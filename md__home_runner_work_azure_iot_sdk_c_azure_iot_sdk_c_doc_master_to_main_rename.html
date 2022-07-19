@@ -66,11 +66,11 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><p>The Azure IoT C SDK initially used a branch named <code>master</code> as its primary branch. This was renamed to <code>main</code> on December 1, 2021.</p>
-<h1><a class="anchor" id="autotoc_md117"></a>
+<h1><a class="anchor" id="autotoc_md122"></a>
 Implications to tools and scripts referencing this repo</h1>
 <p>When a web request to an older link to this repo that contains <code>master</code> in it - for instance <a href="https://github.com/Azure/azure-iot-sdk-c/blob/master/doc/master_to_main_rename.md">https://github.com/Azure/azure-iot-sdk-c/blob/**master**/doc/master_to_main_rename.md</a> - GitHub will automatically redirect this to <code>main</code>.</p>
 <p>GitHub will <b>not</b> redirect tools, scripts, command line requests, etc. that explicitly reference the <code>master</code> branch, however. These will instead fail accessing the deleted branch. You will need to change these to reference this repo's <code>main</code> branch.</p>
-<h1><a class="anchor" id="autotoc_md118"></a>
+<h1><a class="anchor" id="autotoc_md123"></a>
 Implications to local clones of this repo</h1>
 <p><b>If you cloned this repo after December 1, 2021, you can ignore the rest of this document.</b></p><ul>
 <li>Git clones after the default rename will use <code>main</code> and do the right thing.</li>

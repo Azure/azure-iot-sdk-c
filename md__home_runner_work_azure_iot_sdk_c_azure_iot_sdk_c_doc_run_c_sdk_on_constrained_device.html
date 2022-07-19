@@ -66,19 +66,19 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><p>IoT devices are coming with greater memory constrains and the IoTHub SDK has options to shrink its ROM and RAM footprint considerably when you invoke cmake with the correct flags. These are some tips to reduce the c sdk memory footprints on these devices.</p>
-<h1><a class="anchor" id="autotoc_md134"></a>
+<h1><a class="anchor" id="autotoc_md139"></a>
 Run with only MQTT</h1>
 <p>To maximize memory usage you should only include the protocol that is needed. For constrained devices, we recommend using MQTT which provides the best balance between RAM/ROM usage and feature support. To enable the c-sdk to run with just the mqtt protocol you will need to run the following cmake command:</p>
 <div class="fragment"><div class="line">cmake -Duse_amqp=OFF -Duse_http=OFF &lt;Path_to_cmake&gt;</div>
-</div><!-- fragment --><h1><a class="anchor" id="autotoc_md135"></a>
+</div><!-- fragment --><h1><a class="anchor" id="autotoc_md140"></a>
 Run without logging</h1>
 <p>There is extensive logging throughout the SDK. Every message will be included in the SDK's RAM and ROM footprint. Removing logging will reduce the size of your application.</p>
 <div class="fragment"><div class="line">cmake -Duse_amqp=OFF -Duse_http=OFF -Dno_logging=ON &lt;Path_to_cmake&gt;</div>
-</div><!-- fragment --><h1><a class="anchor" id="autotoc_md136"></a>
+</div><!-- fragment --><h1><a class="anchor" id="autotoc_md141"></a>
 Running the SDK without upload to blob</h1>
 <p>Upload to blob is an SDK feature used to send data to Azure Storage. If your application doesn't need this feature you can remove the files</p>
 <div class="fragment"><div class="line">cmake -Duse_amqp=OFF -Duse_http=OFF -Dno_logging=ON -Ddont_use_uploadtoblob=ON &lt;Path_to_cmake&gt;</div>
-</div><!-- fragment --><h1><a class="anchor" id="autotoc_md137"></a>
+</div><!-- fragment --><h1><a class="anchor" id="autotoc_md142"></a>
 Running strip on Linux environment</h1>
 <p>The <a href="https://en.wikipedia.org/wiki/Strip_(Unix)">strip</a> command is used to reduce the size of binaries on the linux systems. After you compile your application use strip to reduce the size of the final application.</p>
 <div class="fragment"><div class="line">strip -s &lt;Path_to_executable&gt;</div>

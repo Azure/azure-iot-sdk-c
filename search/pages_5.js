@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['iot_20hub_20c_20sdk_20options_473',['IoT Hub C SDK Options',['../md__home_runner_work_azure_iot_sdk_c_azure_iot_sdk_c_doc__iothub_sdk_options.html',1,'']]]
+  ['master_20to_20main_20branch_20rename_20instructions_598',['master to main branch rename instructions',['../md__home_runner_work_azure_iot_sdk_c_azure_iot_sdk_c_doc_master_to_main_rename.html',1,'']]],
+  ['multiplexing_20limitations_20and_20alternatives_599',['Multiplexing limitations and alternatives',['../md__home_runner_work_azure_iot_sdk_c_azure_iot_sdk_c_doc_multiplexing_limitations.html',1,'']]]
 ];

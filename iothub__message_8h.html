@@ -210,6 +210,12 @@ Functions</h2></td></tr>
 <tr class="memitem:a1bb03d62deff82498204340a6cd0d09c"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__message_8h.html#a1bb03d62deff82498204340a6cd0d09c">IoTHubMessage_IsSecurityMessage</a> (<a class="el" href="iothub__message_8h.html#a98782b8f57e3f751b4f0196de946432c">IOTHUB_MESSAGE_HANDLE</a> iotHubMessageHandle)</td></tr>
 <tr class="memdesc:a1bb03d62deff82498204340a6cd0d09c"><td class="mdescLeft">&#160;</td><td class="mdescRight">returns if this message is a IoT Hub security message or not  <a href="iothub__message_8h.html#a1bb03d62deff82498204340a6cd0d09c">More...</a><br /></td></tr>
 <tr class="separator:a1bb03d62deff82498204340a6cd0d09c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a30d776d7fce26670ea456573e2e2c211"><td class="memItemLeft" align="right" valign="top"><a class="el" href="iothub__message_8h.html#a9ecf3d22e0ef357c3e7eda387ea07f62">IOTHUB_MESSAGE_RESULT</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__message_8h.html#a30d776d7fce26670ea456573e2e2c211">IoTHubMessage_SetComponentName</a> (<a class="el" href="iothub__message_8h.html#a98782b8f57e3f751b4f0196de946432c">IOTHUB_MESSAGE_HANDLE</a> iotHubMessageHandle, const char *componentName)</td></tr>
+<tr class="memdesc:a30d776d7fce26670ea456573e2e2c211"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets component name of the message.  <a href="iothub__message_8h.html#a30d776d7fce26670ea456573e2e2c211">More...</a><br /></td></tr>
+<tr class="separator:a30d776d7fce26670ea456573e2e2c211"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a866803c6ca8ec8035bea313d208e5f05"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__message_8h.html#a866803c6ca8ec8035bea313d208e5f05">IoTHubMessage_GetComponentName</a> (<a class="el" href="iothub__message_8h.html#a98782b8f57e3f751b4f0196de946432c">IOTHUB_MESSAGE_HANDLE</a> iotHubMessageHandle)</td></tr>
+<tr class="memdesc:a866803c6ca8ec8035bea313d208e5f05"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the component name from the IOTHUB_MESSAGE_HANDLE. No new memory is allocated, the caller is not responsible for freeing the memory. The memory is valid until IoTHubMessage_Destroy is called on the message.  <a href="iothub__message_8h.html#a866803c6ca8ec8035bea313d208e5f05">More...</a><br /></td></tr>
+<tr class="separator:a866803c6ca8ec8035bea313d208e5f05"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8303de9790f32c3b0aebac6cfb0e80bf"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__message_8h.html#a8303de9790f32c3b0aebac6cfb0e80bf">IoTHubMessage_Destroy</a> (<a class="el" href="iothub__message_8h.html#a98782b8f57e3f751b4f0196de946432c">IOTHUB_MESSAGE_HANDLE</a> iotHubMessageHandle)</td></tr>
 <tr class="memdesc:a8303de9790f32c3b0aebac6cfb0e80bf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Frees all resources associated with the given message handle.  <a href="iothub__message_8h.html#a8303de9790f32c3b0aebac6cfb0e80bf">More...</a><br /></td></tr>
 <tr class="separator:a8303de9790f32c3b0aebac6cfb0e80bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -377,6 +383,33 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns IOTHUB_MESSAGE_OK if the byte array was fetched successfully or an error code otherwise. </dd></dl>
+
+</div>
+</div>
+<a id="a866803c6ca8ec8035bea313d208e5f05"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a866803c6ca8ec8035bea313d208e5f05">&#9670;&nbsp;</a></span>IoTHubMessage_GetComponentName()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const char* IoTHubMessage_GetComponentName </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="iothub__message_8h.html#a98782b8f57e3f751b4f0196de946432c">IOTHUB_MESSAGE_HANDLE</a>&#160;</td>
+          <td class="paramname"><em>iotHubMessageHandle</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Gets the component name from the IOTHUB_MESSAGE_HANDLE. No new memory is allocated, the caller is not responsible for freeing the memory. The memory is valid until IoTHubMessage_Destroy is called on the message. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">iotHubMessageHandle</td><td>Handle to the message.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A const char* pointing to the component name. </dd></dl>
 
 </div>
 </div>
@@ -849,6 +882,44 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns IOTHUB_MESSAGE_OK if the security message was set successfully or an error code otherwise. </dd></dl>
+
+</div>
+</div>
+<a id="a30d776d7fce26670ea456573e2e2c211"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a30d776d7fce26670ea456573e2e2c211">&#9670;&nbsp;</a></span>IoTHubMessage_SetComponentName()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="iothub__message_8h.html#a9ecf3d22e0ef357c3e7eda387ea07f62">IOTHUB_MESSAGE_RESULT</a> IoTHubMessage_SetComponentName </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="iothub__message_8h.html#a98782b8f57e3f751b4f0196de946432c">IOTHUB_MESSAGE_HANDLE</a>&#160;</td>
+          <td class="paramname"><em>iotHubMessageHandle</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>componentName</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Sets component name of the message. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">iotHubMessageHandle</td><td>Handle to the message. </td></tr>
+    <tr><td class="paramname">componentName</td><td>Pointer to the component name.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns IOTHUB_MESSAGE_OK if the componentName was set successfully or an error code otherwise. </dd></dl>
 
 </div>
 </div>

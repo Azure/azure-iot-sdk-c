@@ -141,6 +141,21 @@ Functions</h2></td></tr>
 <tr class="memitem:a9acebf0174e4ad8e6f6a6b54e1858601"><td class="memItemLeft" align="right" valign="top"><a class="el" href="iothub__client__core__common_8h.html#ae8e8840cc715c54bc60465f3f110d40f">IOTHUB_CLIENT_RESULT</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__module__client_8h.html#a9acebf0174e4ad8e6f6a6b54e1858601">IoTHubModuleClient_SendMessageDisposition</a> (<a class="el" href="iothub__module__client_8h.html#a61259310a513ae73b31cb3c66d3f4087">IOTHUB_MODULE_CLIENT_HANDLE</a> iotHubModuleClientHandle, <a class="el" href="iothub__message_8h.html#a98782b8f57e3f751b4f0196de946432c">IOTHUB_MESSAGE_HANDLE</a> message, <a class="el" href="iothub__client__core__common_8h.html#a96cfa82412891d077ec835922ed5b626">IOTHUBMESSAGE_DISPOSITION_RESULT</a> disposition)</td></tr>
 <tr class="memdesc:a9acebf0174e4ad8e6f6a6b54e1858601"><td class="mdescLeft">&#160;</td><td class="mdescRight">This API sends an acknowledgement to Azure IoT Hub that a cloud-to-device message has been received and frees resources associated with the message.  <a href="iothub__module__client_8h.html#a9acebf0174e4ad8e6f6a6b54e1858601">More...</a><br /></td></tr>
 <tr class="separator:a9acebf0174e4ad8e6f6a6b54e1858601"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a89499ae67b666dde69d32229c9cd890e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="iothub__client__core__common_8h.html#ae8e8840cc715c54bc60465f3f110d40f">IOTHUB_CLIENT_RESULT</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__module__client_8h.html#a89499ae67b666dde69d32229c9cd890e">IoTHubModuleClient_SendTelemetryAsync</a> (<a class="el" href="iothub__module__client_8h.html#a61259310a513ae73b31cb3c66d3f4087">IOTHUB_MODULE_CLIENT_HANDLE</a> iotHubModuleClientHandle, <a class="el" href="iothub__message_8h.html#a98782b8f57e3f751b4f0196de946432c">IOTHUB_MESSAGE_HANDLE</a> telemetryMessageHandle, <a class="el" href="iothub__client__core__common_8h.html#a194ebfcaa5940c0b88c7e6d6a7d980b2">IOTHUB_CLIENT_TELEMETRY_CALLBACK</a> telemetryConfirmationCallback, void *userContextCallback)</td></tr>
+<tr class="memdesc:a89499ae67b666dde69d32229c9cd890e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Asynchronous call to send the telemetry message specified by <code>telemetryMessageHandle</code>.  <a href="iothub__module__client_8h.html#a89499ae67b666dde69d32229c9cd890e">More...</a><br /></td></tr>
+<tr class="separator:a89499ae67b666dde69d32229c9cd890e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a12dce673fd050e7f6f249dd95fcb3016"><td class="memItemLeft" align="right" valign="top"><a class="el" href="iothub__client__core__common_8h.html#ae8e8840cc715c54bc60465f3f110d40f">IOTHUB_CLIENT_RESULT</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__module__client_8h.html#a12dce673fd050e7f6f249dd95fcb3016">IoTHubModuleClient_SubscribeToCommands</a> (<a class="el" href="iothub__module__client_8h.html#a61259310a513ae73b31cb3c66d3f4087">IOTHUB_MODULE_CLIENT_HANDLE</a> iotHubModuleClientHandle, <a class="el" href="iothub__client__core__common_8h.html#a412ccb59a1da49437bb220159c2a4c59">IOTHUB_CLIENT_COMMAND_CALLBACK_ASYNC</a> commandCallback, void *userContextCallback)</td></tr>
+<tr class="memdesc:a12dce673fd050e7f6f249dd95fcb3016"><td class="mdescLeft">&#160;</td><td class="mdescRight">Subscribe to incoming commands from IoT Hub.  <a href="iothub__module__client_8h.html#a12dce673fd050e7f6f249dd95fcb3016">More...</a><br /></td></tr>
+<tr class="separator:a12dce673fd050e7f6f249dd95fcb3016"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3bc38f6cf4c77de40f4c741825f2c9b7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="iothub__client__core__common_8h.html#ae8e8840cc715c54bc60465f3f110d40f">IOTHUB_CLIENT_RESULT</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__module__client_8h.html#a3bc38f6cf4c77de40f4c741825f2c9b7">IoTHubModuleClient_SendPropertiesAsync</a> (<a class="el" href="iothub__module__client_8h.html#a61259310a513ae73b31cb3c66d3f4087">IOTHUB_MODULE_CLIENT_HANDLE</a> iotHubModuleClientHandle, const unsigned char *properties, size_t propertiesLength, <a class="el" href="iothub__client__core__common_8h.html#a003430eb3f78bfe0e3b73ade373bc37b">IOTHUB_CLIENT_PROPERTY_ACKNOWLEDGED_CALLBACK</a> propertyAcknowledgedCallback, void *userContextCallback)</td></tr>
+<tr class="memdesc:a3bc38f6cf4c77de40f4c741825f2c9b7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sends module properties to IoT Hub.  <a href="iothub__module__client_8h.html#a3bc38f6cf4c77de40f4c741825f2c9b7">More...</a><br /></td></tr>
+<tr class="separator:a3bc38f6cf4c77de40f4c741825f2c9b7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa23f3af14efb6758b12ad2bb37d79744"><td class="memItemLeft" align="right" valign="top"><a class="el" href="iothub__client__core__common_8h.html#ae8e8840cc715c54bc60465f3f110d40f">IOTHUB_CLIENT_RESULT</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__module__client_8h.html#aa23f3af14efb6758b12ad2bb37d79744">IoTHubModuleClient_GetPropertiesAsync</a> (<a class="el" href="iothub__module__client_8h.html#a61259310a513ae73b31cb3c66d3f4087">IOTHUB_MODULE_CLIENT_HANDLE</a> iotHubModuleClientHandle, <a class="el" href="iothub__client__core__common_8h.html#abc0c399a42dbe058acf5142cfcdb95aa">IOTHUB_CLIENT_PROPERTIES_RECEIVED_CALLBACK</a> propertyCallback, void *userContextCallback)</td></tr>
+<tr class="memdesc:aa23f3af14efb6758b12ad2bb37d79744"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves all module properties from IoT Hub.  <a href="iothub__module__client_8h.html#aa23f3af14efb6758b12ad2bb37d79744">More...</a><br /></td></tr>
+<tr class="separator:aa23f3af14efb6758b12ad2bb37d79744"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab01abc4addcbe93debb7674628bd0a9e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="iothub__client__core__common_8h.html#ae8e8840cc715c54bc60465f3f110d40f">IOTHUB_CLIENT_RESULT</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__module__client_8h.html#ab01abc4addcbe93debb7674628bd0a9e">IoTHubModuleClient_GetPropertiesAndSubscribeToUpdatesAsync</a> (<a class="el" href="iothub__module__client_8h.html#a61259310a513ae73b31cb3c66d3f4087">IOTHUB_MODULE_CLIENT_HANDLE</a> iotHubModuleClientHandle, <a class="el" href="iothub__client__core__common_8h.html#abc0c399a42dbe058acf5142cfcdb95aa">IOTHUB_CLIENT_PROPERTIES_RECEIVED_CALLBACK</a> propertyUpdateCallback, void *userContextCallback)</td></tr>
+<tr class="memdesc:ab01abc4addcbe93debb7674628bd0a9e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves all module properties from IoT Hub and also subscribes for updates to writable properties.  <a href="iothub__module__client_8h.html#ab01abc4addcbe93debb7674628bd0a9e">More...</a><br /></td></tr>
+<tr class="separator:ab01abc4addcbe93debb7674628bd0a9e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Extends the IoTHubModuleClient_LL module with additional features. </p>
@@ -229,10 +244,11 @@ Functions</h2></td></tr>
 <p>Disposes of resources allocated by the IoT Hub client. This is a blocking call. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">iotHubModuleClientHandle</td><td>The handle created by a call to the create function. </td></tr>
+    <tr><td class="paramname">iotHubModuleClientHandle</td><td>The handle created by a call to the create function.</td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section warning"><dt>Warning</dt><dd>Do not call this function from inside any application callbacks from this SDK, e.g. your IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK handler. </dd></dl>
 
 </div>
 </div>
@@ -274,6 +290,98 @@ Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="ab01abc4addcbe93debb7674628bd0a9e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab01abc4addcbe93debb7674628bd0a9e">&#9670;&nbsp;</a></span>IoTHubModuleClient_GetPropertiesAndSubscribeToUpdatesAsync()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="iothub__client__core__common_8h.html#ae8e8840cc715c54bc60465f3f110d40f">IOTHUB_CLIENT_RESULT</a> IoTHubModuleClient_GetPropertiesAndSubscribeToUpdatesAsync </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="iothub__module__client_8h.html#a61259310a513ae73b31cb3c66d3f4087">IOTHUB_MODULE_CLIENT_HANDLE</a>&#160;</td>
+          <td class="paramname"><em>iotHubModuleClientHandle</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="iothub__client__core__common_8h.html#abc0c399a42dbe058acf5142cfcdb95aa">IOTHUB_CLIENT_PROPERTIES_RECEIVED_CALLBACK</a>&#160;</td>
+          <td class="paramname"><em>propertyUpdateCallback</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>userContextCallback</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Retrieves all module properties from IoT Hub and also subscribes for updates to writable properties. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">iotHubModuleClientHandle</td><td>The handle created by a call to the create function. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">propertyUpdateCallback</td><td>Callback both on initial retrieval of properties stored on IoT Hub and subsequent service-initiated modifications of writable properties. The API IoTHubClient_Deserialize_Properties() can help deserialize the raw payload stream. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">userContextCallback</td><td>User specified context that will be provided to the callback. This can be <code>NULL</code>.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section remark"><dt>Remarks</dt><dd>The application behavior is undefined if the user calls the IoTHubModuleClient_Destroy function from within any callback.</dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>IOTHUB_CLIENT_OK upon success or an error code upon failure. </dd></dl>
+
+</div>
+</div>
+<a id="aa23f3af14efb6758b12ad2bb37d79744"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa23f3af14efb6758b12ad2bb37d79744">&#9670;&nbsp;</a></span>IoTHubModuleClient_GetPropertiesAsync()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="iothub__client__core__common_8h.html#ae8e8840cc715c54bc60465f3f110d40f">IOTHUB_CLIENT_RESULT</a> IoTHubModuleClient_GetPropertiesAsync </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="iothub__module__client_8h.html#a61259310a513ae73b31cb3c66d3f4087">IOTHUB_MODULE_CLIENT_HANDLE</a>&#160;</td>
+          <td class="paramname"><em>iotHubModuleClientHandle</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="iothub__client__core__common_8h.html#abc0c399a42dbe058acf5142cfcdb95aa">IOTHUB_CLIENT_PROPERTIES_RECEIVED_CALLBACK</a>&#160;</td>
+          <td class="paramname"><em>propertyCallback</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>userContextCallback</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Retrieves all module properties from IoT Hub. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">iotHubModuleClientHandle</td><td>The handle created by a call to the create function. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">propertyCallback</td><td>Callback invoked when properties are retrieved. The API IoTHubClient_Deserialize_Properties() can help deserialize the raw payload stream. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">userContextCallback</td><td>User specified context that will be provided to the callback. This can be <code>NULL</code>.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section remark"><dt>Remarks</dt><dd>The application behavior is undefined if the user calls the IoTHubModuleClient_Destroy function from within any callback.</dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>IOTHUB_CLIENT_OK upon success or an error code upon failure. </dd></dl>
+
+</div>
+</div>
 <a id="a96f0c8e7d91868a8919c0374918608c6"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a96f0c8e7d91868a8919c0374918608c6">&#9670;&nbsp;</a></span>IoTHubModuleClient_GetRetryPolicy()</h2>
 
@@ -311,12 +419,11 @@ Functions</h2></td></tr>
   <table class="params">
     <tr><td class="paramname">iotHubModuleClientHandle</td><td>The handle created by a call to the create function. </td></tr>
     <tr><td class="paramname">retryPolicy</td><td>Out parameter containing the policy to use to reconnect to IoT Hub. </td></tr>
-    <tr><td class="paramname">retryTimeoutLimitInSeconds</td><td>Out parameter containing maximum amount of time in seconds to attempt reconnection to IOT Hub. <pre class="fragment">         @b NOTE: The application behavior is undefined if the user calls
-         the ::IoTHubModuleClient_Destroy() function from within any callback.
-</pre> </td></tr>
+    <tr><td class="paramname">retryTimeoutLimitInSeconds</td><td>Out parameter containing maximum amount of time in seconds to attempt reconnection to IOT Hub.</td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section warning"><dt>Warning</dt><dd>: Do not call <a class="el" href="iothub__module__client_8h.html#af70545d139f41f0bc8acb51725c2d0de" title="Disposes of resources allocated by the IoT Hub client. This is a blocking call.">IoTHubModuleClient_Destroy()</a> from inside your application's callback.</dd></dl>
 <dl class="section return"><dt>Returns</dt><dd>IOTHUB_CLIENT_OK upon success or an error code upon failure. </dd></dl>
 
 </div>
@@ -400,7 +507,7 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<p><b>NOTE:</b> The application behavior is undefined if the user calls the <a class="el" href="iothub__module__client_8h.html#af70545d139f41f0bc8acb51725c2d0de" title="Disposes of resources allocated by the IoT Hub client. This is a blocking call.">IoTHubModuleClient_Destroy()</a> function from within any callback.</p>
+<dl class="section warning"><dt>Warning</dt><dd>: Do not call <a class="el" href="iothub__module__client_8h.html#af70545d139f41f0bc8acb51725c2d0de" title="Disposes of resources allocated by the IoT Hub client. This is a blocking call.">IoTHubModuleClient_Destroy()</a> from inside your application's callback.</dd></dl>
 <dl class="section return"><dt>Returns</dt><dd>IOTHUB_CLIENT_OK upon success or an error code upon failure. </dd></dl>
 
 </div>
@@ -453,7 +560,8 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<p><b>NOTE:</b> The application behavior is undefined if the user calls the <a class="el" href="iothub__module__client_8h.html#af70545d139f41f0bc8acb51725c2d0de" title="Disposes of resources allocated by the IoT Hub client. This is a blocking call.">IoTHubModuleClient_Destroy()</a> function from within any callback. </p><dl class="section remark"><dt>Remarks</dt><dd>The IOTHUB_MESSAGE_HANDLE instance provided as argument is copied by the function, so this argument can be destroyed by the calling application right after IoTHubModuleClient_SendEventAsync returns. The copy of <code>eventMessageHandle</code> is later destroyed by the iothub client when the message is effectively sent, if a failure sending it occurs, or if the client is destroyed. </dd></dl>
+<dl class="section warning"><dt>Warning</dt><dd>: Do not call <a class="el" href="iothub__module__client_8h.html#af70545d139f41f0bc8acb51725c2d0de" title="Disposes of resources allocated by the IoT Hub client. This is a blocking call.">IoTHubModuleClient_Destroy()</a> from inside your application's callback.</dd></dl>
+<dl class="section remark"><dt>Remarks</dt><dd>The IOTHUB_MESSAGE_HANDLE instance provided as argument is copied by the function, so this argument can be destroyed by the calling application right after IoTHubModuleClient_SendEventAsync returns. The copy of <code>eventMessageHandle</code> is later destroyed by the iothub client when the message is effectively sent, if a failure sending it occurs, or if the client is destroyed. </dd></dl>
 <dl class="section return"><dt>Returns</dt><dd>IOTHUB_CLIENT_OK upon success or an error code upon failure. </dd></dl>
 
 </div>
@@ -513,7 +621,7 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<p><b>NOTE:</b> The application behavior is undefined if the user calls the <a class="el" href="iothub__module__client_8h.html#af70545d139f41f0bc8acb51725c2d0de" title="Disposes of resources allocated by the IoT Hub client. This is a blocking call.">IoTHubModuleClient_Destroy()</a> function from within any callback.</p>
+<dl class="section warning"><dt>Warning</dt><dd>: Do not call <a class="el" href="iothub__module__client_8h.html#af70545d139f41f0bc8acb51725c2d0de" title="Disposes of resources allocated by the IoT Hub client. This is a blocking call.">IoTHubModuleClient_Destroy()</a> from inside your application's callback.</dd></dl>
 <dl class="section return"><dt>Returns</dt><dd>IOTHUB_CLIENT_OK upon success or an error code upon failure. </dd></dl>
 
 </div>
@@ -562,6 +670,66 @@ Functions</h2></td></tr>
 <dl class="section warning"><dt>Warning</dt><dd>This function is to be used only when IOTHUBMESSAGE_ASYNC_ACK is used in the callback for incoming cloud-to-device messages. </dd></dl>
 <dl class="section remark"><dt>Remarks</dt><dd>If your cloud-to-device message callback returned IOTHUBMESSAGE_ASYNC_ACK, it MUST call this API eventually. Beyond sending acknowledgment to the service, this method also handles freeing message's memory. Not calling this function will result in memory leaks. Depending on the protocol used, this API will acknowledge cloud-to-device messages differently: AMQP: A MESSAGE DISPOSITION is sent using the <code>disposition</code> option provided. MQTT: A PUBACK is sent if <code>disposition</code> is <code>IOTHUBMESSAGE_ACCEPTED</code>. Passing any other option results in no PUBACK sent for the message. HTTP: A HTTP request is sent using the <code>disposition</code> option provided. </dd></dl>
 <dl class="section return"><dt>Returns</dt><dd>IOTHUB_CLIENT_OK upon success, or an error code upon failure. </dd></dl>
+
+</div>
+</div>
+<a id="a3bc38f6cf4c77de40f4c741825f2c9b7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3bc38f6cf4c77de40f4c741825f2c9b7">&#9670;&nbsp;</a></span>IoTHubModuleClient_SendPropertiesAsync()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="iothub__client__core__common_8h.html#ae8e8840cc715c54bc60465f3f110d40f">IOTHUB_CLIENT_RESULT</a> IoTHubModuleClient_SendPropertiesAsync </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="iothub__module__client_8h.html#a61259310a513ae73b31cb3c66d3f4087">IOTHUB_MODULE_CLIENT_HANDLE</a>&#160;</td>
+          <td class="paramname"><em>iotHubModuleClientHandle</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const unsigned char *&#160;</td>
+          <td class="paramname"><em>properties</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>propertiesLength</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="iothub__client__core__common_8h.html#a003430eb3f78bfe0e3b73ade373bc37b">IOTHUB_CLIENT_PROPERTY_ACKNOWLEDGED_CALLBACK</a>&#160;</td>
+          <td class="paramname"><em>propertyAcknowledgedCallback</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>userContextCallback</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Sends module properties to IoT Hub. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">iotHubModuleClientHandle</td><td>The handle created by a call to the create function. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">properties</td><td>Serialized property data to be sent to IoT Hub. This buffer can either be manually serialized created with <a class="el" href="iothub__client__properties_8h.html#aeef291173746bfec33ea4c3325f8a7db" title="Serializes reported properties into the required format for sending to IoT Hub.">IoTHubClient_Properties_Serializer_CreateReported()</a> or <a class="el" href="iothub__client__properties_8h.html#a7746310562d76602f197f5b61fdb22ea" title="Serializes the response to writable properties into bytes for sending to IoT Hub.">IoTHubClient_Properties_Serializer_CreateWritableResponse()</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">propertiesLength</td><td>Number of bytes in the properties buffer. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">propertyAcknowledgedCallback</td><td>Optional callback specified by the application to be called with the result of the transaction. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">userContextCallback</td><td>User specified context that will be provided to the callback. This can be <code>NULL</code>.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section remark"><dt>Remarks</dt><dd>The application behavior is undefined if the user calls the IoTHubModuleClient_Destroy function from within any callback.</dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>IOTHUB_CLIENT_OK upon success or an error code upon failure. </dd></dl>
 
 </div>
 </div>
@@ -620,7 +788,61 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<p><b>NOTE:</b> The application behavior is undefined if the user calls the <a class="el" href="iothub__module__client_8h.html#af70545d139f41f0bc8acb51725c2d0de" title="Disposes of resources allocated by the IoT Hub client. This is a blocking call.">IoTHubModuleClient_Destroy()</a> function from within any callback.</p>
+<dl class="section warning"><dt>Warning</dt><dd>: Do not call <a class="el" href="iothub__module__client_8h.html#af70545d139f41f0bc8acb51725c2d0de" title="Disposes of resources allocated by the IoT Hub client. This is a blocking call.">IoTHubModuleClient_Destroy()</a> from inside your application's callback.</dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>IOTHUB_CLIENT_OK upon success or an error code upon failure. </dd></dl>
+
+</div>
+</div>
+<a id="a89499ae67b666dde69d32229c9cd890e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a89499ae67b666dde69d32229c9cd890e">&#9670;&nbsp;</a></span>IoTHubModuleClient_SendTelemetryAsync()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="iothub__client__core__common_8h.html#ae8e8840cc715c54bc60465f3f110d40f">IOTHUB_CLIENT_RESULT</a> IoTHubModuleClient_SendTelemetryAsync </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="iothub__module__client_8h.html#a61259310a513ae73b31cb3c66d3f4087">IOTHUB_MODULE_CLIENT_HANDLE</a>&#160;</td>
+          <td class="paramname"><em>iotHubModuleClientHandle</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="iothub__message_8h.html#a98782b8f57e3f751b4f0196de946432c">IOTHUB_MESSAGE_HANDLE</a>&#160;</td>
+          <td class="paramname"><em>telemetryMessageHandle</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="iothub__client__core__common_8h.html#a194ebfcaa5940c0b88c7e6d6a7d980b2">IOTHUB_CLIENT_TELEMETRY_CALLBACK</a>&#160;</td>
+          <td class="paramname"><em>telemetryConfirmationCallback</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>userContextCallback</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Asynchronous call to send the telemetry message specified by <code>telemetryMessageHandle</code>. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">iotHubModuleClientHandle</td><td>The handle created by a call to the create function. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">telemetryMessageHandle</td><td>The handle to an IoT Hub message. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">telemetryConfirmationCallback</td><td>Optional callback specified by the module for receiving confirmation of the delivery of the telemetry. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">userContextCallback</td><td>User specified context that will be provided to the callback. This can be <code>NULL</code>.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section remark"><dt>Remarks</dt><dd>The application behavior is undefined if the user calls the IoTHubModuleClient_Destroy function from within any callback.</dd></dl>
+<p>The IOTHUB_MESSAGE_HANDLE instance provided as an argument is copied by the function, so this argument can be destroyed by the calling application right after IoTHubModuleClient_SendTelemetryAsync returns. The copy of <code>telemetryMessageHandle</code> is later destroyed by the iothub client when the message is successfully sent, if a failure sending it occurs, or if the client is destroyed.</p>
 <dl class="section return"><dt>Returns</dt><dd>IOTHUB_CLIENT_OK upon success or an error code upon failure. </dd></dl>
 
 </div>
@@ -666,7 +888,7 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<p><b>NOTE:</b> The application behavior is undefined if the user calls the <a class="el" href="iothub__module__client_8h.html#af70545d139f41f0bc8acb51725c2d0de" title="Disposes of resources allocated by the IoT Hub client. This is a blocking call.">IoTHubModuleClient_Destroy()</a> function from within any callback.</p>
+<dl class="section warning"><dt>Warning</dt><dd>: Do not call <a class="el" href="iothub__module__client_8h.html#af70545d139f41f0bc8acb51725c2d0de" title="Disposes of resources allocated by the IoT Hub client. This is a blocking call.">IoTHubModuleClient_Destroy()</a> from inside your application's callback.</dd></dl>
 <dl class="section return"><dt>Returns</dt><dd>IOTHUB_CLIENT_OK upon success or an error code upon failure. </dd></dl>
 
 </div>
@@ -764,7 +986,7 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<p><b>NOTE:</b> The application behavior is undefined if the user calls the <a class="el" href="iothub__device__client_8h.html#a2991e03140462e9cc1606ccf25e8b412" title="Disposes of resources allocated by the IoT Hub client. This is a blocking call.">IoTHubDeviceClient_Destroy()</a> function from within any callback.</p>
+<dl class="section warning"><dt>Warning</dt><dd>: Do not call <a class="el" href="iothub__module__client_8h.html#af70545d139f41f0bc8acb51725c2d0de" title="Disposes of resources allocated by the IoT Hub client. This is a blocking call.">IoTHubModuleClient_Destroy()</a> from inside your application's callback.</dd></dl>
 <dl class="section return"><dt>Returns</dt><dd>IOTHUB_CLIENT_OK upon success or an error code upon failure. </dd></dl>
 
 </div>
@@ -859,7 +1081,7 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<p><b>NOTE:</b> The application behavior is undefined if the user calls the <a class="el" href="iothub__module__client_8h.html#af70545d139f41f0bc8acb51725c2d0de" title="Disposes of resources allocated by the IoT Hub client. This is a blocking call.">IoTHubModuleClient_Destroy()</a> function from within any callback.</p>
+<dl class="section warning"><dt>Warning</dt><dd>: Do not call <a class="el" href="iothub__module__client_8h.html#af70545d139f41f0bc8acb51725c2d0de" title="Disposes of resources allocated by the IoT Hub client. This is a blocking call.">IoTHubModuleClient_Destroy()</a> from inside your application's callback.</dd></dl>
 <dl class="section return"><dt>Returns</dt><dd>IOTHUB_CLIENT_OK upon success or an error code upon failure. </dd></dl>
 
 </div>
@@ -951,7 +1173,53 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<p><b>NOTE:</b> The application behavior is undefined if the user calls the <a class="el" href="iothub__module__client_8h.html#af70545d139f41f0bc8acb51725c2d0de" title="Disposes of resources allocated by the IoT Hub client. This is a blocking call.">IoTHubModuleClient_Destroy()</a> function from within any callback.</p>
+<dl class="section warning"><dt>Warning</dt><dd>: Do not call <a class="el" href="iothub__module__client_8h.html#af70545d139f41f0bc8acb51725c2d0de" title="Disposes of resources allocated by the IoT Hub client. This is a blocking call.">IoTHubModuleClient_Destroy()</a> from inside your application's callback.</dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>IOTHUB_CLIENT_OK upon success or an error code upon failure. </dd></dl>
+
+</div>
+</div>
+<a id="a12dce673fd050e7f6f249dd95fcb3016"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a12dce673fd050e7f6f249dd95fcb3016">&#9670;&nbsp;</a></span>IoTHubModuleClient_SubscribeToCommands()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="iothub__client__core__common_8h.html#ae8e8840cc715c54bc60465f3f110d40f">IOTHUB_CLIENT_RESULT</a> IoTHubModuleClient_SubscribeToCommands </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="iothub__module__client_8h.html#a61259310a513ae73b31cb3c66d3f4087">IOTHUB_MODULE_CLIENT_HANDLE</a>&#160;</td>
+          <td class="paramname"><em>iotHubModuleClientHandle</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="iothub__client__core__common_8h.html#a412ccb59a1da49437bb220159c2a4c59">IOTHUB_CLIENT_COMMAND_CALLBACK_ASYNC</a>&#160;</td>
+          <td class="paramname"><em>commandCallback</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>userContextCallback</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Subscribe to incoming commands from IoT Hub. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">iotHubModuleClientHandle</td><td>The handle created by a call to the create function. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">commandCallback</td><td>The callback which will be called when a command request arrives. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">userContextCallback</td><td>User specified context that will be provided to the callback. This can be <code>NULL</code>.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section remark"><dt>Remarks</dt><dd>The application behavior is undefined if the user calls the IoTHubModuleClient_Destroy function from within any callback.</dd></dl>
 <dl class="section return"><dt>Returns</dt><dd>IOTHUB_CLIENT_OK upon success or an error code upon failure. </dd></dl>
 
 </div>

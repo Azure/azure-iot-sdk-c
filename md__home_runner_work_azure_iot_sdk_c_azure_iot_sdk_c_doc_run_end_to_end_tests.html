@@ -72,7 +72,7 @@ $(function() {
 <li><a href="#linux_client">Run end to end tests for "iothub_client" on a Linux development environment</a></li>
 </ul>
 <p><a class="anchor" id="testparams"></a> </p>
-<h1><a class="anchor" id="autotoc_md139"></a>
+<h1><a class="anchor" id="autotoc_md144"></a>
 Setup the test parameters</h1>
 <ul>
 <li>Open the file "iot_device_params.txt" located under the tools\iot_hub_e2e_tests_params folders in your local copy of the repository.</li>
@@ -115,11 +115,18 @@ Setup the test parameters</h1>
 <p class="startli">```Shell openssl x509 -noout -fingerprint -inform pem -in cert.pem ```</p>
 <p class="startli">Note: IOTHUB_E2E_X509_THUMBPRINT takes a string with HEX characters only; make sure all colons or spaces are removed from the thumbprint.</p>
 </li>
+<li><p class="startli">Set the x509 certificate information for DPS:</p><ul>
+<li>IOT_DPS_INDIVIDUAL_X509_CERTIFICATE</li>
+<li>IOT_DPS_INDIVIDUAL_X509_KEY</li>
+<li>IOT_DPS_INDIVIDUAL_REGISTRATION_ID</li>
+</ul>
+<p class="startli">The certificate must have CN = &lt;registration_id&gt; and EKU set to the Client Authentication OID.</p>
+</li>
 </ul>
 </li>
 </ul>
 <p><a class="anchor" id="windows_client"></a> </p>
-<h1><a class="anchor" id="autotoc_md140"></a>
+<h1><a class="anchor" id="autotoc_md145"></a>
 Run end to end tests on a Windows development environment</h1>
 <ul>
 <li>Start the Windows PowerShell in Administrator mode. Update execution policy by entering "set-executionpolicy unrestricted"</li>
@@ -134,7 +141,7 @@ Run end to end tests on a Windows development environment</h1>
 <li>Run the tests by Test -&gt; Run -&gt; All Tests menu item inside of Visual Studio.</li>
 </ul>
 <p><a class="anchor" id="linux_client"></a> </p>
-<h1><a class="anchor" id="autotoc_md141"></a>
+<h1><a class="anchor" id="autotoc_md146"></a>
 Run end to end tests for "iothub_client" on a Linux development environment</h1>
 <ul>
 <li>Navigate to the folder tools/iot_hub_e2e_tests_params</li>

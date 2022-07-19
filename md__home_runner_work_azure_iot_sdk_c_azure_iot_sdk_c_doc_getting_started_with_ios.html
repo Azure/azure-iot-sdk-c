@@ -66,7 +66,7 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><p>The SDK produces Ios CocoaPods to ease the writing of end user application on Ios devices.</p>
-<h1><a class="anchor" id="autotoc_md96"></a>
+<h1><a class="anchor" id="autotoc_md98"></a>
 Prerequisites</h1>
 <p>You will need these prerequisites to run the samples:</p>
 <ul>
@@ -75,29 +75,29 @@ Prerequisites</h1>
 <li><a href="https://guides.cocoapods.org/using/index.html">The latest version of CocoaPods</a> and familiarity with their basic usage. Some more detail about the Azure IoT CocoaPods may be found <a class="el" href="md__home_runner_work_azure_iot_sdk_c_azure_iot_sdk_c_doc_sdk_cocoapods.html">here</a>.</li>
 <li>An IoT Hub and a connection string for a client device</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md97"></a>
+<h1><a class="anchor" id="autotoc_md99"></a>
 Running the iothub samples</h1>
-<h2><a class="anchor" id="autotoc_md98"></a>
+<h2><a class="anchor" id="autotoc_md100"></a>
 Clone the Azure IoT C SDK repo</h2>
 <p>Change to a location where you would like your samples, and run</p>
 <div class="fragment"><div class="line">git clone https://github.com/Azure-Samples/azure-iot-samples-ios.git</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md99"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md101"></a>
 Navigate to the iOS sample directory</h2>
 <p>Change your current directory to the iOS sample directory they you would like to run</p>
 <p>for device client:</p>
 <div class="fragment"><div class="line">cd azure-iot-ios-samples/quickstart/sample-device</div>
 </div><!-- fragment --><p>for service client:</p>
 <div class="fragment"><div class="line">cd azure-iot-ios-samples/quickstart/sample-service</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md100"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md102"></a>
 Install the CocoaPods</h2>
 <p>Make sure that XCode does not already have the sample project open. If it does, the CocoaPods may not install properly</p>
 <p>Run this command:</p>
 <div class="fragment"><div class="line">pod install</div>
 </div><!-- fragment --><p>This will cause CocoaPods to read the <code>Podfile</code> and install the pods accordingly</p>
-<h2><a class="anchor" id="autotoc_md101"></a>
+<h2><a class="anchor" id="autotoc_md103"></a>
 Open the XCode workspace</h2>
 <p>Double-click the <code>MQTT Client Sample.xcworkspace</code> workspace file for the device sample or the <code>AzureIoTServiceSample.xcworkspace</code> workspace file for the service sample.</p>
-<h2><a class="anchor" id="autotoc_md102"></a>
+<h2><a class="anchor" id="autotoc_md104"></a>
 Modify Device Samples Project</h2>
 <ol type="1">
 <li>Replace the <code>private let connectionString = "[device connection string]"</code> string with the connection string for your provisioned device.</li>

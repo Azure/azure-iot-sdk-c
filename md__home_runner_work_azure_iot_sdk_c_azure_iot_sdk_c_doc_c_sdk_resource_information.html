@@ -67,10 +67,10 @@ $(function() {
 <div class="contents">
 <div class="textblock"><p>Detailed here capture the C SDK Resource consumption for each protocol.</p>
 <p>All tests are executed on an ubuntu 18.04.1 docker container with GCC version 7.3.0 using C-SDK version 1.2.12.</p>
-<h1><a class="anchor" id="autotoc_md31"></a>
+<h1><a class="anchor" id="autotoc_md33"></a>
 On Disk Binary Size</h1>
 <p>This is the size of the binary built with the c sdk for each protocol. The application sets up the SDK and sends 1 telemetry message.</p>
-<h2><a class="anchor" id="autotoc_md32"></a>
+<h2><a class="anchor" id="autotoc_md34"></a>
 C-SDK without upload to blob</h2>
 <p>CMAKE Command:</p>
 <div class="fragment"><div class="line">cmake -DCMAKE_BUILD_TYPE=Release -Ddont_use_uploadtoblob=ON ..</div>
@@ -87,7 +87,7 @@ C-SDK without upload to blob</h2>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">AMQP With Web Sockets   </td><td class="markdownTableBodyNone">815,824   </td></tr>
 </table>
-<h2><a class="anchor" id="autotoc_md33"></a>
+<h2><a class="anchor" id="autotoc_md35"></a>
 C-SDK without upload to blob and logging turned off</h2>
 <p>CMAKE Command:</p>
 <div class="fragment"><div class="line">cmake -DCMAKE_BUILD_TYPE=Release -Ddont_use_uploadtoblob=ON -Dno_logging=ON ..</div>
@@ -104,7 +104,7 @@ C-SDK without upload to blob and logging turned off</h2>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">AMQP With Web Sockets   </td><td class="markdownTableBodyNone">498,672   </td></tr>
 </table>
-<h2><a class="anchor" id="autotoc_md34"></a>
+<h2><a class="anchor" id="autotoc_md36"></a>
 C-SDK using strip command</h2>
 <p>CMAKE Command:</p>
 <div class="fragment"><div class="line">cmake -DCMAKE_BUILD_TYPE=Release -Ddont_use_uploadtoblob=ON -Dno_logging=ON ..</div>
@@ -121,7 +121,7 @@ C-SDK using strip command</h2>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">AMQP With Web Sockets   </td><td class="markdownTableBodyNone">413,864   </td></tr>
 </table>
-<h1><a class="anchor" id="autotoc_md35"></a>
+<h1><a class="anchor" id="autotoc_md37"></a>
 Runtime Memory Information</h1>
 <p>The runtime Memory information is the measurement of the C SDK memory allocation when sending 1 telemetry message</p>
 <table class="markdownTable">
@@ -139,7 +139,7 @@ Runtime Memory Information</h1>
 <ul>
 <li><code>Max Memory Bytes</code> represents all c-sdk calls to malloc. Memory allocated on the stack is not captured</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md36"></a>
+<h1><a class="anchor" id="autotoc_md38"></a>
 Network traffic Information</h1>
 <p>Network packets measure the number of bytes that are sent form the C-SDK with the specified payload size. This value excludes the connection and disconnection headers.</p>
 <table class="markdownTable">
@@ -158,7 +158,7 @@ Network traffic Information</h1>
 <li><code>Bytes Send</code> is the amount of data written by the c-sdk on the socket.</li>
 <li><code>Send Calls</code>/<code>Recv calls</code> are the number of types the c-sdk calls send or recv on the socket</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md37"></a>
+<h1><a class="anchor" id="autotoc_md39"></a>
 Note on constrained devices</h1>
 <p>The <code>Embedded C SDK</code> is an alternative for constrained devices which enables the BYO (bring your own) network approach: IoT developers have the freedom of choice to bring MQTT client, TLS and Socket of their choice to create a device solution. Find more information about the Embedded C SDK <a href="https://github.com/Azure/azure-sdk-for-c/tree/main/sdk/docs/iot">here</a>. </p>
 </div></div><!-- contents -->

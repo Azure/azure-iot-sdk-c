@@ -1,8 +1,9 @@
 var searchData=
 [
-  ['c_2dsdk_20resource_20information_3',['C-SDK Resource Information',['../md__home_runner_work_azure_iot_sdk_c_azure_iot_sdk_c_doc_c_sdk_resource_information.html',1,'']]],
-  ['configure_20tls_20protocol_20version_20and_20ciphers_4',['Configure TLS Protocol Version and Ciphers',['../md__home_runner_work_azure_iot_sdk_c_azure_iot_sdk_c_doc_configure_tls_protocol_version_and_ciphers.html',1,'']]],
-  ['cross_20compiling_20the_20sdk_20in_20a_20docker_20container_5',['Cross Compiling the SDK in a Docker Container',['../md__home_runner_work_azure_iot_sdk_c_azure_iot_sdk_c_doc__docker__s_d_k__cross__compile.html',1,'']]],
-  ['cocoapods_20for_20microsoft_20azure_20iot_6',['CocoaPods for Microsoft Azure IoT',['../md__home_runner_work_azure_iot_sdk_c_azure_iot_sdk_c_doc_sdk_cocoapods.html',1,'']]],
-  ['cross_20compiling_20the_20azure_20iot_20hub_20sdk_7',['Cross Compiling the Azure IoT Hub SDK',['../md__home_runner_work_azure_iot_sdk_c_azure_iot_sdk_c_doc__s_d_k_cross_compile_example.html',1,'']]]
+  ['deprecated_20list_10',['Deprecated List',['../deprecated.html',1,'']]],
+  ['description_11',['description',['../struct_i_o_t_h_u_b___c_l_i_e_n_t___p_r_o_p_e_r_t_y___w_r_i_t_a_b_l_e___r_e_s_p_o_n_s_e.html#abff461f4c284e367995bb5349e6354d1',1,'IOTHUB_CLIENT_PROPERTY_WRITABLE_RESPONSE']]],
+  ['device_5ftwin_5fupdate_5fstate_12',['DEVICE_TWIN_UPDATE_STATE',['../iothub__client__core__common_8h.html#a5391a09a29ced5c97878773ca94f5c29',1,'iothub_client_core_common.h']]],
+  ['deviceid_13',['deviceId',['../struct_i_o_t_h_u_b___c_l_i_e_n_t___c_o_n_f_i_g.html#a25224fac7299dde82c6af5df11a78d70',1,'IOTHUB_CLIENT_CONFIG::deviceId()'],['../struct_i_o_t_h_u_b___c_l_i_e_n_t___d_e_v_i_c_e___c_o_n_f_i_g.html#a11fc0a8ff9796b1456fa5ee0003f7ff1',1,'IOTHUB_CLIENT_DEVICE_CONFIG::deviceId()']]],
+  ['devicekey_14',['deviceKey',['../struct_i_o_t_h_u_b___c_l_i_e_n_t___c_o_n_f_i_g.html#a6fb13ceda0cb9543319d5e9afa88c305',1,'IOTHUB_CLIENT_CONFIG::deviceKey()'],['../struct_i_o_t_h_u_b___c_l_i_e_n_t___d_e_v_i_c_e___c_o_n_f_i_g.html#aec6e8daaff0554c01b58d29cba0b89f0',1,'IOTHUB_CLIENT_DEVICE_CONFIG::deviceKey()']]],
+  ['devicesastoken_15',['deviceSasToken',['../struct_i_o_t_h_u_b___c_l_i_e_n_t___c_o_n_f_i_g.html#ad88b90395c49586f54392950e67f9bee',1,'IOTHUB_CLIENT_CONFIG::deviceSasToken()'],['../struct_i_o_t_h_u_b___c_l_i_e_n_t___d_e_v_i_c_e___c_o_n_f_i_g.html#a4c8f9e4199ab3f7e24e952c045b9f55f',1,'IOTHUB_CLIENT_DEVICE_CONFIG::deviceSasToken()']]]
 ];

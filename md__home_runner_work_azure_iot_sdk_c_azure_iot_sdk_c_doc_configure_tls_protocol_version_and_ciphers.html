@@ -65,43 +65,43 @@ $(function() {
 <div class="title">Configure TLS Protocol Version and Ciphers </div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><h1><a class="anchor" id="autotoc_md39"></a>
+<div class="textblock"><h1><a class="anchor" id="autotoc_md41"></a>
 How to configure the Azure IoT C SDK TLS platforms to disable TLS 1.0 and TLS 1.1</h1>
-<h2><a class="anchor" id="autotoc_md40"></a>
+<h2><a class="anchor" id="autotoc_md42"></a>
 SChannel (Microsoft Windows)</h2>
 <p>To use exclusively TLS 1.2 in Microsoft Windows using SChannel, disable the support for TLS 1.0 and 1.1.</p>
 <p>Be aware that this action might impact other applications in the systems that might not support higher versions of TLS.</p>
 <p>To disable support in SChannel for TLS 1.0, follow this <a href="https://docs.microsoft.com/windows-server/identity/ad-fs/operations/manage-ssl-protocols-in-ad-fs#enable-and-disable-tls-10">documentation</a>.</p>
 <p>To disable support in SChannel for TLS 1.1, follow this <a href="https://docs.microsoft.com/windows-server/identity/ad-fs/operations/manage-ssl-protocols-in-ad-fs#enable-and-disable-tls-11">documentation</a>.</p>
 <p>For more information on TLS configuration please see the <a href="https://docs.microsoft.com/dotnet/framework/network-programming/tls">following documentation</a>.</p>
-<h2><a class="anchor" id="autotoc_md41"></a>
+<h2><a class="anchor" id="autotoc_md43"></a>
 OpenSSL</h2>
 <p>The latest Azure IoT C SDK uses <a href="https://github.com/Azure/azure-c-shared-utility/blob/48f7a556865731f0e96c47eb5e9537361f24647c/adapters/tlsio_openssl.c#L1167">TLS 1.2 by default with OpenSSL</a>.</p>
 <p>The SDK creates the SSL context using the method related to the TLS version selected (1.2 by default).</p>
 <p>According to the <a href="https://www.openssl.org/docs/man1.0.2/man3/SSL_CTX_new.html">OpenSSL documentation</a> the method selected causes OpenSSL to use only the TLS version associated with that method. <br  />
 </p>
-<h2><a class="anchor" id="autotoc_md42"></a>
+<h2><a class="anchor" id="autotoc_md44"></a>
 WolfSSL</h2>
 <p>To use only TLS 1.2 or higher, WolfSSL library MUST be built without using “&ndash;enable-oldtls”.</p>
 <p>Please check the <a href="https://github.com/wolfSSL/wolfssl/wiki/Building-wolfSSL#25-build-options-configure-options">WolfSSL documentation</a> as this option is enabled by default on the binaries distributed by them.</p>
 <p>In its adapter layer, Azure IoT C SDK does not directly set the TLS version that wolfSSL should use. The result is that the wolfSSL library will use its default TLS version.</p>
-<h2><a class="anchor" id="autotoc_md43"></a>
+<h2><a class="anchor" id="autotoc_md45"></a>
 Apple iOS</h2>
 <p>TLS 1.2+ should already be the default for the latest versions of Apple iOS.</p>
-<h2><a class="anchor" id="autotoc_md44"></a>
+<h2><a class="anchor" id="autotoc_md46"></a>
 mbedTLS</h2>
 <p>mbedTLS can be configured to use only higher versions of TLS. That is achieved by calling <a href="https://os.mbed.com/teams/sandbox/code/mbedtls/docs/bef26f687287/ssl_8h.html">mbedtls_ssl_conf_min_version</a>.</p>
 <p>In its adapter layer, Azure IoT C SDK already <a href="https://github.com/Azure/azure-c-shared-utility/blob/48f7a556865731f0e96c47eb5e9537361f24647c/adapters/tlsio_mbedtls.c#L481">sets the minimum TLS version that mbedTLS should use</a> to TLS 1.2.</p>
-<h2><a class="anchor" id="autotoc_md45"></a>
+<h2><a class="anchor" id="autotoc_md47"></a>
 BearSSL/esp8266 Arduino</h2>
 <p>TLS version can be set on BearSSL by using <a href="https://www.bearssl.org/gitweb/?p=BearSSL;a=blob;f=inc/bearssl_ssl.h;h=fee7b3c496086b96b5435674c130af2e740b1b88;hb=5f045c759957fdff8c85716e6af99e10901fdac0#l1114">br_ssl_engine_set_versions</a>.</p>
 <p>Currently the Azure IoT C SDK does not directly set the minimum version of TLS to be used by BearSSL.</p>
-<h1><a class="anchor" id="autotoc_md46"></a>
+<h1><a class="anchor" id="autotoc_md48"></a>
 How to configure ciphers in the Azure IoT C SDK supported TLS platforms</h1>
-<h2><a class="anchor" id="autotoc_md47"></a>
+<h2><a class="anchor" id="autotoc_md49"></a>
 SChannel (Microsoft Windows)</h2>
 <p>To configure additional ciphers for SChannel please follow this <a href="https://docs.microsoft.com/windows-server/identity/ad-fs/operations/manage-ssl-protocols-in-ad-fs#enabling-or-disabling-additional-cipher-suites">documentation</a>.</p>
-<h2><a class="anchor" id="autotoc_md48"></a>
+<h2><a class="anchor" id="autotoc_md50"></a>
 OpenSSL</h2>
 <p>The OpenSSL API function <a href="https://www.openssl.org/docs/man1.0.2/man3/SSL_CTX_set_cipher_list.html">SSL_CTX_set_cipher_list</a> can be used to set the list of ciphers used by the OpenSSL library. <br  />
 </p>
@@ -135,18 +135,18 @@ OpenSSL</h2>
 <div class="line">const <span class="keywordtype">char</span>* ciphers = <span class="stringliteral">&quot;list of ciphers, in the format expected by OpenSSL API&#39;s SSL_CTX_set_cipher_list()&quot;</span>; <span class="comment">// please modify this string to have the desired ciphers.</span></div>
 <div class="line"><a class="code" href="iothub__module__client_8h.html#a8778c5207e84af1048d92ed4af6105c2">IoTHubModuleClient_SetOption</a>(iotHubClientHandle, OPTION_OPENSSL_CIPHER_SUITE, ciphers);</div>
 <div class="ttc" id="aiothub__module__client_8h_html_a8778c5207e84af1048d92ed4af6105c2"><div class="ttname"><a href="iothub__module__client_8h.html#a8778c5207e84af1048d92ed4af6105c2">IoTHubModuleClient_SetOption</a></div><div class="ttdeci">IOTHUB_CLIENT_RESULT IoTHubModuleClient_SetOption(IOTHUB_MODULE_CLIENT_HANDLE iotHubModuleClientHandle, const char *optionName, const void *value)</div><div class="ttdoc">This API sets a runtime option identified by parameter optionName to a value pointed to by value....</div></div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md49"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md51"></a>
 WolfSSL</h2>
 <p>Please check the <a href="https://www.wolfssl.com/docs/wolfssl-manual/ch2/">WolfSSL documentation</a> to build the WolfSSL library to support the desired ciphers.</p>
 <p>In its adapter layer, Azure IoT C SDK does not directly set the ciphers that wolfSSL should use.</p>
-<h2><a class="anchor" id="autotoc_md50"></a>
+<h2><a class="anchor" id="autotoc_md52"></a>
 Apple iOS</h2>
 <p>Please follow the same guidelines above for using OpenSSL.</p>
-<h2><a class="anchor" id="autotoc_md51"></a>
+<h2><a class="anchor" id="autotoc_md53"></a>
 mbedTLS</h2>
 <p>This <a href="https://os.mbed.com/teams/sandbox/code/mbedtls/docs/bef26f687287/ssl_8h_source.html#l00477">mbedTLS documentation</a> provides details of how to set supported ciphers.</p>
 <p>Any additional calls to mbedTLS API should be done in the Azure IoT C SDK mbedTLS adapter code (<a href="https://github.com/Azure/azure-c-shared-utility/blob/48f7a556865731f0e96c47eb5e9537361f24647c/adapters/tlsio_mbedtls.c#L482">tlsio_mbedtls.c, on tlsio_mbedtls.c after mbedtls_ssl_config_init</a>).</p>
-<h2><a class="anchor" id="autotoc_md52"></a>
+<h2><a class="anchor" id="autotoc_md54"></a>
 BearSSL/esp8266 Arduino</h2>
 <p>Set the cipher suite while defining profile at initialization (see "Profiles" in the <a href="https://www.bearssl.org/api1.html">BearSSL documentation</a>) or use <a href="https://arduino-esp8266.readthedocs.io/en/latest/esp8266wifi/bearssl-client-secure-class.html">setCiphers</a>.</p>
 <p>Any additional calls to BearSSL API should be done in the Azure IoT C SDK BearSSL adapter code (<a href="https://github.com/Azure/azure-c-shared-utility/blob/48f7a556865731f0e96c47eb5e9537361f24647c/adapters/tlsio_bearssl.c#L1102">tlsio_bearssl.c, on tlsio_bearssl_open after br_ssl_client_init_full</a>). </p>

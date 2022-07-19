@@ -65,9 +65,9 @@ $(function() {
 <div class="title">Azure IoT Device Client C SDK </div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><h1><a class="anchor" id="autotoc_md54"></a>
+<div class="textblock"><h1><a class="anchor" id="autotoc_md56"></a>
 Connection and Messaging Reliability</h1>
-<h2><a class="anchor" id="autotoc_md55"></a>
+<h2><a class="anchor" id="autotoc_md57"></a>
 Overview</h2>
 <p>In this document you will find information about the reliability aspects of the <a href="https://github.com/Azure/azure-iot-sdk-c">Azure IoT C SDK</a> design, including details of:</p>
 <ul>
@@ -79,7 +79,7 @@ Overview</h2>
 <li>What happens to previously queued and new messages;</li>
 <li>Specific behaviors of the supported transport-protocols (AMQP, MQTT, HTTP).</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md56"></a>
+<h2><a class="anchor" id="autotoc_md58"></a>
 Connection Authentication</h2>
 <p>This is a brief note to clarify how authentication is done in the IoTHub Device/Module clients.</p>
 <p>Authentication of a client in the SDK can be done using either</p>
@@ -108,7 +108,7 @@ Connection Authentication</h2>
 <td class="markdownTableBodyNone">HTTP   </td><td class="markdownTableBodyNone">There is no persistent connection; a new SAS token (valid for 1 hour) is created and sent with each request to the Azure IoT Hub.   </td></tr>
 </table>
 <p>Both the SAS token lifetime and refresh rate are configurable on AMQP transport (see <a href="https://github.com/Azure/azure-iot-sdk-c/blob/2019-03-18/doc/Iothub_sdk_options.md#amqp-transport">AMQP transport section</a> in SDK options documentation).</p>
-<h2><a class="anchor" id="autotoc_md57"></a>
+<h2><a class="anchor" id="autotoc_md59"></a>
 Connection Establishment and Retry Logic</h2>
 <p>The design of the Azure IoT C SDK is composed of layers, each of them assigned specific responsibilities:</p>
 <table class="markdownTable">
@@ -180,7 +180,7 @@ Connection Establishment and Retry Logic</h2>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">HTTP   </td><td class="markdownTableBodyNone">HTTP connections to the Azure IoT Hub are not persistent. Each outgoing message to the hub results in a new connection and is closed as soon as the I/O is completed. Incoming messages from the Hub are received by the device client through polling mechanisms, where the the HTTP connection follows the same lifecycle above. If connection failures occur, the protocol transport simply keeps retrying the operation until it succeeds.   </td></tr>
 </table>
-<h2><a class="anchor" id="autotoc_md58"></a>
+<h2><a class="anchor" id="autotoc_md60"></a>
 The Connection Retry Logic</h2>
 <p>Once a connection issue is detected, the transport protocol will initiate its connection retry logic. The process is as follows:</p>
 <ol type="1">
@@ -230,7 +230,7 @@ The Connection Retry Logic</h2>
 </ul>
 </li>
 </ol>
-<h2><a class="anchor" id="autotoc_md59"></a>
+<h2><a class="anchor" id="autotoc_md61"></a>
 Behavior of the Device Client SDK while Re-Connecting</h2>
 <p>The Azure IoT Device Client C SDK implements asynchronous operations through the *_DoWork() model it uses.</p>
 <p>All API functions that result in I/O (like <a href="https://github.com/Azure/azure-iot-sdk-c/blob/2018-05-04/iothub_client/inc/iothub_client_ll.h#L354"><em>IoTHubClient_LL_SendEventAsync</em></a> or <a href="https://github.com/Azure/azure-iot-sdk-c/blob/2018-05-04/iothub_client/inc/iothub_client_ll.h#L385"><em>IoTHubClient_LL_SetMessageCallback</em></a>) are actually queued or stored, taking effect only when <a href="https://github.com/Azure/azure-iot-sdk-c/blob/2018-05-04/iothub_client/inc/iothub_client_ll.h#L461"><em>IoTHubClient_LL_DoWork</em></a> is invoked* AND the connection with the Azure IoT Hub is established.</p>
@@ -243,7 +243,7 @@ Behavior of the Device Client SDK while Re-Connecting</h2>
 <li>New subscriptions for cloud-to-device messages (e.g., Commands) will be stored, but result in an actual request for subscription to the Azure IoT Hub only the device client re-connects.</li>
 </ul>
 <p>For clarity it is worth mentioning that while the Azure IoT Device Client is re-connecting, it has no means to receive any messages from the Azure IoT Hub. During that time any attempts to send Commands or invoke Device Methods to the given device client (using for example the <a href="https://github.com/Azure/azure-iot-sdk-c/tree/2018-05-04/iothub_service_client">Azure IoT Service Client C SDK</a>) will result in failure returned by the Azure IoT Hub to the source of those requests.</p>
-<h2><a class="anchor" id="autotoc_md60"></a>
+<h2><a class="anchor" id="autotoc_md62"></a>
 Timeout Controls over Outgoing Messages</h2>
 <p>Besides checking for error returns and responding to callbacks from lower its layers, the Azure IoT Device Client C SDK also implements extra logic to detect failures by tracking timeouts. They apply to different functionalities within the SDK, each with a specific course of action in case</p>
 <ul>
@@ -253,7 +253,7 @@ Timeout Controls over Outgoing Messages</h2>
 </ul>
 <p>Some of the time-outs can be fine-tuned by the user (through IoTHubClient_LL_SetOption). Some are dependent on the application protocol selected (AMQP, MQTT or HTTP).</p>
 <p>Details about the specific timeout control values that can be set by the user can be found on the <a href="file:///C:\repos\s1\azure-iot-sdk-c\doc\connection-and-messaging-reliability.md#Current-Configuration-Options">"Current Configuration Options"</a> sub-section bellow.</p>
-<h2><a class="anchor" id="autotoc_md61"></a>
+<h2><a class="anchor" id="autotoc_md63"></a>
 Known Issue: Duplicated Timeout Control for Sending Telemetry Messages</h2>
 <p>Currently the Azure IoT Device Client C SDK implements a queue for pending outgoing Telemetry messages that is owned by the iothub_client_ll layer.</p>
 <p>Any new Telemetry messages passed to the SDK by the user (through ) are copied and immediatelly stored in that queue.</p>
@@ -266,7 +266,7 @@ Known Issue: Duplicated Timeout Control for Sending Telemetry Messages</h2>
 <ul>
 <li>Depends on how frequently IoTHubClient_LL_DoWork is invoked. On the iothub_client (threaded) layer, it is invoked every one-hundred milliseconds.</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md62"></a>
+<h2><a class="anchor" id="autotoc_md64"></a>
 Connection Retry Policies</h2>
 <p>Some times the connection issues, although transient, can last longer than expected, or network availability can bounce on and off for a while after it first returns.</p>
 <p>Attempting to reconnect to the Azure IoT Hub immediatelly in a loop is not the most efficient way for the device client SDK to operate, since some of the initial attempts might fail because of the reasons above.</p>
@@ -327,7 +327,7 @@ Connection Retry Policies</h2>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">IOTHUB_CLIENT_RETRY_RANDOM   </td><td class="markdownTableBodyNone">First attempt should be done immediatelly.Until the re-connection succeeds, each subsequent attempt is subject to a random wait time.Default behavior: the random wait time range is from 0 to 5 seconds.   </td><td class="markdownTableBodyNone">Device client detects a connection issue.The first re-connection attempt happens immediatelly, then again in 5 seconds (random multiplier of 100%), then again 2 seconds ( (random multiplier of 40%), 4 seconds (random multiplier of 80%), 0 seconds (random multiplier of 0%), 3 (60%), ... until it succeeds.   </td></tr>
 </table>
-<h2><a class="anchor" id="autotoc_md63"></a>
+<h2><a class="anchor" id="autotoc_md65"></a>
 Connection Status Callback</h2>
 <p>The Azure IoT Device Client C SDK provides a callback option to notify the upper application layer if it is connected to the Azure IoT Hub or not, followed by a standardized reason.</p>
 <p>To access it the user can invoke one of the functions below, passing a callback function.</p>
@@ -347,7 +347,7 @@ Connection Status Callback</h2>
 <li>When the device client ceases attempting to re-connect (if the Retry Policy no longer allows to).</li>
 </ul>
 <p>Please take a look <a href="https://github.com/Azure/azure-iot-sdk-c/blob/2018-05-04/iothub_client/inc/iothub_client_ll.h#L144">here</a> for more info on the possible status and reasons.</p>
-<h2><a class="anchor" id="autotoc_md64"></a>
+<h2><a class="anchor" id="autotoc_md66"></a>
 Current Configuration Options</h2>
 <p>Most of the options exposed by the public API of the Azure IoT Device Client C SDK are listed on the header file <a href="https://github.com/Azure/azure-iot-sdk-c/blob/2018-05-04/iothub_client/inc/iothub_client_options.h">`iothub_client_options.h</a>.</p>
 <p>They can be set by one of the _SetOption functions depending on the module used:</p>
@@ -372,7 +372,7 @@ Current Configuration Options</h2>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">OPTION_CONNECTION_TIMEOUT   </td><td class="markdownTableBodyNone">int*   </td><td class="markdownTableBodyNone">MQTT and MQTT over WebSockets protocol transports   </td><td class="markdownTableBodyNone">While connecting, it is the maximum number of seconds the device client (when using MQTT) will wait for the connection to complete (CONNACK).The default value is 30 seconds.   </td></tr>
 </table>
-<h2><a class="anchor" id="autotoc_md65"></a>
+<h2><a class="anchor" id="autotoc_md67"></a>
 Special Timeout Controls Not Exposed to the User</h2>
 <p>Although not currently configurable, they are important for further understanding the directives that impact the connection, re-connection and messaging within the Azure IoT Device Client C SDK.</p>
 <table class="markdownTable">

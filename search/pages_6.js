@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['master_20to_20main_20branch_20rename_20instructions_474',['master to main branch rename instructions',['../md__home_runner_work_azure_iot_sdk_c_azure_iot_sdk_c_doc_master_to_main_rename.html',1,'']]],
-  ['multiplexing_20limitations_20and_20alternatives_475',['Multiplexing limitations and alternatives',['../md__home_runner_work_azure_iot_sdk_c_azure_iot_sdk_c_doc_multiplexing_limitations.html',1,'']]]
+  ['prepare_20your_20development_20environment_600',['Prepare your development environment',['../md__home_runner_work_azure_iot_sdk_c_azure_iot_sdk_c_doc_devbox_setup.html',1,'']]]
 ];
