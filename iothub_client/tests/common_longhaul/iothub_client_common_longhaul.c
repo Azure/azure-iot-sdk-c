@@ -690,7 +690,13 @@ static int run_on_loop(RUN_ON_LOOP_ACTION action, size_t iterationDurationInSeco
 
                 if (wait_time_secs > 0)
                 {
-                    ThreadAPI_Sleep((unsigned int)(1000 * wait_time_secs));
+                    IOTHUB_LONGHAUL_RESOURCES* iotHubLonghaul = (IOTHUB_LONGHAUL_RESOURCES*)action_context;
+                    while (wait_time_secs > 0)
+                    {
+                        wait_time_secs -= 10;
+                        ThreadAPI_Sleep((unsigned int)(1000 * 10));
+                        validate_internet_connectivity(iotHubLonghaul);
+                    }
                 }
 
                 // We should get the current time again to be 100% precise, but we will optimize here since wait_time_secs is supposed to be way smaller than totalDurationInSeconds.
@@ -1206,7 +1212,7 @@ static IOTHUB_MESSAGING_CLIENT_HANDLE longhaul_initialize_service_c2d_messaging_
             IoTHubMessaging_Destroy(iotHubLonghaul->iotHubSvcMsgHandle);
             iotHubLonghaul->iotHubSvcMsgHandle = NULL;
             result = NULL;
-        } 
+        }
         else
         {
             result = iotHubLonghaul->iotHubSvcMsgHandle;
@@ -1579,7 +1585,7 @@ static int invoke_device_method(const void* context)
             unsigned char* responsePayload;
             size_t responseSize;
 
-            DEVICE_METHOD_INFO device_method_info = {0};
+            DEVICE_METHOD_INFO device_method_info = { 0 };
             device_method_info.method_id = method_id;
             device_method_info.time_invoked = time(NULL);
 
