@@ -54,7 +54,6 @@ static const char* IOTHUB_LONGHAUL_LOOP_DURATION_SECS = "IOTHUB_LONGHAUL_LOOP_DU
 #define SERVICE_NETWORK_RETRY_ATTEMPTS          4
 #define NETWORK_RETRY_DELAY_MSEC                (15 * 1000)
 #define NETWORK_RETRY_LONG_DELAY_MSEC           (60 * 1000)
-#define NETWORK_TEST_ENDPOINT                   "bing.com"
 
 #define MAX_TELEMETRY_TRAVEL_TIME_SECS          600.0
 #define MAX_C2D_TRAVEL_TIME_SECS                600.0
@@ -431,20 +430,9 @@ static void validate_internet_connectivity(IOTHUB_LONGHAUL_RESOURCES* iotHubLong
 {
     unsigned int statusCode;
 
-    LogInfo("Network error detected in test. Verifying internet connectivity available...");
-
-    statusCode = test_http_endpoint(NETWORK_TEST_ENDPOINT);
-    if (statusCode >= 200 && statusCode <= 301)
-    {
-        LogInfo("validate_internet_connectivity: " NETWORK_TEST_ENDPOINT " is accessible");
-    }
-    else
-    {
-        LogError("validate_internet_connectivity: " NETWORK_TEST_ENDPOINT " is NOT accessible!");
-    }
-
     if (iotHubLonghaul != NULL)
     {
+        LogInfo("Network error detected in test. Verifying internet connectivity available...");
         const char* hubHostName = IoTHubAccount_GetIoTHostName(iotHubLonghaul->iotHubAccountInfo);
         statusCode = test_http_endpoint(hubHostName);
         if (statusCode == 400)
