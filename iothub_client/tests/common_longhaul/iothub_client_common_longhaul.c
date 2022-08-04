@@ -1951,7 +1951,7 @@ int longhaul_run_telemetry_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle)
                 int loop_result;
                 IOTHUB_CLIENT_STATISTICS_HANDLE stats_handle;
                 ThreadAPI_Sleep(30 * 1000); // Extra time for the hub to create the device
-                loop_result = run_on_loop(send_telemetry, iotHubLonghaulRsrcs->test_loop_duration_in_seconds, iotHubLonghaulRsrcs->test_duration_in_seconds, iotHubLonghaulRsrcs);
+                loop_result = run_on_loop(send_telemetry, 10/*iotHubLonghaulRsrcs->test_loop_duration_in_seconds*/, iotHubLonghaulRsrcs->test_duration_in_seconds, iotHubLonghaulRsrcs);
 
                 ThreadAPI_Sleep((unsigned int)iotHubLonghaulRsrcs->test_loop_duration_in_seconds * 1000 * 20); // Extra time for the last messages.
 
