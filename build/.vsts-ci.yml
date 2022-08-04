@@ -454,7 +454,7 @@ jobs:
   container: linux-c-ubuntu-2204
   pool:
     name: 'sdk-c--ubuntu-18'
-  displayName: 'Ubuntu 20.04 (Debug)'
+  displayName: 'Ubuntu 22.04 (Debug)'
   steps:
   - script: |
       sudo -E ./jenkins/ubuntu_c.sh
@@ -499,7 +499,7 @@ jobs:
   container: linux-c-ubuntu-2204
   pool:
     name: 'sdk-c--ubuntu-18'
-  displayName: 'Ubuntu 20.04 (Release)'
+  displayName: 'Ubuntu 22.04 (Release)'
   steps:
   - script: |
       sudo -E ./jenkins/ubuntu_c_release.sh
