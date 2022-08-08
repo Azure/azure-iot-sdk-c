@@ -2,9 +2,9 @@ FROM ubuntu:latest
 
 # Run commands that require root authority
 RUN apt-get update && apt-get -y upgrade
-RUN apt-get install -y cmake git wget nano
+RUN apt-get install -y cmake git wget nano 
 
-RUN useradd -d /home/builder -ms /bin/bash -G sudo -p builder builder
+RUN useradd -d /home/builder -ms /bin/bash -G sudo -p builder builder bzip2
 
 # Switch to new user
 USER builder
