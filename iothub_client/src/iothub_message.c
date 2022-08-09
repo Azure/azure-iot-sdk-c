@@ -38,6 +38,7 @@ typedef struct IOTHUB_MESSAGE_HANDLE_DATA_TAG
     char* userId;
     MESSAGE_DISPOSITION_CONTEXT_HANDLE dispositionContext;
     MESSAGE_DISPOSITION_CONTEXT_DESTROY_FUNCTION dispositionContextDestroyFunction;
+    char* componentName;
 }IOTHUB_MESSAGE_HANDLE_DATA;
 
 static bool ContainsValidUsAscii(const char* asciiValue)
@@ -113,6 +114,7 @@ static void DestroyMessageData(IOTHUB_MESSAGE_HANDLE_DATA* handleData)
         handleData->dispositionContextDestroyFunction(handleData->dispositionContext);
     }
 
+    free(handleData->componentName);
     free(handleData);
 }
 
@@ -408,6 +410,12 @@ IOTHUB_MESSAGE_HANDLE IoTHubMessage_Clone(IOTHUB_MESSAGE_HANDLE iotHubMessageHan
             else if (source->connectionDeviceId != NULL && mallocAndStrcpy_s(&result->connectionDeviceId, source->connectionDeviceId) != 0)
             {
                 LogError("unable to copy inputName");
+                DestroyMessageData(result);
+                result = NULL;
+            }
+            else if (source->componentName != NULL && mallocAndStrcpy_s(&result->componentName, source->componentName) != 0)
+            {
+                LogError("unable to copy componentName");
                 DestroyMessageData(result);
                 result = NULL;
             }
@@ -1135,6 +1143,51 @@ bool IoTHubMessage_IsSecurityMessage(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle)
     else
     {
         result = iotHubMessageHandle->is_security_message;
+    }
+    return result;
+}
+
+IOTHUB_MESSAGE_RESULT IoTHubMessage_SetComponentName(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle, const char* componentName)
+{
+    IOTHUB_MESSAGE_RESULT result;
+    if (iotHubMessageHandle == NULL || componentName == NULL)
+    {
+        LogError("invalid arg (NULL) passed to IoTHubMessage_SetComponentName");
+        result = IOTHUB_MESSAGE_INVALID_ARG;
+    }
+    else
+    {
+        IOTHUB_MESSAGE_HANDLE_DATA* handleData = iotHubMessageHandle;
+        if (handleData->componentName != NULL)
+        {
+            free(handleData->componentName);
+            handleData->componentName = NULL;
+        }
+
+        if (mallocAndStrcpy_s(&handleData->componentName, componentName) != 0)
+        {
+            result = IOTHUB_MESSAGE_ERROR;
+        }
+        else
+        {
+            result = IOTHUB_MESSAGE_OK;
+        }
+    }
+    return result;
+}
+
+const char* IoTHubMessage_GetComponentName(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle)
+{
+    const char* result;
+    if (iotHubMessageHandle == NULL)
+    {
+        LogError("invalid arg (NULL) passed to IoTHubMessage_GetComponentName");
+        result = NULL;
+    }
+    else
+    {
+        IOTHUB_MESSAGE_HANDLE_DATA* handleData = iotHubMessageHandle;
+        result = handleData->componentName;
     }
     return result;
 }

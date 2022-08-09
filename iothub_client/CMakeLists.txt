@@ -17,6 +17,7 @@ set(iothub_client_c_files
     ${CMAKE_CURRENT_LIST_DIR}/src/iothub_client_core_ll.c
     ${CMAKE_CURRENT_LIST_DIR}/src/iothub_client_diagnostic.c
     ${CMAKE_CURRENT_LIST_DIR}/src/iothub_client_ll.c
+    ${CMAKE_CURRENT_LIST_DIR}/src/iothub_client_properties.c
     ${CMAKE_CURRENT_LIST_DIR}/src/iothub_device_client.c
     ${CMAKE_CURRENT_LIST_DIR}/src/iothub_device_client_ll.c
     ${CMAKE_CURRENT_LIST_DIR}/src/iothub_message.c
@@ -34,6 +35,7 @@ set(iothub_client_h_files
     ${CMAKE_CURRENT_LIST_DIR}/inc/iothub_client_core_common.h
     ${CMAKE_CURRENT_LIST_DIR}/inc/iothub_client_ll.h
     ${CMAKE_CURRENT_LIST_DIR}/inc/internal/iothub_client_diagnostic.h
+    ${CMAKE_CURRENT_LIST_DIR}/inc/iothub_client_properties.h
     ${CMAKE_CURRENT_LIST_DIR}/inc/internal/iothub_internal_consts.h
     ${CMAKE_CURRENT_LIST_DIR}/inc/iothub_client_options.h
     ${CMAKE_CURRENT_LIST_DIR}/inc/internal/iothub_client_private.h
@@ -248,7 +250,7 @@ endif()
 set(IOTHUB_CLIENT_INC_FOLDER ${CMAKE_CURRENT_LIST_DIR}/inc CACHE INTERNAL "this is what needs to be included if using iothub_client lib" FORCE)
 
 
-if(NOT ${dont_use_uploadtoblob} OR ${use_edge_modules} AND NOT ${use_installed_dependencies})
+if(NOT ${use_installed_dependencies})
     include_directories(${CMAKE_CURRENT_LIST_DIR}/../deps/parson)
 endif()
 
@@ -260,6 +262,10 @@ include_directories(${IOTHUB_CLIENT_INC_FOLDER})
 
 if(${memory_trace})
     add_definitions(-DGB_MEASURE_MEMORY_FOR_THIS -DGB_DEBUG_ALLOC)
+endif()
+
+if(${run_sfc_tests})
+    add_definitions(-DRUN_SFC_TESTS)
 endif()
 
 IF(WIN32)
@@ -413,7 +419,7 @@ if (${build_as_dynamic})
         ARCHIVE_OUTPUT_NAME "iothub_client_dll_import"
         ENABLE_EXPORTS YES
         VERSION ${IOT_SDK_VERSION}
-        SOVERSION ${IOT_SDK_VERION_MAJOR}
+        SOVERSION ${IOT_SDK_VERSION_MAJOR}
         BUILD_WITH_INSTALL_RPATH TRUE
     )
     set(iothub_client_libs

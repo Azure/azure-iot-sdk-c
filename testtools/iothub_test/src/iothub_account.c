@@ -26,7 +26,7 @@
 #include "azure_c_shared_utility/httpapiexsas.h"
 #include "azure_c_shared_utility/uniqueid.h"
 #include "azure_c_shared_utility/threadapi.h"
-
+#include "azure_c_shared_utility/gb_rand.h"
 
 #include "iothub_service_client_auth.h"
 #include "iothub_registrymanager.h"
@@ -49,8 +49,11 @@ static const char* CONN_MODULE_PART = ";ModuleId=";
 
 #define DEVICE_GUID_SIZE            37
 
-static const int TEST_CREATE_MAX_RETRIES = 3;
-static const int TEST_SLEEP_BETWEEN_CREATION_FAILURES_MSEC = 30 * 1000;
+const int TEST_CREATE_MAX_RETRIES = 10;
+const int TEST_METHOD_INVOKE_MAX_RETRIES = 3;
+const int TEST_SLEEP_THROTTLE_MSEC = 5 * 1000;
+const int TEST_SLEEP_BETWEEN_CREATION_FAILURES_MSEC = 30 * 1000;
+const int TEST_SLEEP_BETWEEN_METHOD_INVOKE_FAILURES_MSEC = 30 * 1000;
 
 typedef struct IOTHUB_ACCOUNT_INFO_TAG
 {
@@ -283,6 +286,7 @@ static IOTHUB_REGISTRYMANAGER_RESULT createTestDeviceWithRetry(IOTHUB_REGISTRYMA
     IOTHUB_REGISTRYMANAGER_RESULT result;
     int creationAttempts = 0;
 
+    ThreadAPI_Sleep(TEST_SLEEP_THROTTLE_MSEC);  // prevent Too Many Requests (429) error from service
     while (true)
     {
         LogInfo("Invoking registry manager to create device %s", deviceCreateInfo->deviceId);
@@ -299,7 +303,7 @@ static IOTHUB_REGISTRYMANAGER_RESULT createTestDeviceWithRetry(IOTHUB_REGISTRYMA
         }
             
         LogError("Creating device %s failed with error %d.  Sleeping %d milliseconds", deviceCreateInfo->deviceId, result, TEST_SLEEP_BETWEEN_CREATION_FAILURES_MSEC);
-        ThreadAPI_Sleep(TEST_SLEEP_BETWEEN_CREATION_FAILURES_MSEC);
+        ThreadAPI_Sleep(TEST_SLEEP_BETWEEN_CREATION_FAILURES_MSEC + gb_rand() % 15);  // sleep with jitter
     }
 
     return result;
@@ -311,6 +315,7 @@ static IOTHUB_REGISTRYMANAGER_RESULT createTestModuleWithRetry(IOTHUB_REGISTRYMA
     IOTHUB_REGISTRYMANAGER_RESULT result;
     int creationAttempts = 0;
 
+    ThreadAPI_Sleep(TEST_SLEEP_THROTTLE_MSEC);  // prevent Too Many Requests (429) error from service
     while (true)
     {
         LogInfo("Invoking registry manager to create device/module %s/%s", moduleCreateInfo->deviceId, moduleCreateInfo->moduleId);
@@ -327,7 +332,7 @@ static IOTHUB_REGISTRYMANAGER_RESULT createTestModuleWithRetry(IOTHUB_REGISTRYMA
         }
             
         LogError("Creating device/module %s/%s failed with error %d.  Sleeping %d milliseconds", moduleCreateInfo->deviceId, moduleCreateInfo->moduleId, result, TEST_SLEEP_BETWEEN_CREATION_FAILURES_MSEC);
-        ThreadAPI_Sleep(TEST_SLEEP_BETWEEN_CREATION_FAILURES_MSEC);
+        ThreadAPI_Sleep(TEST_SLEEP_BETWEEN_CREATION_FAILURES_MSEC + gb_rand() % 15);  // sleep with jitter
     }
 
     return result;
@@ -503,6 +508,33 @@ static int updateTestModule(IOTHUB_REGISTRYMANAGER_HANDLE iothub_registrymanager
     return result;
 }
 
+static int updateTestModuleWithRetry(IOTHUB_REGISTRYMANAGER_HANDLE iothub_registrymanager_handle, IOTHUB_PROVISIONED_DEVICE* deviceToProvision)
+{
+    int result;
+    int attempts = 0;
+
+    while (true)
+    {
+        LogInfo("Attempting to update test module on %s/%s", deviceToProvision->deviceId, deviceToProvision->moduleId);
+        if ((result = updateTestModule(iothub_registrymanager_handle, deviceToProvision)) == 0)
+        {
+            break;
+        }
+
+        attempts++;
+        if (attempts == TEST_CREATE_MAX_RETRIES)
+        {
+            LogError("Updating device/module %s/%s failed with error %d.  Exhausted retry attempts.  Failing test", deviceToProvision->deviceId, deviceToProvision->moduleId, result);
+            break;
+        }
+            
+        LogError("Updating device/module %s/%s failed with error %d.  Sleeping %d milliseconds", deviceToProvision->deviceId, deviceToProvision->moduleId, result, TEST_SLEEP_BETWEEN_CREATION_FAILURES_MSEC);
+        ThreadAPI_Sleep(TEST_SLEEP_BETWEEN_CREATION_FAILURES_MSEC);
+    }
+
+    return result;
+}
+
 static int provisionModule(IOTHUB_ACCOUNT_INFO* accountInfo, IOTHUB_PROVISIONED_DEVICE* deviceToProvision)
 {
     IOTHUB_REGISTRY_MODULE_CREATE moduleCreate;
@@ -563,7 +595,7 @@ static int provisionModule(IOTHUB_ACCOUNT_INFO* accountInfo, IOTHUB_PROVISIONED_
         LogError("managedBy expected (%s) does not match what was returned from IoTHubRegistryManager_CreateModule (%s)", TEST_MANAGED_BY_1, moduleInfo.managedBy);
         result = MU_FAILURE;
     }
-    else if (updateTestModule(iothub_registrymanager_handle, deviceToProvision) != 0)
+    else if (updateTestModuleWithRetry(iothub_registrymanager_handle, deviceToProvision) != 0)
     {
         LogError("Unable to update test module");
         result = MU_FAILURE;
@@ -832,6 +864,17 @@ const char* IoTHubAccount_GetEventHubConnectionString(IOTHUB_ACCOUNT_INFO_HANDLE
     if (acctInfo != NULL)
     {
         result = acctInfo->eventhubConnString;
+    }
+    return result;
+}
+
+const char* IoTHubAccount_GetIoTHostName(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle)
+{
+    const char* result = NULL;
+    IOTHUB_ACCOUNT_INFO* acctInfo = (IOTHUB_ACCOUNT_INFO*)acctHandle;
+    if (acctInfo != NULL)
+    {
+        result = acctInfo->hostname;
     }
     return result;
 }

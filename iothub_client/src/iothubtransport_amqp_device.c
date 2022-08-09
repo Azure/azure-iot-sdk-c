@@ -156,6 +156,9 @@ static D2C_EVENT_SEND_RESULT get_d2c_event_send_result_from(TELEMETRY_MESSENGER_
         case TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_MESSENGER_DESTROYED:
             d2c_esr = D2C_EVENT_SEND_COMPLETE_RESULT_DEVICE_DESTROYED;
             break;
+        case TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_ERROR_QUOTA_EXCEEDED:
+            d2c_esr = D2C_EVENT_SEND_COMPLETE_RESULT_ERROR_QUOTA_EXCEEDED;
+            break;
         default:
             // This is not expected. All states should be mapped.
             d2c_esr = D2C_EVENT_SEND_COMPLETE_RESULT_ERROR_UNKNOWN;

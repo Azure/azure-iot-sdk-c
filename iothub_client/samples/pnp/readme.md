@@ -14,15 +14,17 @@ urlFragment: azure-iot-pnp-device-samples-for-c
 
 [![Documentation](../../../doc/media/docs-link-buttons/azure-documentation.svg)](https://docs.microsoft.com/azure/iot-develop/)
 
-These samples demonstrate how a device that follows the [IoT Plug and Play conventions](https://docs.microsoft.com/azure/iot-pnp/concepts-convention) interacts with IoT Hub or IoT Central, to:
+These samples demonstrate how to implement an [IoT Plug and Play](https://aka.ms/iotpnp) device to interact with IoT Hub or IoT Central.  This demonstrates how to:
 
 - Send telemetry.
-- Update device twin properties.
+- Send properties.
+- Process incoming writable properties and acknowledge them.
 - Respond to command invocation.
 
 The samples demonstrate two scenarios:
 
-- An IoT Plug and Play device that implements the [Thermostat](https://devicemodels.azure.com/dtmi/com/example/thermostat-1.json) model. This model has a single interface that defines telemetry, read-only and read-write properties, and commands.
+- An IoT Plug and Play device that implements the [Thermostat](https://devicemodels.azure.com/dtmi/com/example/thermostat-1.json) model.
+This model has a single interface that defines telemetry, read-only and read-write properties, and commands.
 - An IoT Plug and Play device that implements the [Temperature controller](https://devicemodels.azure.com/dtmi/com/example/temperaturecontroller-1.json) model. This model uses multiple components:
   - The top-level interface defines telemetry, read-only property and commands.
   - The model includes two [Thermostat](https://devicemodels.azure.com/dtmi/com/example/thermostat-1.json) components, and a [device information](https://devicemodels.azure.com/dtmi/azure/devicemanagement/deviceinformation-1.json) component.
@@ -42,9 +44,9 @@ The directory contains the following samples:
 
 * [pnp_simple_thermostat](./pnp_simple_thermostat) A simple thermostat that implements the model [dtmi:com:example:Thermostat;1](https://devicemodels.azure.com/dtmi/com/example/thermostat-1.json).  This sample is considered simple because it only implements one component, the thermostat itself.  **You should begin with this sample.**
 
-* [pnp_temperature_controller](./pnp_temperature_controller) A temperature controller that implements the model [dtmi:com:example:TemperatureController;1](https://devicemodels.azure.com/dtmi/com/example/temperaturecontroller-1.json).  This is considerably more complex than the [pnp_simple_thermostat](./pnp_simple_thermostat) and demonstrates the use of subcomponents.  **You should move onto this sample only after fully understanding pnp_simple_thermostat.**
+* [pnp_temperature_controller](./pnp_temperature_controller) A temperature controller that implements the model [dtmi:com:example:TemperatureController;1](https://devicemodels.azure.com/dtmi/com/example/temperaturecontroller-1.json).  This is considerably more complex than the [pnp_simple_thermostat](./pnp_simple_thermostat) and demonstrates the use of components in addition to the root component.  **You should reference this sample only if your application requires more than one component and only after understanding pnp_simple_thermostat.**
 
-* [common](./common) This directory contains functions for serializing and de-serializing data for PnP and for creating the `IOTHUB_DEVICE_CLIENT_HANDLE` that acts as the transport.  `pnp_temperature_controller` makes extensive use of these functions and demonstrates their use.  **The files in [common](./common) are written generically such that your PnP device application should be able to use them with little or no modification, speeding up your development.**
+* [common](./common) The **common** directory contains helper libraries used by the samples.
 
 ## Configuring the samples
 
@@ -66,9 +68,9 @@ Both samples use environment variables to retrieve configuration.
 
 ## Enabling Device Provisioning Service client (DPS)
 
-To enable DPS with symmetric keys (which is what this sample uses when DPS is configured), use the cmake flags `-Duse_prov_client=ON -Dhsm_type_symm_key=ON -Drun_e2e_tests=OFF `
+To enable DPS with symmetric keys (which is what this sample uses when DPS is configured), use the CMake flags `-Duse_prov_client=ON -Dhsm_type_symm_key=ON -Drun_e2e_tests=OFF `
 
-If you are building connection string only authentication, these extra cmake flags are not required.
+If you are building connection string only authentication, these extra CMake flags are not required.
 
 ## Caveats
 

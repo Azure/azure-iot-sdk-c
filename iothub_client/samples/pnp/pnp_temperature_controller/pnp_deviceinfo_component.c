@@ -5,14 +5,13 @@
 
 // PnP routines
 #include "pnp_deviceinfo_component.h"
-#include "pnp_protocol.h"
+#include "iothub_client_properties.h"
 
 // Core IoT SDK utilities
 #include "azure_c_shared_utility/xlogging.h"
 
 // Property names along with their simulated values.  
 // NOTE: the property values must be legal JSON values.  Strings specifically must be enclosed with an extra set of quotes to be legal json string values.
-// The property names in this sample do not hard-code the extra quotes because the underlying PnP sample adds this to names automatically.
 #define PNP_ENCODE_STRING_FOR_JSON(str) #str
 
 static const char PnPDeviceInfo_SoftwareVersionPropertyName[] = "swVersion";
@@ -40,47 +39,34 @@ static const char PnPDeviceInfo_TotalStoragePropertyValue[] = "10000";
 static const char PnPDeviceInfo_TotalMemoryPropertyName[] = "totalMemory";
 static const char PnPDeviceInfo_TotalMemoryPropertyValue[] = "200";
 
-//
-// SendReportedPropertyForDeviceInformation sends a property as part of DeviceInfo component.
-//
-static void SendReportedPropertyForDeviceInformation(IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClientLL, const char* componentName, const char* propertyName, const char* propertyValue)
+void PnP_DeviceInfoComponent_Report_All_Properties(const char* componentName, IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClient)
 {
     IOTHUB_CLIENT_RESULT iothubClientResult;
-    STRING_HANDLE jsonToSend = NULL;
+    unsigned char* propertiesSerialized = NULL;
+    size_t propertiesSerializedLength;
+    IOTHUB_CLIENT_PROPERTY_REPORTED properties[] =  {
+        {IOTHUB_CLIENT_PROPERTY_REPORTED_STRUCT_VERSION_1, PnPDeviceInfo_SoftwareVersionPropertyName, PnPDeviceInfo_SoftwareVersionPropertyValue},
+        {IOTHUB_CLIENT_PROPERTY_REPORTED_STRUCT_VERSION_1, PnPDeviceInfo_ManufacturerPropertyName, PnPDeviceInfo_ManufacturerPropertyValue},
+        {IOTHUB_CLIENT_PROPERTY_REPORTED_STRUCT_VERSION_1, PnPDeviceInfo_ModelPropertyName, PnPDeviceInfo_ModelPropertyValue},
+        {IOTHUB_CLIENT_PROPERTY_REPORTED_STRUCT_VERSION_1, PnPDeviceInfo_OsNamePropertyName, PnPDeviceInfo_OsNamePropertyValue},
+        {IOTHUB_CLIENT_PROPERTY_REPORTED_STRUCT_VERSION_1, PnPDeviceInfo_ProcessorArchitecturePropertyName, PnPDeviceInfo_ProcessorArchitecturePropertyValue},
+        {IOTHUB_CLIENT_PROPERTY_REPORTED_STRUCT_VERSION_1, PnPDeviceInfo_ProcessorManufacturerPropertyName, PnPDeviceInfo_ProcessorManufacturerPropertyValue},
+        {IOTHUB_CLIENT_PROPERTY_REPORTED_STRUCT_VERSION_1, PnPDeviceInfo_TotalStoragePropertyName, PnPDeviceInfo_TotalStoragePropertyValue},
+        {IOTHUB_CLIENT_PROPERTY_REPORTED_STRUCT_VERSION_1, PnPDeviceInfo_TotalMemoryPropertyName, PnPDeviceInfo_TotalMemoryPropertyValue}
+    };
 
-    if ((jsonToSend = PnP_CreateReportedProperty(componentName, propertyName, propertyValue)) == NULL)
+    const size_t numProperties = sizeof(properties) / sizeof(properties[0]);
+
+    // The first step of reporting properties is to serialize IOTHUB_CLIENT_PROPERTY_REPORTED into JSON for sending.
+    if ((iothubClientResult = IoTHubClient_Properties_Serializer_CreateReported(properties, numProperties, componentName, &propertiesSerialized, &propertiesSerializedLength)) != IOTHUB_CLIENT_OK)
     {
-        LogError("Unable to build reported property response for propertyName=%s, propertyValue=%s", propertyName, propertyValue);
+        LogError("Unable to serialize reported state, error=%d", iothubClientResult);
     }
-    else
+    // The output of IoTHubClient_Properties_Serializer_CreateReported is sent to IoTHubDeviceClient_LL_SendPropertiesAsync to perform network I/O.
+    else if ((iothubClientResult = IoTHubDeviceClient_LL_SendPropertiesAsync(deviceClient, propertiesSerialized, propertiesSerializedLength, NULL, NULL)) != IOTHUB_CLIENT_OK)
     {
-        const char* jsonToSendStr = STRING_c_str(jsonToSend);
-        size_t jsonToSendStrLen = strlen(jsonToSendStr);
-
-        if ((iothubClientResult = IoTHubDeviceClient_LL_SendReportedState(deviceClientLL, (const unsigned char*)jsonToSendStr, jsonToSendStrLen, NULL, NULL)) != IOTHUB_CLIENT_OK)
-        {
-            LogError("Unable to send reported state for property=%s, error=%d", propertyName, iothubClientResult);
-        }
-        else
-        {
-            LogInfo("Sending device information property to IoTHub.  propertyName=%s, propertyValue=%s", propertyName, propertyValue);
-        }
+        LogError("Unable to send reported state, error=%d", iothubClientResult);
     }
 
-    STRING_delete(jsonToSend);
-}
-
-void PnP_DeviceInfoComponent_Report_All_Properties(const char* componentName, IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClientLL)
-{
-    // NOTE: It is possible to put multiple property updates into a single JSON and IoTHubDeviceClient_LL_SendReportedState invocation.
-    // This sample does not do so for clarity, though production devices should seriously consider such property update batching to
-    // save bandwidth.  PnP_CreateReportedProperty does not currently accept arrays.
-    SendReportedPropertyForDeviceInformation(deviceClientLL, componentName, PnPDeviceInfo_SoftwareVersionPropertyName, PnPDeviceInfo_SoftwareVersionPropertyValue);
-    SendReportedPropertyForDeviceInformation(deviceClientLL, componentName, PnPDeviceInfo_ManufacturerPropertyName, PnPDeviceInfo_ManufacturerPropertyValue);
-    SendReportedPropertyForDeviceInformation(deviceClientLL, componentName, PnPDeviceInfo_ModelPropertyName, PnPDeviceInfo_ModelPropertyValue);
-    SendReportedPropertyForDeviceInformation(deviceClientLL, componentName, PnPDeviceInfo_OsNamePropertyName, PnPDeviceInfo_OsNamePropertyValue);
-    SendReportedPropertyForDeviceInformation(deviceClientLL, componentName, PnPDeviceInfo_ProcessorArchitecturePropertyName, PnPDeviceInfo_ProcessorArchitecturePropertyValue);
-    SendReportedPropertyForDeviceInformation(deviceClientLL, componentName, PnPDeviceInfo_ProcessorManufacturerPropertyName, PnPDeviceInfo_ProcessorManufacturerPropertyValue);
-    SendReportedPropertyForDeviceInformation(deviceClientLL, componentName, PnPDeviceInfo_TotalStoragePropertyName, PnPDeviceInfo_TotalStoragePropertyValue);
-    SendReportedPropertyForDeviceInformation(deviceClientLL, componentName, PnPDeviceInfo_TotalMemoryPropertyName, PnPDeviceInfo_TotalMemoryPropertyValue);
+    IoTHubClient_Properties_Serializer_Destroy(propertiesSerialized);
 }

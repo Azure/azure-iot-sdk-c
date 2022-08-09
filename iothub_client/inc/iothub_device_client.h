@@ -106,6 +106,8 @@ extern "C"
     *           blocking call.
     *
     * @param    iotHubClientHandle    The handle created by a call to the create function.
+    *
+    * @warning  Do not call this function from inside any application callbacks from this SDK, e.g. your IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK handler.
     */
     MOCKABLE_FUNCTION(, void, IoTHubDeviceClient_Destroy, IOTHUB_DEVICE_CLIENT_HANDLE, iotHubClientHandle);
 
@@ -124,8 +126,8 @@ extern "C"
     * @param    userContextCallback             User specified context that will be provided to the
     *                                           callback. This can be @c NULL.
     *
-    *           @b NOTE: The application behavior is undefined if the user calls
-    *           the IoTHubDeviceClient_Destroy() function from within any callback.
+    * @warning: Do not call IoTHubDeviceClient_Destroy() from inside your application's callback.
+    *
     * @remarks
     *           The IOTHUB_MESSAGE_HANDLE instance provided as argument is copied by the function,
     *           so this argument can be destroyed by the calling application right after IoTHubDeviceClient_SendEventAsync returns.
@@ -160,8 +162,7 @@ extern "C"
     * @param    userContextCallback         User specified context that will be provided to the
     *                                       callback. This can be @c NULL.
     *
-    *           @b NOTE: The application behavior is undefined if the user calls
-    *           the IoTHubDeviceClient_Destroy() function from within any callback.
+    * @warning: Do not call IoTHubDeviceClient_Destroy() from inside your application's callback.
     *
     * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -177,8 +178,7 @@ extern "C"
     * @param    userContextCallback             User specified context that will be provided to the
     *                                           callback. This can be @c NULL.
     *
-    *           @b NOTE: The application behavior is undefined if the user calls
-    *           the IoTHubDeviceClient_Destroy() function from within any callback.
+    * @warning: Do not call IoTHubDeviceClient_Destroy() from inside your application's callback.
     *
     * @remark   Callback specified will not receive connection status change notifications for upload connections created with IoTHubDeviceClient_UploadToBlob or IoTHubDeviceClient_UploadMultipleBlocksToBlob.
     *
@@ -196,8 +196,7 @@ extern "C"
     * @param    retryTimeoutLimitInSeconds      Maximum amount of time(seconds) to attempt reconnection when a
     *                                           connection drops to IOT Hub.
     *
-    *           @b NOTE: The application behavior is undefined if the user calls
-    *           the IoTHubDeviceClient_Destroy() function from within any callback.
+    * @warning: Do not call IoTHubDeviceClient_Destroy() from inside your application's callback.
     *
     * @remark   Uploads initiated by IoTHubDeviceClient_UploadToBlob or IoTHubDeviceClient_UploadMultipleBlocksToBlob do not have automatic retries and do not honor the retryPolicy settings.
     *
@@ -214,8 +213,7 @@ extern "C"
     * @param    retryTimeoutLimitInSeconds      Out parameter containing maximum amount of time in seconds to attempt reconnection
     *                                           to IOT Hub.
     *
-    *           @b NOTE: The application behavior is undefined if the user calls
-    *           the IoTHubDeviceClient_Destroy() function from within any callback.
+    * @warning: Do not call IoTHubDeviceClient_Destroy() from inside your application's callback.
     *
     * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -262,8 +260,7 @@ extern "C"
     * @param    userContextCallback         User specified context that will be provided to the
     *                                       callback. This can be @c NULL.
     *
-    *           @b NOTE: The application behavior is undefined if the user calls
-    *           the IoTHubDeviceClient_Destroy() function from within any callback.
+    * @warning: Do not call IoTHubDeviceClient_Destroy() from inside your application's callback.
     *
     * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -280,8 +277,7 @@ extern "C"
     * @param    userContextCallback         User specified context that will be provided to the
     *                                       callback. This can be @c NULL.
     *
-    *           @b NOTE: The application behavior is undefined if the user calls
-    *           the IoTHubDeviceClient_Destroy() function from within any callback.
+    * @warning: Do not call IoTHubDeviceClient_Destroy() from inside your application's callback.
     *
     * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -296,8 +292,7 @@ extern "C"
     * @param    userContextCallback      User specified context that will be provided to the
     *                                    callback. This can be @c NULL.
     *
-    *            @b NOTE: The application behavior is undefined if the user calls
-    *            the IoTHubDeviceClient_Destroy() function from within any callback.
+    * @warning: Do not call IoTHubDeviceClient_Destroy() from inside your application's callback.
     *
     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -375,6 +370,97 @@ extern "C"
     * @return   IOTHUB_CLIENT_OK upon success, or an error code upon failure.
     */
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_SendMessageDisposition, IOTHUB_DEVICE_CLIENT_HANDLE, iotHubClientHandle, IOTHUB_MESSAGE_HANDLE, message, IOTHUBMESSAGE_DISPOSITION_RESULT, disposition);
+
+    /**
+    * @brief    Asynchronous call to send the telemetry message specified by @p telemetryMessageHandle.
+    *
+    * @param[in]  iotHubClientHandle             The handle created by a call to the create function.
+    * @param[in]  telemetryMessageHandle         The handle to an IoT Hub message.
+    * @param[in]  telemetryConfirmationCallback  Optional callback specified by the device for receiving
+    *                                            confirmation of the delivery of the telemetry.
+    * @param[in]  userContextCallback            User specified context that will be provided to the
+    *                                            callback. This can be @c NULL.
+    *
+    * @remarks  The application behavior is undefined if the user calls
+    *           the IoTHubDeviceClient_Destroy function from within any callback.
+    *
+    *           The IOTHUB_MESSAGE_HANDLE instance provided as an argument is copied by the function,
+    *           so this argument can be destroyed by the calling application right after IoTHubDeviceClient_SendTelemetryAsync returns.
+    *           The copy of @p telemetryMessageHandle is later destroyed by the iothub client when the message is successfully sent, if a failure sending it occurs, or if the client is destroyed.
+    *
+    * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
+    */
+    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_SendTelemetryAsync, IOTHUB_DEVICE_CLIENT_HANDLE, iotHubClientHandle, IOTHUB_MESSAGE_HANDLE, telemetryMessageHandle, IOTHUB_CLIENT_TELEMETRY_CALLBACK, telemetryConfirmationCallback, void*, userContextCallback);
+    
+    /**
+    * @brief    Subscribe to incoming commands from IoT Hub.
+    *
+    * @param[in]  iotHubClientHandle        The handle created by a call to the create function.
+    * @param[in]  commandCallback           The callback which will be called when a command request arrives.
+    * @param[in]  userContextCallback       User specified context that will be provided to the
+    *                                       callback. This can be @c NULL.
+    *
+    * @remarks    The application behavior is undefined if the user calls
+    *             the IoTHubDeviceClient_LL_Destroy function from within any callback.
+    *
+    * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
+    */
+    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_SubscribeToCommands, IOTHUB_DEVICE_CLIENT_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_COMMAND_CALLBACK_ASYNC, commandCallback,  void*, userContextCallback);
+
+    /**
+    * @brief    Sends device properties to IoT Hub.
+    *
+    * @param[in]  iotHubClientHandle            The handle created by a call to the create function.
+    * @param[in]  properties                    Serialized property data to be sent to IoT Hub.  This buffer can either be
+    *                                           manually serialized created with IoTHubClient_Properties_Serializer_CreateReported() 
+    *                                           or IoTHubClient_Properties_Serializer_CreateWritableResponse().
+    * @param[in]  propertiesLength              Number of bytes in the properties buffer.
+    * @param[in]  propertyAcknowledgedCallback  Optional callback specified by the application to be called with the
+    *                                           result of the transaction.
+    * @param[in]  userContextCallback           User specified context that will be provided to the
+    *                                           callback. This can be @c NULL.
+    *
+    * @remarks   The application behavior is undefined if the user calls
+    *            the IoTHubDeviceClient_Destroy function from within any callback.
+    *
+    * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
+    */
+    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_SendPropertiesAsync, IOTHUB_DEVICE_CLIENT_HANDLE, iotHubClientHandle,  const unsigned char*, properties, size_t, propertiesLength, IOTHUB_CLIENT_PROPERTY_ACKNOWLEDGED_CALLBACK, propertyAcknowledgedCallback, void*, userContextCallback);
+
+    /**
+    * @brief   Retrieves all device properties from IoT Hub.
+    *
+    * @param[in]  iotHubClientHandle    The handle created by a call to the create function.
+    * @param[in]  propertyCallback      Callback invoked when properties are retrieved.
+    *                                   The API IoTHubClient_Deserialize_Properties() can help deserialize the raw 
+    *                                   payload stream.
+    * @param[in]  userContextCallback   User specified context that will be provided to the
+    *                                   callback. This can be @c NULL.
+    *
+    * @remarks  The application behavior is undefined if the user calls
+    *           the IoTHubDeviceClient_Destroy function from within any callback.
+    *
+    * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
+    */
+    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_GetPropertiesAsync, IOTHUB_DEVICE_CLIENT_HANDLE, iotHubClientHandle,  IOTHUB_CLIENT_PROPERTIES_RECEIVED_CALLBACK, propertyCallback, void*, userContextCallback);
+    
+    /**
+    * @brief   Retrieves all device properties from IoT Hub and also subscribes for updates to writable properties.
+    *
+    * @param[in]  iotHubClientHandle      The handle created by a call to the create function.
+    * @param[in]  propertyUpdateCallback  Callback both on initial retrieval of properties stored on IoT Hub
+    *                                     and subsequent service-initiated modifications of writable properties.
+    *                                     The API IoTHubClient_Deserialize_Properties() can help deserialize the raw 
+    *                                     payload stream.
+    * @param[in]  userContextCallback     User specified context that will be provided to the
+    *                                     callback. This can be @c NULL.
+    *
+    * @remarks  The application behavior is undefined if the user calls
+    *           the IoTHubDeviceClient_Destroy function from within any callback.
+    *
+    * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
+    */
+    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_GetPropertiesAndSubscribeToUpdatesAsync, IOTHUB_DEVICE_CLIENT_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_PROPERTIES_RECEIVED_CALLBACK, propertyUpdateCallback, void*, userContextCallback);
 
 #ifdef __cplusplus
 }

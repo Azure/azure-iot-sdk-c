@@ -56,6 +56,10 @@ void real_free(void* ptr)
 #define please_mock_amqpvalue_create_string MOCK_ENABLED
 #define please_mock_amqpvalue_create_symbol MOCK_ENABLED
 #define please_mock_amqpvalue_destroy MOCK_ENABLED
+#define please_mock_amqpvalue_get_symbol MOCK_ENABLED
+#define please_mock_amqpvalue_get_list_item_count MOCK_ENABLED
+#define please_mock_amqpvalue_get_list_item MOCK_ENABLED
+#define please_mock_amqpvalue_get_inplace_described_value MOCK_ENABLED
 #define please_mock_amqpvalue_set_map_value MOCK_ENABLED
 #define please_mock_link_create MOCK_ENABLED
 #define please_mock_link_destroy MOCK_ENABLED
@@ -1146,8 +1150,16 @@ static void set_expected_calls_free_task(int number_callbacks)
     EXPECTED_CALL(free(IGNORED_PTR_ARG));
 }
 
-static void set_expected_calls_for_on_message_send_complete(int number_callbacks)
+static void set_expected_calls_for_on_message_send_complete(int number_callbacks, MESSAGE_SEND_RESULT message_send_result)
 {
+    if (message_send_result == MESSAGE_SEND_ERROR)
+    {
+        uint32_t count = 0;
+        STRICT_EXPECTED_CALL(amqpvalue_get_list_item_count(IGNORED_NUM_ARG, IGNORED_PTR_ARG))
+            .CopyOutArgumentBuffer(2, &count, sizeof(count))
+            .SetReturn(0);
+    }
+
     STRICT_EXPECTED_CALL(singlylinkedlist_foreach(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
 
     STRICT_EXPECTED_CALL(singlylinkedlist_find(TEST_IN_PROGRESS_LIST, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
@@ -1919,6 +1931,11 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
     REGISTER_GLOBAL_MOCK_RETURN(amqpvalue_set_map_value, 0);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(amqpvalue_set_map_value, 1);
 
+    REGISTER_GLOBAL_MOCK_RETURN(amqpvalue_get_symbol, 0);
+    REGISTER_GLOBAL_MOCK_RETURN(amqpvalue_get_list_item_count, 0);
+    REGISTER_GLOBAL_MOCK_RETURN(amqpvalue_get_list_item, 0);
+    REGISTER_GLOBAL_MOCK_RETURN(amqpvalue_get_inplace_described_value, 0);
+
     REGISTER_GLOBAL_MOCK_RETURN(link_set_attach_properties, 0);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(link_set_attach_properties, 1);
 
@@ -2164,7 +2181,7 @@ TEST_FUNCTION(telemetry_messenger_create_failure_checks)
         }
 
         // arrange
-        char error_msg[64];
+        char error_msg[128];
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(i);
@@ -2626,7 +2643,7 @@ TEST_FUNCTION(telemetry_messenger_do_work_create_message_receiver_failure_checks
         }
 
         // arrange
-        char error_msg[64];
+        char error_msg[128];
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(i);
@@ -2671,7 +2688,7 @@ TEST_FUNCTION(telemetry_messenger_do_work_create_message_sender_failure_checks)
         umock_c_negative_tests_snapshot();
         n = umock_c_negative_tests_call_count();
 
-        char error_msg[64];
+        char error_msg[128];
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(i);
@@ -2757,7 +2774,7 @@ static void test_send_events_for_callbacks(MESSAGE_SEND_RESULT message_send_resu
     crank_telemetry_messenger_do_work(handle, mdwp);
 
     umock_c_reset_all_calls();
-    set_expected_calls_for_on_message_send_complete(test_config->number_test_events);
+    set_expected_calls_for_on_message_send_complete(test_config->number_test_events, message_send_result);
 
     // act
     ASSERT_IS_NOT_NULL(saved_messagesender_send_on_message_send_complete);
@@ -3132,7 +3149,7 @@ TEST_FUNCTION(telemetry_messenger_send_async_failure_checks)
     for (i = 0; i < umock_c_negative_tests_call_count(); i++)
     {
         // arrange
-        char error_msg[64];
+        char error_msg[128];
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(i);
@@ -3507,7 +3524,7 @@ TEST_FUNCTION(telemetry_messenger_send_message_disposition_failure_checks)
         }
 
         // arrange
-        char error_msg[64];
+        char error_msg[128];
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(i);
@@ -3585,7 +3602,7 @@ TEST_FUNCTION(telemetry_messenger_retrieve_options_failure_checks)
     for (i = 0; i < umock_c_negative_tests_call_count(); i++)
     {
         // arrange
-        char error_msg[64];
+        char error_msg[128];
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(i);

@@ -12,7 +12,8 @@
 #include "parson.h"
 
 #define INDEFINITE_TIME ((time_t)-1)
-#define SPAN_3_MINUTES_IN_SECONDS (60 * 3)
+#define SPAN_4_MINUTES_IN_SECONDS (60 * 4)
+#define SPAN_10_SECONDS (10)
 
 MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(TELEMETRY_EVENT_TYPE, TELEMETRY_EVENT_TYPE_VALUES)
 MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(C2D_EVENT_TYPE, C2D_EVENT_TYPE_VALUES)
@@ -153,9 +154,9 @@ bool compare_message_time_to_connection_time(LIST_ITEM_HANDLE list_item, const v
 {
     CONNECTION_STATUS_INFO* connection_status = (CONNECTION_STATUS_INFO*)list_item;
     time_t message_time = *((time_t*)match_context);
-    if ((connection_status->status == IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED || connection_status->reason == IOTHUB_CLIENT_CONNECTION_NO_NETWORK) &&
-        connection_status->time < message_time &&
-        connection_status->time >(message_time - SPAN_3_MINUTES_IN_SECONDS))
+    if ((connection_status->reason == IOTHUB_CLIENT_CONNECTION_COMMUNICATION_ERROR || connection_status->reason == IOTHUB_CLIENT_CONNECTION_NO_NETWORK) &&
+        connection_status->time <= (message_time + SPAN_10_SECONDS) &&
+        connection_status->time >  (message_time - SPAN_4_MINUTES_IN_SECONDS))
     {
         return true;
     }
@@ -588,6 +589,11 @@ static void serialize_device_twin_desired_event(const void* item, const void* ac
                     LogError("Failed serializing device twin event receive time");
                     json_value_free(info_json);
                 }
+                else if (json_object_dotset_number(info_json_obj, "receive.version", info->version) != JSONSuccess)
+                {
+                    LogError("Failed serializing device twin event receive version");
+                    json_value_free(info_json);
+                }
                 else if (json_array_append_value(device_twin_array, info_json) != 0)
                 {
                     LogError("Failed appending device twin event json");
@@ -901,15 +907,16 @@ int iothub_client_statistics_get_telemetry_summary(IOTHUB_CLIENT_STATISTICS_HAND
 
                 summary->messages_received = summary->messages_received + 1;
             }
-            else
+            else if (singlylinkedlist_find(stats->connection_status_history, compare_message_time_to_connection_time, &telemetry_info->time_sent))
             {
                 // check to see if the device was disconnected during this Telemetry update
                 // we will miss the update because we reconnected to hub
-                if (singlylinkedlist_find(stats->connection_status_history, compare_message_time_to_connection_time, &telemetry_info->time_sent))
-                {
-                    summary->messages_sent--;
-                    LogInfo("Telemetry update message (%d) failed because of network error", (int)telemetry_info->message_id);
-                }
+                summary->messages_sent--;
+                LogInfo("Telemetry update message (%d) failed because of network error", (int)telemetry_info->message_id);
+            }
+            else
+            {
+                LogError("Error found in id (%d).", (int)telemetry_info->message_id);
             }
 
             list_item = singlylinkedlist_get_next_item(list_item);
@@ -1048,6 +1055,16 @@ int iothub_client_statistics_get_c2d_summary(IOTHUB_CLIENT_STATISTICS_HANDLE han
 
                     summary->messages_received = summary->messages_received + 1;
                 }
+                else if (c2d_msg_info->send_callback_result == IOTHUB_MESSAGING_ERROR)
+                {
+                    // remove the item if we failed to send the C2D message
+                    summary->messages_sent--;
+                    LogInfo("Removing C2D message id (%d) because of network send error", (int)c2d_msg_info->message_id);
+                }
+                else
+                {
+                    LogError("Error found in id (%d).", (int)c2d_msg_info->message_id);
+                }
             }
 
             list_item = singlylinkedlist_get_next_item(list_item);
@@ -1178,6 +1195,16 @@ int iothub_client_statistics_get_device_method_summary(IOTHUB_CLIENT_STATISTICS_
                     }
 
                     summary->methods_received = summary->methods_received + 1;
+                }
+                else if (device_method_info->method_result == IOTHUB_DEVICE_METHOD_ERROR)
+                {
+                    // remove the item if we failed to send the device method
+                    summary->methods_invoked--;
+                    LogInfo("Removing device method id (%d) because of network send error", (int)device_method_info->method_id);
+                }
+                else
+                {
+                    LogError("Error found in id (%d).", (int)device_method_info->method_id);
                 }
             }
 
@@ -1317,15 +1344,16 @@ int iothub_client_statistics_get_device_twin_desired_summary(IOTHUB_CLIENT_STATI
 
                     summary->updates_received = summary->updates_received + 1;
                 }
-                else
+                else if (singlylinkedlist_find(stats->connection_status_history, compare_message_time_to_connection_time, &device_twin_info->time_updated))
                 {
                     // check to see if the device was disconnected during this twin update
                     // we will miss the update because we reconnected to hub
-                    if (singlylinkedlist_find(stats->connection_status_history, compare_message_time_to_connection_time, &device_twin_info->time_updated))
-                    {
-                        summary->updates_sent--;
-                        LogInfo("Removing twin desired update id (%d) because of network error", (int)device_twin_info->update_id);
-                    }
+                    summary->updates_sent--;
+                    LogInfo("Removing twin desired update id (%d) because of network error", (int)device_twin_info->update_id);
+                }
+                else
+                {
+                    LogError("Error found in id (%d).", (int)device_twin_info->update_id);
                 }
             }
 
@@ -1460,15 +1488,24 @@ int iothub_client_statistics_get_device_twin_reported_summary(IOTHUB_CLIENT_STAT
 
                 summary->updates_received = summary->updates_received + 1;
             }
-            else
+            else if (
+                     device_twin_info->send_status_code == 408 ||    // WebSockets: http status 408 = Request Timeout
+                     device_twin_info->send_status_code == 0         // amqp send timeout
+                    )  
+            {
+                summary->updates_sent--;
+                LogInfo("Removing twin reported update id (%d) because of [(%d) Request Timeout] network error", (int)device_twin_info->update_id, device_twin_info->send_status_code);
+            }
+            else if (singlylinkedlist_find(stats->connection_status_history, compare_message_time_to_connection_time, &device_twin_info->time_queued))
             {
                 // check to see if the device was disconnected during this twin update
                 // we will miss the update because we reconnected to hub
-                if (singlylinkedlist_find(stats->connection_status_history, compare_message_time_to_connection_time, &device_twin_info->time_queued))
-                {
-                    summary->updates_sent--;
-                    LogInfo("Removing twin reported update id (%d) because of network error", (int)device_twin_info->update_id);
-                }
+                summary->updates_sent--;
+                LogInfo("Removing twin reported update id (%d) because of network error", (int)device_twin_info->update_id);
+            }
+            else
+            {
+                LogError("Error found in id (%d).", (int)device_twin_info->update_id);
             }
 
             list_item = singlylinkedlist_get_next_item(list_item);

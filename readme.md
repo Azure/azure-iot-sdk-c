@@ -13,9 +13,13 @@ For constrained devices - where memory is measured in kilobytes and not megabyte
 
 ## Table of Contents
 - [Azure IoT C SDKs and Libraries](#azure-iot-c-sdks-and-libraries)
+  - [Important branch rename information](#important-branch-rename-information)
+  - [Introduction](#introduction)
   - [Table of Contents](#table-of-contents)
   - [Critical Upcoming Change Notice](#critical-upcoming-change-notice)
   - [Getting the SDK](#getting-the-sdk)
+    - [Packages](#packages)
+    - [Linux](#linux)
   - [Samples](#samples)
   - [SDK API Reference Documentation](#sdk-api-reference-documentation)
   - [Other Azure IoT SDKs](#other-azure-iot-sdks)
@@ -70,6 +74,8 @@ The simplest way to get started with the Azure IoT SDKs on supported platforms i
   - Authentication is limited to SAS keys on iOS. No certificate-based authentication is officially supported.
   - The Device Provisioning Client is not supported on iOS. Only the Azure IoT Hub device client is supported.
 
+For a more complete iOS experience including the two missing features above, please see our sample native Swift library built on top of the Embedded C SDK [here](https://github.com/Azure-Samples/azure-sdk-for-c-swift).
+
 ### Linux
 
 For other platforms - including Linux - you need to clone and build the SDK directly.  You may also build it directly for the platforms above.
@@ -100,6 +106,8 @@ To learn more about building Azure IoT Applications, you can visit the [Azure Io
 ### Device Client SDK
 
 IoT Hub supports multiple protocols for the device to connect with : MQTT, AMQP, and HTTPS.  MQTT and AMQP can optionally run over WebSockets.  The Device Client SDK allows the protocol to be chosen at connection creation time.
+
+The Device/Module Client SDK optionally allows creation of [IoT Plug and Play devices](https://aka.ms/iotpnp).
 
 **If you're not sure which protocol to use, you should use MQTT or MQTT-WS.**  MQTT requires considerably fewer resources than AMQP and supports considerably more IoT Hub functionality than HTTPS.  Neither AMQP nor HTTPS are guaranteed to have Device Client SDK implementations for new features going forward, such as Azure IoT Plug and Play.
 
@@ -262,6 +270,7 @@ Below is a table showing the mapping of the LTS branches to the packages release
 
   | Package | GitHub Branch | LTS Tag | LTS Start Date | Maintenance End Date |
   | :-----: | :-----------: | :-----: | :------------: | :------------------: |
+  | vcpkg: 2022-07-18 | lts_07_2022 | LTS_07_2022_Ref01 | 2022-07-18 | 2023-07-18 |
   | vcpkg: 2022-01-21 | lts_01_2022 | LTS_01_2022_Ref01 | 2022-01-21 | 2023-01-21 |
   | vcpkg: 2021-09-09 | lts_07_2021 | LTS_07_2021_Ref01 | 2021-08-11 | 2022-08-11 |
 

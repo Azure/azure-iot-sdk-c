@@ -47,7 +47,7 @@
 #define BUILD_CONFIG_USERNAME               24
 #define SAS_TOKEN_DEFAULT_LEN               10
 #define RESEND_TIMEOUT_VALUE_MIN            1*60
-#define MAX_SEND_RECOUNT_LIMIT              2
+#define TELEMETRY_MSG_TIMEOUT_MIN           2*60
 #define DEFAULT_CONNECTION_INTERVAL         30
 #define FAILED_CONN_BACKOFF_VALUE           5
 #define STATUS_CODE_FAILURE_VALUE           500
@@ -80,7 +80,9 @@ static const char TOPIC_SLASH = '/';
 static const char* REPORTED_PROPERTIES_TOPIC = "$iothub/twin/PATCH/properties/reported/?$rid=%"PRIu16;
 static const char* GET_PROPERTIES_TOPIC = "$iothub/twin/GET/?$rid=%"PRIu16;
 static const char* DEVICE_METHOD_RESPONSE_TOPIC = "$iothub/methods/res/%d/?$rid=%s";
-
+#ifdef RUN_SFC_TESTS
+    static const char* FAULT_OPERATION_TYPE = "AzIoTHub_FaultOperationType";
+#endif //RUN_SFC_TESTS
 static const char SYS_TOPIC_STRING_FORMAT[] = "%s%%24.%s=%s";
 
 static const char REQUEST_ID_PROPERTY[] = "?$rid=";
@@ -99,6 +101,7 @@ static size_t REQUEST_ID_PROPERTY_LEN = sizeof(REQUEST_ID_PROPERTY) - 1;
 #define SYS_PROP_ON "on"
 #define SYS_PROP_EXP "exp"
 #define SYS_PROP_TO "to"
+#define SYS_COMPONENT_NAME "sub"
 
 static const char* DIAGNOSTIC_CONTEXT_CREATION_TIME_UTC_PROPERTY = "creationtimeutc";
 static const char DT_MODEL_ID_TOKEN[] = "model-id";
@@ -301,8 +304,8 @@ typedef struct MQTT_DEVICE_TWIN_ITEM_TAG
 
 typedef struct MQTT_MESSAGE_DETAILS_LIST_TAG
 {
+    tickcounter_ms_t msgCreationTime;
     tickcounter_ms_t msgPublishTime;
-    size_t retryCount;
     IOTHUB_MESSAGE_LIST* iotHubMessageEntry;
     void* context;
     uint16_t packet_id;
@@ -734,6 +737,40 @@ static int addUserPropertiesTouMqttMessage(IOTHUB_MESSAGE_HANDLE iothub_message_
     return result;
 }
 
+#ifdef RUN_SFC_TESTS
+//
+// isMqttMessageSfcType checks to see if the message is a service-fault-control message.
+//
+static bool isMqttMessageSfcType(IOTHUB_MESSAGE_HANDLE iothub_message_handle)
+{
+    bool result = false;
+    const char* const* propertyKeys;
+    const char* const* propertyValues;
+    size_t propertyCount;
+    size_t index;
+    MAP_HANDLE properties_map = IoTHubMessage_Properties(iothub_message_handle);
+    if (properties_map != NULL)
+    {
+        if (Map_GetInternals(properties_map, &propertyKeys, &propertyValues, &propertyCount) != MAP_OK)
+        {
+            LogError("Failed to get the internals of the property map.");
+        }
+        else
+        {
+            for (index = 0; index < propertyCount; index++)
+            {
+                if (strncmp(propertyKeys[index], FAULT_OPERATION_TYPE , strlen(FAULT_OPERATION_TYPE )) == 0)
+                {
+                    result = true;
+                    break;
+                }
+            }
+        }
+    }
+    return result;
+}
+#endif //RUN_SFC_TESTS
+
 //
 // addSystemPropertyToTopicString appends a given "system" property from iothub_message_handle (set by the application with APIs such as IoTHubMessage_SetMessageId,
 // IoTHubMessage_SetContentTypeSystemProperty, etc.) onto the MQTT TOPIC topic_string.
@@ -849,6 +886,24 @@ static int addSystemPropertiesTouMqttMessage(IOTHUB_MESSAGE_HANDLE iothub_messag
             if (addSystemPropertyToTopicString(topic_string, index++, SYS_PROP_ON, output_name, urlencode) != 0)
             {
                 LogError("Failed setting output name");
+                result = MU_FAILURE;
+            }
+            else
+            {
+                result = 0;
+            }
+        }
+    }
+
+    if (result == 0)
+    {
+        const char* component_name = IoTHubMessage_GetComponentName(iothub_message_handle);
+        if (component_name != NULL)
+        {
+            // Encode the component name if encoding is on
+            if (addSystemPropertyToTopicString(topic_string, index++, SYS_COMPONENT_NAME, component_name, urlencode) != 0)
+            {
+                LogError("Failed setting component name");
                 result = MU_FAILURE;
             }
             else
@@ -1003,7 +1058,6 @@ static int publishTelemetryMsg(PMQTTTRANSPORT_HANDLE_DATA transport_data, MQTT_M
                 }
                 else
                 {
-                    mqttMsgEntry->retryCount++;
                     result = 0;
                 }
             }
@@ -1856,12 +1910,15 @@ static void processDeviceMethodNotification(PMQTTTRANSPORT_HANDLE_DATA transport
             else
             {
                 const APP_PAYLOAD* payload = mqttmessage_getApplicationMsg(msgHandle);
-                if (payload == NULL ||
-                    transportData->transport_callbacks.method_complete_cb(STRING_c_str(method_name), payload->message, payload->length, (void*)dev_method_info, transportData->transport_ctx) != 0)
+                if (payload == NULL)
                 {
-                    LogError("Failure: IoTHubClientCore_LL_DeviceMethodComplete");
+                    LogError("Failure: mqttmessage_getApplicationMsg");
                     STRING_delete(dev_method_info->request_id);
                     free(dev_method_info);
+                } 
+                else if (transportData->transport_callbacks.method_complete_cb(STRING_c_str(method_name), payload->message, payload->length, (void*)dev_method_info, transportData->transport_ctx) != 0)
+                {
+                    LogError("Failure: IoTHubClientCore_LL_DeviceMethodComplete");
                 }
             }
         }
@@ -2333,6 +2390,27 @@ static void SubscribeToMqttProtocol(PMQTTTRANSPORT_HANDLE_DATA transport_data)
     else
     {
         transport_data->currPacketState = PUBLISH_TYPE;
+
+        // On a service reconnect, reset the expired time of messages waiting for a PUBACK.
+        // This will cause the messages to republish in order as required by the MQTT spec.
+        PDLIST_ENTRY current_entry = transport_data->telemetry_waitingForAck.Flink;
+        while (current_entry != &transport_data->telemetry_waitingForAck)
+        {
+            MQTT_MESSAGE_DETAILS_LIST* msg_detail_entry = containingRecord(current_entry, MQTT_MESSAGE_DETAILS_LIST, entry);
+#ifdef RUN_SFC_TESTS
+            if (!isMqttMessageSfcType(msg_detail_entry->iotHubMessageEntry->messageHandle))
+            {
+#endif //RUN_SFC_TESTS
+                // Setting the value to 0 as it is simpler than calculating the amount of time to
+                // expire the PUBLISH. This value of zero is equivalent to setting a time way in the 
+                // past, enough for this control logic.
+                msg_detail_entry->msgPublishTime = 0;        // force the message to resend
+
+#ifdef RUN_SFC_TESTS
+            }
+#endif //RUN_SFC_TESTS
+            current_entry = current_entry->Flink;
+        }
     }
 }
 
@@ -2398,45 +2476,42 @@ static void ProcessPendingTelemetryMessages(PMQTTTRANSPORT_HANDLE_DATA transport
         DLIST_ENTRY nextListEntry;
         nextListEntry.Flink = current_entry->Flink;
 
-        if (((current_ms - msg_detail_entry->msgPublishTime) / 1000) > RESEND_TIMEOUT_VALUE_MIN)
+        if (((current_ms - msg_detail_entry->msgCreationTime) / 1000) >= TELEMETRY_MSG_TIMEOUT_MIN)
         {
-            if (msg_detail_entry->retryCount >= MAX_SEND_RECOUNT_LIMIT)
-            {
-                notifyApplicationOfSendMessageComplete(msg_detail_entry->iotHubMessageEntry, transport_data, IOTHUB_CLIENT_CONFIRMATION_MESSAGE_TIMEOUT);
-                (void)DList_RemoveEntryList(current_entry);
-                free(msg_detail_entry);
+            notifyApplicationOfSendMessageComplete(msg_detail_entry->iotHubMessageEntry, transport_data, IOTHUB_CLIENT_CONFIRMATION_MESSAGE_TIMEOUT);
+            (void)DList_RemoveEntryList(current_entry);
+            LogError("Disconnecting MQTT connection because message PUBACK (%d) timeout.", msg_detail_entry->packet_id);
+            free(msg_detail_entry);
 
-                DisconnectFromClient(transport_data);
-                transport_data->transport_callbacks.connection_status_cb(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_COMMUNICATION_ERROR, transport_data->transport_ctx);
-            }
-            else
+            DisconnectFromClient(transport_data);
+            transport_data->transport_callbacks.connection_status_cb(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_COMMUNICATION_ERROR, transport_data->transport_ctx);
+        }
+        else if (((current_ms - msg_detail_entry->msgPublishTime) / 1000) > RESEND_TIMEOUT_VALUE_MIN)
+        {
+            // Ensure that the packet state is PUBLISH_TYPE and then attempt to send the message
+            // again
+            if (transport_data->currPacketState == PUBLISH_TYPE)
             {
-                // Ensure that the packet state is PUBLISH_TYPE and then attempt to send the message
-                // again
-                if (transport_data->currPacketState == PUBLISH_TYPE)
+                size_t messageLength;
+                const unsigned char* messagePayload = NULL;
+                if (!RetrieveMessagePayload(msg_detail_entry->iotHubMessageEntry->messageHandle, &messagePayload, &messageLength))
                 {
-                    size_t messageLength;
-                    const unsigned char* messagePayload = NULL;
-                    if (!RetrieveMessagePayload(msg_detail_entry->iotHubMessageEntry->messageHandle, &messagePayload, &messageLength))
-                    {
-                        (void)DList_RemoveEntryList(current_entry);
-                        notifyApplicationOfSendMessageComplete(msg_detail_entry->iotHubMessageEntry, transport_data, IOTHUB_CLIENT_CONFIRMATION_ERROR);
-                    }
-                    else
-                    {
-                        if (publishTelemetryMsg(transport_data, msg_detail_entry, messagePayload, messageLength) != 0)
-                        {
-                            (void)DList_RemoveEntryList(current_entry);
-                            notifyApplicationOfSendMessageComplete(msg_detail_entry->iotHubMessageEntry, transport_data, IOTHUB_CLIENT_CONFIRMATION_ERROR);
-                            free(msg_detail_entry);
-                        }
-                    }
+                    (void)DList_RemoveEntryList(current_entry);
+                    notifyApplicationOfSendMessageComplete(msg_detail_entry->iotHubMessageEntry, transport_data, IOTHUB_CLIENT_CONFIRMATION_ERROR);
                 }
                 else
                 {
-                    msg_detail_entry->retryCount++;
-                    msg_detail_entry->msgPublishTime = current_ms;
+                    if (publishTelemetryMsg(transport_data, msg_detail_entry, messagePayload, messageLength) != 0)
+                    {
+                        (void)DList_RemoveEntryList(current_entry);
+                        notifyApplicationOfSendMessageComplete(msg_detail_entry->iotHubMessageEntry, transport_data, IOTHUB_CLIENT_CONFIRMATION_ERROR);
+                        free(msg_detail_entry);
+                    }
                 }
+            }
+            else
+            {
+                msg_detail_entry->msgPublishTime = current_ms;
             }
         }
         current_entry = nextListEntry.Flink;
@@ -2620,31 +2695,17 @@ static int SendMqttConnectMsg(PMQTTTRANSPORT_HANDLE_DATA transport_data)
         sasToken = IoTHubClient_Auth_Get_SasToken(transport_data->authorization_module, STRING_c_str(transport_data->devicesAndModulesPath), 0, NULL);
         if (sasToken == NULL)
         {
-            LogError("failure getting sas token from IoTHubClient_Auth_Get_SasToken.");
+            LogError("Failure getting SAS token from IoTHubClient_Auth_Get_SasToken.");
             result = MU_FAILURE;
         }
     }
     else if (cred_type == IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN)
     {
-        SAS_TOKEN_STATUS token_status = IoTHubClient_Auth_Is_SasToken_Valid(transport_data->authorization_module);
-        if (token_status == SAS_TOKEN_STATUS_INVALID)
+        sasToken = IoTHubClient_Auth_Get_SasToken(transport_data->authorization_module, NULL, 0, NULL);
+        if (sasToken == NULL)
         {
-            transport_data->transport_callbacks.connection_status_cb(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_EXPIRED_SAS_TOKEN, transport_data->transport_ctx);
+            LogError("Failure getting SAS token.");
             result = MU_FAILURE;
-        }
-        else if (token_status == SAS_TOKEN_STATUS_FAILED)
-        {
-            transport_data->transport_callbacks.connection_status_cb(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_BAD_CREDENTIAL, transport_data->transport_ctx);
-            result = MU_FAILURE;
-        }
-        else
-        {
-            sasToken = IoTHubClient_Auth_Get_SasToken(transport_data->authorization_module, NULL, 0, NULL);
-            if (sasToken == NULL)
-            {
-                LogError("failure getting sas Token.");
-                result = MU_FAILURE;
-            }
         }
     }
 
@@ -2780,7 +2841,7 @@ static int UpdateMqttConnectionStateIfNeeded(PMQTTTRANSPORT_HANDLE_DATA transpor
             }
             else if ((current_time - transport_data->mqtt_connect_time) / 1000 > transport_data->connect_timeout_in_sec)
             {
-                LogError("mqtt_client timed out waiting for CONNACK");
+                LogError("mqtt_client timed out waiting for CONNACK: disconnecting MQTT connection");
                 transport_data->currPacketState = PACKET_TYPE_ERROR;
                 DisconnectFromClient(transport_data);
                 result = MU_FAILURE;
@@ -3095,7 +3156,9 @@ static void ProcessPublishStateDoWork(PMQTTTRANSPORT_HANDLE_DATA transport_data)
             }
             else
             {
-                mqttMsgEntry->retryCount = 0;
+                tickcounter_ms_t current_ms;
+                (void)tickcounter_get_current_ms(transport_data->msgTickCounter, &current_ms);
+                mqttMsgEntry->msgCreationTime = current_ms;
                 mqttMsgEntry->iotHubMessageEntry = iothubMsgList;
                 mqttMsgEntry->packet_id = getNextPacketId(transport_data);
                 if (publishTelemetryMsg(transport_data, mqttMsgEntry, messagePayload, messageLength) != 0)
@@ -3410,35 +3473,36 @@ void IoTHubTransport_MQTT_Common_Unsubscribe_DeviceMethod(TRANSPORT_LL_HANDLE ha
 int IoTHubTransport_MQTT_Common_DeviceMethod_Response(TRANSPORT_LL_HANDLE handle, METHOD_HANDLE methodId, const unsigned char* response, size_t respSize, int status)
 {
     int result;
-    MQTTTRANSPORT_HANDLE_DATA* transport_data = (MQTTTRANSPORT_HANDLE_DATA*)handle;
-    if (transport_data != NULL)
+    DEVICE_METHOD_INFO* dev_method_info = (DEVICE_METHOD_INFO*)methodId;
+    if (dev_method_info == NULL)
     {
-        DEVICE_METHOD_INFO* dev_method_info = (DEVICE_METHOD_INFO*)methodId;
-        if (dev_method_info == NULL)
+        LogError("Failure: DEVICE_METHOD_INFO is NULL");
+        result = MU_FAILURE;
+    }
+    else if (handle == NULL)
+    {
+        LogError("Failure: TRANSPORT_LL_HANDLE is NULL");
+        result = MU_FAILURE;
+        STRING_delete(dev_method_info->request_id);
+        free(dev_method_info);
+    }
+    else
+    {
+        MQTTTRANSPORT_HANDLE_DATA* transport_data = (MQTTTRANSPORT_HANDLE_DATA*)handle;
+        if (publishDeviceMethodResponseMsg(transport_data, status, dev_method_info->request_id, response, respSize) != 0)
         {
-            LogError("Failure: DEVICE_METHOD_INFO was NULL");
+            LogError("Failure: publishing device method response");
             result = MU_FAILURE;
         }
         else
         {
-            if (publishDeviceMethodResponseMsg(transport_data, status, dev_method_info->request_id, response, respSize) != 0)
-            {
-                LogError("Failure: publishing device method response");
-                result = MU_FAILURE;
-            }
-            else
-            {
-                result = 0;
-            }
-            STRING_delete(dev_method_info->request_id);
-            free(dev_method_info);
+            result = 0;
         }
+      
+        STRING_delete(dev_method_info->request_id);
+        free(dev_method_info);
     }
-    else
-    {
-        result = MU_FAILURE;
-        LogError("Failure: invalid TRANSPORT_LL_HANDLE parameter specified");
-    }
+
     return result;
 }
 
@@ -3570,6 +3634,10 @@ void IoTHubTransport_MQTT_Common_DoWork(TRANSPORT_LL_HANDLE handle)
             }
             else if (transport_data->currPacketState == PUBLISH_TYPE)
             {
+                // The duplicated call here and down below is intentional at this point.
+                // This is the simplest way to guarantee compliance with MQTT v3.1.1 [MQTT-4.6.0-1].
+                // ** QoS1 Publish messages must be sent in packet id order on reconnect
+                ProcessPendingTelemetryMessages(transport_data);
                 ProcessPublishStateDoWork(transport_data);
             }
             mqtt_client_dowork(transport_data->mqttClient);

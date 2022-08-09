@@ -80,6 +80,7 @@ static const char* TEST_CONNECTION_DEVICE_ID = "connectiondeviceid";
 static const char* TEST_CONNECTION_DEVICE_ID2 = "connectiondeviceid2";
 static const char* TEST_CONNECTION_MODULE_ID = "connectionmoduleid";
 static const char* TEST_CONNECTION_MODULE_ID2 = "connectionmoduleid2";
+static const char* TEST_COMPONENT_NAME = "testComponentName";
 static const char* TEST_PROPERTY_KEY = "property_key";
 static const char* TEST_PROPERTY_VALUE = "property_value";
 static const char* TEST_NON_ASCII_PROPERTY_KEY = "\x01property_key";
@@ -427,7 +428,7 @@ TEST_FUNCTION(IoTHubMessage_CreateFromByteArray_fails)
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
 
-        char tmp_msg[64];
+        char tmp_msg[128];
         sprintf(tmp_msg, "IoTHubMessage_CreateFromByteArray failure in test %lu/%lu", (unsigned long)index, (unsigned long)count);
 
         IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromByteArray(c, 1);
@@ -493,7 +494,7 @@ TEST_FUNCTION(IoTHubMessage_CreateFromString_fails)
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
 
-        char tmp_msg[64];
+        char tmp_msg[128];
         sprintf(tmp_msg, "IoTHubMessage_CreateFromByteArray failure in test %lu/%lu", (unsigned long)index, (unsigned long)count);
 
         IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromString("a");
@@ -589,6 +590,7 @@ TEST_FUNCTION(IoTHubMessage_Destroy_destroys_a_BYTEARRAY_IoTHubMEssage)
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(gballoc_free(h));
 
     //act
@@ -608,6 +610,7 @@ TEST_FUNCTION(IoTHubMessage_Destroy_destroys_a_STRING_IoTHubMessage)
 
     STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(Map_Destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
@@ -766,7 +769,7 @@ TEST_FUNCTION(IoTHubMessage_Clone_with_BYTE_ARRAY_fails)
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
 
-        char tmp_msg[64];
+        char tmp_msg[128];
         sprintf(tmp_msg, "IoTHubMessage_Clone failure in test %lu/%lu", (unsigned long)index, (unsigned long)count);
 
         IOTHUB_MESSAGE_HANDLE r = IoTHubMessage_Clone(h);
@@ -824,7 +827,7 @@ TEST_FUNCTION(IoTHubMessage_Clone_with_STRING_fails)
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
 
-        char tmp_msg[64];
+        char tmp_msg[128];
         sprintf(tmp_msg, "IoTHubMessage_Clone_w_string failure in test %lu/%lu", (unsigned long)index, (unsigned long)count);
 
         IOTHUB_MESSAGE_HANDLE r = IoTHubMessage_Clone(h);
@@ -1253,7 +1256,7 @@ TEST_FUNCTION(IoTHubMessage_SetContentTypeSystemProperty_Fails)
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
 
-        char tmp_msg[64];
+        char tmp_msg[128];
         sprintf(tmp_msg, "Failed in test %lu/%lu", (unsigned long)index, (unsigned long)count);
 
         //act
@@ -1359,7 +1362,7 @@ TEST_FUNCTION(IoTHubMessage_SetContentEncodingSystemProperty_Fails)
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
 
-        char tmp_msg[64];
+        char tmp_msg[128];
         sprintf(tmp_msg, "Failed in test %lu/%lu", (unsigned long)index, (unsigned long)count);
 
         //act
@@ -1616,7 +1619,7 @@ TEST_FUNCTION(IoTHubMessage_SetDiagnosticPropertyData_Fails)
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
 
-        char tmp_msg[64];
+        char tmp_msg[128];
         sprintf(tmp_msg, "Failed in test %lu/%lu", (unsigned long)index, (unsigned long)count);
 
         //act
@@ -2195,6 +2198,7 @@ TEST_FUNCTION(IoTHubMessage_Destroy_with_context_Succeed)
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(gballoc_free(h));
 
     //act
@@ -2331,6 +2335,41 @@ TEST_FUNCTION(IoTHubMessage_GetDispositionContext_NULL_context_Fails)
 
     //cleanup
     IoTHubMessage_Destroy(h);
+}
+
+TEST_FUNCTION(IoTHubMessage_SetComponentName_NULL_handle_Fails)
+{
+    set_string_NULL_handle_fails_impl(IoTHubMessage_SetComponentName, TEST_COMPONENT_NAME);
+}
+
+TEST_FUNCTION(IoTHubMessage_SetComponentName_NULL_MessageId_Fails)
+{
+    set_string_NULL_string_fails_impl(IoTHubMessage_SetComponentName);
+}
+
+TEST_FUNCTION(IoTHubMessage_SetComponentName_SUCCEED)
+{
+    set_string_succeeds_impl(IoTHubMessage_SetComponentName, TEST_COMPONENT_NAME);
+}
+
+TEST_FUNCTION(IoTHubMessage_SetComponentName_ComponentName_Not_NULL_SUCCEED)
+{
+    set_string_string_already_allocated_succeeds_impl(IoTHubMessage_SetComponentName, "output_string2");
+}
+
+TEST_FUNCTION(IoTHubMessage_GetComponentName_NULL_handle_Fails)
+{
+    get_string_NULL_handle_fails_impl(IoTHubMessage_GetComponentName);
+}
+
+TEST_FUNCTION(IoTHubMessage_GetComponentName_ComponentName_Not_Set_Fails)
+{
+    get_string_not_set_fails_impl(IoTHubMessage_GetComponentName);
+}
+
+TEST_FUNCTION(IoTHubMessage_GetComponentName_SUCCEED)
+{
+    get_string_succeeds_impl(IoTHubMessage_SetComponentName, IoTHubMessage_GetComponentName, TEST_COMPONENT_NAME);
 }
 
 END_TEST_SUITE(iothubmessage_ut)

@@ -43,6 +43,7 @@ extern IOTHUB_ACCOUNT_INFO_HANDLE IoTHubAccount_Init_With_Config(IOTHUB_ACCOUNT_
 extern void IoTHubAccount_deinit(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle);
 
 extern const char* IoTHubAccount_GetEventHubConnectionString(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle);
+extern const char* IoTHubAccount_GetIoTHostName(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle);
 extern const char* IoTHubAccount_GetIoTHubName(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle);
 extern const char* IoTHubAccount_GetIoTHubSuffix(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle);
 extern IOTHUB_PROVISIONED_DEVICE* IoTHubAccount_GetSASDevice(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle);
@@ -56,6 +57,11 @@ extern const char* IoTHubAccount_GetEventhubAccessKey(IOTHUB_ACCOUNT_INFO_HANDLE
 extern const size_t IoTHubAccount_GetIoTHubPartitionCount(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle);
 extern const char* IoTHubAccount_GetEventhubConsumerGroup(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle);
 extern const IOTHUB_MESSAGING_HANDLE IoTHubAccount_GetMessagingHandle(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle);
+
+extern const int TEST_CREATE_MAX_RETRIES;
+extern const int TEST_METHOD_INVOKE_MAX_RETRIES;
+extern const int TEST_SLEEP_BETWEEN_CREATION_FAILURES_MSEC;
+extern const int TEST_SLEEP_BETWEEN_METHOD_INVOKE_FAILURES_MSEC;
 
 #ifdef __cplusplus
 }

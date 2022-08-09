@@ -4,13 +4,14 @@ variables:
   iotHubLonghaulTotalDurationSecs: 43200
   iotHubLonghaulLoopDurationSecs: 60
 resources:
-- repo: self
-  clean: true
+  containers:
+  - container: linux-c-ubuntu-2004
+    endpoint: csdk-containers
+    image: csdkcontainerregistry.azurecr.io/linux-c-ubuntu-2004:latest
 jobs:
 - job: longhaul_linux
   timeoutInMinutes: 800
-  variables:
-    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu-2004"
+  container: linux-c-ubuntu-2004
   pool: 
     name: 'sdk-c--ubuntu-18'
   displayName: 'Longhaul: Linux'
@@ -19,11 +20,10 @@ jobs:
       sudo cat /etc/os-release
       sudo apt show valgrind
       sudo chmod --recursive ugo+rw cmake
-      sudo chmod 755 jenkins/longhaul_c.sh
       sudo -E ./jenkins/longhaul_c.sh
     displayName: 'Build'
   - script: |
-      cd cmake && sudo -E ../build_all/linux/run_tests.sh
+      cd cmake && sudo -E ../build_all/linux/run_tests_memcheck.sh
     displayName: 'Run Tests'
     env:
       IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
@@ -45,6 +45,12 @@ jobs:
       PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
       IOTHUB_LONGHAUL_TOTAL_DURATION_SECS: $(iotHubLonghaulTotalDurationSecs)
       IOTHUB_LONGHAUL_LOOP_DURATION_SECS: $(iotHubLonghaulLoopDurationSecs)
+  - task: PublishPipelineArtifact@1
+    condition: succeededOrFailed()
+    inputs:
+      targetPath: '$(Build.SourcesDirectory)/cmake/Testing/Temporary/'
+      artifact: 'Memcheck'
+      publishLocation: 'pipeline'
 - job: longhaul_windows
   timeoutInMinutes: 800
   pool:

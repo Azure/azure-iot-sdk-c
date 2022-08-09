@@ -4,6 +4,10 @@
 cmake_minimum_required (VERSION 3.5)
 
 compileAsC99()
+if (MSVC)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -bigobj")
+endif()
+
 set(theseTestsName serializer_dt_ut)
 
 include_directories(${SERIALIZER_INC_FOLDER})

@@ -114,5 +114,29 @@ IOTHUB_CLIENT_RESULT IoTHubDeviceClient_UploadMultipleBlocksToBlobAsync(IOTHUB_D
 {
     return IoTHubClientCore_UploadMultipleBlocksToBlobAsync((IOTHUB_CLIENT_CORE_HANDLE)iotHubClientHandle, destinationFileName, NULL, getDataCallbackEx, context);
 }
-
 #endif /*DONT_USE_UPLOADTOBLOB*/
+
+IOTHUB_CLIENT_RESULT IoTHubDeviceClient_SendTelemetryAsync(IOTHUB_DEVICE_CLIENT_HANDLE iotHubClientHandle, IOTHUB_MESSAGE_HANDLE telemetryMessageHandle, IOTHUB_CLIENT_TELEMETRY_CALLBACK telemetryConfirmationCallback, void* userContextCallback)
+{
+    return IoTHubClientCore_SendEventAsync((IOTHUB_CLIENT_CORE_HANDLE)iotHubClientHandle, telemetryMessageHandle, (IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK)telemetryConfirmationCallback, userContextCallback);
+}
+
+IOTHUB_CLIENT_RESULT IoTHubDeviceClient_SendPropertiesAsync(IOTHUB_DEVICE_CLIENT_HANDLE iotHubClientHandle, const unsigned char* properties, size_t propertiesLength, IOTHUB_CLIENT_PROPERTY_ACKNOWLEDGED_CALLBACK propertyAcknowledgedCallback, void* userContextCallback)
+{
+    return IoTHubClientCore_SendReportedState((IOTHUB_CLIENT_CORE_HANDLE)iotHubClientHandle, properties, propertiesLength, (IOTHUB_CLIENT_REPORTED_STATE_CALLBACK)propertyAcknowledgedCallback, userContextCallback);
+}
+
+IOTHUB_CLIENT_RESULT IoTHubDeviceClient_SubscribeToCommands(IOTHUB_DEVICE_CLIENT_HANDLE iotHubClientHandle, IOTHUB_CLIENT_COMMAND_CALLBACK_ASYNC commandCallback, void* userContextCallback)
+{
+    return IoTHubClientCore_SubscribeToCommands((IOTHUB_CLIENT_CORE_HANDLE)iotHubClientHandle, commandCallback, userContextCallback);
+}
+
+IOTHUB_CLIENT_RESULT IoTHubDeviceClient_GetPropertiesAsync(IOTHUB_DEVICE_CLIENT_HANDLE iotHubClientHandle,  IOTHUB_CLIENT_PROPERTIES_RECEIVED_CALLBACK propertyCallback,  void* userContextCallback)
+{
+    return IoTHubClientCore_GetTwinAsync((IOTHUB_CLIENT_CORE_HANDLE)iotHubClientHandle, (IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK)propertyCallback, userContextCallback);
+}
+
+IOTHUB_CLIENT_RESULT IoTHubDeviceClient_GetPropertiesAndSubscribeToUpdatesAsync(IOTHUB_DEVICE_CLIENT_HANDLE iotHubClientHandle, IOTHUB_CLIENT_PROPERTIES_RECEIVED_CALLBACK propertiesCallback, void* userContextCallback)
+{
+    return IoTHubClientCore_SetDeviceTwinCallback((IOTHUB_CLIENT_CORE_HANDLE)iotHubClientHandle, (IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK)propertiesCallback, userContextCallback);
+}

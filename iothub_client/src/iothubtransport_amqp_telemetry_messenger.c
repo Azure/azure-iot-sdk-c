@@ -27,6 +27,7 @@
 #define IOTHUB_DEVICES_MODULE_PATH_FMT                  "%s/devices/%s/modules/%s"
 #define IOTHUB_EVENT_SEND_ADDRESS_FMT                   "amqps://%s/messages/events"
 #define IOTHUB_MESSAGE_RECEIVE_ADDRESS_FMT              "amqps://%s/messages/devicebound"
+#define IOTHUB_MESSAGE_PROPERTY_RESOURCE_LIMIT_EXCEEDED "amqp:resource-limit-exceeded"
 #define MESSAGE_SENDER_LINK_NAME_PREFIX                 "link-snd"
 #define MESSAGE_SENDER_MAX_LINK_SIZE                    UINT64_MAX
 #define MESSAGE_RECEIVER_LINK_NAME_PREFIX               "link-rcv"
@@ -964,7 +965,6 @@ static void invoke_callback(const void* item, const void* action_context, bool* 
 
 static void internal_on_event_send_complete_callback(void* context, MESSAGE_SEND_RESULT send_result, AMQP_VALUE delivery_state)
 {
-    (void)delivery_state;
     if (context != NULL)
     {
         MESSENGER_SEND_EVENT_TASK* task = (MESSENGER_SEND_EVENT_TASK*)context;
@@ -981,7 +981,51 @@ static void internal_on_event_send_complete_callback(void* context, MESSAGE_SEND
                 }
                 else
                 {
-                    messenger_send_result = TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_ERROR_FAIL_SENDING;
+                    bool isResourceLimitExceeded = false;
+                    uint32_t item_count;
+                    int ret = amqpvalue_get_list_item_count(delivery_state, &item_count);
+                    for (uint32_t i = 0; !isResourceLimitExceeded && ret == 0 && i < item_count; i++)
+                    {
+                        AMQP_VALUE delivery_state_item = amqpvalue_get_list_item(delivery_state, i);
+                        if (delivery_state_item != NULL)
+                        {
+                            AMQP_VALUE item_properties = amqpvalue_get_inplace_described_value(delivery_state_item);
+                            if (item_properties != NULL)
+                            {
+                                uint32_t item_properties_count = 0;
+                                ret = amqpvalue_get_list_item_count(item_properties, &item_properties_count);
+                                for (uint32_t t = 0; !isResourceLimitExceeded && ret == 0 && t < item_properties_count; t++)
+                                {
+                                    AMQP_VALUE item_property = amqpvalue_get_list_item(item_properties, t);
+                                    if (item_property != NULL)
+                                    {
+                                        const char* symbol_value;
+                                        int ret_sym = amqpvalue_get_symbol(item_property, &symbol_value);
+                                        if (ret_sym == 0)
+                                        {
+                                            size_t proplen = strlen(symbol_value);
+                                            proplen = proplen < sizeof(IOTHUB_MESSAGE_PROPERTY_RESOURCE_LIMIT_EXCEEDED) ? proplen : sizeof(IOTHUB_MESSAGE_PROPERTY_RESOURCE_LIMIT_EXCEEDED);
+                                            if (strncmp(symbol_value, IOTHUB_MESSAGE_PROPERTY_RESOURCE_LIMIT_EXCEEDED, proplen) == 0)
+                                            {
+                                                isResourceLimitExceeded = true;
+                                            }
+                                        }
+                                        amqpvalue_destroy(item_property);
+                                    }
+                                }
+                            }
+                            amqpvalue_destroy(delivery_state_item);
+                        }
+                    }
+
+                    if (isResourceLimitExceeded)
+                    {
+                        messenger_send_result = TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_ERROR_QUOTA_EXCEEDED;
+                    }
+                    else
+                    {
+                        messenger_send_result = TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_ERROR_FAIL_SENDING;
+                    }
                 }
 
                 // Initially typecast to a size_t to avoid 64 bit compiler warnings on casting of void* to larger type.

@@ -526,53 +526,6 @@ const char* IoTHubClient_Auth_Get_DeviceKey(IOTHUB_AUTHORIZATION_HANDLE handle)
     return result;
 }
 
-SAS_TOKEN_STATUS IoTHubClient_Auth_Is_SasToken_Valid(IOTHUB_AUTHORIZATION_HANDLE handle)
-{
-    SAS_TOKEN_STATUS result;
-    if (handle == NULL)
-    {
-        LogError("Invalid Parameter handle: %p", handle);
-        result = SAS_TOKEN_STATUS_FAILED;
-    }
-    else
-    {
-        if (handle->cred_type == IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN)
-        {
-            if (handle->device_sas_token == NULL)
-            {
-                LogError("Failure: device_sas_toke is NULL");
-                result = SAS_TOKEN_STATUS_FAILED;
-            }
-            else
-            {
-                STRING_HANDLE strSasToken = STRING_construct(handle->device_sas_token);
-                if (strSasToken != NULL)
-                {
-                    if (!SASToken_Validate(strSasToken))
-                    {
-                        result = SAS_TOKEN_STATUS_INVALID;
-                    }
-                    else
-                    {
-                        result = SAS_TOKEN_STATUS_VALID;
-                    }
-                    STRING_delete(strSasToken);
-                }
-                else
-                {
-                    LogError("Failure constructing SAS Token");
-                    result = SAS_TOKEN_STATUS_FAILED;
-                }
-            }
-        }
-        else
-        {
-            result = SAS_TOKEN_STATUS_VALID;
-        }
-    }
-    return result;
-}
-
 #ifdef USE_EDGE_MODULES
 
 // For debugging C modules, the environment can set the environment variable 'EdgeModuleCACertificateFile' to provide

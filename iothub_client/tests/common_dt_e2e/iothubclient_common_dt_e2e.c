@@ -794,6 +794,7 @@ void dt_e2e_send_reported_test_svc_fault_ctrl_kill_Tcp(IOTHUB_CLIENT_TRANSPORT_P
 
     // Send the Event from the device client
     client_send_tcp_kill_via_d2c(device_to_use);
+    free(reported_payload);
 
     // Send a new reported payload. Register callback. Receive reported state message.
     reported_payload = calloc_and_fill_reported_payload(reported_twin_data->string_property,
@@ -927,6 +928,29 @@ void dt_e2e_get_twin_async_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol,
 
     // Cleanup
     destroy_client_handle();
+    received_twin_data_deinit(received_twin_data);
+}
+
+void dt_e2e_get_twin_async_destroy_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol,
+    IOTHUB_ACCOUNT_AUTH_METHOD account_auth_method)
+{
+    // Test setup
+    IOTHUB_PROVISIONED_DEVICE* device_to_use = IoTHubAccount_GetDevice(iothub_accountinfo_handle,
+        account_auth_method);
+    RECEIVED_TWIN_DATA* received_twin_data = received_twin_data_init();
+
+    create_client_handle(device_to_use, protocol);
+
+    // Connect device client to IoT Hub. Register callback. 
+    get_twin_async(twin_callback, received_twin_data);
+    // destroy client handle, should get twin_callback
+    destroy_client_handle();
+
+    // Check results.
+    ASSERT_IS_TRUE(received_twin_data->received_callback);
+    ASSERT_IS_TRUE(received_twin_data->cb_payload_size == 0);
+
+    // Cleanup
     received_twin_data_deinit(received_twin_data);
 }
 

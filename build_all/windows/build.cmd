@@ -66,6 +66,7 @@ goto args-continue
 :arg-build-config
 shift
 if "%1" equ "" call :usage && exit /b 1
+echo setting build-config to %1
 set build-config=%1
 goto args-continue
 
@@ -147,15 +148,15 @@ pushd %cmake-root%\cmake
 
 if %build-platform% == x64 (
     echo ***Running CMAKE for Win64***
-    cmake -LAH -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_sfc_tests:BOOL=%CMAKE_run_sfc_tests% -Duse_cppunittest:BOOL=OFF -Drun_unittests:BOOL=%CMAKE_run_unittests% %build-root% -Duse_prov_client:BOOL=%prov_auth% -G "Visual Studio 15 2017" -A x64 -Duse_edge_modules=%use_edge_modules%
+    cmake -LAH -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_sfc_tests:BOOL=%CMAKE_run_sfc_tests% -Duse_cppunittest:BOOL=OFF -Drun_unittests:BOOL=%CMAKE_run_unittests% %build-root% -Duse_prov_client:BOOL=%prov_auth% -G "Visual Studio 15 2017" -A x64 -Duse_edge_modules=%use_edge_modules% -DCMAKE_BUILD_TYPE=$build_config
     if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 ) else if %build-platform% == arm (
     echo ***Running CMAKE for ARM***
-    cmake -LAH -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_sfc_tests:BOOL=%CMAKE_run_sfc_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% %build-root% -Duse_prov_client:BOOL=%prov_auth% -G "Visual Studio 15 2017" -A ARM  -Duse_edge_modules=%use_edge_modules%
+    cmake -LAH -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_sfc_tests:BOOL=%CMAKE_run_sfc_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% %build-root% -Duse_prov_client:BOOL=%prov_auth% -G "Visual Studio 15 2017" -A ARM  -Duse_edge_modules=%use_edge_modules% -DCMAKE_BUILD_TYPE=$build_config
     if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 ) else (
     echo ***Running CMAKE for Win32***
-    cmake -LAH -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_sfc_tests:BOOL=%CMAKE_run_sfc_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% %build-root% -Duse_prov_client:BOOL=%prov_auth% -G "Visual Studio 15 2017" -A Win32 -Duse_edge_modules=%use_edge_modules%
+    cmake -LAH -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_sfc_tests:BOOL=%CMAKE_run_sfc_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% %build-root% -Duse_prov_client:BOOL=%prov_auth% -G "Visual Studio 15 2017" -A Win32 -Duse_edge_modules=%use_edge_modules% -DCMAKE_BUILD_TYPE=$build_config
     if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 )
 
@@ -168,7 +169,9 @@ echo ***setting VC paths***
 where msbuild
 
 if %make%==yes (
-    msbuild /m azure_iot_sdks.sln
+    echo build-config is %build-config%
+
+    msbuild /m azure_iot_sdks.sln "-p:Configuration=%build-config%"
     if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 )
 

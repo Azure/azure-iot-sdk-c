@@ -34,26 +34,25 @@ PNP_THERMOSTAT_COMPONENT_HANDLE PnP_ThermostatComponent_CreateHandle(const char*
 void PnP_ThermostatComponent_Destroy(PNP_THERMOSTAT_COMPONENT_HANDLE pnpThermostatComponentHandle);
 
 //
-// PnP_ThermostatComponent_ProcessCommand is used to process any incoming PnP Commands, transferred via the IoTHub device method channel,
-// to the given PNP_THERMOSTAT_COMPONENT_HANDLE.  The function returns an HTTP style return code to indicate success or failure.
+// PnP_ThermostatComponent_ProcessCommand is used to process any incoming PnP Commands to the given PNP_THERMOSTAT_COMPONENT_HANDLE.  
 //
-int PnP_ThermostatComponent_ProcessCommand(PNP_THERMOSTAT_COMPONENT_HANDLE pnpThermostatComponentHandle, const char *pnpCommandName, JSON_Value* commandJsonValue, unsigned char** response, size_t* responseSize);
+void PnP_ThermostatComponent_ProcessCommand(PNP_THERMOSTAT_COMPONENT_HANDLE pnpThermostatComponentHandle, const char *pnpCommandName, JSON_Value* commandJsonValue, IOTHUB_CLIENT_COMMAND_RESPONSE* commandResponse);
 
 //
 // PnP_ThermostatComponent_ProcessPropertyUpdate processes an incoming property update and, if the property is in the thermostat's model, will
 // send a reported property acknowledging receipt of the property request from IoTHub.
 //
-void PnP_ThermostatComponent_ProcessPropertyUpdate(PNP_THERMOSTAT_COMPONENT_HANDLE pnpThermostatComponentHandle, IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClientLL, const char* propertyName, JSON_Value* propertyValue, int version);
+void PnP_ThermostatComponent_ProcessPropertyUpdate(PNP_THERMOSTAT_COMPONENT_HANDLE pnpThermostatComponentHandle, IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClient, const char* propertyName, const char* propertyValue, int version);
 
 //
-// PnP_ThermostatComponent_SendTelemetry sends telemetry indicating the current temperature of the thermostat.
+// PnP_ThermostatComponent_SendCurrentTemperature sends a telemetry message indicating the current temperature.
 //
-void PnP_ThermostatComponent_SendTelemetry(PNP_THERMOSTAT_COMPONENT_HANDLE pnpThermostatComponentHandle, IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClientLL);
+void PnP_ThermostatComponent_SendCurrentTemperature(PNP_THERMOSTAT_COMPONENT_HANDLE pnpThermostatComponentHandle, IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClient);
 
 //
 // PnP_TempControlComponent_Report_MaxTempSinceLastReboot_Property sends a property indicating maxTempSinceLastReboot.  Since 
-// this property is not "writeable" in the DTDL, the application can invoke this at startup.
+// this property is not "writable" in the DTDL, the application can invoke this at startup.
 //
-void PnP_TempControlComponent_Report_MaxTempSinceLastReboot_Property(PNP_THERMOSTAT_COMPONENT_HANDLE pnpThermostatComponentHandle, IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClientLL);
+void PnP_TempControlComponent_Report_MaxTempSinceLastReboot_Property(PNP_THERMOSTAT_COMPONENT_HANDLE pnpThermostatComponentHandle, IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClient);
 
 #endif /* PNP_THERMOSTAT_CONTROLLER_H */

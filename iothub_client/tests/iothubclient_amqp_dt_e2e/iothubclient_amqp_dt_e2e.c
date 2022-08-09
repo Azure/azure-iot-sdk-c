@@ -71,6 +71,11 @@ TEST_FUNCTION(IoTHub_AMQP_WS_GetTwinAsync_e2e_sas)
     dt_e2e_get_twin_async_test(AMQP_Protocol_over_WebSocketsTls, IOTHUB_ACCOUNT_AUTH_CONNSTRING);
 }
 
+TEST_FUNCTION(IoTHub_MQTT_GetTwinAsync_Client_Destroy_e2e_sas)
+{
+    dt_e2e_get_twin_async_destroy_test(AMQP_Protocol_over_WebSocketsTls, IOTHUB_ACCOUNT_AUTH_CONNSTRING);
+}
+
 #ifndef __APPLE__
 TEST_FUNCTION(IoTHub_AMQP_WS_SendReported_e2e_x509)
 {

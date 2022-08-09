@@ -5,8 +5,9 @@
 
 compileAsC99()
 
-set(pnp_simple_thermostat_c_files
+set(iothub_c_files
     pnp_simple_thermostat.c
+    ../common/pnp_sample_config.c
 )
 
 IF(WIN32)
@@ -15,20 +16,19 @@ IF(WIN32)
 ENDIF(WIN32)
 
 if(${use_prov_client})
-    set(pnp_simple_thermostat_c_files ${pnp_simple_thermostat_c_files} ../common/pnp_dps_ll.c)
-    include_directories(../common)
+    set(iothub_c_files ${iothub_c_files} ../common/pnp_dps_ll.c)
 endif()
 
 #Conditionally use the SDK trusted certs in the samples
 if(${use_sample_trusted_cert})
     add_definitions(-DSET_TRUSTED_CERT_IN_SAMPLES)
     include_directories(${PROJECT_SOURCE_DIR}/certs)
-    set(pnp_simple_thermostat_c_files ${pnp_simple_thermostat_c_files} ${PROJECT_SOURCE_DIR}/certs/certs.c)
+    set(iothub_c_files ${iothub_c_files} ${PROJECT_SOURCE_DIR}/certs/certs.c)
 endif()
 
-include_directories(. ${PROJECT_SOURCE_DIR}/deps/parson)
+include_directories(. ${PROJECT_SOURCE_DIR}/deps/parson ../common)
 
-add_executable(pnp_simple_thermostat ${pnp_simple_thermostat_c_files})
+add_executable(pnp_simple_thermostat ${iothub_c_files})
 
 target_link_libraries(pnp_simple_thermostat iothub_client_mqtt_transport iothub_client_mqtt_ws_transport)
 linkMqttLibrary(pnp_simple_thermostat)
