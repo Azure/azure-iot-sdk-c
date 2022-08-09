@@ -432,7 +432,7 @@ static void validate_internet_connectivity(IOTHUB_LONGHAUL_RESOURCES* iotHubLong
 
     if (iotHubLonghaul != NULL)
     {
-        LogInfo("Network error detected in test. Verifying internet connectivity available...");
+        //LogInfo("Network error detected in test. Verifying internet connectivity available...");
         const char* hubHostName = IoTHubAccount_GetIoTHostName(iotHubLonghaul->iotHubAccountInfo);
         statusCode = test_http_endpoint(hubHostName);
         if (statusCode == 400)
