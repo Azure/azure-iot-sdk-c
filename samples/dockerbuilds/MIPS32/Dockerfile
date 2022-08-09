@@ -4,7 +4,7 @@ FROM ubuntu:latest
 RUN apt-get update && apt-get -y upgrade
 RUN apt-get install -y cmake git wget nano bzip2
 
-RUN useradd -d /home/builder -ms /bin/bash -G sudo -p builder builder 
+RUN useradd -d /home/builder -ms /bin/bash -G sudo -p builder builder
 
 # Switch to new user
 USER builder
