@@ -15,8 +15,6 @@ RUN mkdir MIPSBuild
 WORKDIR MIPSBuild
 
 # Cross compile toolchain
-#RUN wget https://downloads.openwrt.org/barrier_breaker/14.07/ramips/mt7620n/OpenWrt-Toolchain-ramips-for-mipsel_24kec%2bdsp-gcc-4.8-linaro_uClibc-0.9.33.2.tar.bz2
-#RUN tar -xvf OpenWrt-Toolchain-ramips-for-mipsel_24kec+dsp-gcc-4.8-linaro_uClibc-0.9.33.2.tar.bz2
 RUN wget https://downloads.openwrt.org/releases/21.02.3/targets/ramips/mt7620/openwrt-sdk-21.02.3-ramips-mt7620_gcc-8.4.0_musl.Linux-x86_64.tar.xz
 RUN tar -xvf openwrt-sdk-21.02.3-ramips-mt7620_gcc-8.4.0_musl.Linux-x86_64.tar.xz
 
@@ -35,7 +33,6 @@ RUN tar -xvf curl-7.60.0.tar.gz
 RUN wget https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.32/util-linux-2.32-rc2.tar.gz
 RUN tar -xvf util-linux-2.32-rc2.tar.gz
 
-#~/MIPSBuild/openwrt-sdk-21.02.3-ramips-mt7620_gcc-8.4.0_musl.Linux-x86_64/staging_dir/toolchain-mipsel_24kc_gcc-8.4.0_musl/bin
 # Set up environment variables in preperation for the builds to follow
 ENV WORK_ROOT=/home/builder/MIPSBuild
 ENV TOOLCHAIN_ROOT=${WORK_ROOT}/openwrt-sdk-21.02.3-ramips-mt7620_gcc-8.4.0_musl.Linux-x86_64/staging_dir
