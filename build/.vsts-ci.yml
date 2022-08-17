@@ -894,3 +894,23 @@ jobs:
     displayName: 'Build'
   - script: sudo rm -rf $(Agent.BuildDirectory)/*
     displayName: 'Cleanup'
+- job: crosscompile_mips32
+  pool:
+    vmImage: 'ubuntu-20.04'
+  displayName: "Cross Compile (MIPS32)"
+  steps:
+  - script: |
+      sudo apt-get update && apt-get install -y \
+      curl \
+      git \
+      python-software-properties \
+      build-essential \
+      pkg-config \
+      docker.io
+      sudo curl -sL https://deb.nodesource.com/setup_16.x | bash -
+      sudo apt-get install -y nodejs
+    displayName: 'Setup'
+  - script: |
+      cd samples/dockerbuilds/MIPS32
+      docker build -t mipsiotbuild:latest . --network=host
+    displayName: 'Build MIPS32'
