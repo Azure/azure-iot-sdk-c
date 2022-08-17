@@ -451,6 +451,7 @@ jobs:
     displayName: 'Cleanup'
     condition: always()
 - job: ubuntu2204debug
+  timeoutInMinutes: 120
   container: linux-c-ubuntu-2204
   pool:
     name: 'sdk-c--ubuntu-18'
@@ -496,6 +497,7 @@ jobs:
     displayName: 'Cleanup'
     condition: always()
 - job: ubuntu2204release
+  timeoutInMinutes: 120
   container: linux-c-ubuntu-2204
   pool:
     name: 'sdk-c--ubuntu-18'
