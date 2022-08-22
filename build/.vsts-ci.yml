@@ -452,7 +452,7 @@ jobs:
     condition: always()
 - job: ubuntu2204debug
   timeoutInMinutes: 120
-  container: linux-c-ubuntu-2204
+  container: linux-c-ubuntu-2204:valgrind-3.19
   pool:
     name: 'sdk-c--ubuntu-18'
   displayName: 'Ubuntu 22.04 (Debug)'
@@ -498,7 +498,7 @@ jobs:
     condition: always()
 - job: ubuntu2204release
   timeoutInMinutes: 120
-  container: linux-c-ubuntu-2204
+  container: linux-c-ubuntu-2204:valgrind-3.19
   pool:
     name: 'sdk-c--ubuntu-18'
   displayName: 'Ubuntu 22.04 (Release)'
