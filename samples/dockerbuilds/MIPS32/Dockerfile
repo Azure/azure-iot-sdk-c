@@ -2,7 +2,7 @@ FROM ubuntu:latest
 
 # Run commands that require root authority
 RUN apt-get update && apt-get -y upgrade
-RUN apt-get install -y cmake git wget nano
+RUN apt-get install -y cmake git wget nano xz-utils bzip2
 
 RUN useradd -d /home/builder -ms /bin/bash -G sudo -p builder builder
 
@@ -15,8 +15,8 @@ RUN mkdir MIPSBuild
 WORKDIR MIPSBuild
 
 # Cross compile toolchain
-RUN wget https://downloads.openwrt.org/barrier_breaker/14.07/ramips/mt7620n/OpenWrt-Toolchain-ramips-for-mipsel_24kec%2bdsp-gcc-4.8-linaro_uClibc-0.9.33.2.tar.bz2
-RUN tar -xvf OpenWrt-Toolchain-ramips-for-mipsel_24kec+dsp-gcc-4.8-linaro_uClibc-0.9.33.2.tar.bz2
+RUN wget https://downloads.openwrt.org/releases/21.02.3/targets/ramips/mt7620/openwrt-sdk-21.02.3-ramips-mt7620_gcc-8.4.0_musl.Linux-x86_64.tar.xz
+RUN tar -xvf openwrt-sdk-21.02.3-ramips-mt7620_gcc-8.4.0_musl.Linux-x86_64.tar.xz
 
 # Azure IoT SDK for C
 RUN git clone --recursive https://github.com/azure/azure-iot-sdk-c.git
@@ -35,10 +35,10 @@ RUN tar -xvf util-linux-2.32-rc2.tar.gz
 
 # Set up environment variables in preperation for the builds to follow
 ENV WORK_ROOT=/home/builder/MIPSBuild
-ENV TOOLCHAIN_ROOT=${WORK_ROOT}/OpenWrt-Toolchain-ramips-for-mipsel_24kec+dsp-gcc-4.8-linaro_uClibc-0.9.33.2
-ENV TOOLCHAIN_SYSROOT=${TOOLCHAIN_ROOT}/toolchain-mipsel_24kec+dsp_gcc-4.8-linaro_uClibc-0.9.33.2
+ENV TOOLCHAIN_ROOT=${WORK_ROOT}/openwrt-sdk-21.02.3-ramips-mt7620_gcc-8.4.0_musl.Linux-x86_64/staging_dir
+ENV TOOLCHAIN_SYSROOT=${TOOLCHAIN_ROOT}/toolchain-mipsel_24kc_gcc-8.4.0_musl
 ENV TOOLCHAIN_EXES=${TOOLCHAIN_SYSROOT}/bin
-ENV TOOLCHAIN_NAME=mipsel-openwrt-linux-uclibc
+ENV TOOLCHAIN_NAME=mipsel-openwrt-linux-musl
 ENV AR=${TOOLCHAIN_EXES}/${TOOLCHAIN_NAME}-ar
 ENV AS=${TOOLCHAIN_EXES}/${TOOLCHAIN_NAME}-as
 ENV CC=${TOOLCHAIN_EXES}/${TOOLCHAIN_NAME}-gcc
