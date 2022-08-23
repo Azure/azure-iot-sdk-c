@@ -5,7 +5,7 @@ resources:
   containers:
   - container: linux-c-ubuntu-2204
     endpoint: csdk-containers
-    image: csdkcontainerregistry.azurecr.io/linux-c-ubuntu-2204:valgrind-3.19
+    image: csdkcontainerregistry.azurecr.io/linux-c-ubuntu-2204:latest
   - container: linux-c-ubuntu-2004
     endpoint: csdk-containers
     image: csdkcontainerregistry.azurecr.io/linux-c-ubuntu-2004:latest
@@ -454,7 +454,7 @@ jobs:
   timeoutInMinutes: 120
   container: linux-c-ubuntu-2204
   pool:
-    name: 'sdk-c--ubuntu-18'
+    vmImage: 'ubuntu-22.04'
   displayName: 'Ubuntu 22.04 (Debug)'
   steps:
   - script: |
@@ -500,7 +500,7 @@ jobs:
   timeoutInMinutes: 120
   container: linux-c-ubuntu-2204
   pool:
-    name: 'sdk-c--ubuntu-18'
+    vmImage: 'ubuntu-22.04'
   displayName: 'Ubuntu 22.04 (Release)'
   steps:
   - script: |
