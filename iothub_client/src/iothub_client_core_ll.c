@@ -2386,6 +2386,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SetOption(IOTHUB_CLIENT_CORE_LL_HANDLE 
             {
                 /*Codes_SRS_IOTHUBCLIENT_LL_10_037: [Calling IoTHubClientCore_LL_SetOption with value between [0, 100] shall return `IOTHUB_CLIENT_OK`. ]*/
                 handleData->diagnostic_setting.diagSamplingPercentage = percentage;
+                handleData->distributedTracing_setting.samplingRate = percentage;
                 handleData->diagnostic_setting.currentMessageNumber = 0;
                 result = IOTHUB_CLIENT_OK;
             }

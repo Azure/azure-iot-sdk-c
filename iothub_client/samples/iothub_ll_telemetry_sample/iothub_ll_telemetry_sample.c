@@ -50,8 +50,8 @@ and removing calls to _DoWork will yield the same results. */
 
 
 /* Paste in the your iothub connection string  */
-static const char* connectionString = "[device connection string]";
-#define MESSAGE_COUNT        5
+static const char* connectionString = "...";
+#define MESSAGE_COUNT        5000
 static bool g_continueRunning = true;
 static size_t g_message_count_send_confirmations = 0;
 
@@ -137,10 +137,14 @@ int main(void)
         //ONLY valid for use with MQTT
         bool urlEncodeOn = true;
         (void)IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_AUTO_URL_ENCODE_DECODE, &urlEncodeOn);
+
+        uint32_t diagPercentage = 100;
+        (void)IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_DIAGNOSTIC_SAMPLING_PERCENTAGE, &diagPercentage);
 #endif
 
         // Setting connection status callback to get indication of connection to iothub
         (void)IoTHubDeviceClient_LL_SetConnectionStatusCallback(device_ll_handle, connection_status_callback, NULL);
+        (void)IoTHubDeviceClient_LL_EnablePolicyConfiguration(device_ll_handle, POLICY_CONFIGURATION_DISTRIBUTED_TRACING, true);
 
         do
         {
@@ -178,7 +182,7 @@ int main(void)
             }
 
             IoTHubDeviceClient_LL_DoWork(device_ll_handle);
-            ThreadAPI_Sleep(1);
+            ThreadAPI_Sleep(1000);
 
         } while (g_continueRunning);
 
