@@ -5,6 +5,8 @@
 #include "iothubclient_common_e2e.h"
 #include "iothubtransportamqp.h"
 
+#define TELEMETRY_BATCH_SIZE 3500
+
 BEGIN_TEST_SUITE(iothubclient_amqp_e2e)
 
     TEST_SUITE_INITIALIZE(TestClassInitialize)
@@ -23,6 +25,25 @@ BEGIN_TEST_SUITE(iothubclient_amqp_e2e)
         g_e2e_test_options.set_mac_address = true;
 #endif
         e2e_send_event_test_sas(AMQP_Protocol);
+    }
+
+    TEST_FUNCTION(IoTHub_AMQP_SendBatchEvents_e2e_sas)
+    {
+#ifdef AZIOT_LINUX
+        g_e2e_test_options.set_mac_address = true;
+#endif
+        IOTHUB_GATEWAY_VERSION iotHubVersion = IoTHubAccount_GetIoTHubVersion(g_iothubAcctInfo);
+
+        ASSERT_ARE_NOT_EQUAL(int, IOTHUB_GATEWAY_VERSION_UNDEFINED, iotHubVersion);
+
+        if (iotHubVersion == IOTHUB_GATEWAY_VERSION_2)
+        {
+            e2e_send_events_test_sas(AMQP_Protocol, TELEMETRY_BATCH_SIZE);
+        }
+        else
+        {
+            // Skipping the test if not running against IoT Hub Gateway V2.
+        }
     }
 
     TEST_FUNCTION(IoTHub_AMQP_RecvMessage_E2ETest_sas)

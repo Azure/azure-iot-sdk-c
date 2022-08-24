@@ -104,6 +104,14 @@ typedef struct EXPECTED_SEND_DATA_TAG
     IOTHUB_MESSAGE_HANDLE msgHandle;
 } EXPECTED_SEND_DATA;
 
+#define MAX_SEND_DATA_BUNDLE_ITEM_COUNT 3500
+
+typedef struct SEND_DATA_BUNDLE_TAG
+{
+    int count;
+    EXPECTED_SEND_DATA* items[MAX_SEND_DATA_BUNDLE_ITEM_COUNT];
+} SEND_DATA_BUNDLE;
+
 typedef struct EXPECTED_RECEIVE_DATA_TAG
 {
     bool wasFound;
@@ -144,29 +152,37 @@ static void sendCompleteCallback(void* context, IOTHUB_MESSAGING_RESULT messagin
 
 static int IoTHubCallback(void* context, const char* data, size_t size)
 {
-    (void)size;
-    int result = 0; // 0 means "keep processing"
-    EXPECTED_SEND_DATA* expectedData = (EXPECTED_SEND_DATA*)context;
-    if (expectedData != NULL)
+    int messagesReceived = 0;
+    SEND_DATA_BUNDLE* d2cMessages = (SEND_DATA_BUNDLE*)context;
+
+    for (int i = 0; i < d2cMessages->count; i++)
     {
-        if (Lock(expectedData->lock) != LOCK_OK)
+        EXPECTED_SEND_DATA* expectedData = d2cMessages->items[i];
+        if (expectedData != NULL)
         {
-            ASSERT_FAIL("unable to lock");
-        }
-        else
-        {
-            if (
-                (strlen(expectedData->expectedString) == size) &&
-                (memcmp(expectedData->expectedString, data, size) == 0)
-                )
+            if (Lock(expectedData->lock) != LOCK_OK)
             {
-                expectedData->wasFound = true;
-                result = 1;
+                ASSERT_FAIL("unable to lock");
             }
-            (void)Unlock(expectedData->lock);
+            else
+            {
+                if (
+                    (strlen(expectedData->expectedString) == size) &&
+                    (memcmp(expectedData->expectedString, data, size) == 0)
+                    )
+                {
+                    expectedData->wasFound = true;
+                }
+
+                messagesReceived += (expectedData->wasFound ? 1 : 0);
+
+                (void)Unlock(expectedData->lock);
+            }
         }
     }
-    return result;
+
+    // Returning 0 means "keep processing"
+    return (messagesReceived == d2cMessages->count ? 1 : 0);
 }
 
 // Invoked when a connection status changes.  Tests poll the status in the connection_status_info to make sure expected transitions occur.
@@ -369,7 +385,7 @@ static EXPECTED_SEND_DATA* EventData_Create(void)
                 data_fmt = TEST_EVENT_DATA_FMT;
             }
 
-            string_length = sprintf(temp, data_fmt, ctime(&t), g_iotHubTestId);
+            string_length = sprintf(temp, data_fmt, ctime(&t), g_iotHubTestId++);
             if ((tempString = (char*)malloc(string_length + 1)) == NULL)
             {
                 Lock_Deinit(result->lock);
@@ -657,15 +673,14 @@ static void client_connect_to_hub(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB
 #endif //AZIOT_LINUX
 }
 
-D2C_MESSAGE_HANDLE client_create_and_send_d2c(TEST_MESSAGE_CREATION_MECHANISM test_message_creation)
+void client_create_and_send_d2c_messages(TEST_MESSAGE_CREATION_MECHANISM test_message_creation, int count, SEND_DATA_BUNDLE* d2cMessages)
 {
-    IOTHUB_MESSAGE_HANDLE msgHandle;
-
-    EXPECTED_SEND_DATA* sendData = EventData_Create();
-    ASSERT_IS_NOT_NULL(sendData, "Could not create the EventData associated with the event to be sent");
-
-    if (sendData != NULL)
+    for (int i = 0; i < count; i++)
     {
+        IOTHUB_MESSAGE_HANDLE msgHandle;
+        EXPECTED_SEND_DATA* sendData = EventData_Create();
+        ASSERT_IS_NOT_NULL(sendData, "Could not create the EventData associated with the event to be sent");
+
         if (test_message_creation == TEST_MESSAGE_CREATE_BYTE_ARRAY)
         {
             msgHandle = IoTHubMessage_CreateFromByteArray((const unsigned char*)sendData->expectedString, strlen(sendData->expectedString));
@@ -681,56 +696,85 @@ D2C_MESSAGE_HANDLE client_create_and_send_d2c(TEST_MESSAGE_CREATION_MECHANISM te
         }
         ASSERT_IS_NOT_NULL(msgHandle, "Could not create the D2C message to be sent");
 
-        for (size_t i = 0; i < MSG_PROP_COUNT; i++)
+        for (size_t j = 0; j < MSG_PROP_COUNT; j++)
         {
             if (g_e2e_test_options.use_special_chars)
             {
-                if (IoTHubMessage_SetProperty(msgHandle, MSG_PROP_KEYS_SPECIAL[i], MSG_PROP_VALS_SPECIAL[i]) != IOTHUB_MESSAGE_OK)
+                if (IoTHubMessage_SetProperty(msgHandle, MSG_PROP_KEYS_SPECIAL[j], MSG_PROP_VALS_SPECIAL[j]) != IOTHUB_MESSAGE_OK)
                 {
-                    LogError("ERROR: Map_AddOrUpdate failed for property %zu!", i);
+                    LogError("ERROR: Map_AddOrUpdate failed for property %zu!", j);
                 }
             }
             else
             {
-                if (IoTHubMessage_SetProperty(msgHandle, MSG_PROP_KEYS[i], MSG_PROP_VALS[i]) != IOTHUB_MESSAGE_OK)
+                if (IoTHubMessage_SetProperty(msgHandle, MSG_PROP_KEYS[j], MSG_PROP_VALS[j]) != IOTHUB_MESSAGE_OK)
                 {
-                    LogError("ERROR: Map_AddOrUpdate failed for property %zu!", i);
+                    LogError("ERROR: Map_AddOrUpdate failed for property %zu!", j);
                 }
             }
         }
 
         sendData->msgHandle = msgHandle;
+        d2cMessages->items[i] = sendData;
+        d2cMessages->count++;
 
         // act
         sendeventasync_on_device_or_module(msgHandle, sendData);
     }
-
-    return (D2C_MESSAGE_HANDLE)sendData;
 }
 
-bool client_wait_for_d2c_confirmation(D2C_MESSAGE_HANDLE d2cMessage, IOTHUB_CLIENT_CONFIRMATION_RESULT expectedClientResult)
+D2C_MESSAGE_HANDLE client_create_and_send_d2c(TEST_MESSAGE_CREATION_MECHANISM test_message_creation)
+{
+    SEND_DATA_BUNDLE d2cMessages;
+    client_create_and_send_d2c_messages(test_message_creation, 1, &d2cMessages);
+    return d2cMessages.items[0];
+}
+
+bool client_wait_for_d2c_confirmations(SEND_DATA_BUNDLE* d2cMessages, IOTHUB_CLIENT_CONFIRMATION_RESULT expectedClientResult)
 {
     time_t beginOperation, nowTime;
-    bool ret;
+    bool allMessagesSent = false;
 
-    LogInfo("Begin wait for d2c confirmation.  d2cMessage=<%p>", d2cMessage);
+    for (int i = 0; i < d2cMessages->count; i++)
+    {
+        LogInfo("Begin wait for d2c confirmation.  d2cMessage=<%p>", d2cMessages->items[i]);
+    }
 
     beginOperation = time(NULL);
     while (
         (nowTime = time(NULL)),
-        (difftime(nowTime, beginOperation) < MAX_CLOUD_TRAVEL_TIME) // time box
+        !allMessagesSent && (difftime(nowTime, beginOperation) < MAX_CLOUD_TRAVEL_TIME) // time box
         )
     {
-        if (client_received_confirmation(d2cMessage, expectedClientResult))
+        allMessagesSent = true;
+
+        for (int i = 0; i < d2cMessages->count; i++)
         {
-            break;
+            if (!client_received_confirmation(d2cMessages->items[i], expectedClientResult))
+            {
+                allMessagesSent = false;
+                break;
+            }
         }
+
         ThreadAPI_Sleep(100);
     }
-    ret = client_received_confirmation(d2cMessage, expectedClientResult);
 
-    LogInfo("Completed wait for d2c confirmation.  d2cMessage=<%p>, ret=<%d>", d2cMessage, ret);
-    return ret;
+    for (int i = 0; i < d2cMessages->count; i++)
+    {
+        bool messageSent = client_received_confirmation(d2cMessages->items[i], expectedClientResult);
+        LogInfo("Completed wait for d2c confirmation.  d2cMessage=<%p>, ret=<%d>", d2cMessages->items[i], messageSent);
+    }
+
+    return allMessagesSent;
+}
+
+bool client_wait_for_d2c_confirmation(D2C_MESSAGE_HANDLE d2cMessage, IOTHUB_CLIENT_CONFIRMATION_RESULT expectedClientResult)
+{
+    SEND_DATA_BUNDLE d2cMessages;
+    d2cMessages.count = 1;
+    d2cMessages.items[0] = (EXPECTED_SEND_DATA*)d2cMessage;
+    return client_wait_for_d2c_confirmations(&d2cMessages, expectedClientResult);
 }
 
 bool client_received_confirmation(D2C_MESSAGE_HANDLE d2cMessage, IOTHUB_CLIENT_CONFIRMATION_RESULT expectedClientResult)
@@ -891,22 +935,35 @@ static void service_wait_for_security_d2c_event_arrival(IOTHUB_PROVISIONED_DEVIC
     LogInfo("Completed listening for security event arrival.");
 }
 
-void service_wait_for_d2c_event_arrival(IOTHUB_PROVISIONED_DEVICE* deviceToUse, D2C_MESSAGE_HANDLE d2cMessage, double max_wait_time)
+void service_wait_for_d2c_events_arrival(IOTHUB_PROVISIONED_DEVICE* deviceToUse, SEND_DATA_BUNDLE* d2cMessages, double max_wait_time)
 {
-    EXPECTED_SEND_DATA* sendData = (EXPECTED_SEND_DATA*)d2cMessage;
+    bool allMessagesArrived = true;
 
     IOTHUB_TEST_HANDLE iotHubTestHandle = IoTHubTest_Initialize(IoTHubAccount_GetEventHubConnectionString(g_iothubAcctInfo), IoTHubAccount_GetIoTHubConnString(g_iothubAcctInfo), deviceToUse->deviceId, IoTHubAccount_GetEventhubListenName(g_iothubAcctInfo), IoTHubAccount_GetEventhubAccessKey(g_iothubAcctInfo), IoTHubAccount_GetSharedAccessSignature(g_iothubAcctInfo), IoTHubAccount_GetEventhubConsumerGroup(g_iothubAcctInfo));
     ASSERT_IS_NOT_NULL(iotHubTestHandle, "Could not initialize IoTHubTest in order to listen for events");
 
     LogInfo("Beginning to listen for d2c event arrival.  Waiting up to %f seconds...", max_wait_time);
-    IOTHUB_TEST_CLIENT_RESULT result = IoTHubTest_ListenForEvent(iotHubTestHandle, IoTHubCallback, IoTHubAccount_GetIoTHubPartitionCount(g_iothubAcctInfo), sendData, time(NULL)-SERVICE_EVENT_WAIT_TIME_DELTA_SECONDS, max_wait_time);
+    IOTHUB_TEST_CLIENT_RESULT result = IoTHubTest_ListenForEvent(iotHubTestHandle, IoTHubCallback, IoTHubAccount_GetIoTHubPartitionCount(g_iothubAcctInfo), d2cMessages, time(NULL)-SERVICE_EVENT_WAIT_TIME_DELTA_SECONDS, max_wait_time);
     ASSERT_ARE_EQUAL(IOTHUB_TEST_CLIENT_RESULT, IOTHUB_TEST_CLIENT_OK, result, "Listening for the event failed");
 
-    ASSERT_IS_TRUE(sendData->wasFound, "Failure retrieving data that was sent to eventhub"); // was found is written by the callback...
+    for (int i = 0; i < d2cMessages->count; i++)
+    {
+        allMessagesArrived &= d2cMessages->items[i]->wasFound;
+        LogInfo("d2c message %p received by eventhub: %d", d2cMessages->items[i], d2cMessages->items[i]->wasFound);
+    }
+    ASSERT_IS_TRUE(allMessagesArrived, "Failure retrieving all data that was sent to eventhub"); // was found is written by the callback...
 
     IoTHubTest_Deinit(iotHubTestHandle);
 
     LogInfo("Completed listening for d2c event arrival.");
+}
+
+void service_wait_for_d2c_event_arrival(IOTHUB_PROVISIONED_DEVICE* deviceToUse, D2C_MESSAGE_HANDLE d2cMessage, double max_wait_time)
+{
+    SEND_DATA_BUNDLE d2cMessages;
+    d2cMessages.count = 1;
+    d2cMessages.items[0] = (EXPECTED_SEND_DATA*)d2cMessage;
+    service_wait_for_d2c_events_arrival(deviceToUse, &d2cMessages, max_wait_time);
 }
 
 bool service_received_the_message(D2C_MESSAGE_HANDLE d2cMessage)
@@ -920,41 +977,66 @@ void destroy_d2c_message_handle(D2C_MESSAGE_HANDLE d2cMessage)
     EventData_Destroy((EXPECTED_SEND_DATA*)d2cMessage);
 }
 
-static void send_event_test(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
+static void SendDataBundle_Initialize(SEND_DATA_BUNDLE* d2cMessages)
+{
+    (void)memset(d2cMessages, 0, sizeof(SEND_DATA_BUNDLE));
+}
+
+static void SendDataBundle_Deinitialize(SEND_DATA_BUNDLE* d2cMessages)
+{
+    for (int i = 0; i < d2cMessages->count; i++)
+    {
+        // TODO: change this from d2c_message_handle to SEND_DATA ...
+        destroy_d2c_message_handle((D2C_MESSAGE_HANDLE)d2cMessages->items[i]);
+        d2cMessages->items[i] = NULL;
+    }
+}
+
+static void send_events_test(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, int count)
 {
     TEST_MESSAGE_CREATION_MECHANISM test_message_creation[] = { TEST_MESSAGE_CREATE_BYTE_ARRAY, TEST_MESSAGE_CREATE_STRING };
+    SEND_DATA_BUNDLE d2cMessages;
 
     int i;
     for (i = 0; i < sizeof(test_message_creation) / sizeof(test_message_creation[0]); i++)
     {
         // arrange
-        D2C_MESSAGE_HANDLE d2cMessage;
-
+        SendDataBundle_Initialize(&d2cMessages);
+        
         // Create the IoT Hub Data
         client_connect_to_hub(deviceToUse, protocol);
 
         // Send the Event from the client
-        d2cMessage = client_create_and_send_d2c(test_message_creation[i]);
-
+        client_create_and_send_d2c_messages(test_message_creation[i], count, &d2cMessages);
+        
         // Wait for confirmation that the event was recevied
-        bool dataWasRecv = client_wait_for_d2c_confirmation(d2cMessage, IOTHUB_CLIENT_CONFIRMATION_OK);
+        bool dataWasRecv = client_wait_for_d2c_confirmations(&d2cMessages, IOTHUB_CLIENT_CONFIRMATION_OK);
         ASSERT_IS_TRUE(dataWasRecv, "Failure sending data to IotHub"); // was received by the callback...
 
         // close the client connection
         destroy_on_device_or_module();
 
         // Wait for the message to arrive
-        service_wait_for_d2c_event_arrival(deviceToUse, d2cMessage, MAX_SERVICE_EVENT_WAIT_TIME_SECONDS);
+        service_wait_for_d2c_events_arrival(deviceToUse, &d2cMessages, MAX_SERVICE_EVENT_WAIT_TIME_SECONDS);
 
         // cleanup
-        destroy_d2c_message_handle(d2cMessage);
+        SendDataBundle_Deinitialize(&d2cMessages);
     }
+}
 
+static void send_event_test(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
+{
+    send_events_test(deviceToUse, protocol, 1);
 }
 
 void e2e_send_event_test_sas(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 {
     send_event_test(IoTHubAccount_GetSASDevice(g_iothubAcctInfo), protocol);
+}
+
+void e2e_send_events_test_sas(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, int count)
+{
+    send_events_test(IoTHubAccount_GetSASDevice(g_iothubAcctInfo), protocol, count);
 }
 
 void e2e_send_event_test_x509(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
@@ -964,9 +1046,6 @@ void e2e_send_event_test_x509(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 
 void e2e_send_security_event_test_sas(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 {
-    //IOTHUB_MESSAGE_HANDLE msgHandle;
-
-    //char* test_telemetry_message;
     const char* TEST_ASC_SECURITY_MESSAGE = "{ \
         \"AgentVersion\": \"0.0.1\", \
         \"AgentId\" : \"{A3B5D80C-06AA-4D84-BA2D-5470ADAE33A3}\", \
