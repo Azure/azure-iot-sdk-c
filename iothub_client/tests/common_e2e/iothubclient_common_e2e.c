@@ -712,11 +712,6 @@ static void destroy_on_device_or_module()
     }
 }
 
-static void setup_iothub_client()
-{
-    // TODO: implement to simplify the functions below.
-}
-
 static void run_client_do_work()
 {
     if (iothub_deviceclient_ll_handle != NULL)
@@ -729,22 +724,8 @@ static void run_client_do_work()
     }
 }
 
-static void client_connect_to_hub(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
+static void setup_iothub_client(IOTHUB_PROVISIONED_DEVICE* deviceToUse)
 {
-    ASSERT_IS_NULL(iothub_deviceclient_handle, "iothub_deviceclient_handle is non-NULL on test initialization");
-    ASSERT_IS_NULL(iothub_moduleclient_handle, "iothub_moduleclient_handle is non-NULL on test initialization");
-
-    if (deviceToUse->moduleConnectionString != NULL)
-    {
-        iothub_moduleclient_handle = IoTHubModuleClient_CreateFromConnectionString(deviceToUse->moduleConnectionString, protocol);
-        ASSERT_IS_NOT_NULL(iothub_moduleclient_handle, "Could not invoke IoTHubModuleClient_CreateFromConnectionString");
-    }
-    else
-    {
-        iothub_deviceclient_handle = IoTHubDeviceClient_CreateFromConnectionString(deviceToUse->connectionString, protocol);
-        ASSERT_IS_NOT_NULL(iothub_deviceclient_handle, "Could not invoke IoTHubDeviceClient_CreateFromConnectionString");
-    }
-
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
     setoption_on_device_or_module(OPTION_TRUSTED_CERT, certificates, "Cannot enable trusted cert");
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
@@ -793,6 +774,25 @@ static void client_connect_to_hub(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB
         free(mac_address);
     }
 #endif //AZIOT_LINUX
+}
+
+static void client_connect_to_hub(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
+{
+    ASSERT_IS_NULL(iothub_deviceclient_handle, "iothub_deviceclient_handle is non-NULL on test initialization");
+    ASSERT_IS_NULL(iothub_moduleclient_handle, "iothub_moduleclient_handle is non-NULL on test initialization");
+
+    if (deviceToUse->moduleConnectionString != NULL)
+    {
+        iothub_moduleclient_handle = IoTHubModuleClient_CreateFromConnectionString(deviceToUse->moduleConnectionString, protocol);
+        ASSERT_IS_NOT_NULL(iothub_moduleclient_handle, "Could not invoke IoTHubModuleClient_CreateFromConnectionString");
+    }
+    else
+    {
+        iothub_deviceclient_handle = IoTHubDeviceClient_CreateFromConnectionString(deviceToUse->connectionString, protocol);
+        ASSERT_IS_NOT_NULL(iothub_deviceclient_handle, "Could not invoke IoTHubDeviceClient_CreateFromConnectionString");
+    }
+
+    setup_iothub_client(deviceToUse);
 }
 
 static void client_ll_connect_to_hub(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
@@ -813,56 +813,10 @@ static void client_ll_connect_to_hub(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOT
         ASSERT_IS_NOT_NULL(iothub_deviceclient_ll_handle, "Could not invoke IoTHubDeviceClient_LL_CreateFromConnectionString");
     }
 
-#ifdef SET_TRUSTED_CERT_IN_SAMPLES
-    setoption_on_device_or_module(OPTION_TRUSTED_CERT, certificates, "Cannot enable trusted cert");
-#endif // SET_TRUSTED_CERT_IN_SAMPLES
+    setup_iothub_client(deviceToUse);
 
-    // Set connection status change callback
-    setconnectionstatuscallback_on_device_or_module();
-
-    if (deviceToUse->howToCreate == IOTHUB_ACCOUNT_AUTH_X509)
-    {
-        setoption_on_device_or_module(OPTION_X509_CERT, deviceToUse->certificate, "Could not set the device x509 certificate");
-        setoption_on_device_or_module(OPTION_X509_PRIVATE_KEY, deviceToUse->primaryAuthentication, "Could not set the device x509 privateKey");
-    }
-
-    bool trace = true;
-    setoption_on_device_or_module(OPTION_LOG_TRACE, &trace, "Cannot enable tracing");
-
-    setoption_on_device_or_module(OPTION_PRODUCT_INFO, "MQTT_E2E/1.1.12", "Cannot set product info");
-
-    //Turn on URL encoding/decoding (MQTT)
-    if (g_e2e_test_options.use_special_chars)
-    {
-        bool encodeDecode = true;
-        setoption_on_device_or_module(OPTION_AUTO_URL_ENCODE_DECODE, &encodeDecode, "Cannot set auto_url_encode/decode");
-    }
-
-    if (test_protocol_type == TEST_AMQP || test_protocol_type == TEST_AMQP_WEBSOCKETS)
-    {
-        size_t svc2cl_keep_alive_timeout_secs = 120; // service will send pings at 120 x 7/8 = 105 seconds. Higher the value, lesser the frequency of service side pings.
-        setoption_on_device_or_module(OPTION_SERVICE_SIDE_KEEP_ALIVE_FREQ_SECS, &svc2cl_keep_alive_timeout_secs, "Cannot set OPTION_SERVICE_SIDE_KEEP_ALIVE_FREQ_SECS");
-
-        // Set keep alive for remote idle is optional. If it is not set the default ratio of 1/2 will be used. For default value of 4 minutes, it will be 2 minutes (120 seconds)
-        double cl2svc_keep_alive_send_ratio = 1.0 / 2.0; // Set it to 120 seconds (240 x 1/2 = 120 seconds) for 4 minutes remote idle.
-
-        // client will send pings to service at 210 second interval for 4 minutes remote idle. For 25 minutes remote idle, it will be set to 21 minutes.
-        setoption_on_device_or_module(OPTION_REMOTE_IDLE_TIMEOUT_RATIO, &cl2svc_keep_alive_send_ratio, "Cannot set OPTION_REMOTE_IDLE_TIMEOUT_RATIO");
-    }
-#ifdef AZIOT_LINUX
-    if (g_e2e_test_options.set_mac_address)
-    {
-        char* mac_address = get_target_mac_address();
-        ASSERT_IS_NOT_NULL(mac_address, "failed getting the target MAC ADDRESS");
-
-        setoption_on_device_or_module(OPTION_NET_INT_MAC_ADDRESS, mac_address, "Cannot setoption MAC ADDRESS");
-
-        LogInfo("Target MAC ADDRESS: %s", mac_address);
-        free(mac_address);
-    }
-#endif //AZIOT_LINUX
-
-    // TODO: maintain just this end
+    // LL clients require _DoWork to be explicitly called to do network I/O.
+    // Calling the function below guarantees DoWork is called and the client gets authenticated.
     ASSERT_IS_TRUE(wait_for_client_authenticated(client_conn_wait_time));
 }
 
