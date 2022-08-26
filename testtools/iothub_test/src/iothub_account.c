@@ -55,6 +55,18 @@ const int TEST_SLEEP_THROTTLE_MSEC = 5 * 1000;
 const int TEST_SLEEP_BETWEEN_CREATION_FAILURES_MSEC = 30 * 1000;
 const int TEST_SLEEP_BETWEEN_METHOD_INVOKE_FAILURES_MSEC = 30 * 1000;
 
+#define NSLOOKUP_MAX_COMMAND_SIZE 128
+
+#ifndef popen
+// If running on Microsoft Windows.
+#define popen _popen
+#endif
+
+#ifndef pclose
+// If running on Microsoft Windows.
+#define pclose _pclose
+#endif
+
 typedef struct IOTHUB_ACCOUNT_INFO_TAG
 {
     const char* connString;
@@ -1137,3 +1149,46 @@ const IOTHUB_MESSAGING_HANDLE IoTHubAccount_GetMessagingHandle(IOTHUB_ACCOUNT_IN
     return result;
 }
 
+IOTHUB_GATEWAY_VERSION IoTHubAccount_GetIoTHubVersion(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle)
+{
+    IOTHUB_GATEWAY_VERSION result = IOTHUB_GATEWAY_VERSION_UNDEFINED;
+
+    const char* iotHubFqdn = IoTHubAccount_GetIoTHostName(acctHandle);
+
+    if (iotHubFqdn != NULL)
+    {
+        const char* IoTHubGwV1Suffix = "ihsu-";
+        const char* IoTHubGwV2Suffix = "gateway-prod-gw-";
+        const char* nslookup_fmt = "nslookup %s";
+        char command[NSLOOKUP_MAX_COMMAND_SIZE];
+        char stdoutLine[128];
+
+        int commandLength = snprintf(command, NSLOOKUP_MAX_COMMAND_SIZE, nslookup_fmt, iotHubFqdn);
+
+        if (commandLength > 0 && commandLength < NSLOOKUP_MAX_COMMAND_SIZE)
+        {
+            FILE* stdOut = popen(command, "r");
+
+            while (fgets(stdoutLine, sizeof(stdoutLine), stdOut) != NULL)
+            {
+                if (strstr(stdoutLine, "Name:") == stdoutLine)
+                {
+                    if (strstr(stdoutLine, IoTHubGwV1Suffix) != NULL)
+                    {
+                        result = IOTHUB_GATEWAY_VERSION_1;
+                    }
+                    else if (strstr(stdoutLine, IoTHubGwV2Suffix) != NULL)
+                    {
+                        result = IOTHUB_GATEWAY_VERSION_2;
+                    }
+
+                    break;
+                }
+            }
+
+            (void)pclose(stdOut);
+        }
+    }
+
+    return result;
+}
