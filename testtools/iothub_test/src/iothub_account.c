@@ -1145,6 +1145,8 @@ IOTHUB_GATEWAY_VERSION IoTHubAccount_GetIoTHubVersion(IOTHUB_ACCOUNT_INFO_HANDLE
 
     const char* iotHubFqdn = IoTHubAccount_GetIoTHostName(acctHandle);
 
+    LogInfo("nslookup: check %s", iotHubFqdn);
+
     if (iotHubFqdn != NULL)
     {
         const char* IoTHubGwV1Suffix = "ihsu-";
@@ -1167,6 +1169,8 @@ IOTHUB_GATEWAY_VERSION IoTHubAccount_GetIoTHubVersion(IOTHUB_ACCOUNT_INFO_HANDLE
             {
                 if (strstr(stdoutLine, "Name:") == stdoutLine)
                 {
+                    LogInfo("nslookup: result=%s", stdoutLine);
+
                     if (strstr(stdoutLine, IoTHubGwV1Suffix) != NULL)
                     {
                         result = IOTHUB_GATEWAY_VERSION_1;
