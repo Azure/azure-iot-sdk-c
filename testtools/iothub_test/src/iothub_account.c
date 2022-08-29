@@ -57,16 +57,6 @@ const int TEST_SLEEP_BETWEEN_METHOD_INVOKE_FAILURES_MSEC = 30 * 1000;
 
 #define NSLOOKUP_MAX_COMMAND_SIZE 128
 
-#ifndef popen
-// If running on Microsoft Windows.
-#define popen _popen
-#endif
-
-#ifndef pclose
-// If running on Microsoft Windows.
-#define pclose _pclose
-#endif
-
 typedef struct IOTHUB_ACCOUNT_INFO_TAG
 {
     const char* connString;
@@ -1167,7 +1157,11 @@ IOTHUB_GATEWAY_VERSION IoTHubAccount_GetIoTHubVersion(IOTHUB_ACCOUNT_INFO_HANDLE
 
         if (commandLength > 0 && commandLength < NSLOOKUP_MAX_COMMAND_SIZE)
         {
+#if defined(__APPLE__) || defined(AZIOT_LINUX)
             FILE* stdOut = popen(command, "r");
+#else
+            FILE* stdOut = _popen(command, "r");
+#endif
 
             while (fgets(stdoutLine, sizeof(stdoutLine), stdOut) != NULL)
             {
@@ -1186,7 +1180,11 @@ IOTHUB_GATEWAY_VERSION IoTHubAccount_GetIoTHubVersion(IOTHUB_ACCOUNT_INFO_HANDLE
                 }
             }
 
+#if defined(__APPLE__) || defined(AZIOT_LINUX)
             (void)pclose(stdOut);
+#else
+            (void)_pclose(stdOut);
+#endif
         }
     }
 
