@@ -454,7 +454,7 @@ jobs:
   timeoutInMinutes: 120
   container: linux-c-ubuntu-2204
   pool:
-    name: sdk-c--ubuntu-22
+    name: sdk-c--ubuntu-20
   displayName: 'Ubuntu 22.04 (Debug)'
   steps:
   - script: |
@@ -500,7 +500,7 @@ jobs:
   timeoutInMinutes: 120
   container: linux-c-ubuntu-2204
   pool:
-    name: sdk-c--ubuntu-22
+    name: sdk-c--ubuntu-20
   displayName: 'Ubuntu 22.04 (Release)'
   steps:
   - script: |
