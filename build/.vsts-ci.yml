@@ -8,10 +8,7 @@ resources:
     image: csdkcontainerregistry.azurecr.io/linux-c-ubuntu-2204:latest
   - container: linux-c-ubuntu-2004
     endpoint: csdk-containers
-    image: csdkcontainerregistry.azurecr.io/linux-c-ubuntu-2004:latest
-  - container: linux-c-ubuntu-2004
-    endpoint: csdk-containers
-    image: csdkcontainerregistry.azurecr.io/linux-c-ubuntu-2004:openssl3
+    image: csdkcontainerregistry.azurecr.io/linux-c-ubuntu-2004
   - container: linux-c-ubuntu-1804
     endpoint: csdk-containers
     image: csdkcontainerregistry.azurecr.io/linux-c-ubuntu-1804:latest
