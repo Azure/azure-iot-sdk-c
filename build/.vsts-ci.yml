@@ -7,11 +7,11 @@ resources:
     endpoint: csdk-containers
     image: csdkcontainerregistry.azurecr.io/linux-c-ubuntu-2204:latest
   - container: linux-c-ubuntu-2004
-    type: ACR
-    repository: linux-c-ubuntu-2004
-    azureSubscription: csdk-containers
-    registry: csdkcontainerregistry
-    resourceGroup: aziotsdkbuild
+    endpoint: csdk-containers
+    image: csdkcontainerregistry.azurecr.io/linux-c-ubuntu-2004:latest
+  - container: linux-c-ubuntu-2004-openssl3
+    endpoint: csdk-containers
+    image: csdkcontainerregistry.azurecr.io/linux-c-ubuntu-2004:openssl3
   - container: linux-c-ubuntu-1804
     endpoint: csdk-containers
     image: csdkcontainerregistry.azurecr.io/linux-c-ubuntu-1804:latest
@@ -454,7 +454,7 @@ jobs:
 #     displayName: 'Cleanup'
 #     condition: always()
 - job: ubuntu2004debugopenssl3
-  container: linux-c-ubuntu-2004:openssl3
+  container: linux-c-ubuntu-2004-openssl3
   pool:
     name: 'sdk-c--ubuntu-18'
   displayName: 'Ubuntu 20.04 OpenSSL 3 (Debug)'
