@@ -297,23 +297,3 @@
    fun:ENGINE_get_pkey_meth
    ...
 }
-{
-   The object at address 0x5afd060 is not a mutex.
-   drd:MutexErr
-   fun:pthread_mutex_destroy@*
-   obj:/usr/lib/x86_64-linux-gnu/libp11-kit.so.0.3.0
-   fun:_dl_fini
-   fun:__run_exit_handlers
-   fun:exit
-   fun:(below main)
-}
-{
-  Thread #1: pthread_mutex_destroy with invalid argument
-  Helgrind:Misc
-  obj:/usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so
-  obj:/usr/lib/x86_64-linux-gnu/libp11-kit.so.0.3.0
-  fun:_dl_fini
-  fun:__run_exit_handlers
-  fun:exit
-  fun:(below main)
-}
