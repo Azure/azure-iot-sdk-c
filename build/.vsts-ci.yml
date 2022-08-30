@@ -11,6 +11,7 @@ resources:
     repository: linux-c-ubuntu-2004
     azureSubscription: csdk-containers
     registry: csdkcontainerregistry
+    resourceGroup: aziotsdkbuild
   - container: linux-c-ubuntu-1804
     endpoint: csdk-containers
     image: csdkcontainerregistry.azurecr.io/linux-c-ubuntu-1804:latest
