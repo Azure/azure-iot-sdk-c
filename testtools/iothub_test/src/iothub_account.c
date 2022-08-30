@@ -1167,10 +1167,10 @@ IOTHUB_GATEWAY_VERSION IoTHubAccount_GetIoTHubVersion(IOTHUB_ACCOUNT_INFO_HANDLE
 
             while (fgets(stdoutLine, sizeof(stdoutLine), stdOut) != NULL)
             {
+                LogInfo("nslookup: %s", stdoutLine);
+
                 if (strstr(stdoutLine, "Name:") == stdoutLine)
                 {
-                    LogInfo("nslookup: result=%s", stdoutLine);
-
                     if (strstr(stdoutLine, IoTHubGwV1Suffix) != NULL)
                     {
                         result = IOTHUB_GATEWAY_VERSION_1;
