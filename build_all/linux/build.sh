@@ -113,7 +113,7 @@ process_args ()
               "--use-hsmsas")  hsm_type_sastoken=ON;;
               "--use-hsmx509") hsm_type_riot=OFF; hsm_type_x509=ON;;
               "--use-hsmriot") hsm_type_riot=ON; hsm_type_x509=OFF;;
-              "--use-local-openssl" openssl_include_dir="/usr/local/ssl/include"
+              "--use-local-openssl" openssl_include_dir="/usr/local/ssl/include";;
               "--config") save_next_arg=4;;
               * ) usage;;
           esac
