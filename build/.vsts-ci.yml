@@ -3,9 +3,6 @@ variables:
   runCodesignValidationInjection: false
 resources:
   containers:
-  - container: linux-c-ubuntu-2204
-    endpoint: csdk-containers
-    image: csdkcontainerregistry.azurecr.io/linux-c-ubuntu-2204:latest
   - container: linux-c-ubuntu-2004
     endpoint: csdk-containers
     image: csdkcontainerregistry.azurecr.io/linux-c-ubuntu-2004:latest
