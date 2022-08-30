@@ -9,7 +9,8 @@ resources:
   - container: linux-c-ubuntu-2004
     type: ACR
     repository: linux-c-ubuntu-2004
-    registry: csdk-containers
+    azureSubscription: csdk-containers
+    registry: csdkcontainerregistry
   - container: linux-c-ubuntu-1804
     endpoint: csdk-containers
     image: csdkcontainerregistry.azurecr.io/linux-c-ubuntu-1804:latest
