@@ -132,7 +132,11 @@ if (${warnings_as_errors})
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wunused-variable -Wmaybe-uninitialized")
+<<<<<<< HEAD
         set(CMAKE_C_FLAGS "${CMAKE_CXX_FLAGS} -Wunused-variable -Wmaybe-uninitialized")
+=======
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wunused-variable -Wmaybe-uninitialized")
+>>>>>>> f94ecbaf868ab092d9e5730af93fe89d2c8d8053
     endif()
 endif()
 
