@@ -460,12 +460,14 @@ jobs:
   displayName: 'Ubuntu 20.04 OpenSSL 3 (Debug)'
   steps:
   - script: |
+      ls /usr/local/ssl/bin
+      echo $PATH
+      openssl version
       sudo -E ./jenkins/ubuntu_c.sh
     displayName: 'Build'
   - script: |
       export OPENSSL_ia32cap=0x00000000
       sudo chmod -R 755 .
-      openssl version
       cd cmake && sudo -E ../build_all/linux/run_tests.sh
     displayName: "Run Tests"
     env:
