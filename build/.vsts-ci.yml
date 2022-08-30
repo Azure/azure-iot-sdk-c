@@ -37,7 +37,7 @@ resources:
   - container: raspberrypi-c-buster
     endpoint: csdk-containers
     image: csdkcontainerregistry.azurecr.io/raspberrypi-c-buster:brown
-# jobs:
+jobs:
 # - job: checksubmodule
 #   pool:
 #     vmImage: 'ubuntu-20.04'
