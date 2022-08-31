@@ -396,3 +396,25 @@
    fun:RunTests
    fun:(below main)
 }
+{
+  OpenSSL leak
+  Memcheck:Leak
+  match-leak-kinds: definite
+  fun:malloc
+  fun:RSA_meth_dup
+  obj:*
+  obj:*
+  obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+  fun:ENGINE_ctrl_cmd_string
+  fun:ENGINE_by_id
+  obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+  fun:CONF_modules_load
+  fun:CONF_modules_load_file
+  obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+  obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+  fun:__pthread_once_slow
+  fun:CRYPTO_THREAD_run_once
+  fun:OPENSSL_init_crypto
+  fun:OPENSSL_init_ssl
+  obj:/usr/lib/x86_64-linux-gnu/libcurl.so.4.6.0
+}
