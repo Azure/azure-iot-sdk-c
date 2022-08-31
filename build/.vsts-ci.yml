@@ -461,7 +461,7 @@ jobs:
       gcc --version
       openssl version
       curl --version
-      sudo -E env PATH="$PATH" ./build_all/linux/build.sh --provisioning --use-hsmsymmkey --use-hsmsas --use-hsmx509 --use-edge-modules --config Debug
+      sudo -E env PATH="$PATH" ./build_all/linux/build.sh --run-unittests --provisioning --use-hsmsymmkey --use-hsmsas --use-hsmx509 --use-edge-modules --config Debug
     displayName: 'Build'
   - script: |
       export OPENSSL_ia32cap=0x00000000
