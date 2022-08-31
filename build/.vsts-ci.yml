@@ -9,9 +9,6 @@ resources:
   - container: linux-c-ubuntu-2004
     endpoint: csdk-containers
     image: csdkcontainerregistry.azurecr.io/linux-c-ubuntu-2004:latest
-  - container: linux-c-ubuntu-2004-openssl3
-    endpoint: csdk-containers
-    image: csdkcontainerregistry.azurecr.io/linux-c-ubuntu-2004:openssl3
   - container: linux-c-ubuntu-1804
     endpoint: csdk-containers
     image: csdkcontainerregistry.azurecr.io/linux-c-ubuntu-1804:latest
@@ -492,7 +489,7 @@ jobs:
       IOT_DPS_INDIVIDUAL_X509_KEY: $(IOTHUB-E2E-X509-ECC-PRIVATE-KEY-BASE64)
       IOT_DPS_INDIVIDUAL_REGISTRATION_ID: $(IOT-DPS-INDIVIDUAL-REGISTRATION-ID)
   - task: PublishTestResults@2
-    displayName: 'Publish Ubuntu 20 (Debug) Results'
+    displayName: 'Publish Ubuntu 22 (Debug) Results'
     inputs:
       testRunner: CTest
       testResultsFiles: '**/Test.xml'
