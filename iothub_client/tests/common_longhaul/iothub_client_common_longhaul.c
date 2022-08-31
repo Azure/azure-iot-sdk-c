@@ -432,7 +432,6 @@ static void validate_internet_connectivity(IOTHUB_LONGHAUL_RESOURCES* iotHubLong
 
     if (iotHubLonghaul != NULL)
     {
-        //LogInfo("Network error detected in test. Verifying internet connectivity available...");
         const char* hubHostName = IoTHubAccount_GetIoTHostName(iotHubLonghaul->iotHubAccountInfo);
         statusCode = test_http_endpoint(hubHostName);
         if (statusCode == 400)
@@ -678,13 +677,7 @@ static int run_on_loop(RUN_ON_LOOP_ACTION action, size_t iterationDurationInSeco
 
                 if (wait_time_secs > 0)
                 {
-                    IOTHUB_LONGHAUL_RESOURCES* iotHubLonghaul = (IOTHUB_LONGHAUL_RESOURCES*)action_context;
-                    while (wait_time_secs > 0)
-                    {
-                        wait_time_secs -= 10;
-                        ThreadAPI_Sleep((unsigned int)(1000 * 10));
-                        validate_internet_connectivity(iotHubLonghaul);
-                    }
+                    ThreadAPI_Sleep((unsigned int)(1000 * wait_time_secs));
                 }
 
                 // We should get the current time again to be 100% precise, but we will optimize here since wait_time_secs is supposed to be way smaller than totalDurationInSeconds.
@@ -1541,6 +1534,7 @@ static int send_c2d(const void* context)
             }
 
             IoTHubMessage_Destroy(message);
+            ThreadAPI_Sleep(5 * 1000);
         }
     }
 
@@ -1951,7 +1945,7 @@ int longhaul_run_telemetry_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle)
                 int loop_result;
                 IOTHUB_CLIENT_STATISTICS_HANDLE stats_handle;
                 ThreadAPI_Sleep(30 * 1000); // Extra time for the hub to create the device
-                loop_result = run_on_loop(send_telemetry, 10/*iotHubLonghaulRsrcs->test_loop_duration_in_seconds*/, iotHubLonghaulRsrcs->test_duration_in_seconds, iotHubLonghaulRsrcs);
+                loop_result = run_on_loop(send_telemetry, iotHubLonghaulRsrcs->test_loop_duration_in_seconds, iotHubLonghaulRsrcs->test_duration_in_seconds, iotHubLonghaulRsrcs);
 
                 ThreadAPI_Sleep((unsigned int)iotHubLonghaulRsrcs->test_loop_duration_in_seconds * 1000 * 20); // Extra time for the last messages.
 
