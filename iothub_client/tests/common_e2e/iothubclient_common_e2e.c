@@ -71,7 +71,9 @@ const char* MSG_PROP_VALS[MSG_PROP_COUNT] = { "Val1", "Val2", "Val3" };
 const char* MSG_PROP_KEYS_SPECIAL[MSG_PROP_COUNT] = { "&ey1", "K/y2", "Ke?3"};
 const char* MSG_PROP_VALS_SPECIAL[MSG_PROP_COUNT] = { "=al1", "V@l2", "Va%3" };
 
-static size_t g_iotHubTestId = 0;
+// Due to the way some test messages are composed, please do not set the initial
+// value of g_iotHubTestId to zero (due to potential issues with strlen).
+static size_t g_iotHubTestId = 1;
 IOTHUB_ACCOUNT_INFO_HANDLE g_iothubAcctInfo = NULL;
 E2E_TEST_OPTIONS g_e2e_test_options;
 
@@ -97,6 +99,7 @@ static IOTHUB_MODULE_CLIENT_LL_HANDLE iothub_moduleclient_ll_handle = NULL;
 // `test_message_creation` for creating the telemetry message.
 #define DEFAULT_MESSAGE_SIZE    0
 #define LARGE_MESSAGE_SIZE      64536
+#define LARGE_MESSAGE_COUNT     5
 
 TEST_DEFINE_ENUM_TYPE(IOTHUB_TEST_CLIENT_RESULT, IOTHUB_TEST_CLIENT_RESULT_VALUES);
 TEST_DEFINE_ENUM_TYPE(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
@@ -114,7 +117,7 @@ typedef struct EXPECTED_SEND_DATA_TAG
     IOTHUB_MESSAGE_HANDLE msgHandle;
 } EXPECTED_SEND_DATA;
 
-#define MAX_SEND_DATA_BUNDLE_ITEM_COUNT 10
+#define MAX_SEND_DATA_BUNDLE_ITEM_COUNT 5
 
 typedef struct SEND_DATA_BUNDLE_TAG
 {
@@ -438,30 +441,19 @@ static EXPECTED_SEND_DATA* EventData_Create(void)
 static EXPECTED_SEND_DATA* EventData_Create_With_Custom_Size(size_t messageSize)
 {
     EXPECTED_SEND_DATA* result;
-    char* message = malloc(sizeof(char) * messageSize);
+    char* message = calloc(messageSize, sizeof(char));
 
-    if (message == NULL)
-    {
-        LogError("Failed to allocate EventData message");
-        result = NULL;
-    }
-    else
-    {
-        char idString[10];
-        size_t idStringLength = sprintf(idString, "%d", (int)g_iotHubTestId++);
+    ASSERT_IS_NOT_NULL(message, "Failed to allocate EventData message");
 
-        (void)memset(message, (int)'a', messageSize - 1);
-        (void)memcpy(message + 1, idString, idStringLength);
-        message[messageSize - 1] = '\0';
+    char idString[10];
+    size_t idStringLength = sprintf(idString, "%d", (int)g_iotHubTestId++);
 
-        result = EventData_Create_With_String(message);
+    (void)memcpy(message, idString, idStringLength);
+    (void)memset(message + idStringLength, 'a', messageSize - idStringLength - 1);
 
-        if (result == NULL)
-        {
-            LogError("Failed allocating EventData");
-            free(message);
-        }
-    }
+    result = EventData_Create_With_String(message);
+
+    ASSERT_IS_NOT_NULL(result, "Failed allocating EventData");
 
     return result;
 }
@@ -880,7 +872,7 @@ D2C_MESSAGE_HANDLE client_create_and_send_d2c(TEST_MESSAGE_CREATION_MECHANISM te
 bool client_wait_for_d2c_confirmations(SEND_DATA_BUNDLE* d2cMessages, IOTHUB_CLIENT_CONFIRMATION_RESULT expectedClientResult)
 {
     time_t beginOperation, nowTime;
-    bool allMessagesSent = false;
+    bool allMessagesDelivered = false;
 
     for (int i = 0; i < d2cMessages->count; i++)
     {
@@ -890,16 +882,16 @@ bool client_wait_for_d2c_confirmations(SEND_DATA_BUNDLE* d2cMessages, IOTHUB_CLI
     beginOperation = time(NULL);
     while (
         (nowTime = time(NULL)),
-        !allMessagesSent && (difftime(nowTime, beginOperation) < MAX_CLOUD_TRAVEL_TIME) // time box
+        !allMessagesDelivered && (difftime(nowTime, beginOperation) < MAX_CLOUD_TRAVEL_TIME) // time box
         )
     {
-        allMessagesSent = true;
+        allMessagesDelivered = true;
 
         for (int i = 0; i < d2cMessages->count; i++)
         {
             if (!client_received_confirmation(d2cMessages->items[i], expectedClientResult))
             {
-                allMessagesSent = false;
+                allMessagesDelivered = false;
                 break;
             }
         }
@@ -911,10 +903,10 @@ bool client_wait_for_d2c_confirmations(SEND_DATA_BUNDLE* d2cMessages, IOTHUB_CLI
     for (int i = 0; i < d2cMessages->count; i++)
     {
         bool messageSent = client_received_confirmation(d2cMessages->items[i], expectedClientResult);
-        LogInfo("Completed wait for d2c confirmation.  d2cMessage=<%p>, ret=<%d>", d2cMessages->items[i], messageSent);
+        LogInfo("Completed wait for d2c confirmation. d2cMessage=<%p>, ret=<%d>", d2cMessages->items[i], messageSent);
     }
 
-    return allMessagesSent;
+    return allMessagesDelivered;
 }
 
 bool client_wait_for_d2c_confirmation(D2C_MESSAGE_HANDLE d2cMessage, IOTHUB_CLIENT_CONFIRMATION_RESULT expectedClientResult)
@@ -1170,6 +1162,13 @@ static void send_event_test(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB_CLIEN
     }
 }
 
+/**
+ * This is a test function that can send several telemetry messages in one shot,
+ * aiming to trigger the telemetry batching capability of the Azure IoT C SDK (AMQP). 
+ * We need to use the Azure IoT C SDK LL API to force the batching to occur, since we lose
+ * control on convenience layer (which has a dedicated thread running *DoWork, and could consume
+ * messages on the `waitingToSend` list too fast and prevent telemetry batching to kick in). 
+ */
 static void send_batch_event_test(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 {
     TEST_MESSAGE_CREATION_MECHANISM test_message_creation[] = { TEST_MESSAGE_CREATE_BYTE_ARRAY, TEST_MESSAGE_CREATE_STRING };
@@ -1186,7 +1185,7 @@ static void send_batch_event_test(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB
         client_ll_connect_to_hub(deviceToUse, protocol);
 
         // Send the Events from the client
-        client_create_and_send_d2c_messages(test_message_creation[i], 5, LARGE_MESSAGE_SIZE, &d2cMessages);
+        client_create_and_send_d2c_messages(test_message_creation[i], LARGE_MESSAGE_COUNT, LARGE_MESSAGE_SIZE, &d2cMessages);
 
         // Wait for confirmation that the event was recevied
         bool dataWasRecv = client_wait_for_d2c_confirmations(&d2cMessages, IOTHUB_CLIENT_CONFIRMATION_OK);
