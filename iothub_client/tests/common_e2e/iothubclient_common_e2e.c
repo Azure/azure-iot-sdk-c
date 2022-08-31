@@ -445,10 +445,8 @@ static EXPECTED_SEND_DATA* EventData_Create_With_Custom_Size(size_t messageSize)
 
     ASSERT_IS_NOT_NULL(message, "Failed to allocate EventData message");
 
-    char idString[10];
-    size_t idStringLength = sprintf(idString, "%d", (int)g_iotHubTestId++);
+    size_t idStringLength = sprintf(message, "%d", (int)g_iotHubTestId++);
 
-    (void)memcpy(message, idString, idStringLength);
     (void)memset(message + idStringLength, 'a', messageSize - idStringLength - 1);
 
     result = EventData_Create_With_String(message);
