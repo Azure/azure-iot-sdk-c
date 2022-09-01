@@ -131,8 +131,6 @@ if (${warnings_as_errors})
         # Make warning as error
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wunused-variable -Wmaybe-uninitialized")
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wunused-variable -Wmaybe-uninitialized")
     endif()
 endif()
 
