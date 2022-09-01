@@ -4,8 +4,13 @@
 #include <cstdlib>
 #include <cstdint>
 #include <cstddef>
-#include <climits>
 #include <cfloat>
+
+#ifdef __cplusplus
+#include <limits>
+#else
+#include <climits>
+#endif
 
 #define CTEST_USE_STDINT
 
