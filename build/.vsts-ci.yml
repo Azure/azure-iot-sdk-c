@@ -454,7 +454,7 @@ jobs:
   container: linux-c-ubuntu-2204
   pool:
     name: 'sdk-c--ubuntu-18'
-  displayName: 'Ubuntu 22.04 Build Only (Debug)'
+  displayName: 'Ubuntu 22.04 Unit Tests (Debug)'
   steps:
   - script: |
       cat /etc/*release | grep VERSION*
