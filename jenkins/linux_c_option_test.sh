@@ -64,7 +64,8 @@ declare -a arr=(
     "-Duse_prov_client:BOOL=ON -Dhsm_type_x509:BOOL=OFF -Dhsm_type_riot:BOOL=ON"
     "-Duse_prov_client:BOOL=ON -Dhsm_type_sastoken:BOOL=ON"
     "-Duse_prov_client:BOOL=ON -Dstrict_prototypes:BOOL=ON"
-    "-DcompileOption_C=\"-Wunused-variable -Wmaybe-uninitialized\""
+    "-Duse_prov_client:BOOL=ON -DcompileOption_C=-Wunused-variable"
+     "-Duse_prov_client:BOOL=ON -DcompileOption_C=-Wmaybe-uninitialized"
 )
 
 for item in "${arr[@]}"
