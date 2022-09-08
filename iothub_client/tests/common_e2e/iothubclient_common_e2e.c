@@ -837,17 +837,11 @@ void client_create_and_send_d2c_messages(TEST_MESSAGE_CREATION_MECHANISM test_me
         {
             if (g_e2e_test_options.use_special_chars)
             {
-                if (IoTHubMessage_SetProperty(msgHandle, MSG_PROP_KEYS_SPECIAL[j], MSG_PROP_VALS_SPECIAL[j]) != IOTHUB_MESSAGE_OK)
-                {
-                    LogError("ERROR: Map_AddOrUpdate failed for property %zu!", j);
-                }
+                ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK, IoTHubMessage_SetProperty(msgHandle, MSG_PROP_KEYS_SPECIAL[j], MSG_PROP_VALS_SPECIAL[j]), "Map_AddOrUpdate failed for property %zu!", j);
             }
             else
             {
-                if (IoTHubMessage_SetProperty(msgHandle, MSG_PROP_KEYS[j], MSG_PROP_VALS[j]) != IOTHUB_MESSAGE_OK)
-                {
-                    LogError("ERROR: Map_AddOrUpdate failed for property %zu!", j);
-                }
+                ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK, IoTHubMessage_SetProperty(msgHandle, MSG_PROP_KEYS[j], MSG_PROP_VALS[j]), "Map_AddOrUpdate failed for property %zu!", j);
             }
         }
 
