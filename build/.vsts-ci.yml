@@ -934,4 +934,3 @@ jobs:
       cd samples/dockerbuilds/ARM
       docker build -t armiotbuild:latest . --network=host
     displayName: 'Build ARM'
-
