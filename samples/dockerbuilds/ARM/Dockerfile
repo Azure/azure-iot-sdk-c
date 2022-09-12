@@ -20,7 +20,7 @@ WORKDIR ARMBuild
 
 USER root
  
-# Set up environment variables in preperation for the builds to follow
+# Set up environment variables in preparation for the builds to follow
 ENV WORK_ROOT=/home/builder/ARMBuild
 ENV TOOLCHAIN_ARM=gcc-arm-10.3-2021.07-x86_64-arm-none-linux-gnueabihf
 ENV TOOLCHAIN_PLATFORM=arm-none-linux-gnueabihf
