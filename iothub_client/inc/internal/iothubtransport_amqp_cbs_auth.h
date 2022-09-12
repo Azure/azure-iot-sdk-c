@@ -10,8 +10,8 @@
 #include "umock_c/umock_c_prod.h"
 #include "azure_c_shared_utility/optionhandler.h"
 
-static const char* AUTHENTICATION_OPTION_SAVED_OPTIONS = "saved_authentication_options";
-static const char* AUTHENTICATION_OPTION_CBS_REQUEST_TIMEOUT_SECS = "cbs_request_timeout_secs";
+#define AUTHENTICATION_OPTION_SAVED_OPTIONS "saved_authentication_options"
+#define AUTHENTICATION_OPTION_CBS_REQUEST_TIMEOUT_SECS "cbs_request_timeout_secs"
 
 #ifdef __cplusplus
 extern "C"

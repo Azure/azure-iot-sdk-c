@@ -52,9 +52,6 @@ static const char g_maxMinCommandResponseFormat[] = "{\"maxTemp\":%.2f,\"minTemp
 // Format string for sending maxTempSinceLastReboot property.
 static const char g_maxTempSinceLastRebootPropertyFormat[] = "%.2f";
 
-// Format of the body when responding to a targetTemperature.
-static const char g_targetTemperaturePropertyResponseFormat[] = "%.2f";
-
 // Metadata to add to telemetry messages.
 static const char g_jsonContentType[] = "application/json";
 static const char g_utf8EncodingType[] = "utf8";
