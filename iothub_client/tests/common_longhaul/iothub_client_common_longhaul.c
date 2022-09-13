@@ -1447,6 +1447,7 @@ static int send_c2d(const void* context)
     {
         IOTHUB_MESSAGE_HANDLE message;
 
+        LogInfo("C2D sending message id %d", message_id);
         if ((message = create_iothub_message(iotHubLonghaul->test_id, message_id)) == NULL)
         {
             LogError("Failed creating C2D message text");
@@ -1468,6 +1469,7 @@ static int send_c2d(const void* context)
 
                 for (int retryAttemps = NETWORK_RETRY_ATTEMPTS; retryAttemps > 0; retryAttemps--)
                 {
+                    LogInfo("IoTHubMessaging_SendAsync");
                     IOTHUB_MESSAGING_RESULT iotHubMessagingResult = IoTHubMessaging_SendAsync(iotHubLonghaul->iotHubSvcMsgHandle, iotHubLonghaul->deviceInfo->deviceId, message, on_c2d_message_sent, send_context);
                     if (iotHubMessagingResult == IOTHUB_MESSAGING_ERROR)
                     {
@@ -1507,6 +1509,8 @@ static int send_c2d(const void* context)
                         break;
                     }
                 }
+                LogInfo("Message sent");
+
 
                 C2D_MESSAGE_INFO c2d_msg_info;
                 c2d_msg_info.message_id = message_id;
@@ -2014,6 +2018,7 @@ int longhaul_run_telemetry_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle)
 int longhaul_run_c2d_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle)
 {
     int result;
+    LogInfo("longhaul_run_c2d_tests enter.");
 
     if (handle == NULL)
     {
@@ -2041,12 +2046,15 @@ int longhaul_run_c2d_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle)
         }
         else
         {
+            LogInfo("longhaul_initialize_service_c2d_messaging_client done.");
+
             int loop_result;
             IOTHUB_CLIENT_STATISTICS_HANDLE stats_handle;
 
             ThreadAPI_Sleep(30 * 1000); // Extra time for the hub to create the device
 
             loop_result = run_on_loop(send_c2d, iotHubLonghaul->test_loop_duration_in_seconds, iotHubLonghaul->test_duration_in_seconds, iotHubLonghaul);
+            LogInfo("run_on_loop done.");
 
             ThreadAPI_Sleep((unsigned int)iotHubLonghaul->test_loop_duration_in_seconds * 1000 * 10); // Extra time for the last messages.
 
