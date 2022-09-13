@@ -27,6 +27,7 @@ ENV TOOLCHAIN_PLATFORM=arm-none-linux-gnueabihf
 ENV TOOLCHAIN_SYSROOT=${WORK_ROOT}/${TOOLCHAIN_ARM}
 ENV TOOLCHAIN_BIN=${WORK_ROOT}/${TOOLCHAIN_ARM}/bin
 ENV OPENSSL_ROOT_DIR=${WORK_ROOT}/openssl-OpenSSL_1_1_1f
+ENV TOOLCHAIN_PREFIX=${TOOLCHAIN_SYSROOT}/usr
 
 #########################################
 # Download ARM GCC 10.3 with Linux ABI
