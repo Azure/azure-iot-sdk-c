@@ -1,5 +1,7 @@
 FROM ubuntu:latest
 
+ARG DEBIAN_FRONTEND=noninteractive
+
 # Run commands that require root authority
 #########################################
 # start from home directory
