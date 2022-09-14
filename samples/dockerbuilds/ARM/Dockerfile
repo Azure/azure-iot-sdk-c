@@ -92,7 +92,7 @@ RUN echo "SET(OPENSSL_ROOT_DIR ${OPENSSL_ROOT_DIR})" >> toolchain.cmake
 RUN echo "SET(OPENSSL_CRYPTO_LIBRARY ${OPENSSL_ROOT_DIR}/libcrypto.so.1.1)" >> toolchain.cmake
 RUN echo "SET(OPENSSL_SSL_LIBRARY ${OPENSSL_ROOT_DIR}/libssl.so.1.1)" >> toolchain.cmake
 RUN echo "SET(OPENSSL_INCLUDE_DIR ${OPENSSL_ROOT_DIR}/include)" >> toolchain.cmake
-RUN cmake -DCMAKE_TOOLCHAIN_FILE=toolchain.cmake -Duse_default_uuid=ON -Duse_condition=OFF ..
+RUN cmake -DCMAKE_TOOLCHAIN_FILE=toolchain.cmake -Duse_default_uuid=ON -Duse_condition=OFF -Duse_prov_client=OFF ..
 RUN make
 RUN make install
 
