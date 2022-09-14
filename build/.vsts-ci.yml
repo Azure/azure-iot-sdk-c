@@ -985,4 +985,6 @@ jobs:
   - script: |
       cd samples/dockerbuilds/ARM
       docker build -t armiotbuild:latest . --network=host
+      cd samples/dockerbuilds
+      docker build -t armiotapp:latest . --network=host --file ./ARM/Dockerfile_adjunct
     displayName: 'Build ARM'
