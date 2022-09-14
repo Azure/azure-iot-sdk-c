@@ -43,7 +43,7 @@ RUN tar -xvf ./${TOOLCHAIN_ARM}.tar.xz
 RUN wget https://github.com/openssl/openssl/archive/refs/tags/OpenSSL_1_1_1f.tar.gz \
 && tar -xvf ./OpenSSL_1_1_1f.tar.gz \
 && cd openssl-OpenSSL_1_1_1f \
-&& ./Configure linux-armv4 --prefix=${TOOLCHAIN_SYSROOT}/bin/ --openssldir=${OPENSSL_ROOT_DIR} shared \
+&& ./Configure linux-armv4 --prefix=${TOOLCHAIN_SYSROOT}/bin --openssldir=${OPENSSL_ROOT_DIR} shared \
 && make CC=${TOOLCHAIN_BIN}/${TOOLCHAIN_PLATFORM}-gcc AR=${TOOLCHAIN_BIN}/${TOOLCHAIN_PLATFORM}-ar \
 && make install \
 && cd ..
@@ -75,6 +75,7 @@ RUN wget https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.32/util-l
 
 RUN git clone --recursive https://github.com/azure/azure-iot-sdk-c.git
 WORKDIR azure-iot-sdk-c
+RUN git checkout dane/arm
 RUN mkdir cmake
 WORKDIR cmake
 
@@ -94,6 +95,7 @@ RUN echo "SET(OPENSSL_SSL_LIBRARY ${OPENSSL_ROOT_DIR}/libssl.so.1.1)" >> toolcha
 RUN echo "SET(OPENSSL_INCLUDE_DIR ${OPENSSL_ROOT_DIR}/include)" >> toolchain.cmake
 RUN cmake -DCMAKE_TOOLCHAIN_FILE=toolchain.cmake -Duse_default_uuid=ON -Duse_condition=OFF ..
 RUN make
+RUN make install
 
 WORKDIR ../..
 
