@@ -34,8 +34,11 @@ set(iothub_client_h_files
     ${CMAKE_CURRENT_LIST_DIR}/inc/iothub_client.h
     ${CMAKE_CURRENT_LIST_DIR}/inc/iothub_client_core_common.h
     ${CMAKE_CURRENT_LIST_DIR}/inc/iothub_client_ll.h
+    ${CMAKE_CURRENT_LIST_DIR}/inc/internal/iothub_client_diagnostic.h
     ${CMAKE_CURRENT_LIST_DIR}/inc/iothub_client_properties.h
+    ${CMAKE_CURRENT_LIST_DIR}/inc/internal/iothub_internal_consts.h
     ${CMAKE_CURRENT_LIST_DIR}/inc/iothub_client_options.h
+    ${CMAKE_CURRENT_LIST_DIR}/inc/internal/iothub_client_private.h
     ${CMAKE_CURRENT_LIST_DIR}/inc/iothub_client_version.h
     ${CMAKE_CURRENT_LIST_DIR}/inc/iothub_device_client.h
     ${CMAKE_CURRENT_LIST_DIR}/inc/iothub_device_client_ll.h
@@ -43,13 +46,6 @@ set(iothub_client_h_files
     ${CMAKE_CURRENT_LIST_DIR}/inc/iothub_module_client_ll.h
     ${CMAKE_CURRENT_LIST_DIR}/inc/iothub_transport_ll.h
     ${CMAKE_CURRENT_LIST_DIR}/inc/iothub_message.h
-
-)
-
-set(iothub_client_internal_h_files
-    ${CMAKE_CURRENT_LIST_DIR}/inc/internal/iothub_client_diagnostic.h
-    ${CMAKE_CURRENT_LIST_DIR}/inc/internal/iothub_internal_consts.h
-    ${CMAKE_CURRENT_LIST_DIR}/inc/internal/iothub_client_private.h
     ${CMAKE_CURRENT_LIST_DIR}/inc/internal/iothub_message_private.h
     ${CMAKE_CURRENT_LIST_DIR}/inc/internal/iothubtransport.h
 )
@@ -67,8 +63,8 @@ if(NOT dont_use_uploadtoblob)
         ${CMAKE_CURRENT_LIST_DIR}/src/blob.c
     )
 
-    set(iothub_client_internal_h_files
-        ${iothub_client_internal_h_files}
+    set(iothub_client_h_files
+        ${iothub_client_h_files}
         ${CMAKE_CURRENT_LIST_DIR}/inc/internal/blob.h
         ${CMAKE_CURRENT_LIST_DIR}/inc/internal/iothub_client_ll_uploadtoblob.h
     )
@@ -80,29 +76,23 @@ if (use_edge_modules)
         ${CMAKE_CURRENT_LIST_DIR}/src/iothub_client_edge.c
     )
 
-    set (iothub_client_internal_h_files
-        ${iothub_client_internal_h_files}
+    set (iothub_client_h_files
+        ${iothub_client_h_files}
         ${CMAKE_CURRENT_LIST_DIR}/inc/internal/iothub_client_edge.h
     )
 endif()
 
 #this is around for back compat only
 if (${use_prov_client_core})
-    set(iothub_client_internal_h_files
-        ${iothub_client_internal_h_files}
+    set(iothub_client_h_files
+        ${iothub_client_h_files}
         ${CMAKE_CURRENT_LIST_DIR}/inc/internal/iothub_client_hsm_ll.h
     )
 endif()
 #end back compat only
 
-set(iothub_client_h_files
-    ${iothub_client_h_files}
-    ${iothub_client_internal_h_files}
-)
-
 set(iothub_client_h_install_files
     ${iothub_client_h_files}
-    
 )
 
 if(${use_http})
@@ -117,20 +107,15 @@ if(${use_http})
     )
 
     set(iothub_client_http_transport_h_files
+        ${CMAKE_CURRENT_LIST_DIR}/inc/internal/iothub_client_authorization.h
+        ${CMAKE_CURRENT_LIST_DIR}/inc/internal/iothub_client_retry_control.h
+        ${CMAKE_CURRENT_LIST_DIR}/inc/internal/iothub_transport_ll_private.h
         ${CMAKE_CURRENT_LIST_DIR}/inc/iothubtransporthttp.h
         ${CMAKE_CURRENT_LIST_DIR}/inc/iothub_transport_ll.h
     )
 
-    set(iothub_client_internal_h_files
-        ${iothub_client_internal_h_files}
-        ${CMAKE_CURRENT_LIST_DIR}/inc/internal/iothub_client_authorization.h
-        ${CMAKE_CURRENT_LIST_DIR}/inc/internal/iothub_client_retry_control.h
-        ${CMAKE_CURRENT_LIST_DIR}/inc/internal/iothub_transport_ll_private.h
-    )
-
     set(iothub_client_h_install_files
         ${iothub_client_h_install_files}
-        ${iothub_client_internal_h_files}
         ${iothub_client_http_transport_h_files}
     )
 endif()
@@ -171,11 +156,6 @@ if(${use_amqp})
         ${CMAKE_CURRENT_LIST_DIR}/inc/internal/iothubtransportamqp_methods.h
         ${CMAKE_CURRENT_LIST_DIR}/inc/internal/message_queue.h
         ${CMAKE_CURRENT_LIST_DIR}/inc/internal/uamqp_messaging.h
-    )
-
-    set(iothub_client_internal_h_files
-      ${iothub_client_internal_h_files}
-      ${iothub_client_amqp_transport_common_h_files}
     )
 
     set(iothub_client_amqp_transport_c_files
@@ -517,11 +497,9 @@ if(${use_installed_dependencies})
         INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot
     )
     install(FILES ${iothub_client_h_install_files} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot)
-    install(FILES ${iothub_client_internal_h_files} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot/internal)
 else()
     install(FILES ${iothub_client_h_install_files}
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot)
-    install(FILES ${iothub_client_internal_h_files} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot/internal)
     install(TARGETS ${install_staticlibs}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
