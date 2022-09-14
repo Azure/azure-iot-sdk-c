@@ -73,7 +73,7 @@ RUN wget https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.32/util-l
 #########################################
 # Build Azure C SDK
 
-RUN git clone -b dane/arm --recursive https://github.com/azure/azure-iot-sdk-c.git
+RUN git clone --recursive https://github.com/azure/azure-iot-sdk-c.git
 WORKDIR azure-iot-sdk-c
 RUN mkdir cmake
 WORKDIR cmake
