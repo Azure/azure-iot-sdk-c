@@ -965,6 +965,8 @@ jobs:
   - script: |
       cd samples/dockerbuilds/MIPS32
       docker build -t mipsiotbuild:latest . --network=host
+      cd ..
+      docker build -t mipsiotapp:latest . --network=host --file ./MIPS32/Dockerfile_adjunct
     displayName: 'Build MIPS32'
 - job: crosscompile_arm
   pool:
