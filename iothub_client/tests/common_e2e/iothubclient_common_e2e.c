@@ -152,14 +152,17 @@ static void openCompleteCallback(void* context)
 
 static void sendCompleteCallback(void* context, IOTHUB_MESSAGING_RESULT messagingResult)
 {  
+    time_t t = get_time(NULL);
+    char* timeString = get_ctime(&t);
+
     (void) context;
     if (messagingResult == IOTHUB_MESSAGING_OK)
     {
-        LogInfo("C2D Message has been sent successfully");
+        LogInfo("%.24s C2D Message has been sent successfully", timeString);
     }
     else
     {
-        LogError("C2D send failed! messagingResult=%s", MU_ENUM_TO_STRING(IOTHUB_MESSAGING_RESULT, messagingResult));
+        LogError("%.24s C2D send failed! messagingResult=%s", timeString, MU_ENUM_TO_STRING(IOTHUB_MESSAGING_RESULT, messagingResult));
     }
 }
 
@@ -326,14 +329,14 @@ static void GenerateUniqueId(const char* prefix, size_t prefix_len, char* buffer
     {
         memcpy(buffer, prefix, prefix_len);
         buffer_len -= prefix_len;
-        if ((MSG_UNIQUE_ID_STAMP_LEN + 1) <= buffer_len)
+        if ((MSG_UNIQUE_ID_STAMP_LEN) <= buffer_len)
         {
             buffer[prefix_len - 1] = '.';
-            for (int i = 0; i < MSG_UNIQUE_ID_STAMP_LEN; i++)
+            for (int i = 0; i < (MSG_UNIQUE_ID_STAMP_LEN - 1); i++)
             {
                 buffer[prefix_len + i] = (unsigned char)((gb_rand() % 10) + '0');
             }
-            buffer[prefix_len + MSG_UNIQUE_ID_STAMP_LEN] = '\0';
+            buffer[prefix_len + MSG_UNIQUE_ID_STAMP_LEN - 1] = '\0';
         }
     }
     else
