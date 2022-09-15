@@ -30,6 +30,7 @@ ENV TOOLCHAIN_SYSROOT=${WORK_ROOT}/${TOOLCHAIN_ARM}
 ENV TOOLCHAIN_BIN=${WORK_ROOT}/${TOOLCHAIN_ARM}/bin
 ENV OPENSSL_ROOT_DIR=${WORK_ROOT}/openssl-OpenSSL_1_1_1f
 ENV TOOLCHAIN_PREFIX=${TOOLCHAIN_SYSROOT}/usr
+ENV CMAKE_INSTALL_PREFIX ${TOOLCHAIN_SYSROOT}
 
 #########################################
 # Download ARM GCC 10.3 with Linux ABI
@@ -43,7 +44,7 @@ RUN tar -xvf ./${TOOLCHAIN_ARM}.tar.xz
 RUN wget https://github.com/openssl/openssl/archive/refs/tags/OpenSSL_1_1_1f.tar.gz \
 && tar -xvf ./OpenSSL_1_1_1f.tar.gz \
 && cd openssl-OpenSSL_1_1_1f \
-&& ./Configure linux-armv4 --prefix=${TOOLCHAIN_SYSROOT}/bin/ --openssldir=${OPENSSL_ROOT_DIR} shared \
+&& ./Configure linux-armv4 --prefix=${TOOLCHAIN_SYSROOT}/bin --openssldir=${OPENSSL_ROOT_DIR} shared \
 && make CC=${TOOLCHAIN_BIN}/${TOOLCHAIN_PLATFORM}-gcc AR=${TOOLCHAIN_BIN}/${TOOLCHAIN_PLATFORM}-ar \
 && make install \
 && cd ..
@@ -92,8 +93,9 @@ RUN echo "SET(OPENSSL_ROOT_DIR ${OPENSSL_ROOT_DIR})" >> toolchain.cmake
 RUN echo "SET(OPENSSL_CRYPTO_LIBRARY ${OPENSSL_ROOT_DIR}/libcrypto.so.1.1)" >> toolchain.cmake
 RUN echo "SET(OPENSSL_SSL_LIBRARY ${OPENSSL_ROOT_DIR}/libssl.so.1.1)" >> toolchain.cmake
 RUN echo "SET(OPENSSL_INCLUDE_DIR ${OPENSSL_ROOT_DIR}/include)" >> toolchain.cmake
-RUN cmake -DCMAKE_TOOLCHAIN_FILE=toolchain.cmake -Duse_default_uuid=ON -Duse_condition=OFF ..
+RUN cmake -DCMAKE_TOOLCHAIN_FILE=toolchain.cmake -Duse_default_uuid=ON -Duse_condition=OFF -Duse_prov_client=OFF ..
 RUN make
+RUN cmake --install .
 
 WORKDIR ../..
 
