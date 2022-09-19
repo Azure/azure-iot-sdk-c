@@ -40,4 +40,4 @@ endif()
 include_directories(${OPENSSL_INCLUDE_DIR})
 
 # List the libraries required by the link step
-target_link_libraries(myapp iothub_client iothub_client_mqtt_transport umqtt aziotsharedutil parson pthread curl OpenSSL::SSL OpenSSL::Crypto m )
+target_link_libraries(myapp iothub_client prov_device_client iothub_client_mqtt_transport prov_auth_client umqtt hsm_security_client utpm dl aziotsharedutil parson pthread curl OpenSSL::SSL OpenSSL::Crypto m )

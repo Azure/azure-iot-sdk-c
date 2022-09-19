@@ -1,5 +1,6 @@
 FROM mipsiotbuild:latest
 
+ENV WORK_ROOT=/home/builder/MIPSBuild
 USER builder
 WORKDIR /home/builder
 
