@@ -9,7 +9,7 @@ As of [December 1, 2021](https://github.com/Azure/azure-iot-sdk-c/commit/de09b35
 The Azure IOT Hub Device SDK allows applications written in C99 or later or C++ to communicate easily with [Azure IoT Hub](https://azure.microsoft.com/services/iot-hub/), [Azure IoT Central][Azure-IoT-Central] and to
  [Azure IoT Device Provisioning][Azure-IoT-Device-Provisioning].  This repo includes the source code for the libraries, setup instructions, and samples demonstrating use scenarios.
 
-For **constrained devices** - where memory is measured in kilobytes and not megabytes - there are even lighter weight SDK options available.  See [Other Azure IoT SDKs](https://learn.microsoft.com/azure/iot-develop/concepts-using-c-sdk-and-embedded-c-sdk) to learn more.
+For **constrained devices**, where memory is measured in kilobytes and not megabytes, there are even lighter weight SDK options available.  See [Other Azure IoT SDKs](https://learn.microsoft.com/azure/iot-develop/concepts-using-c-sdk-and-embedded-c-sdk) to learn more.
 
 ## Table of Contents
 - [Azure IoT C SDKs and Libraries](#azure-iot-c-sdks-and-libraries)
