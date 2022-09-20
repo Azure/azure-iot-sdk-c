@@ -58,7 +58,7 @@ For a more in depth explanation as to why the IoT services are doing this, pleas
 
 ## Getting the SDK
 
-> Please note, for constrained device scenarios like mbed and Arduino, there are better, lighter weight SDK options available.  See [Other Azure IoT SDKs](https://learn.microsoft.com/en-us/azure/iot-develop/concepts-using-c-sdk-and-embedded-c-sdk) to learn more.
+> Please note, for constrained device scenarios like mbed and Arduino, there are better, lighter weight SDK options available.  See [Other Azure IoT SDKs](https://learn.microsoft.com/azure/iot-develop/concepts-using-c-sdk-and-embedded-c-sdk) to learn more.
 
 ### Packages
 
