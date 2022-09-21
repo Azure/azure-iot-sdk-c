@@ -1404,7 +1404,8 @@ static void on_c2d_message_sent(void* context, IOTHUB_MESSAGING_RESULT messaging
         C2D_MESSAGE_INFO info;
         info.message_id = send_context->message_id;
         info.send_callback_result = messagingResult;
-        info.time_sent = time(NULL);
+        info.time_sent = get_time(NULL);
+        LogInfo("on_c2d_message_sent(#%d) messagingResult=%s, %s", send_context->message_id, MU_ENUM_TO_STRING(IOTHUB_MESSAGING_RESULT, messagingResult), get_ctime(&info.time_sent));
 
         if (info.time_sent == INDEFINITE_TIME)
         {
@@ -1447,7 +1448,7 @@ static int send_c2d(const void* context)
     {
         IOTHUB_MESSAGE_HANDLE message;
 
-        LogInfo("C2D sending message id %d", message_id);
+        LogInfo("C2D sending message id #%d", message_id);
         if ((message = create_iothub_message(iotHubLonghaul->test_id, message_id)) == NULL)
         {
             LogError("Failed creating C2D message text");
@@ -1487,6 +1488,7 @@ static int send_c2d(const void* context)
                         IOTHUB_MESSAGING_CLIENT_HANDLE messageClientHandle = longhaul_initialize_service_c2d_messaging_client(iotHubLonghaul);
                         if (messageClientHandle != NULL)
                         {
+                            LogInfo("Reopening service handle complete.");
                             continue;
                         }
                         else
@@ -1498,7 +1500,7 @@ static int send_c2d(const void* context)
                     if (iotHubMessagingResult != IOTHUB_MESSAGING_OK)
                     {
                         validate_internet_connectivity(iotHubLonghaul);
-                        LogError("Failed sending c2d message with error %d", iotHubMessagingResult);
+                        LogError("Failed sending c2d message with error %s", MU_ENUM_TO_STRING(IOTHUB_MESSAGING_RESULT, iotHubMessagingResult));
                         free(send_context);
                         result = MU_FAILURE;
                         break;
@@ -1509,7 +1511,9 @@ static int send_c2d(const void* context)
                         break;
                     }
                 }
-                LogInfo("Message sent");
+
+                time_t t = get_time(NULL);
+                LogInfo("IoTHubMessaging_SendAsync done %s", get_ctime(&t));
 
 
                 C2D_MESSAGE_INFO c2d_msg_info;
