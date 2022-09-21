@@ -16,6 +16,10 @@ extern void device_method_e2e_deinit(void);
 
 extern void device_method_function_cleanup();
 
+extern void device_command_subscribe_e2e_sas(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol);
+
+extern void device_command_subscribe_e2e_x509(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol);
+
 extern void device_method_e2e_method_call_with_string_sas(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol);
 
 extern void device_method_e2e_method_call_with_string_sas_multiplexed(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, size_t number_of_devices);

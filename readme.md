@@ -9,7 +9,7 @@ As of [December 1, 2021](https://github.com/Azure/azure-iot-sdk-c/commit/de09b35
 The Azure IOT Hub Device SDK allows applications written in C99 or later or C++ to communicate easily with [Azure IoT Hub](https://azure.microsoft.com/services/iot-hub/), [Azure IoT Central][Azure-IoT-Central] and to
  [Azure IoT Device Provisioning][Azure-IoT-Device-Provisioning].  This repo includes the source code for the libraries, setup instructions, and samples demonstrating use scenarios.
 
-For constrained devices - where memory is measured in kilobytes and not megabytes - there are even lighter weight SDK options available.  See [Other Azure IoT SDKs](#other-azure-iot-sdks) for more.
+For **constrained devices**, where memory is measured in kilobytes and not megabytes, there are even lighter weight SDK options available.  See [Other Azure IoT SDKs](https://learn.microsoft.com/azure/iot-develop/concepts-using-c-sdk-and-embedded-c-sdk) to learn more.
 
 ## Table of Contents
 - [Azure IoT C SDKs and Libraries](#azure-iot-c-sdks-and-libraries)
@@ -58,14 +58,13 @@ For a more in depth explanation as to why the IoT services are doing this, pleas
 
 ## Getting the SDK
 
-> Please note, for constrained device scenarios like mbed and Arduino, there are better, lighter weight SDK options available.  See [Other Azure IoT SDKs](#other-azure-iot-sdks) for more.
+> Please note, for constrained device scenarios like mbed and Arduino, there are better, lighter weight SDK options available.  See [Other Azure IoT SDKs](https://learn.microsoft.com/azure/iot-develop/concepts-using-c-sdk-and-embedded-c-sdk) to learn more.
 
 ### Packages
 
 The simplest way to get started with the Azure IoT SDKs on supported platforms is to use the following packages and libraries:
 
-- mbed:                                      [Device SDK library on MBED](./iothub_client/readme.md#mbed)
-- Arduino:                                   [Device SDK library in the Arduino IDE](./iothub_client/readme.md#arduino)
+- Arduino:                                   [Device SDK library in the Arduino IDE](https://aka.ms/arduino)
 - Windows:                                   [Device SDK on Vcpkg](./doc/setting_up_vcpkg.md#setup-c-sdk-vcpkg-for-windows-development-environment)
 - iOS:                                       [Device SDK on CocoaPod](https://cocoapods.org/pods/AzureIoTHubClient)
 
@@ -74,7 +73,7 @@ The simplest way to get started with the Azure IoT SDKs on supported platforms i
   - Authentication is limited to SAS keys on iOS. No certificate-based authentication is officially supported.
   - The Device Provisioning Client is not supported on iOS. Only the Azure IoT Hub device client is supported.
 
-For a more complete iOS experience including the two missing features above, please see our sample native Swift library built on top of the Embedded C SDK [here](https://github.com/Azure-Samples/azure-sdk-for-c-swift).
+  For a more complete **iOS experience** including the two missing features above, please see our sample [native Swift library](https://github.com/Azure-Samples/azure-sdk-for-c-swift) built on top of the Embedded C SDK.
 
 ### Linux
 
@@ -106,6 +105,8 @@ To learn more about building Azure IoT Applications, you can visit the [Azure Io
 ### Device Client SDK
 
 IoT Hub supports multiple protocols for the device to connect with : MQTT, AMQP, and HTTPS.  MQTT and AMQP can optionally run over WebSockets.  The Device Client SDK allows the protocol to be chosen at connection creation time.
+
+The Device/Module Client SDK optionally allows creation of [IoT Plug and Play devices](https://aka.ms/iotpnp).
 
 **If you're not sure which protocol to use, you should use MQTT or MQTT-WS.**  MQTT requires considerably fewer resources than AMQP and supports considerably more IoT Hub functionality than HTTPS.  Neither AMQP nor HTTPS are guaranteed to have Device Client SDK implementations for new features going forward, such as Azure IoT Plug and Play.
 
@@ -268,8 +269,9 @@ Below is a table showing the mapping of the LTS branches to the packages release
 
   | Package | GitHub Branch | LTS Tag | LTS Start Date | Maintenance End Date |
   | :-----: | :-----------: | :-----: | :------------: | :------------------: |
+  | vcpkg: 2022-09-15 | lts_07_2022 | LTS_07_2022_Ref02 | 2022-09-15 | 2023-09-15 |
+  | vcpkg: 2022-07-18 | lts_07_2022 | LTS_07_2022_Ref01 | 2022-07-18 | 2023-07-18 |
   | vcpkg: 2022-01-21 | lts_01_2022 | LTS_01_2022_Ref01 | 2022-01-21 | 2023-01-21 |
-  | vcpkg: 2021-09-09 | lts_07_2021 | LTS_07_2021_Ref01 | 2021-08-11 | 2022-08-11 |
 
 ## Release Example
 

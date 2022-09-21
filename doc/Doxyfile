@@ -795,6 +795,7 @@ INPUT                  = ./ \
                          ./doc-stage/iothub_client.h \
                          ./doc-stage/iothub_client_ll.h \
                          ./doc-stage/iothub_client_core_common.h \
+                         ./doc-stage/iothub_client_properties.h \						 
                          ./doc-stage/iothub_client_version.h \
                          ./doc-stage/iothub_device_client.h \
                          ./doc-stage/iothub_device_client_ll.h \

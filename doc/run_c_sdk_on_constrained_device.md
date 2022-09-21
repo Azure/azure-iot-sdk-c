@@ -2,6 +2,8 @@
 
 IoT devices are coming with greater memory constrains and the IoTHub SDK has options to shrink its ROM and RAM footprint considerably when you invoke cmake with the correct flags.  These are some tips to reduce the c sdk memory footprints on these devices.
 
+For **constrained devices**, where memory is measured in kilobytes and not megabytes, there are even lighter weight SDK options available.  See [Other Azure IoT SDKs](https://learn.microsoft.com/azure/iot-develop/concepts-using-c-sdk-and-embedded-c-sdk) to learn more.
+
 ## Run with only MQTT
 
 To maximize memory usage you should only include the protocol that is needed.  For constrained devices, we recommend using MQTT which provides the best balance between RAM/ROM usage and feature support.  To enable the c-sdk to run with just the mqtt protocol you will need to run the following cmake command:

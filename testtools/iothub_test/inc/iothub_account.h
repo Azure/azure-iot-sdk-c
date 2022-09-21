@@ -21,6 +21,13 @@ extern "C"
 
 MU_DEFINE_ENUM(IOTHUB_ACCOUNT_AUTH_METHOD, IOTHUB_ACCOUNT_AUTH_METHOD_VALUES);
 
+#define IOTHUB_GATEWAY_VERSION_VALUES    \
+    IOTHUB_GATEWAY_VERSION_UNDEFINED,    \
+    IOTHUB_GATEWAY_VERSION_1,            \
+    IOTHUB_GATEWAY_VERSION_2
+
+MU_DEFINE_ENUM(IOTHUB_GATEWAY_VERSION, IOTHUB_GATEWAY_VERSION_VALUES);
+
 typedef struct IOTHUB_PROVISIONED_DEVICE_TAG {
     char* connectionString;
     char* primaryAuthentication;
@@ -46,6 +53,7 @@ extern const char* IoTHubAccount_GetEventHubConnectionString(IOTHUB_ACCOUNT_INFO
 extern const char* IoTHubAccount_GetIoTHostName(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle);
 extern const char* IoTHubAccount_GetIoTHubName(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle);
 extern const char* IoTHubAccount_GetIoTHubSuffix(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle);
+extern IOTHUB_GATEWAY_VERSION IoTHubAccount_GetIoTHubVersion(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle);
 extern IOTHUB_PROVISIONED_DEVICE* IoTHubAccount_GetSASDevice(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle);
 extern IOTHUB_PROVISIONED_DEVICE** IoTHubAccount_GetSASDevices(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle);
 extern IOTHUB_PROVISIONED_DEVICE* IoTHubAccount_GetX509Device(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle);

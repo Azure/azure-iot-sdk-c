@@ -50,6 +50,11 @@ EXPORTS
     IoTHubDeviceClient_DeviceMethodResponse
     IoTHubDeviceClient_UploadToBlobAsync
     IoTHubDeviceClient_UploadMultipleBlocksToBlobAsync
+    IoTHubDeviceClient_SendTelemetryAsync
+    IoTHubDeviceClient_SubscribeToCommands
+    IoTHubDeviceClient_SendPropertiesAsync
+    IoTHubDeviceClient_GetPropertiesAsync
+    IoTHubDeviceClient_GetPropertiesAndSubscribeToUpdatesAsync
 
     IoTHubModuleClient_CreateFromConnectionString
     IoTHubModuleClient_Destroy
@@ -67,6 +72,11 @@ EXPORTS
     IoTHubModuleClient_SetModuleMethodCallback
     IoTHubModuleClient_SendEventToOutputAsync
     IoTHubModuleClient_SetInputMessageCallback
+    IoTHubModuleClient_SendTelemetryAsync
+    IoTHubModuleClient_SubscribeToCommands
+    IoTHubModuleClient_SendPropertiesAsync
+    IoTHubModuleClient_GetPropertiesAsync
+    IoTHubModuleClient_GetPropertiesAndSubscribeToUpdatesAsync
 
     IoTHubClient_LL_CreateFromConnectionString
     IoTHubClient_LL_Destroy
@@ -96,6 +106,11 @@ EXPORTS
     IoTHubDeviceClient_LL_DeviceMethodResponse
     IoTHubDeviceClient_LL_UploadToBlob
     IoTHubDeviceClient_LL_UploadMultipleBlocksToBlob
+    IoTHubDeviceClient_LL_SendTelemetryAsync
+    IoTHubDeviceClient_LL_SubscribeToCommands
+    IoTHubDeviceClient_LL_SendPropertiesAsync
+    IoTHubDeviceClient_LL_GetPropertiesAsync
+    IoTHubDeviceClient_LL_GetPropertiesAndSubscribeToUpdatesAsync
 
     IoTHubModuleClient_LL_CreateFromConnectionString
     IoTHubModuleClient_LL_Destroy
@@ -114,6 +129,11 @@ EXPORTS
     IoTHubModuleClient_LL_SetModuleMethodCallback
     IoTHubModuleClient_LL_SendEventToOutputAsync
     IoTHubModuleClient_LL_SetInputMessageCallback
+    IoTHubModuleClient_LL_SendTelemetryAsync
+    IoTHubModuleClient_LL_SubscribeToCommands
+    IoTHubModuleClient_LL_SendPropertiesAsync
+    IoTHubModuleClient_LL_GetPropertiesAsync
+    IoTHubModuleClient_LL_GetPropertiesAndSubscribeToUpdatesAsync
 
     IoTHubMessage_CreateFromString
     IoTHubMessage_CreateFromByteArray
@@ -147,6 +167,15 @@ EXPORTS
     IoTHubMessage_SetAsSecurityMessage
     IoTHubMessage_IsSecurityMessage
 
+    IoTHubClient_Properties_Serializer_CreateReported
+    IoTHubClient_Properties_Serializer_CreateWritableResponse
+    IoTHubClient_Properties_Serializer_Destroy
+    IoTHubClient_Properties_Deserializer_Create
+    IoTHubClient_Properties_Deserializer_GetVersion
+    IoTHubClient_Properties_Deserializer_GetNext
+    IoTHubClient_Properties_DeserializerProperty_Destroy
+    IoTHubClient_Properties_Deserializer_Destroy
+ 
     IOTHUB_CLIENT_CONFIRMATION_RESULTStrings
     IOTHUB_CLIENT_FILE_UPLOAD_RESULTStrings
     IOTHUB_CLIENT_RESULTStrings

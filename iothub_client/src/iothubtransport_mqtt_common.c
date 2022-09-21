@@ -47,7 +47,7 @@
 #define BUILD_CONFIG_USERNAME               24
 #define SAS_TOKEN_DEFAULT_LEN               10
 #define RESEND_TIMEOUT_VALUE_MIN            1*60
-#define MAX_SEND_RECOUNT_LIMIT              2
+#define TELEMETRY_MSG_TIMEOUT_MIN           2*60
 #define DEFAULT_CONNECTION_INTERVAL         30
 #define FAILED_CONN_BACKOFF_VALUE           5
 #define STATUS_CODE_FAILURE_VALUE           500
@@ -101,6 +101,7 @@ static size_t REQUEST_ID_PROPERTY_LEN = sizeof(REQUEST_ID_PROPERTY) - 1;
 #define SYS_PROP_ON "on"
 #define SYS_PROP_EXP "exp"
 #define SYS_PROP_TO "to"
+#define SYS_COMPONENT_NAME "sub"
 
 static const char* DIAGNOSTIC_CONTEXT_CREATION_TIME_UTC_PROPERTY = "creationtimeutc";
 static const char DT_MODEL_ID_TOKEN[] = "model-id";
@@ -303,8 +304,8 @@ typedef struct MQTT_DEVICE_TWIN_ITEM_TAG
 
 typedef struct MQTT_MESSAGE_DETAILS_LIST_TAG
 {
+    tickcounter_ms_t msgCreationTime;
     tickcounter_ms_t msgPublishTime;
-    size_t retryCount;
     IOTHUB_MESSAGE_LIST* iotHubMessageEntry;
     void* context;
     uint16_t packet_id;
@@ -894,6 +895,24 @@ static int addSystemPropertiesTouMqttMessage(IOTHUB_MESSAGE_HANDLE iothub_messag
         }
     }
 
+    if (result == 0)
+    {
+        const char* component_name = IoTHubMessage_GetComponentName(iothub_message_handle);
+        if (component_name != NULL)
+        {
+            // Encode the component name if encoding is on
+            if (addSystemPropertyToTopicString(topic_string, index++, SYS_COMPONENT_NAME, component_name, urlencode) != 0)
+            {
+                LogError("Failed setting component name");
+                result = MU_FAILURE;
+            }
+            else
+            {
+                result = 0;
+            }
+        }
+    }
+
     *index_ptr = index;
     return result;
 }
@@ -1039,7 +1058,6 @@ static int publishTelemetryMsg(PMQTTTRANSPORT_HANDLE_DATA transport_data, MQTT_M
                 }
                 else
                 {
-                    mqttMsgEntry->retryCount++;
                     result = 0;
                 }
             }
@@ -2458,45 +2476,42 @@ static void ProcessPendingTelemetryMessages(PMQTTTRANSPORT_HANDLE_DATA transport
         DLIST_ENTRY nextListEntry;
         nextListEntry.Flink = current_entry->Flink;
 
-        if (((current_ms - msg_detail_entry->msgPublishTime) / 1000) > RESEND_TIMEOUT_VALUE_MIN)
+        if (((current_ms - msg_detail_entry->msgCreationTime) / 1000) >= TELEMETRY_MSG_TIMEOUT_MIN)
         {
-            if (msg_detail_entry->retryCount >= MAX_SEND_RECOUNT_LIMIT)
-            {
-                notifyApplicationOfSendMessageComplete(msg_detail_entry->iotHubMessageEntry, transport_data, IOTHUB_CLIENT_CONFIRMATION_MESSAGE_TIMEOUT);
-                (void)DList_RemoveEntryList(current_entry);
-                free(msg_detail_entry);
+            notifyApplicationOfSendMessageComplete(msg_detail_entry->iotHubMessageEntry, transport_data, IOTHUB_CLIENT_CONFIRMATION_MESSAGE_TIMEOUT);
+            (void)DList_RemoveEntryList(current_entry);
+            LogError("Disconnecting MQTT connection because message PUBACK (%d) timeout.", msg_detail_entry->packet_id);
+            free(msg_detail_entry);
 
-                DisconnectFromClient(transport_data);
-                transport_data->transport_callbacks.connection_status_cb(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_COMMUNICATION_ERROR, transport_data->transport_ctx);
-            }
-            else
+            DisconnectFromClient(transport_data);
+            transport_data->transport_callbacks.connection_status_cb(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_COMMUNICATION_ERROR, transport_data->transport_ctx);
+        }
+        else if (((current_ms - msg_detail_entry->msgPublishTime) / 1000) > RESEND_TIMEOUT_VALUE_MIN)
+        {
+            // Ensure that the packet state is PUBLISH_TYPE and then attempt to send the message
+            // again
+            if (transport_data->currPacketState == PUBLISH_TYPE)
             {
-                // Ensure that the packet state is PUBLISH_TYPE and then attempt to send the message
-                // again
-                if (transport_data->currPacketState == PUBLISH_TYPE)
+                size_t messageLength;
+                const unsigned char* messagePayload = NULL;
+                if (!RetrieveMessagePayload(msg_detail_entry->iotHubMessageEntry->messageHandle, &messagePayload, &messageLength))
                 {
-                    size_t messageLength;
-                    const unsigned char* messagePayload = NULL;
-                    if (!RetrieveMessagePayload(msg_detail_entry->iotHubMessageEntry->messageHandle, &messagePayload, &messageLength))
-                    {
-                        (void)DList_RemoveEntryList(current_entry);
-                        notifyApplicationOfSendMessageComplete(msg_detail_entry->iotHubMessageEntry, transport_data, IOTHUB_CLIENT_CONFIRMATION_ERROR);
-                    }
-                    else
-                    {
-                        if (publishTelemetryMsg(transport_data, msg_detail_entry, messagePayload, messageLength) != 0)
-                        {
-                            (void)DList_RemoveEntryList(current_entry);
-                            notifyApplicationOfSendMessageComplete(msg_detail_entry->iotHubMessageEntry, transport_data, IOTHUB_CLIENT_CONFIRMATION_ERROR);
-                            free(msg_detail_entry);
-                        }
-                    }
+                    (void)DList_RemoveEntryList(current_entry);
+                    notifyApplicationOfSendMessageComplete(msg_detail_entry->iotHubMessageEntry, transport_data, IOTHUB_CLIENT_CONFIRMATION_ERROR);
                 }
                 else
                 {
-                    msg_detail_entry->retryCount++;
-                    msg_detail_entry->msgPublishTime = current_ms;
+                    if (publishTelemetryMsg(transport_data, msg_detail_entry, messagePayload, messageLength) != 0)
+                    {
+                        (void)DList_RemoveEntryList(current_entry);
+                        notifyApplicationOfSendMessageComplete(msg_detail_entry->iotHubMessageEntry, transport_data, IOTHUB_CLIENT_CONFIRMATION_ERROR);
+                        free(msg_detail_entry);
+                    }
                 }
+            }
+            else
+            {
+                msg_detail_entry->msgPublishTime = current_ms;
             }
         }
         current_entry = nextListEntry.Flink;
@@ -2826,7 +2841,7 @@ static int UpdateMqttConnectionStateIfNeeded(PMQTTTRANSPORT_HANDLE_DATA transpor
             }
             else if ((current_time - transport_data->mqtt_connect_time) / 1000 > transport_data->connect_timeout_in_sec)
             {
-                LogError("mqtt_client timed out waiting for CONNACK");
+                LogError("mqtt_client timed out waiting for CONNACK: disconnecting MQTT connection");
                 transport_data->currPacketState = PACKET_TYPE_ERROR;
                 DisconnectFromClient(transport_data);
                 result = MU_FAILURE;
@@ -3141,7 +3156,9 @@ static void ProcessPublishStateDoWork(PMQTTTRANSPORT_HANDLE_DATA transport_data)
             }
             else
             {
-                mqttMsgEntry->retryCount = 0;
+                tickcounter_ms_t current_ms;
+                (void)tickcounter_get_current_ms(transport_data->msgTickCounter, &current_ms);
+                mqttMsgEntry->msgCreationTime = current_ms;
                 mqttMsgEntry->iotHubMessageEntry = iothubMsgList;
                 mqttMsgEntry->packet_id = getNextPacketId(transport_data);
                 if (publishTelemetryMsg(transport_data, mqttMsgEntry, messagePayload, messageLength) != 0)

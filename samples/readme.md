@@ -11,5 +11,3 @@ The samples available throughout the tree are:
 * Serializer samples are  [here](../serializer/samples).  *Please read and understand the limitations and alternatives to the serializer described [here](../serializer/readme.md) before using the serializer.*
 * Provisioning Client SDK samples are [here](../provisioning_client/samples)
 * Provisioning Service SDK samples are [here](../provisioning_service_client/samples)
-
-You can find samples for end-to-end samples scenarios [here](solutions).
