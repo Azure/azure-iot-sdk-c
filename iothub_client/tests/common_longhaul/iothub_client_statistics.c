@@ -154,7 +154,9 @@ bool compare_message_time_to_connection_time(LIST_ITEM_HANDLE list_item, const v
 {
     CONNECTION_STATUS_INFO* connection_status = (CONNECTION_STATUS_INFO*)list_item;
     time_t message_time = *((time_t*)match_context);
-    if ((connection_status->reason == IOTHUB_CLIENT_CONNECTION_COMMUNICATION_ERROR || connection_status->reason == IOTHUB_CLIENT_CONNECTION_NO_NETWORK) &&
+    if ((connection_status->reason == IOTHUB_CLIENT_CONNECTION_COMMUNICATION_ERROR || 
+        connection_status->reason == IOTHUB_CLIENT_CONNECTION_NO_NETWORK || 
+        connection_status->reason == IOTHUB_CLIENT_CONNECTION_NO_PING_RESPONSE) &&
         connection_status->time <= (message_time + SPAN_10_SECONDS) &&
         connection_status->time >  (message_time - SPAN_4_MINUTES_IN_SECONDS))
     {
