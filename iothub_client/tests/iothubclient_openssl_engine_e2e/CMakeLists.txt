@@ -35,6 +35,13 @@ if(LINUX AND ${use_openssl})
     target_link_libraries(${theseTestsName}_exe pthread ${UUID_LIBRARIES})
 
     if(TARGET ${theseTestsName}_exe)
+        if(${use_http})
+            add_definitions(-DUSE_HTTP)
+            target_link_libraries(${theseTestsName}_exe
+                iothub_client_http_transport
+            )
+            linkMqttLibrary(${theseTestsName}_exe)
+        endif()
         if(${use_mqtt})
             add_definitions(-DUSE_MQTT)
             target_link_libraries(${theseTestsName}_exe
