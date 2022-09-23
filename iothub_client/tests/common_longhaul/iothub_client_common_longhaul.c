@@ -54,7 +54,6 @@ static const char* IOTHUB_LONGHAUL_LOOP_DURATION_SECS = "IOTHUB_LONGHAUL_LOOP_DU
 #define SERVICE_NETWORK_RETRY_ATTEMPTS          4
 #define NETWORK_RETRY_DELAY_MSEC                (15 * 1000)
 #define NETWORK_RETRY_LONG_DELAY_MSEC           (60 * 1000)
-#define NETWORK_TEST_ENDPOINT                   "bing.com"
 
 #define MAX_TELEMETRY_TRAVEL_TIME_SECS          600.0
 #define MAX_C2D_TRAVEL_TIME_SECS                600.0
@@ -430,18 +429,6 @@ static unsigned int test_http_endpoint(const char* hostName)
 static void validate_internet_connectivity(IOTHUB_LONGHAUL_RESOURCES* iotHubLonghaul)
 {
     unsigned int statusCode;
-
-    LogInfo("Network error detected in test. Verifying internet connectivity available...");
-
-    statusCode = test_http_endpoint(NETWORK_TEST_ENDPOINT);
-    if (statusCode >= 200 && statusCode <= 301)
-    {
-        LogInfo("validate_internet_connectivity: " NETWORK_TEST_ENDPOINT " is accessible");
-    }
-    else
-    {
-        LogError("validate_internet_connectivity: " NETWORK_TEST_ENDPOINT " is NOT accessible!");
-    }
 
     if (iotHubLonghaul != NULL)
     {
@@ -1206,7 +1193,7 @@ static IOTHUB_MESSAGING_CLIENT_HANDLE longhaul_initialize_service_c2d_messaging_
             IoTHubMessaging_Destroy(iotHubLonghaul->iotHubSvcMsgHandle);
             iotHubLonghaul->iotHubSvcMsgHandle = NULL;
             result = NULL;
-        } 
+        }
         else
         {
             result = iotHubLonghaul->iotHubSvcMsgHandle;
@@ -1417,7 +1404,8 @@ static void on_c2d_message_sent(void* context, IOTHUB_MESSAGING_RESULT messaging
         C2D_MESSAGE_INFO info;
         info.message_id = send_context->message_id;
         info.send_callback_result = messagingResult;
-        info.time_sent = time(NULL);
+        info.time_sent = get_time(NULL);
+        LogInfo("on_c2d_message_sent(#%d) messagingResult=%s, %s", send_context->message_id, MU_ENUM_TO_STRING(IOTHUB_MESSAGING_RESULT, messagingResult), get_ctime(&info.time_sent));
 
         if (info.time_sent == INDEFINITE_TIME)
         {
@@ -1460,6 +1448,7 @@ static int send_c2d(const void* context)
     {
         IOTHUB_MESSAGE_HANDLE message;
 
+        LogInfo("C2D sending message id #%d", message_id);
         if ((message = create_iothub_message(iotHubLonghaul->test_id, message_id)) == NULL)
         {
             LogError("Failed creating C2D message text");
@@ -1498,6 +1487,7 @@ static int send_c2d(const void* context)
                         IOTHUB_MESSAGING_CLIENT_HANDLE messageClientHandle = longhaul_initialize_service_c2d_messaging_client(iotHubLonghaul);
                         if (messageClientHandle != NULL)
                         {
+                            LogInfo("Reopening service handle complete.");
                             continue;
                         }
                         else
@@ -1509,7 +1499,7 @@ static int send_c2d(const void* context)
                     if (iotHubMessagingResult != IOTHUB_MESSAGING_OK)
                     {
                         validate_internet_connectivity(iotHubLonghaul);
-                        LogError("Failed sending c2d message with error %d", iotHubMessagingResult);
+                        LogError("Failed sending c2d message with error %s", MU_ENUM_TO_STRING(IOTHUB_MESSAGING_RESULT, iotHubMessagingResult));
                         free(send_context);
                         result = MU_FAILURE;
                         break;
@@ -1520,6 +1510,9 @@ static int send_c2d(const void* context)
                         break;
                     }
                 }
+
+                time_t t = get_time(NULL);
+                LogInfo("IoTHubMessaging_SendAsync done %s", get_ctime(&t));
 
                 C2D_MESSAGE_INFO c2d_msg_info;
                 c2d_msg_info.message_id = message_id;
@@ -1547,6 +1540,7 @@ static int send_c2d(const void* context)
             }
 
             IoTHubMessage_Destroy(message);
+            ThreadAPI_Sleep(5 * 1000);
         }
     }
 
@@ -1579,7 +1573,7 @@ static int invoke_device_method(const void* context)
             unsigned char* responsePayload;
             size_t responseSize;
 
-            DEVICE_METHOD_INFO device_method_info = {0};
+            DEVICE_METHOD_INFO device_method_info = { 0 };
             device_method_info.method_id = method_id;
             device_method_info.time_invoked = time(NULL);
 

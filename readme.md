@@ -9,7 +9,7 @@ As of [December 1, 2021](https://github.com/Azure/azure-iot-sdk-c/commit/de09b35
 The Azure IOT Hub Device SDK allows applications written in C99 or later or C++ to communicate easily with [Azure IoT Hub](https://azure.microsoft.com/services/iot-hub/), [Azure IoT Central][Azure-IoT-Central] and to
  [Azure IoT Device Provisioning][Azure-IoT-Device-Provisioning].  This repo includes the source code for the libraries, setup instructions, and samples demonstrating use scenarios.
 
-For constrained devices - where memory is measured in kilobytes and not megabytes - there are even lighter weight SDK options available.  See [Other Azure IoT SDKs](#other-azure-iot-sdks) for more.
+For **constrained devices**, where memory is measured in kilobytes and not megabytes, there are even lighter weight SDK options available.  See [Other Azure IoT SDKs](https://learn.microsoft.com/azure/iot-develop/concepts-using-c-sdk-and-embedded-c-sdk) to learn more.
 
 ## Table of Contents
 - [Azure IoT C SDKs and Libraries](#azure-iot-c-sdks-and-libraries)
@@ -58,14 +58,13 @@ For a more in depth explanation as to why the IoT services are doing this, pleas
 
 ## Getting the SDK
 
-> Please note, for constrained device scenarios like mbed and Arduino, there are better, lighter weight SDK options available.  See [Other Azure IoT SDKs](#other-azure-iot-sdks) for more.
+> Please note, for constrained device scenarios like mbed and Arduino, there are better, lighter weight SDK options available.  See [Other Azure IoT SDKs](https://learn.microsoft.com/azure/iot-develop/concepts-using-c-sdk-and-embedded-c-sdk) to learn more.
 
 ### Packages
 
 The simplest way to get started with the Azure IoT SDKs on supported platforms is to use the following packages and libraries:
 
-- mbed:                                      [Device SDK library on MBED](./iothub_client/readme.md#mbed)
-- Arduino:                                   [Device SDK library in the Arduino IDE](./iothub_client/readme.md#arduino)
+- Arduino:                                   [Device SDK library in the Arduino IDE](https://aka.ms/arduino)
 - Windows:                                   [Device SDK on Vcpkg](./doc/setting_up_vcpkg.md#setup-c-sdk-vcpkg-for-windows-development-environment)
 - iOS:                                       [Device SDK on CocoaPod](https://cocoapods.org/pods/AzureIoTHubClient)
 
@@ -74,7 +73,7 @@ The simplest way to get started with the Azure IoT SDKs on supported platforms i
   - Authentication is limited to SAS keys on iOS. No certificate-based authentication is officially supported.
   - The Device Provisioning Client is not supported on iOS. Only the Azure IoT Hub device client is supported.
 
-For a more complete iOS experience including the two missing features above, please see our sample native Swift library built on top of the Embedded C SDK [here](https://github.com/Azure-Samples/azure-sdk-for-c-swift).
+  For a more complete **iOS experience** including the two missing features above, please see our sample [native Swift library](https://github.com/Azure-Samples/azure-sdk-for-c-swift) built on top of the Embedded C SDK.
 
 ### Linux
 

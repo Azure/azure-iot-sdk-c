@@ -12,6 +12,13 @@ The [Microsoft Azure IoT C SDK](https://github.com/azure/azure-iot-sdk-c) is ava
 
 Samples in Swift for iOS are [here](https://github.com/Azure-Samples/azure-iot-samples-ios.git).
 
+   **iOS Limitations**
+
+  - Authentication is limited to SAS keys on iOS. No certificate-based authentication is officially supported.
+  - The Device Provisioning Client is not supported on iOS. Only the Azure IoT Hub device client is supported.
+
+  For a more complete **iOS experience** including the two missing features above, please see our sample [native Swift library](https://github.com/Azure-Samples/azure-sdk-for-c-swift) built on top of the Embedded C SDK.
+
 ## Using Azure IoT CocoaPods with Objective-C
 
 Using Objective-C libraries within another Objective-C app or library requires setting up header search paths just like typical C libraries require
