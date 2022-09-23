@@ -93,9 +93,6 @@ jobs:
       mergeTestResults: true
       testRunTitle: 'windowsx86'
     condition: succeededOrFailed()
-  - script: cd .. && rd /Q /S $(Agent.BuildDirectory)\s
-    displayName: 'Cleanup'
-    condition: always()
 - job: windowsx64debug
   pool:
     name: 'sdk-c--win-vs2017'
@@ -136,9 +133,6 @@ jobs:
       mergeTestResults: true
       testRunTitle: 'windowsx64'
     condition: succeededOrFailed()
-  - script: cd .. && rd /Q /S $(Agent.BuildDirectory)\s
-    displayName: 'Cleanup'
-    condition: always()
 - job: windowsx64release
   pool:
     name: 'sdk-c--win-vs2017'
@@ -179,9 +173,6 @@ jobs:
       mergeTestResults: true
       testRunTitle: 'windowsx64release'
     condition: succeededOrFailed()
-  - script: cd .. && rd /Q /S $(Agent.BuildDirectory)\s
-    displayName: 'Cleanup'
-    condition: always()
 - job: windowsdynamic
   pool:
     name: 'sdk-c--win-vs2017'
@@ -221,9 +212,6 @@ jobs:
   steps:
   - script: 'sudo ./jenkins/linux_c_option_test.sh'
     displayName: 'Build'
-    condition: always()
-  - script: sudo rm -rf $(Agent.BuildDirectory)/*
-    displayName: 'Cleanup'
     condition: always()
 - job: clang
   container: linux-c-ubuntu-clang
@@ -267,9 +255,6 @@ jobs:
       mergeTestResults: true
       testRunTitle: 'clang'
     condition: succeededOrFailed()
-  - script: sudo rm -rf $(Agent.BuildDirectory)/*
-    displayName: 'Cleanup'
-    condition: always()
 - job: clang_release
   container: linux-c-ubuntu-clang
   pool: 
@@ -312,9 +297,6 @@ jobs:
       mergeTestResults: true
       testRunTitle: 'clang_release'
     condition: succeededOrFailed()
-  - script: sudo rm -rf $(Agent.BuildDirectory)/*
-    displayName: 'Cleanup'
-    condition: always()
 - job: ubuntu1804
   container: linux-c-ubuntu-1804
   pool:
@@ -357,9 +339,6 @@ jobs:
       mergeTestResults: true
       testRunTitle: 'ubuntu1804'
     condition: succeededOrFailed()
-  - script: sudo rm -rf $(Agent.BuildDirectory)/*
-    displayName: 'Cleanup'
-    condition: always()
 - job: ubuntu2004debug
   container: linux-c-ubuntu-2004
   pool:
@@ -402,9 +381,6 @@ jobs:
       mergeTestResults: true
       testRunTitle: 'ubuntu2004debug'
     condition: succeededOrFailed()
-  - script: sudo rm -rf $(Agent.BuildDirectory)/*
-    displayName: 'Cleanup'
-    condition: always()
 - job: ubuntu2004release
   container: linux-c-ubuntu-2004
   pool:
@@ -447,9 +423,6 @@ jobs:
       mergeTestResults: true
       testRunTitle: 'ubuntu2004release'
     condition: succeededOrFailed()
-  - script: sudo rm -rf $(Agent.BuildDirectory)/*
-    displayName: 'Cleanup'
-    condition: always()
 - job: ubuntu2204build
   container: linux-c-ubuntu-2204
   pool:
@@ -496,9 +469,6 @@ jobs:
       mergeTestResults: true
       testRunTitle: 'ubuntu2004debug'
     condition: succeededOrFailed()
-  - script: sudo rm -rf $(Agent.BuildDirectory)/*
-    displayName: 'Cleanup'
-    condition: always()
 - job: ubuntuRIOT
   container: linux-c-ubuntu-2004
   pool:
@@ -541,9 +511,6 @@ jobs:
       mergeTestResults: true
       testRunTitle: 'ubuntuRIOT'
     condition: succeededOrFailed()
-  - script: sudo rm -rf $(Agent.BuildDirectory)/*
-    displayName: 'Cleanup'
-    condition: always()
 - job: debian
   container: linux-c-debian
   pool: 
@@ -584,9 +551,6 @@ jobs:
       mergeTestResults: true
       testRunTitle: 'debian'
     condition: succeededOrFailed()
-  - script: sudo rm -rf $(Agent.BuildDirectory)/*
-    displayName: 'Cleanup'
-    condition: always()
 - job: linux_installed_deps
   container: linux-c-ubuntu-2004
   pool: 
@@ -618,9 +582,6 @@ jobs:
       IOT_DPS_INDIVIDUAL_X509_CERTIFICATE: $(IOTHUB-E2E-X509-ECC-CERT-BASE64)
       IOT_DPS_INDIVIDUAL_X509_KEY: $(IOTHUB-E2E-X509-ECC-PRIVATE-KEY-BASE64)
       IOT_DPS_INDIVIDUAL_REGISTRATION_ID: $(IOT-DPS-INDIVIDUAL-REGISTRATION-ID)
-  - script: sudo rm -rf $(Agent.BuildDirectory)/*
-    displayName: 'Cleanup'
-    condition: always()
 - job: wolfssl
   pool:
     name: 'sdk-c--ubuntu-18'
@@ -663,9 +624,6 @@ jobs:
       mergeTestResults: true
       testRunTitle: 'wolfssl'
     condition: succeededOrFailed()
-  - script: sudo rm -rf $(Agent.BuildDirectory)/*
-    displayName: 'Cleanup'
-    condition: always()
 - job: bearssl
   container: linux-c-ubuntu-bearssl
   pool:
@@ -708,9 +666,6 @@ jobs:
       mergeTestResults: true
       testRunTitle: 'bearssl'
     condition: succeededOrFailed()
-  - script: sudo rm -rf $(Agent.BuildDirectory)/*
-    displayName: 'Cleanup'
-    condition: always()
 - job: mbedtls
   container: linux-c-ubuntu-mbed
   pool:
@@ -753,9 +708,6 @@ jobs:
       mergeTestResults: true
       testRunTitle: 'mbedtls'
     condition: succeededOrFailed()
-  - script: sudo rm -rf $(Agent.BuildDirectory)/*
-    displayName: 'Cleanup'
-    condition: always()
 - job: cares
   container: linux-c-ubuntu-c-ares
   pool: 
@@ -796,9 +748,6 @@ jobs:
       mergeTestResults: true
       testRunTitle: 'cares'
     condition: succeededOrFailed()
-  - script: sudo rm -rf $(Agent.BuildDirectory)/*
-    displayName: 'Cleanup'
-    condition: always()
 - job: openssl_engine
   container: linux-c-openssl-pkcs11
   pool: 
@@ -842,9 +791,6 @@ jobs:
       mergeTestResults: true
       testRunTitle: 'openssl_engine'
     condition: succeededOrFailed()
-  - script: sudo rm -rf $(Agent.BuildDirectory)/*
-    displayName: 'Cleanup'
-    condition: always()
 - job: OSX
   pool:
     name: OSX
@@ -944,8 +890,6 @@ jobs:
      chmod +x jenkins/raspberrypi_c_buster.sh
       ./jenkins/raspberrypi_c_buster.sh
     displayName: 'Build'
-  - script: sudo rm -rf $(Agent.BuildDirectory)/*
-    displayName: 'Cleanup'
 - job: crosscompile_mips32
   pool:
     vmImage: 'ubuntu-20.04'
