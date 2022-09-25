@@ -26,7 +26,7 @@ RUN mkdir RPiBuild
 ENV WORK_ROOT=/home/builder/RPiBuild
 WORKDIR ${WORK_ROOT}
 
-RUN wget https://releases.linaro.org/components/toolchain/binaries/latest-7/arm-linux-gnueabihf/gcc-linaro-7.3.1-2018.05-x86_64_arm-linux-gnueabihf.tar.xz
+RUN wget https://releases.linaro.org/components/toolchain/binaries/7.3-2018.05/arm-linux-gnueabihf/gcc-linaro-7.3.1-2018.05-x86_64_arm-linux-gnueabihf.tar.xz
 RUN tar -xvf gcc-linaro-7.3.1-2018.05-x86_64_arm-linux-gnueabihf.tar.xz
 
 # Set up environment variables for builds

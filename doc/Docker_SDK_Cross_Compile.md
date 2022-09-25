@@ -34,125 +34,114 @@ Here is an example script:
 # Start with the latest version of the Ubuntu Docker container
 FROM ubuntu:latest
 
+#########################################
+# start from home directory
+RUN cd ~
+
+#########################################
 # Run commands that require root authority
-
-# Fetch and install all outstanding updates
 RUN apt-get update && apt-get -y upgrade
+RUN apt-get install -y cmake git wget nano xz-utils bzip2
 
-# Install cmake, git, wget and nano
-RUN apt-get install -y cmake git wget nano
-
-# Create a user to use so that we don't run it all as root
+#########################################
+# Create and switch to new user
 RUN useradd -d /home/builder -ms /bin/bash -G sudo -p builder builder
-
-# Switch to new user and change to the user's home directory
 USER builder
 WORKDIR /home/builder
 
-# Create a work directory and switch to it
+#########################################
+# Download all required files
 RUN mkdir MIPSBuild
 WORKDIR MIPSBuild
 
-#
-# The following wget invocation will need to be modified to download a toolchain appropriate 
-# for your target device.
-#
+# Cross compile toolchain
+RUN wget https://downloads.openwrt.org/releases/21.02.3/targets/ramips/mt7620/openwrt-sdk-21.02.3-ramips-mt7620_gcc-8.4.0_musl.Linux-x86_64.tar.xz
+RUN tar -xvf openwrt-sdk-21.02.3-ramips-mt7620_gcc-8.4.0_musl.Linux-x86_64.tar.xz
 
-# Download the WRTNode cross compile toolchain and expand it
-RUN wget https://downloads.openwrt.org/barrier_breaker/14.07/ramips/mt7620n/OpenWrt-Toolchain-ramips-for-mipsel_24kec%2bdsp-gcc-4.8-linaro_uClibc-0.9.33.2.tar.bz2
-RUN tar -xvf OpenWrt-Toolchain-ramips-for-mipsel_24kec+dsp-gcc-4.8-linaro_uClibc-0.9.33.2.tar.bz2
-
-# Download the Azure IoT SDK for C
-RUN git clone https://github.com/azure/azure-iot-sdk-c.git
-WORKDIR azure-iot-sdk-c
-RUN git submodule update --init
-WORKDIR ..
-
-# Download OpenSSL source and expand it
+# OpenSSL
 RUN wget https://www.openssl.org/source/openssl-1.0.2o.tar.gz
 RUN tar -xvf openssl-1.0.2o.tar.gz
 
-# Download cURL source and expand it
+# Curl
 RUN wget http://curl.haxx.se/download/curl-7.60.0.tar.gz
 RUN tar -xvf curl-7.60.0.tar.gz
 
-# Download the Linux utilities for libuuid and expand it
+# Linux utilities for libuuid
 RUN wget https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.32/util-linux-2.32-rc2.tar.gz
 RUN tar -xvf util-linux-2.32-rc2.tar.gz
 
-#
-# Set up environment variables in preparation for the builds to follow
-# These will need to be modified for the corresponding locations in the downloaded toolchain
-#
+#########################################
+# Set up environment variables in preperation for the builds to follow
 ENV WORK_ROOT=/home/builder/MIPSBuild
-ENV TOOLCHAIN_ROOT=${WORK_ROOT}/OpenWrt-Toolchain-ramips-for-mipsel_24kec+dsp-gcc-4.8-linaro_uClibc-0.9.33.2
-ENV TOOLCHAIN_SYSROOT=${TOOLCHAIN_ROOT}/toolchain-mipsel_24kec+dsp_gcc-4.8-linaro_uClibc-0.9.33.2
-ENV TOOLCHAIN_EXES=${TOOLCHAIN_SYSROOT}/bin
-ENV TOOLCHAIN_NAME=mipsel-openwrt-linux-uclibc
-ENV AR=${TOOLCHAIN_EXES}/${TOOLCHAIN_NAME}-ar
-ENV AS=${TOOLCHAIN_EXES}/${TOOLCHAIN_NAME}-as
-ENV CC=${TOOLCHAIN_EXES}/${TOOLCHAIN_NAME}-gcc
-ENV LD=${TOOLCHAIN_EXES}/${TOOLCHAIN_NAME}-ld
-ENV NM=${TOOLCHAIN_EXES}/${TOOLCHAIN_NAME}-nm
-ENV RANLIB=${TOOLCHAIN_EXES}/${TOOLCHAIN_NAME}-ranlib
+ENV TOOLCHAIN_MIPS=openwrt-sdk-21.02.3-ramips-mt7620_gcc-8.4.0_musl.Linux-x86_64
+ENV TOOLCHAIN_PLATFORM=mipsel-openwrt-linux-musl
+ENV STAGING_DIR=${WORK_ROOT}/${TOOLCHAIN_MIPS}/staging_dir
+ENV TOOLCHAIN_SYSROOT=${WORK_ROOT}/${TOOLCHAIN_MIPS}/staging_dir/toolchain-mipsel_24kc_gcc-8.4.0_musl
+ENV TOOLCHAIN_BIN=${TOOLCHAIN_SYSROOT}/bin
+ENV OPENSSL_ROOT_DIR=${WORK_ROOT}/openssl-OpenSSL_1_1_1f
+ENV TOOLCHAIN_PREFIX=${WORK_ROOT}/MIPS
+ENV AR=${TOOLCHAIN_BIN}/${TOOLCHAIN_PLATFORM}-ar
+ENV CC=${TOOLCHAIN_BIN}/${TOOLCHAIN_PLATFORM}-gcc
+ENV CXX=${TOOLCHAIN_BIN}/${TOOLCHAIN_PLATFORM}-g++
 
-ENV LDFLAGS="-L${TOOLCHAIN_SYSROOT}/usr/lib"
+
+ENV LDFLAGS="-L${TOOLCHAIN_PREFIX}/lib"
 ENV LIBS="-lssl -lcrypto -ldl -lpthread"
-ENV TOOLCHAIN_PREFIX=${TOOLCHAIN_SYSROOT}/usr
-ENV STAGING_DIR=${TOOLCHAIN_SYSROOT}
 
 # Build OpenSSL
 WORKDIR openssl-1.0.2o
-RUN ./Configure linux-generic32 shared --prefix=${TOOLCHAIN_PREFIX} --openssldir=${TOOLCHAIN_PREFIX}
+RUN ./Configure linux-generic32 --prefix=${TOOLCHAIN_PREFIX} --openssldir=${OPENSSL_ROOT_DIR} no-tests shared 
 RUN make
-RUN make install
+RUN make install_sw
 WORKDIR ..
 
-# Build cURL
+# Build curl
 WORKDIR curl-7.60.0
-RUN ./configure --with-sysroot=${TOOLCHAIN_SYSROOT} --prefix=${TOOLCHAIN_PREFIX} --target=${TOOLCHAIN_NAME} --with-ssl --with-zlib --host=${TOOLCHAIN_NAME} --build=x86_64-pc-linux-uclibc
+RUN ./configure --with-sysroot=${TOOLCHAIN_SYSROOT} --prefix=${TOOLCHAIN_PREFIX} --target=${TOOLCHAIN_PLATFORM} --with-ssl=${TOOLCHAIN_PREFIX} --with-zlib --host=${TOOLCHAIN_PLATFORM} 
 RUN make
 RUN make install
 WORKDIR ..
 
 # Build uuid
 WORKDIR util-linux-2.32-rc2
-RUN ./configure --prefix=${TOOLCHAIN_PREFIX} --with-sysroot=${TOOLCHAIN_SYSROOT} --target=${TOOLCHAIN_NAME} --host=${TOOLCHAIN_NAME} --disable-all-programs  --disable-bash-completion --enable-libuuid
+RUN ./configure --with-sysroot=${TOOLCHAIN_SYSROOT} --prefix=${TOOLCHAIN_PREFIX} --target=${TOOLCHAIN_PLATFORM} --host=${TOOLCHAIN_PLATFORM} --disable-all-programs  --disable-bash-completion --enable-libuuid
 RUN make
 RUN make install
 WORKDIR ..
 
-# To build the SDK we need to create a cmake toolchain file. This tells cmake to use the tools in the
-# toolchain rather than those on the host
-WORKDIR azure-iot-sdk-c
+#########################################
+# Build Azure C SDK
 
-# Create a working directory for the cmake operations
+RUN git clone https://github.com/azure/azure-iot-sdk-c.git
+WORKDIR azure-iot-sdk-c
+RUN git submodule update --init
 RUN mkdir cmake
 WORKDIR cmake
 
-# Create a cmake toolchain file on the fly
+# Create a toolchain file on the fly
 RUN echo "SET(CMAKE_SYSTEM_NAME Linux)     # this one is important" > toolchain.cmake
-RUN echo "SET(CMAKE_SYSTEM_VERSION 1)      # this one not so much" >> toolchain.cmake
+RUN echo "SET(CMAKE_SYSTEM_VERSION 1)"  >> toolchain.cmake
 RUN echo "SET(CMAKE_SYSROOT ${TOOLCHAIN_SYSROOT})" >> toolchain.cmake
-RUN echo "SET(CMAKE_C_COMPILER ${TOOLCHAIN_EXES}/${TOOLCHAIN_NAME}-gcc)" >> toolchain.cmake
-RUN echo "SET(CMAKE_CXX_COMPILER ${TOOLCHAIN_EXES}/${TOOLCHAIN_NAME}-g++)" >> toolchain.cmake
-RUN echo "SET(CMAKE_FIND_ROOT_PATH $ENV{TOOLCHAIN_SYSROOT})" >> toolchain.cmake
+RUN echo "SET(CMAKE_C_COMPILER ${CC})" >> toolchain.cmake
+RUN echo "SET(CMAKE_CXX_COMPILER ${CXX})" >> toolchain.cmake
+RUN echo "SET(CMAKE_FIND_ROOT_PATH ${WORK_ROOT})" >> toolchain.cmake
 RUN echo "SET(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)" >> toolchain.cmake
 RUN echo "SET(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)" >> toolchain.cmake
 RUN echo "SET(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)" >> toolchain.cmake
+RUN echo "SET(CURL_LIBRARIES ${TOOLCHAIN_PREFIX}/lib/libcurl.so)" >> toolchain.cmake
+RUN echo "SET(ENV{LDFLAGS} -L${TOOLCHAIN_PREFIX}/lib)" >> toolchain.cmake
+RUN echo "SET(OPENSSL_ROOT_DIR ${TOOLCHAIN_PREFIX})" >> toolchain.cmake
 RUN echo "SET(set_trusted_cert_in_samples true CACHE BOOL \"Force use of TrustedCerts option\" FORCE)" >> toolchain.cmake
+RUN echo "include_directories(${TOOLCHAIN_PREFIX}/include)" >> toolchain.cmake
 
-# Build the SDK. This will use the OpenSSL, cURL and uuid binaries that we built before
-RUN cmake -DCMAKE_TOOLCHAIN_FILE=toolchain.cmake -DCMAKE_INSTALL_PREFIX=${TOOLCHAIN_PREFIX} ..
-RUN make
-RUN make install
+RUN cmake -DCMAKE_TOOLCHAIN_FILE=toolchain.cmake ..
+RUN cmake --build .
+RUN cmake --install . --prefix ${TOOLCHAIN_PREFIX}
 
-# Finally a sanity check to make sure the files are there
-RUN ls -al ${TOOLCHAIN_PREFIX}/lib
-RUN ls -al ${TOOLCHAIN_PREFIX}/include
-
-# Go to project root
 WORKDIR ../..
+
+CMD ["/bin/bash"]
+
 ```
 
 To run this script save it to a directory and change to that directory then simply enter:
@@ -167,9 +156,9 @@ You can replace the value 'mipsiotbuild' with any name that describes your build
 Once you have successfully built the SDK you are now ready to create your application. You will need to create a directory that contains your source code and a CMakeLists.txt. The application build can use the cmake toolchain file that is already present in the image. 
 
 ### Sample ```CMakeLists.txt``` for an Application
-Here is a simple ```CMakeLists.txt``` file that demonstrates how to build an application that uses the libraries built above. This sample, for demonstration purposes uses a copy of the ```iothub_convenience_sample.c``` sample from the SDK.
+Here is a simple ```CMakeLists.txt``` file that demonstrates how to build an application that uses the libraries built above. This sample, for demonstration purposes uses a copy of the ```iothub_cross_compile_simple_sample.c``` sample from the SDK.
 ```cmake
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required (VERSION 3.5)
 project(myapp_project)
 
 # The demonstration uses C99 but it could just as easily be a C++ application
@@ -180,7 +169,7 @@ set (CMAKE_C_FLAGS "--std=c99 ${CMAKE_C_FLAGS}")
 option(use_sample_trusted_cert "Set flag in samples to use SDK's built-in CA as TrustedCerts" ON)
 
 set(iothub_c_files
-    iothub_convenience_sample.c
+    iothub_cross_compile_simple_sample.c
 )
 
 # Conditionally use the SDK trusted certs in the samples (is set to true in cmake toolchain file)
@@ -193,17 +182,25 @@ if(${use_sample_trusted_cert})
 endif()
 
 # Set up the include and library paths
-include_directories($ENV{TOOLCHAIN_PREFIX}/include/)
-include_directories($ENV{TOOLCHAIN_PREFIX}/include/azureiot)
+include_directories(${CMAKE_INSTALL_PREFIX}/include/)
+include_directories(${CMAKE_INSTALL_PREFIX}/include/azureiot)
+link_directories(/usr/local/lib)
 link_directories($ENV{TOOLCHAIN_PREFIX}/lib)
 
 add_executable(myapp ${iothub_c_files})
 
-# Redundant in this case but demonstrates how to rename your output executable
-set_target_properties(myapp PROPERTIES OUTPUT_NAME "myapp") 
+# Redundant in this case but shows how to rename your output executable
+set_target_properties(myapp PROPERTIES OUTPUT_NAME "myapp")
+
+# If OpenSSL::SSL OR OpenSSL::Crypto are not set then you need to run
+# the find package for openssl
+if (NOT TARGET OpenSSL::SSL OR NOT TARGET OpenSSL::Crypto OR NOT ${OPENSSL_INCLUDE_DIR})
+    find_package(OpenSSL REQUIRED)
+endif()
+include_directories(${OPENSSL_INCLUDE_DIR})
 
 # List the libraries required by the link step
-target_link_libraries(myapp iothub_client_mqtt_transport iothub_client umqtt aziotsharedutil parson pthread curl ssl crypto m )
+target_link_libraries(myapp iothub_client prov_device_client iothub_client_mqtt_transport prov_auth_client umqtt hsm_security_client utpm dl aziotsharedutil parson pthread curl OpenSSL::SSL OpenSSL::Crypto m )
 ```
 ### Using a Separate Docker Script to Build the Application
 Though one could append the application build steps to the Docker script above, this will demonstrate how to use the existing image and build the application in a seperate Docker script. This will keep the original image clean so it may be used for building multiple applications.
@@ -212,6 +209,7 @@ This sample script assumes you have your source files and the ```CMakeLists.txt`
 ```docker
 FROM mipsiotbuild:latest
 
+ENV WORK_ROOT=/home/builder/MIPSBuild
 USER builder
 WORKDIR /home/builder
 
@@ -252,7 +250,7 @@ The above steps will create and acquire the Docker container identifier, copy th
 
 **Note:** Depending upon your device you may need to copy additional binaries from the container in order to add them to your device. For example you device may not have the OpenSSL binaries so you will need to copy libssl.so and libcrypto.so. This could also be true for libuuid and libcurl. All of these libraries will be in the toolchain typically in ```/usr/local/lib```.
 # A Complete Example
-You can find two complete examples in [samples](../samples/dockerbuilds). This directory contains Docker scripts to cross compile the SDK for MIPS32 and for Raspbian and subsequently builds an application. In order to reduce the number of files required, the steps are slightly modified though they perform the same function. To cross compile the SDK for Raspbian, create an application and copy it to your host use the following steps. 
+You can find three complete examples in [samples](../samples/dockerbuilds). This directory contains Docker scripts to cross compile the SDK for MIPS32, ARM, and for Raspbian and subsequently builds an application. In order to reduce the number of files required, the steps are slightly modified though they perform the same function. To cross compile the SDK for Raspbian, create an application and copy it to your host use the following steps. 
 ```bash
 # Change directory to your Azure IoT SDK cloned repository root
 cd <SDK Root>
@@ -267,7 +265,7 @@ id=$(docker create rpiiotapp)
 docker cp $id:/home/builder/myapp/cmake/myapp ~/myapp_rpi
 docker rm -v $id
 ```
-And for MIPS32:
+For MIPS32:
 ```bash
 # Change directory to your Azure IoT SDK cloned repository root
 cd <SDK Root>
@@ -280,6 +278,21 @@ docker build -t mipsiotapp:latest . --network=host --file ./MIPS32/Dockerfile_ad
 id=$(docker create mipsiotapp)
 # Copy application to home directory
 docker cp $id:/home/builder/myapp/cmake/myapp ~/myapp_mips
+docker rm -v $id
+```
+And for ARM:
+```bash
+# Change directory to your Azure IoT SDK cloned repository root
+cd <SDK Root>
+# Work in this directory or two copies of the myapp directory will be required
+cd samples/dockerbuilds
+# Cross compile the SDK
+docker build -t armiotbuild:latest ./ARM --network=host
+# Build the application against the SDK
+docker build -t armiotapp:latest . --network=host --file ./ARM/Dockerfile_adjunct
+id=$(docker create armiotapp)
+# Copy application to home directory
+docker cp $id:/home/builder/myapp/cmake/myapp ~/myapp_arm
 docker rm -v $id
 ```
 **Note:** For these examples to work successfully the image names must be exactly as they are shown in the examples.

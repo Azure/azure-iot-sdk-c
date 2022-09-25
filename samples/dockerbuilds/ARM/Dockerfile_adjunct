@@ -1,6 +1,6 @@
-FROM mipsiotbuild:latest
+FROM armiotbuild:latest
 
-ENV WORK_ROOT=/home/builder/MIPSBuild
+ENV WORK_ROOT=/home/builder/ARMBuild
 USER builder
 WORKDIR /home/builder
 
