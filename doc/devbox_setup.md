@@ -11,13 +11,13 @@ This document describes how to prepare your development environment to use the *
 
 ## Set up a Windows development environment
 
-- Install [Visual Studio 2019][visual-studio]. You can use the **Visual Studio Community** free download if you meet the licensing requirements.  (**Visual Studio 2017** is also supported.)
+- Install [Visual Studio 2022][visual-studio]. You can use the **Visual Studio Community** free download if you meet the licensing requirements.  (**Visual Studio 2017** and **Visual Studio 2019** are also supported.)
 
 > Be sure to include Visual C++.
 
 - Install [git]. Confirm git is in your PATH by typing `git version` from a command prompt.
 
-- Install CMake, either by including it in your Visual Studio 2019 install or installing directly from [CMake.org][CMake]. Make sure it is in your PATH by typing `cmake -version` from a command prompt. CMake will be used to create Visual Studio projects to build libraries and samples.
+- Install CMake, either by including it in your Visual Studio install or installing directly from [CMake.org][CMake]. Make sure it is in your PATH by typing `cmake -version` from a command prompt. CMake will be used to create Visual Studio projects to build libraries and samples.
 
 - Locate the tag name for the [latest release][latest-release] of the SDK.
 
@@ -57,7 +57,7 @@ Build the sample project.
 
 In some cases, you may want to build the SDK locally for development and testing purposes (without using vcpkg). First, take the following steps to generate project files:
 
-- Open a "Developer Command Prompt for VS2017" or "Developer Command Prompt for VS2019".
+- Open a "Developer Command Prompt for VS2017" or "Developer Command Prompt for VS2019" or "Developer Command Prompt for VS 2022".
 
 - Run the following CMake commands from the root of the repository:
 
@@ -69,9 +69,11 @@ cd cmake
   cmake .. -G "Visual Studio 15 2017" ## For Visual Studio 2017
 # or
   cmake .. -G "Visual Studio 16 2019" -A Win32
+# or
+  cmake .. -G "Visual Studio 17 2022" -A Win32
 ```
 
-> This builds x86 libraries. To build for x64 for Visual Studio 2017, `cmake .. -G "Visual Studio 15 2017 Win64"` or for Visual Studio 2019, `cmake .. -G "Visual Studio 16 2019" -A x64`
+> This builds x86 libraries. To build for x64 for Visual Studio 2017: `cmake .. -G "Visual Studio 15 2017 Win64"`, for Visual Studio 2019: `cmake .. -G "Visual Studio 16 2019" -A x64`, or for Visual Studio 2022: `cmake .. -G "Visual Studio 17 2022" -A x64`
 
 When the project generation completes successfully, you will see a Visual Studio solution file (.sln) under the `cmake` folder. To build the SDK, do one of the following:
 
@@ -86,13 +88,13 @@ cmake --build . -- /m /p:Configuration=Release
 > There are many CMake configuration options available for building the SDK. For example, you can disable one of the available protocol stacks by adding an argument to the CMake project generation command:
 
 ```Shell
-cmake -G "Visual Studio 15 2017" -Duse_amqp=OFF .. // same with 2017 and 2019 generator (see above)
+cmake -G "Visual Studio 15 2017" -Duse_amqp=OFF .. // same with 2017, 2019, and 2022 generator (see above)
 ```
 
 > Also, you can build and run unit tests:
 
 ```Shell
-cmake -G "Visual Studio 15 2017" -Drun_unittests=ON ..  // same with 2017 and 2019 generator (see above)
+cmake -G "Visual Studio 15 2017" -Drun_unittests=ON ..  // same with 2017, 2019, and 2022 generator (see above)
 cmake --build . -- /m /p:Configuration=Debug
 ctest -C "debug" -V
 ```
