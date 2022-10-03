@@ -71,7 +71,7 @@ cd cmake
   cmake .. -G "Visual Studio 16 2019" -A Win32
 ```
 
-> This builds x86 libraries. To build for x64 for Visual Studio 2017, `cmake .. -G "Visual Studio 15 2017 Win64"` or for Visual Studio 2019, `cmake .. -G "Visual Studio 16 2019 -A x64"`
+> This builds x86 libraries. To build for x64 for Visual Studio 2017, `cmake .. -G "Visual Studio 15 2017 Win64"` or for Visual Studio 2019, `cmake .. -G "Visual Studio 16 2019" -A x64`
 
 When the project generation completes successfully, you will see a Visual Studio solution file (.sln) under the `cmake` folder. To build the SDK, do one of the following:
 
