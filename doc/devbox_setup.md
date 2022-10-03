@@ -57,7 +57,7 @@ Build the sample project.
 
 In some cases, you may want to build the SDK locally for development and testing purposes (without using vcpkg). First, take the following steps to generate project files:
 
-- Open a "Developer Command Prompt for VS2017" or "Developer Command Prompt for VS2019" or "Developer Command Prompt for VS 2022".
+- Open a "Developer Command Prompt for VS 2022" or "Developer Command Prompt for VS2019" or "Developer Command Prompt for VS2017".
 
 - Run the following CMake commands from the root of the repository:
 
