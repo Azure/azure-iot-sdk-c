@@ -44,8 +44,8 @@ For **constrained devices**, where memory is measured in kilobytes and not megab
 
 All Azure IoT SDK users are advised to be aware of upcoming TLS certificate changes for Azure IoT Hub and Device Provisioning Service
 that will impact the SDK's ability to connect to these services. In October 2022, both services will migrate from the current
-[Baltimore CyberTrust CA Root](https://baltimore-cybertrust-root.chain-demos.digicert.com/info/index.html) to the
-[DigiCert Global G2 CA root](https://global-root-g2.chain-demos.digicert.com/info/index.html). There will be a
+[Baltimore CyberTrust CA Root](https://www.digicert.com/kb/digicert-root-certificates.htm#otherroots) to the
+[DigiCert Global G2 CA root](https://www.digicert.com/kb/digicert-root-certificates.htm#otherroots). There will be a
 transition period beforehand where your IoT devices must have both the Baltimore and Digicert public certificates
 which may be hardcoded in their application or flashed onto your WiFi module in order to prevent connectivity issues.
 
@@ -299,7 +299,7 @@ Microsoft collects performance and usage information which may be used to provid
 [c-sdk-intro]: https://azure.microsoft.com/documentation/articles/iot-hub-device-sdk-c-intro/
 [c-porting-guide]: https://github.com/Azure/azure-c-shared-utility/blob/master/devdoc/porting_guide.md
 [c-cross-compile]: doc/SDK_cross_compile_example.md
-[c-api-reference]: https://docs.microsoft.com/azure/iot-hub/iot-c-sdk-ref/
+[c-api-reference]: https://azure.github.io/azure-iot-sdk-c/files.html
 [about-iot-sdks]:https://docs.microsoft.com/azure/iot-develop/about-iot-sdks
 [Azure-IoT-Central]: https://docs.microsoft.com/azure/iot-central/
 [Azure-IoT-Device-Provisioning]: https://docs.microsoft.com/azure/iot-dps/
