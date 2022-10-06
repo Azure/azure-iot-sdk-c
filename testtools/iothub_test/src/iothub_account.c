@@ -107,7 +107,7 @@ static int generateDeviceName(const char* prefix, char** deviceName)
             }
             else
             {
-                LogInfo("Created Device %s.", *deviceName);
+                LogInfo("Generated unique device name %s.", *deviceName);
                 result = 0;
             }
         }

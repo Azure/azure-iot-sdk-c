@@ -347,7 +347,7 @@ static IOTHUB_DEVICE_METHOD_RESULT sendHttpRequestDeviceMethod(IOTHUB_SERVICE_CL
             }
             else if (HTTPAPIEX_SAS_ExecuteRequest(httpExApiSasHandle, httpExApiHandle, httpApiRequestType, STRING_c_str(relativePath), httpHeader, deviceJsonBuffer, &statusCode, NULL, responseBuffer) != HTTPAPIEX_OK)
             {
-                LogError("HTTPAPIEX_SAS_ExecuteRequest failed");
+                LogError("HTTPAPIEX_SAS_ExecuteRequest failed (%s)", STRING_c_str(relativePath));
                 STRING_delete(relativePath);
                 result = IOTHUB_DEVICE_METHOD_HTTPAPI_ERROR;
             }
