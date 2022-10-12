@@ -98,10 +98,10 @@ static time_t retry_get_tick_seconds(RETRY_CONTROL_INSTANCE* retry_control)
     int tick_result;
     tickcounter_ms_t tick = 0;
 
-    if (NULL != retry_control && NULL != retry_control->tick_counter) 
+    if (retry_control != NULL && retry_control->tick_counter != NULL)
     {
         tick_result = tickcounter_get_current_ms(retry_control->tick_counter, &tick);
-        if (0 == tick_result)
+        if (tick_result == 0 && INDEFINITE_TIME != tick)
         {
             // convert tick ms into secs
             result = (time_t)(tick / 1000); 
@@ -288,35 +288,39 @@ RETRY_CONTROL_HANDLE retry_control_create(IOTHUB_CLIENT_RETRY_POLICY policy, uns
 {
     RETRY_CONTROL_INSTANCE* retry_control;
 
-    if ((retry_control = (RETRY_CONTROL_INSTANCE*)calloc(1, sizeof(RETRY_CONTROL_INSTANCE))) == NULL)
+    if ((retry_control = (RETRY_CONTROL_INSTANCE*)malloc(sizeof(RETRY_CONTROL_INSTANCE))) == NULL)
     {
         LogError("Failed creating the retry control (calloc failed)");
     }
-    else if ((retry_control->tick_counter = tickcounter_create()) == NULL)    
-    {
-        LogError("Failed creating the retry controller (tickcounter_create failed)");
-        free(retry_control);
-        retry_control = NULL;
-    }
     else
     {
-        retry_control->policy = policy;
-        retry_control->max_retry_time_in_secs = max_retry_time_in_secs;
-
-        if (retry_control->policy == IOTHUB_CLIENT_RETRY_EXPONENTIAL_BACKOFF ||
-            retry_control->policy == IOTHUB_CLIENT_RETRY_EXPONENTIAL_BACKOFF_WITH_JITTER)
+        memset(retry_control, 0, sizeof(RETRY_CONTROL_INSTANCE));
+        if ((retry_control->tick_counter = tickcounter_create()) == NULL)
         {
-            retry_control->initial_wait_time_in_secs = 1;
+            LogError("Failed creating the retry controller (tickcounter_create failed)");
+            free(retry_control);
+            retry_control = NULL;
         }
         else
         {
-            retry_control->initial_wait_time_in_secs = 5;
+            retry_control->policy = policy;
+            retry_control->max_retry_time_in_secs = max_retry_time_in_secs;
+
+            if (retry_control->policy == IOTHUB_CLIENT_RETRY_EXPONENTIAL_BACKOFF ||
+                retry_control->policy == IOTHUB_CLIENT_RETRY_EXPONENTIAL_BACKOFF_WITH_JITTER)
+            {
+                retry_control->initial_wait_time_in_secs = 1;
+            }
+            else
+            {
+                retry_control->initial_wait_time_in_secs = 5;
+            }
+
+            retry_control->max_jitter_percent = 5;
+            retry_control->max_delay_in_secs = DEFAULT_MAX_DELAY_IN_SECS;
+
+            retry_control_reset(retry_control);
         }
-
-        retry_control->max_jitter_percent = 5;
-        retry_control->max_delay_in_secs = DEFAULT_MAX_DELAY_IN_SECS;
-
-        retry_control_reset(retry_control);
     }
 
     return (RETRY_CONTROL_HANDLE)retry_control;
