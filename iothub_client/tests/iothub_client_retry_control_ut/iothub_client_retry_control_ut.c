@@ -60,6 +60,7 @@ static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 
 #define INDEFINITE_TIME                     ((time_t)-1)
 #define TEST_OPTIONHANDLER_HANDLE           (OPTIONHANDLER_HANDLE)0x7771
+#define TEST_TICKCOUNTER_HANDLE             (TICK_COUNTER_HANDLE)0x7772
 #define SECONDS_TO_TICKS(x)                 (x * 1000)
 
 static time_t TEST_current_time;
@@ -118,11 +119,6 @@ static time_t add_seconds(time_t base_time, int seconds)
     }
 
     return new_time;
-}
-
-static TICK_COUNTER_HANDLE my_tickcounter_create(void)
-{
-    return (TICK_COUNTER_HANDLE)malloc(1);
 }
 
 static void run_and_verify_should_retry(RETRY_CONTROL_HANDLE handle, time_t first_retry_time, time_t last_retry_time, time_t current_time, double secs_since_first_retry, double secs_since_last_retry, RETRY_ACTION expected_retry_action, bool is_first_check)
@@ -238,7 +234,6 @@ static void register_global_mock_hooks()
     REGISTER_GLOBAL_MOCK_HOOK(malloc, TEST_malloc);
     REGISTER_GLOBAL_MOCK_HOOK(free, TEST_free);
     REGISTER_GLOBAL_MOCK_HOOK(OptionHandler_AddOption, TEST_OptionHandler_AddOption);
-    REGISTER_GLOBAL_MOCK_HOOK(tickcounter_create, my_tickcounter_create);
 }
 
 static void register_global_mock_returns()
@@ -251,6 +246,7 @@ static void register_global_mock_returns()
 
     REGISTER_GLOBAL_MOCK_RETURN(OptionHandler_FeedOptions, OPTIONHANDLER_OK);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(OptionHandler_FeedOptions, OPTIONHANDLER_ERROR);
+    REGISTER_GLOBAL_MOCK_RETURN(tickcounter_create, TEST_TICKCOUNTER_HANDLE);
 }
 
 
@@ -367,7 +363,6 @@ TEST_FUNCTION(create_success)
     umock_c_reset_all_calls();
     EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
     EXPECTED_CALL(tickcounter_create());
-    EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
 
     // act
     RETRY_CONTROL_HANDLE handle = retry_control_create(IOTHUB_CLIENT_RETRY_EXPONENTIAL_BACKOFF_WITH_JITTER, 10);
