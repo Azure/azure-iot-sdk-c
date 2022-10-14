@@ -290,7 +290,7 @@ RETRY_CONTROL_HANDLE retry_control_create(IOTHUB_CLIENT_RETRY_POLICY policy, uns
 
     if ((retry_control = (RETRY_CONTROL_INSTANCE*)malloc(sizeof(RETRY_CONTROL_INSTANCE))) == NULL)
     {
-        LogError("Failed creating the retry control (calloc failed)");
+        LogError("Failed creating the retry control (malloc failed)");
     }
     else
     {
