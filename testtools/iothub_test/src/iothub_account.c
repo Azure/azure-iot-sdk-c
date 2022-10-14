@@ -292,19 +292,21 @@ static IOTHUB_REGISTRYMANAGER_RESULT createTestDeviceWithRetry(IOTHUB_REGISTRYMA
     while (true)
     {
         LogInfo("Invoking registry manager to create device %s", deviceCreateInfo->deviceId);
-        if ((result = IoTHubRegistryManager_CreateDevice(iothub_registrymanager_handle, deviceCreateInfo, deviceInfo)) == IOTHUB_REGISTRYMANAGER_OK)
+        result = IoTHubRegistryManager_CreateDevice(iothub_registrymanager_handle, deviceCreateInfo, deviceInfo);
+        if (result == IOTHUB_REGISTRYMANAGER_OK || result == IOTHUB_REGISTRYMANAGER_DEVICE_EXIST)
         {
+            LogInfo("Device created with status %s", MU_ENUM_TO_STRING(IOTHUB_REGISTRYMANAGER_RESULT, result));
             break;
         }
 
         creationAttempts++;
         if (creationAttempts == TEST_CREATE_MAX_RETRIES)
         {
-            LogError("Creating device %s failed with error %d.  Exhausted retry attempts.  Failing test", deviceCreateInfo->deviceId, result);
+            LogError("Creating device %s failed with error %s (%d).  Exhausted retry attempts.  Failing test", deviceCreateInfo->deviceId, MU_ENUM_TO_STRING(IOTHUB_REGISTRYMANAGER_RESULT, result), result);
             break;
         }
             
-        LogError("Creating device %s failed with error %d.  Sleeping %d milliseconds", deviceCreateInfo->deviceId, result, TEST_SLEEP_BETWEEN_CREATION_FAILURES_MSEC);
+        LogError("Creating device %s failed with error %s (%d).  Sleeping %d milliseconds", deviceCreateInfo->deviceId, MU_ENUM_TO_STRING(IOTHUB_REGISTRYMANAGER_RESULT, result), result, TEST_SLEEP_BETWEEN_CREATION_FAILURES_MSEC);
         ThreadAPI_Sleep(TEST_SLEEP_BETWEEN_CREATION_FAILURES_MSEC + gb_rand() % 15);  // sleep with jitter
     }
 
