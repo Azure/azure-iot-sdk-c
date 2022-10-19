@@ -52,6 +52,7 @@ static const char* CONN_MODULE_PART = ";ModuleId=";
 const int TEST_CREATE_MAX_RETRIES = 10;
 const int TEST_METHOD_INVOKE_MAX_RETRIES = 3;
 const int TEST_SLEEP_THROTTLE_MSEC = 5 * 1000;
+const int TEST_SLEEP_AFTER_CREATED_DEVICE_MSEC = 30 * 1000;
 const int TEST_SLEEP_BETWEEN_CREATION_FAILURES_MSEC = 30 * 1000;
 const int TEST_SLEEP_BETWEEN_METHOD_INVOKE_FAILURES_MSEC = 30 * 1000;
 
@@ -296,6 +297,7 @@ static IOTHUB_REGISTRYMANAGER_RESULT createTestDeviceWithRetry(IOTHUB_REGISTRYMA
         if (result == IOTHUB_REGISTRYMANAGER_OK || result == IOTHUB_REGISTRYMANAGER_DEVICE_EXIST)
         {
             LogInfo("Device created with status %s", MU_ENUM_TO_STRING(IOTHUB_REGISTRYMANAGER_RESULT, result));
+            ThreadAPI_Sleep(TEST_SLEEP_AFTER_CREATED_DEVICE_MSEC);  // allow ARM cache to update
             break;
         }
 
