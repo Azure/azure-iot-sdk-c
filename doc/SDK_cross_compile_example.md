@@ -61,50 +61,61 @@ In the above command replace &lt;*your Pi identifier*&gt; with the IP address of
 
 This command will copy many more files to your host than you actually need but, for brevity, we copy them all. If you wish, you could optimize the sync action to exclude files that are not required.
 
-### Setting up cmake to cross compile
+### Building the SDK
 
 In order to tell cmake that it is performing a cross compile we need to provide it with a toolchain file. To save us some typing and to make our whole procedure less dependent upon the current user we are going to export a value. Whilst in the same directory as above enter the following command
 ```
 export RPI_ROOT=$(pwd)
 ```
 You can use *export -p* to verify RPI\_ROOT has been added to the environment.
-
-Now we need to switch to the SDK directory tree. Enter this command
+Then set the following variables accordingly:
 ```
-cd ~/Source/azure-iot-sdk-c/build_all/linux
+ENV TOOLCHAIN_ROOT=${RPI_ROOT}/gcc-linaro-7.3.1-2018.05-x86_64_arm-linux-gnueabihf
+ENV TOOLCHAIN_SYSROOT=${TOOLCHAIN_ROOT}
+ENV TOOLCHAIN_EXES=${TOOLCHAIN_SYSROOT}/bin
+ENV TOOLCHAIN_NAME=arm-linux-gnueabihf
+ENV TOOLCHAIN_PREFIX=${TOOLCHAIN_SYSROOT}/usr
 ```
-Using the text editor of your choice, create a new file in this directory and call it toolchain-rpi.cmake. Into this file place the following lines
-
-```cmake
-INCLUDE(CMakeForceCompiler)
-
-SET(CMAKE_SYSTEM_NAME Linux)     # this one is important
-SET(CMAKE_SYSTEM_VERSION 1)     # this one not so much
-
-# this is the location of the amd64 toolchain targeting the Raspberry Pi
-SET(CMAKE_C_COMPILER $ENV{RPI_ROOT}/../bin/arm-linux-gnueabihf-gcc)
-
-# this is the file system root of the target
-SET(CMAKE_FIND_ROOT_PATH $ENV{RPI_ROOT})
-
-# search for programs in the build host directories
-SET(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
-
-# for libraries and headers in the target directories
-SET(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
-SET(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+Now to create the toolchain and build the SDK, run the script found at:
 ```
-and save the toolchain file. Your cross compilation environment is now complete.
-
-### Building the SDK
-
-The final step in the process is to run the actual build. For this you will need to be in the Linux build directory as shown above. Enter the following commands
+/Source/azure-iot-sdk-c/blob/main/jenkins/raspberrypi_c_buster.sh
 ```
-cd ~/Source/azure-iot-sdk-c/build_all/linux
-./build.sh --toolchain-file toolchain-rpi.cmake -cl --sysroot=$RPI_ROOT
-```
-This will tell cmake to build the SDK using the toolchain file toolchain-rpi.cmake. Finally, and absolutely critical is the use of the *--sysroot* option. Without this the compiler will fail to find required headers and libraries.
 
+```
+#!/bin/bash
+# Copyright (c) Microsoft. All rights reserved.
+# Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+set -x # Set trace on
+set -o errexit # Exit if command failed
+set -o nounset # Exit if variable not set
+set -o pipefail # Exit if pipe failed
+
+cd ~/Source/azure-iot-sdk-c/
+
+# assume directory is root of downloaded repo
+mkdir cmake
+cd cmake
+ls -al
+
+# Create a cmake toolchain file on the fly
+echo "SET(CMAKE_SYSTEM_NAME Linux)     # this one is important" > toolchain.cmake
+echo "SET(CMAKE_SYSTEM_VERSION 1)      # this one not so much" >> toolchain.cmake
+
+echo "SET(CMAKE_C_COMPILER ${TOOLCHAIN_EXES}/${TOOLCHAIN_NAME}-gcc)" >> toolchain.cmake
+echo "SET(CMAKE_CXX_COMPILER ${TOOLCHAIN_EXES}/${TOOLCHAIN_NAME}-g++)" >> toolchain.cmake
+echo "SET(CMAKE_FIND_ROOT_PATH ${TOOLCHAIN_SYSROOT})" >> toolchain.cmake
+echo "SET(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)" >> toolchain.cmake
+echo "SET(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)" >> toolchain.cmake
+echo "SET(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)" >> toolchain.cmake
+ls -al
+
+# Build the SDK. This will use the OpenSSL, cURL and uuid binaries that we built before
+cmake -DCMAKE_TOOLCHAIN_FILE=toolchain.cmake -Duse_prov_client:BOOL=OFF -DCMAKE_INSTALL_PREFIX=${TOOLCHAIN_PREFIX} -Drun_e2e_tests:BOOL=ON -Drun_unittests=:BOOL=ON ..
+make -j 2
+ls -al
+
+```
 ### Specifying Additional Build Flags
 
 If you need to provide additional build flags for your cross compile to function you can add further _-cl_ parameters to the build script's command line. For example, adding _-cl -v_ will turn on the verbose output from the compile and link process or to pass options only to the linker for example to pass -v to the linker you can use _-cl Wl,-v_.
