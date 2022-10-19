@@ -77,9 +77,7 @@ ENV TOOLCHAIN_NAME=arm-linux-gnueabihf
 ENV TOOLCHAIN_PREFIX=${TOOLCHAIN_SYSROOT}/usr
 ```
 Now to create the toolchain and build the SDK, run the script found at:
-```
 [raspberrypi_c_buster.sh](https://github.com/Azure/azure-iot-sdk-c/blob/main/jenkins/raspberrypi_c_buster.sh)
-```
 
 ```
 #!/bin/bash
