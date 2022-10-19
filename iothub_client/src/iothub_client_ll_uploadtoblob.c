@@ -1015,13 +1015,15 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_SetOption(IOTHUB_CLIENT_LL_UPL
         }
         else if (strcmp(OPTION_OPENSSL_PRIVATE_KEY_TYPE, optionName) == 0)
         {
-            if (value == NULL)
+            if (upload_data->cred_type != IOTHUB_CREDENTIAL_TYPE_X509)
             {
-                if (upload_data->credentials.x509_credentials.x509privatekeyType != NULL)
-                {
-                    free(upload_data->credentials.x509_credentials.x509privatekeyType);
-                    upload_data->credentials.x509_credentials.x509privatekeyType = NULL;
-                }
+                LogError("trying to set a x509 private key type while the authentication scheme is not x509");
+                result = IOTHUB_CLIENT_INVALID_ARG;
+            }
+            else if (value == NULL)
+            {
+                LogError("NULL is a not a valid value for x509 private key type");
+                result = IOTHUB_CLIENT_INVALID_ARG;
             }
             else
             {
@@ -1045,20 +1047,28 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_SetOption(IOTHUB_CLIENT_LL_UPL
         }
         else if (strcmp(OPTION_OPENSSL_ENGINE, optionName) == 0)
         {
-            char* temp;
-            if (mallocAndStrcpy_s(&temp, value) != 0)
+            if (upload_data->cred_type != IOTHUB_CREDENTIAL_TYPE_X509)
             {
-                LogError("failure in mallocAndStrcpy_s");
-                result = IOTHUB_CLIENT_ERROR;
+                LogError("trying to set an openssl engine while the authentication scheme is not x509");
+                result = IOTHUB_CLIENT_INVALID_ARG;
             }
             else
             {
-                if (upload_data->credentials.x509_credentials.engine != NULL)
+                char* temp;
+                if (mallocAndStrcpy_s(&temp, value) != 0)
                 {
-                    free(upload_data->credentials.x509_credentials.engine);
+                    LogError("failure in mallocAndStrcpy_s");
+                    result = IOTHUB_CLIENT_ERROR;
                 }
-                upload_data->credentials.x509_credentials.engine = temp;
-                result = IOTHUB_CLIENT_OK;
+                else
+                {
+                    if (upload_data->credentials.x509_credentials.engine != NULL)
+                    {
+                        free(upload_data->credentials.x509_credentials.engine);
+                    }
+                    upload_data->credentials.x509_credentials.engine = temp;
+                    result = IOTHUB_CLIENT_OK;
+                }
             }
         }
         else if (strcmp(OPTION_TRUSTED_CERT, optionName) == 0)
