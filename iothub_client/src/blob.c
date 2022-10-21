@@ -14,7 +14,7 @@
 #include "azure_c_shared_utility/shared_util_options.h"
 
 #define HTTP_STATUS_CODE_OK                 200
-#define IS_HTTP_STATUS_CODE_SUCCESS(x)      (x < 300)
+#define IS_HTTP_STATUS_CODE_SUCCESS(x)      ((x) < 300)
 
 static const char blockListXmlBegin[]  = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<BlockList>";
 static const char blockListXmlEnd[] = "</BlockList>";

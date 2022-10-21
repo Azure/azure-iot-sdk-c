@@ -48,6 +48,8 @@ static void my_gballoc_free(void* s)
 #endif
 
 #define TEST_HTTPAPIEX_HANDLE   (HTTPAPIEX_HANDLE)0x4343;
+#define HTTP_OK                 200
+#define HTTP_NOT_FOUND          404
 
 TEST_DEFINE_ENUM_TYPE(HTTPAPI_REQUEST_TYPE, HTTPAPI_REQUEST_TYPE_VALUES);
 IMPLEMENT_UMOCK_C_ENUM_TYPE(HTTPAPI_REQUEST_TYPE, HTTPAPI_REQUEST_TYPE_VALUES);
@@ -131,9 +133,8 @@ static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 }
 
 static BUFFER_HANDLE testValidBufferHandle; /*assigned in TEST_SUITE_INITIALIZE*/
-static unsigned int httpResponse; /*used as out parameter in every call to Blob_....*/
-static const unsigned int TwoHundred = 200;
-static const unsigned int FourHundredFour = 404;
+static const unsigned int TwoHundred = HTTP_OK;
+static const unsigned int FourHundredFour = HTTP_NOT_FOUND;
 
 // Allocate test content during initial test setup only.  This buffer is very large,
 // which means significant performance degradation on Valgrind tests if we were to
@@ -339,6 +340,7 @@ TEST_FUNCTION_CLEANUP(Cleanup)
 TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_with_NULL_SasUri_fails)
 {
     ///arrange
+    unsigned int httpResponse = HTTP_OK;
 
     ///act
     BLOB_RESULT result = Blob_UploadMultipleBlocksFromSasUri(NULL, FileUpload_GetData_Callback, &context, &httpResponse, testValidBufferHandle, NULL, NULL, NULL);
@@ -353,6 +355,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_with_NULL_SasUri_fails)
 TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_with_NULL_getDataCallBack_and_non_NULL_context_fails)
 {
     ///arrange
+    unsigned int httpResponse = HTTP_OK;
 
     ///act
     BLOB_RESULT result = Blob_UploadMultipleBlocksFromSasUri(TEST_VALID_SASURI_1, NULL, &context, &httpResponse, testValidBufferHandle, NULL, NULL, NULL);
@@ -367,6 +370,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_with_NULL_getDataCallBack_and_
 TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_succeeds_when_HTTP_status_code_is_404)
 {
     ///arrange
+    unsigned int httpResponse = HTTP_OK;
     unsigned char c = '3';
     size_t size = 1;
     context.size = size;
@@ -408,7 +412,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_succeeds_when_HTTP_status_code
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)) /*this is getting the relative path as const char* */
             .IgnoreArgument_handle();
 
-        int responseCode = 404; /*not found*/
+        int responseCode = HTTP_NOT_FOUND; /*not found*/
         STRICT_EXPECTED_CALL(HTTPAPIEX_ExecuteRequest(IGNORED_PTR_ARG, HTTPAPI_REQUEST_PUT, IGNORED_PTR_ARG, NULL, IGNORED_PTR_ARG, &httpResponse, NULL, testValidBufferHandle))
             .IgnoreArgument_handle()
             .IgnoreArgument_relativePath()
@@ -430,6 +434,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_succeeds_when_HTTP_status_code
 
     ///assert
     ASSERT_ARE_EQUAL(BLOB_RESULT, BLOB_OK, result);
+    ASSERT_ARE_EQUAL(int, HTTP_NOT_FOUND, httpResponse);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     ///cleanup
@@ -438,6 +443,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_succeeds_when_HTTP_status_code
 TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_fails_when_HTTPAPIEX_ExecuteRequest_fails)
 {
     ///arrange
+    unsigned int httpResponse = HTTP_OK;
     unsigned char c = '3';
     size_t size = 1;
     context.size = size;
@@ -479,7 +485,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_fails_when_HTTPAPIEX_ExecuteRe
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)) /*this is getting the relative path as const char* */
             .IgnoreArgument_handle();
 
-        int responseCode = 200; /*ok*/
+        int responseCode = HTTP_OK; /*ok*/
         STRICT_EXPECTED_CALL(HTTPAPIEX_ExecuteRequest(IGNORED_PTR_ARG, HTTPAPI_REQUEST_PUT, IGNORED_PTR_ARG, NULL, IGNORED_PTR_ARG, &httpResponse, NULL, testValidBufferHandle))
             .IgnoreArgument_handle()
             .IgnoreArgument_relativePath()
@@ -511,6 +517,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_fails_when_HTTPAPIEX_ExecuteRe
 TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_fails_when_BUFFER_create_fails)
 {
     ///arrange
+    unsigned int httpResponse = HTTP_OK;
     unsigned char c = '3';
     context.size = 1;
     context.source = &c;
@@ -542,6 +549,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_fails_when_BUFFER_create_fails
 TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_fails_when_HTTPAPIEX_Create_fails)
 {
     ///arrange
+    unsigned int httpResponse = HTTP_OK;
     unsigned char c = '3';
     context.size = 1;
     context.source = &c;
@@ -569,6 +577,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_fails_when_HTTPAPIEX_Create_fa
 TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_fails_when_malloc_fails)
 {
     ///arrange
+    unsigned int httpResponse = HTTP_OK;
     unsigned char c = '3';
     context.size = 1;
     context.source = &c;
@@ -593,6 +602,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_fails_when_malloc_fails)
 TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_when_SasUri_is_wrong_fails_1)
 {
     ///arrange
+    unsigned int httpResponse = HTTP_OK;
     unsigned char c = '3';
     context.size = 1;
     context.source = &c;
@@ -613,6 +623,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_when_SasUri_is_wrong_fails_1)
 TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_when_SasUri_is_wrong_fails_2)
 {
     ///arrange
+    unsigned int httpResponse = HTTP_OK;
     unsigned char c = '3';
     context.size = 1;
     context.source = &c;
@@ -632,6 +643,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_when_SasUri_is_wrong_fails_2)
 
 static void Blob_UploadMultipleBlocksFromSasUri_various_sizes_happy_path_Impl(HTTP_PROXY_OPTIONS *proxyOptions, const char * networkInterface, const char* certificate, size_t* blockSizesToTest, size_t numberBlockSizesToTest)
 {
+    unsigned int httpResponse = HTTP_OK;
     for (size_t iSize = 0; iSize < numberBlockSizesToTest; iSize++)
     {
         umock_c_reset_all_calls();
@@ -753,6 +765,7 @@ static void Blob_UploadMultipleBlocksFromSasUri_various_sizes_happy_path_Impl(HT
         ///assert
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
         ASSERT_ARE_EQUAL(BLOB_RESULT, BLOB_OK, result);
+        ASSERT_ARE_EQUAL(int, HTTP_OK, httpResponse);
     }
 
 
@@ -794,6 +807,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_various_sizes_happy_path)
 
 TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_64MB_unhappy_paths)
 {
+    unsigned int httpResponse = HTTP_OK;
     (void)umock_c_negative_tests_init();
 
     umock_c_reset_all_calls();
@@ -918,6 +932,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_64MB_unhappy_paths)
 
             ///assert
             ASSERT_ARE_NOT_EQUAL(BLOB_RESULT, BLOB_OK, result, temp_str);
+            ASSERT_ARE_EQUAL(int, HTTP_OK, httpResponse);
         }
     }
 
@@ -926,8 +941,9 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_64MB_unhappy_paths)
 
 TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_64MB_with_certificate_and_network_interface_unhappy_paths)
 {
-    (void)umock_c_negative_tests_init();
+    unsigned int httpResponse = HTTP_OK;
 
+    (void)umock_c_negative_tests_init();
 
     umock_c_reset_all_calls();
     ///arrange
@@ -1054,6 +1070,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_64MB_with_certificate_and_netw
 
             ///assert
             ASSERT_ARE_NOT_EQUAL(BLOB_RESULT, BLOB_OK, result, temp_str);
+            ASSERT_ARE_EQUAL(int, HTTP_OK, httpResponse);
         }
     }
 
@@ -1063,6 +1080,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_64MB_with_certificate_and_netw
 TEST_FUNCTION(Blob_UploadFromSasUri_when_http_code_is_404_it_immediately_succeeds)
 {
     ///arrange
+    unsigned int httpResponse = HTTP_OK;
     umock_c_reset_all_calls();
 
     memset(testUploadToBlobContent, '3', testUploadToBlobContentMaxSize);
@@ -1132,11 +1150,13 @@ TEST_FUNCTION(Blob_UploadFromSasUri_when_http_code_is_404_it_immediately_succeed
     ///assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     ASSERT_ARE_EQUAL(BLOB_RESULT, BLOB_OK, result);
+    ASSERT_ARE_EQUAL(int, HTTP_NOT_FOUND, httpResponse);
 }
 
 TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_when_blockSize_too_big_fails)
 {
     ///arrange
+    unsigned int httpResponse = HTTP_OK;
     BLOB_UPLOAD_CONTEXT_FAKE fakeContext;
     fakeContext.blockSent = 0;
     fakeContext.blockSize = BLOCK_SIZE + 1;
@@ -1149,6 +1169,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_when_blockSize_too_big_fails)
 
     ///assert
     ASSERT_ARE_EQUAL(BLOB_RESULT, BLOB_INVALID_ARG, result);
+    ASSERT_ARE_EQUAL(int, HTTP_OK, httpResponse);
 
     ///cleanup
     gballoc_free(fakeContext.fakeData);
@@ -1157,6 +1178,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_when_blockSize_too_big_fails)
 TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_when_blockSize_is_4MB_succeeds)
 {
     ///arrange
+    unsigned int httpResponse = HTTP_OK;
     BLOB_UPLOAD_CONTEXT_FAKE fakeContext;
     fakeContext.blockSent = 0;
     fakeContext.blockSize = BLOCK_SIZE;
@@ -1169,6 +1191,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_when_blockSize_is_4MB_succeeds
 
     ///assert
     ASSERT_ARE_EQUAL(BLOB_RESULT, BLOB_OK, result);
+    ASSERT_ARE_EQUAL(int, HTTP_OK, httpResponse);
 
     ///cleanup
     gballoc_free(fakeContext.fakeData);
@@ -1177,6 +1200,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_when_blockSize_is_4MB_succeeds
 TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_when_blockCount_is_maximum_succeeds)
 {
     ///arrange
+    unsigned int httpResponse = HTTP_OK;
     BLOB_UPLOAD_CONTEXT_FAKE fakeContext;
     fakeContext.blockSent = 0;
     fakeContext.blockSize = 1;
@@ -1189,6 +1213,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_when_blockCount_is_maximum_suc
 
     ///assert
     ASSERT_ARE_EQUAL(BLOB_RESULT, BLOB_OK, result);
+    ASSERT_ARE_EQUAL(int, HTTP_OK, httpResponse);
 
     ///cleanup
     gballoc_free(fakeContext.fakeData);
@@ -1197,6 +1222,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_when_blockCount_is_maximum_suc
 TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_when_blockCount_is_one_over_maximum_fails)
 {
     ///arrange
+    unsigned int httpResponse = HTTP_OK;
     BLOB_UPLOAD_CONTEXT_FAKE fakeContext;
     fakeContext.blockSent = 0;
     fakeContext.blockSize = 1;
@@ -1209,6 +1235,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_when_blockCount_is_one_over_ma
 
     ///assert
     ASSERT_ARE_EQUAL(BLOB_RESULT, BLOB_INVALID_ARG, result);
+    ASSERT_ARE_EQUAL(int, HTTP_OK, httpResponse);
 
     ///cleanup
     gballoc_free(fakeContext.fakeData);
@@ -1217,6 +1244,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_when_blockCount_is_one_over_ma
 TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_returns_BLOB_ABORTED_when_callback_aborts_immediately)
 {
     ///arrange
+    unsigned int httpResponse = HTTP_OK;
     BLOB_UPLOAD_CONTEXT_FAKE fakeContext;
     fakeContext.blockSent = 0;
     fakeContext.blockSize = 1;
@@ -1237,6 +1265,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_returns_BLOB_ABORTED_when_call
 TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_returns_BLOB_ABORTED_when_callback_aborts_after_5_blocks)
 {
     ///arrange
+    unsigned int httpResponse = HTTP_OK;
     BLOB_UPLOAD_CONTEXT_FAKE fakeContext;
     fakeContext.blockSent = 0;
     fakeContext.blockSize = 1;
@@ -1257,6 +1286,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_returns_BLOB_ABORTED_when_call
 TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_with_empty_payload)
 {
     ///arrange
+    unsigned int httpResponse = HTTP_OK;
     BLOB_UPLOAD_CONTEXT_FAKE fakeContext;
     fakeContext.blockSent = 0;
     fakeContext.blockSize = 1;
@@ -1269,6 +1299,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_with_empty_payload)
 
     ///assert
     ASSERT_ARE_EQUAL(BLOB_RESULT, BLOB_OK, result);
+    ASSERT_ARE_EQUAL(int, HTTP_OK, httpResponse);
 
     ///cleanup
     gballoc_free(fakeContext.fakeData);
