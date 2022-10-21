@@ -251,32 +251,34 @@ static void e2e_uploadtoblob_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, IOT
         deviceToUse = IoTHubAccount_GetSASDevice(g_iothubAcctInfo);
     }
     ASSERT_IS_NOT_NULL(deviceToUse);
-
-    IOTHUB_CLIENT_HANDLE iotHubClientHandle = IoTHubClient_CreateFromConnectionString(deviceToUse->connectionString, protocol);
-    ASSERT_IS_NOT_NULL(iotHubClientHandle, "Could not invoke IoTHubClient_CreateFromConnectionString");
-
-    if (accountAuthMethod == IOTHUB_ACCOUNT_AUTH_X509)
+    if (deviceToUse != NULL)
     {
-        result = IoTHubClient_SetOption(iotHubClientHandle, OPTION_X509_CERT, deviceToUse->certificate);
-        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device x509 certificate");
-        result = IoTHubClient_SetOption(iotHubClientHandle, OPTION_X509_PRIVATE_KEY, deviceToUse->primaryAuthentication);
-        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device x509 privateKey");
-    }
+        IOTHUB_CLIENT_HANDLE iotHubClientHandle = IoTHubClient_CreateFromConnectionString(deviceToUse->connectionString, protocol);
+        ASSERT_IS_NOT_NULL(iotHubClientHandle, "Could not invoke IoTHubClient_CreateFromConnectionString");
+
+        if (accountAuthMethod == IOTHUB_ACCOUNT_AUTH_X509)
+        {
+            result = IoTHubClient_SetOption(iotHubClientHandle, OPTION_X509_CERT, deviceToUse->certificate);
+            ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device x509 certificate");
+            result = IoTHubClient_SetOption(iotHubClientHandle, OPTION_X509_PRIVATE_KEY, deviceToUse->primaryAuthentication);
+            ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device x509 privateKey");
+        }
 
 #if defined(__APPLE__) || defined(AZIOT_LINUX)
-    bool curl_verbose = true;
-    result = IoTHubClient_SetOption(iotHubClientHandle, OPTION_CURL_VERBOSE, &curl_verbose);
-    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set curl_verbose opt");
+        bool curl_verbose = true;
+        result = IoTHubClient_SetOption(iotHubClientHandle, OPTION_CURL_VERBOSE, &curl_verbose);
+        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set curl_verbose opt");
 #endif
-	
-    g_uploadToBlobStatus = UPLOADTOBLOB_CALLBACK_PENDING;
-    result = IoTHubClient_UploadToBlobAsync(iotHubClientHandle, TEST_UPLOADTOBLOB_DESTINATION_FILE, UPLOADTOBLOB_E2E_TEST_DATA, strlen((const char*)UPLOADTOBLOB_E2E_TEST_DATA), uploadToBlobCallback, &g_uploadToBlobStatus);
-    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not IoTHubClient_UploadToBlobAsync");
 
-    poll_for_upload_completion(&g_uploadToBlobStatus);
-    check_upload_result(g_uploadToBlobStatus);
+        g_uploadToBlobStatus = UPLOADTOBLOB_CALLBACK_PENDING;
+        result = IoTHubClient_UploadToBlobAsync(iotHubClientHandle, TEST_UPLOADTOBLOB_DESTINATION_FILE, UPLOADTOBLOB_E2E_TEST_DATA, strlen((const char*)UPLOADTOBLOB_E2E_TEST_DATA), uploadToBlobCallback, &g_uploadToBlobStatus);
+        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not IoTHubClient_UploadToBlobAsync");
 
-    IoTHubClient_Destroy(iotHubClientHandle);
+        poll_for_upload_completion(&g_uploadToBlobStatus);
+        check_upload_result(g_uploadToBlobStatus);
+
+        IoTHubClient_Destroy(iotHubClientHandle);
+    }
 }
 
 // Callback invoked by the SDK to retrieve data.
@@ -353,32 +355,34 @@ static void uploadToBlobGetData(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, unsigne
     (void)uploadToBlobGetDataEx(result, data, size, context);
 }
 
-static void e2e_uploadtoblob_multiblock_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, bool useExMethod, bool causeAbort)
+static void e2e_uploadtoblob_multiblock_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, bool useExMethod, bool causeAbort, bool noData)
 {
     IOTHUB_CLIENT_RESULT result;
     IOTHUB_PROVISIONED_DEVICE* deviceToUse = IoTHubAccount_GetSASDevice(g_iothubAcctInfo);
     ASSERT_IS_NOT_NULL(deviceToUse);
-
-    IOTHUB_CLIENT_HANDLE iotHubClientHandle = IoTHubClient_CreateFromConnectionString(deviceToUse->connectionString, protocol);
-    ASSERT_IS_NOT_NULL(iotHubClientHandle, "Could not invoke IoTHubClient_CreateFromConnectionString");
-
-    uploadToBlobCauseAbort = causeAbort;
-    g_uploadToBlobStatus = UPLOADTOBLOB_CALLBACK_PENDING;
-    uploadBlobNumber = 0;
-    if (useExMethod)
+    if (deviceToUse != NULL)
     {
-        result = IoTHubClient_UploadMultipleBlocksToBlobAsyncEx(iotHubClientHandle, TEST_UPLOADTOBLOB_DESTINATION_FILE_MULTIBLOCK, uploadToBlobGetDataEx, &g_uploadToBlobStatus);
-    }
-    else
-    {
-        result = IoTHubClient_UploadMultipleBlocksToBlobAsync(iotHubClientHandle, TEST_UPLOADTOBLOB_DESTINATION_FILE_MULTIBLOCK, uploadToBlobGetData, &g_uploadToBlobStatus);
-    }
-    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not IoTHubClient_UploadToBlobAsync");
+        IOTHUB_CLIENT_HANDLE iotHubClientHandle = IoTHubClient_CreateFromConnectionString(deviceToUse->connectionString, protocol);
+        ASSERT_IS_NOT_NULL(iotHubClientHandle, "Could not invoke IoTHubClient_CreateFromConnectionString");
 
-    poll_for_upload_completion(&g_uploadToBlobStatus);
-    check_upload_result(g_uploadToBlobStatus);
+        uploadToBlobCauseAbort = causeAbort;
+        g_uploadToBlobStatus = UPLOADTOBLOB_CALLBACK_PENDING;
+        uploadBlobNumber = noData ? 1 : 0;
+        if (useExMethod)
+        {
+            result = IoTHubClient_UploadMultipleBlocksToBlobAsyncEx(iotHubClientHandle, TEST_UPLOADTOBLOB_DESTINATION_FILE_MULTIBLOCK, uploadToBlobGetDataEx, &g_uploadToBlobStatus);
+        }
+        else
+        {
+            result = IoTHubClient_UploadMultipleBlocksToBlobAsync(iotHubClientHandle, TEST_UPLOADTOBLOB_DESTINATION_FILE_MULTIBLOCK, uploadToBlobGetData, &g_uploadToBlobStatus);
+        }
+        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not IoTHubClient_UploadToBlobAsync");
 
-    IoTHubClient_Destroy(iotHubClientHandle);
+        poll_for_upload_completion(&g_uploadToBlobStatus);
+        check_upload_result(g_uploadToBlobStatus);
+
+        IoTHubClient_Destroy(iotHubClientHandle);
+    }
 }
 
 // uploadToBlobTestEarlyClose is the callback passed to SDK that will retrieve uploadToBlob data.  For this test, however, we simply
@@ -394,18 +398,21 @@ static IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT uploadToBlobBlockForALongTime(I
 
         ASSERT_ARE_EQUAL(int, (int)LOCK_OK, (int)Lock(updateBlobTestLock));
         bool* slowThreadContext = context;
-        ASSERT_IS_FALSE(*slowThreadContext);
-        (void)Unlock(updateBlobTestLock);
+        ASSERT_IS_NOT_NULL(slowThreadContext);
+        if (slowThreadContext != NULL)
+        {
+            ASSERT_IS_FALSE(*slowThreadContext);
+            (void)Unlock(updateBlobTestLock);
 
-        LogInfo("Slow worker thread created, context=%p.  It will sleep %d milliseconds before return", context, TEST_SLEEP_SLOW_WORKER_THREAD);
-        ThreadAPI_Sleep(TEST_SLEEP_SLOW_WORKER_THREAD);
-        LogInfo("Slow worker thread sleep finished, context=%p.  Returning to caller.", context);
+            LogInfo("Slow worker thread created, context=%p.  It will sleep %d milliseconds before return", context, TEST_SLEEP_SLOW_WORKER_THREAD);
+            ThreadAPI_Sleep(TEST_SLEEP_SLOW_WORKER_THREAD);
+            LogInfo("Slow worker thread sleep finished, context=%p.  Returning to caller.", context);
 
-        // Set the context to indicate to test that we have actually executed this thread.
-        ASSERT_ARE_EQUAL(int, (int)LOCK_OK, (int)Lock(updateBlobTestLock));
-        *slowThreadContext = true;
-        (void)Unlock(updateBlobTestLock);
-
+            // Set the context to indicate to test that we have actually executed this thread.
+            ASSERT_ARE_EQUAL(int, (int)LOCK_OK, (int)Lock(updateBlobTestLock));
+            *slowThreadContext = true;
+            (void)Unlock(updateBlobTestLock);
+        }
         // It doesn't matter for the test what code we return, as the worker thread can continue to execute indefinitely as the Destroy() call will block.
         // Since we're testing the SDK close here and not the Hub, just terminate the request.
         return IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_ABORT;
@@ -492,7 +499,12 @@ TEST_FUNCTION_INITIALIZE(TestMethodInitialize)
 #ifdef TEST_MQTT
 TEST_FUNCTION(IoTHub_MQTT_UploadMultipleBlocksToBlobEx)
 {
-    e2e_uploadtoblob_multiblock_test(MQTT_Protocol, true, false);
+    e2e_uploadtoblob_multiblock_test(MQTT_Protocol, true, false, false);
+}
+
+TEST_FUNCTION(IoTHub_MQTT_UploadMultipleBlocksNoData)
+{
+    e2e_uploadtoblob_multiblock_test(MQTT_Protocol, true, false, true);
 }
 
 #ifndef __APPLE__

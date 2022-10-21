@@ -47,6 +47,8 @@ static void my_gballoc_free(void* s)
 #undef malloc
 #endif
 
+#define TEST_HTTPAPIEX_HANDLE   (HTTPAPIEX_HANDLE)0x4343;
+
 TEST_DEFINE_ENUM_TYPE(HTTPAPI_REQUEST_TYPE, HTTPAPI_REQUEST_TYPE_VALUES);
 IMPLEMENT_UMOCK_C_ENUM_TYPE(HTTPAPI_REQUEST_TYPE, HTTPAPI_REQUEST_TYPE_VALUES);
 
@@ -1247,6 +1249,26 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_returns_BLOB_ABORTED_when_call
 
     ///assert
     ASSERT_ARE_EQUAL(BLOB_RESULT, BLOB_ABORTED, result);
+
+    ///cleanup
+    gballoc_free(fakeContext.fakeData);
+}
+
+TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_with_empty_payload)
+{
+    ///arrange
+    BLOB_UPLOAD_CONTEXT_FAKE fakeContext;
+    fakeContext.blockSent = 0;
+    fakeContext.blockSize = 1;
+    fakeContext.blocksCount = 0;
+    fakeContext.fakeData = NULL;
+    fakeContext.abortOnBlockNumber = 5;
+
+    ///act
+    BLOB_RESULT result = Blob_UploadMultipleBlocksFromSasUri("https://h.h/something?a=b", FileUpload_GetFakeData_Callback, &fakeContext, &httpResponse, testValidBufferHandle, NULL, NULL, NULL);
+
+    ///assert
+    ASSERT_ARE_EQUAL(BLOB_RESULT, BLOB_OK, result);
 
     ///cleanup
     gballoc_free(fakeContext.fakeData);
