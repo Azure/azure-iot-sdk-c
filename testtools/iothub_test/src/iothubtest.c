@@ -165,6 +165,8 @@ const char* AMQP_ADDRESS_PATH_FMT = "/devices/%s/messages/deviceBound";
 const char* AMQP_SEND_TARGET_ADDRESS_FMT = "amqps://%s/messages/deviceBound";
 const char* AMQP_SEND_AUTHCID_FMT = "iothubowner@sas.root.%s";
 
+const char* DEFAULT_TARGET_NETWORK_INTERFACE = "eth0";
+
 #define THREAD_CONTINUE             0
 #define THREAD_END                  1
 #define MAX_DRAIN_TIME              1000.0
@@ -2004,6 +2006,34 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_SendMessage(IOTHUB_TEST_HANDLE devhubHandle
             xio_destroy(tls_io);
             saslmechanism_destroy(sasl_mechanism_handle);
         }
+    }
+
+    return result;
+}
+
+const char* IoTHubTest_GetTargetNetworkInterface(IOTHUB_TEST_HANDLE devhubHandle)
+{
+    const char* result = NULL;
+    static char networkInterface[32];
+
+    if (devhubHandle == NULL)
+    {
+        LogError("Invalid parameter: devhubHandle is NULL", devhubHandle);
+    }
+    else
+    {
+        char* envVarValue = getenv("IOTHUB_TEST_TARGET_NETWORK_INTERFACE");
+
+        if (envVarValue != NULL)
+        {
+            (void)strcpy(networkInterface, envVarValue);
+        }
+        else
+        {
+            (void)strcpy(networkInterface, DEFAULT_TARGET_NETWORK_INTERFACE);
+        }
+
+        result = networkInterface;
     }
 
     return result;

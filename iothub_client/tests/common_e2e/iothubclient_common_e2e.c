@@ -505,6 +505,7 @@ static char* get_target_mac_address()
         {
             struct ifreq* it = ifc.ifc_req;
             const struct ifreq* const end = it + (ifc.ifc_len / sizeof(struct ifreq));
+            const char* networkInterface = IoTHubTest_GetTargetNetworkInterface(iotHubTestHandle);
 
             result = NULL;
 
@@ -527,7 +528,7 @@ static char* get_target_mac_address()
                     LogError("ioctl failed querying socket (SIOCGIFADDR)");
                     break;
                 }
-                else if (strcmp(ifr.ifr_name, "eth0") == 0)
+                else if (strcmp(ifr.ifr_name, networkInterface) == 0)
                 {
                     unsigned char* mac = (unsigned char*)ifr.ifr_hwaddr.sa_data;
 
