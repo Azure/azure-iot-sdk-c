@@ -505,7 +505,7 @@ static char* get_target_mac_address()
         {
             struct ifreq* it = ifc.ifc_req;
             const struct ifreq* const end = it + (ifc.ifc_len / sizeof(struct ifreq));
-            const char* networkInterface = IoTHubTest_GetTargetNetworkInterface(iotHubTestHandle);
+            const char* networkInterface = IoTHubTest_GetTargetNetworkInterface();
 
             result = NULL;
 

@@ -2011,30 +2011,22 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_SendMessage(IOTHUB_TEST_HANDLE devhubHandle
     return result;
 }
 
-const char* IoTHubTest_GetTargetNetworkInterface(IOTHUB_TEST_HANDLE devhubHandle)
+const char* IoTHubTest_GetTargetNetworkInterface()
 {
     const char* result = NULL;
     static char networkInterface[32];
+    char* envVarValue = getenv("IOTHUB_TEST_TARGET_NETWORK_INTERFACE");
 
-    if (devhubHandle == NULL)
+    if (envVarValue != NULL)
     {
-        LogError("Invalid parameter: devhubHandle is NULL");
+        (void)strcpy(networkInterface, envVarValue);
     }
     else
     {
-        char* envVarValue = getenv("IOTHUB_TEST_TARGET_NETWORK_INTERFACE");
-
-        if (envVarValue != NULL)
-        {
-            (void)strcpy(networkInterface, envVarValue);
-        }
-        else
-        {
-            (void)strcpy(networkInterface, DEFAULT_TARGET_NETWORK_INTERFACE);
-        }
-
-        result = networkInterface;
+        (void)strcpy(networkInterface, DEFAULT_TARGET_NETWORK_INTERFACE);
     }
+
+    result = networkInterface;
 
     return result;
 }
