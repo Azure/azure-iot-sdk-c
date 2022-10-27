@@ -2018,7 +2018,7 @@ const char* IoTHubTest_GetTargetNetworkInterface(IOTHUB_TEST_HANDLE devhubHandle
 
     if (devhubHandle == NULL)
     {
-        LogError("Invalid parameter: devhubHandle is NULL", devhubHandle);
+        LogError("Invalid parameter: devhubHandle is NULL");
     }
     else
     {
