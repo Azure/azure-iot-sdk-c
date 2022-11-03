@@ -166,6 +166,8 @@ const char* AMQP_SEND_TARGET_ADDRESS_FMT = "amqps://%s/messages/deviceBound";
 const char* AMQP_SEND_AUTHCID_FMT = "iothubowner@sas.root.%s";
 
 const char* DEFAULT_TARGET_NETWORK_INTERFACE = "eth0";
+#define ENV_VAR_E2E_TARGET_NETWORK_INTERFACE               "IOTHUB_E2E_TARGET_NETWORK_INTERFACE"
+#define ENV_VAR_E2E_TARGET_NETWORK_INTERFACE_MAX_LENGTH    32
 
 #define THREAD_CONTINUE             0
 #define THREAD_END                  1
@@ -2014,12 +2016,12 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_SendMessage(IOTHUB_TEST_HANDLE devhubHandle
 const char* IoTHubTest_GetTargetNetworkInterface()
 {
     const char* result = NULL;
-    static char networkInterface[32];
-    char* envVarValue = getenv("IOTHUB_TEST_TARGET_NETWORK_INTERFACE");
+    static char networkInterface[ENV_VAR_E2E_TARGET_NETWORK_INTERFACE_MAX_LENGTH];
+    char* envNetworkInterfaceVal = getenv(ENV_VAR_E2E_TARGET_NETWORK_INTERFACE);
 
-    if (envVarValue != NULL)
+    if (envNetworkInterfaceVal != NULL)
     {
-        (void)strcpy(networkInterface, envVarValue);
+        (void)strcpy(networkInterface, envNetworkInterfaceVal);
     }
     else
     {
