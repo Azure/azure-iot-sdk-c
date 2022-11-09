@@ -61,7 +61,6 @@ Detailed instructions can be found below for each platforms:
 * [Setting up a Windows development environment](../doc/devbox_setup.md#windows)
 * [Setting up a Linux development environment](../doc/devbox_setup.md#linux)
 * [Setting up a Mac OS X development environment](../doc/devbox_setup.md#macos)
-* [Cross compile the C device SDK (targeting Raspbian and using Ubuntu as host)](../doc/SDK_cross_compile_example.md)
 
 <a name="samples"></a>
 
@@ -84,7 +83,6 @@ In addition to the simple samples found in the current repository, you can find 
 * [Setup IoT Hub][setup-iothub]
 * [Azure IoT device SDK for C tutorial][c-sdk-intro]
 * [How to port the C libraries to other OS platforms][c-porting-guide]
-* [Cross compilation example][c-cross-compile]
 * [C SDKs API reference][c-api-reference]
 
 
