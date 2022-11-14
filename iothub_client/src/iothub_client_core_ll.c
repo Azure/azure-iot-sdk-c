@@ -2919,7 +2919,7 @@ static IOTHUB_CLIENT_RESULT remove_event_unsubscribe_if_needed(IOTHUB_CLIENT_COR
             {
                 if (singlylinkedlist_get_head_item(handleData->event_callbacks) == NULL)
                 {
-                    handleData->IoTHubTransport_Unsubscribe_InputQueue(handleData);
+                    handleData->IoTHubTransport_Unsubscribe_InputQueue(handleData->deviceHandle);
                 }
                 result = IOTHUB_CLIENT_OK;
             }
