@@ -22,4 +22,11 @@ set(${theseTestsName}_c_files
 set(${theseTestsName}_h_files
 )
 
-build_c_test_artifacts(${theseTestsName} ON "tests/azure_iothub_client_tests")
+file(COPY ../global_valgrind_suppression.supp DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+build_c_test_artifacts(${theseTestsName} ON "tests/azure_iothub_client_tests"
+    VALGRIND_SUPPRESSIONS_FILE 
+        global_valgrind_suppression.supp
+    ADDITIONAL_LIBS
+        aziotsharedutil
+        iothub_client
+)

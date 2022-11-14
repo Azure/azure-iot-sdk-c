@@ -379,7 +379,6 @@ Actions are discarded, since no marshalling will be done for those when sending 
     { \
         AGENT_DATA_TYPES_RESULT result = AGENT_DATA_TYPES_OK; \
         size_t iMember = 0; \
-        DEFINITION_THAT_CAN_SUSTAIN_A_COMMA_STEAL(phantomName, 1); \
         const char* memberNames[MU_IF(MU_DIV2(MU_C1(MU_COUNT_ARG(__VA_ARGS__))), MU_DIV2(MU_C1(MU_COUNT_ARG(__VA_ARGS__))), 1)] = { 0 }; \
         size_t memberCount = sizeof(memberNames) / sizeof(memberNames[0]); \
         (void)value; \
@@ -390,13 +389,10 @@ Actions are discarded, since no marshalling will be done for those when sending 
         else \
         { \
             AGENT_DATA_TYPE members[sizeof(memberNames) / sizeof(memberNames[0])]; \
-            DEFINITION_THAT_CAN_SUSTAIN_A_COMMA_STEAL(phantomName, 2); \
             MU_FOR_EACH_2(FIELD_AS_STRING, MU_EXPAND_TWICE(__VA_ARGS__)) \
             iMember = 0; \
             { \
-                DEFINITION_THAT_CAN_SUSTAIN_A_COMMA_STEAL(phantomName, 3); \
                 MU_FOR_EACH_2(CREATE_AGENT_DATA_TYPE, MU_EXPAND_TWICE(__VA_ARGS__)) \
-                {DEFINITION_THAT_CAN_SUSTAIN_A_COMMA_STEAL(phantomName, 4); } \
                 result = ((result == AGENT_DATA_TYPES_OK) && (Create_AGENT_DATA_TYPE_from_Members(destination, #name, sizeof(memberNames) / sizeof(memberNames[0]), memberNames, members) == AGENT_DATA_TYPES_OK)) \
                             ? AGENT_DATA_TYPES_OK \
                             : AGENT_DATA_TYPES_ERROR; \

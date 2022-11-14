@@ -52,8 +52,11 @@ static const char* CONN_MODULE_PART = ";ModuleId=";
 const int TEST_CREATE_MAX_RETRIES = 10;
 const int TEST_METHOD_INVOKE_MAX_RETRIES = 3;
 const int TEST_SLEEP_THROTTLE_MSEC = 5 * 1000;
+const int TEST_SLEEP_AFTER_CREATED_DEVICE_MSEC = 30 * 1000;
 const int TEST_SLEEP_BETWEEN_CREATION_FAILURES_MSEC = 30 * 1000;
 const int TEST_SLEEP_BETWEEN_METHOD_INVOKE_FAILURES_MSEC = 30 * 1000;
+
+#define NSLOOKUP_MAX_COMMAND_SIZE 128
 
 typedef struct IOTHUB_ACCOUNT_INFO_TAG
 {
@@ -105,7 +108,7 @@ static int generateDeviceName(const char* prefix, char** deviceName)
             }
             else
             {
-                LogInfo("Created Device %s.", *deviceName);
+                LogInfo("Generated unique device name %s.", *deviceName);
                 result = 0;
             }
         }
@@ -290,19 +293,22 @@ static IOTHUB_REGISTRYMANAGER_RESULT createTestDeviceWithRetry(IOTHUB_REGISTRYMA
     while (true)
     {
         LogInfo("Invoking registry manager to create device %s", deviceCreateInfo->deviceId);
-        if ((result = IoTHubRegistryManager_CreateDevice(iothub_registrymanager_handle, deviceCreateInfo, deviceInfo)) == IOTHUB_REGISTRYMANAGER_OK)
+        result = IoTHubRegistryManager_CreateDevice(iothub_registrymanager_handle, deviceCreateInfo, deviceInfo);
+        if (result == IOTHUB_REGISTRYMANAGER_OK || result == IOTHUB_REGISTRYMANAGER_DEVICE_EXIST)
         {
+            LogInfo("Device created with status %s", MU_ENUM_TO_STRING(IOTHUB_REGISTRYMANAGER_RESULT, result));
+            ThreadAPI_Sleep(TEST_SLEEP_AFTER_CREATED_DEVICE_MSEC);  // allow ARM cache to update
             break;
         }
 
         creationAttempts++;
         if (creationAttempts == TEST_CREATE_MAX_RETRIES)
         {
-            LogError("Creating device %s failed with error %d.  Exhausted retry attempts.  Failing test", deviceCreateInfo->deviceId, result);
+            LogError("Creating device %s failed with error %s (%d).  Exhausted retry attempts.  Failing test", deviceCreateInfo->deviceId, MU_ENUM_TO_STRING(IOTHUB_REGISTRYMANAGER_RESULT, result), result);
             break;
         }
             
-        LogError("Creating device %s failed with error %d.  Sleeping %d milliseconds", deviceCreateInfo->deviceId, result, TEST_SLEEP_BETWEEN_CREATION_FAILURES_MSEC);
+        LogError("Creating device %s failed with error %s (%d).  Sleeping %d milliseconds", deviceCreateInfo->deviceId, MU_ENUM_TO_STRING(IOTHUB_REGISTRYMANAGER_RESULT, result), result, TEST_SLEEP_BETWEEN_CREATION_FAILURES_MSEC);
         ThreadAPI_Sleep(TEST_SLEEP_BETWEEN_CREATION_FAILURES_MSEC + gb_rand() % 15);  // sleep with jitter
     }
 
@@ -1137,3 +1143,58 @@ const IOTHUB_MESSAGING_HANDLE IoTHubAccount_GetMessagingHandle(IOTHUB_ACCOUNT_IN
     return result;
 }
 
+IOTHUB_GATEWAY_VERSION IoTHubAccount_GetIoTHubVersion(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle)
+{
+    IOTHUB_GATEWAY_VERSION result = IOTHUB_GATEWAY_VERSION_UNDEFINED;
+
+    const char* iotHubFqdn = IoTHubAccount_GetIoTHostName(acctHandle);
+
+    LogInfo("nslookup: check %s", iotHubFqdn);
+
+    if (iotHubFqdn != NULL)
+    {
+        const char* IoTHubGwV1Suffix = "ihsu-";
+        const char* IoTHubGwV2Suffix = "gateway-prod-gw-";
+        const char* nslookup_fmt = "nslookup %s";
+        char command[NSLOOKUP_MAX_COMMAND_SIZE];
+        char stdoutLine[128];
+
+        int commandLength = snprintf(command, NSLOOKUP_MAX_COMMAND_SIZE, nslookup_fmt, iotHubFqdn);
+
+        if (commandLength > 0 && commandLength < NSLOOKUP_MAX_COMMAND_SIZE)
+        {
+#if defined(__APPLE__) || defined(AZIOT_LINUX)
+            FILE* stdOut = popen(command, "r");
+#else
+            FILE* stdOut = _popen(command, "r");
+#endif
+
+            while (fgets(stdoutLine, sizeof(stdoutLine), stdOut) != NULL)
+            {
+                LogInfo("nslookup: %s", stdoutLine);
+
+                if (strstr(stdoutLine, "Name:") == stdoutLine)
+                {
+                    if (strstr(stdoutLine, IoTHubGwV1Suffix) != NULL)
+                    {
+                        result = IOTHUB_GATEWAY_VERSION_1;
+                    }
+                    else if (strstr(stdoutLine, IoTHubGwV2Suffix) != NULL)
+                    {
+                        result = IOTHUB_GATEWAY_VERSION_2;
+                    }
+
+                    break;
+                }
+            }
+
+#if defined(__APPLE__) || defined(AZIOT_LINUX)
+            (void)pclose(stdOut);
+#else
+            (void)_pclose(stdOut);
+#endif
+        }
+    }
+
+    return result;
+}

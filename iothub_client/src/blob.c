@@ -13,6 +13,9 @@
 #include "azure_c_shared_utility/azure_base64.h"
 #include "azure_c_shared_utility/shared_util_options.h"
 
+#define HTTP_STATUS_CODE_OK                 200
+#define IS_HTTP_STATUS_CODE_SUCCESS(x)      ((x) >= 100 && (x) < 300)
+
 static const char blockListXmlBegin[]  = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<BlockList>";
 static const char blockListXmlEnd[] = "</BlockList>";
 static const char blockListUriMarker[] = "&comp=blocklist";
@@ -105,7 +108,7 @@ BLOB_RESULT Blob_UploadBlock(
                                 LogError("unable to HTTPAPIEX_ExecuteRequest");
                                 result = BLOB_HTTP_ERROR;
                             }
-                            else if (*httpStatus >= 300)
+                            else if (!IS_HTTP_STATUS_CODE_SUCCESS(*httpStatus))
                             {
                                 LogError("HTTP status from storage does not indicate success (%d)", (int)*httpStatus);
                                 result = BLOB_OK;
@@ -152,6 +155,7 @@ static BLOB_RESULT InvokeUserCallbackAndSendBlobs(HTTPAPIEX_HANDLE httpApiExHand
         {
             uploadOneMoreBlock = 0;
             result = BLOB_OK;
+            *httpStatus = HTTP_STATUS_CODE_OK;
         }
         else
         {
@@ -195,7 +199,7 @@ static BLOB_RESULT InvokeUserCallbackAndSendBlobs(HTTPAPIEX_HANDLE httpApiExHand
                     LogError("unable to Blob_UploadBlock. Returned value=%d", result);
                     isError = 1;
                 }
-                else if (*httpStatus >= 300)
+                else if (!IS_HTTP_STATUS_CODE_SUCCESS(*httpStatus))
                 {
                     LogError("unable to Blob_UploadBlock. Returned httpStatus=%u", (unsigned int)*httpStatus);
                     isError = 1;
@@ -348,7 +352,7 @@ BLOB_RESULT Blob_UploadMultipleBlocksFromSasUri(const char* SASURI, IOTHUB_CLIEN
                 {
                    LogError("Failed in invoking callback/sending blob step");
                 }
-                else if (*httpStatus < 300)
+                else if (IS_HTTP_STATUS_CODE_SUCCESS(*httpStatus))
                 {
                     // Per SRS_BLOB_02_026, it possible for us to have a result=BLOB_OK AND a non-success HTTP status code.
                     // In order to maintain back-compat with existing code, we will return the BLOB_OK to the caller but NOT invoke this final step.

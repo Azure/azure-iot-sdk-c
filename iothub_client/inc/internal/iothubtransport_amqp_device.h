@@ -18,11 +18,11 @@ extern "C"
 #endif
 
 // @brief    name of option to apply the instance obtained using amqp_device_retrieve_options
-static const char* DEVICE_OPTION_SAVED_OPTIONS = "saved_device_options";
-static const char* DEVICE_OPTION_EVENT_SEND_TIMEOUT_SECS = "event_send_timeout_secs";
-static const char* DEVICE_OPTION_CBS_REQUEST_TIMEOUT_SECS = "cbs_request_timeout_secs";
-static const char* DEVICE_OPTION_SAS_TOKEN_REFRESH_TIME_SECS = "sas_token_refresh_time_secs";
-static const char* DEVICE_OPTION_SAS_TOKEN_LIFETIME_SECS = "sas_token_lifetime_secs";
+#define DEVICE_OPTION_SAVED_OPTIONS "saved_device_options"
+#define DEVICE_OPTION_EVENT_SEND_TIMEOUT_SECS "event_send_timeout_secs"
+#define DEVICE_OPTION_CBS_REQUEST_TIMEOUT_SECS "cbs_request_timeout_secs"
+#define DEVICE_OPTION_SAS_TOKEN_REFRESH_TIME_SECS "sas_token_refresh_time_secs"
+#define DEVICE_OPTION_SAS_TOKEN_LIFETIME_SECS "sas_token_lifetime_secs"
 
 #define DEVICE_STATE_VALUES \
     DEVICE_STATE_STOPPED, \
