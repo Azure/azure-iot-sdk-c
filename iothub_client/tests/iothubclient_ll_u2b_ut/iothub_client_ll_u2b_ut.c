@@ -1398,6 +1398,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_SetOption_openssl_private_key_type_su
 {
     int privateKeyType = 1;
     //arrange
+    setup_uploadtoblob_create_mocks(IOTHUB_CREDENTIAL_TYPE_X509);
     IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE h = IoTHubClient_LL_UploadToBlob_Create(&TEST_CONFIG_SAS, TEST_AUTH_HANDLE);
     umock_c_reset_all_calls();
 
@@ -1416,6 +1417,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_SetOption_openssl_engine_type_succeed
 {
     const char* engine = "pkcs11";
     //arrange
+    setup_uploadtoblob_create_mocks(IOTHUB_CREDENTIAL_TYPE_X509);
     IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE h = IoTHubClient_LL_UploadToBlob_Create(&TEST_CONFIG_SAS, TEST_AUTH_HANDLE);
     umock_c_reset_all_calls();
 
