@@ -985,6 +985,8 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_Destroy_handle_x509_succeeds)
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
 
     IoTHubClient_LL_UploadToBlob_Destroy(h);
 
@@ -1403,6 +1405,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_SetOption_openssl_private_key_type_su
     umock_c_reset_all_calls();
 
     //act
+    STRICT_EXPECTED_CALL(gballoc_malloc(sizeof(privateKeyType)));
     IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_UploadToBlob_SetOption(h, OPTION_OPENSSL_PRIVATE_KEY_TYPE, &privateKeyType);
 
     //assert
@@ -1422,6 +1425,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_SetOption_openssl_engine_type_succeed
     umock_c_reset_all_calls();
 
     //act
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, engine));
     IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_UploadToBlob_SetOption(h, OPTION_OPENSSL_ENGINE, engine);
 
     //assert
