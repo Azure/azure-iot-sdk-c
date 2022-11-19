@@ -43,6 +43,8 @@ typedef struct UPLOADTOBLOB_X509_CREDENTIALS_TAG
 {
     char* x509certificate;
     char* x509privatekey;
+    int* x509privatekeyType;
+    char* engine;
 } UPLOADTOBLOB_X509_CREDENTIALS;
 
 typedef enum UPLOADTOBLOB_CURL_VERBOSITY_TAG
@@ -273,6 +275,8 @@ IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE IoTHubClient_LL_UploadToBlob_Create(const I
                     upload_data->cred_type = IOTHUB_CREDENTIAL_TYPE_X509;
                     upload_data->credentials.x509_credentials.x509certificate = NULL;
                     upload_data->credentials.x509_credentials.x509privatekey = NULL;
+                    upload_data->credentials.x509_credentials.x509privatekeyType = NULL;
+                    upload_data->credentials.x509_credentials.engine = NULL;
                 }
                 else if (upload_data->cred_type == IOTHUB_CREDENTIAL_TYPE_X509_ECC)
                 {
@@ -660,7 +664,9 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl(IOTHUB_CLIE
                 if ((upload_data->cred_type == IOTHUB_CREDENTIAL_TYPE_X509 || upload_data->cred_type == IOTHUB_CREDENTIAL_TYPE_X509_ECC) &&
                      (((upload_data->tls_renegotiation == true) && (HTTPAPIEX_SetOption(iotHubHttpApiExHandle, OPTION_SET_TLS_RENEGOTIATION, &upload_data->tls_renegotiation) != HTTPAPIEX_OK)) ||
                      (HTTPAPIEX_SetOption(iotHubHttpApiExHandle, OPTION_X509_CERT, upload_data->credentials.x509_credentials.x509certificate) != HTTPAPIEX_OK) ||
-                     (HTTPAPIEX_SetOption(iotHubHttpApiExHandle, OPTION_X509_PRIVATE_KEY, upload_data->credentials.x509_credentials.x509privatekey) != HTTPAPIEX_OK)))
+                     (HTTPAPIEX_SetOption(iotHubHttpApiExHandle, OPTION_X509_PRIVATE_KEY, upload_data->credentials.x509_credentials.x509privatekey) != HTTPAPIEX_OK) ||
+                     ((upload_data->credentials.x509_credentials.x509privatekeyType != NULL) && (HTTPAPIEX_SetOption(iotHubHttpApiExHandle, OPTION_OPENSSL_PRIVATE_KEY_TYPE, upload_data->credentials.x509_credentials.x509privatekeyType) != HTTPAPIEX_OK)) ||
+                     ((upload_data->credentials.x509_credentials.engine != NULL) && (HTTPAPIEX_SetOption(iotHubHttpApiExHandle, OPTION_OPENSSL_ENGINE, upload_data->credentials.x509_credentials.engine) != HTTPAPIEX_OK))))
                 {
                     LogError("unable to HTTPAPIEX_SetOption for x509 certificate");
                     result = IOTHUB_CLIENT_ERROR;
@@ -908,6 +914,8 @@ void IoTHubClient_LL_UploadToBlob_Destroy(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE h
         {
             free(upload_data->credentials.x509_credentials.x509certificate);
             free(upload_data->credentials.x509_credentials.x509privatekey);
+            free(upload_data->credentials.x509_credentials.x509privatekeyType);
+            free(upload_data->credentials.x509_credentials.engine);
         }
         else if (upload_data->cred_type == IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN)
         {
@@ -1001,6 +1009,64 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_SetOption(IOTHUB_CLIENT_LL_UPL
                         free(upload_data->credentials.x509_credentials.x509privatekey);
                     }
                     upload_data->credentials.x509_credentials.x509privatekey = temp;
+                    result = IOTHUB_CLIENT_OK;
+                }
+            }
+        }
+        else if (strcmp(OPTION_OPENSSL_PRIVATE_KEY_TYPE, optionName) == 0)
+        {
+            if (upload_data->cred_type != IOTHUB_CREDENTIAL_TYPE_X509)
+            {
+                LogError("trying to set a x509 private key type while the authentication scheme is not x509");
+                result = IOTHUB_CLIENT_INVALID_ARG;
+            }
+            else if (value == NULL)
+            {
+                LogError("NULL is a not a valid value for x509 private key type");
+                result = IOTHUB_CLIENT_INVALID_ARG;
+            }
+            else
+            {
+                int* temp = malloc(sizeof(int));
+                if (temp == NULL)
+                {
+                    LogError("failure in malloc");
+                    result = IOTHUB_CLIENT_ERROR;
+                }
+                else
+                {
+                    *temp = *(int*)value;
+                    if (upload_data->credentials.x509_credentials.x509privatekeyType != NULL)
+                    {
+                        free(upload_data->credentials.x509_credentials.x509privatekeyType);
+                    }
+                    upload_data->credentials.x509_credentials.x509privatekeyType = temp;
+                    result = IOTHUB_CLIENT_OK;
+                }
+            }
+        }
+        else if (strcmp(OPTION_OPENSSL_ENGINE, optionName) == 0)
+        {
+            if (upload_data->cred_type != IOTHUB_CREDENTIAL_TYPE_X509)
+            {
+                LogError("trying to set an openssl engine while the authentication scheme is not x509");
+                result = IOTHUB_CLIENT_INVALID_ARG;
+            }
+            else
+            {
+                char* temp;
+                if (mallocAndStrcpy_s(&temp, value) != 0)
+                {
+                    LogError("failure in mallocAndStrcpy_s");
+                    result = IOTHUB_CLIENT_ERROR;
+                }
+                else
+                {
+                    if (upload_data->credentials.x509_credentials.engine != NULL)
+                    {
+                        free(upload_data->credentials.x509_credentials.engine);
+                    }
+                    upload_data->credentials.x509_credentials.engine = temp;
                     result = IOTHUB_CLIENT_OK;
                 }
             }
