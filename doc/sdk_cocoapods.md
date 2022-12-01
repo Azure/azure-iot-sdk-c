@@ -1,6 +1,10 @@
 # CocoaPods for Microsoft Azure IoT
 
+## Warning
+
 **Cocoapods support is deprecated and will be removed on <DATE>**
+
+## Contents
 
 The [Microsoft Azure IoT C SDK](https://github.com/azure/azure-iot-sdk-c) is available as five Objective-C [CocoaPods](https://cocoapods.org/):
 
