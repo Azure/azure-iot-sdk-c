@@ -2,7 +2,7 @@
 
 ## Warning
 
-**Cocoapods support is deprecated and will be removed on <DATE>**
+**Cocoapods support is deprecated and will be removed on June 1, 2023**
 
 ## Contents
 
