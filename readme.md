@@ -164,6 +164,14 @@ In the repository you will find instructions and build tools to compile and run 
 
 If you are considering porting the device client SDK for C to a new platform, check out the [porting guide](https://github.com/Azure/azure-c-shared-utility/blob/master/devdoc/porting_guide.md) document.
 
+## Deprecation Notes
+
+  `MBED OS`
+
+  - Packages of azure-iot-sdk-c for MBED OS have been deprecated in January, 2023.
+
+  See also [Deprecated Folders](#deprecated-folders) below for other relevant notes.
+
 ## Contribution, Feedback and Issues
 
 If you encounter any bugs, have suggestions for new features or if you would like to become an active contributor to this project please follow the instructions provided in the [contribution guidelines](.github/CONTRIBUTING.md).
@@ -245,6 +253,7 @@ Contains libraries that enable interactions with the Device Proviosining service
 `/serializer`
 
 Contains libraries that provide modeling and JSON serialization capabilities on top of the raw messaging library.
+
 
 # Releases
 
