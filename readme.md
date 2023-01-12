@@ -207,7 +207,7 @@ This folder contains application development guides and device setup instruction
 
 Contains Azure IoT Hub client components that provide the raw messaging capabilities of the library. Refer to the API documentation and samples for information on how to use it.
 
-   * build: has one subfolder for each platform (e.g. Windows, Linux, Mbed). Contains makefiles, batch files, and solutions that are used to generate the library binaries.
+   * build: has one subfolder for each platform (e.g. Windows, Linux). Contains makefiles, batch files, and solutions that are used to generate the library binaries.
    * devdoc: contains requirements, designs notes, manuals.
    * inc: public include files.
    * src: client libraries source files.
