@@ -1,6 +1,7 @@
 # Azure IoT C SDKs and Libraries
 
 [![Build Status](https://azure-iot-sdks.visualstudio.com/azure-iot-sdks/_apis/build/status/c/integrate-into-repo-C)](https://azure-iot-sdks.visualstudio.com/azure-iot-sdks/_build/latest?definitionId=85)
+  
 
 ## Introduction
 The Azure IOT Hub Device SDK allows applications written in C99 or later or C++ to communicate easily with [Azure IoT Hub](https://azure.microsoft.com/services/iot-hub/), [Azure IoT Central][Azure-IoT-Central] and to
@@ -26,6 +27,7 @@ For **constrained devices**, where memory is measured in kilobytes and not megab
     - [Provisioning Client SDK](#provisioning-client-sdk)
   - [OS Platforms and Hardware Compatibility](#os-platforms-and-hardware-compatibility)
   - [Porting the Azure IoT Device Client SDK for C to New Devices](#porting-the-azure-iot-device-client-sdk-for-c-to-new-devices)
+  - [Deprecation Notes](#deprecation-notes)
   - [Contribution, Feedback and Issues](#contribution-feedback-and-issues)
   - [Support](#support)
   - [Read More](#read-more)
@@ -163,6 +165,14 @@ The C SDKs and Libraries:
 In the repository you will find instructions and build tools to compile and run the device client SDK for C on Linux, Windows and microcontroller platforms (refer to the links above for more information on compiling the device client for C).
 
 If you are considering porting the device client SDK for C to a new platform, check out the [porting guide](https://github.com/Azure/azure-c-shared-utility/blob/master/devdoc/porting_guide.md) document.
+
+## Deprecation Notes
+
+  `MBED OS`
+
+  - Packages of azure-iot-sdk-c for MBED OS have been deprecated in January, 2023.
+
+  See also [Deprecated Folders](#deprecated-folders) below for other relevant notes.
 
 ## Contribution, Feedback and Issues
 
