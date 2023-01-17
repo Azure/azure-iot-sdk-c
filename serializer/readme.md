@@ -22,7 +22,7 @@ This folder contains the following
 
 ### Using the seralizer library for C
 
-The seralizer library for C is used with the Azure IoT device SDK for which you will find detailed instructions on how to use on Linux, mbed, Windows and other platforms [here][device-sdk].
+The seralizer library for C is used with the Azure IoT device SDK for which you will find detailed instructions on how to use on Linux, Windows and other platforms [here][device-sdk].
 
 [devbox_setup]: ../doc/devbox_setup.md
 [device-sdk]: ../iothub_client/
