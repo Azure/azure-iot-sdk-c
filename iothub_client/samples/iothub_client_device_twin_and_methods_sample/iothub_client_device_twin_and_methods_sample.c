@@ -339,7 +339,8 @@ static void iothub_client_device_twin_and_methods_sample_run(void)
         (void)IoTHubDeviceClient_SetOption(iotHubClientHandle, OPTION_AUTO_URL_ENCODE_DECODE, &urlEncodeOn);
 #endif
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
-            // For mbed add the certificate information
+            // Setting the Trusted Certificate.
+            // This is only necessary on systems without built-in certificate stores.
             if (IoTHubDeviceClient_SetOption(iotHubClientHandle, "TrustedCerts", certificates) != IOTHUB_CLIENT_OK)
             {
                 (void)printf("failure to set option \"TrustedCerts\"\r\n");
