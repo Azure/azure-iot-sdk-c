@@ -66,15 +66,15 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><p>The Azure IoT C SDK supports multiplexing - the ability to have multiple device identities sharing the same underlying TLS connection. <b>There are many limitations in its support, however. Before using multiplexing you need to carefully understand these.</b></p>
-<h1><a class="anchor" id="autotoc_md133"></a>
+<h1><a class="anchor" id="autotoc_md125"></a>
 Prefer IoT Edge or Azure IoT C# Device SDK for multiplexing if possible</h1>
 <p>If you are creating a gateway device, <a href="http://aka.ms/iotedge">Azure IoT Edge</a> is highly recommend over using this SDK to multiplex leaf devices. Edge was designed from the ground up for gateway scenarios including full multiplexing support, store and forward of messages, enhanced diagnostics, module support, and more.</p>
 <p>If you need multiplexing for a non-gateway scenario, and if your device has the required resources, using the <a href="https://github.com/Azure/azure-iot-sdk-csharp">Azure IoT Device SDK for C#</a> is highly recommended. The C# Device SDK has a more complete feature set for multiplexing support.</p>
 <p><em>The rest of this document will discuss the Azure IoT Device SDK for C (this repo's) multiplexing support.</em></p>
-<h1><a class="anchor" id="autotoc_md134"></a>
+<h1><a class="anchor" id="autotoc_md126"></a>
 Supported Protocols</h1>
 <p>Multiplexing is supported on the AMQP, AMQP over WebSockets, and HTTPS protocols. It is not supported on MQTT or MQTT over WebSockets.</p>
-<h1><a class="anchor" id="autotoc_md135"></a>
+<h1><a class="anchor" id="autotoc_md127"></a>
 Limited functionality</h1>
 <p>When multiplexing over an AMQP, AMQP over WebSockets, or HTTP connection, the SDK supports:</p><ul>
 <li>Sending telemetry (<code>IoTHubDeviceClient_LL_SendEventAsync</code> and <code>IoTHubDeviceClient_SendEventAsync</code>)</li>
@@ -84,10 +84,10 @@ Limited functionality</h1>
 <li>Receiving incoming device methods (via callbacks set in <code>IoTHubDeviceClient_LL_SetDeviceMethodCallback</code> and <code>IoTHubDeviceClient_SetDeviceMethodCallback</code>).</li>
 </ul>
 <p>The SDK does not support any other features, such as receiving device twins, sending device twin updates, or uploading files to Azure Storage. Any additional IoT features added to the SDK will <em>not</em> support multiplexing.</p>
-<h1><a class="anchor" id="autotoc_md136"></a>
+<h1><a class="anchor" id="autotoc_md128"></a>
 Device client support only</h1>
 <p>Multiplexing only works when using device client handles (<code>IOTHUB_DEVICE_CLIENT_HANDLE</code> and <code>IOTHUB_DEVICE_CLIENT_LL_HANDLE</code>). Modules (<code>IOTHUB_MODULE_CLIENT_HANDLE</code> and <code>IOTHUB_MODULE_CLIENT_LL_HANDLE</code>) are not supported.</p>
-<h1><a class="anchor" id="autotoc_md137"></a>
+<h1><a class="anchor" id="autotoc_md129"></a>
 Samples</h1>
 <p>Samples demonstrating multiplexing are available in the <a href="../iothub_client/samples/">device client samples folder</a></p><ul>
 <li><a href="../iothub_client/samples/iothub_ll_client_shared_sample">Sending telemetry and receiving Cloud-to-Device messages</a></li>

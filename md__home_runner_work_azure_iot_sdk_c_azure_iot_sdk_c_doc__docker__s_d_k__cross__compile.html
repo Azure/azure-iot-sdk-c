@@ -100,125 +100,113 @@ The Docker Script</h1>
 <p>Here is an example script: </p><div class="fragment"><div class="line"><span class="preprocessor"># Start with the latest version of the Ubuntu Docker container</span></div>
 <div class="line">FROM ubuntu:latest</div>
 <div class="line"> </div>
+<div class="line"><span class="preprocessor">#########################################</span></div>
+<div class="line"><span class="preprocessor"># start from home directory</span></div>
+<div class="line">RUN cd ~</div>
+<div class="line"> </div>
+<div class="line"><span class="preprocessor">#########################################</span></div>
 <div class="line"><span class="preprocessor"># Run commands that require root authority</span></div>
-<div class="line"> </div>
-<div class="line"><span class="preprocessor"># Fetch and install all outstanding updates</span></div>
 <div class="line">RUN apt-get update &amp;&amp; apt-get -y upgrade</div>
+<div class="line">RUN apt-get install -y cmake git wget nano xz-utils bzip2</div>
 <div class="line"> </div>
-<div class="line"><span class="preprocessor"># Install cmake, git, wget and nano</span></div>
-<div class="line">RUN apt-get install -y cmake git wget nano</div>
-<div class="line"> </div>
-<div class="line"><span class="preprocessor"># Create a user to use so that we don&#39;t run it all as root</span></div>
+<div class="line"><span class="preprocessor">#########################################</span></div>
+<div class="line"><span class="preprocessor"># Create and switch to new user</span></div>
 <div class="line">RUN useradd -d /home/builder -ms /bin/bash -G sudo -p builder builder</div>
-<div class="line"> </div>
-<div class="line"><span class="preprocessor"># Switch to new user and change to the user&#39;s home directory</span></div>
 <div class="line">USER builder</div>
 <div class="line">WORKDIR /home/builder</div>
 <div class="line"> </div>
-<div class="line"><span class="preprocessor"># Create a work directory and switch to it</span></div>
+<div class="line"><span class="preprocessor">#########################################</span></div>
+<div class="line"><span class="preprocessor"># Download all required files</span></div>
 <div class="line">RUN mkdir MIPSBuild</div>
 <div class="line">WORKDIR MIPSBuild</div>
 <div class="line"> </div>
-<div class="line"><span class="preprocessor">#</span></div>
-<div class="line"><span class="preprocessor"># The following wget invocation will need to be modified to download a toolchain appropriate </span></div>
-<div class="line"><span class="preprocessor"># for your target device.</span></div>
-<div class="line"><span class="preprocessor">#</span></div>
+<div class="line"><span class="preprocessor"># Cross compile toolchain</span></div>
+<div class="line">RUN wget https:<span class="comment">//downloads.openwrt.org/releases/21.02.3/targets/ramips/mt7620/openwrt-sdk-21.02.3-ramips-mt7620_gcc-8.4.0_musl.Linux-x86_64.tar.xz</span></div>
+<div class="line">RUN tar -xvf openwrt-sdk-21.02.3-ramips-mt7620_gcc-8.4.0_musl.Linux-x86_64.tar.xz</div>
 <div class="line"> </div>
-<div class="line"><span class="preprocessor"># Download the WRTNode cross compile toolchain and expand it</span></div>
-<div class="line">RUN wget https:<span class="comment">//downloads.openwrt.org/barrier_breaker/14.07/ramips/mt7620n/OpenWrt-Toolchain-ramips-for-mipsel_24kec%2bdsp-gcc-4.8-linaro_uClibc-0.9.33.2.tar.bz2</span></div>
-<div class="line">RUN tar -xvf OpenWrt-Toolchain-ramips-<span class="keywordflow">for</span>-mipsel_24kec+dsp-gcc-4.8-linaro_uClibc-0.9.33.2.tar.bz2</div>
-<div class="line"> </div>
-<div class="line"><span class="preprocessor"># Download the Azure IoT SDK for C</span></div>
-<div class="line">RUN git clone https:<span class="comment">//github.com/azure/azure-iot-sdk-c.git</span></div>
-<div class="line">WORKDIR azure-iot-sdk-c</div>
-<div class="line">RUN git submodule update --init</div>
-<div class="line">WORKDIR ..</div>
-<div class="line"> </div>
-<div class="line"><span class="preprocessor"># Download OpenSSL source and expand it</span></div>
+<div class="line"><span class="preprocessor"># OpenSSL</span></div>
 <div class="line">RUN wget https:<span class="comment">//www.openssl.org/source/openssl-1.0.2o.tar.gz</span></div>
 <div class="line">RUN tar -xvf openssl-1.0.2o.tar.gz</div>
 <div class="line"> </div>
-<div class="line"><span class="preprocessor"># Download cURL source and expand it</span></div>
+<div class="line"><span class="preprocessor"># Curl</span></div>
 <div class="line">RUN wget http:<span class="comment">//curl.haxx.se/download/curl-7.60.0.tar.gz</span></div>
 <div class="line">RUN tar -xvf curl-7.60.0.tar.gz</div>
 <div class="line"> </div>
-<div class="line"><span class="preprocessor"># Download the Linux utilities for libuuid and expand it</span></div>
+<div class="line"><span class="preprocessor"># Linux utilities for libuuid</span></div>
 <div class="line">RUN wget https:<span class="comment">//mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.32/util-linux-2.32-rc2.tar.gz</span></div>
 <div class="line">RUN tar -xvf util-linux-2.32-rc2.tar.gz</div>
 <div class="line"> </div>
-<div class="line"><span class="preprocessor">#</span></div>
-<div class="line"><span class="preprocessor"># Set up environment variables in preparation for the builds to follow</span></div>
-<div class="line"><span class="preprocessor"># These will need to be modified for the corresponding locations in the downloaded toolchain</span></div>
-<div class="line"><span class="preprocessor">#</span></div>
+<div class="line"><span class="preprocessor">#########################################</span></div>
+<div class="line"><span class="preprocessor"># Set up environment variables in preperation for the builds to follow</span></div>
 <div class="line">ENV WORK_ROOT=/home/builder/MIPSBuild</div>
-<div class="line">ENV TOOLCHAIN_ROOT=${WORK_ROOT}/OpenWrt-Toolchain-ramips-<span class="keywordflow">for</span>-mipsel_24kec+dsp-gcc-4.8-linaro_uClibc-0.9.33.2</div>
-<div class="line">ENV TOOLCHAIN_SYSROOT=${TOOLCHAIN_ROOT}/toolchain-mipsel_24kec+dsp_gcc-4.8-linaro_uClibc-0.9.33.2</div>
-<div class="line">ENV TOOLCHAIN_EXES=${TOOLCHAIN_SYSROOT}/bin</div>
-<div class="line">ENV TOOLCHAIN_NAME=mipsel-openwrt-linux-uclibc</div>
-<div class="line">ENV AR=${TOOLCHAIN_EXES}/${TOOLCHAIN_NAME}-ar</div>
-<div class="line">ENV AS=${TOOLCHAIN_EXES}/${TOOLCHAIN_NAME}-as</div>
-<div class="line">ENV CC=${TOOLCHAIN_EXES}/${TOOLCHAIN_NAME}-gcc</div>
-<div class="line">ENV LD=${TOOLCHAIN_EXES}/${TOOLCHAIN_NAME}-ld</div>
-<div class="line">ENV NM=${TOOLCHAIN_EXES}/${TOOLCHAIN_NAME}-nm</div>
-<div class="line">ENV RANLIB=${TOOLCHAIN_EXES}/${TOOLCHAIN_NAME}-ranlib</div>
+<div class="line">ENV TOOLCHAIN_MIPS=openwrt-sdk-21.02.3-ramips-mt7620_gcc-8.4.0_musl.Linux-x86_64</div>
+<div class="line">ENV TOOLCHAIN_PLATFORM=mipsel-openwrt-linux-musl</div>
+<div class="line">ENV STAGING_DIR=${WORK_ROOT}/${TOOLCHAIN_MIPS}/staging_dir</div>
+<div class="line">ENV TOOLCHAIN_SYSROOT=${WORK_ROOT}/${TOOLCHAIN_MIPS}/staging_dir/toolchain-mipsel_24kc_gcc-8.4.0_musl</div>
+<div class="line">ENV TOOLCHAIN_BIN=${TOOLCHAIN_SYSROOT}/bin</div>
+<div class="line">ENV OPENSSL_ROOT_DIR=${WORK_ROOT}/openssl-OpenSSL_1_1_1f</div>
+<div class="line">ENV TOOLCHAIN_PREFIX=${WORK_ROOT}/MIPS</div>
+<div class="line">ENV AR=${TOOLCHAIN_BIN}/${TOOLCHAIN_PLATFORM}-ar</div>
+<div class="line">ENV CC=${TOOLCHAIN_BIN}/${TOOLCHAIN_PLATFORM}-gcc</div>
+<div class="line">ENV CXX=${TOOLCHAIN_BIN}/${TOOLCHAIN_PLATFORM}-g++</div>
 <div class="line"> </div>
-<div class="line">ENV LDFLAGS=<span class="stringliteral">&quot;-L${TOOLCHAIN_SYSROOT}/usr/lib&quot;</span></div>
+<div class="line"> </div>
+<div class="line">ENV LDFLAGS=<span class="stringliteral">&quot;-L${TOOLCHAIN_PREFIX}/lib&quot;</span></div>
 <div class="line">ENV LIBS=<span class="stringliteral">&quot;-lssl -lcrypto -ldl -lpthread&quot;</span></div>
-<div class="line">ENV TOOLCHAIN_PREFIX=${TOOLCHAIN_SYSROOT}/usr</div>
-<div class="line">ENV STAGING_DIR=${TOOLCHAIN_SYSROOT}</div>
 <div class="line"> </div>
 <div class="line"><span class="preprocessor"># Build OpenSSL</span></div>
 <div class="line">WORKDIR openssl-1.0.2o</div>
-<div class="line">RUN ./Configure linux-generic32 shared --prefix=${TOOLCHAIN_PREFIX} --openssldir=${TOOLCHAIN_PREFIX}</div>
+<div class="line">RUN ./Configure linux-generic32 --prefix=${TOOLCHAIN_PREFIX} --openssldir=${OPENSSL_ROOT_DIR} no-tests shared </div>
 <div class="line">RUN make</div>
-<div class="line">RUN make install</div>
+<div class="line">RUN make install_sw</div>
 <div class="line">WORKDIR ..</div>
 <div class="line"> </div>
-<div class="line"><span class="preprocessor"># Build cURL</span></div>
+<div class="line"><span class="preprocessor"># Build curl</span></div>
 <div class="line">WORKDIR curl-7.60.0</div>
-<div class="line">RUN ./configure --with-sysroot=${TOOLCHAIN_SYSROOT} --prefix=${TOOLCHAIN_PREFIX} --target=${TOOLCHAIN_NAME} --with-ssl --with-zlib --host=${TOOLCHAIN_NAME} --build=x86_64-pc-linux-uclibc</div>
+<div class="line">RUN ./configure --with-sysroot=${TOOLCHAIN_SYSROOT} --prefix=${TOOLCHAIN_PREFIX} --target=${TOOLCHAIN_PLATFORM} --with-ssl=${TOOLCHAIN_PREFIX} --with-zlib --host=${TOOLCHAIN_PLATFORM} </div>
 <div class="line">RUN make</div>
 <div class="line">RUN make install</div>
 <div class="line">WORKDIR ..</div>
 <div class="line"> </div>
 <div class="line"><span class="preprocessor"># Build uuid</span></div>
 <div class="line">WORKDIR util-linux-2.32-rc2</div>
-<div class="line">RUN ./configure --prefix=${TOOLCHAIN_PREFIX} --with-sysroot=${TOOLCHAIN_SYSROOT} --target=${TOOLCHAIN_NAME} --host=${TOOLCHAIN_NAME} --disable-all-programs  --disable-bash-completion --enable-libuuid</div>
+<div class="line">RUN ./configure --with-sysroot=${TOOLCHAIN_SYSROOT} --prefix=${TOOLCHAIN_PREFIX} --target=${TOOLCHAIN_PLATFORM} --host=${TOOLCHAIN_PLATFORM} --disable-all-programs  --disable-bash-completion --enable-libuuid</div>
 <div class="line">RUN make</div>
 <div class="line">RUN make install</div>
 <div class="line">WORKDIR ..</div>
 <div class="line"> </div>
-<div class="line"><span class="preprocessor"># To build the SDK we need to create a cmake toolchain file. This tells cmake to use the tools in the</span></div>
-<div class="line"><span class="preprocessor"># toolchain rather than those on the host</span></div>
-<div class="line">WORKDIR azure-iot-sdk-c</div>
+<div class="line"><span class="preprocessor">#########################################</span></div>
+<div class="line"><span class="preprocessor"># Build Azure C SDK</span></div>
 <div class="line"> </div>
-<div class="line"><span class="preprocessor"># Create a working directory for the cmake operations</span></div>
+<div class="line">RUN git clone https:<span class="comment">//github.com/azure/azure-iot-sdk-c.git</span></div>
+<div class="line">WORKDIR azure-iot-sdk-c</div>
+<div class="line">RUN git submodule update --init</div>
 <div class="line">RUN mkdir cmake</div>
 <div class="line">WORKDIR cmake</div>
 <div class="line"> </div>
-<div class="line"><span class="preprocessor"># Create a cmake toolchain file on the fly</span></div>
+<div class="line"><span class="preprocessor"># Create a toolchain file on the fly</span></div>
 <div class="line">RUN echo <span class="stringliteral">&quot;SET(CMAKE_SYSTEM_NAME Linux)     # this one is important&quot;</span> &gt; toolchain.cmake</div>
-<div class="line">RUN echo <span class="stringliteral">&quot;SET(CMAKE_SYSTEM_VERSION 1)      # this one not so much&quot;</span> &gt;&gt; toolchain.cmake</div>
+<div class="line">RUN echo <span class="stringliteral">&quot;SET(CMAKE_SYSTEM_VERSION 1)&quot;</span>  &gt;&gt; toolchain.cmake</div>
 <div class="line">RUN echo <span class="stringliteral">&quot;SET(CMAKE_SYSROOT ${TOOLCHAIN_SYSROOT})&quot;</span> &gt;&gt; toolchain.cmake</div>
-<div class="line">RUN echo <span class="stringliteral">&quot;SET(CMAKE_C_COMPILER ${TOOLCHAIN_EXES}/${TOOLCHAIN_NAME}-gcc)&quot;</span> &gt;&gt; toolchain.cmake</div>
-<div class="line">RUN echo <span class="stringliteral">&quot;SET(CMAKE_CXX_COMPILER ${TOOLCHAIN_EXES}/${TOOLCHAIN_NAME}-g++)&quot;</span> &gt;&gt; toolchain.cmake</div>
-<div class="line">RUN echo <span class="stringliteral">&quot;SET(CMAKE_FIND_ROOT_PATH $ENV{TOOLCHAIN_SYSROOT})&quot;</span> &gt;&gt; toolchain.cmake</div>
+<div class="line">RUN echo <span class="stringliteral">&quot;SET(CMAKE_C_COMPILER ${CC})&quot;</span> &gt;&gt; toolchain.cmake</div>
+<div class="line">RUN echo <span class="stringliteral">&quot;SET(CMAKE_CXX_COMPILER ${CXX})&quot;</span> &gt;&gt; toolchain.cmake</div>
+<div class="line">RUN echo <span class="stringliteral">&quot;SET(CMAKE_FIND_ROOT_PATH ${WORK_ROOT})&quot;</span> &gt;&gt; toolchain.cmake</div>
 <div class="line">RUN echo <span class="stringliteral">&quot;SET(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)&quot;</span> &gt;&gt; toolchain.cmake</div>
 <div class="line">RUN echo <span class="stringliteral">&quot;SET(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)&quot;</span> &gt;&gt; toolchain.cmake</div>
 <div class="line">RUN echo <span class="stringliteral">&quot;SET(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)&quot;</span> &gt;&gt; toolchain.cmake</div>
+<div class="line">RUN echo <span class="stringliteral">&quot;SET(CURL_LIBRARIES ${TOOLCHAIN_PREFIX}/lib/libcurl.so)&quot;</span> &gt;&gt; toolchain.cmake</div>
+<div class="line">RUN echo <span class="stringliteral">&quot;SET(ENV{LDFLAGS} -L${TOOLCHAIN_PREFIX}/lib)&quot;</span> &gt;&gt; toolchain.cmake</div>
+<div class="line">RUN echo <span class="stringliteral">&quot;SET(OPENSSL_ROOT_DIR ${TOOLCHAIN_PREFIX})&quot;</span> &gt;&gt; toolchain.cmake</div>
 <div class="line">RUN echo <span class="stringliteral">&quot;SET(set_trusted_cert_in_samples true CACHE BOOL \&quot;Force use of TrustedCerts option\&quot; FORCE)&quot;</span> &gt;&gt; toolchain.cmake</div>
+<div class="line">RUN echo <span class="stringliteral">&quot;include_directories(${TOOLCHAIN_PREFIX}/include)&quot;</span> &gt;&gt; toolchain.cmake</div>
 <div class="line"> </div>
-<div class="line"><span class="preprocessor"># Build the SDK. This will use the OpenSSL, cURL and uuid binaries that we built before</span></div>
-<div class="line">RUN cmake -DCMAKE_TOOLCHAIN_FILE=toolchain.cmake -DCMAKE_INSTALL_PREFIX=${TOOLCHAIN_PREFIX} ..</div>
-<div class="line">RUN make</div>
-<div class="line">RUN make install</div>
+<div class="line">RUN cmake -DCMAKE_TOOLCHAIN_FILE=toolchain.cmake ..</div>
+<div class="line">RUN cmake --build .</div>
+<div class="line">RUN cmake --install . --prefix ${TOOLCHAIN_PREFIX}</div>
 <div class="line"> </div>
-<div class="line"><span class="preprocessor"># Finally a sanity check to make sure the files are there</span></div>
-<div class="line">RUN ls -al ${TOOLCHAIN_PREFIX}/lib</div>
-<div class="line">RUN ls -al ${TOOLCHAIN_PREFIX}/include</div>
+<div class="line">WORKDIR ../..</div>
 <div class="line"> </div>
-<div class="line"><span class="preprocessor"># Go to project root</span></div>
-<div class="line"><span class="preprocessor">WORKDIR ../..</span></div>
+<div class="line">CMD [<span class="stringliteral">&quot;/bin/bash&quot;</span>]</div>
 </div><!-- fragment --><p>To run this script save it to a directory and change to that directory then simply enter: </p><div class="fragment"><div class="line">docker build -t mipsiotbuild:latest . --network=host</div>
 </div><!-- fragment --><p> You can replace the value 'mipsiotbuild' with any name that describes your build. In this instance it is building for a MIPS32 processor hence the name. Once the build is complete you will be ready to build your application against the libraries just built.</p>
 <p><em>Note:</em> The build of the Azure IoT C SDK uses cmake to generate the makefiles. In order to instruct cmake to perform a cross-compile one uses a cmake toolchain file. This tells cmake where to find the libraries etc. in the toolchain rather than on the host. This file is created on the fly in the above script to reduce dependencies on external files. Alternatively one could create this file outside the script and import into the container.</p>
@@ -227,7 +215,7 @@ Building Your Application</h1>
 <p>Once you have successfully built the SDK you are now ready to create your application. You will need to create a directory that contains your source code and a CMakeLists.txt. The application build can use the cmake toolchain file that is already present in the image.</p>
 <h2><a class="anchor" id="autotoc_md92"></a>
 Sample &lt;tt&gt;CMakeLists.txt&lt;/tt&gt; for an Application</h2>
-<p>Here is a simple <code>CMakeLists.txt</code> file that demonstrates how to build an application that uses the libraries built above. This sample, for demonstration purposes uses a copy of the <code>iothub_convenience_sample.c</code> sample from the SDK. </p><div class="fragment"><div class="line">cmake_minimum_required(VERSION 2.8.11)</div>
+<p>Here is a simple <code>CMakeLists.txt</code> file that demonstrates how to build an application that uses the libraries built above. This sample, for demonstration purposes uses a copy of the <code>iothub_cross_compile_simple_sample.c</code> sample from the SDK. </p><div class="fragment"><div class="line">cmake_minimum_required (VERSION 3.5)</div>
 <div class="line">project(myapp_project)</div>
 <div class="line"> </div>
 <div class="line"># The demonstration uses C99 but it could just as easily be a C++ application</div>
@@ -238,7 +226,7 @@ Sample &lt;tt&gt;CMakeLists.txt&lt;/tt&gt; for an Application</h2>
 <div class="line">option(use_sample_trusted_cert &quot;Set flag in samples to use SDK&#39;s built-in CA as TrustedCerts&quot; ON)</div>
 <div class="line"> </div>
 <div class="line">set(iothub_c_files</div>
-<div class="line">    iothub_convenience_sample.c</div>
+<div class="line">    iothub_cross_compile_simple_sample.c</div>
 <div class="line">)</div>
 <div class="line"> </div>
 <div class="line"># Conditionally use the SDK trusted certs in the samples (is set to true in cmake toolchain file)</div>
@@ -251,22 +239,31 @@ Sample &lt;tt&gt;CMakeLists.txt&lt;/tt&gt; for an Application</h2>
 <div class="line">endif()</div>
 <div class="line"> </div>
 <div class="line"># Set up the include and library paths</div>
-<div class="line">include_directories($ENV{TOOLCHAIN_PREFIX}/include/)</div>
-<div class="line">include_directories($ENV{TOOLCHAIN_PREFIX}/include/azureiot)</div>
+<div class="line">include_directories(${CMAKE_INSTALL_PREFIX}/include/)</div>
+<div class="line">include_directories(${CMAKE_INSTALL_PREFIX}/include/azureiot)</div>
+<div class="line">link_directories(/usr/local/lib)</div>
 <div class="line">link_directories($ENV{TOOLCHAIN_PREFIX}/lib)</div>
 <div class="line"> </div>
 <div class="line">add_executable(myapp ${iothub_c_files})</div>
 <div class="line"> </div>
-<div class="line"># Redundant in this case but demonstrates how to rename your output executable</div>
-<div class="line">set_target_properties(myapp PROPERTIES OUTPUT_NAME &quot;myapp&quot;) </div>
+<div class="line"># Redundant in this case but shows how to rename your output executable</div>
+<div class="line">set_target_properties(myapp PROPERTIES OUTPUT_NAME &quot;myapp&quot;)</div>
+<div class="line"> </div>
+<div class="line"># If OpenSSL::SSL OR OpenSSL::Crypto are not set then you need to run</div>
+<div class="line"># the find package for openssl</div>
+<div class="line">if (NOT TARGET OpenSSL::SSL OR NOT TARGET OpenSSL::Crypto OR NOT ${OPENSSL_INCLUDE_DIR})</div>
+<div class="line">    find_package(OpenSSL REQUIRED)</div>
+<div class="line">endif()</div>
+<div class="line">include_directories(${OPENSSL_INCLUDE_DIR})</div>
 <div class="line"> </div>
 <div class="line"># List the libraries required by the link step</div>
-<div class="line">target_link_libraries(myapp iothub_client_mqtt_transport iothub_client umqtt aziotsharedutil parson pthread curl ssl crypto m )</div>
+<div class="line">target_link_libraries(myapp iothub_client prov_device_client iothub_client_mqtt_transport prov_auth_client umqtt hsm_security_client utpm dl aziotsharedutil parson pthread curl OpenSSL::SSL OpenSSL::Crypto m )</div>
 </div><!-- fragment --> <h2><a class="anchor" id="autotoc_md93"></a>
 Using a Separate Docker Script to Build the Application</h2>
 <p>Though one could append the application build steps to the Docker script above, this will demonstrate how to use the existing image and build the application in a seperate Docker script. This will keep the original image clean so it may be used for building multiple applications.</p>
 <p>This sample script assumes you have your source files and the <code>CMakeLists.txt</code> in a directory called <code>myapp</code>. </p><div class="fragment"><div class="line">FROM mipsiotbuild:latest</div>
 <div class="line"> </div>
+<div class="line">ENV WORK_ROOT=/home/builder/MIPSBuild</div>
 <div class="line">USER builder</div>
 <div class="line">WORKDIR /home/builder</div>
 <div class="line"> </div>
@@ -300,7 +297,7 @@ Copying the Executable from the Docker Container</h1>
 <p><b>Note:</b> Depending upon your device you may need to copy additional binaries from the container in order to add them to your device. For example you device may not have the OpenSSL binaries so you will need to copy libssl.so and libcrypto.so. This could also be true for libuuid and libcurl. All of these libraries will be in the toolchain typically in <code>/usr/local/lib</code>. </p>
 <h1><a class="anchor" id="autotoc_md95"></a>
 A Complete Example</h1>
-<p>You can find two complete examples in <a href="../samples/dockerbuilds">samples</a>. This directory contains Docker scripts to cross compile the SDK for MIPS32 and for Raspbian and subsequently builds an application. In order to reduce the number of files required, the steps are slightly modified though they perform the same function. To cross compile the SDK for Raspbian, create an application and copy it to your host use the following steps. </p><div class="fragment"><div class="line"># Change directory to your Azure IoT SDK cloned repository root</div>
+<p>You can find three complete examples in <a href="../samples/dockerbuilds">samples</a>. This directory contains Docker scripts to cross compile the SDK for MIPS32, ARM, and for Raspbian and subsequently builds an application. In order to reduce the number of files required, the steps are slightly modified though they perform the same function. To cross compile the SDK for Raspbian, create an application and copy it to your host use the following steps. </p><div class="fragment"><div class="line"># Change directory to your Azure IoT SDK cloned repository root</div>
 <div class="line">cd &lt;SDK Root&gt;</div>
 <div class="line"># Work in this directory or two copies of the myapp directory will be required</div>
 <div class="line">cd samples/dockerbuilds</div>
@@ -312,7 +309,7 @@ A Complete Example</h1>
 <div class="line"># Copy application to home directory</div>
 <div class="line">docker cp $id:/home/builder/myapp/cmake/myapp ~/myapp_rpi</div>
 <div class="line">docker rm -v $id</div>
-</div><!-- fragment --><p> And for MIPS32: </p><div class="fragment"><div class="line"># Change directory to your Azure IoT SDK cloned repository root</div>
+</div><!-- fragment --><p> For MIPS32: </p><div class="fragment"><div class="line"># Change directory to your Azure IoT SDK cloned repository root</div>
 <div class="line">cd &lt;SDK Root&gt;</div>
 <div class="line"># Work in this directory or two copies of the myapp directory will be required</div>
 <div class="line">cd samples/dockerbuilds</div>
@@ -323,6 +320,18 @@ A Complete Example</h1>
 <div class="line">id=$(docker create mipsiotapp)</div>
 <div class="line"># Copy application to home directory</div>
 <div class="line">docker cp $id:/home/builder/myapp/cmake/myapp ~/myapp_mips</div>
+<div class="line">docker rm -v $id</div>
+</div><!-- fragment --><p> And for ARM: </p><div class="fragment"><div class="line"># Change directory to your Azure IoT SDK cloned repository root</div>
+<div class="line">cd &lt;SDK Root&gt;</div>
+<div class="line"># Work in this directory or two copies of the myapp directory will be required</div>
+<div class="line">cd samples/dockerbuilds</div>
+<div class="line"># Cross compile the SDK</div>
+<div class="line">docker build -t armiotbuild:latest ./ARM --network=host</div>
+<div class="line"># Build the application against the SDK</div>
+<div class="line">docker build -t armiotapp:latest . --network=host --file ./ARM/Dockerfile_adjunct</div>
+<div class="line">id=$(docker create armiotapp)</div>
+<div class="line"># Copy application to home directory</div>
+<div class="line">docker cp $id:/home/builder/myapp/cmake/myapp ~/myapp_arm</div>
 <div class="line">docker rm -v $id</div>
 </div><!-- fragment --><p> <b>Note:</b> For these examples to work successfully the image names must be exactly as they are shown in the examples. </p>
 <h2><a class="anchor" id="autotoc_md96"></a>

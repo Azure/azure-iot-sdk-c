@@ -66,7 +66,7 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><p>This document is only relevant if you are using the IoT C-SDK on Windows and you wish to use OpenSSL instead of Schannel for your TLS stack.</p>
-<h1><a class="anchor" id="autotoc_md184"></a>
+<h1><a class="anchor" id="autotoc_md165"></a>
 Using OpenSSL on Windows is highly discouraged</h1>
 <p>By default you should use the SDK's default settings for Windows, which is to use Schannel. You should avoid OpenSSL on Windows for the C-SDK because:</p>
 <ul>
@@ -74,7 +74,7 @@ Using OpenSSL on Windows is highly discouraged</h1>
 <li>You are responsible for updating your OpenSSL dependencies as security fixes for it become available. Schannel on Windows is a system component automatically serviced by Windows Update. OpenSSL on Linux is updated by Linux packaging mechanisms, such as apt-get on Debian based distributions. Shipping the C-SDK on Windows using OpenSSL means you are responsible for getting updated versions of it to your devices.</li>
 </ul>
 <p>This document is kept primarily for archival purposes for customers who may be on OpenSSL/Windows and are not able to change.</p>
-<h1><a class="anchor" id="autotoc_md185"></a>
+<h1><a class="anchor" id="autotoc_md166"></a>
 Setup instructions</h1>
 <p><a href="https://www.openssl.org/">OpenSSL</a> binaries that the C-SDK depends on are <b>ssleay32</b> and <b>libeay32</b>. To enable OpenSSL to be used on Windows, you need to</p>
 <ul>
@@ -91,7 +91,7 @@ Setup instructions</h1>
 </ul>
 </li>
 </ul>
-<h1><a class="anchor" id="autotoc_md186"></a>
+<h1><a class="anchor" id="autotoc_md167"></a>
 Samples and usage</h1>
 <p>Building samples and your application should be the same as using the default Schannel at this point. </p>
 </div></div><!-- contents -->

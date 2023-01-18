@@ -66,7 +66,7 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><p>This document describes how to setup vcpkg to build device applications using Microsoft Azure IoT C SDK. It demonstrates building and running a C language device SDK sample for Windows, Linux, and Mac.</p>
-<h1><a class="anchor" id="autotoc_md165"></a>
+<h1><a class="anchor" id="autotoc_md146"></a>
 Azure IoT C SDK vcpkg support</h1>
 <p>The Azure IoT C SDK uses <a href="https://github.com/microsoft/vcpkg">vcpkg</a> primarily for LTS releases. The most recent LTS release can be installed using the syntax: <code>vcpkg install azure-iot-sdk-c</code> and builds using the following CMake flags:</p>
 <div class="fragment"><div class="line">-Dskip_samples=ON</div>
@@ -89,7 +89,7 @@ Azure IoT C SDK vcpkg support</h1>
 <p>NOTE: If your application requires specific CMake flags not shown above, please build and install directly from the source code. See <a href="https://github.com/Azure/azure-iot-sdk-c/blob/main/doc/devbox_setup.md">devbox_setup.md</a> for further information. </p>
 </blockquote>
 <p>The most recent <a href="https://github.com/microsoft/vcpkg/blob/master/ports/azure-iot-sdk-c/portfile.cmake">portfile.cmake</a> and <a href="https://github.com/microsoft/vcpkg/blob/master/ports/azure-iot-sdk-c/vcpkg.json">vcpkg.json</a> files for the Azure IoT C SDK can be found under <a href="https://github.com/microsoft/vcpkg/tree/master/ports/azure-iot-sdk-c">vcpkg/ports/azure-iot-sdk-c</a>.</p>
-<h1><a class="anchor" id="autotoc_md166"></a>
+<h1><a class="anchor" id="autotoc_md147"></a>
 Setup Azure IoT C SDK vcpkg for Windows development environment</h1>
 <ul>
 <li><p class="startli">Open PowerShell and run the following commands:</p>
@@ -100,10 +100,10 @@ Setup Azure IoT C SDK vcpkg for Windows development environment</h1>
 </ul>
 </li>
 </ul>
-<h1><a class="anchor" id="autotoc_md167"></a>
+<h1><a class="anchor" id="autotoc_md148"></a>
 Install azure-iot-sdk-c package with integration</h1>
 <p>.\vcpkg.exe integrate install .\vcpkg.exe install azure-iot-sdk-c popd</p>
-<h1><a class="anchor" id="autotoc_md168"></a>
+<h1><a class="anchor" id="autotoc_md149"></a>
 Open the Azure IoT C SDK telemetry sample solution for Visual Studio.</h1>
 <p>git clone <a href="https://github.com/Azure/azure-iot-sdk-c.git">https://github.com/Azure/azure-iot-sdk-c.git</a> # Skip if already have a cloned repo pushd .\azure-iot-sdk-c\iothub_client\samples\iothub_ll_telemetry_sample\windows\ start .\iothub_ll_telemetry_sample.sln ```</p>
 <ul>
@@ -111,13 +111,13 @@ Open the Azure IoT C SDK telemetry sample solution for Visual Studio.</h1>
 <p class="startli">```powershell </p>
 </li>
 </ul>
-<h1><a class="anchor" id="autotoc_md169"></a>
+<h1><a class="anchor" id="autotoc_md150"></a>
 Install azure-iot-sdk-c package</h1>
 <p>.\vcpkg.exe install azure-iot-sdk-c</p>
-<h1><a class="anchor" id="autotoc_md170"></a>
+<h1><a class="anchor" id="autotoc_md151"></a>
 Export nuget package locally</h1>
 <p>.\vcpkg.exe export azure-iot-sdk-c &ndash;nuget popd</p>
-<h1><a class="anchor" id="autotoc_md171"></a>
+<h1><a class="anchor" id="autotoc_md152"></a>
 Open the Azure IoT C SDK telemetry sample solution for Visual Studio.</h1>
 <p>git clone <a href="https://github.com/Azure/azure-iot-sdk-c.git">https://github.com/Azure/azure-iot-sdk-c.git</a> # Skip if already have a cloned repo pushd .\azure-iot-sdk-c\iothub_client\samples\iothub_ll_telemetry_sample\windows\ start .\iothub_ll_telemetry_sample.sln ```</p>
 <ul>
@@ -128,7 +128,7 @@ Open the Azure IoT C SDK telemetry sample solution for Visual Studio.</h1>
 <li>Hit F5 to build and run.</li>
 <li>More information on building the Azure IoT C SDK and samples can be found <a href="https://github.com/Azure/azure-iot-sdk-c/blob/main/doc/devbox_setup.md">here</a>.</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md172"></a>
+<h2><a class="anchor" id="autotoc_md153"></a>
 Setup Azure IoT C SDK vcpkg for Linux or Mac development environment</h2>
 <ul>
 <li><p class="startli">Open a command prompt and run the following commands:</p>

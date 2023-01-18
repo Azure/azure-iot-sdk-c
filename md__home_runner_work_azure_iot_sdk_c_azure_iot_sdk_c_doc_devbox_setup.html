@@ -76,14 +76,14 @@ $(function() {
 <h1><a class="anchor" id="autotoc_md69"></a>
 Set up a Windows development environment</h1>
 <ul>
-<li>Install <a href="https://www.visualstudio.com/downloads/">Visual Studio 2019</a>. You can use the <b>Visual Studio Community</b> free download if you meet the licensing requirements. (<b>Visual Studio 2017</b> is also supported.)</li>
+<li>Install <a href="https://www.visualstudio.com/downloads/">Visual Studio 2022</a>. You can use the <b>Visual Studio Community</b> free download if you meet the licensing requirements. (<b>Visual Studio 2017</b> and <b>Visual Studio 2019</b> are also supported.)</li>
 </ul>
 <blockquote class="doxtable">
 <p>Be sure to include Visual C++. </p>
 </blockquote>
 <ul>
 <li>Install <a href="http://www.git-scm.com">git</a>. Confirm git is in your PATH by typing <code>git version</code> from a command prompt.</li>
-<li>Install CMake, either by including it in your Visual Studio 2019 install or installing directly from <a href="https://cmake.org/">CMake.org</a>. Make sure it is in your PATH by typing <code>cmake -version</code> from a command prompt. CMake will be used to create Visual Studio projects to build libraries and samples.</li>
+<li>Install CMake, either by including it in your Visual Studio install or installing directly from <a href="https://cmake.org/">CMake.org</a>. Make sure it is in your PATH by typing <code>cmake -version</code> from a command prompt. CMake will be used to create Visual Studio projects to build libraries and samples.</li>
 <li>Locate the tag name for the <a href="https://github.com/Azure/azure-iot-sdk-c/releases/latest">latest release</a> of the SDK.</li>
 </ul>
 <blockquote class="doxtable">
@@ -109,7 +109,7 @@ Building sample applications using vcpkg to build the SDK</h2>
 Building the C SDK with CMake on Windows</h2>
 <p>In some cases, you may want to build the SDK locally for development and testing purposes (without using vcpkg). First, take the following steps to generate project files:</p>
 <ul>
-<li>Open a "Developer Command Prompt for VS2017" or "Developer Command Prompt for VS2019".</li>
+<li>Open a "Developer Command Prompt for VS 2022" or "Developer Command Prompt for VS2019" or "Developer Command Prompt for VS2017".</li>
 <li>Run the following CMake commands from the root of the repository:</li>
 </ul>
 <div class="fragment"><div class="line">cd azure-iot-sdk-c</div>
@@ -119,8 +119,10 @@ Building the C SDK with CMake on Windows</h2>
 <div class="line">  cmake .. -G &quot;Visual Studio 15 2017&quot; ## For Visual Studio 2017</div>
 <div class="line"># or</div>
 <div class="line">  cmake .. -G &quot;Visual Studio 16 2019&quot; -A Win32</div>
+<div class="line"># or</div>
+<div class="line">  cmake .. -G &quot;Visual Studio 17 2022&quot; -A Win32</div>
 </div><!-- fragment --><blockquote class="doxtable">
-<p>This builds x86 libraries. To build for x64 for Visual Studio 2017, <code>cmake .. -G "Visual Studio 15 2017 Win64"</code> or for Visual Studio 2019, <code>cmake .. -G "Visual Studio 16 2019 -A x64"</code> </p>
+<p>This builds x86 libraries. To build for x64 for Visual Studio 2017: <code>cmake .. -G "Visual Studio 15 2017 Win64"</code>, for Visual Studio 2019: <code>cmake .. -G "Visual Studio 16 2019" -A x64</code>, or for Visual Studio 2022: <code>cmake .. -G "Visual Studio 17 2022" -A x64</code> </p>
 </blockquote>
 <p>When the project generation completes successfully, you will see a Visual Studio solution file (.sln) under the <code>cmake</code> folder. To build the SDK, do one of the following:</p>
 <ul>
@@ -131,11 +133,11 @@ Building the C SDK with CMake on Windows</h2>
 </div><!-- fragment --><blockquote class="doxtable">
 <p>To build Debug binaries, use the corresponding MSBuild argument: <code>cmake --build . -- /m /p:Configuration=Debug</code> There are many CMake configuration options available for building the SDK. For example, you can disable one of the available protocol stacks by adding an argument to the CMake project generation command: </p>
 </blockquote>
-<div class="fragment"><div class="line">cmake -G &quot;Visual Studio 15 2017&quot; -Duse_amqp=OFF .. // same with 2017 and 2019 generator (see above)</div>
+<div class="fragment"><div class="line">cmake -G &quot;Visual Studio 15 2017&quot; -Duse_amqp=OFF .. // same with 2017, 2019, and 2022 generator (see above)</div>
 </div><!-- fragment --><blockquote class="doxtable">
 <p>Also, you can build and run unit tests: </p>
 </blockquote>
-<div class="fragment"><div class="line">cmake -G &quot;Visual Studio 15 2017&quot; -Drun_unittests=ON ..  // same with 2017 and 2019 generator (see above)</div>
+<div class="fragment"><div class="line">cmake -G &quot;Visual Studio 15 2017&quot; -Drun_unittests=ON ..  // same with 2017, 2019, and 2022 generator (see above)</div>
 <div class="line">cmake --build . -- /m /p:Configuration=Debug</div>
 <div class="line">ctest -C &quot;debug&quot; -V</div>
 </div><!-- fragment --><h2><a class="anchor" id="autotoc_md72"></a>

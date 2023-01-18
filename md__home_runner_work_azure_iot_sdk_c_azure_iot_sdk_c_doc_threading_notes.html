@@ -65,9 +65,9 @@ $(function() {
 <div class="title">Threading model and optimizing for resource constrained devices </div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><h1><a class="anchor" id="autotoc_md174"></a>
+<div class="textblock"><h1><a class="anchor" id="autotoc_md155"></a>
 IoTHub Device Client and the _LL_ (lower layer) API</h1>
-<h2><a class="anchor" id="autotoc_md175"></a>
+<h2><a class="anchor" id="autotoc_md156"></a>
 The lower layer</h2>
 <p>There are two distinct but closely related sets of APIs for the IoT Hub client. Applications that want to run on a single thread should use the _LL_ (aka lower level) API. Sometimes the hardware/OS can only support one thread at a time or else spinning additional threads is expensive. Applications on more capable hardware may also use the _LL_ layer for greater control over scheduling.</p>
 <p>Calls to the IoT Hub API's ending in Async do not cause the operation to execute immediately. Instead, the work - both for sending data across the network and receiving data - is queued. The application must manually schedule the work by calling <code>IoTHubDeviceClient_LL_DoWork</code> (when using a device client).</p>
@@ -87,26 +87,26 @@ The lower layer</h2>
 <li>You <b>MUST NOT</b> use an _LL_ handle on more than one thread (unless you provide <em>all</em> your own locking). Part of what makes the _LL_ layer use fewer resources is that it does not use locks. It assumes a single threaded environment where locks are not needed.</li>
 <li>Even if you are not actively sending data while using _LL_ layer, you still need to periodically invoke the appropriate <code>DoWork</code> to make the client accept data from the network. This periodic <code>DoWork</code> call is also required as otherwise the underlying network transport and/or service may timeout the service due to inactivity.</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md176"></a>
+<h2><a class="anchor" id="autotoc_md157"></a>
 The convenience layer</h2>
 <p>Applications may also use the non _LL_ API set, which is also known as the "convenience layer." <br  />
 </p>
 <p>Just like the _LL_ layer, IoT Hub API's ending in Async queue work to be performed later and do not block waiting for the service accepting or rejecting the request. The difference is that the convenience layer itself automatically takes care of sending the data. In other words, there is no <code>DoWork</code>. The convenience layer does this for you automatically by spinning a worker thread to implicitly <code>DoWork</code> for your application. The convenience layer also performs locking, allowing a given <code>IOTHUB_DEVICE_CLIENT_HANDLE</code> to be safely used by different threads.</p>
-<h1><a class="anchor" id="autotoc_md177"></a>
+<h1><a class="anchor" id="autotoc_md158"></a>
 How to specify between the _LL_ and convenience layers</h1>
 <ul>
 <li>Applications using the _LL_ layer should <code>#include <a class="el" href="iothub__device__client__ll_8h.html" title="APIs that allow a user (usually a device) to communicate with an Azure IoT Hub.">iothub_device_client_ll.h</a></code> and use its API's and <code>IOTHUB_DEVICE_CLIENT_LL_HANDLE</code>.</li>
 <li>Applications using the convenience layer should <code>#include <a class="el" href="iothub__device__client_8h.html" title="Extends the IoTHubDeviceClient_LL with additional features.">iothub_device_client.h</a></code> and use its API's and <code>IOTHUB_DEVICE_CLIENT_HANDLE</code>.</li>
 </ul>
 <p>The _LL_ | convenience layer paradigm is used in many places throughout the SDK. The module client follows this pattern with <code>IOTHUB_MODULE_CLIENT_LL_HANDLE</code> and <code>IOTHUB_MODULE_CLIENT_HANDLE</code>. The provisioning client also follows this pattern with <code>PROV_DEVICE_LL_HANDLE</code> and <code>PROV_DEVICE_HANDLE</code>.</p>
-<h1><a class="anchor" id="autotoc_md178"></a>
+<h1><a class="anchor" id="autotoc_md159"></a>
 Avoid long-running callbacks</h1>
 <p>Regardless of whether you are using the _LL_ or convenience layer, application callbacks that you implement - such as processing a twin update - must NOT block for extended periods of time. <br  />
 </p>
 <p>The IoT Hub SDK uses a single dispatcher thread to handle all callbacks to user code. This same thread handles all network I/O. This is true whether the _LL_ or convenience layer is used. The only difference is that in the _LL_ layer, your thread is the dispatcher when it calls into the appropriate DoWork() call.</p>
 <p>An application callback that takes a long time to run is problematic. The SDK will not be able to call other pending callbacks as it is blocked on the long-running one. If the call back code takes long enough (minutes) there is the risk that the SDK will not be able to fire its periodic network keep-alive and that the entire connection will be dropped.</p>
 <p>Your callback should in general limit itself to quick, CPU bound operations.</p>
-<h1><a class="anchor" id="autotoc_md179"></a>
+<h1><a class="anchor" id="autotoc_md160"></a>
 Reentrancy and API calls</h1>
 <p>When processing a callback, your application code must not destroy the underlying handle (via <code>IoTHubDeviceClient_LL_Destroy</code>, e.g.). If your application is using the _LL_ layer, it must also not invoke <code>IoTHubDeviceClient_LL_DoWork</code> or <code>IoTHubModuleClient_LL_DoWork</code>.</p>
 <p>Your code can invoke other IoT Hub SDK calls. A common pattern for instance is that while processing a callback for an updated device twin properties for the application to invoke <code>IoTHubDeviceClient_LL_SendReportedState</code>. </p>

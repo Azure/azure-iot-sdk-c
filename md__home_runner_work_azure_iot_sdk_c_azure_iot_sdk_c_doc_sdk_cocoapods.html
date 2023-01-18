@@ -65,7 +65,12 @@ $(function() {
 <div class="title">CocoaPods for Microsoft Azure IoT </div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p>The <a href="https://github.com/azure/azure-iot-sdk-c">Microsoft Azure IoT C SDK</a> is available as five Objective-C <a href="https://cocoapods.org/">CocoaPods</a>:</p>
+<div class="textblock"><h1><a class="anchor" id="autotoc_md140"></a>
+Warning</h1>
+<p><b>Cocoapods support is deprecated and will be removed on June 1, 2023</b></p>
+<h1><a class="anchor" id="autotoc_md141"></a>
+Contents</h1>
+<p>The <a href="https://github.com/azure/azure-iot-sdk-c">Microsoft Azure IoT C SDK</a> is available as five Objective-C <a href="https://cocoapods.org/">CocoaPods</a>:</p>
 <ul>
 <li><a href="https://cocoapods.org/?q=AzureIoTUtility">AzureIoTUtility</a> contains the <a href="https://github.com/Azure/azure-c-shared-utility">Azure IoT C Shared Utility library</a></li>
 <li><a href="https://cocoapods.org/?q=AzureIoTuAmqp">AzureIoTuAmqp</a> contains the <a href="https://github.com/Azure/azure-uamqp-c">Azure IoT AMQP library</a></li>
@@ -73,10 +78,16 @@ $(function() {
 <li><a href="https://cocoapods.org/?q=AzureIoTHubClient">AzureIoTHubClient</a> contains the <a href="https://github.com/azure/azure-iot-sdk-c">Azure IoT Hub Client</a></li>
 <li><a href="https://cocoapods.org/?q=AzureIoTHubServiceClient">AzureIoTHubServiceClient</a> contains the <a href="https://github.com/azure/azure-iot-sdk-c">Azure IoT Hub Service Client</a></li>
 </ul>
-<h1><a class="anchor" id="autotoc_md148"></a>
+<h1><a class="anchor" id="autotoc_md142"></a>
 Samples</h1>
 <p>Samples in Swift for iOS are <a href="https://github.com/Azure-Samples/azure-iot-samples-ios.git">here</a>.</p>
-<h1><a class="anchor" id="autotoc_md149"></a>
+<p><b>iOS Limitations</b></p>
+<ul>
+<li>Authentication is limited to SAS keys on iOS. No certificate-based authentication is officially supported.</li>
+<li>The Device Provisioning Client is not supported on iOS. Only the Azure IoT Hub device client is supported.</li>
+</ul>
+<p>For a more complete <b>iOS experience</b> including the two missing features above, please see our sample <a href="https://github.com/Azure-Samples/azure-sdk-for-c-swift">native Swift library</a> built on top of the Embedded C SDK.</p>
+<h1><a class="anchor" id="autotoc_md143"></a>
 Using Azure IoT CocoaPods with Objective-C</h1>
 <p>Using Objective-C libraries within another Objective-C app or library requires setting up header search paths just like typical C libraries require</p>
 <p>The header search path values you'll need to set for the Azure IoT CocoaPods are:</p>
@@ -87,7 +98,7 @@ Using Azure IoT CocoaPods with Objective-C</h1>
 <li><code>${PODS_ROOT}/AzureIoTuMqtt/inc/</code></li>
 <li><code>${PODS_ROOT}/AzureIoTuAmqp/inc/</code></li>
 </ul>
-<h1><a class="anchor" id="autotoc_md150"></a>
+<h1><a class="anchor" id="autotoc_md144"></a>
 Using Azure IoT CocoaPods with Swift</h1>
 <p>Swift apps and libraries can use Azure IoT CocoaPods with standard Swift imports:</p>
 <ul>
