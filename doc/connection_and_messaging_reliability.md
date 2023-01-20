@@ -288,11 +288,15 @@ To access it the user can invoke one of the functions below, passing a callback 
 
 On [iothub\_client](https://github.com/Azure/azure-iot-sdk-c/blob/2018-05-04/iothub_client/inc/iothub_client.h#L171) module:
 
+```c
 IOTHUB\_CLIENT\_RESULT IoTHubClient\_SetConnectionStatusCallback(IOTHUB\_CLIENT\_HANDLE iotHubClientHandle, IOTHUB\_CLIENT\_CONNECTION\_STATUS\_CALLBACK connectionStatusCallback, void\* userContextCallback);
+```
 
 On [iothub\_client\_ll](https://github.com/Azure/azure-iot-sdk-c/blob/2018-05-04/iothub_client/inc/iothub_client_ll.h#L402) module:
 
+```c
 IOTHUB\_CLIENT\_RESULT IoTHubClient\_LL\_SetConnectionStatusCallback(IOTHUB\_CLIENT\_LL\_HANDLE iotHubClientHandle, IOTHUB\_CLIENT\_CONNECTION\_STATUS\_CALLBACK connectionStatusCallback, void\* userContextCallback);
+```
 
 This callback will be invoked in these specific situations:
 
@@ -300,11 +304,52 @@ This callback will be invoked in these specific situations:
 
 - When the device client gets disconnected due to any issues;
 
-> These include network availability and IoT hub connectivity issues, authentication failures.
+  > These include network availability and IoT hub connectivity issues, authentication failures.
 
 - When the device client ceases attempting to re-connect (if the Retry Policy no longer allows to).
 
-Please take a look [here](https://github.com/Azure/azure-iot-sdk-c/blob/2018-05-04/iothub_client/inc/iothub_client_ll.h#L144) for more info on the possible status and reasons.
+The type `IOTHUB\_CLIENT\_CONNECTION\_STATUS\_CALLBACK` is [defined](https://github.com/Azure/azure-iot-sdk-c/blob/2018-05-04/iothub_client/inc/iothub_client_ll.h#L183) as:
+```c
+typedef void(*IOTHUB_CLIENT_CONNECTION_STATUS_CALLBACK)(IOTHUB_CLIENT_CONNECTION_STATUS result, IOTHUB_CLIENT_CONNECTION_STATUS_REASON reason, void* userContextCallback);
+```
+
+The user application must provide a function that matches the function pointer definition above to provide it as an argument to any of the `*_SetConnectionStatusCallback` functions above.
+
+For reference, the connection status and reason enumerations (`IOTHUB_CLIENT_CONNECTION_STATUS` and `IOTHUB_CLIENT_CONNECTION_STATUS_REASON`, respectively) are defined in [iothub_client_core_common.h](https://github.com/Azure/azure-iot-sdk-c/blob/main/iothub_client/inc/iothub_client_core_common.h#L143).
+
+
+#### Understanding IOTHUB_CLIENT_CONNECTION_STATUS
+
+Indicates whether the device client is connected or not to the Azure IoT Hub.
+
+|Value|Description|
+|-|-|
+|IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED|Effectively means the device client is not ready to communicate with the Azure IoT Hub. The device client could be in any state from completely disconnected to not yet authenticated, including when brief disconnections occur for SAS token refreshes. See the list of IOTHUB_CLIENT_CONNECTION_STATUS_REASON status below for further details.|
+|IOTHUB_CLIENT_CONNECTION_AUTHENTICATED|The device client is **ready** to communicate with the Azure IoT Hub, being both connected and authenticated.|
+
+#### Understanding IOTHUB_CLIENT_CONNECTION_STATUS_REASON
+
+This enumeration attemps to provide a more specific reason for the current connection status of the device client. Its values depend on the transport protocol chosen by the user application for the Azure IoT C SDK client (AMQP, MQTT or HTTP) and on error granularity provided by the Azure IoT Hub.
+
+An `IOTHUB_CLIENT_CONNECTION_OK` is applicable to `IOTHUB_CLIENT_CONNECTION_AUTHENTICATED` only.
+
+All the other values of `IOTHUB_CLIENT_CONNECTION_STATUS_REASON` are applicable to `IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED` only. 
+
+Please see a description of the values according to each transport protocol supported by the Azure IoT C SDK:
+
+|Value|MQTT|AMQP|HTTP|
+|-|-|-|-|
+|IOTHUB_CLIENT_CONNECTION_OK|The Azure IoT C SDK client is connected and ready to communicate with the Azure IoT Hub.|Same|Same|
+|IOTHUB_CLIENT_CONNECTION_COMMUNICATION_ERROR|If a telemetry message [times out receiving a PUBACK](https://github.com/Azure/azure-iot-sdk-c/blob/main/iothub_client/src/iothubtransport_mqtt_common.c#L2287) from the Azure IoT Hub, or if there is [an error](https://github.com/Azure/azure-iot-sdk-c/blob/main/iothub_client/src/iothubtransport_mqtt_common.c#L2269) sending a [PUBACK or PUBREC](https://github.com/Azure/azure-umqtt-c/blob/master/src/mqtt_client.c#L667) to Azure IoT Hub or if an [I/O error occurs when using WebSockets](https://github.com/Azure/azure-umqtt-c/blob/master/src/mqtt_client.c#L226).|If the [AMQP transport](https://github.com/Azure/azure-iot-sdk-c/blob/main/iothub_client/src/iothubtransport_amqp_common.c#306) encounters an authentication timeout, unexpected link DETACH from Azure IoT Hub, link ATTACH timeouts.|**Not applicable**.|
+|IOTHUB_CLIENT_CONNECTION_NO_NETWORK|If an MQTT CONNECT packet [fails to be sent](https://github.com/Azure/azure-iot-sdk-c/blob/main/iothub_client/src/iothubtransport_mqtt_common.c#L2264) to the Azure IoT Hub for any reason.|If the AMQP transport detects a [network connection issue](https://github.com/Azure/azure-iot-sdk-c/blob/main/iothub_client/src/iothubtransport_amqp_common.c#L720), which includes socket errors, AMQP ATTACH failures to CBS link (for authentication).|**Not applicable**.|
+|IOTHUB_CLIENT_CONNECTION_BAD_CREDENTIAL|**Not applicable.**. The MQTT transport does [map some MQTT CONNECT return code values](https://github.com/Azure/azure-iot-sdk-c/blob/main/iothub_client/src/iothubtransport_mqtt_common.c#L2116) to this status code, but these MQTT CONNECT return codes are not supported by the Azure IoT Hub. See [note](#azure-iot-hub-limitations-on-mqtt-connect-result-codes) below.|If a SAS-based authentication request [fails](https://github.com/Azure/azure-iot-sdk-c/blob/main/iothub_client/src/iothubtransport_amqp_common.c#L302). See Azure IoT Hub documentation on [device authentication](https://learn.microsoft.com/en-us/azure/iot-hub/iot-hub-dev-guide-sas?tabs=node#authenticating-a-device-to-iot-hub) for more details.|**Not applicable**.|
+|IOTHUB_CLIENT_CONNECTION_DEVICE_DISABLED|Raised by the [MQTT transport](https://github.com/Azure/azure-iot-sdk-c/blob/main/iothub_client/src/iothubtransport_mqtt_common.c#L2114) if an MQTT CONNECT to the Azure IoT Hub is rejected. See [note](#azure-iot-hub-limitations-on-mqtt-connect-result-codes) below.|**Not applicable.**|**Not applicable.**|
+|IOTHUB_CLIENT_CONNECTION_RETRY_EXPIRED|The MQTT transport has made its [maximum number of attempts to reconnect](https://github.com/Azure/azure-iot-sdk-c/blob/main/iothub_client/src/iothubtransport_mqtt_common.c#L2818) to the Azure IoT Hub and it will not longer try.|The AMQP transport has made its [maximum number of attempts to reconnect](https://github.com/Azure/azure-iot-sdk-c/blob/main/iothub_client/src/iothubtransport_amqp_common.c#L267) to the Azure IoT Hub and it will not longer try.|**Not applicable**. Each new HTTP request sent to the Azure IoT Hub is done over a new HTTP connection.|
+|IOTHUB_CLIENT_CONNECTION_EXPIRED_SAS_TOKEN|The SAS token used in the current [MQTT](https://github.com/Azure/azure-iot-sdk-c/blob/main/iothub_client/src/iothubtransport_mqtt_common.c#L2870) connection is expired and the client must reconnect with a new SAS token. This is an inplicit dependency on MQTT v3.1.1, which is not capable of refreshing authentication information in the same connection.|**Not applicable.** The AMQP protocol is capable of [refreshing authentication](https://github.com/Azure/azure-iot-sdk-c/blob/main/iothub_client/src/iothubtransport_amqp_cbs_auth.c#L572) within the same connection.|**Not applicable.** A [new SAS token is generated](https://github.com/Azure/azure-c-shared-utility/blob/master/src/httpapiexsas.c#L168) for each HTTP request sent to the Azure IoT Hub.|
+
+##### Azure IoT Hub Limitations on MQTT CONNECT Result Codes
+
+The Azure IoT Hub does not support all the MQTT CONNECT return code values defined in the [MQTT v3.1.1 specification](http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Table_3.1_-), returning always `Not Authorized` (MQTT CONNECT Return Code 5) on MQTT CONNECT failure.
 
 ### Current Configuration Options
 
