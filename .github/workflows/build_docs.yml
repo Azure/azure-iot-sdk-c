@@ -9,7 +9,8 @@ on:
 
 jobs:
   push-docs:
-
+    # 22.04 has broken deps for bison and flex, so reverted to 20.04 for docs build
+    # until a more permanent fix is created.
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout
