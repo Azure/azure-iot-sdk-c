@@ -166,8 +166,8 @@ extern "C"
     IOTHUB_CLIENT_CONNECTION_QUOTA_EXCEEDED                \
 
     /** @brief Enumeration passed to the application callback indicating reason that connection was unsuccessful.
-    *   @remark Each of the values of @c IOTHUB_CLIENT_CONNECTION_STATUS_REASON has a specific semanthics
-    *           depending on the transport protocol used. Here is a brief description of he reasons for each
+    *   @remark Each of the values of @c IOTHUB_CLIENT_CONNECTION_STATUS_REASON has a specific semantics
+    *           depending on the transport protocol used. Here is a brief description of the reasons for each
     *           transport protocol:
     *           @c IOTHUB_CLIENT_CONNECTION_EXPIRED_SAS_TOKEN
     *               MQTT: The SAS token used in the current MQTT connection is expired
@@ -195,7 +195,7 @@ extern "C"
     *               HTTP: Not applicable.
     *           @c IOTHUB_CLIENT_CONNECTION_COMMUNICATION_ERROR
     *               MQTT: A telemetry message timed out receiving a PUBACK from the Azure IoT Hub,
-    *                     or there was an error sending a PUBACK or PUBREC to Azure IoT Hub or
+    *                     there was an error sending a PUBACK or PUBREC to Azure IoT Hub, or
     *                     an I/O error occurred when using WebSockets.
     *               AMQP: Authentication request timed out, received an unexpected link DETACH from
     *                     Azure IoT Hub, or a link ATTACH timed out.
