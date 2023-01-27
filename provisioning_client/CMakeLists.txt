@@ -180,7 +180,7 @@ set(PROV_DEVICE_CLIENT_SOURCE_H_FILES
 set(PROV_DEVICE_LL_CLIENT_SOURCE_C_FILES
     ${CMAKE_CURRENT_LIST_DIR}/src/prov_device_ll_client.c)
 
-set(PROV_DEVICE_LL_CLEINT_SOURCE_H_FILES
+set(PROV_DEVICE_LL_CLIENT_SOURCE_H_FILES
     ${CMAKE_CURRENT_LIST_DIR}/inc/azure_prov_client/prov_client_const.h
     ${CMAKE_CURRENT_LIST_DIR}/inc/azure_prov_client/prov_device_ll_client.h)
 
@@ -219,12 +219,12 @@ set(provisioning_libs ${provisioning_libs} prov_auth_client)
 set(provisioning_headers ${provisioning_headers} ${AUTH_CLIENT_H_FILES})
 
 if(${use_prov_client} OR (${use_prov_client_core} AND ${run_e2e_tests}))
-    add_library(prov_device_ll_client ${PROV_DEVICE_LL_CLIENT_SOURCE_C_FILES} ${PROV_DEVICE_LL_CLEINT_SOURCE_H_FILES})
+    add_library(prov_device_ll_client ${PROV_DEVICE_LL_CLIENT_SOURCE_C_FILES} ${PROV_DEVICE_LL_CLIENT_SOURCE_H_FILES})
     applyXcodeBuildFlagsIfNeeded(prov_device_ll_client)
     linkSharedUtil(prov_device_ll_client)
     link_security_client(prov_device_ll_client)
     set(provisioning_libs ${provisioning_libs} prov_device_ll_client)
-    set(provisioning_headers ${provisioning_headers} ${PROV_DEVICE_LL_CLEINT_SOURCE_H_FILES})
+    set(provisioning_headers ${provisioning_headers} ${PROV_DEVICE_LL_CLIENT_SOURCE_H_FILES})
     target_link_libraries(prov_device_ll_client parson)
 
     add_library(prov_device_client ${PROV_DEVICE_CLIENT_SOURCE_C_FILES} ${PROV_DEVICE_CLIENT_SOURCE_H_FILES})
@@ -238,9 +238,9 @@ if(${use_prov_client} OR (${use_prov_client_core} AND ${run_e2e_tests}))
     if (${build_as_dynamic})
         add_library(prov_device_client_dll SHARED
             ${PROV_DEVICE_CLIENT_SOURCE_C_FILES}
-            ${PROV_DEVICE_CLEINT_SOURCE_H_FILES}
+            ${PROV_DEVICE_CLIENT_SOURCE_H_FILES}
             ${PROV_DEVICE_LL_CLIENT_SOURCE_C_FILES}
-            ${PROV_DEVICE_LL_CLEINT_SOURCE_H_FILES}
+            ${PROV_DEVICE_LL_CLIENT_SOURCE_H_FILES}
             ${CMAKE_CURRENT_LIST_DIR}/src/prov_device_client_dll.def
         )
         linkSharedUtil(prov_device_client_dll)
