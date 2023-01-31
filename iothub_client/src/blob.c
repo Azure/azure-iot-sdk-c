@@ -279,7 +279,7 @@ static BLOB_RESULT SendBlockIdList(HTTPAPIEX_HANDLE httpApiExHandle, const char*
 }
 
 
-BLOB_RESULT Blob_UploadMultipleBlocksFromSasUri(const char* SASURI, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK_EX getDataCallbackEx, void* context, unsigned int* httpStatus, BUFFER_HANDLE httpResponse, const char* certificates, HTTP_PROXY_OPTIONS *proxyOptions, const char* networkInterface, const size_t* timeout)
+BLOB_RESULT Blob_UploadMultipleBlocksFromSasUri(const char* SASURI, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK_EX getDataCallbackEx, void* context, unsigned int* httpStatus, BUFFER_HANDLE httpResponse, const char* certificates, HTTP_PROXY_OPTIONS *proxyOptions, const char* networkInterface, const long* timeout)
 {
     BLOB_RESULT result;
     const char* hostnameBegin;
