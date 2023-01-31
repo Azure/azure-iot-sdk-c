@@ -745,7 +745,8 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl(IOTHUB_CLIE
                                         }
                                         else
                                         {
-                                            BLOB_RESULT uploadMultipleBlocksResult = Blob_UploadMultipleBlocksFromSasUri(STRING_c_str(sasUri), getDataCallbackEx, context, &httpResponse, responseToIoTHub, upload_data->certificates, &(upload_data->http_proxy_options), upload_data->networkInterface);
+                                            size_t timeout = ((long)upload_data->blob_upload_timeout_secs * 1000);
+                                            BLOB_RESULT uploadMultipleBlocksResult = Blob_UploadMultipleBlocksFromSasUri(STRING_c_str(sasUri), getDataCallbackEx, context, &httpResponse, responseToIoTHub, upload_data->certificates, &(upload_data->http_proxy_options), upload_data->networkInterface, &timeout);
                                             if (uploadMultipleBlocksResult == BLOB_ABORTED)
                                             {
                                                 LogInfo("Blob_UploadFromSasUri aborted file upload");
