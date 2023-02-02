@@ -57,10 +57,11 @@ MU_DEFINE_ENUM_WITHOUT_INVALID(BLOB_RESULT, BLOB_RESULT_VALUES)
 * @param  certificates      A null terminated string containing CA certificates to be used
 * @param    proxyOptions    A structure that contains optional web proxy information
 * @param  networkInterface    An optional null terminated string containing the network interface
+* @param  timeoutInMilliseconds  The maximum time in ms allowed for a blob transfer. A value of 0 uses the default timeout for the underlying transport.
 *
 * @return    A @c BLOB_RESULT. BLOB_OK means the blob has been uploaded successfully. Any other value indicates an error
 */
-MOCKABLE_FUNCTION(, BLOB_RESULT, Blob_UploadMultipleBlocksFromSasUri, const char*, SASURI, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK_EX, getDataCallbackEx, void*, context, unsigned int*, httpStatus, BUFFER_HANDLE, httpResponse, const char*, certificates, HTTP_PROXY_OPTIONS*, proxyOptions, const char*, networkInterface)
+MOCKABLE_FUNCTION(, BLOB_RESULT, Blob_UploadMultipleBlocksFromSasUri, const char*, SASURI, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK_EX, getDataCallbackEx, void*, context, unsigned int*, httpStatus, BUFFER_HANDLE, httpResponse, const char*, certificates, HTTP_PROXY_OPTIONS*, proxyOptions, const char*, networkInterface, const size_t, timeoutInMilliseconds)
 
 /**
 * @brief  Synchronously uploads a byte array as a new block to blob storage

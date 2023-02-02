@@ -279,7 +279,7 @@ static BLOB_RESULT SendBlockIdList(HTTPAPIEX_HANDLE httpApiExHandle, const char*
 }
 
 
-BLOB_RESULT Blob_UploadMultipleBlocksFromSasUri(const char* SASURI, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK_EX getDataCallbackEx, void* context, unsigned int* httpStatus, BUFFER_HANDLE httpResponse, const char* certificates, HTTP_PROXY_OPTIONS *proxyOptions, const char* networkInterface)
+BLOB_RESULT Blob_UploadMultipleBlocksFromSasUri(const char* SASURI, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK_EX getDataCallbackEx, void* context, unsigned int* httpStatus, BUFFER_HANDLE httpResponse, const char* certificates, HTTP_PROXY_OPTIONS *proxyOptions, const char* networkInterface, const size_t timeoutInMilliseconds)
 {
     BLOB_RESULT result;
     const char* hostnameBegin;
@@ -328,7 +328,12 @@ BLOB_RESULT Blob_UploadMultipleBlocksFromSasUri(const char* SASURI, IOTHUB_CLIEN
                     LogError("unable to create a HTTPAPIEX_HANDLE");
                     result = BLOB_ERROR;
                 }
-                else if ((certificates != NULL) && (HTTPAPIEX_SetOption(httpApiExHandle, "TrustedCerts", certificates) == HTTPAPIEX_ERROR))
+                else if ((timeoutInMilliseconds != 0) && (HTTPAPIEX_SetOption(httpApiExHandle, OPTION_HTTP_TIMEOUT, &timeoutInMilliseconds) == HTTPAPIEX_ERROR))
+                {
+                    LogError("unable to set blob transfer timeout");
+                    result = BLOB_ERROR;
+                }
+                else if ((certificates != NULL) && (HTTPAPIEX_SetOption(httpApiExHandle, OPTION_TRUSTED_CERT, certificates) == HTTPAPIEX_ERROR))
                 {
                     LogError("failure in setting trusted certificates");
                     result = BLOB_ERROR;
