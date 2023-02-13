@@ -280,8 +280,36 @@ if(${use_prov_client} OR (${use_prov_client_core} AND ${run_e2e_tests}))
         linkSharedUtil(prov_http_transport)
         set(provisioning_libs ${provisioning_libs} prov_http_transport)
         set(provisioning_headers ${provisioning_headers} ${PROV_HTTP_CLIENT_H_FILES})
-
         target_link_libraries(prov_http_transport uhttp)
+
+        if (${build_as_dynamic})
+            add_library(prov_http_transport_dll SHARED
+                ${PROV_HTTP_CLIENT_C_FILES} 
+                ${PROV_HTTP_CLIENT_H_FILES}
+                ${CMAKE_CURRENT_LIST_DIR}/src/prov_http_transport_dll.def
+            )
+            linkSharedUtil(prov_http_transport_dll)
+
+            if(NOT WIN32)
+                set_target_properties(prov_http_transport_dll PROPERTIES OUTPUT_NAME "prov_http_transport")
+            endif()
+            set_target_properties(prov_http_transport_dll PROPERTIES
+                OUTPUT_NAME "prov_http_transport"
+                ARCHIVE_OUTPUT_NAME "prov_http_transport_dll_import"
+                ENABLE_EXPORTS YES
+                PDB_NAME "prov_http_transport_dll"
+                VERSION ${PROV_SDK_VERSION}
+                SOVERSION ${PROV_SDK_VERSION_MAJOR}
+                BUILD_WITH_INSTALL_RPATH TRUE
+            )
+            if (${CMAKE_C_COMPILER_ID} STREQUAL "GNU" OR ${CMAKE_C_COMPILER_ID} STREQUAL "Clang")
+                target_link_libraries(prov_http_transport_dll
+                    "-Wl,--exclude-libs,libparson.a"
+                )
+            endif()
+            set(provisioning_libs ${provisioning_libs} prov_http_transport_dll)
+            target_link_libraries(prov_http_transport_dll uhttp)
+        endif()
     endif()
 
     if (${use_amqp})
@@ -315,6 +343,34 @@ if(${use_prov_client} OR (${use_prov_client_core} AND ${run_e2e_tests}))
         target_link_libraries(prov_amqp_ws_transport uamqp)
         set(provisioning_libs ${provisioning_libs} prov_amqp_ws_transport)
         set(provisioning_headers ${provisioning_headers} ${PROV_AMQP_WS_CLIENT_H_FILES})
+        if (${build_as_dynamic})
+            add_library(prov_amqp_ws_transport_dll SHARED
+                ${PROV_AMQP_WS_CLIENT_C_FILES} 
+                ${PROV_AMQP_WS_CLIENT_H_FILES}
+                ${CMAKE_CURRENT_LIST_DIR}/src/prov_amqp_ws_transport_dll.def
+            )
+            linkSharedUtil(prov_amqp_ws_transport_dll)
+
+            if(NOT WIN32)
+                set_target_properties(prov_amqp_ws_transport_dll PROPERTIES OUTPUT_NAME "prov_amqp_ws_transport")
+            endif()
+            set_target_properties(prov_amqp_ws_transport_dll PROPERTIES
+                OUTPUT_NAME "prov_amqp_ws_transport"
+                ARCHIVE_OUTPUT_NAME "prov_amqp_ws_transport_dll_import"
+                ENABLE_EXPORTS YES
+                PDB_NAME "prov_amqp_ws_transport_dll"
+                VERSION ${PROV_SDK_VERSION}
+                SOVERSION ${PROV_SDK_VERSION_MAJOR}
+                BUILD_WITH_INSTALL_RPATH TRUE
+            )
+            if (${CMAKE_C_COMPILER_ID} STREQUAL "GNU" OR ${CMAKE_C_COMPILER_ID} STREQUAL "Clang")
+                target_link_libraries(prov_amqp_ws_transport_dll
+                    "-Wl,--exclude-libs,libparson.a"
+                )
+            endif()
+            set(provisioning_libs ${provisioning_libs} prov_amqp_ws_transport_dll)
+            target_link_libraries(prov_amqp_ws_transport_dll uamqp)
+        endif()
 
         # Provisioning amqp Transport Client library
         add_library(prov_amqp_transport ${PROV_AMQP_CLIENT_C_FILES} ${PROV_AMQP_CLIENT_H_FILES})
@@ -323,6 +379,34 @@ if(${use_prov_client} OR (${use_prov_client_core} AND ${run_e2e_tests}))
         target_link_libraries(prov_amqp_transport uamqp)
         set(provisioning_libs ${provisioning_libs} prov_amqp_transport)
         set(provisioning_headers ${provisioning_headers} ${PROV_AMQP_CLIENT_H_FILES})
+        if (${build_as_dynamic})
+            add_library(prov_amqp_transport_dll SHARED
+                ${PROV_AMQP_CLIENT_C_FILES} 
+                ${PROV_AMQP_CLIENT_H_FILES}
+                ${CMAKE_CURRENT_LIST_DIR}/src/prov_amqp_transport_dll.def
+            )
+            linkSharedUtil(prov_amqp_transport_dll)
+
+            if(NOT WIN32)
+                set_target_properties(prov_amqp_transport_dll PROPERTIES OUTPUT_NAME "prov_amqp_transport")
+            endif()
+            set_target_properties(prov_amqp_transport_dll PROPERTIES
+                OUTPUT_NAME "prov_amqp_transport"
+                ARCHIVE_OUTPUT_NAME "prov_amqp_transport_dll_import"
+                ENABLE_EXPORTS YES
+                PDB_NAME "prov_amqp_transport_dll"
+                VERSION ${PROV_SDK_VERSION}
+                SOVERSION ${PROV_SDK_VERSION_MAJOR}
+                BUILD_WITH_INSTALL_RPATH TRUE
+            )
+            if (${CMAKE_C_COMPILER_ID} STREQUAL "GNU" OR ${CMAKE_C_COMPILER_ID} STREQUAL "Clang")
+                target_link_libraries(prov_amqp_transport_dll
+                    "-Wl,--exclude-libs,libparson.a"
+                )
+            endif()
+            set(provisioning_libs ${provisioning_libs} prov_amqp_transport_dll)
+            target_link_libraries(prov_amqp_transport_dll uamqp)
+        endif()
     endif()
 
     if (${use_mqtt})
@@ -352,6 +436,34 @@ if(${use_prov_client} OR (${use_prov_client_core} AND ${run_e2e_tests}))
         target_link_libraries(prov_mqtt_ws_transport umqtt)
         set(provisioning_libs ${provisioning_libs} prov_mqtt_ws_transport)
         set(provisioning_headers ${provisioning_headers} ${PROV_MQTT_WS_CLIENT_H_FILES})
+        if (${build_as_dynamic})
+            add_library(prov_mqtt_ws_transport_dll SHARED
+                ${PROV_MQTT_WS_CLIENT_C_FILES} 
+                ${PROV_MQTT_WS_CLIENT_H_FILES}
+                ${CMAKE_CURRENT_LIST_DIR}/src/prov_mqtt_ws_transport_dll.def
+            )
+            linkSharedUtil(prov_mqtt_ws_transport_dll)
+
+            if(NOT WIN32)
+                set_target_properties(prov_mqtt_ws_transport_dll PROPERTIES OUTPUT_NAME "prov_mqtt_ws_transport")
+            endif()
+            set_target_properties(prov_mqtt_ws_transport_dll PROPERTIES
+                OUTPUT_NAME "prov_mqtt_ws_transport"
+                ARCHIVE_OUTPUT_NAME "prov_mqtt_ws_transport_dll_import"
+                ENABLE_EXPORTS YES
+                PDB_NAME "prov_mqtt_ws_transport_dll"
+                VERSION ${PROV_SDK_VERSION}
+                SOVERSION ${PROV_SDK_VERSION_MAJOR}
+                BUILD_WITH_INSTALL_RPATH TRUE
+            )
+            if (${CMAKE_C_COMPILER_ID} STREQUAL "GNU" OR ${CMAKE_C_COMPILER_ID} STREQUAL "Clang")
+                target_link_libraries(prov_mqtt_ws_transport_dll
+                    "-Wl,--exclude-libs,libparson.a"
+                )
+            endif()
+            set(provisioning_libs ${provisioning_libs} prov_mqtt_ws_transport_dll)
+            target_link_libraries(prov_mqtt_ws_transport_dll umqtt)
+        endif()
 
         # Provisioning mqtt Transport Client library
         add_library(prov_mqtt_transport ${PROV_MQTT_CLIENT_C_FILES} ${PROV_MQTT_CLIENT_H_FILES})
@@ -360,6 +472,34 @@ if(${use_prov_client} OR (${use_prov_client_core} AND ${run_e2e_tests}))
         target_link_libraries(prov_mqtt_transport umqtt)
         set(provisioning_libs ${provisioning_libs} prov_mqtt_transport)
         set(provisioning_headers ${provisioning_headers} ${PROV_MQTT_CLIENT_H_FILES})
+        if (${build_as_dynamic})
+            add_library(prov_mqtt_transport_dll SHARED
+                ${PROV_MQTT_CLIENT_C_FILES} 
+                ${PROV_MQTT_CLIENT_H_FILES}
+                ${CMAKE_CURRENT_LIST_DIR}/src/prov_mqtt_transport_dll.def
+            )
+            linkSharedUtil(prov_mqtt_transport_dll)
+
+            if(NOT WIN32)
+                set_target_properties(prov_mqtt_transport_dll PROPERTIES OUTPUT_NAME "prov_mqtt_transport")
+            endif()
+            set_target_properties(prov_mqtt_transport_dll PROPERTIES
+                OUTPUT_NAME "prov_mqtt_transport"
+                ARCHIVE_OUTPUT_NAME "prov_mqtt_transport_dll_import"
+                ENABLE_EXPORTS YES
+                PDB_NAME "prov_mqtt_transport_dll"
+                VERSION ${PROV_SDK_VERSION}
+                SOVERSION ${PROV_SDK_VERSION_MAJOR}
+                BUILD_WITH_INSTALL_RPATH TRUE
+            )
+            if (${CMAKE_C_COMPILER_ID} STREQUAL "GNU" OR ${CMAKE_C_COMPILER_ID} STREQUAL "Clang")
+                target_link_libraries(prov_mqtt_transport_dll
+                    "-Wl,--exclude-libs,libparson.a"
+                )
+            endif()
+            set(provisioning_libs ${provisioning_libs} prov_mqtt_transport_dll)
+            target_link_libraries(prov_mqtt_transport_dll umqtt)
+        endif()
     endif()
 endif()
 
