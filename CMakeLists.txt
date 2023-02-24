@@ -376,6 +376,8 @@ if (${build_service_client})
     add_subdirectory(iothub_service_client)
 endif()
 
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/iothub_client)
+
 if (${use_prov_client_core})
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_PROV_MODULE")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DUSE_PROV_MODULE")
@@ -386,8 +388,6 @@ if (${use_prov_client_core})
 
     add_subdirectory(provisioning_client)
 endif()
-
-add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/iothub_client)
 
 
 # Note this is deprecated

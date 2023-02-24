@@ -283,15 +283,16 @@ if(${use_http})
     )
     applyXcodeBuildFlagsIfNeeded(iothub_client_http_transport)
     linkSharedUtil(iothub_client_http_transport)
-    set(iothub_client_libs
-        ${iothub_client_libs}
-        iothub_client_http_transport
-    )
 
     if(build_as_dynamic)
         set(iothub_transport_source ${iothub_transport_source}
             ${iothub_client_http_transport_c_files}
             ${iothub_client_http_transport_h_files})
+    else()
+        set(iothub_client_libs
+            ${iothub_client_libs}
+            iothub_client_http_transport
+        )
     endif(build_as_dynamic)
 endif()
 
@@ -305,10 +306,6 @@ if(${use_amqp})
     applyXcodeBuildFlagsIfNeeded(iothub_client_amqp_transport)
     linkSharedUtil(iothub_client_amqp_transport)
     linkUAMQP(iothub_client_amqp_transport)
-    set(iothub_client_libs
-        ${iothub_client_libs}
-        iothub_client_amqp_transport
-    )
 
     include_directories(${iothub_client_amqp_ws_transport_INC_FOLDER} ${UAMQP_INC_FOLDER})
     add_library(iothub_client_amqp_ws_transport
@@ -318,10 +315,6 @@ if(${use_amqp})
     applyXcodeBuildFlagsIfNeeded(iothub_client_amqp_ws_transport)
     linkSharedUtil(iothub_client_amqp_ws_transport)
     linkUAMQP(iothub_client_amqp_ws_transport)
-    set(iothub_client_libs
-        ${iothub_client_libs}
-        iothub_client_amqp_ws_transport
-    )
 
     if (build_as_dynamic)
         set(iothub_transport_source ${iothub_transport_source}
@@ -331,6 +324,11 @@ if(${use_amqp})
         set(iothub_transport_source ${iothub_transport_source}
             ${iothub_client_amqp_ws_transport_c_files}
             ${iothub_client_amqp_ws_transport_h_files})
+    else()
+        set(iothub_client_libs
+            ${iothub_client_libs}
+            iothub_client_amqp_transport iothub_client_amqp_ws_transport
+        )
     endif(build_as_dynamic)
 endif()
 
@@ -344,10 +342,7 @@ if(${use_mqtt})
     applyXcodeBuildFlagsIfNeeded(iothub_client_mqtt_transport)
     linkSharedUtil(iothub_client_mqtt_transport)
     linkMqttLibrary(iothub_client_mqtt_transport)
-    set(iothub_client_libs
-        ${iothub_client_libs}
-        iothub_client_mqtt_transport
-    )
+
     include_directories(${IOTHUB_CLIENT_MQTT_TRANSPORT_INC_FOLDER} ${MQTT_INC_FOLDER})
     add_library(iothub_client_mqtt_ws_transport
         ${iothub_client_mqtt_ws_transport_c_files}
@@ -356,10 +351,6 @@ if(${use_mqtt})
     applyXcodeBuildFlagsIfNeeded(iothub_client_mqtt_ws_transport)
     linkSharedUtil(iothub_client_mqtt_ws_transport)
     linkMqttLibrary(iothub_client_mqtt_ws_transport)
-    set(iothub_client_libs
-        ${iothub_client_libs}
-        iothub_client_mqtt_ws_transport
-    )
 
     if (build_as_dynamic)
         set(iothub_transport_source ${iothub_transport_source}
@@ -369,6 +360,11 @@ if(${use_mqtt})
         set(iothub_transport_source ${iothub_transport_source}
             ${iothub_client_mqtt_ws_transport_c_files}
             ${iothub_client_mqtt_ws_transport_h_files})
+    else()
+        set(iothub_client_libs
+            ${iothub_client_libs}
+            iothub_client_mqtt_transport iothub_client_mqtt_ws_transport
+        )
     endif(build_as_dynamic)
 endif()
 
@@ -379,6 +375,11 @@ IF(WIN32)
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
     add_definitions(-DGB_MEASURE_MEMORY_FOR_THIS -DGB_DEBUG_ALLOC)
 ENDIF(WIN32)
+
+add_library(iothub_client
+    ${iothub_client_c_files}
+    ${iothub_client_h_files}
+)
 
 if (${build_as_dynamic})
     set(iothub_def_file ${CMAKE_CURRENT_LIST_DIR}/src/iothub_client_dll.def)
@@ -408,6 +409,18 @@ if (${build_as_dynamic})
         ${iothub_def_file}
         ${iothub_transport_source}
     )
+
+    if(use_amqp)
+        linkUAMQP(iothub_client_dll)
+    endif()
+
+    if(use_http)
+        linkSharedUtil(iothub_client_dll)
+    endif()
+
+    if(use_mqtt)
+        linkMqttLibrary(iothub_client_dll)
+    endif()
 
     applyXcodeBuildFlagsIfNeeded(iothub_client_dll)
     target_link_libraries(iothub_client_dll ${iothub_client_libs})
@@ -440,10 +453,6 @@ if (${build_as_dynamic})
     set(install_staticlibs ${install_staticlibs} iothub_client_dll)
 endif()
 
-add_library(iothub_client
-    ${iothub_client_c_files}
-    ${iothub_client_h_files}
-)
 target_include_directories(iothub_client
     PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
@@ -460,10 +469,13 @@ if (${use_prov_client_core})
 endif()
 
 linkSharedUtil(iothub_client)
-set(iothub_client_libs
-    iothub_client
-    ${iothub_client_libs}
-)
+if (NOT ${build_as_dynamic})
+    set(iothub_client_libs
+        iothub_client
+        ${iothub_client_libs}
+    )
+endif()
+
 # Don't build samples under Win32 ARM for now
 if(NOT ${skip_samples})
 if(WIN32)
@@ -504,3 +516,5 @@ else()
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 endif()
+
+set(iothub_client_libs ${iothub_client_libs} PARENT_SCOPE)

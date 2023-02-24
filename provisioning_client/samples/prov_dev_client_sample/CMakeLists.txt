@@ -31,10 +31,9 @@ include_directories(${CMAKE_CURRENT_LIST_DIR}/adapters)
 add_executable(prov_dev_client_sample ${prov_dev_client_sample_c_files} ${prov_dev_client_sample_h_files})
 
 target_link_libraries(prov_dev_client_sample
-    iothub_client
+    ${iothub_client_libs}
     prov_auth_client
     hsm_security_client
-    prov_device_client
 )
 
 if(${use_openssl})
@@ -47,12 +46,19 @@ if(${use_openssl})
 endif()
 
 if (${use_http})
-    target_link_libraries(prov_dev_client_sample prov_http_transport aziotsharedutil)
+    target_link_libraries(prov_dev_client_sample ${provisioning_libs} aziotsharedutil)
 endif()
 if (${use_mqtt})
-    target_link_libraries(prov_dev_client_sample iothub_client_mqtt_transport prov_mqtt_transport prov_mqtt_ws_transport aziotsharedutil)
+    target_link_libraries(prov_dev_client_sample ${provisioning_libs} iothub_client_mqtt_transport aziotsharedutil)
 endif()
 if (${use_amqp})
-    target_link_libraries(prov_dev_client_sample iothub_client_amqp_transport prov_amqp_ws_transport prov_amqp_transport aziotsharedutil)
-    linkUAMQP(prov_dev_client_sample)
+    target_link_libraries(prov_dev_client_sample ${provisioning_libs} iothub_client_amqp_transport aziotsharedutil)
 endif()
+
+if (${build_as_dynamic})
+    add_custom_command(TARGET prov_dev_client_sample POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_RUNTIME_DLLS:prov_dev_client_sample> $<TARGET_FILE_DIR:prov_dev_client_sample>
+      COMMAND_EXPAND_LISTS
+      )
+endif()
+
