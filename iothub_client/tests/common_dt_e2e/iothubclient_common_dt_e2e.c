@@ -35,6 +35,7 @@
 #define MAX_CLOUD_TRAVEL_TIME  120.0    // 2 minutes
 #define BUFFER_SIZE            37
 #define SLEEP_MS               5000
+#define LONG_SLEEP_MS          30000
 
 TEST_DEFINE_ENUM_TYPE(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
 TEST_DEFINE_ENUM_TYPE(DEVICE_TWIN_UPDATE_STATE, DEVICE_TWIN_UPDATE_STATE_VALUES);
@@ -471,7 +472,7 @@ static void receive_twin_loop(RECEIVED_TWIN_DATA* received_twin_data, DEVICE_TWI
     time_t begin_operation = time(NULL);
     time_t now_time;
 
-    LogInfo("receive_twin_loop(): Entering loop.");
+    LogInfo("receive_twin_loop(): Entering loop with expected state %s.", MU_ENUM_TO_STRING(DEVICE_TWIN_UPDATE_STATE, expected_update_state));
 
     while (now_time = time(NULL), (difftime(now_time, begin_operation) < MAX_CLOUD_TRAVEL_TIME))
     {
@@ -495,7 +496,7 @@ static void receive_twin_loop(RECEIVED_TWIN_DATA* received_twin_data, DEVICE_TWI
     ASSERT_IS_TRUE(difftime(now_time, begin_operation) < MAX_CLOUD_TRAVEL_TIME,
                    "Timeout waiting for twin message.");
 
-    LogInfo("receive_twin_loop(): Exiting loop.");
+    LogInfo("receive_twin_loop(): Exiting loop with state %s.", MU_ENUM_TO_STRING(DEVICE_TWIN_UPDATE_STATE, received_twin_data->update_state));
 }
 
 static void reported_state_callback(int status_code, void* user_context_callback)
@@ -729,9 +730,10 @@ void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol,
     receive_twin_loop(received_twin_data, DEVICE_TWIN_UPDATE_COMPLETE);
     received_twin_data_reset(received_twin_data);
 
-    ThreadAPI_Sleep(SLEEP_MS);
+    ThreadAPI_Sleep(LONG_SLEEP_MS);
 
     // Connect service client to IoT Hub to update twin.
+    LogInfo("dt_e2e_get_complete_desired_test: Connecting to the hub service client.");
     const char* connection_string = IoTHubAccount_GetIoTHubConnString(iothub_accountinfo_handle);
     IOTHUB_SERVICE_CLIENT_AUTH_HANDLE iothub_serviceclient_handle = IoTHubServiceClientAuth_CreateFromConnectionString(connection_string);
     ASSERT_IS_NOT_NULL(iothub_serviceclient_handle,
@@ -747,6 +749,7 @@ void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol,
     ASSERT_IS_NOT_NULL(desired_payload,
                        "Failed to create the payload for IoTHubDeviceTwin_UpdateTwin.");
 
+    LogInfo("dt_e2e_get_complete_desired_test: Updating device twin from service client.");
     service_client_update_twin(serviceclient_devicetwin_handle, device_to_use, desired_payload);
     receive_twin_loop(received_twin_data, DEVICE_TWIN_UPDATE_PARTIAL);
 
