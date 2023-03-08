@@ -2,7 +2,6 @@
 #Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 cmake_minimum_required (VERSION 3.5)
-cmake_policy(SET CMP0079 NEW)
 compileAsC99()
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_PROV_MODULE")
@@ -487,4 +486,7 @@ else()
     )
 endif()
 
-set(provisioning_libs ${provisioning_libs} PARENT_SCOPE)
+if (${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.13.0")
+    cmake_policy(SET CMP0079 NEW)
+    set(provisioning_libs ${provisioning_libs} PARENT_SCOPE)
+endif()

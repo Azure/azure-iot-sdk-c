@@ -2,6 +2,7 @@
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 cmake_minimum_required (VERSION 3.5)
+message(CMAKE_VERSION=${CMAKE_VERSION})
 project(azure_iot_sdks)
 
 ########## Enable CMake Features ##########
