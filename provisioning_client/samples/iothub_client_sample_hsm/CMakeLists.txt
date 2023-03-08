@@ -26,6 +26,7 @@ include_directories(.)
 include_directories(${IOTHUB_CLIENT_INC_FOLDER})
 include_directories(${DEV_AUTH_MODULES_CLIENT_INC_FOLDER})
 include_directories(${SHARED_UTIL_INC_FOLDER})
+include_directories(${PROJECT_SOURCE_DIR}/deps/parson)
 
 if (${build_as_dynamic}) 
     set(link_libs iothub_prov_client_dll)   
@@ -39,6 +40,7 @@ target_link_libraries(iothub_client_sample_hsm
     ${link_libs} 
     aziotsharedutil
     prov_auth_client
+    parson
 )
 
 if(${use_openssl})

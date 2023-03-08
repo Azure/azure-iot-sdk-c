@@ -375,6 +375,19 @@ if(${use_prov_client} OR (${use_prov_client_core} AND ${run_e2e_tests}))
             ${iothub_def_file}
         )
 
+        set(target_transport_libs)
+if(${use_http})
+        set(target_transport_libs ${target_transport_libs} iothub_client_http_transport)
+endif()
+if(${use_amqp})
+        set(target_transport_libs ${target_transport_libs} iothub_client_amqp_transport)
+        set(target_transport_libs ${target_transport_libs} iothub_client_amqp_ws_transport)
+endif()
+if(${use_mqtt})
+        set(target_transport_libs ${target_transport_libs} iothub_client_mqtt_transport)
+        set(target_transport_libs ${target_transport_libs} iothub_client_mqtt_ws_transport)
+endif()
+
         target_link_libraries(iothub_prov_client_dll 
             PRIVATE iothub_client    
             PRIVATE prov_auth_client 
@@ -382,18 +395,8 @@ if(${use_prov_client} OR (${use_prov_client_core} AND ${run_e2e_tests}))
             PRIVATE prov_http_transport
             PRIVATE prov_mqtt_ws_transport prov_mqtt_transport
             PRIVATE prov_amqp_ws_transport prov_amqp_transport
+            PRIVATE ${target_transport_libs}
             PRIVATE parson)
-if(${use_http})
-        target_link_libraries(iothub_prov_client_dll PRIVATE iothub_client_http_transport)
-endif()
-if(${use_amqp})
-        target_link_libraries(iothub_prov_client_dll PRIVATE iothub_client_amqp_transport)
-        target_link_libraries(iothub_prov_client_dll PRIVATE iothub_client_amqp_ws_transport)
-endif()
-if(${use_mqtt})
-        target_link_libraries(iothub_prov_client_dll PRIVATE iothub_client_mqtt_transport)
-        target_link_libraries(iothub_prov_client_dll PRIVATE iothub_client_mqtt_ws_transport)
-endif()
 
         if(NOT WIN32)
             set_target_properties(iothub_prov_client_dll PROPERTIES OUTPUT_NAME "iothub_prov_client")
