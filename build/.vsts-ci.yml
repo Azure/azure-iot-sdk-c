@@ -828,6 +828,9 @@ jobs:
     condition: succeededOrFailed()
   - task: ms.vss-governance-buildtask.governance-build-task-component-detection.ComponentGovernanceComponentDetection@0
     displayName: 'Component Detection'
+  - script: rm -rf $(Agent.BuildDirectory)/*
+    displayName: 'Cleanup'
+    condition: always()
 - job: xcodenative
   pool:
     name: OSX
@@ -871,6 +874,9 @@ jobs:
     condition: succeededOrFailed()
   - task: ms.vss-governance-buildtask.governance-build-task-component-detection.ComponentGovernanceComponentDetection@0
     displayName: 'Component Detection'
+  - script: rm -rf $(Agent.BuildDirectory)/*
+    displayName: 'Cleanup'
+    condition: always()
 - job: raspberrypi
   container: raspberrypi-c-buster
   pool: 
