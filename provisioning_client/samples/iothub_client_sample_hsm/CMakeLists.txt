@@ -52,7 +52,7 @@ if(${use_openssl})
     endif()
 endif()
 
-if (CMAKE_IMPORT_LIBRARY_SUFFIX)
+if (${build_as_dynamic} AND ${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.21.0") 
     add_custom_command(TARGET iothub_client_sample_hsm POST_BUILD
       COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_RUNTIME_DLLS:iothub_client_sample_hsm> $<TARGET_FILE_DIR:iothub_client_sample_hsm>
       COMMAND_EXPAND_LISTS
