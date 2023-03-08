@@ -52,7 +52,7 @@ if(${use_openssl})
     endif()
 endif()
 
-if (${build_as_dynamic})
+if (CMAKE_IMPORT_LIBRARY_SUFFIX)
     add_custom_command(TARGET prov_dev_client_ll_sample POST_BUILD
       COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_RUNTIME_DLLS:prov_dev_client_ll_sample> $<TARGET_FILE_DIR:prov_dev_client_ll_sample>
       COMMAND_EXPAND_LISTS
