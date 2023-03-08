@@ -62,7 +62,7 @@ static const char* HTTP_HEADER_VAL_CONNECT_TIMEOUT_SECS = "60";
 static const char* HTTP_HEADER_KEY_RESPONSE_TIMEOUT_SECS = "iothub-streaming-response-timeout-in-seconds";
 static const char* HTTP_HEADER_VAL_RESPONSE_TIMEOUT_SECS = "60";
 static const int UID_LENGTH = 37;
-static const char* const URL_API_VERSION = "api-version=2018-06-30";
+static const char* const URL_API_VERSION = "api-version=2018-10-20-preview";
 static const char* const DEVICE_STREAMING_URI_RELATIVE_PATH_FMT = "/twins/%s/streams/%s?%s";
 static const char* const MODULE_STREAMING_URI_RELATIVE_PATH_FMT = "/twins/%s/modules/%s/streams/%s?%s";
 
