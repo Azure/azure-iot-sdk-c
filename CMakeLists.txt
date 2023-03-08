@@ -378,6 +378,8 @@ if (${build_service_client})
     add_subdirectory(iothub_service_client)
 endif()
 
+include_directories(${CMAKE_CURRENT_LIST_DIR}/provisioning_client/inc)
+
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/iothub_client)
 
 if (${use_prov_client_core})
