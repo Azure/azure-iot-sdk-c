@@ -1,4 +1,3 @@
-LIBRARY iothub_client_dll
 EXPORTS
 	MQTT_Protocol
 	MQTT_WebSocket_Protocol

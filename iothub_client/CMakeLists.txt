@@ -435,10 +435,7 @@ if (${build_as_dynamic})
         SOVERSION ${IOT_SDK_VERSION_MAJOR}
         BUILD_WITH_INSTALL_RPATH TRUE
     )
-    set(iothub_client_libs
-        iothub_client_dll
-        ${iothub_client_libs}
-    )
+
     if (${use_prov_client_core})
         target_link_libraries(iothub_client_dll hsm_security_client prov_auth_client)
     endif()
@@ -518,3 +515,4 @@ else()
 endif()
 
 set(iothub_client_libs ${iothub_client_libs} PARENT_SCOPE)
+set(iothub_def_file ${iothub_def_file} PARENT_SCOPE)

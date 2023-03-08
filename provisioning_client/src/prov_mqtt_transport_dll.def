@@ -1,3 +1,2 @@
-LIBRARY prov_mqtt_transport
 EXPORTS
 Prov_Device_MQTT_Protocol

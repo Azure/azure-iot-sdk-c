@@ -27,7 +27,19 @@ include_directories(${IOTHUB_CLIENT_INC_FOLDER})
 include_directories(${DEV_AUTH_MODULES_CLIENT_INC_FOLDER})
 include_directories(${SHARED_UTIL_INC_FOLDER})
 
+if (${build_as_dynamic}) 
+    set(link_libs iothub_prov_client_dll)   
+else()
+    set(link_libs ${iothub_client_libs} ${provisioning_libs})
+endif()
+
 add_executable(iothub_client_sample_hsm ${iothub_client_sample_hsm_c_files} ${iothub_client_sample_hsm_h_files})
+
+target_link_libraries(iothub_client_sample_hsm
+    ${link_libs} 
+    aziotsharedutil
+    prov_auth_client
+)
 
 if(${use_openssl})
     add_definitions(-DUSE_OPENSSL)
@@ -40,16 +52,9 @@ if(${use_openssl})
     endif()
 endif()
 
-if (${use_amqp})
-    linkUAMQP(iothub_client_sample_hsm)
+if (${build_as_dynamic})
+    add_custom_command(TARGET iothub_client_sample_hsm POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_RUNTIME_DLLS:iothub_client_sample_hsm> $<TARGET_FILE_DIR:iothub_client_sample_hsm>
+      COMMAND_EXPAND_LISTS
+      )
 endif()
-
-# prov_auth_client must come after the transport selection
-target_link_libraries(iothub_client_sample_hsm
-    $<$<BOOL:${use_mqtt}>:iothub_client_mqtt_transport>
-    $<$<BOOL:${use_amqp}>:iothub_client_amqp_transport>
-    iothub_client
-    prov_auth_client
-    aziotsharedutil
-    hsm_security_client
-)

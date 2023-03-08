@@ -1,7 +1,11 @@
-LIBRARY prov_device_client
 EXPORTS
 Prov_Device_Create
 Prov_Device_Destroy
 Prov_Device_Register_Device
 Prov_Device_SetOption
 Prov_Device_GetVersionString
+Prov_Device_Set_Provisioning_Payload
+Prov_Device_Get_Provisioning_Payload
+prov_dev_security_init
+prov_dev_security_deinit
+prov_dev_set_symmetric_key_info

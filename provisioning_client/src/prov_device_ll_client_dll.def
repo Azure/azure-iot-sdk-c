@@ -1,0 +1,7 @@
+EXPORTS
+Prov_Device_LL_Create
+Prov_Device_LL_Destroy
+Prov_Device_LL_Register_Device
+Prov_Device_LL_DoWork
+Prov_Device_LL_SetOption
+Prov_Device_LL_GetVersionString
