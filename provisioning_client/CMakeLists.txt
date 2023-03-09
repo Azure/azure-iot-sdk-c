@@ -380,12 +380,10 @@ if(${use_http})
         set(target_transport_libs ${target_transport_libs} iothub_client_http_transport)
 endif()
 if(${use_amqp})
-        set(target_transport_libs ${target_transport_libs} iothub_client_amqp_transport)
-        set(target_transport_libs ${target_transport_libs} iothub_client_amqp_ws_transport)
+        set(target_transport_libs ${target_transport_libs} iothub_client_amqp_transport iothub_client_amqp_ws_transport)
 endif()
 if(${use_mqtt})
-        set(target_transport_libs ${target_transport_libs} iothub_client_mqtt_transport)
-        set(target_transport_libs ${target_transport_libs} iothub_client_mqtt_ws_transport)
+        set(target_transport_libs ${target_transport_libs} iothub_client_mqtt_transport iothub_client_mqtt_ws_transport)
 endif()
 
         target_link_libraries(iothub_prov_client_dll 
@@ -412,10 +410,9 @@ endif()
         )
         if (${CMAKE_C_COMPILER_ID} STREQUAL "GNU" OR ${CMAKE_C_COMPILER_ID} STREQUAL "Clang")
             target_link_libraries(iothub_prov_client_dll
-                "-Wl,--exclude-libs,libparson.a"
+                PRIVATE "-Wl,--exclude-libs,libparson.a"
             )
         endif()
-        #set(provisioning_libs ${provisioning_libs} prov_mqtt_transport_dll)
     endif()
 endif()
 
