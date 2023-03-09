@@ -2,7 +2,6 @@
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 cmake_minimum_required (VERSION 3.5)
-message(CMAKE_VERSION=${CMAKE_VERSION})
 project(azure_iot_sdks)
 
 ########## Enable CMake Features ##########
@@ -13,6 +12,8 @@ include(GNUInstallDirs)
 include (CTest)
 
 include("${CMAKE_CURRENT_LIST_DIR}/configs/azure_iot_sdksFunctions.cmake")
+message("CMAKE_VERSION: ${CMAKE_VERSION}")
+printCmakeArgs()
 
 # MACOSX_RPATH is enabled
 # https://cmake.org/cmake/help/latest/prop_tgt/MACOSX_RPATH.html#prop_tgt:MACOSX_RPATH
