@@ -36,7 +36,9 @@ BEGIN_TEST_SUITE(iothubclient_amqp_e2e)
 
         if (iotHubVersion == IOTHUB_GATEWAY_VERSION_2)
         {
-            e2e_send_batch_event_test_sas(AMQP_Protocol);
+            // Disbling this test on IoT Hub Gateway V2
+            // batching size is no longer supported
+            //e2e_send_batch_event_test_sas(AMQP_Protocol);
         }
         else
         {
