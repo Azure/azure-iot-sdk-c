@@ -29,16 +29,15 @@ include_directories(${SHARED_UTIL_INC_FOLDER})
 include_directories(${PROJECT_SOURCE_DIR}/deps/parson)
 
 if (${build_as_dynamic}) 
-    set(link_libs iothub_prov_client_dll)   
+    set(link_libs iothub_prov_client_dll aziotsharedutil_dll)   
 else()
-    set(link_libs ${iothub_client_libs} ${provisioning_libs})
+    set(link_libs ${iothub_client_libs} ${provisioning_libs} aziotsharedutil)
 endif()
 
 add_executable(iothub_client_sample_hsm ${iothub_client_sample_hsm_c_files} ${iothub_client_sample_hsm_h_files})
 
 target_link_libraries(iothub_client_sample_hsm
     ${link_libs} 
-    aziotsharedutil
     prov_auth_client
     parson
 )
@@ -54,7 +53,7 @@ if(${use_openssl})
     endif()
 endif()
 
-if (${build_as_dynamic} AND ${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.21.0") 
+if (WIN32 AND ${build_as_dynamic} AND ${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.21.0") 
     add_custom_command(TARGET iothub_client_sample_hsm POST_BUILD
       COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_RUNTIME_DLLS:iothub_client_sample_hsm> $<TARGET_FILE_DIR:iothub_client_sample_hsm>
       COMMAND_EXPAND_LISTS

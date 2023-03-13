@@ -233,7 +233,6 @@ if(${use_prov_client} OR (${use_prov_client_core} AND ${run_e2e_tests}))
     set(provisioning_headers ${provisioning_headers} ${PROV_DEVICE_CLIENT_SOURCE_H_FILES})
     target_link_libraries(prov_device_client parson)
 
-
     if (${build_as_dynamic})
         add_library(prov_device_client_dll SHARED
             ${PROV_DEVICE_CLIENT_SOURCE_C_FILES}
@@ -270,7 +269,9 @@ if(${use_prov_client} OR (${use_prov_client_core} AND ${run_e2e_tests}))
             ${CMAKE_CURRENT_LIST_DIR}/inc/azure_prov_client/internal/prov_transport_private.h
             ${CMAKE_CURRENT_LIST_DIR}/inc/azure_prov_client/prov_transport_http_client.h)
         set(PROV_HTTP_CLIENT_C_FILES
-            ${CMAKE_CURRENT_LIST_DIR}/src/prov_transport_http_client.c)
+            ${CMAKE_CURRENT_LIST_DIR}/src/prov_transport_http_client.c)     
+        set(PROV_HTTP_CLIENT_DEF_FILES
+            ${CMAKE_CURRENT_LIST_DIR}/src/prov_http_transport_dll.def)
 
         # Provisioning http Transport Client library
         add_library(prov_http_transport ${PROV_HTTP_CLIENT_C_FILES} ${PROV_HTTP_CLIENT_H_FILES})
@@ -305,6 +306,10 @@ if(${use_prov_client} OR (${use_prov_client_core} AND ${run_e2e_tests}))
             ${CMAKE_CURRENT_LIST_DIR}/src/prov_transport_amqp_ws_client.c
             ${CMAKE_CURRENT_LIST_DIR}/src/prov_transport_amqp_common.c
             ${CMAKE_CURRENT_LIST_DIR}/src/prov_sasl_tpm.c)
+
+        set(PROV_AMQP_CLIENT_DEF_FILES
+            ${CMAKE_CURRENT_LIST_DIR}/src/prov_amqp_transport_dll.def
+            ${CMAKE_CURRENT_LIST_DIR}/src/prov_amqp_ws_transport_dll.def)
 
         add_library(prov_amqp_ws_transport ${PROV_AMQP_WS_CLIENT_C_FILES} ${PROV_AMQP_WS_CLIENT_H_FILES})
         applyXcodeBuildFlagsIfNeeded(prov_amqp_ws_transport)
@@ -343,6 +348,10 @@ if(${use_prov_client} OR (${use_prov_client_core} AND ${run_e2e_tests}))
             ${CMAKE_CURRENT_LIST_DIR}/src/prov_transport_mqtt_ws_client.c
             ${CMAKE_CURRENT_LIST_DIR}/src/prov_transport_mqtt_common.c)
 
+        set(PROV_MQTT_CLIENT_DEF_FILES
+            ${CMAKE_CURRENT_LIST_DIR}/src/prov_mqtt_transport_dll.def
+            ${CMAKE_CURRENT_LIST_DIR}/src/prov_mqtt_ws_transport_dll.def)
+
         add_library(prov_mqtt_ws_transport ${PROV_MQTT_WS_CLIENT_C_FILES} ${PROV_MQTT_WS_CLIENT_H_FILES})
         applyXcodeBuildFlagsIfNeeded(prov_mqtt_ws_transport)
         linkSharedUtil(prov_mqtt_ws_transport)
@@ -359,44 +368,38 @@ if(${use_prov_client} OR (${use_prov_client_core} AND ${run_e2e_tests}))
         set(provisioning_libs ${provisioning_libs} prov_mqtt_transport)
     endif()
 
-    if (${build_as_dynamic})
-    
+    if (${build_as_dynamic})    
         add_library(iothub_prov_client_dll SHARED
             ${PROV_DEVICE_CLIENT_SOURCE_C_FILES} ${PROV_DEVICE_CLIENT_SOURCE_H_FILES}
             ${PROV_DEVICE_LL_CLIENT_SOURCE_C_FILES} ${PROV_DEVICE_LL_CLEINT_SOURCE_H_FILES}
+            ${PROV_MQTT_CLIENT_C_FILES} ${PROV_MQTT_CLIENT_H_FILES}
+            ${PROV_MQTT_WS_CLIENT_C_FILES} ${PROV_MQTT_WS_CLIENT_H_FILES}
+            ${PROV_AMQP_WS_CLIENT_C_FILES} ${PROV_AMQP_WS_CLIENT_H_FILES}
+            ${PROV_AMQP_CLIENT_C_FILES} ${PROV_AMQP_CLIENT_H_FILES}
+            ${PROV_HTTP_CLIENT_C_FILES} ${PROV_HTTP_CLIENT_H_FILES}
+
+            ${iothub_client_c_files} ${iothub_client_h_files} ${iothub_transport_source}
+
             ${CMAKE_CURRENT_LIST_DIR}/src/prov_device_client_dll.def
             ${CMAKE_CURRENT_LIST_DIR}/src/prov_device_ll_client_dll.def
-            ${CMAKE_CURRENT_LIST_DIR}/src/prov_http_transport_dll.def
-            ${CMAKE_CURRENT_LIST_DIR}/src/prov_amqp_transport_dll.def
-            ${CMAKE_CURRENT_LIST_DIR}/src/prov_amqp_ws_transport_dll.def
-            ${CMAKE_CURRENT_LIST_DIR}/src/prov_mqtt_transport_dll.def
-            ${CMAKE_CURRENT_LIST_DIR}/src/prov_mqtt_ws_transport_dll.def            
-            ${CMAKE_CURRENT_LIST_DIR}/src/prov_mqtt_ws_transport_dll.def                   
+            ${PROV_HTTP_CLIENT_DEF_FILES}
+            ${PROV_AMQP_CLIENT_DEF_FILES}
+            ${PROV_MQTT_CLIENT_DEF_FILES}
             ${iothub_def_file}
         )
 
-        set(target_transport_libs)
-if(${use_http})
-        set(target_transport_libs ${target_transport_libs} iothub_client_http_transport)
-endif()
-if(${use_amqp})
-        set(target_transport_libs ${target_transport_libs} iothub_client_amqp_transport iothub_client_amqp_ws_transport)
-endif()
-if(${use_mqtt})
-        set(target_transport_libs ${target_transport_libs} iothub_client_mqtt_transport iothub_client_mqtt_ws_transport)
-endif()
 
         target_link_libraries(iothub_prov_client_dll 
-            PRIVATE iothub_client    
             PRIVATE prov_auth_client 
             PRIVATE hsm_security_client
-            PRIVATE prov_http_transport
-            PRIVATE prov_mqtt_ws_transport prov_mqtt_transport
-            PRIVATE prov_amqp_ws_transport prov_amqp_transport
-            PRIVATE ${target_transport_libs}
-            PRIVATE parson)
+            PRIVATE uhttp
+            PRIVATE parson
+            PRIVATE iothub_client_http_transport
+            PRIVATE iothub_client_amqp_transport iothub_client_amqp_ws_transport
+            PRIVATE iothub_client_mqtt_transport iothub_client_mqtt_ws_transport
+        )
 
-        if(NOT WIN32)
+        if (NOT WIN32)
             set_target_properties(iothub_prov_client_dll PROPERTIES OUTPUT_NAME "iothub_prov_client")
         endif()
         set_target_properties(iothub_prov_client_dll PROPERTIES
@@ -426,7 +429,7 @@ if (${use_prov_client} AND (NOT ${skip_samples}))
     add_subdirectory(tools)
 endif ()
 
-if(${use_installed_dependencies})
+if (${use_installed_dependencies})
 
     # Install Provisioning libs
     set(package_location "${CMAKE_INSTALL_LIBDIR}/cmake/azure_prov_sdk")

@@ -516,3 +516,6 @@ endif()
 
 set(iothub_client_libs ${iothub_client_libs} PARENT_SCOPE)
 set(iothub_def_file ${iothub_def_file} PARENT_SCOPE)
+set(iothub_client_c_files ${iothub_client_c_files} PARENT_SCOPE)
+set(iothub_client_h_files ${iothub_client_h_files} PARENT_SCOPE)
+set(iothub_transport_source ${iothub_transport_source} PARENT_SCOPE)

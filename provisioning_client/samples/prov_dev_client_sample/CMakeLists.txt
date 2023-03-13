@@ -29,16 +29,15 @@ include_directories(${SHARED_UTIL_INC_FOLDER})
 include_directories(${CMAKE_CURRENT_LIST_DIR}/adapters)
 
 if (${build_as_dynamic}) 
-    set(link_libs iothub_prov_client_dll)   
+    set(link_libs iothub_prov_client_dll aziotsharedutil_dll)   
 else()
-    set(link_libs ${iothub_client_libs} ${provisioning_libs})
+    set(link_libs ${iothub_client_libs} ${provisioning_libs} aziotsharedutil)
 endif()
 
 add_executable(prov_dev_client_sample ${prov_dev_client_sample_c_files} ${prov_dev_client_sample_h_files})
 
 target_link_libraries(prov_dev_client_sample
     ${link_libs} 
-    aziotsharedutil
 )
 
 if(${use_openssl})
@@ -50,8 +49,7 @@ if(${use_openssl})
     endif()
 endif()
 
-
-if (${build_as_dynamic} AND ${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.21.0") 
+if (WIN32 AND ${build_as_dynamic} AND ${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.21.0") 
     add_custom_command(TARGET prov_dev_client_sample POST_BUILD
       COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_RUNTIME_DLLS:prov_dev_client_sample> $<TARGET_FILE_DIR:prov_dev_client_sample>
       COMMAND_EXPAND_LISTS
