@@ -90,7 +90,11 @@ int json_deserialize_and_get_struct(void** dest, JSON_Object* root_object, const
 {
     int result;
 
+    LogError("json_key = %s", json_key);
+    LogError("root_object = %lX", (unsigned long)root_object);
+    LogError("is_required = %d", is_required);
     JSON_Object* struct_object = json_object_get_object(root_object, json_key);
+    LogError("struct_object = %lX", (unsigned long)struct_object);
     if (!is_required && struct_object == NULL)
     {
         result = 0;

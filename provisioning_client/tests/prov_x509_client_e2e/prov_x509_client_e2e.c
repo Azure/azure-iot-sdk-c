@@ -49,9 +49,13 @@ BEGIN_TEST_SUITE(prov_x509_client_e2e)
         ASSERT_IS_NOT_NULL(g_dps_scope_id, "Environment variable DPS_ID_SCOPE is not set or empty.");
 
 #ifdef HSM_TYPE_X509
+        LogInfo("prov_x509_client_e2e: HSM_TYPE_X509 is set");
+
         char* dps_x509_cert_individual_base64 = getenv(DPS_X509_INDIVIDUAL_CERT_BASE64);
         ASSERT_IS_NOT_NULL(dps_x509_cert_individual_base64, "Environment variable DPS_X509_INDIVIDUAL_CERT_BASE64 is not set or empty.");
         g_dps_x509_cert_individual = convert_base64_to_string(dps_x509_cert_individual_base64);
+        int lll = strlen(g_dps_x509_cert_individual) / 2;
+        LogInfo("prov_x509_client_e2e: DPS_X509_INDIVIDUAL_CERT_BASE64=%.*s", lll, g_dps_x509_cert_individual);
 
         char* dps_x509_key_individual = getenv(DPS_X509_INDIVIDUAL_KEY_BASE64);
         ASSERT_IS_NOT_NULL(dps_x509_key_individual, "Environment variable DPS_X509_INDIVIDUAL_KEY_BASE64 is not set or empty.");
