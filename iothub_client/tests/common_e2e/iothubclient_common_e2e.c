@@ -202,7 +202,7 @@ static int IoTHubCallback(void* context, const char* data, size_t size)
 }
 
 // Invoked when a connection status changes.  Tests poll the status in the connection_status_info to make sure expected transitions occur.
-static void connection_status_callback( status, IOTHUB_CLIENT_CONNECTION_STATUS_REASON reason, void* userContextCallback)
+static void connection_status_callback(IOTHUB_CLIENT_CONNECTION_STATUS status, IOTHUB_CLIENT_CONNECTION_STATUS_REASON reason, void* userContextCallback)
 {
     LogInfo("connection_status_callback: status=<%s>, reason=<%s>", MU_ENUM_TO_STRING(IOTHUB_CLIENT_CONNECTION_STATUS, status), MU_ENUM_TO_STRING(IOTHUB_CLIENT_CONNECTION_STATUS_REASON, reason));
 
