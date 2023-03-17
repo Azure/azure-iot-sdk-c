@@ -202,9 +202,9 @@ static int IoTHubCallback(void* context, const char* data, size_t size)
 }
 
 // Invoked when a connection status changes.  Tests poll the status in the connection_status_info to make sure expected transitions occur.
-static void connection_status_callback(IOTHUB_CLIENT_CONNECTION_STATUS status, IOTHUB_CLIENT_CONNECTION_STATUS_REASON reason, void* userContextCallback)
+static void connection_status_callback( status, IOTHUB_CLIENT_CONNECTION_STATUS_REASON reason, void* userContextCallback)
 {
-    LogInfo("connection_status_callback: status=<%d>, reason=<%s>", status, MU_ENUM_TO_STRING(IOTHUB_CLIENT_CONNECTION_STATUS_REASON, reason));
+    LogInfo("connection_status_callback: status=<%s>, reason=<%s>", MU_ENUM_TO_STRING(IOTHUB_CLIENT_CONNECTION_STATUS, status), MU_ENUM_TO_STRING(IOTHUB_CLIENT_CONNECTION_STATUS_REASON, reason));
 
     CONNECTION_STATUS_INFO* connection_status_info = (CONNECTION_STATUS_INFO*)userContextCallback;
     ASSERT_ARE_EQUAL(LOCK_RESULT, LOCK_OK, Lock(connection_status_info->lock));
@@ -1622,7 +1622,7 @@ static void recv_message_test(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB_CLI
     client_connect_to_hub(deviceToUse, protocol);
 
     // Make sure we have a connection
-    ASSERT_IS_TRUE(client_wait_for_connection_restored(), "Connection Callback has not been called");
+    ASSERT_IS_TRUE(wait_for_client_authenticated(client_conn_wait_time), "Connection Callback has not been called");
 
     // Create receive context
     const char* msg_content;
