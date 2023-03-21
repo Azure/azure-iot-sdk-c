@@ -146,10 +146,11 @@ mkdir %cmake-root%\cmake
 rem no error checking
 pushd %cmake-root%\cmake
 
+rem set
+rem dir /s "%ProgramFiles%"
+
 echo ***checking msbuild***
 where /q msbuild
-set
-dir /s "%ProgramFiles%"
 IF ERRORLEVEL 1 (
 echo ***setting VC paths***
 rem    IF EXIST "%ProgramFiles(x86)%\Microsoft Visual Studio\2017\Enterprise\Common7\Tools\VsMSBuildCmd.bat" call "%ProgramFiles(x86)%\Microsoft Visual Studio\2017\Enterprise\Common7\Tools\VsMSBuildCmd.bat"
