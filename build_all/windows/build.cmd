@@ -147,7 +147,7 @@ rem no error checking
 pushd %cmake-root%\cmake
 
 rem set
-rem dir /s "%ProgramFiles%"
+dir /s "%ProgramFiles%"
 
 echo ***checking msbuild***
 where /q msbuild
