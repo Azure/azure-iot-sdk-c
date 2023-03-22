@@ -146,9 +146,6 @@ mkdir %cmake-root%\cmake
 rem no error checking
 pushd %cmake-root%\cmake
 
-where cmake
-cmake --version
-
 echo ***checking msbuild***
 where /q msbuild
 IF ERRORLEVEL 1 (
@@ -162,6 +159,9 @@ IF ERRORLEVEL 1 (
     )
 )
 where msbuild
+
+where cmake
+cmake --version
 
 if %build-platform% == x64 (
     echo ***Running CMAKE for Win64***
