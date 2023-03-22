@@ -159,11 +159,10 @@ IF ERRORLEVEL 1 (
     )
 )
 where msbuild
+echo VSVERSION=%VSVERSION%
 
 where cmake
 cmake --version
-
-dir "c:\windows\system32\*.dll"
 
 if %build-platform% == x64 (
     echo ***Running CMAKE for Win64***
