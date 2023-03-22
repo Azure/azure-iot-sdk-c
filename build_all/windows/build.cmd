@@ -146,6 +146,9 @@ mkdir %cmake-root%\cmake
 rem no error checking
 pushd %cmake-root%\cmake
 
+where cmake
+cmake --version
+
 echo ***checking msbuild***
 where /q msbuild
 IF ERRORLEVEL 1 (
