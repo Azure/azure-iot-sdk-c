@@ -62,7 +62,6 @@ jobs:
   displayName: "Windows x86"
   steps:
   - script: |
-      call "%ProgramFiles%\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsMSBuildCmd.bat"
       call jenkins\windows_c.cmd
     displayName: 'Build'
   - script: |
