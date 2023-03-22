@@ -65,6 +65,8 @@ jobs:
       call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\Tools\VsDevCmd.bat"
       call jenkins\windows_c.cmd
     displayName: 'Build'
+  - publish: $(System.DefaultWorkingDirectory)/cmake/tests/iothubclient_ut 
+    artifact: iothubclient_ut
   - script: |
       cd cmake && ctest -T test --no-compress-output -C "Debug" -V -j 16 --schedule-random
     displayName: "Run Tests"
