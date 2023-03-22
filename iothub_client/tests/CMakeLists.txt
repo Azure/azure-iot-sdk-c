@@ -7,6 +7,16 @@ if(${LINUX})
    add_definitions(-DAZIOT_LINUX)
 endif()
 
+if(WIN32 AND (MSVC_VERSION GREATER_EQUAL 1700))
+message("MSVC_VERSION GREATER_EQUAL 1700")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /fsanitize=address")
+endif()
+
+if(WIN32 AND (${VisualStudioVersion} GREATER_EQUAL "17.0"))
+message("${VisualStudioVersion} GREATER_EQUAL 17.0")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /fsanitize=address")
+endif()
+
 usePermissiveRulesForSdkSamplesAndTests()
 
 # addSupportedTransportsToTest determines transport dependencies based on which transports are enabled via cmake and
