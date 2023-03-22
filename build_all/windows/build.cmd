@@ -163,6 +163,8 @@ where msbuild
 where cmake
 cmake --version
 
+dir "c:\windows\system32\*.dll"
+
 if %build-platform% == x64 (
     echo ***Running CMAKE for Win64***
     cmake -LAH -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_sfc_tests:BOOL=%CMAKE_run_sfc_tests% -Duse_cppunittest:BOOL=OFF -Drun_unittests:BOOL=%CMAKE_run_unittests% %build-root% -Duse_prov_client:BOOL=%prov_auth% -G %VSVERSION% -A x64 -Duse_edge_modules=%use_edge_modules% -DCMAKE_BUILD_TYPE=$build_config
