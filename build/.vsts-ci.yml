@@ -62,12 +62,13 @@ jobs:
   displayName: "Windows x86"
   steps:
   - script: |
-      call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\Tools\VsDevCmd.bat"
+      call "%ProgramFiles%\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsMSBuildCmd.bat"
       call jenkins\windows_c.cmd
     displayName: 'Build'
   - publish: $(System.DefaultWorkingDirectory)/cmake/tests/iothubclient_ut 
     artifact: iothubclient_ut
   - script: |
+      call "%ProgramFiles%\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsMSBuildCmd.bat"
       cd cmake && ctest -T test --no-compress-output -C "Debug" -V -j 16 --schedule-random
     displayName: "Run Tests"
     env:
