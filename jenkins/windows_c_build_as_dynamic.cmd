@@ -5,7 +5,9 @@
 @echo off
 
 ver
-msbuild -version
+call jenkins\windows_c_VsDevCmd.cmd
+where cmake
+cmake --version
 
 set current-path=%~dp0
 rem // remove trailing slash
