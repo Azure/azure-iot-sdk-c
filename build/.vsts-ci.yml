@@ -65,9 +65,7 @@ jobs:
       call jenkins\windows_c.cmd
     displayName: 'Build'
   - script: |
-      call "%ProgramFiles%\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat"
-      dir /s c:\clang_rt.asan_dbg*.dll
-      set
+      call jenkins\windows_c_VsDevCmd.cmd
       cd cmake && ctest -T test --no-compress-output -C "Debug" -V -j 16 --schedule-random
     displayName: "Run Tests"
     env:
@@ -104,7 +102,8 @@ jobs:
       call jenkins\windows_c.cmd --platform x64
     displayName: 'Build'
   - script: |
-        cd cmake && ctest -T test --no-compress-output -C "Debug" -V -j 16 --schedule-random
+      call jenkins\windows_c_VsDevCmd.cmd
+      cd cmake && ctest -T test --no-compress-output -C "Debug" -V -j 16 --schedule-random
     displayName: "Run Tests"
     env:
       IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
@@ -143,7 +142,8 @@ jobs:
       call jenkins\windows_c_release.cmd --platform x64
     displayName: 'Build'
   - script: |
-        cd cmake && ctest -T test --no-compress-output -C "Release" -V -j 16 --schedule-random
+      call jenkins\windows_c_VsDevCmd.cmd
+      cd cmake && ctest -T test --no-compress-output -C "Release" -V -j 16 --schedule-random
     displayName: "Run Tests"
     env:
       IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
