@@ -160,6 +160,7 @@ IF ERRORLEVEL 1 (
 )
 where msbuild
 dir /s c:\clang_rt.asan_dbg*.dll
+set
 
 where cmake
 cmake --version
