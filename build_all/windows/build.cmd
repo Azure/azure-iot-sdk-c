@@ -159,7 +159,7 @@ IF ERRORLEVEL 1 (
     )
 )
 where msbuild
-echo VSVERSION=%VSVERSION%
+dir /s c:\clang_rt.asan_dbg*.dll
 
 where cmake
 cmake --version
