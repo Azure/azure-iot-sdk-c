@@ -5,7 +5,6 @@
 @echo off
 
 ver
-call %build-root%\jenkins\windows_c_VsDevCmd.cmd
 where cmake
 cmake --version
 

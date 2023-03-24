@@ -182,6 +182,7 @@ jobs:
   displayName: "Windows Dynamic"
   steps:
   - script: |
+      call jenkins\windows_c_VsDevCmd.cmd
       call jenkins\windows_c_build_as_dynamic.cmd
     displayName: 'Build'
     env:
