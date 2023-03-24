@@ -5,11 +5,6 @@ cmake_minimum_required (VERSION 3.5)
 
 usePermissiveRulesForSdkSamplesAndTests()
 
-if(WIN32 AND (MSVC_VERSION GREATER_EQUAL 1700))
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /fsanitize=address")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /fsanitize=address")
-endif()
-
 #this is CMakeLists for serializer e2e folder
 if(${run_unittests})
 add_subdirectory(agentmacros_ut)
