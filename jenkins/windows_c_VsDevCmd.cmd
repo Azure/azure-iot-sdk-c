@@ -6,14 +6,16 @@ IF EXIST "%ProgramFiles(x86)%\Microsoft Visual Studio\2017\Enterprise\Common7\To
     call "%ProgramFiles(x86)%\Microsoft Visual Studio\2017\Enterprise\Common7\Tools\VsMSBuildCmd.bat"
     set VSVERSION="Visual Studio 15 2017"
 ) ELSE IF EXIST "%ProgramFiles%\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat" (
-    call "%ProgramFiles%\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat"
+    IF %build-platform% == x64 (
+        call "%ProgramFiles%\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat" -arch=amd64
+    ) ELSE (
+        call "%ProgramFiles%\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat"
+    )
     set VSVERSION="Visual Studio 17 2022"
 ) ELSE (
     echo "ERROR: Did not find Microsoft Visual Studio"
     EXIT 1
 )
-
-set PATH=C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Tools\MSVC\14.35.32215\bin\HostX86\x64;%PATH%
 
 where /q msbuild
 IF ERRORLEVEL 1 (
