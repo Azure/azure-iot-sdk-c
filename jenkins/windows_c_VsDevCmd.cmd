@@ -13,7 +13,7 @@ IF EXIST "%ProgramFiles(x86)%\Microsoft Visual Studio\2017\Enterprise\Common7\To
     EXIT 1
 )
 
-set PATH=C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Tools\MSVC\14.35.32215\bin\HostX86\x86;%PATH%
+set PATH=C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Tools\MSVC\14.35.32215\bin\HostX86\x64;%PATH%
 
 where /q msbuild
 IF ERRORLEVEL 1 (

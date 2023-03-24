@@ -3,11 +3,12 @@
 
 cmake_minimum_required(VERSION 3.5)
 
+usePermissiveRulesForSdkSamplesAndTests()
+
 if(WIN32 AND (MSVC_VERSION GREATER_EQUAL 1700))
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /fsanitize=address")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /fsanitize=address")
 endif()
-
-usePermissiveRulesForSdkSamplesAndTests()
 
 add_unittest_directory(prov_transport_http_client_ut)
 
