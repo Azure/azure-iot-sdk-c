@@ -7,8 +7,10 @@ IF EXIST "%ProgramFiles(x86)%\Microsoft Visual Studio\2017\Enterprise\Common7\To
     set VSVERSION="Visual Studio 15 2017"
 ) ELSE IF EXIST "%ProgramFiles%\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat" (
     IF "%build-platform%" == "x64" (
+        set
         echo "%build-platform%" x64
-        call "%ProgramFiles%\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat -arch=amd64" 
+        call "%ProgramFiles%\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat" -arch=amd64
+        set
     ) ELSE (
         call "%ProgramFiles%\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat"
     )
