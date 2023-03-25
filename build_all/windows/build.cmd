@@ -146,7 +146,7 @@ mkdir %cmake-root%\cmake
 rem no error checking
 pushd %cmake-root%\cmake
 
-call %build-root%\jenkins\windows_c_VsDevCmd.cmd
+call %build-root%\jenkins\windows_c_VsDevCmd.cmd %build-platform%
 
 where cmake
 cmake --version
