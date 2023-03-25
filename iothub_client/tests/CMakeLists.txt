@@ -7,10 +7,7 @@ if(${LINUX})
    add_definitions(-DAZIOT_LINUX)
 endif()
 
-message("CMAKE_BUILD_TYPE= ${CMAKE_BUILD_TYPE}")
-message("build-config= ${build-config}")
 if(WIN32 AND (${CMAKE_BUILD_TYPE} STREQUAL "Debug") AND (MSVC_VERSION GREATER_EQUAL 1700))
-message("enable fsanitize")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /fsanitize=address")
 endif()
 
