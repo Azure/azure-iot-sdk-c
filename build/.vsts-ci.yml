@@ -66,7 +66,6 @@ jobs:
     displayName: 'Build'
   - script: |
       call jenkins\windows_c_VsDevCmd.cmd x86
-      set
       cd cmake && ctest -T test --no-compress-output -C "Debug" -V -j 16 --schedule-random
     displayName: "Run Tests"
     env:
@@ -104,7 +103,6 @@ jobs:
     displayName: 'Build'
   - script: |
       call jenkins\windows_c_VsDevCmd.cmd x64
-      set
       cd cmake && ctest -T test --no-compress-output -C "Debug" -V -j 16 --schedule-random
     displayName: "Run Tests"
     env:
@@ -145,7 +143,6 @@ jobs:
     displayName: 'Build'
   - script: |
       call jenkins\windows_c_VsDevCmd.cmd x64
-      set
       cd cmake && ctest -T test --no-compress-output -C "Release" -V -j 16 --schedule-random
     displayName: "Run Tests"
     env:

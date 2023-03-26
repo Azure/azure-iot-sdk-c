@@ -3,9 +3,7 @@
 
 cmake_minimum_required (VERSION 3.5)
 
-if(WIN32 AND (${CMAKE_BUILD_TYPE} STREQUAL "Debug") AND (MSVC_VERSION GREATER_EQUAL 1700))
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /fsanitize=address")
-endif()
+enable_address_sanitize()
 
 #this is CMakeLists for provisioning service client tests folder
 add_unittest_directory(provisioning_sc_attestation_ut)
