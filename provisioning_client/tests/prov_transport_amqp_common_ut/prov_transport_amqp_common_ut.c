@@ -100,12 +100,13 @@ extern "C"
 #define TEST_AMQP_VALUE     (AMQP_VALUE)0x11111116
 #define TEST_DATA_VALUE     (unsigned char*)0x11111117
 #define TEST_DATA_LENGTH    (size_t)128
-#define TEST_BUFFER_HANDLE_VALUE     (BUFFER_HANDLE)0x1111111B
 
 #define TEST_UNASSIGNED     (void*)0x11111118
 #define TEST_ASSIGNED       (void*)0x11111119
 #define TEST_ASSIGNING      (void*)0x1111111A
 #define TEST_OPTION_VALUE   (void*)0x1111111B
+#define TEST_BUFFER_HANDLE_VALUE     (BUFFER_HANDLE)0x1111111C
+#define TEST_TPM_SASL_INTERFACE_DESC (const SASL_MECHANISM_INTERFACE_DESCRIPTION*)0x1111111D
 
 static const char* TEST_OPERATION_ID_VALUE = "operation_id";
 static char* TEST_STRING_VALUE = "Test_String_Value";
@@ -325,11 +326,12 @@ static MESSAGE_RECEIVER_HANDLE my_messagereceiver_create(LINK_HANDLE link, ON_ME
 
 static SASL_MECHANISM_HANDLE my_saslmechanism_create(const SASL_MECHANISM_INTERFACE_DESCRIPTION* sasl_mechanism_interface_description, void* sasl_mechanism_create_parameters)
 {
-    SASL_TPM_CONFIG_INFO* sasl_config = (SASL_TPM_CONFIG_INFO*)sasl_mechanism_create_parameters;
-    (void)sasl_mechanism_interface_description;
-
-    g_challenge_cb = sasl_config->challenge_cb;
-    g_challenge_context = sasl_config->user_ctx;
+    if (sasl_mechanism_interface_description == TEST_TPM_SASL_INTERFACE_DESC)
+    {
+        SASL_TPM_CONFIG_INFO* sasl_config = (SASL_TPM_CONFIG_INFO*)sasl_mechanism_create_parameters;
+        g_challenge_cb = sasl_config->challenge_cb;
+        g_challenge_context = sasl_config->user_ctx;
+    }
 
     return (SASL_MECHANISM_HANDLE)my_gballoc_malloc(1);
 }
@@ -582,7 +584,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         REGISTER_GLOBAL_MOCK_HOOK(on_transport_io, my_on_transport_io);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(on_transport_io, NULL);
 
-        REGISTER_GLOBAL_MOCK_RETURN(prov_sasltpm_get_interface, TEST_INTERFACE_DESC);
+        REGISTER_GLOBAL_MOCK_RETURN(prov_sasltpm_get_interface, TEST_TPM_SASL_INTERFACE_DESC);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(prov_sasltpm_get_interface, NULL);
         REGISTER_GLOBAL_MOCK_RETURN(saslplain_get_interface, TEST_INTERFACE_DESC);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(saslplain_get_interface, NULL);

@@ -7,6 +7,8 @@ if(${LINUX})
    add_definitions(-DAZIOT_LINUX)
 endif()
 
+enable_address_sanitize()
+
 usePermissiveRulesForSdkSamplesAndTests()
 
 # addSupportedTransportsToTest determines transport dependencies based on which transports are enabled via cmake and

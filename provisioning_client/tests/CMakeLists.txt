@@ -5,6 +5,8 @@ cmake_minimum_required(VERSION 3.5)
 
 usePermissiveRulesForSdkSamplesAndTests()
 
+enable_address_sanitize()
+
 add_unittest_directory(prov_transport_http_client_ut)
 
 if(${use_prov_client})
