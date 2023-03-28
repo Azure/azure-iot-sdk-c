@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#ifndef PROV_TRANSPORT_AMQP_COMMON_H
-#define PROV_TRANSPORT_AMQP_COMMON_H
+#ifndef PROV_TRANSPORT_MQTT_COMMON_H
+#define PROV_TRANSPORT_MQTT_COMMON_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -39,4 +39,4 @@ MOCKABLE_FUNCTION(, int, prov_transport_common_mqtt_set_option, PROV_DEVICE_TRAN
 }
 #endif /* __cplusplus */
 
-#endif // PROV_TRANSPORT_AMQP_COMMON_H
+#endif // PROV_TRANSPORT_MQTT_COMMON_H
