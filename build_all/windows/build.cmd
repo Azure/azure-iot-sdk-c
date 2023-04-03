@@ -142,6 +142,7 @@ if EXIST %cmake-root%\cmake (
 )
 
 echo CMAKE Output Path: %cmake-root%\cmake
+rd /Q /S %cmake-root%\cmake
 mkdir %cmake-root%\cmake
 rem no error checking
 pushd %cmake-root%\cmake

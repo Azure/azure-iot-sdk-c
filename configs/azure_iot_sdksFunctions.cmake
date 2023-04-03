@@ -215,7 +215,6 @@ macro(compileAsC11)
 endmacro(compileAsC11)
 
 macro(enable_address_sanitize)
-set
 message("start")
 message(WIN32)
 message(${CMAKE_BUILD_TYPE})
