@@ -216,10 +216,15 @@ endmacro(compileAsC11)
 
 macro(enable_address_sanitize)
 message("start")
-message(WIN32)
+message(${WIN32})
 message(${CMAKE_BUILD_TYPE})
-message(MSVC_VERSION)
+message(${MSVC_VERSION})
 message("end")
+if(WIN32)
+    message("WIN32 flag is set")
+endif()
+
+
     if(WIN32 AND (${CMAKE_BUILD_TYPE} STREQUAL "Debug") AND (MSVC_VERSION GREATER_EQUAL 1700))
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /fsanitize=address")
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /fsanitize=address")
