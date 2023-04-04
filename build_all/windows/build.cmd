@@ -175,10 +175,9 @@ if %make%==yes (
 
 popd
 
-if %build_traceabilitytool%==1 (
-    set
+if %build_traceabilitytool%==1 %build-platform% == Release (
     rem invoke the traceabilitytool here instead of the second build step in Jenkins windows_c job
-    msbuild /m %build-root%\tools\traceabilitytool\traceabilitytool.sln
+    msbuild /m %build-root%\tools\traceabilitytool\traceabilitytool.sln "-p:Configuration=%build-config%"
     if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 )
 
