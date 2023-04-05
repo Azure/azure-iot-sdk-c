@@ -61,6 +61,7 @@ jobs:
       call jenkins\longhaul_c.cmd
     displayName: 'Build'
   - script: |
+        call jenkins\windows_c_VsDevCmd.cmd x86
         cd cmake && ctest -T test --no-compress-output -C "Debug" -V -j 16 --schedule-random
     displayName: 'Run Tests'
     env:
