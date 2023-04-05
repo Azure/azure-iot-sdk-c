@@ -215,13 +215,13 @@ macro(compileAsC11)
 endmacro(compileAsC11)
 
 macro(enable_address_sanitize)
-message("enable_address_sanitize");
+message("enable_address_sanitize")
     if(WIN32)
-message("enable_address_sanitize2");
-message("${CMAKE_BUILD_TYPE}");
-message("${MSVC_VERSION}");
+message("enable_address_sanitize2")
+message("${CMAKE_BUILD_TYPE}")
+message("${MSVC_VERSION}")
         if((${CMAKE_BUILD_TYPE} STREQUAL "Debug") AND (${MSVC_VERSION} GREATER_EQUAL 1930))
-message("enable_address_sanitize3");
+message("enable_address_sanitize3")
             set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /fsanitize=address")
             set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /fsanitize=address")
         endif()
