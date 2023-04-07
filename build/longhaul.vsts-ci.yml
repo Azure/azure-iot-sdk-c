@@ -58,10 +58,10 @@ jobs:
   displayName: 'Longhaul: Windows'
   steps:
   - script: |
-      call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\Tools\VsDevCmd.bat"
       call jenkins\longhaul_c.cmd
     displayName: 'Build'
   - script: |
+        call jenkins\windows_c_VsDevCmd.cmd x86
         cd cmake && ctest -T test --no-compress-output -C "Debug" -V -j 16 --schedule-random
     displayName: 'Run Tests'
     env:
