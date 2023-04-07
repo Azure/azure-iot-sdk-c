@@ -631,3 +631,10 @@
   fun:RunTests
   fun:main
 }
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   ...
+   fun:ENGINE_get_pkey_meth
+   ...
+}
