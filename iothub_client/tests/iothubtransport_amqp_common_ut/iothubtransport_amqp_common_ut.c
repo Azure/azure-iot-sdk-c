@@ -437,6 +437,25 @@ static DLIST_ENTRY TEST_waitingToSend;
 static unsigned long TEST_MESSAGE_ID;
 
 
+// ---------- Time-related Test Helpers ---------- //
+static time_t add_seconds(time_t base_time, unsigned int seconds)
+{
+    time_t new_time;
+    struct tm* bd_new_time;
+
+    if ((bd_new_time = localtime(&base_time)) == NULL)
+    {
+        new_time = INDEFINITE_TIME;
+    }
+    else
+    {
+        bd_new_time->tm_sec += seconds;
+        new_time = mktime(bd_new_time);
+    }
+
+    return new_time;
+}
+
 // ---------- Helpers for Expected Calls ---------- //
 
 // @remarks
@@ -4482,6 +4501,139 @@ TEST_FUNCTION(ConnectionStatusCallBack_UNAUTH_msg_communication_error)
     // act
     TEST_device_create_saved_on_state_changed_callback(TEST_device_create_saved_on_state_changed_context,
         DEVICE_STATE_STARTED, DEVICE_STATE_ERROR_MSG);
+
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    // cleanup
+    destroy_transport(handle, device_handle, NULL);
+}
+
+TEST_FUNCTION(Transport_Fully_Reconnects_After_5_AMQP_device_errors)
+{
+    // arrange
+    initialize_test_variables();
+    time_t current_time = TEST_current_time;
+    bool is_state_change_timedout = false;
+    TRANSPORT_LL_HANDLE handle = create_transport();
+    IOTHUB_DEVICE_CONFIG* device_config = create_device_config(TEST_DEVICE_ID_CHAR_PTR, true);
+
+    IOTHUB_DEVICE_HANDLE device_handle;
+    device_handle = register_device(handle, device_config, &TEST_waitingToSend, true);
+
+    crank_transport_ready_after_create(handle, &TEST_waitingToSend, 0, false, true, 1, TEST_current_time, false);
+
+    // act
+    // Fail AMQP device enough times to trigger reconnection:
+    umock_c_reset_all_calls();
+
+    for (int i = 0; i < 4; i++)
+    {
+        // Raise error from amqp_device level.
+        STRICT_EXPECTED_CALL(get_time(NULL)).SetReturn(current_time);
+        STRICT_EXPECTED_CALL(Transport_ConnectionStatusCallBack(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_COMMUNICATION_ERROR, IGNORED_PTR_ARG));
+        TEST_device_create_saved_on_state_changed_callback(TEST_device_create_saved_on_state_changed_context,
+            DEVICE_STATE_STARTED, DEVICE_STATE_ERROR_MSG);
+
+        // On first error, restablish the links (amqp_device_delayed_stop)
+        STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG));
+	STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(amqp_device_stop(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(amqp_device_do_work(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(singlylinkedlist_get_next_item(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(amqp_connection_do_work(IGNORED_PTR_ARG));
+        (void)IoTHubTransport_AMQP_Common_DoWork(handle);
+
+        STRICT_EXPECTED_CALL(get_time(NULL)).SetReturn(current_time);
+        TEST_device_create_saved_on_state_changed_callback(TEST_device_create_saved_on_state_changed_context,
+            DEVICE_STATE_ERROR_MSG, DEVICE_STATE_STOPPING);
+
+        // amqp_device_delayed_stop takes 10 seconds to fully stop.
+        current_time = add_seconds(current_time, 10);
+
+        STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(is_timeout_reached(IGNORED_NUM_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG))
+            .CopyOutArgumentBuffer_is_timed_out(&is_state_change_timedout, sizeof(is_state_change_timedout))
+            .SetReturn(0);
+        STRICT_EXPECTED_CALL(amqp_device_do_work(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(singlylinkedlist_get_next_item(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(amqp_connection_do_work(IGNORED_PTR_ARG));
+        (void)IoTHubTransport_AMQP_Common_DoWork(handle);
+
+        // Complete stopping amqp_device.
+        STRICT_EXPECTED_CALL(get_time(NULL)).SetReturn(current_time);
+        STRICT_EXPECTED_CALL(Transport_ConnectionStatusCallBack(
+            IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_OK, IGNORED_PTR_ARG));
+        TEST_device_create_saved_on_state_changed_callback(TEST_device_create_saved_on_state_changed_context,
+            DEVICE_STATE_STOPPING, DEVICE_STATE_STOPPED);
+
+        current_time = add_seconds(current_time, 1);
+
+        // AMQP transport starts the amqp_device again.
+        STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(amqp_connection_get_session_handle(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(amqp_connection_get_cbs_handle(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(amqp_device_start_async(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(amqp_device_do_work(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(singlylinkedlist_get_next_item(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(amqp_connection_do_work(IGNORED_PTR_ARG));
+        (void)IoTHubTransport_AMQP_Common_DoWork(handle);
+
+        STRICT_EXPECTED_CALL(get_time(NULL)).SetReturn(current_time);
+        TEST_device_create_saved_on_state_changed_callback(TEST_device_create_saved_on_state_changed_context,
+            DEVICE_STATE_STOPPED, DEVICE_STATE_STARTING);
+
+        // amqp_device now goes fully started.
+        current_time = add_seconds(current_time, 1);
+
+        STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(is_timeout_reached(IGNORED_NUM_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG))
+            .CopyOutArgumentBuffer_is_timed_out(&is_state_change_timedout, sizeof(is_state_change_timedout))
+            .SetReturn(0);
+        STRICT_EXPECTED_CALL(amqp_device_do_work(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(singlylinkedlist_get_next_item(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(amqp_connection_do_work(IGNORED_PTR_ARG));
+        (void)IoTHubTransport_AMQP_Common_DoWork(handle);
+
+        STRICT_EXPECTED_CALL(get_time(NULL)).SetReturn(current_time);
+        STRICT_EXPECTED_CALL(retry_control_reset(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(Transport_ConnectionStatusCallBack(
+            IOTHUB_CLIENT_CONNECTION_AUTHENTICATED, IOTHUB_CLIENT_CONNECTION_OK, IGNORED_PTR_ARG));
+        TEST_device_create_saved_on_state_changed_callback(TEST_device_create_saved_on_state_changed_context,
+            DEVICE_STATE_STARTING, DEVICE_STATE_STARTED);
+
+        // Regular DoWork call with no issues.
+        STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(DList_IsListEmpty(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(amqp_device_do_work(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(singlylinkedlist_get_next_item(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(amqp_connection_do_work(IGNORED_PTR_ARG));
+        (void)IoTHubTransport_AMQP_Common_DoWork(handle);
+    }
+
+    // Raise 5th error from amqp_device, triggering AMQP transport to do a full reconnection.
+    STRICT_EXPECTED_CALL(get_time(NULL)).SetReturn(current_time);
+    STRICT_EXPECTED_CALL(Transport_ConnectionStatusCallBack(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_COMMUNICATION_ERROR, IGNORED_PTR_ARG));
+    TEST_device_create_saved_on_state_changed_callback(TEST_device_create_saved_on_state_changed_context,
+        DEVICE_STATE_STARTED, DEVICE_STATE_ERROR_MSG);
+
+    STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(amqp_device_do_work(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_get_next_item(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(amqp_connection_do_work(IGNORED_PTR_ARG));
+    (void)IoTHubTransport_AMQP_Common_DoWork(handle);
+
+    // Observe the AMQP transport do a full re-connection.
+    set_expected_calls_for_prepare_for_connection_retry(1, DEVICE_STATE_ERROR_MSG);
+    (void)IoTHubTransport_AMQP_Common_DoWork(handle);
 
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
