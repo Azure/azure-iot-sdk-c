@@ -115,7 +115,7 @@ static int construct_send_data(SASL_TPM_INSTANCE* sasl_tpm_info, const char* sco
             payload_data_length = MAX_FRAME_DATA_LEN;
         }
 
-        sasl_tpm_info->data_buffer = (unsigned char*)malloc(payload_data_length+1);
+        sasl_tpm_info->data_buffer = (unsigned char*)malloc((size_t)payload_data_length+1);
         if (sasl_tpm_info->data_buffer == NULL)
         {
             LogError("Failed allocating initial data");
@@ -154,7 +154,7 @@ static int construct_send_data(SASL_TPM_INSTANCE* sasl_tpm_info, const char* sco
     else
     {
         payload_data_length = (uint32_t)(data_len + scope_id_len + registration_id_len + 1);
-        sasl_tpm_info->data_buffer = (unsigned char*)malloc(payload_data_length+1);
+        sasl_tpm_info->data_buffer = (unsigned char*)malloc((size_t)payload_data_length+1);
         if (sasl_tpm_info->data_buffer == NULL)
         {
             LogError("Failed allocating initial data");

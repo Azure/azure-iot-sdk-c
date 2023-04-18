@@ -1391,7 +1391,6 @@ AGENT_DATA_TYPES_RESULT AgentDataTypes_ToString(STRING_HANDLE destination, const
                             MAX_LONG_STRING_LENGTH + // %.2d
                             1 + //\"
                             1;  // " (terminating NULL);
-
                         char* tempBuffer = (char*)malloc(tempBufferSize);
                         if (tempBuffer == NULL)
                         {
