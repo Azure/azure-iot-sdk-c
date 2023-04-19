@@ -102,7 +102,7 @@ jobs:
       call jenkins\windows_c.cmd --platform x64
     displayName: 'Build'
   - script: |
-         call jenkins\windows_c_VsDevCmd.cmd x64
+        call jenkins\windows_c_VsDevCmd.cmd x64
         cd cmake && ctest -T test --no-compress-output -C "Debug" -V -j 16 --schedule-random
     displayName: "Run Tests"
     env:
