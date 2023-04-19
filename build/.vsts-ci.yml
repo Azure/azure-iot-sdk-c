@@ -62,10 +62,10 @@ jobs:
   displayName: "Windows x86"
   steps:
   - script: |
-      call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\Tools\VsDevCmd.bat"
       call jenkins\windows_c.cmd
     displayName: 'Build'
   - script: |
+      call jenkins\windows_c_VsDevCmd.cmd x86
       cd cmake && ctest -T test --no-compress-output -C "Debug" -V -j 16 --schedule-random
     displayName: "Run Tests"
     env:
@@ -99,10 +99,10 @@ jobs:
   displayName: 'Windows x64 (Debug)'
   steps:
   - script: |
-      call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\Tools\VsDevCmd.bat"
       call jenkins\windows_c.cmd --platform x64
     displayName: 'Build'
   - script: |
+         call jenkins\windows_c_VsDevCmd.cmd x64
         cd cmake && ctest -T test --no-compress-output -C "Debug" -V -j 16 --schedule-random
     displayName: "Run Tests"
     env:
@@ -139,10 +139,10 @@ jobs:
   displayName: 'Windows x64 (Release)'
   steps:
   - script: |
-      call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\Tools\VsDevCmd.bat"
       call jenkins\windows_c_release.cmd --platform x64
     displayName: 'Build'
   - script: |
+        call jenkins\windows_c_VsDevCmd.cmd x64
         cd cmake && ctest -T test --no-compress-output -C "Release" -V -j 16 --schedule-random
     displayName: "Run Tests"
     env:
@@ -179,7 +179,7 @@ jobs:
   displayName: "Windows Dynamic"
   steps:
   - script: |
-      call "%ProgramFiles(x86)%\Microsoft Visual Studio\2017\Enterprise\Common7\Tools\VsDevCmd.bat"
+      call jenkins\windows_c_VsDevCmd.cmd
       call jenkins\windows_c_build_as_dynamic.cmd
     displayName: 'Build'
     env:
