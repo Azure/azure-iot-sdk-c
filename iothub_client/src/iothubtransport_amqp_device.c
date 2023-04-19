@@ -804,7 +804,7 @@ int amqp_device_start_async(AMQP_DEVICE_HANDLE handle, SESSION_HANDLE session_ha
         {
             instance->session_handle = session_handle;
             instance->cbs_handle = cbs_handle;
-	    instance->stop_delay_ms = 0;
+	        instance->stop_delay_ms = 0;
 
             update_state(instance, DEVICE_STATE_STARTING);
 
