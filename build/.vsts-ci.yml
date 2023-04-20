@@ -62,10 +62,10 @@ jobs:
   displayName: "Windows x86"
   steps:
   - script: |
-      call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\Tools\VsDevCmd.bat"
       call jenkins\windows_c.cmd
     displayName: 'Build'
   - script: |
+      call jenkins\windows_c_VsDevCmd.cmd x86
       cd cmake && ctest -T test --no-compress-output -C "Debug" -V -j 16 --schedule-random
     displayName: "Run Tests"
     env:
@@ -99,11 +99,11 @@ jobs:
   displayName: 'Windows x64 (Debug)'
   steps:
   - script: |
-      call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\Tools\VsDevCmd.bat"
       call jenkins\windows_c.cmd --platform x64
     displayName: 'Build'
   - script: |
-        cd cmake && ctest -T test --no-compress-output -C "Debug" -V -j 16 --schedule-random
+      call jenkins\windows_c_VsDevCmd.cmd x64
+      cd cmake && ctest -T test --no-compress-output -C "Debug" -V -j 16 --schedule-random
     displayName: "Run Tests"
     env:
       IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
@@ -139,11 +139,11 @@ jobs:
   displayName: 'Windows x64 (Release)'
   steps:
   - script: |
-      call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\Tools\VsDevCmd.bat"
       call jenkins\windows_c_release.cmd --platform x64
     displayName: 'Build'
   - script: |
-        cd cmake && ctest -T test --no-compress-output -C "Release" -V -j 16 --schedule-random
+      call jenkins\windows_c_VsDevCmd.cmd x64
+      cd cmake && ctest -T test --no-compress-output -C "Release" -V -j 16 --schedule-random
     displayName: "Run Tests"
     env:
       IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
@@ -179,7 +179,7 @@ jobs:
   displayName: "Windows Dynamic"
   steps:
   - script: |
-      call "%ProgramFiles(x86)%\Microsoft Visual Studio\2017\Enterprise\Common7\Tools\VsDevCmd.bat"
+      call jenkins\windows_c_VsDevCmd.cmd
       call jenkins\windows_c_build_as_dynamic.cmd
     displayName: 'Build'
     env:
@@ -201,9 +201,6 @@ jobs:
       IOT_DPS_INDIVIDUAL_X509_CERTIFICATE: $(IOTHUB-E2E-X509-ECC-CERT-BASE64)
       IOT_DPS_INDIVIDUAL_X509_KEY: $(IOTHUB-E2E-X509-ECC-PRIVATE-KEY-BASE64)
       IOT_DPS_INDIVIDUAL_REGISTRATION_ID: $(IOT-DPS-INDIVIDUAL-REGISTRATION-ID)
-  - script: cd .. && rd /Q /S $(Agent.BuildDirectory)\s
-    displayName: 'Cleanup'
-    condition: always()
 - job: linuxoptions
   container: linux-c-ubuntu-2004
   pool: 
@@ -829,9 +826,6 @@ jobs:
       mergeTestResults: true
       testRunTitle: 'OSX'
     condition: succeededOrFailed()
-  - script: rm -rf $(Agent.BuildDirectory)/*
-    displayName: 'Cleanup'
-    condition: always()
 - job: xcodenative
   pool:
     name: OSX
@@ -873,9 +867,6 @@ jobs:
       mergeTestResults: true
       testRunTitle: 'XCode'
     condition: succeededOrFailed()
-  - script: rm -rf $(Agent.BuildDirectory)/*
-    displayName: 'Cleanup'
-    condition: always()
 - job: raspberrypi
   container: raspberrypi-c-buster
   pool: 
