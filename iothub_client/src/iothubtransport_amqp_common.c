@@ -157,6 +157,7 @@ typedef struct AMQP_TRANSPORT_DEVICE_TWIN_CONTEXT_TAG
     uint32_t item_id;
     TRANSPORT_CALLBACKS_INFO transport_callbacks;
     void* transport_ctx;
+    AMQP_TRANSPORT_DEVICE_INSTANCE* device;
 } AMQP_TRANSPORT_DEVICE_TWIN_CONTEXT;
 
 typedef struct AMQP_TRANSPORT_GET_TWIN_CONTEXT_TAG
@@ -442,6 +443,8 @@ static DEVICE_MESSAGE_DISPOSITION_RESULT on_message_received(IOTHUB_MESSAGE_HAND
         {
             device_disposition_result = DEVICE_MESSAGE_DISPOSITION_RESULT_NONE;
         }
+
+        amqp_device_instance->number_of_previous_failures = 0;
     }
 
     return device_disposition_result;
@@ -472,6 +475,7 @@ static int on_method_request_received(void* context, const char* method_name, co
     }
     else
     {
+        device_state->number_of_previous_failures = 0;
         result = 0;
     }
     return result;
@@ -520,8 +524,12 @@ static void on_device_send_twin_update_complete_callback(DEVICE_TWIN_UPDATE_RESU
     else
     {
         AMQP_TRANSPORT_DEVICE_TWIN_CONTEXT* dev_twin_ctx = (AMQP_TRANSPORT_DEVICE_TWIN_CONTEXT*)context;
-
         dev_twin_ctx->transport_callbacks.twin_rpt_state_complete_cb(dev_twin_ctx->item_id, status_code, dev_twin_ctx->transport_ctx);
+
+        if (status_code >= 200 && status_code < 300)
+        {
+            dev_twin_ctx->device->number_of_previous_failures = 0;
+        }
 
         free(dev_twin_ctx);
     }
@@ -539,6 +547,8 @@ static void on_device_twin_update_received_callback(DEVICE_TWIN_UPDATE_TYPE upda
 
         registered_device->transport_instance->transport_callbacks.twin_retrieve_prop_complete_cb((update_type == DEVICE_TWIN_UPDATE_TYPE_COMPLETE ? DEVICE_TWIN_UPDATE_COMPLETE : DEVICE_TWIN_UPDATE_PARTIAL),
                 message, length, registered_device->transport_instance->transport_ctx);
+
+        registered_device->number_of_previous_failures = 0;
     }
 }
 
@@ -948,6 +958,7 @@ static void on_event_send_complete(IOTHUB_MESSAGE_LIST* message, D2C_EVENT_SEND_
     else
     {
         registered_device->number_of_send_event_complete_failures = 0;
+        registered_device->number_of_previous_failures = 0;
     }
 
     if (result == D2C_EVENT_SEND_COMPLETE_RESULT_ERROR_QUOTA_EXCEEDED)
@@ -1090,7 +1101,6 @@ static int IoTHubTransport_AMQP_Common_Device_DoWork(AMQP_TRANSPORT_DEVICE_INSTA
         }
         else
         {
-            registered_device->number_of_previous_failures = 0;
             result = RESULT_OK;
         }
     }
@@ -1364,6 +1374,7 @@ IOTHUB_PROCESS_ITEM_RESULT IoTHubTransport_AMQP_Common_ProcessItem(TRANSPORT_LL_
                 dev_twin_ctx->transport_callbacks = transport_instance->transport_callbacks;
                 dev_twin_ctx->transport_ctx = transport_instance->transport_ctx;
                 dev_twin_ctx->item_id = iothub_item->device_twin->item_id;
+                dev_twin_ctx->device = registered_device;
 
                 if (amqp_device_send_twin_update_async(
                     registered_device->device_handle,
