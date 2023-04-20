@@ -473,7 +473,8 @@ static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 #define TEST_X509_PRIVATE_KEY                      "Raphael Rabello"
 #define TEST_MESSAGE_SOURCE_CHAR_PTR               "messagereceiver_link_name"
 #define TEST_RETRY_CONTROL_HANDLE                  (RETRY_CONTROL_HANDLE)0x4276
-
+// This parameter must match the namesake macro in iothubtransport_amqp_common.c
+#define MAX_NUMBER_OF_DEVICE_FAILURES              5
 static TRANSPORT_CALLBACKS_INFO transport_cb_info;
 static void* transport_cb_ctx = (void*)0x499922;
 
@@ -4348,7 +4349,7 @@ TEST_FUNCTION(ConnectionStatusCallBack_UNAUTH_msg_communication_error)
     destroy_transport(handle, device_handle, NULL);
 }
 
-TEST_FUNCTION(Transport_Fully_Reconnects_After_5_AMQP_device_errors)
+TEST_FUNCTION(Transport_Fully_Reconnects_After_MAX_NUMBER_OF_DEVICE_FAILURES_AMQP_device_errors)
 {
     // arrange
     initialize_test_variables();
@@ -4366,7 +4367,7 @@ TEST_FUNCTION(Transport_Fully_Reconnects_After_5_AMQP_device_errors)
     // Fail AMQP device enough times to trigger reconnection:
     umock_c_reset_all_calls();
 
-    for (int i = 0; i < 4; i++)
+    for (int i = 0; i < (MAX_NUMBER_OF_DEVICE_FAILURES - 1); i++)
     {
         // Raise error from amqp_device level.
         STRICT_EXPECTED_CALL(get_time(NULL)).SetReturn(current_time);
