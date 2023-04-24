@@ -842,7 +842,7 @@ jobs:
     displayName: 'Build'
   - script: |
       export DYLD_LIBRARY_PATH=/usr/local/Cellar/curl/7.61.0/lib
-      cd cmake && ctest -T test --no-compress-output -C "Debug" -V -j $TEST_JOB_COUNT --schedule-random
+      cd cmake && ctest -T test --no-compress-output -C "Debug" -V -j 8 --schedule-random
     displayName: "Run Tests"
     env:
       IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
