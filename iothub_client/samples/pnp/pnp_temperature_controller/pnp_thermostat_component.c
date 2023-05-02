@@ -174,12 +174,12 @@ static bool BuildMaxMinCommandResponse(PNP_THERMOSTAT_COMPONENT* pnpThermostatCo
     }
     // We must allocate the response buffer.  It is returned to the IoTHub SDK in the command callback and the SDK in turn sends this to the server.
     // The SDK takes responsibility for the buffer and will free it.
-    else if ((responseBuilder = calloc(1, responseBuilderSize + 1)) == NULL)
+    else if ((responseBuilder = calloc(1, (size_t)responseBuilderSize + 1)) == NULL)
     {
         LogError("Unable to allocate %lu bytes", (unsigned long)(responseBuilderSize + 1));
         result = false;
     }
-    else if ((responseBuilderSize = snprintf((char*)responseBuilder, responseBuilderSize + 1, g_maxMinCommandResponseFormat, pnpThermostatComponent->maxTemperature, pnpThermostatComponent->minTemperature,
+    else if ((responseBuilderSize = snprintf((char*)responseBuilder, (size_t)responseBuilderSize + 1, g_maxMinCommandResponseFormat, pnpThermostatComponent->maxTemperature, pnpThermostatComponent->minTemperature,
                                               pnpThermostatComponent->allTemperatures / pnpThermostatComponent->numTemperatureUpdates, g_programStartTime, currentTime)) < 0)
     {
         LogError("snprintf to output buffer for command response");
