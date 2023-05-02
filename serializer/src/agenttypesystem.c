@@ -611,7 +611,7 @@ int scanbase64b16(const char* source, size_t sourceSize, size_t *consumed, unsig
             (base64b16toValue(source[2], &c2) == 0)
             )
         {
-            *consumed = 3 + ((sourceSize>=3)&&(source[3] == '=')); /*== produce 1 or 0 ( in C )*/
+            *consumed = (size_t)3 + ((sourceSize>=3)&&(source[3] == '=')); /*== produce 1 or 0 ( in C )*/
             *destination0 = (c0 << 2) | ((c1 & 0x30) >> 4);
             *destination1 = ((c1 &0x0F) <<4) | c2;
             result = 0;
@@ -641,7 +641,7 @@ int scanbase64b8(const char* source, size_t sourceSize, size_t *consumed, unsign
             (base64b8toValue(source[1], &c1) == 0)
             )
         {
-            *consumed = 2 + (((sourceSize>=4) && (source[2] == '=') && (source[3] == '='))?2:0); /*== produce 1 or 0 ( in C )*/
+            *consumed = (size_t)2 + (((sourceSize>=4) && (source[2] == '=') && (source[3] == '='))?2:0); /*== produce 1 or 0 ( in C )*/
             *destination0 = (c0 << 2) | (c1 & 3);
             result = 0;
         }
@@ -1822,7 +1822,13 @@ AGENT_DATA_TYPES_RESULT AgentDataTypes_ToString(STRING_HANDLE destination, const
                                 tempBuffer[w++] = '0';
                                 tempBuffer[w++] = '0';
                                 tempBuffer[w++] = hexToASCII[(v[i] & 0xF0) >> 4]; /*high nibble*/
+#ifdef _MSC_VER
+#pragma warning(disable:6386) // warning C6386: Buffer overrun while writing to 'tempBuffer'. This if statement will only enter if v[i] is a control character, which means that the buffer will not be overrun.
+#endif
                                 tempBuffer[w++] = hexToASCII[v[i] & 0x0F]; /*lowNibble nibble*/
+#ifdef _MSC_VER
+#pragma warning (default:6386)
+#endif
                             }
                             else if (v[i] == '"')
                             {
