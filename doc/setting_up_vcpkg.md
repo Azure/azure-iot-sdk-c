@@ -37,7 +37,7 @@ The most recent [portfile.cmake](https://github.com/microsoft/vcpkg/blob/master/
         ```powershell
         # Install azure-iot-sdk-c package with integration
         .\vcpkg.exe integrate install
-        .\vcpkg.exe install azure-iot-sdk-c
+        .\vcpkg.exe install azure-iot-sdk-c:x64-windows
         popd
 
         # Open the Azure IoT C SDK telemetry sample solution for Visual Studio.
@@ -50,10 +50,10 @@ The most recent [portfile.cmake](https://github.com/microsoft/vcpkg/blob/master/
 
         ```powershell
         # Install azure-iot-sdk-c package
-        .\vcpkg.exe install azure-iot-sdk-c
+        .\vcpkg.exe install azure-iot-sdk-c:x64-windows
 
         # Export nuget package locally
-        .\vcpkg.exe export azure-iot-sdk-c --nuget
+        .\vcpkg.exe export azure-iot-sdk-c:x64-windows --nuget
         popd
 
         # Open the Azure IoT C SDK telemetry sample solution for Visual Studio.

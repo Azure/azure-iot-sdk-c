@@ -19,7 +19,7 @@ and removing calls to _DoWork will yield the same results. */
 #include "iothub.h"
 #include "iothub_device_client_ll.h"
 #include "iothub_message.h"
-#include "iothubtransporthttp.h"
+#include "iothubtransportmqtt.h"
 
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
 #include "certs.h"
@@ -96,7 +96,7 @@ int main(void)
     (void)IoTHub_Init();
     (void)printf("Starting the IoTHub client sample upload to blob with multiple blocks...\r\n");
 
-    device_ll_handle = IoTHubDeviceClient_LL_CreateFromConnectionString(connectionString, HTTP_Protocol);
+    device_ll_handle = IoTHubDeviceClient_LL_CreateFromConnectionString(connectionString, MQTT_Protocol);
     if (device_ll_handle == NULL)
     {
         (void)printf("Failure creating IotHub device. Hint: Check your connection string.\r\n");
