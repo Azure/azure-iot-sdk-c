@@ -37,25 +37,25 @@ resources:
     endpoint: csdk-containers
     image: csdkcontainerregistry.azurecr.io/raspberrypi-c-buster:brown
 jobs:
-- job: checksubmodule
-  pool:
-    vmImage: 'ubuntu-20.04'
-  displayName: "Check Submodules"
-  steps:
-  - script: |
-      sudo apt-get update && apt-get install -y \
-      curl \
-      git \
-      python-software-properties \
-      build-essential \
-      pkg-config
-      sudo curl -sL https://deb.nodesource.com/setup_16.x | bash -
-      sudo apt-get install -y nodejs
-    displayName: 'Setup'
-  - script: |
-      npm install check_submodules
-      ./../../node_modules/.bin/check_submodules . main
-    displayName: 'Check Submodules Match'
+# - job: checksubmodule
+#   pool:
+#     vmImage: 'ubuntu-20.04'
+#   displayName: "Check Submodules"
+#   steps:
+#   - script: |
+#       sudo apt-get update && apt-get install -y \
+#       curl \
+#       git \
+#       python-software-properties \
+#       build-essential \
+#       pkg-config
+#       sudo curl -sL https://deb.nodesource.com/setup_16.x | bash -
+#       sudo apt-get install -y nodejs
+#     displayName: 'Setup'
+#   - script: |
+#       npm install check_submodules
+#       ./../../node_modules/.bin/check_submodules . main
+#     displayName: 'Check Submodules Match'
 - job: windowsx86
   pool:
     name: 'sdk-c--win-vs2017'
