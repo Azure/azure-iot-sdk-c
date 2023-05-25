@@ -365,6 +365,10 @@ static void e2e_uploadtoblob_multiblock_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER pr
         IOTHUB_CLIENT_HANDLE iotHubClientHandle = IoTHubClient_CreateFromConnectionString(deviceToUse->connectionString, protocol);
         ASSERT_IS_NOT_NULL(iotHubClientHandle, "Could not invoke IoTHubClient_CreateFromConnectionString");
 
+        // We ignore the error if it occurs, in case this CURL is not installed nor used. 
+        size_t enableCurlVerboseLogging = 1;
+        (void)IoTHubClient_SetOption(iotHubClientHandle, OPTION_CURL_VERBOSE, &enableCurlVerboseLogging);
+
         uploadToBlobCauseAbort = causeAbort;
         g_uploadToBlobStatus = UPLOADTOBLOB_CALLBACK_PENDING;
         uploadBlobNumber = noData ? 1 : 0;
@@ -505,6 +509,11 @@ TEST_FUNCTION(IoTHub_MQTT_UploadMultipleBlocksToBlobEx)
 TEST_FUNCTION(IoTHub_MQTT_UploadMultipleBlocksNoData)
 {
     e2e_uploadtoblob_multiblock_test(MQTT_Protocol, true, false, true);
+}
+
+TEST_FUNCTION(IoTHub_MQTT_UploadMultipleBlocksAbort)
+{
+    e2e_uploadtoblob_multiblock_test(MQTT_Protocol, true, false, false);
 }
 
 #ifndef __APPLE__
