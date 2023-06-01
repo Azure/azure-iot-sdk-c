@@ -511,7 +511,7 @@ jobs:
 - job: ubuntu2004dualipstack
   container: linux-c-ubuntu-2004
   pool:
-    vmImage: ubuntu-22.04
+    name: 'sdk-c--ubuntu-22'
   displayName: 'Ubuntu 20.04 with Dual IP Stack'
   steps:
   - script: |
@@ -553,7 +553,7 @@ jobs:
 - job: ubuntu2204dualipstack
   container: linux-c-ubuntu-2204
   pool:
-    vmImage: ubuntu-22.04
+    name: 'sdk-c--ubuntu-22'
   displayName: 'Ubuntu 22.04 with Dual IP Stack'
   steps:
   - script: |
