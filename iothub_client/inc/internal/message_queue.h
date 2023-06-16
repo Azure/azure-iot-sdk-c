@@ -39,12 +39,12 @@ typedef void(*MESSAGE_PROCESSING_COMPLETED_CALLBACK)(MQ_MESSAGE_HANDLE message, 
 * @brief    Callback that MUST be invoked by PROCESS_MESSAGE_CALLBACK (user provided) to signal to MESSAGE_QUEUE that a message has been processed.
 * @remarks  Besides causing MESSAGE_QUEUE to dequeue the message from its internal lists, causes MESSAGE_PROCESSING_COMPLETED_CALLBACK to be triggered.
 */
-typedef void(*PROCESS_MESSAGE_COMPLETED_CALLBACK)(MESSAGE_QUEUE_HANDLE message_queue, MQ_MESSAGE_HANDLE message, MESSAGE_QUEUE_RESULT result, USER_DEFINED_REASON reason);
+typedef void(*PROCESS_MESSAGE_COMPLETED_CALLBACK)(MESSAGE_QUEUE_HANDLE message_queue, uint32_t message_id, MESSAGE_QUEUE_RESULT result, USER_DEFINED_REASON reason);
 
 /**
 * @brief    User-provided callback invoked by MESSAGE_QUEUE when a messages is ready to be processed, getting internally moved from "pending" to "in-progress".
 */
-typedef void(*PROCESS_MESSAGE_CALLBACK)(MESSAGE_QUEUE_HANDLE message_queue, MQ_MESSAGE_HANDLE message, PROCESS_MESSAGE_COMPLETED_CALLBACK on_process_message_completed_callback, void* user_context);
+typedef void(*PROCESS_MESSAGE_CALLBACK)(MESSAGE_QUEUE_HANDLE message_queue, MQ_MESSAGE_HANDLE message, uint32_t message_id, PROCESS_MESSAGE_COMPLETED_CALLBACK on_process_message_completed_callback, void* user_context);
 
 typedef struct MESSAGE_QUEUE_CONFIG_TAG
 {
