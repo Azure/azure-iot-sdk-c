@@ -24,6 +24,7 @@ static const char* SAVED_OPTION_MAX_PROCESSING_TIME_SECS = "SAVED_OPTION_MAX_PRO
 
 struct MESSAGE_QUEUE_TAG
 {
+    uint32_t id_counter;
     size_t max_message_enqueued_time_secs;
     size_t max_message_processing_time_secs;
     size_t max_retry_count;
@@ -37,6 +38,7 @@ struct MESSAGE_QUEUE_TAG
 
 typedef struct MESSAGE_QUEUE_ITEM_TAG
 {
+    uint32_t id;
     MQ_MESSAGE_HANDLE message;
     MESSAGE_PROCESSING_COMPLETED_CALLBACK on_message_processing_completed_callback;
     void* user_context;
@@ -49,11 +51,11 @@ typedef struct MESSAGE_QUEUE_ITEM_TAG
 
 // ---------- Helper Functions ---------- //
 
-static bool find_item_by_message_ptr(LIST_ITEM_HANDLE list_item, const void* match_context)
+static bool find_item_by_message_id(LIST_ITEM_HANDLE list_item, const void* match_context)
 {
     bool result;
     MESSAGE_QUEUE_ITEM* current_item = (MESSAGE_QUEUE_ITEM*)singlylinkedlist_item_get_value(list_item);
-    MQ_MESSAGE_HANDLE* target_item = (MQ_MESSAGE_HANDLE*)match_context;
+    uint32_t message_id = *(uint32_t*)match_context;
 
     if (current_item == NULL)
     {
@@ -62,7 +64,7 @@ static bool find_item_by_message_ptr(LIST_ITEM_HANDLE list_item, const void* mat
     }
     else
     {
-        result = (current_item->message == target_item);
+        result = (current_item->id == message_id);
     }
     return result;
 }
@@ -128,19 +130,19 @@ static void dequeue_message_and_fire_callback(SINGLYLINKEDLIST_HANDLE list, LIST
     free(mq_item);
 }
 
-static void on_process_message_completed_callback(MESSAGE_QUEUE_HANDLE message_queue, MQ_MESSAGE_HANDLE message, MESSAGE_QUEUE_RESULT result, USER_DEFINED_REASON reason)
+static void on_process_message_completed_callback(MESSAGE_QUEUE_HANDLE message_queue, uint32_t message_id, MESSAGE_QUEUE_RESULT result, USER_DEFINED_REASON reason)
 {
-    if (message == NULL || message_queue == NULL)
+    if (message_queue == NULL)
     {
-        LogError("on_process_message_completed_callback invoked with NULL arguments (message=%p, message_queue=%p)", message, message_queue);
+        LogError("on_process_message_completed_callback invoked with NULL arguments (message_id=%u, message_queue=%p)", message_id, message_queue);
     }
     else
     {
         LIST_ITEM_HANDLE list_item;
 
-        if ((list_item = singlylinkedlist_find(message_queue->in_progress, find_item_by_message_ptr, message)) == NULL)
+        if ((list_item = singlylinkedlist_find(message_queue->in_progress, find_item_by_message_id, &message_id)) == NULL)
         {
-            LogError("on_process_message_completed_callback invoked for a message not in the in-progress list (%p)", message);
+            LogError("on_process_message_completed_callback invoked for a message not in the in-progress list (%u)", message_id);
         }
         else
         {
@@ -291,7 +293,7 @@ static void process_pending_messages(MESSAGE_QUEUE_HANDLE message_queue)
         {
             mq_item->number_of_attempts++;
 
-            message_queue->on_process_message_callback(message_queue, mq_item->message, on_process_message_completed_callback, mq_item->user_context);
+            message_queue->on_process_message_callback(message_queue, mq_item->message, mq_item->id, on_process_message_completed_callback, mq_item->user_context);
         }
     }
 }
@@ -479,6 +481,7 @@ MESSAGE_QUEUE_HANDLE message_queue_create(MESSAGE_QUEUE_CONFIG* config)
     }
     else
     {
+        // Here it already sets the id_counter to zero.
         memset(result, 0, sizeof(MESSAGE_QUEUE));
 
         if ((result->pending = singlylinkedlist_create()) == NULL)
@@ -542,6 +545,7 @@ int message_queue_add(MESSAGE_QUEUE_HANDLE message_queue, MQ_MESSAGE_HANDLE mess
             }
             else
             {
+                mq_item->id = message_queue->id_counter++;
                 mq_item->message = message;
                 mq_item->on_message_processing_completed_callback = on_message_processing_completed_callback;
                 mq_item->user_context = user_context;

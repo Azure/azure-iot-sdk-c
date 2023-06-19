@@ -76,6 +76,7 @@ typedef struct AMQP_MESSENGER_INSTANCE_TAG
 
 typedef struct MESSAGE_SEND_CONTEXT_TAG
 {
+    uint32_t mq_message_id;
     MESSAGE_HANDLE message;
     bool is_destroyed;
 
@@ -858,11 +859,11 @@ static void on_send_complete_callback(void* context, MESSAGE_SEND_RESULT send_re
             mq_result = MESSAGE_QUEUE_ERROR;
         }
 
-        msg_ctx->on_process_message_completed_callback(msg_ctx->messenger->send_queue, (MQ_MESSAGE_HANDLE)msg_ctx->message, mq_result, NULL);
+        msg_ctx->on_process_message_completed_callback(msg_ctx->messenger->send_queue, msg_ctx->mq_message_id, mq_result, NULL);
     }
 }
 
-static void on_process_message_callback(MESSAGE_QUEUE_HANDLE message_queue, MQ_MESSAGE_HANDLE message, PROCESS_MESSAGE_COMPLETED_CALLBACK on_process_message_completed_callback, void* context)
+static void on_process_message_callback(MESSAGE_QUEUE_HANDLE message_queue, MQ_MESSAGE_HANDLE message, uint32_t message_id, PROCESS_MESSAGE_COMPLETED_CALLBACK on_process_message_completed_callback, void* context)
 {
     if (message_queue == NULL || message == NULL || on_process_message_completed_callback == NULL || context == NULL)
     {
@@ -871,12 +872,13 @@ static void on_process_message_callback(MESSAGE_QUEUE_HANDLE message_queue, MQ_M
     else
     {
         MESSAGE_SEND_CONTEXT* message_context = (MESSAGE_SEND_CONTEXT*)context;
+        message_context->mq_message_id = message_id;
         message_context->on_process_message_completed_callback = on_process_message_completed_callback;
 
         if (messagesender_send_async(message_context->messenger->message_sender, (MESSAGE_HANDLE)message, on_send_complete_callback, context, 0) == NULL)
         {
             LogError("Failed sending AMQP message");
-            on_process_message_completed_callback(message_queue, message, MESSAGE_QUEUE_ERROR, NULL);
+            on_process_message_completed_callback(message_queue, message_id, MESSAGE_QUEUE_ERROR, NULL);
         }
 
         message_destroy((MESSAGE_HANDLE)message);
