@@ -286,23 +286,30 @@ static void freeDeviceInfoFields(IOTHUB_DEVICE* deviceInfo)
 // put on hub means that we need to have a basic retry on creation.
 static IOTHUB_REGISTRYMANAGER_RESULT createTestDeviceWithRetry(IOTHUB_REGISTRYMANAGER_HANDLE iothub_registrymanager_handle, IOTHUB_REGISTRY_DEVICE_CREATE* deviceCreateInfo, IOTHUB_DEVICE* deviceInfo)
 {
-    IOTHUB_REGISTRYMANAGER_RESULT result;
+    IOTHUB_REGISTRYMANAGER_RESULT result = IOTHUB_REGISTRYMANAGER_ERROR;
     int creationAttempts = 0;
+    bool doesDeviceExist = false;
 
     ThreadAPI_Sleep(TEST_SLEEP_THROTTLE_MSEC);  // prevent Too Many Requests (429) error from service
     while (true)
     {
-        LogInfo("Invoking registry manager to create device %s", deviceCreateInfo->deviceId);
-        result = IoTHubRegistryManager_CreateDevice(iothub_registrymanager_handle, deviceCreateInfo, deviceInfo);
-        if (result == IOTHUB_REGISTRYMANAGER_OK)
+        if (doesDeviceExist == false)
         {
-            LogInfo("Device created with status %s", MU_ENUM_TO_STRING(IOTHUB_REGISTRYMANAGER_RESULT, result));
-            ThreadAPI_Sleep(TEST_SLEEP_AFTER_CREATED_DEVICE_MSEC);  // allow ARM cache to update
-            break;
+            LogInfo("Invoking registry manager to create device %s", deviceCreateInfo->deviceId);
+            result = IoTHubRegistryManager_CreateDevice(iothub_registrymanager_handle, deviceCreateInfo, deviceInfo);
+            if (result == IOTHUB_REGISTRYMANAGER_OK)
+            {
+                LogInfo("Device created with status %s", MU_ENUM_TO_STRING(IOTHUB_REGISTRYMANAGER_RESULT, result));
+                ThreadAPI_Sleep(TEST_SLEEP_AFTER_CREATED_DEVICE_MSEC);  // allow ARM cache to update
+                break;
+            }
         }
-        else if (result == IOTHUB_REGISTRYMANAGER_DEVICE_EXIST)
+        
+        if (result == IOTHUB_REGISTRYMANAGER_DEVICE_EXIST)
         {
+            doesDeviceExist = true;
             ThreadAPI_Sleep(TEST_SLEEP_AFTER_CREATED_DEVICE_MSEC);  // allow ARM cache to update
+            LogInfo("Invoking registry manager to get device %s", deviceCreateInfo->deviceId);
             result = IoTHubRegistryManager_GetDevice(iothub_registrymanager_handle, deviceCreateInfo->deviceId, deviceInfo);
             if (result == IOTHUB_REGISTRYMANAGER_OK)
             {
@@ -327,21 +334,28 @@ static IOTHUB_REGISTRYMANAGER_RESULT createTestDeviceWithRetry(IOTHUB_REGISTRYMA
 // Provides same functionality as createTestDeviceWithRetry, except with modules instead of devices.
 static IOTHUB_REGISTRYMANAGER_RESULT createTestModuleWithRetry(IOTHUB_REGISTRYMANAGER_HANDLE iothub_registrymanager_handle, IOTHUB_REGISTRY_MODULE_CREATE* moduleCreateInfo, IOTHUB_MODULE* moduleInfo)
 {
-    IOTHUB_REGISTRYMANAGER_RESULT result;
+    IOTHUB_REGISTRYMANAGER_RESULT result = IOTHUB_REGISTRYMANAGER_ERROR;
     int creationAttempts = 0;
+    bool doesDeviceExist = false;
 
     ThreadAPI_Sleep(TEST_SLEEP_THROTTLE_MSEC);  // prevent Too Many Requests (429) error from service
     while (true)
     {
-        LogInfo("Invoking registry manager to create device/module %s/%s", moduleCreateInfo->deviceId, moduleCreateInfo->moduleId);
-        result = IoTHubRegistryManager_CreateModule(iothub_registrymanager_handle, moduleCreateInfo, moduleInfo);
-        if (result == IOTHUB_REGISTRYMANAGER_OK)
+        if (doesDeviceExist == false)
         {
-            break;
+            LogInfo("Invoking registry manager to create device/module %s/%s", moduleCreateInfo->deviceId, moduleCreateInfo->moduleId);
+            result = IoTHubRegistryManager_CreateModule(iothub_registrymanager_handle, moduleCreateInfo, moduleInfo);
+            if (result == IOTHUB_REGISTRYMANAGER_OK)
+            {
+                break;
+            }
         }
-        else if (result == IOTHUB_REGISTRYMANAGER_DEVICE_EXIST)
+        
+        if (result == IOTHUB_REGISTRYMANAGER_DEVICE_EXIST)
         {
+            doesDeviceExist = true;
             ThreadAPI_Sleep(TEST_SLEEP_AFTER_CREATED_DEVICE_MSEC);  // allow ARM cache to update
+            LogInfo("Invoking registry manager to get device/module %s/%s", moduleCreateInfo->deviceId, moduleCreateInfo->moduleId);
             result = IoTHubRegistryManager_GetModule(iothub_registrymanager_handle, moduleCreateInfo->deviceId, moduleCreateInfo->moduleId, moduleInfo);
             if (result == IOTHUB_REGISTRYMANAGER_OK)
             {
