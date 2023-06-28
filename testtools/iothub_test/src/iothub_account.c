@@ -294,11 +294,16 @@ static IOTHUB_REGISTRYMANAGER_RESULT createTestDeviceWithRetry(IOTHUB_REGISTRYMA
     {
         LogInfo("Invoking registry manager to create device %s", deviceCreateInfo->deviceId);
         result = IoTHubRegistryManager_CreateDevice(iothub_registrymanager_handle, deviceCreateInfo, deviceInfo);
-        if (result == IOTHUB_REGISTRYMANAGER_OK || result == IOTHUB_REGISTRYMANAGER_DEVICE_EXIST)
+        if (result == IOTHUB_REGISTRYMANAGER_OK)
         {
-            result = IOTHUB_REGISTRYMANAGER_OK;
             LogInfo("Device created with status %s", MU_ENUM_TO_STRING(IOTHUB_REGISTRYMANAGER_RESULT, result));
             ThreadAPI_Sleep(TEST_SLEEP_AFTER_CREATED_DEVICE_MSEC);  // allow ARM cache to update
+            break;
+        }
+        else if (result == IOTHUB_REGISTRYMANAGER_DEVICE_EXIST)
+        {
+            ThreadAPI_Sleep(TEST_SLEEP_AFTER_CREATED_DEVICE_MSEC);  // allow ARM cache to update
+            result = IoTHubRegistryManager_GetDevice(iothub_registrymanager_handle, deviceCreateInfo->deviceId, deviceInfo);
             break;
         }
 
@@ -327,9 +332,14 @@ static IOTHUB_REGISTRYMANAGER_RESULT createTestModuleWithRetry(IOTHUB_REGISTRYMA
     {
         LogInfo("Invoking registry manager to create device/module %s/%s", moduleCreateInfo->deviceId, moduleCreateInfo->moduleId);
         result = IoTHubRegistryManager_CreateModule(iothub_registrymanager_handle, moduleCreateInfo, moduleInfo);
-        if (result == IOTHUB_REGISTRYMANAGER_OK || result == IOTHUB_REGISTRYMANAGER_DEVICE_EXIST)
+        if (result == IOTHUB_REGISTRYMANAGER_OK)
         {
-            result = IOTHUB_REGISTRYMANAGER_OK;
+            break;
+        }
+        else if (result == IOTHUB_REGISTRYMANAGER_DEVICE_EXIST)
+        {
+            ThreadAPI_Sleep(TEST_SLEEP_AFTER_CREATED_DEVICE_MSEC);  // allow ARM cache to update
+            result = IoTHubRegistryManager_GetModule(iothub_registrymanager_handle, moduleCreateInfo->deviceId, moduleCreateInfo->moduleId, moduleInfo);
             break;
         }
 
