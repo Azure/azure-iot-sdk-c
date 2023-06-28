@@ -304,7 +304,10 @@ static IOTHUB_REGISTRYMANAGER_RESULT createTestDeviceWithRetry(IOTHUB_REGISTRYMA
         {
             ThreadAPI_Sleep(TEST_SLEEP_AFTER_CREATED_DEVICE_MSEC);  // allow ARM cache to update
             result = IoTHubRegistryManager_GetDevice(iothub_registrymanager_handle, deviceCreateInfo->deviceId, deviceInfo);
-            break;
+            if (result == IOTHUB_REGISTRYMANAGER_OK)
+            {
+                break;
+            }
         }
 
         creationAttempts++;
@@ -340,7 +343,10 @@ static IOTHUB_REGISTRYMANAGER_RESULT createTestModuleWithRetry(IOTHUB_REGISTRYMA
         {
             ThreadAPI_Sleep(TEST_SLEEP_AFTER_CREATED_DEVICE_MSEC);  // allow ARM cache to update
             result = IoTHubRegistryManager_GetModule(iothub_registrymanager_handle, moduleCreateInfo->deviceId, moduleCreateInfo->moduleId, moduleInfo);
-            break;
+            if (result == IOTHUB_REGISTRYMANAGER_OK)
+            {
+                break;
+            }
         }
 
         creationAttempts++;
