@@ -296,6 +296,7 @@ static IOTHUB_REGISTRYMANAGER_RESULT createTestDeviceWithRetry(IOTHUB_REGISTRYMA
         result = IoTHubRegistryManager_CreateDevice(iothub_registrymanager_handle, deviceCreateInfo, deviceInfo);
         if (result == IOTHUB_REGISTRYMANAGER_OK || result == IOTHUB_REGISTRYMANAGER_DEVICE_EXIST)
         {
+            result = IOTHUB_REGISTRYMANAGER_OK;
             LogInfo("Device created with status %s", MU_ENUM_TO_STRING(IOTHUB_REGISTRYMANAGER_RESULT, result));
             ThreadAPI_Sleep(TEST_SLEEP_AFTER_CREATED_DEVICE_MSEC);  // allow ARM cache to update
             break;
@@ -325,8 +326,10 @@ static IOTHUB_REGISTRYMANAGER_RESULT createTestModuleWithRetry(IOTHUB_REGISTRYMA
     while (true)
     {
         LogInfo("Invoking registry manager to create device/module %s/%s", moduleCreateInfo->deviceId, moduleCreateInfo->moduleId);
-        if ((result = IoTHubRegistryManager_CreateModule(iothub_registrymanager_handle, moduleCreateInfo, moduleInfo)) == IOTHUB_REGISTRYMANAGER_OK)
+        result = IoTHubRegistryManager_CreateModule(iothub_registrymanager_handle, moduleCreateInfo, moduleInfo);
+        if (result == IOTHUB_REGISTRYMANAGER_OK || result == IOTHUB_REGISTRYMANAGER_DEVICE_EXIST)
         {
+            result = IOTHUB_REGISTRYMANAGER_OK;
             break;
         }
 
