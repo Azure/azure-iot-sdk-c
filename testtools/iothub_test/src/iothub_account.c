@@ -303,11 +303,14 @@ static IOTHUB_REGISTRYMANAGER_RESULT createTestDeviceWithRetry(IOTHUB_REGISTRYMA
                 ThreadAPI_Sleep(TEST_SLEEP_AFTER_CREATED_DEVICE_MSEC);  // allow ARM cache to update
                 break;
             }
+            else if (result == IOTHUB_REGISTRYMANAGER_DEVICE_EXIST)
+            {
+                doesDeviceExist = true;
+            }
         }
         
-        if (result == IOTHUB_REGISTRYMANAGER_DEVICE_EXIST)
+        if (doesDeviceExist)
         {
-            doesDeviceExist = true;
             ThreadAPI_Sleep(TEST_SLEEP_AFTER_CREATED_DEVICE_MSEC);  // allow ARM cache to update
             LogInfo("Invoking registry manager to get device %s", deviceCreateInfo->deviceId);
             result = IoTHubRegistryManager_GetDevice(iothub_registrymanager_handle, deviceCreateInfo->deviceId, deviceInfo);
