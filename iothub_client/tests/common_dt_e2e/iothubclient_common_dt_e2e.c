@@ -734,8 +734,16 @@ void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol,
     RECEIVED_TWIN_DATA* received_twin_data = received_twin_data_init();
 
     create_client_handle(device_to_use, protocol);
-    IOTHUB_CLIENT_RESULT result = IoTHubDeviceClient_SetConnectionStatusCallback(iothub_deviceclient_handle, connection_status_callback, received_twin_data);
-    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "IoTHubDeviceClient_SetConnectionStatusCallback failed.");
+    if (iothub_deviceclient_handle != NULL)
+    {
+        IOTHUB_CLIENT_RESULT result = IoTHubDeviceClient_SetConnectionStatusCallback(iothub_deviceclient_handle, connection_status_callback, received_twin_data);
+        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "IoTHubDeviceClient_SetConnectionStatusCallback failed.");
+    }
+    else
+    {
+        IOTHUB_CLIENT_RESULT result = IoTHubModuleClient_SetConnectionStatusCallback(iothub_moduleclient_handle, connection_status_callback, received_twin_data);
+        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "IoTHubModuleClient_SetConnectionStatusCallback failed.");
+    }
 
     // There is a race condition between the service SDK updating the twin and the device
     // subscribing to the twin PATCH topic:
