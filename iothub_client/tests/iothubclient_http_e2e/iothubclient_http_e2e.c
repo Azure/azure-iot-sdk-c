@@ -54,6 +54,7 @@ typedef struct EXPECTED_SEND_DATA_TAG
     bool wasFound;
     bool dataWasRecv;
     LOCK_HANDLE lock;
+    IOTHUB_CLIENT_CONFIRMATION_RESULT result;
 } EXPECTED_SEND_DATA;
 
 typedef struct EXPECTED_RECEIVE_DATA_TAG
@@ -171,7 +172,7 @@ static int IoTHubCallbackMultipleEvents(void* context, const char* data, size_t 
 static void ReceiveConfirmationCallback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* userContextCallback)
 {
     EXPECTED_SEND_DATA* expectedData = (EXPECTED_SEND_DATA*)userContextCallback;
-    (void)result;
+    ASSERT_IS_NOT_NULL(userContextCallback, "userContextCallback is NULL");
     if (expectedData != NULL)
     {
         if (Lock(expectedData->lock) != LOCK_OK)
@@ -180,7 +181,11 @@ static void ReceiveConfirmationCallback(IOTHUB_CLIENT_CONFIRMATION_RESULT result
         }
         else
         {
-            expectedData->dataWasRecv = true;
+            expectedData->result = result;
+            if (result == IOTHUB_CLIENT_CONFIRMATION_OK)
+            {
+                expectedData->dataWasRecv = true;
+            }
             (void)Unlock(expectedData->lock);
         }
     }
@@ -308,7 +313,7 @@ static void ReceiveUserContext_Destroy(EXPECTED_RECEIVE_DATA* data)
 
 static EXPECTED_SEND_DATA* EventData_Create(void)
 {
-    EXPECTED_SEND_DATA* result = (EXPECTED_SEND_DATA*)malloc(sizeof(EXPECTED_SEND_DATA));
+    EXPECTED_SEND_DATA* result = (EXPECTED_SEND_DATA*)calloc(1, sizeof(EXPECTED_SEND_DATA));
     if (result != NULL)
     {
         if ((result->lock = Lock_Init()) == NULL)
@@ -634,6 +639,7 @@ TEST_FUNCTION(IoTHub_HTTP_SendEvent_Shared_e2e)
         ASSERT_IS_NOT_NULL(msgHandle1, "Failure to create message handle");
 
         // act
+        LogInfo("Send the Event device 2");
         result = IoTHubDeviceClient_SendEventAsync(iotHubClientHandle1, msgHandle1, ReceiveConfirmationCallback, sendData1);
         ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Failure calling IoTHubDeviceClient_SendEventAsync");
     }
@@ -649,6 +655,7 @@ TEST_FUNCTION(IoTHub_HTTP_SendEvent_Shared_e2e)
         ASSERT_IS_NOT_NULL(msgHandle2, "Failure to create message handle");
 
         // act
+        LogInfo("Send the Event device 2");
         result = IoTHubDeviceClient_SendEventAsync(iotHubClientHandle2, msgHandle2, ReceiveConfirmationCallback, sendData2);
         ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Failure calling IoTHubDeviceClient_SendEventAsync");
     }
@@ -689,8 +696,8 @@ TEST_FUNCTION(IoTHub_HTTP_SendEvent_Shared_e2e)
         ThreadAPI_Sleep(100);
     }
 
-    ASSERT_IS_TRUE(dataWasRecv1, "Failure sending data to IotHub, device 1");
-    ASSERT_IS_TRUE(dataWasRecv2, "Failure sending data to IotHub, device 2");
+    ASSERT_IS_TRUE(dataWasRecv1, "Failure sending data to IotHub, device 1, result=%s", MU_ENUM_TO_STRING(IOTHUB_CLIENT_CONFIRMATION_RESULT, sendData1->result));
+    ASSERT_IS_TRUE(dataWasRecv2, "Failure sending data to IotHub, device 2, result=%s", MU_ENUM_TO_STRING(IOTHUB_CLIENT_CONFIRMATION_RESULT, sendData2->result));
 
 
     {

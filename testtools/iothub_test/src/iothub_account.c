@@ -50,10 +50,12 @@ static const char* CONN_MODULE_PART = ";ModuleId=";
 #define DEVICE_GUID_SIZE            37
 
 const int TEST_CREATE_MAX_RETRIES = 10;
+const int TEST_DELETE_MAX_RETRIES = 10;
 const int TEST_METHOD_INVOKE_MAX_RETRIES = 3;
 const int TEST_SLEEP_THROTTLE_MSEC = 5 * 1000;
 const int TEST_SLEEP_AFTER_CREATED_DEVICE_MSEC = 30 * 1000;
 const int TEST_SLEEP_BETWEEN_CREATION_FAILURES_MSEC = 30 * 1000;
+const int TEST_SLEEP_BETWEEN_DELETE_FAILURES_MSEC = 30 * 1000;
 const int TEST_SLEEP_BETWEEN_METHOD_INVOKE_FAILURES_MSEC = 30 * 1000;
 
 #define NSLOOKUP_MAX_COMMAND_SIZE 128
@@ -290,7 +292,7 @@ static IOTHUB_REGISTRYMANAGER_RESULT createTestDeviceWithRetry(IOTHUB_REGISTRYMA
     int creationAttempts = 0;
     bool doesDeviceExist = false;
 
-    ThreadAPI_Sleep(TEST_SLEEP_THROTTLE_MSEC);  // prevent Too Many Requests (429) error from service
+    ThreadAPI_Sleep(TEST_SLEEP_THROTTLE_MSEC + gb_rand() % 10);  // prevent Too Many Requests (429) error from service
     while (true)
     {
         if (doesDeviceExist == false)
@@ -341,7 +343,7 @@ static IOTHUB_REGISTRYMANAGER_RESULT createTestModuleWithRetry(IOTHUB_REGISTRYMA
     int creationAttempts = 0;
     bool doesDeviceExist = false;
 
-    ThreadAPI_Sleep(TEST_SLEEP_THROTTLE_MSEC);  // prevent Too Many Requests (429) error from service
+    ThreadAPI_Sleep(TEST_SLEEP_THROTTLE_MSEC + gb_rand() % 10);  // prevent Too Many Requests (429) error from service
     while (true)
     {
         if (doesDeviceExist == false)
@@ -571,7 +573,7 @@ static int updateTestModuleWithRetry(IOTHUB_REGISTRYMANAGER_HANDLE iothub_regist
         }
             
         LogError("Updating device/module %s/%s failed with error %d.  Sleeping %d milliseconds", deviceToProvision->deviceId, deviceToProvision->moduleId, result, TEST_SLEEP_BETWEEN_CREATION_FAILURES_MSEC);
-        ThreadAPI_Sleep(TEST_SLEEP_BETWEEN_CREATION_FAILURES_MSEC);
+        ThreadAPI_Sleep(TEST_SLEEP_BETWEEN_CREATION_FAILURES_MSEC + gb_rand() % 15);
     }
 
     return result;
@@ -851,10 +853,15 @@ void IoTHubAccount_deinit(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle)
             {
                 if (provisioned_device->deviceId != NULL)
                 {
-                    iothub_registrymanager_result = IoTHubRegistryManager_DeleteDevice(acctInfo->iothub_registrymanager_handle, provisioned_device->deviceId);
-                    if (iothub_registrymanager_result != IOTHUB_REGISTRYMANAGER_OK)
+                    for (int i = 0; i < TEST_DELETE_MAX_RETRIES; i++)
                     {
-                        LogError("IoTHubRegistryManager_DeleteDevice failed for SAS Based Device \"%s\"\r\n", provisioned_device->deviceId);
+                        iothub_registrymanager_result = IoTHubRegistryManager_DeleteDevice(acctInfo->iothub_registrymanager_handle, provisioned_device->deviceId);
+                        if (iothub_registrymanager_result == IOTHUB_REGISTRYMANAGER_OK)
+                        {
+                            break;
+                        }
+                        LogError("IoTHubRegistryManager_DeleteDevice failed (%d) for SAS Based Device \"%s\"\r\n", i, provisioned_device->deviceId);
+                        ThreadAPI_Sleep(TEST_SLEEP_BETWEEN_DELETE_FAILURES_MSEC + gb_rand() % 15);  // sleep with jitter
                     }
                 }
 
