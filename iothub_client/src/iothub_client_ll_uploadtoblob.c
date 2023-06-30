@@ -29,8 +29,11 @@
 
 static const char* const RESPONSE_BODY_FORMAT = "{\"correlationId\":\"%s\", \"isSuccess\":%s, \"statusCode\":%d, \"statusDescription\":\"%s\"}";
 static const char* const RESPONSE_BODY_ABORTED_MESSAGE = "file upload aborted";
-static const char* const RESPONSE_BODY_FAILED_MESSAGE = "client not able to connect with the server";
+static const char* const RESPONSE_BODY_BLOCK_SIZE_EXCEEDED_MESSAGE = "block data size exceeded";
+static const char* const RESPONSE_BODY_BLOCK_COUNT_EXCEEDED_MESSAGE = "block count exceeded";
+static const char* const RESPONSE_BODY_UPLOAD_FAILED_MESSAGE = "block upload failed";
 static const int RESPONSE_BODY_ERROR_RETURN_CODE = -1;
+static const char* const RESPONSE_BODY_SUCCESS_BOOLEAN_STRING = "true";
 static const char* const RESPONSE_BODY_ERROR_BOOLEAN_STRING = "false";
 
 #define INDEFINITE_TIME                            ((time_t)-1)
@@ -38,6 +41,10 @@ static const char* const RESPONSE_BODY_ERROR_BOOLEAN_STRING = "false";
 static const char* const EMPTY_STRING = "";
 static const char* const HEADER_AUTHORIZATION = "Authorization";
 static const char* const HEADER_APP_JSON = "application/json";
+
+#define HTTP_STATUS_CODE_OK                 200
+#define HTTP_STATUS_CODE_BAD_REQUEST        400
+#define IS_HTTP_STATUS_CODE_SUCCESS(x)      ((x) >= 100 && (x) < 300)
 
 typedef struct UPLOADTOBLOB_X509_CREDENTIALS_TAG
 {
@@ -69,10 +76,10 @@ typedef struct IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA_TAG
     char* certificates;
     HTTP_PROXY_OPTIONS http_proxy_options;
     UPLOADTOBLOB_CURL_VERBOSITY curl_verbosity_level;
-    size_t blob_upload_timeout_secs;
+    size_t blob_upload_timeout_millisecs;
     const char* networkInterface;
     bool tls_renegotiation;
-}IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA;
+} IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA;
 
 typedef struct BLOB_UPLOAD_CONTEXT_TAG
 {
@@ -81,36 +88,65 @@ typedef struct BLOB_UPLOAD_CONTEXT_TAG
     size_t remainingSizeToUpload; /* size not yet uploaded */
 } BLOB_UPLOAD_CONTEXT;
 
-static int send_http_sas_request(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA* upload_client, const char* uri_resource, HTTPAPIEX_HANDLE http_api_handle, const char* relative_path, HTTP_HEADERS_HANDLE request_header, BUFFER_HANDLE blobBuffer, BUFFER_HANDLE response_buff)
+typedef struct IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_STRUCT
+{
+    IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA* u2bClientData;
+
+    /* ID of the upload as provided by the Azure IoT Hub */
+    STRING_HANDLE correlationId;
+    char* blobStorageHostname;
+    char* blobStorageRelativePath;
+    SINGLYLINKEDLIST_HANDLE blockIdList;
+
+    HTTPAPIEX_HANDLE blobHttpApiHandle;
+} IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT;
+
+static int send_http_sas_request(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA* upload_client, HTTPAPIEX_HANDLE http_api_handle, const char* relative_path, HTTP_HEADERS_HANDLE request_header, BUFFER_HANDLE blobBuffer, BUFFER_HANDLE response_buff)
 {
     int result;
-    unsigned int statusCode;
+    STRING_HANDLE uri_resource = STRING_construct_sprintf("%s/devices/%s", upload_client->hostname, upload_client->deviceId);
 
-    HTTPAPIEX_SAS_HANDLE http_sas_handle = HTTPAPIEX_SAS_Create_From_String(IoTHubClient_Auth_Get_DeviceKey(upload_client->authorization_module), uri_resource, EMPTY_STRING);
-    if (http_sas_handle == NULL)
+    if (uri_resource == NULL)
     {
-        LogError("unable to HTTPAPIEX_SAS_Create");
+        LogError("Failure constructing uri string");
         result = MU_FAILURE;
     }
     else
     {
-        if (HTTPAPIEX_SAS_ExecuteRequest(http_sas_handle, http_api_handle, HTTPAPI_REQUEST_POST, relative_path, request_header,
-            blobBuffer, &statusCode, NULL, response_buff) != HTTPAPIEX_OK)
+        HTTPAPIEX_SAS_HANDLE http_sas_handle = HTTPAPIEX_SAS_Create_From_String(IoTHubClient_Auth_Get_DeviceKey(upload_client->authorization_module), STRING_c_str(uri_resource), EMPTY_STRING);
+
+        if (http_sas_handle == NULL)
         {
+            LogError("unable to HTTPAPIEX_SAS_Create");
             result = MU_FAILURE;
-            LogError("unable to HTTPAPIEX_ExecuteRequest");
-        }
-        else if (statusCode >= 300)
-        {
-            result = MU_FAILURE;
-            LogError("HTTP code was %u", statusCode);
         }
         else
         {
-            result = 0;
+            unsigned int statusCode;
+
+            if (HTTPAPIEX_SAS_ExecuteRequest(
+                http_sas_handle, http_api_handle, HTTPAPI_REQUEST_POST, relative_path, request_header,
+                blobBuffer, &statusCode, NULL, response_buff) != HTTPAPIEX_OK)
+            {
+                LogError("unable to HTTPAPIEX_ExecuteRequest");
+                result = MU_FAILURE;
+            }
+            else if (!IS_HTTP_STATUS_CODE_SUCCESS(statusCode))
+            {
+                LogError("HTTP response code was %u", statusCode);
+                result = MU_FAILURE;
+            }
+            else
+            {
+                result = 0;
+            }
+
+            HTTPAPIEX_SAS_Destroy(http_sas_handle);
         }
-        HTTPAPIEX_SAS_Destroy(http_sas_handle);
+
+        STRING_delete(uri_resource);
     }
+
     return result;
 }
 
@@ -121,22 +157,23 @@ static int send_http_request(HTTPAPIEX_HANDLE http_api_handle, const char* relat
     if (HTTPAPIEX_ExecuteRequest(http_api_handle, HTTPAPI_REQUEST_POST, relative_path, request_header,
         blobBuffer, &statusCode, NULL, response_buff) != HTTPAPIEX_OK)
     {
-        result = MU_FAILURE;
         LogError("unable to HTTPAPIEX_ExecuteRequest");
-    }
-    else if (statusCode >= 300)
-    {
         result = MU_FAILURE;
+    }
+    else if (!IS_HTTP_STATUS_CODE_SUCCESS(statusCode))
+    {
         LogError("HTTP code was %u", statusCode);
+        result = MU_FAILURE;
     }
     else
     {
         result = 0;
     }
+
     return result;
 }
 
-static int parse_result_json(const char* json_response, STRING_HANDLE correlation_id, STRING_HANDLE sas_uri)
+static int parseResultFromIoTHub(const char* json_response, STRING_HANDLE correlation_id, STRING_HANDLE sas_uri)
 {
     int result;
 
@@ -215,6 +252,536 @@ static int parse_result_json(const char* json_response, STRING_HANDLE correlatio
         }
         json_value_free(json);
     }
+    return result;
+}
+
+
+static HTTP_HEADERS_HANDLE createIotHubRequestHttpHeaders(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA* upload_data)
+{
+    HTTP_HEADERS_HANDLE iotHubRequestHttpHeaders;
+
+    if ((iotHubRequestHttpHeaders = HTTPHeaders_Alloc()) == NULL)
+    {
+        LogError("Failed to allocate HTTP headers for IoT Hub connection");
+    }
+    else
+    {
+        bool isError;
+
+        if ((HTTPHeaders_AddHeaderNameValuePair(iotHubRequestHttpHeaders, "Content-Type", HEADER_APP_JSON) != HTTP_HEADERS_OK) ||
+            (HTTPHeaders_AddHeaderNameValuePair(iotHubRequestHttpHeaders, "Accept", HEADER_APP_JSON) != HTTP_HEADERS_OK) ||
+            (HTTPHeaders_AddHeaderNameValuePair(iotHubRequestHttpHeaders, "User-Agent", "iothubclient/" IOTHUB_SDK_VERSION) != HTTP_HEADERS_OK))
+        {
+            LogError("unable to HTTPHeaders_AddHeaderNameValuePair");
+            isError = true;
+        }
+        else
+        {
+            switch (upload_data->cred_type)
+            {
+                default:
+                {
+                    LogError("Internal Error: unexpected value in auth schema = %d", upload_data->cred_type);
+                    isError = true;
+                    break;
+                }
+                case IOTHUB_CREDENTIAL_TYPE_X509_ECC:
+                case IOTHUB_CREDENTIAL_TYPE_X509:
+                {
+                    isError = false;
+                    break;
+                }
+                case IOTHUB_CREDENTIAL_TYPE_DEVICE_KEY:
+                {
+                    // This is the scenario that uses `send_http_sas_request`.
+                    // Believe it or not, HTTPAPIEX_SAS_ExecuteRequest requires the headers to have
+                    // an empty Authorization header so it can replace it with the authorization value. 
+
+                    if (HTTPHeaders_AddHeaderNameValuePair(iotHubRequestHttpHeaders, HEADER_AUTHORIZATION, EMPTY_STRING) != HTTP_HEADERS_OK)
+                    {
+                        LogError("unable to add authorization header");
+                        isError = true;
+                    }
+                    else
+                    {
+                        isError = false;
+                    }
+                    break;
+                }
+                case IOTHUB_CREDENTIAL_TYPE_DEVICE_AUTH:
+                {
+                    STRING_HANDLE uri_resource = STRING_construct_sprintf("%s/devices/%s", upload_data->hostname, upload_data->deviceId);
+
+                    if (uri_resource == NULL)
+                    {
+                        LogError("Failure constructing uri string");
+                        isError = true;
+                    }
+                    else
+                    {
+                        time_t curr_time;
+                        if ((curr_time = get_time(NULL)) == INDEFINITE_TIME)
+                        {
+                            LogError("failure retrieving time");
+                            isError = true;
+                        }
+                        else
+                        {
+                            uint64_t expiry = (uint64_t)(difftime(curr_time, 0) + 3600);
+                            char* sas_token = IoTHubClient_Auth_Get_SasToken(upload_data->authorization_module, STRING_c_str(uri_resource), expiry, EMPTY_STRING);
+
+                            if (sas_token == NULL)
+                            {
+                                LogError("unable to retrieve sas token");
+                                isError = true;
+                            }
+                            else
+                            {
+                                if (HTTPHeaders_AddHeaderNameValuePair(iotHubRequestHttpHeaders, HEADER_AUTHORIZATION, sas_token) != HTTP_HEADERS_OK)
+                                {
+                                    LogError("unable to HTTPHeaders_AddHeaderNameValuePair");
+                                    isError = true;
+                                }
+                                else
+                                {
+                                    isError = false;
+                                }
+
+                                free(sas_token);
+                            }
+                        }
+
+                        STRING_delete(uri_resource);
+                    }
+
+                    break;
+                }
+                case IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN:
+                {
+                    if (HTTPHeaders_AddHeaderNameValuePair(iotHubRequestHttpHeaders, HEADER_AUTHORIZATION, upload_data->credentials.supplied_sas_token) != HTTP_HEADERS_OK)
+                    {
+                        LogError("unable to add authorization header");
+                        isError = true;
+                    }
+                    else
+                    {
+                        isError = false;
+                    }
+                    break;
+                }
+            }
+        }
+
+        if (isError)
+        {
+            HTTPHeaders_Free(iotHubRequestHttpHeaders);
+            iotHubRequestHttpHeaders = NULL;
+        }
+    }
+
+    return iotHubRequestHttpHeaders;
+}
+
+static HTTPAPIEX_HANDLE createIotHubHttpApiExHandle(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA* u2bLLClientData)
+{
+    HTTPAPIEX_HANDLE iotHubHttpApiExHandle = HTTPAPIEX_Create(u2bLLClientData->hostname);
+
+    if (iotHubHttpApiExHandle == NULL)
+    {
+        LogError("unable to HTTPAPIEX_Create");
+    }
+    else if (u2bLLClientData->blob_upload_timeout_millisecs != 0 &&
+             HTTPAPIEX_SetOption(iotHubHttpApiExHandle, OPTION_HTTP_TIMEOUT, &u2bLLClientData->blob_upload_timeout_millisecs) != HTTPAPIEX_OK)
+    {
+        LogError("unable to set blob transfer timeout");
+        HTTPAPIEX_Destroy(iotHubHttpApiExHandle);
+        iotHubHttpApiExHandle = NULL;
+    }
+    else
+    {
+        if (u2bLLClientData->curl_verbosity_level != UPLOADTOBLOB_CURL_VERBOSITY_UNSET)
+        {
+            size_t curl_verbose = (u2bLLClientData->curl_verbosity_level == UPLOADTOBLOB_CURL_VERBOSITY_ON);
+            (void)HTTPAPIEX_SetOption(iotHubHttpApiExHandle, OPTION_CURL_VERBOSE, &curl_verbose);
+        }
+
+        if ((u2bLLClientData->networkInterface) != NULL &&
+            (HTTPAPIEX_SetOption(iotHubHttpApiExHandle, OPTION_CURL_INTERFACE, u2bLLClientData->networkInterface) != HTTPAPIEX_OK))
+        {
+            LogError("unable to set networkInteface!");
+            HTTPAPIEX_Destroy(iotHubHttpApiExHandle);
+            iotHubHttpApiExHandle = NULL;
+        }
+        else
+        {
+            /*transmit the x509certificate and x509privatekey*/
+            if ((u2bLLClientData->cred_type == IOTHUB_CREDENTIAL_TYPE_X509 || u2bLLClientData->cred_type == IOTHUB_CREDENTIAL_TYPE_X509_ECC) &&
+                    (((u2bLLClientData->tls_renegotiation == true) && (HTTPAPIEX_SetOption(iotHubHttpApiExHandle, OPTION_SET_TLS_RENEGOTIATION, &u2bLLClientData->tls_renegotiation) != HTTPAPIEX_OK)) ||
+                    (HTTPAPIEX_SetOption(iotHubHttpApiExHandle, OPTION_X509_CERT, u2bLLClientData->credentials.x509_credentials.x509certificate) != HTTPAPIEX_OK) ||
+                    (HTTPAPIEX_SetOption(iotHubHttpApiExHandle, OPTION_X509_PRIVATE_KEY, u2bLLClientData->credentials.x509_credentials.x509privatekey) != HTTPAPIEX_OK) ||
+                    ((u2bLLClientData->credentials.x509_credentials.x509privatekeyType != NULL) && (HTTPAPIEX_SetOption(iotHubHttpApiExHandle, OPTION_OPENSSL_PRIVATE_KEY_TYPE, u2bLLClientData->credentials.x509_credentials.x509privatekeyType) != HTTPAPIEX_OK)) ||
+                    ((u2bLLClientData->credentials.x509_credentials.engine != NULL) && (HTTPAPIEX_SetOption(iotHubHttpApiExHandle, OPTION_OPENSSL_ENGINE, u2bLLClientData->credentials.x509_credentials.engine) != HTTPAPIEX_OK))))
+            {
+                LogError("unable to HTTPAPIEX_SetOption for x509 certificate");
+                HTTPAPIEX_Destroy(iotHubHttpApiExHandle);
+                iotHubHttpApiExHandle = NULL;
+            }
+            else if ((u2bLLClientData->certificates != NULL) &&
+                    (HTTPAPIEX_SetOption(iotHubHttpApiExHandle, OPTION_TRUSTED_CERT, u2bLLClientData->certificates) != HTTPAPIEX_OK))
+            {
+                LogError("unable to set TrustedCerts!");
+                HTTPAPIEX_Destroy(iotHubHttpApiExHandle);
+                iotHubHttpApiExHandle = NULL;
+            }
+            else if ((u2bLLClientData->http_proxy_options.host_address != NULL) &&
+                    (HTTPAPIEX_SetOption(iotHubHttpApiExHandle, OPTION_HTTP_PROXY, &(u2bLLClientData->http_proxy_options)) != HTTPAPIEX_OK))
+            {
+                LogError("unable to set http proxy!");
+                HTTPAPIEX_Destroy(iotHubHttpApiExHandle);
+                iotHubHttpApiExHandle = NULL;
+            }
+        }
+    }
+
+    return iotHubHttpApiExHandle;
+}
+
+static int IoTHubClient_LL_UploadToBlob_GetBlobCredentialsFromIoTHub(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA* upload_data, const char* destinationFileName, STRING_HANDLE correlationId, STRING_HANDLE sasUri)
+{
+    int result;
+    STRING_HANDLE relativePath = STRING_construct_sprintf("/devices/%s/files/%s", upload_data->deviceId, API_VERSION);
+
+    if (relativePath == NULL)
+    {
+        LogError("Failure constructing string");
+        result = MU_FAILURE;
+    }
+    else
+    {
+        STRING_HANDLE blobName = STRING_construct_sprintf("{ \"blobName\": \"%s\" }", destinationFileName);
+
+        if (blobName == NULL)
+        {
+            LogError("Failure constructing string");
+            result = MU_FAILURE;
+        }
+        else
+        {
+            BUFFER_HANDLE blobBuffer = BUFFER_create(
+                (const unsigned char *)STRING_c_str(blobName), STRING_length(blobName));
+
+            if (blobBuffer == NULL)
+            {
+                LogError("unable to create BUFFER");
+                result = MU_FAILURE;
+            }
+            else
+            {
+                BUFFER_HANDLE responseContent;
+
+                if ((responseContent = BUFFER_new()) == NULL)
+                {
+                    result = MU_FAILURE;
+                    LogError("unable to BUFFER_new");
+                }
+                else
+                {
+                    HTTPAPIEX_HANDLE iotHubHttpApiExHandle = createIotHubHttpApiExHandle(upload_data);
+
+                    if (iotHubHttpApiExHandle == NULL)
+                    {
+                        LogError("Failed to create the HTTPAPIEX_HANDLE for Azure IoT Hub");
+                        result = MU_FAILURE;
+                    }
+                    else
+                    {
+                        HTTP_HEADERS_HANDLE iotHubRequestHttpHeaders;
+
+                        if ((iotHubRequestHttpHeaders = createIotHubRequestHttpHeaders(upload_data)) == NULL)
+                        {
+                            LogError("Failed to allocate HTTP headers for IoT Hub connection");
+                            result = MU_FAILURE;
+                        }
+                        else
+                        {
+                            bool wasIoTHubRequestSuccess = false;
+
+                            switch (upload_data->cred_type)
+                            {
+                                default:
+                                {
+                                    LogError("Internal Error: unexpected value in auth schema = %d", upload_data->cred_type);
+                                    break;
+                                }
+                                case IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN:
+                                case IOTHUB_CREDENTIAL_TYPE_DEVICE_AUTH:
+                                case IOTHUB_CREDENTIAL_TYPE_X509_ECC:
+                                case IOTHUB_CREDENTIAL_TYPE_X509:
+                                {
+                                    if (send_http_request(iotHubHttpApiExHandle, STRING_c_str(relativePath), iotHubRequestHttpHeaders, blobBuffer, responseContent) != 0)
+                                    {
+                                        LogError("unable to HTTPAPIEX_ExecuteRequest");
+                                    }
+                                    else
+                                    {
+                                        wasIoTHubRequestSuccess = true;
+                                    }
+                                    break;
+                                }
+                                case IOTHUB_CREDENTIAL_TYPE_DEVICE_KEY:
+                                {
+                                    if (send_http_sas_request(upload_data, iotHubHttpApiExHandle, STRING_c_str(relativePath), iotHubRequestHttpHeaders, blobBuffer, responseContent) != 0)
+                                    {
+                                        LogError("unable to HTTPAPIEX_ExecuteRequest");
+                                    }
+                                    else
+                                    {
+                                        wasIoTHubRequestSuccess = true;
+                                    }
+
+                                    break;
+                                }
+                            }
+
+                            if (wasIoTHubRequestSuccess)
+                            {
+                                const unsigned char* responseContent_u_char = BUFFER_u_char(responseContent);
+                                size_t responseContent_length = BUFFER_length(responseContent);
+                                STRING_HANDLE responseAsString = STRING_from_byte_array(responseContent_u_char, responseContent_length);
+                                if (responseAsString == NULL)
+                                {
+                                    LogError("unable to get the response as string");
+                                    result = MU_FAILURE;
+                                }
+                                else
+                                {
+                                    if (parseResultFromIoTHub(STRING_c_str(responseAsString), correlationId, sasUri) != 0)
+                                    {
+                                        LogError("unable to parse json result");
+                                        result = MU_FAILURE;
+                                    }
+                                    else
+                                    {
+                                        result = 0;
+                                    }
+
+                                    STRING_delete(responseAsString);
+                                }
+                            }
+                            else
+                            {
+                                result = MU_FAILURE;
+                            }
+
+                            HTTPHeaders_Free(iotHubRequestHttpHeaders);
+                        }
+
+                        HTTPAPIEX_Destroy(iotHubHttpApiExHandle);
+                    }
+
+                    BUFFER_delete(responseContent);
+                }
+
+                BUFFER_delete(blobBuffer);
+            }
+
+            STRING_delete(blobName);
+        }
+
+        STRING_delete(relativePath);
+    }
+
+    return result;
+}
+
+static int IoTHubClient_LL_UploadToBlob_NotifyIoTHubOfUploadCompletion(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA* upload_data, BUFFER_HANDLE messageBody)
+{
+    int result;
+    STRING_HANDLE relativePathNotification = STRING_construct_sprintf("/devices/%s/files/notifications/%s", upload_data->deviceId, API_VERSION);
+
+    if (relativePathNotification == NULL)
+    {
+        LogError("Failure constructing relative path string");
+        result = MU_FAILURE;
+    }
+    else
+    {
+        HTTPAPIEX_HANDLE iotHubHttpApiExHandle = createIotHubHttpApiExHandle(upload_data);
+
+        if (iotHubHttpApiExHandle == NULL)
+        {
+            LogError("Failed to create the HTTPAPIEX_HANDLE for Azure IoT Hub");
+            result = MU_FAILURE;
+        }
+        else
+        {
+            HTTP_HEADERS_HANDLE iotHubRequestHttpHeaders;
+
+            if ((iotHubRequestHttpHeaders = createIotHubRequestHttpHeaders(upload_data)) == NULL)
+            {
+                LogError("Failed to allocate HTTP headers for IoT Hub connection");
+                result = MU_FAILURE;
+            }
+            else
+            {
+                switch (upload_data->cred_type)
+                {
+                    default:
+                    {
+                        LogError("internal error: unknown authorization Scheme");
+                        result = MU_FAILURE;
+                        break;
+                    }
+                    case IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN:
+                    case IOTHUB_CREDENTIAL_TYPE_X509:
+                    case IOTHUB_CREDENTIAL_TYPE_X509_ECC:
+                    case IOTHUB_CREDENTIAL_TYPE_DEVICE_AUTH:
+                    {
+                        if (send_http_request(iotHubHttpApiExHandle, STRING_c_str(relativePathNotification), iotHubRequestHttpHeaders, messageBody, NULL) != 0)
+                        {
+                            LogError("unable to execute HTTPAPIEX_ExecuteRequest");
+                            result = MU_FAILURE;
+                        }
+                        else
+                        {
+                            result = 0;
+                        }
+                        break;
+                    }
+                    case IOTHUB_CREDENTIAL_TYPE_DEVICE_KEY:
+                    {
+                        if (send_http_sas_request(upload_data, iotHubHttpApiExHandle, STRING_c_str(relativePathNotification), iotHubRequestHttpHeaders, messageBody, NULL) != 0)
+                        {
+                            LogError("unable to execute HTTPAPIEX_ExecuteRequest");
+                            result = MU_FAILURE;
+                        }
+                        else
+                        {
+                            result = 0;
+                        }
+                        break;
+                    }
+                }
+
+                HTTPHeaders_Free(iotHubRequestHttpHeaders);
+            }
+
+            HTTPAPIEX_Destroy(iotHubHttpApiExHandle);
+        }
+
+        STRING_delete(relativePathNotification);
+    }
+
+    return result;
+}
+
+static IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT* createUploadToBlobContextInstance()
+{
+    IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT* result;
+
+    if ((result = malloc(sizeof(IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT))) == NULL)
+    {
+        LogError("Failed allocating IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT");
+    }
+    else
+    {
+        (void)memset(result, 0, sizeof(IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT));
+
+        if ((result->blockIdList = singlylinkedlist_create()) == NULL)
+        {
+            LogError("Failed allocating list for blockIds");
+            free(result);
+            result = NULL;
+        }
+        else if ((result->correlationId = STRING_new()) == NULL)
+        {
+            LogError("unable to STRING_new");
+            singlylinkedlist_destroy(result->blockIdList);
+            free(result);
+            result = NULL;
+        }
+    }
+
+    return result;
+}
+
+static void destroyUploadToBlobContextInstance(IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT* uploadContext)
+{
+    if (uploadContext != NULL)
+    {
+        HTTPAPIEX_Destroy(uploadContext->blobHttpApiHandle);
+
+        if (uploadContext->blockIdList != NULL)
+        {
+            Blob_ClearBlockIdList(uploadContext->blockIdList);
+            singlylinkedlist_destroy(uploadContext->blockIdList);
+        }
+
+        STRING_delete(uploadContext->correlationId);
+        free(uploadContext->blobStorageHostname);
+        free(uploadContext->blobStorageRelativePath);
+        free(uploadContext);
+    }
+}
+
+static int parseAzureBlobSasUri(STRING_HANDLE sasUri, char** blobStorageHostname, char** blobStorageRelativePath)
+{
+    int result;
+    const char* hostnameBegin;
+    char* hostname = NULL;
+    char* relativePath = NULL;
+    
+    /*to find the hostname, the following logic is applied:*/
+    /*the hostname starts at the first character after "://"*/
+    /*the hostname ends at the first character before the next "/" after "://"*/
+    if ((hostnameBegin = strstr(STRING_c_str(sasUri), "://")) == NULL)
+    {
+        LogError("hostname cannot be determined");
+        result = MU_FAILURE;
+    }
+    else
+    {
+        hostnameBegin += 3; /*have to skip 3 characters which are "://"*/
+        const char* relativePathBegin = strchr(hostnameBegin, '/');
+
+        if (relativePathBegin == NULL)
+        {
+            LogError("relative path cannot be determined");
+            result = MU_FAILURE;
+        }
+        else
+        {
+            size_t hostnameSize = relativePathBegin - hostnameBegin;
+
+            if ((hostname = malloc(hostnameSize + 1)) == NULL)
+            {
+                LogError("failed to allocate memory for blob storage hostname");
+                result = MU_FAILURE;
+            }
+            else
+            {
+                (void)memcpy(hostname, hostnameBegin, hostnameSize);
+                hostname[hostnameSize] = '\0';
+                size_t relativePathSize = STRING_length(sasUri) - (relativePathBegin - STRING_c_str(sasUri));
+
+                if ((relativePath = malloc(relativePathSize + 1)) == NULL)
+                {
+                    LogError("failed to allocate memory for blob storage relative path");
+                    free(hostname);
+                    result = MU_FAILURE;
+                }
+                else
+                {
+                    (void)memcpy(relativePath, relativePathBegin, relativePathSize);
+                    relativePath[relativePathSize] = '\0';
+                    *blobStorageHostname = hostname;
+                    *blobStorageRelativePath = relativePath;
+                    result = 0;
+                }
+            }
+        }
+    }
+
     return result;
 }
 
@@ -302,602 +869,297 @@ IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE IoTHubClient_LL_UploadToBlob_Create(const I
             }
         }
     }
+
     return (IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE)upload_data;
-
 }
 
-/*returns 0 when correlationId, sasUri contain data*/
-static int IoTHubClient_LL_UploadToBlob_step1and2(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA* upload_data, HTTPAPIEX_HANDLE iotHubHttpApiExHandle, HTTP_HEADERS_HANDLE requestHttpHeaders, const char* destinationFileName, STRING_HANDLE correlationId, STRING_HANDLE sasUri)
+IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE IoTHubClient_LL_UploadToBlob_CreateContext(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE handle, const char* destinationFileName)
 {
-    int result;
+    IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT* result;
 
-    STRING_HANDLE relativePath = STRING_construct_sprintf("/devices/%s/files/%s", upload_data->deviceId, API_VERSION);
-    if (relativePath == NULL)
+    if (handle == NULL || destinationFileName == NULL)
     {
-        LogError("Failure constructing string");
-        result = MU_FAILURE;
+        LogError("invalid argument detected handle=%p destinationFileName=%p", handle, destinationFileName);
+        result = NULL;
     }
-    else
+    else if ((result = createUploadToBlobContextInstance()) == NULL)
     {
-        STRING_HANDLE blobName = STRING_construct_sprintf("{ \"blobName\": \"%s\" }", destinationFileName);
-        if (blobName == NULL)
-        {
-            LogError("Failure constructing string");
-            result = MU_FAILURE;
-        }
-        else
-        {
-            BUFFER_HANDLE responseContent;
-            size_t len = STRING_length(blobName);
-            BUFFER_HANDLE blobBuffer = BUFFER_create((const unsigned char *)STRING_c_str(blobName), len);
-            if (blobBuffer == NULL)
-            {
-                LogError("unable to create BUFFER");
-                result = MU_FAILURE;
-            }
-            else
-            {
-                if ((responseContent = BUFFER_new()) == NULL)
-                {
-                    result = MU_FAILURE;
-                    LogError("unable to BUFFER_new");
-                }
-                else
-                {
-                    if (!(
-                        (HTTPHeaders_AddHeaderNameValuePair(requestHttpHeaders, "Content-Type", HEADER_APP_JSON) == HTTP_HEADERS_OK) &&
-                        (HTTPHeaders_AddHeaderNameValuePair(requestHttpHeaders, "Accept", HEADER_APP_JSON) == HTTP_HEADERS_OK) &&
-                        (HTTPHeaders_AddHeaderNameValuePair(requestHttpHeaders, "User-Agent", "iothubclient/" IOTHUB_SDK_VERSION) == HTTP_HEADERS_OK) &&
-                        ((upload_data->cred_type == IOTHUB_CREDENTIAL_TYPE_X509 || upload_data->cred_type == IOTHUB_CREDENTIAL_TYPE_X509_ECC) ||
-                        (HTTPHeaders_AddHeaderNameValuePair(requestHttpHeaders, HEADER_AUTHORIZATION, EMPTY_STRING) == HTTP_HEADERS_OK))
-                        ))
-                    {
-                        LogError("unable to HTTPHeaders_AddHeaderNameValuePair");
-                        result = MU_FAILURE;
-                    }
-                    else
-                    {
-                        int wasIoTHubRequestSuccess = 0; /*!=0 means responseContent has a buffer that should be parsed by parson after executing the below switch*/
-                        /* set the result to error by default */
-                        result = MU_FAILURE;
-                        switch (upload_data->cred_type)
-                        {
-                            default:
-                            {
-                                /*wasIoTHubRequestSuccess takes care of the return value*/
-                                LogError("Internal Error: unexpected value in auth schema = %d", upload_data->cred_type);
-                                result = MU_FAILURE;
-                                break;
-                            }
-                            case IOTHUB_CREDENTIAL_TYPE_X509_ECC:
-                            case IOTHUB_CREDENTIAL_TYPE_X509:
-                            {
-                                if (send_http_request(iotHubHttpApiExHandle, STRING_c_str(relativePath), requestHttpHeaders, blobBuffer, responseContent) != 0)
-                                {
-                                    result = MU_FAILURE;
-                                    LogError("unable to HTTPAPIEX_ExecuteRequest");
-                                }
-                                else
-                                {
-                                    wasIoTHubRequestSuccess = 1;
-                                }
-                                break;
-                            }
-                            case IOTHUB_CREDENTIAL_TYPE_DEVICE_KEY:
-                            case IOTHUB_CREDENTIAL_TYPE_DEVICE_AUTH:
-                            {
-                                STRING_HANDLE uri_resource = STRING_construct_sprintf("%s/devices/%s", upload_data->hostname, upload_data->deviceId);
-                                if (uri_resource == NULL)
-                                {
-                                    result = MU_FAILURE;
-                                    LogError("Failure constructing string");
-                                }
-                                else
-                                {
-                                    if (upload_data->cred_type == IOTHUB_CREDENTIAL_TYPE_DEVICE_AUTH)
-                                    {
-                                        time_t curr_time;
-                                        if ((curr_time = get_time(NULL)) == INDEFINITE_TIME)
-                                        {
-                                            result = MU_FAILURE;
-                                            LogError("failure retrieving time");
-                                        }
-                                        else
-                                        {
-                                            uint64_t expiry = (uint64_t)(difftime(curr_time, 0) + 3600);
-                                            char* sas_token = IoTHubClient_Auth_Get_SasToken(upload_data->authorization_module, STRING_c_str(uri_resource), expiry, EMPTY_STRING);
-                                            if (sas_token == NULL)
-                                            {
-                                                result = MU_FAILURE;
-                                                LogError("unable to retrieve sas token");
-                                            }
-                                            else
-                                            {
-                                                if (HTTPHeaders_ReplaceHeaderNameValuePair(requestHttpHeaders, HEADER_AUTHORIZATION, sas_token) != HTTP_HEADERS_OK)
-                                                {
-                                                    result = MU_FAILURE;
-                                                    LogError("unable to HTTPHeaders_AddHeaderNameValuePair");
-                                                }
-                                                else if (send_http_request(iotHubHttpApiExHandle, STRING_c_str(relativePath), requestHttpHeaders, blobBuffer, responseContent) != 0)
-                                                {
-                                                    result = MU_FAILURE;
-                                                    LogError("unable to HTTPAPIEX_ExecuteRequest");
-                                                }
-                                                else
-                                                {
-                                                    wasIoTHubRequestSuccess = 1;
-                                                }
-                                            }
-                                            free(sas_token);
-                                        }
-                                    }
-                                    else
-                                    {
-                                        if (send_http_sas_request(upload_data, STRING_c_str(uri_resource), iotHubHttpApiExHandle, STRING_c_str(relativePath), requestHttpHeaders, blobBuffer, responseContent) != 0)
-                                        {
-                                            result = MU_FAILURE;
-                                            LogError("unable to HTTPAPIEX_ExecuteRequest");
-                                        }
-                                        else
-                                        {
-                                            wasIoTHubRequestSuccess = 1;
-                                        }
-                                    }
-                                    STRING_delete(uri_resource);
-                                }
-                                break;
-                            }
-                            case IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN:
-                            {
-                                if (HTTPHeaders_ReplaceHeaderNameValuePair(requestHttpHeaders, HEADER_AUTHORIZATION, upload_data->credentials.supplied_sas_token) != HTTP_HEADERS_OK)
-                                {
-                                    result = MU_FAILURE;
-                                    LogError("unable to HTTPHeaders_AddHeaderNameValuePair");
-                                }
-                                else if (send_http_request(iotHubHttpApiExHandle, STRING_c_str(relativePath), requestHttpHeaders, blobBuffer, responseContent) != 0)
-                                {
-                                    result = MU_FAILURE;
-                                    LogError("unable to HTTPAPIEX_ExecuteRequest");
-                                }
-                                else
-                                {
-                                    wasIoTHubRequestSuccess = 1;
-                                }
-                                break;
-                            }
-                        }
-                        if (wasIoTHubRequestSuccess == 1)
-                        {
-                            const unsigned char*responseContent_u_char = BUFFER_u_char(responseContent);
-                            size_t responseContent_length = BUFFER_length(responseContent);
-                            STRING_HANDLE responseAsString = STRING_from_byte_array(responseContent_u_char, responseContent_length);
-                            if (responseAsString == NULL)
-                            {
-                                result = MU_FAILURE;
-                                LogError("unable to get the response as string");
-                            }
-                            else
-                            {
-                                if (parse_result_json(STRING_c_str(responseAsString), correlationId, sasUri) != 0)
-                                {
-                                    LogError("unable to parse json result");
-                                    result = MU_FAILURE;
-                                }
-                                else
-                                {
-                                    result = 0;
-                                }
-                                STRING_delete(responseAsString);
-                            }
-                        }
-                    }
-                    BUFFER_delete(responseContent);
-                }
-                BUFFER_delete(blobBuffer);
-            }
-            STRING_delete(blobName);
-        }
-        STRING_delete(relativePath);
-    }
-    return result;
-}
-
-/*returns 0 when the IoTHub has been informed about the file upload status*/
-static int IoTHubClient_LL_UploadToBlob_step3(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA* upload_data, HTTPAPIEX_HANDLE iotHubHttpApiExHandle, HTTP_HEADERS_HANDLE requestHttpHeaders, BUFFER_HANDLE messageBody)
-{
-    int result;
-    /*here is step 3. depending on the outcome of step 2 it needs to inform IoTHub about the file upload status*/
-    /*if step 1 failed, there's nothing that step 3 needs to report.*/
-    /*this POST "tries" to happen*/
-
-    STRING_HANDLE relativePathNotification = STRING_construct_sprintf("/devices/%s/files/notifications/%s", upload_data->deviceId, API_VERSION);
-    if (relativePathNotification == NULL)
-    {
-        result = MU_FAILURE;
-        LogError("Failure constructing string");
-    }
-    else
-    {
-        switch (upload_data->cred_type)
-        {
-            default:
-            {
-                LogError("internal error: unknown authorization Scheme");
-                result = MU_FAILURE;
-                break;
-            }
-            case IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN:
-            case IOTHUB_CREDENTIAL_TYPE_X509:
-            case IOTHUB_CREDENTIAL_TYPE_X509_ECC:
-            case IOTHUB_CREDENTIAL_TYPE_DEVICE_AUTH:
-            {
-                if (send_http_request(iotHubHttpApiExHandle, STRING_c_str(relativePathNotification), requestHttpHeaders, messageBody, NULL) != 0)
-                {
-                    LogError("unable to execute HTTPAPIEX_ExecuteRequest");
-                    result = MU_FAILURE;
-                }
-                else
-                {
-                    result = 0;
-                }
-                break;
-            }
-            case IOTHUB_CREDENTIAL_TYPE_DEVICE_KEY:
-            {
-                STRING_HANDLE uriResource = STRING_construct_sprintf("%s/devices/%s/files/notifications", upload_data->hostname, upload_data->deviceId);
-                if (uriResource == NULL)
-                {
-                    LogError("Failure constructing string");
-                    result = MU_FAILURE;
-                }
-                else
-                {
-                    if (send_http_sas_request(upload_data, STRING_c_str(uriResource), iotHubHttpApiExHandle, STRING_c_str(relativePathNotification), requestHttpHeaders, messageBody, NULL) != 0)
-                    {
-                        LogError("unable to execute HTTPAPIEX_ExecuteRequest");
-                        result = MU_FAILURE;
-                    }
-                    else
-                    {
-                        result = 0;
-                    }
-                    STRING_delete(uriResource);
-                }
-                break;
-            }
-        }
-        STRING_delete(relativePathNotification);
-    }
-    return result;
-}
-
-// this callback splits the source data into blocks to be fed to IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex)_Impl
-static IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT FileUpload_GetData_Callback(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, unsigned char const ** data, size_t* size, void* context)
-{
-    BLOB_UPLOAD_CONTEXT* uploadContext = (BLOB_UPLOAD_CONTEXT*) context;
-
-    if (data == NULL || size == NULL)
-    {
-        // This is the last call, nothing to do
-    }
-    else if (result != FILE_UPLOAD_OK)
-    {
-        // Last call failed
-        *data = NULL;
-        *size = 0;
-    }
-    else if (uploadContext->remainingSizeToUpload == 0)
-    {
-        // Everything has been uploaded
-        *data = NULL;
-        *size = 0;
-    }
-    else
-    {
-        // Upload next block
-        size_t thisBlockSize = (uploadContext->remainingSizeToUpload > BLOCK_SIZE) ? BLOCK_SIZE : uploadContext->remainingSizeToUpload;
-        *data = (unsigned char*)uploadContext->blobSource + (uploadContext->blobSourceSize - uploadContext->remainingSizeToUpload);
-        *size = thisBlockSize;
-        uploadContext->remainingSizeToUpload -= thisBlockSize;
-    }
-
-    return IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_OK;
-}
-
-static HTTPAPIEX_RESULT set_transfer_timeout(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA* upload_data, HTTPAPIEX_HANDLE iotHubHttpApiExHandle)
-{
-    HTTPAPIEX_RESULT result;
-    if (upload_data->blob_upload_timeout_secs != 0)
-    {
-        // Convert the timeout to milliseconds for curl
-        long http_timeout = (long)upload_data->blob_upload_timeout_secs * 1000;
-        result = HTTPAPIEX_SetOption(iotHubHttpApiExHandle, OPTION_HTTP_TIMEOUT, &http_timeout);
-    }
-    else
-    {
-        result = HTTPAPIEX_OK;
-    }
-    return result;
-}
-
-IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE handle, const char* destinationFileName, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK_EX getDataCallbackEx, void* context)
-{
-    IOTHUB_CLIENT_RESULT result;
-
-
-    if (handle == NULL || destinationFileName == NULL || getDataCallbackEx == NULL)
-    {
-        LogError("invalid argument detected handle=%p destinationFileName=%p getDataCallbackEx=%p", handle, destinationFileName, getDataCallbackEx);
-        result = IOTHUB_CLIENT_INVALID_ARG;
+        LogError("Failed creating Upload to Blob context");
     }
     else
     {
         IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA* upload_data = (IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA*)handle;
+        STRING_HANDLE sasUri;
 
-        HTTPAPIEX_HANDLE iotHubHttpApiExHandle = HTTPAPIEX_Create(upload_data->hostname);
-        if (iotHubHttpApiExHandle == NULL)
+        if ((sasUri = STRING_new()) == NULL)
         {
-            LogError("unable to HTTPAPIEX_Create");
-            result = IOTHUB_CLIENT_ERROR;
+            LogError("Failed to allocate STRING_HANDLE for SAS URI");
+            destroyUploadToBlobContextInstance(result);
+            result = NULL;
         }
-        else if (set_transfer_timeout(upload_data, iotHubHttpApiExHandle) != HTTPAPIEX_OK)
+        else
         {
-            LogError("unable to set blob transfer timeout");
+            /*do step 1*/
+            if (IoTHubClient_LL_UploadToBlob_GetBlobCredentialsFromIoTHub(
+                upload_data, destinationFileName, result->correlationId, sasUri) != 0)
+            {
+                LogError("error in IoTHubClient_LL_UploadToBlob_GetBlobCredentialsFromIoTHub");
+                destroyUploadToBlobContextInstance(result);
+                result = NULL;
+            }
+            else if (parseAzureBlobSasUri(sasUri, &result->blobStorageHostname, &result->blobStorageRelativePath) != 0)
+            {
+                LogError("failed parsing Blob Storage SAS URI");
+                destroyUploadToBlobContextInstance(result);
+                result = NULL;
+            }
+            else
+            {
+                result->u2bClientData = upload_data;
+
+                result->blobHttpApiHandle = Blob_CreateHttpConnection(
+                    result->blobStorageHostname,
+                    result->u2bClientData->certificates,
+                    &(result->u2bClientData->http_proxy_options),
+                    result->u2bClientData->networkInterface,
+                    result->u2bClientData->blob_upload_timeout_millisecs);
+
+                if (result->blobHttpApiHandle == NULL)
+                {
+                    LogError("Failed creating HTTP connection to Azure Blob");
+                    destroyUploadToBlobContextInstance(result);
+                    result = NULL;
+                }
+            }
+
+            STRING_delete(sasUri);
+        }
+    }
+
+    return result;
+}
+
+IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_DestroyContext(IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE uploadContext)
+{
+    IOTHUB_CLIENT_RESULT result;
+
+    if (uploadContext == NULL)
+    {
+        LogError("invalid argument detected uploadContext=%p", uploadContext);
+        result = IOTHUB_CLIENT_INVALID_ARG;
+    }
+    else
+    {
+        destroyUploadToBlobContextInstance(uploadContext);
+        result = IOTHUB_CLIENT_OK;
+    }
+
+    return result;
+}
+
+IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_UploadBlock(IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE uploadContext, uint32_t blockNumber, const uint8_t* dataPtr, size_t dataSize)
+{
+    IOTHUB_CLIENT_RESULT result;
+
+    if (uploadContext == NULL || dataPtr == NULL || dataSize == 0)
+    {
+        LogError("invalid argument detected uploadContext=%p, dataPtr=%p, dataSize=%zu", uploadContext, dataPtr, dataSize);
+        result = IOTHUB_CLIENT_INVALID_ARG;
+    }
+    else
+    {
+        BUFFER_HANDLE blockData;
+
+        if ((blockData = BUFFER_create(dataPtr, dataSize)) == NULL)
+        {
+            LogError("Failed allocating buffer for Blob block data");
             result = IOTHUB_CLIENT_ERROR;
         }
         else
         {
-            if (upload_data->curl_verbosity_level != UPLOADTOBLOB_CURL_VERBOSITY_UNSET)
-            {
-                size_t curl_verbose = (upload_data->curl_verbosity_level == UPLOADTOBLOB_CURL_VERBOSITY_ON);
-                (void)HTTPAPIEX_SetOption(iotHubHttpApiExHandle, OPTION_CURL_VERBOSE, &curl_verbose);
-            }
+            unsigned int httpResponseStatus;
 
-            if ((upload_data->networkInterface) != NULL && (HTTPAPIEX_SetOption(iotHubHttpApiExHandle, OPTION_CURL_INTERFACE, upload_data->networkInterface) != HTTPAPIEX_OK))
+            if (Blob_PutBlock(
+                uploadContext->blobHttpApiHandle,
+                uploadContext->blobStorageRelativePath,
+                blockNumber, blockData,
+                uploadContext->blockIdList,
+                &httpResponseStatus, NULL) != BLOB_OK)
             {
-                LogError("unable to set networkInteface!");
+                LogError("Failed uploading Blob block data");
                 result = IOTHUB_CLIENT_ERROR;
             }
             else
             {
-                /*transmit the x509certificate and x509privatekey*/
-                if ((upload_data->cred_type == IOTHUB_CREDENTIAL_TYPE_X509 || upload_data->cred_type == IOTHUB_CREDENTIAL_TYPE_X509_ECC) &&
-                     (((upload_data->tls_renegotiation == true) && (HTTPAPIEX_SetOption(iotHubHttpApiExHandle, OPTION_SET_TLS_RENEGOTIATION, &upload_data->tls_renegotiation) != HTTPAPIEX_OK)) ||
-                     (HTTPAPIEX_SetOption(iotHubHttpApiExHandle, OPTION_X509_CERT, upload_data->credentials.x509_credentials.x509certificate) != HTTPAPIEX_OK) ||
-                     (HTTPAPIEX_SetOption(iotHubHttpApiExHandle, OPTION_X509_PRIVATE_KEY, upload_data->credentials.x509_credentials.x509privatekey) != HTTPAPIEX_OK) ||
-                     ((upload_data->credentials.x509_credentials.x509privatekeyType != NULL) && (HTTPAPIEX_SetOption(iotHubHttpApiExHandle, OPTION_OPENSSL_PRIVATE_KEY_TYPE, upload_data->credentials.x509_credentials.x509privatekeyType) != HTTPAPIEX_OK)) ||
-                     ((upload_data->credentials.x509_credentials.engine != NULL) && (HTTPAPIEX_SetOption(iotHubHttpApiExHandle, OPTION_OPENSSL_ENGINE, upload_data->credentials.x509_credentials.engine) != HTTPAPIEX_OK))))
+                result = IOTHUB_CLIENT_OK;
+            }
+
+            BUFFER_delete(blockData);
+        }
+    }
+
+    return result;
+}
+
+IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_Complete(IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE uploadContext, bool isSuccess, int responseCode, const char* responseMessage)
+{
+    IOTHUB_CLIENT_RESULT result;
+
+    if (uploadContext == NULL)
+    {
+        LogError("invalid argument detected uploadContext=%p", uploadContext);
+        result = IOTHUB_CLIENT_INVALID_ARG;
+    }
+    else
+    {
+        unsigned int putBlockListHttpStatus;
+
+        // Do not PUT BLOCK LIST if result is not success (isSuccess == false)
+        // Otherwise we could corrupt a blob with a partial update.
+        if (isSuccess && Blob_PutBlockList(
+                uploadContext->blobHttpApiHandle,
+                uploadContext->blobStorageRelativePath,
+                uploadContext->blockIdList, &putBlockListHttpStatus, NULL) != BLOB_OK)
+        {
+            LogError("Failed sending block ID list to Blob Storage (%u)", putBlockListHttpStatus);
+            result = IOTHUB_CLIENT_ERROR;
+        }
+        else
+        {
+            IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA* upload_data = (IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA*)uploadContext->u2bClientData;
+
+            STRING_HANDLE response = STRING_construct_sprintf(RESPONSE_BODY_FORMAT,
+                                                        STRING_c_str(uploadContext->correlationId),
+                                                        isSuccess ? RESPONSE_BODY_SUCCESS_BOOLEAN_STRING : RESPONSE_BODY_ERROR_BOOLEAN_STRING,
+                                                        responseCode,
+                                                        responseMessage);
+
+            if(response == NULL)
+            {
+                LogError("STRING_construct_sprintf failed");
+                result = IOTHUB_CLIENT_ERROR;
+            }
+            else
+            {
+                size_t response_length = STRING_length(response);
+                BUFFER_HANDLE responseToIoTHub = BUFFER_new();
+
+                if (responseToIoTHub == NULL)
                 {
-                    LogError("unable to HTTPAPIEX_SetOption for x509 certificate");
+                    LogError("BUFFER_new failed");
                     result = IOTHUB_CLIENT_ERROR;
                 }
                 else
                 {
-                    if ((upload_data->certificates != NULL) && (HTTPAPIEX_SetOption(iotHubHttpApiExHandle, OPTION_TRUSTED_CERT, upload_data->certificates) != HTTPAPIEX_OK))
+                    if (BUFFER_build(responseToIoTHub, (const unsigned char*)STRING_c_str(response), response_length) == 0)
                     {
-                        LogError("unable to set TrustedCerts!");
-                        result = IOTHUB_CLIENT_ERROR;
-                    }
-                    else
-                    {
-
-                        if (upload_data->http_proxy_options.host_address != NULL)
+                        if (IoTHubClient_LL_UploadToBlob_NotifyIoTHubOfUploadCompletion(upload_data, responseToIoTHub) != 0)
                         {
-                            HTTP_PROXY_OPTIONS proxy_options;
-                            proxy_options = upload_data->http_proxy_options;
-
-                            if (HTTPAPIEX_SetOption(iotHubHttpApiExHandle, OPTION_HTTP_PROXY, &proxy_options) != HTTPAPIEX_OK)
-                            {
-                                LogError("unable to set http proxy!");
-                                result = IOTHUB_CLIENT_ERROR;
-                            }
-                            else
-                            {
-                                result = IOTHUB_CLIENT_OK;
-                            }
+                            LogError("IoTHubClient_LL_UploadToBlob_NotifyIoTHubOfUploadCompletion failed");
+                            result = IOTHUB_CLIENT_ERROR;
                         }
                         else
                         {
                             result = IOTHUB_CLIENT_OK;
                         }
-
-                        if (result != IOTHUB_CLIENT_ERROR)
-                        {
-                            STRING_HANDLE sasUri;
-                            STRING_HANDLE correlationId;
-                            if ((correlationId = STRING_new()) == NULL)
-                            {
-                                LogError("unable to STRING_new");
-                                result = IOTHUB_CLIENT_ERROR;
-                            }
-                            else if ((sasUri = STRING_new()) == NULL)
-                            {
-                                LogError("unable to create sas uri");
-                                result = IOTHUB_CLIENT_ERROR;
-                                STRING_delete(correlationId);
-                            }
-                            else
-                            {
-                                HTTP_HEADERS_HANDLE requestHttpHeaders = HTTPHeaders_Alloc(); /*these are build by step 1 and used by step 3 too*/
-                                if (requestHttpHeaders == NULL)
-                                {
-                                    LogError("unable to HTTPHeaders_Alloc");
-                                    result = IOTHUB_CLIENT_ERROR;
-                                }
-                                else
-                                {
-                                    /*do step 1*/
-                                    if (IoTHubClient_LL_UploadToBlob_step1and2(upload_data, iotHubHttpApiExHandle, requestHttpHeaders, destinationFileName, correlationId, sasUri) != 0)
-                                    {
-                                        LogError("error in IoTHubClient_LL_UploadToBlob_step1");
-                                        result = IOTHUB_CLIENT_ERROR;
-                                    }
-                                    else
-                                    {
-                                        /*do step 2.*/
-
-                                        unsigned int httpResponse;
-                                        BUFFER_HANDLE responseToIoTHub = BUFFER_new();
-                                        if (responseToIoTHub == NULL)
-                                        {
-                                            result = IOTHUB_CLIENT_ERROR;
-                                            LogError("unable to BUFFER_new");
-                                        }
-                                        else
-                                        {
-                                            const size_t timeoutInMilliseconds = (upload_data->blob_upload_timeout_secs * 1000);
-                                            BLOB_RESULT uploadMultipleBlocksResult = Blob_UploadMultipleBlocksFromSasUri(STRING_c_str(sasUri), getDataCallbackEx, context, &httpResponse, responseToIoTHub, upload_data->certificates, &(upload_data->http_proxy_options), upload_data->networkInterface, timeoutInMilliseconds);
-                                            if (uploadMultipleBlocksResult == BLOB_ABORTED)
-                                            {
-                                                LogInfo("Blob_UploadFromSasUri aborted file upload");
-
-                                                STRING_HANDLE aborted_response = STRING_construct_sprintf(RESPONSE_BODY_FORMAT,
-                                                                                            STRING_c_str(correlationId),
-                                                                                            RESPONSE_BODY_ERROR_BOOLEAN_STRING,
-                                                                                            RESPONSE_BODY_ERROR_RETURN_CODE,
-                                                                                            RESPONSE_BODY_ABORTED_MESSAGE);
-                                                if(aborted_response == NULL)
-                                                {
-                                                    LogError("STRING_construct_sprintf failed");
-                                                    result = IOTHUB_CLIENT_ERROR;
-                                                }
-                                                else
-                                                {
-                                                    size_t response_length = STRING_length(aborted_response);
-                                                    if (BUFFER_build(responseToIoTHub, (const unsigned char*)STRING_c_str(aborted_response), response_length) == 0)
-                                                    {
-                                                        if (IoTHubClient_LL_UploadToBlob_step3(upload_data, iotHubHttpApiExHandle, requestHttpHeaders, responseToIoTHub) != 0)
-                                                        {
-                                                            LogError("IoTHubClient_LL_UploadToBlob_step3 failed");
-                                                            result = IOTHUB_CLIENT_ERROR;
-                                                        }
-                                                        else
-                                                        {
-                                                            result = IOTHUB_CLIENT_OK;
-                                                        }
-                                                    }
-                                                    else
-                                                    {
-                                                        LogError("Unable to BUFFER_build, can't perform IoTHubClient_LL_UploadToBlob_step3");
-                                                        result = IOTHUB_CLIENT_ERROR;
-                                                    }
-                                                    STRING_delete(aborted_response);
-                                                }
-                                            }
-                                            else if (uploadMultipleBlocksResult != BLOB_OK)
-                                            {
-                                                LogError("unable to Blob_UploadFromSasUri");
-
-                                                /*do step 3*/ /*try*/
-                                                STRING_HANDLE failed_response = STRING_construct_sprintf(RESPONSE_BODY_FORMAT, 
-                                                                                            STRING_c_str(correlationId), 
-                                                                                            RESPONSE_BODY_ERROR_BOOLEAN_STRING,
-                                                                                            RESPONSE_BODY_ERROR_RETURN_CODE,
-                                                                                            RESPONSE_BODY_FAILED_MESSAGE);
-                                                if(failed_response == NULL)
-                                                {
-                                                    LogError("STRING_construct_sprintf failed");
-                                                    result = IOTHUB_CLIENT_ERROR;
-                                                }
-                                                else
-                                                {
-                                                    size_t response_length = STRING_length(failed_response);
-                                                    if (BUFFER_build(responseToIoTHub, (const unsigned char*)STRING_c_str(failed_response), response_length) == 0)
-                                                    {
-                                                        if (IoTHubClient_LL_UploadToBlob_step3(upload_data, iotHubHttpApiExHandle, requestHttpHeaders, responseToIoTHub) != 0)
-                                                        {
-                                                            LogError("IoTHubClient_LL_UploadToBlob_step3 failed");
-                                                        }
-                                                    }
-                                                    STRING_delete(failed_response);
-                                                    result = IOTHUB_CLIENT_ERROR;
-                                                }
-                                            }
-                                            else
-                                            {
-                                                /*must make a json*/
-                                                unsigned char * response = BUFFER_u_char(responseToIoTHub);
-                                                STRING_HANDLE req_string;
-                                                req_string = STRING_construct_sprintf(RESPONSE_BODY_FORMAT,
-                                                                                            STRING_c_str(correlationId),
-                                                                                            ((httpResponse < 300) ? "true" : "false"),
-                                                                                            httpResponse, 
-                                                                                            (response == NULL ? (const unsigned char*)"" : response));
-                                                if (req_string == NULL)
-                                                {
-                                                    LogError("Failure constructing string");
-                                                    result = IOTHUB_CLIENT_ERROR;
-                                                }
-                                                else
-                                                {
-                                                    /*do again snprintf*/
-                                                    BUFFER_HANDLE toBeTransmitted = NULL;
-                                                    size_t req_string_len = STRING_length(req_string);
-                                                    const char* required_string = STRING_c_str(req_string);
-                                                    if ((toBeTransmitted = BUFFER_create((const unsigned char*)required_string, req_string_len)) == NULL)
-                                                    {
-                                                        LogError("unable to BUFFER_create");
-                                                        result = IOTHUB_CLIENT_ERROR;
-                                                    }
-                                                    else
-                                                    {
-                                                        if (IoTHubClient_LL_UploadToBlob_step3(upload_data, iotHubHttpApiExHandle, requestHttpHeaders, toBeTransmitted) != 0)
-                                                        {
-                                                            LogError("IoTHubClient_LL_UploadToBlob_step3 failed");
-                                                            result = IOTHUB_CLIENT_ERROR;
-                                                        }
-                                                        else
-                                                        {
-                                                            result = (httpResponse < 300) ? IOTHUB_CLIENT_OK : IOTHUB_CLIENT_ERROR;
-                                                        }
-                                                        BUFFER_delete(toBeTransmitted);
-                                                    }
-                                                    STRING_delete(req_string);
-                                                }
-                                            }
-                                            BUFFER_delete(responseToIoTHub);
-                                        }
-                                    }
-                                    HTTPHeaders_Free(requestHttpHeaders);
-                                }
-                                STRING_delete(sasUri);
-                                STRING_delete(correlationId);
-                            }
-                        }
                     }
-                }
-            }
-            HTTPAPIEX_Destroy(iotHubHttpApiExHandle);
-        }
+                    else
+                    {
+                        LogError("Unable to BUFFER_build, can't perform IoTHubClient_LL_UploadToBlob_NotifyIoTHubOfUploadCompletion");
+                        result = IOTHUB_CLIENT_ERROR;
+                    }
 
-        (void)getDataCallbackEx(result == IOTHUB_CLIENT_OK ? FILE_UPLOAD_OK : FILE_UPLOAD_ERROR, NULL, NULL, context);
+                    BUFFER_delete(responseToIoTHub);
+                }
+
+                STRING_delete(response);
+            }
+        }
     }
+
     return result;
 }
 
-IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_Impl(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE handle, const char* destinationFileName, const unsigned char* source, size_t size)
+IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_UploadMultipleBlocks(IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE uploadContextHandle, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK_EX getDataCallbackEx, void* context)
 {
     IOTHUB_CLIENT_RESULT result;
 
-    if (handle == NULL || destinationFileName == NULL)
+    if (uploadContextHandle == NULL || getDataCallbackEx == NULL)
     {
-        LogError("Invalid parameter handle:%p destinationFileName:%p", handle, destinationFileName);
-        result = IOTHUB_CLIENT_INVALID_ARG;
-    }
-    else if (source == NULL && size > 0)
-    {
-        LogError("Invalid source and size combination: source=%p size=%lu", source, (unsigned long)size);
+        LogError("invalid argument detected uploadContextHandle=%p getDataCallbackEx=%p", uploadContextHandle, getDataCallbackEx);
         result = IOTHUB_CLIENT_INVALID_ARG;
     }
     else
     {
-        BLOB_UPLOAD_CONTEXT context;
-        context.blobSource = source;
-        context.blobSourceSize = size;
-        context.remainingSizeToUpload = size;
+        unsigned int blockID = 0;
+        unsigned int uploadHttpStatus;
+        const char* responseToIoTHub = RESPONSE_BODY_ABORTED_MESSAGE;
+        unsigned char const * blockDataPtr = NULL;
+        size_t blockDataSize = 0;
+        IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT getDataReturnValue;
 
-        result = IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl(handle, destinationFileName, FileUpload_GetData_Callback, &context);
+        do
+        {
+            getDataReturnValue = getDataCallbackEx(FILE_UPLOAD_OK, &blockDataPtr, &blockDataSize, context);
+
+            if (getDataReturnValue == IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_ABORT)
+            {
+                LogInfo("Upload to blob has been aborted by the user");
+                uploadHttpStatus = HTTP_STATUS_CODE_BAD_REQUEST;
+                responseToIoTHub = RESPONSE_BODY_ABORTED_MESSAGE;
+                break;
+            }
+            else if (blockDataPtr == NULL || blockDataSize == 0)
+            {
+                // This is how the user indicates that there is no more data to be uploaded,
+                // and the function can end with success result.
+                uploadHttpStatus = HTTP_STATUS_CODE_OK;
+                responseToIoTHub = EMPTY_STRING;
+                break;
+            }
+            else
+            {
+                if (blockDataSize > BLOCK_SIZE)
+                {
+                    LogError("tried to upload block of size %lu, max allowed size is %d", (unsigned long)blockDataSize, BLOCK_SIZE);
+                    uploadHttpStatus = HTTP_STATUS_CODE_BAD_REQUEST;
+                    responseToIoTHub = RESPONSE_BODY_BLOCK_SIZE_EXCEEDED_MESSAGE;
+                    break;
+                }
+                else if (blockID >= MAX_BLOCK_COUNT)
+                {
+                    LogError("unable to upload more than %lu blocks in one blob", (unsigned long)MAX_BLOCK_COUNT);
+                    uploadHttpStatus = HTTP_STATUS_CODE_BAD_REQUEST;
+                    responseToIoTHub = RESPONSE_BODY_BLOCK_COUNT_EXCEEDED_MESSAGE;
+                    break;
+                }
+                else if (IoTHubClient_LL_UploadToBlob_UploadBlock(uploadContextHandle, blockID, blockDataPtr, blockDataSize) != IOTHUB_CLIENT_OK)
+                {
+                    LogError("failed uploading block to blob");
+                    uploadHttpStatus = HTTP_STATUS_CODE_BAD_REQUEST;
+                    responseToIoTHub = RESPONSE_BODY_UPLOAD_FAILED_MESSAGE;
+                    break;
+                }
+
+                blockID++;
+            }
+        }
+        while(true);
+
+        if (IoTHubClient_LL_UploadToBlob_Complete(
+                uploadContextHandle, IS_HTTP_STATUS_CODE_SUCCESS(uploadHttpStatus), uploadHttpStatus, responseToIoTHub) != IOTHUB_CLIENT_OK)
+        {
+            LogError("Failed notifying IoT Hub of upload completion");
+            (void)getDataCallbackEx(FILE_UPLOAD_ERROR, NULL, NULL, context);
+            result = IOTHUB_CLIENT_ERROR;
+        }
+        else
+        {
+            (void)getDataCallbackEx(FILE_UPLOAD_OK, NULL, NULL, context);
+            result = IOTHUB_CLIENT_OK;
+        }
     }
+
     return result;
 }
 
@@ -1161,7 +1423,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_SetOption(IOTHUB_CLIENT_LL_UPL
         }
         else if (strcmp(optionName, OPTION_BLOB_UPLOAD_TIMEOUT_SECS) == 0)
         {
-            upload_data->blob_upload_timeout_secs = *(size_t*)value;
+            upload_data->blob_upload_timeout_millisecs = 1000 * (*(size_t*)value);
             result = IOTHUB_CLIENT_OK;
         }
         else if (strcmp(optionName, OPTION_NETWORK_INTERFACE_UPLOAD_TO_BLOB) == 0)
@@ -1204,5 +1466,3 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_SetOption(IOTHUB_CLIENT_LL_UPL
 }
 
 #endif /*DONT_USE_UPLOADTOBLOB*/
-
-

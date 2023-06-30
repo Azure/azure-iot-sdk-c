@@ -103,6 +103,11 @@ int main(void)
     }
     else
     {
+#ifndef WIN32
+        size_t log = 1;
+        (void)IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_CURL_VERBOSE, &log);
+#endif // !WIN32
+
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
         // Setting the Trusted Certificate. This is only necessary on systems without
         // built in certificate stores.

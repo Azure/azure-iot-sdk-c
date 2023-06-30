@@ -2486,6 +2486,42 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_UploadMultipleBlocksToBlobAsync(IOTHUB_CLI
     return result;
 }
 
+IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE IoTHubClientCore_CreateUploadContext(IOTHUB_CLIENT_CORE_HANDLE iotHubClientHandle, const char* destinationFileName)
+{
+    IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE result;
+
+    if (
+        (iotHubClientHandle == NULL) ||
+        (destinationFileName == NULL))
+    {
+        LogError("invalid parameters iotHubClientHandle = %p , destinationFileName = %p",
+            iotHubClientHandle,
+            destinationFileName
+        );
+        result = NULL;
+    }
+    else
+    {
+        result = IoTHubClientCore_LL_CreateUploadContext(iotHubClientHandle->IoTHubClientLLHandle, destinationFileName);
+    }
+
+    return result;
+}
+
+IOTHUB_CLIENT_RESULT IoTHubClientCore_UploadBlockToBlob(IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE uploadContextHandle, uint32_t blockNumber, const uint8_t* dataPtr, size_t dataSize)
+{
+    return IoTHubClientCore_LL_UploadBlockToBlob(uploadContextHandle, blockNumber, dataPtr, dataSize);
+}
+
+IOTHUB_CLIENT_RESULT IoTHubClientCore_CompleteUploadToBlob(IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE uploadContextHandle, bool isSuccess, int responseCode, const char* responseMessage)
+{
+    return IoTHubClientCore_LL_CompleteUploadToBlob(uploadContextHandle, isSuccess, responseCode, responseMessage);
+}
+
+void IoTHubClientCore_DestroyUploadContext(IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE uploadContextHandle)
+{
+    IoTHubClientCore_LL_DestroyUploadContext(uploadContextHandle);
+}
 #endif /*DONT_USE_UPLOADTOBLOB*/
 
 IOTHUB_CLIENT_RESULT IoTHubClientCore_SendEventToOutputAsync(IOTHUB_CLIENT_CORE_HANDLE iotHubClientHandle, IOTHUB_MESSAGE_HANDLE eventMessageHandle, const char* outputName, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK eventConfirmationCallback, void* userContextCallback)

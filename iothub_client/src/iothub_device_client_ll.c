@@ -137,6 +137,25 @@ IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_UploadMultipleBlocksToBlob(IOTHUB_DEV
     return IoTHubClientCore_LL_UploadMultipleBlocksToBlobEx((IOTHUB_CLIENT_CORE_LL_HANDLE)iotHubClientHandle, destinationFileName, getDataCallbackEx, context);
 }
 
+IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE IoTHubDeviceClient_LL_CreateUploadContext(IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, const char* destinationFileName)
+{
+    return IoTHubClientCore_LL_CreateUploadContext((IOTHUB_CLIENT_CORE_LL_HANDLE)iotHubClientHandle, destinationFileName);
+}
+
+IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_UploadBlockToBlob(IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE uploadContextHandle, uint32_t blockNumber, const uint8_t* dataPtr, size_t dataSize)
+{
+    return IoTHubClientCore_LL_UploadBlockToBlob(uploadContextHandle, blockNumber, dataPtr, dataSize);
+}
+
+IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_CompleteUploadToBlob(IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE uploadContextHandle, bool isSuccess, int responseCode, const char* responseMessage)
+{
+    return IoTHubClientCore_LL_CompleteUploadToBlob(uploadContextHandle, isSuccess, responseCode, responseMessage);
+}
+
+void IoTHubDeviceClient_LL_DestroyUploadContext(IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE uploadContextHandle)
+{
+    IoTHubClientCore_LL_DestroyUploadContext(uploadContextHandle);
+}
 #endif
 
 IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_SendTelemetryAsync(IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_MESSAGE_HANDLE telemetryMessageHandle, IOTHUB_CLIENT_TELEMETRY_CALLBACK telemetryConfirmationCallback, void* userContextCallback)

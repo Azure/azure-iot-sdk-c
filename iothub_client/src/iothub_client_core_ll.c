@@ -2711,8 +2711,38 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_UploadToBlob(IOTHUB_CLIENT_CORE_LL_HAND
     }
     else
     {
-        result = IoTHubClient_LL_UploadToBlob_Impl(iotHubClientHandle->uploadToBlobHandle, destinationFileName, source, size);
+        IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE uploadContext = IoTHubClient_LL_UploadToBlob_CreateContext(iotHubClientHandle->uploadToBlobHandle, destinationFileName);
+
+        if (uploadContext == NULL)
+        {
+            LogError("Failed creating upload to blob context");
+            result = IOTHUB_CLIENT_ERROR;
+        }
+        else
+        {
+            bool uploadSucceeded = true;
+
+            if (IoTHubClient_LL_UploadToBlob_UploadBlock(uploadContext, 0, source, size) != IOTHUB_CLIENT_OK)
+            {
+                LogError("Failed uploading block to Azure Blob Storage");
+                uploadSucceeded = false;
+            }
+
+            if (IoTHubClient_LL_UploadToBlob_Complete(
+                uploadContext, uploadSucceeded, (uploadSucceeded ? 200 : 400), NULL) != IOTHUB_CLIENT_OK)
+            {
+                LogError("Failed completing upload to blob.");
+                result = IOTHUB_CLIENT_ERROR;
+            }
+            else
+            {
+                result = (uploadSucceeded ? IOTHUB_CLIENT_OK : IOTHUB_CLIENT_ERROR); 
+            }
+
+            IoTHubClient_LL_UploadToBlob_DestroyContext(uploadContext);
+        }
     }
+
     return result;
 }
 
@@ -2744,12 +2774,25 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_UploadMultipleBlocksToBlob(IOTHUB_CLIEN
     }
     else
     {
-        UPLOAD_MULTIPLE_BLOCKS_WRAPPER_CONTEXT uploadMultipleBlocksWrapperContext;
-        uploadMultipleBlocksWrapperContext.getDataCallback = getDataCallback;
-        uploadMultipleBlocksWrapperContext.context = context;
+        IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE uploadContextHandle = IoTHubClient_LL_UploadToBlob_CreateContext(iotHubClientHandle->uploadToBlobHandle, destinationFileName);
 
-        result = IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl(iotHubClientHandle->uploadToBlobHandle, destinationFileName, uploadMultipleBlocksCallbackWrapper, &uploadMultipleBlocksWrapperContext);
+        if (uploadContextHandle == NULL)
+        {
+            LogError("Failed creating upload to blob context");
+            result = IOTHUB_CLIENT_ERROR;
+        }
+        else
+        {
+            UPLOAD_MULTIPLE_BLOCKS_WRAPPER_CONTEXT uploadMultipleBlocksWrapperContext;
+            uploadMultipleBlocksWrapperContext.getDataCallback = getDataCallback;
+            uploadMultipleBlocksWrapperContext.context = context;
+
+            result = IoTHubClient_LL_UploadToBlob_UploadMultipleBlocks(uploadContextHandle, uploadMultipleBlocksCallbackWrapper, &uploadMultipleBlocksWrapperContext);
+
+            IoTHubClient_LL_UploadToBlob_DestroyContext(uploadContextHandle);
+        }
     }
+    
     return result;
 }
 
@@ -2767,9 +2810,89 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_UploadMultipleBlocksToBlobEx(IOTHUB_CLI
     }
     else
     {
-        result = IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl(iotHubClientHandle->uploadToBlobHandle, destinationFileName, getDataCallbackEx, context);
+        IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE uploadContextHandle = IoTHubClient_LL_UploadToBlob_CreateContext(iotHubClientHandle->uploadToBlobHandle, destinationFileName);
+
+        if (uploadContextHandle == NULL)
+        {
+            LogError("Failed creating upload to blob context");
+            result = IOTHUB_CLIENT_ERROR;
+        }
+        else
+        {
+            result = IoTHubClient_LL_UploadToBlob_UploadMultipleBlocks(uploadContextHandle, getDataCallbackEx, context);
+
+            IoTHubClient_LL_UploadToBlob_DestroyContext(uploadContextHandle);
+        }
     }
+
     return result;
+}
+
+IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE IoTHubClientCore_LL_CreateUploadContext(IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle, const char* destinationFileName)
+{
+    IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE result;
+    if (
+        (iotHubClientHandle == NULL) ||
+        (destinationFileName == NULL)
+        )
+    {
+        LogError("invalid parameters IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle=%p, destinationFileName=%p", iotHubClientHandle, destinationFileName);
+        result = NULL;
+    }
+    else
+    {
+        result = IoTHubClient_LL_UploadToBlob_CreateContext(iotHubClientHandle->uploadToBlobHandle, destinationFileName);
+    }
+
+    return result;
+}
+
+IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_UploadBlockToBlob(IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE uploadContextHandle, uint32_t blockNumber, const uint8_t* dataPtr, size_t dataSize)
+{
+    IOTHUB_CLIENT_RESULT result;
+
+    if (
+        (uploadContextHandle == NULL) ||
+        (dataPtr == NULL) ||
+        (dataSize == 0)
+        )
+    {
+        LogError("invalid parameters uploadContextHandle=%p, dataPtr=%p, dataSize=%zu", uploadContextHandle, dataPtr, dataSize);
+        result = IOTHUB_CLIENT_INVALID_ARG;
+    }
+    else
+    {
+        result = IoTHubClient_LL_UploadToBlob_UploadBlock(uploadContextHandle, blockNumber, dataPtr, dataSize);
+    }
+
+    return result;
+}
+
+IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_CompleteUploadToBlob(IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE uploadContextHandle, bool isSuccess, int responseCode, const char* responseMessage)
+{
+    IOTHUB_CLIENT_RESULT result;
+
+    if (
+        (uploadContextHandle == NULL)
+        )
+    {
+        LogError("invalid parameters uploadContextHandle=%p", uploadContextHandle);
+        result = IOTHUB_CLIENT_INVALID_ARG;
+    }
+    else
+    {
+        result = IoTHubClient_LL_UploadToBlob_Complete(uploadContextHandle, isSuccess, responseCode, responseMessage);
+    }
+
+    return result;
+}
+
+void IoTHubClientCore_LL_DestroyUploadContext(IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE uploadContextHandle)
+{
+    if (uploadContextHandle != NULL)
+    {
+        IoTHubClient_LL_UploadToBlob_DestroyContext(uploadContextHandle);
+    }
 }
 #endif // DONT_USE_UPLOADTOBLOB
 

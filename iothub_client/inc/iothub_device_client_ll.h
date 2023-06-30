@@ -378,6 +378,88 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
      */
      MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_LL_UploadMultipleBlocksToBlob, IOTHUB_DEVICE_CLIENT_LL_HANDLE, iotHubClientHandle, const char*, destinationFileName, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK_EX, getDataCallbackEx, void*, context);
 
+     /**
+     * @brief    This API creates a context for a new blob upload to Azure Storage.
+     * @remark   It is part of a set of functions for more granular control over Azure IoT-based blob uploads.
+     *           This function is expected to be used along with:
+     *           `IoTHubDeviceClient_LL_UploadBlockToBlob`
+     *           `IoTHubDeviceClient_LL_CompleteUploadToBlob`
+     *           `IoTHubDeviceClient_LL_DestroyUploadContext`
+     *           For the standard less-granular uploads to blob please use either
+     *           `IoTHubDeviceClient_LL_UploadToBlob` or `IoTHubDeviceClient_LL_UploadMultipleBlocksToBlob`.
+     *
+     * @param    iotHubClientHandle      The handle created by a call to the create function.
+     * @param    destinationFileName     name of the file.
+     *
+     * @warning  This is a synchronous/blocking function.
+     *
+     * @return   A `IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE` on success or NULL if the function fails.
+     */
+     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE, IoTHubDeviceClient_LL_CreateUploadContext, IOTHUB_DEVICE_CLIENT_LL_HANDLE, iotHubClientHandle, const char*, destinationFileName);
+
+     /**
+     * @brief    This API upload a single blob block to Azure Storage (performs a PUT BLOCK operation).
+     * @remark   It is part of a set of functions for more granular control over Azure IoT-based blob uploads.
+     *           This function is expected to be used along with:
+     *           `IoTHubDeviceClient_LL_CreateUploadContext`
+     *           `IoTHubDeviceClient_LL_CompleteUploadToBlob`
+     *           `IoTHubDeviceClient_LL_DestroyUploadContext`
+     *           For the standard less-granular uploads to blob please use either
+     *           `IoTHubDeviceClient_LL_UploadToBlob` or `IoTHubDeviceClient_LL_UploadMultipleBlocksToBlob`.
+     *
+     * @param    uploadContextHandle    The handle created with `IoTHubDeviceClient_LL_CreateUploadContext`.
+     * @param    blockNumber            Number of the block being uploaded.
+     * @param    dataPtr                Pointer to the block data to be uploaded to Azure Storage blob.
+     * @param    dataSize               Size of the block data pointed by `dataPtr`.
+     *
+     * @warning  This is a synchronous/blocking function.
+     *
+     * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
+     */
+     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_LL_UploadBlockToBlob, IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE, uploadContextHandle, uint32_t, blockNumber, const uint8_t*, dataPtr, size_t, dataSize);
+
+     /**
+     * @brief    This API performs an Azure Storage PUT BLOCK LIST operation and
+     *           notifies Azure IoT Hub of the upload completion.
+     * @remark   It is part of a set of functions for more granular control over Azure IoT-based blob uploads.
+     *           This function is expected to be used along with:
+     *           `IoTHubDeviceClient_LL_CreateUploadContext`
+     *           `IoTHubDeviceClient_LL_UploadBlockToBlob`
+     *           `IoTHubDeviceClient_LL_DestroyUploadContext`
+     *           For the standard less-granular uploads to blob please use either
+     *           `IoTHubDeviceClient_LL_UploadToBlob` or `IoTHubDeviceClient_LL_UploadMultipleBlocksToBlob`.
+     *           If this function fails (due to any HTTP error to either Azure Storage or Azure IoT Hub) it can
+     *           be run again for a discretionary number of times in an attempt to succeed after, for example,
+     *           an internet connectivity disruption is over.  
+     *
+     * @param    uploadContextHandle    The handle created with `IoTHubDeviceClient_LL_CreateUploadContext`.
+     * @param    isSuccess              A boolean value indicating if the call(s) to `IoTHubDeviceClient_LL_UploadBlockToBlob` succeeded.
+     * @param    responseCode           An user-defined code to signal the status of the upload (e.g., 200 for success, or -1 for abort).
+     * @param    responseMessage        An user-defined status message to go along with `responseCode` on the notification to Azure IoT Hub.
+     *
+     * @warning  This is a synchronous/blocking function.
+     *
+     * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
+     */
+     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_LL_CompleteUploadToBlob, IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE, uploadContextHandle, bool, isSuccess, int, responseCode, const char*, responseMessage);
+
+     /**
+     * @brief    This API destroy a blob upload context previously created with `IoTHubDeviceClient_LL_CreateUploadContext` .
+     * @remark   It is part of a set of functions for more granular control over Azure IoT-based blob uploads.
+     *           This function is expected to be used along with:
+     *           `IoTHubDeviceClient_LL_CreateUploadContext`
+     *           `IoTHubDeviceClient_LL_UploadBlockToBlob`
+     *           `IoTHubDeviceClient_LL_CompleteUploadToBlob`
+     *           For the standard less-granular uploads to blob please use either
+     *           `IoTHubDeviceClient_LL_UploadToBlob` or `IoTHubDeviceClient_LL_UploadMultipleBlocksToBlob`.
+     *
+     * @param    uploadContextHandle     The handle created with `IoTHubDeviceClient_LL_CreateUploadContext`.
+     *
+     * @warning  This is a synchronous/blocking function.
+     *
+     * @return   Nothing.
+     */
+     MOCKABLE_FUNCTION(, void, IoTHubDeviceClient_LL_DestroyUploadContext, IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE, uploadContextHandle);
 #endif /*DONT_USE_UPLOADTOBLOB*/
 
     /**
