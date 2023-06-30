@@ -186,6 +186,10 @@ static void ReceiveConfirmationCallback(IOTHUB_CLIENT_CONFIRMATION_RESULT result
             {
                 expectedData->dataWasRecv = true;
             }
+            else
+            {
+                LogInfo("ReceiveConfirmationCallback failed result=%s", MU_ENUM_TO_STRING(IOTHUB_CLIENT_CONFIRMATION_RESULT, result));
+            }
             (void)Unlock(expectedData->lock);
         }
     }
@@ -417,7 +421,7 @@ static void SendEvent(IOTHUB_PROVISIONED_DEVICE* deviceToUse)
     }
     else
     {
-        ASSERT_IS_TRUE(sendData->dataWasRecv, "Failure sending data to IotHub"); // was found is written by the callback...
+        ASSERT_IS_TRUE(sendData->dataWasRecv, "Failure sending event to IotHub, result=%s", MU_ENUM_TO_STRING(IOTHUB_CLIENT_CONFIRMATION_RESULT, sendData->result)); // was found is written by the callback...
         (void)Unlock(sendData->lock);
     }
 
