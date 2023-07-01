@@ -44,6 +44,7 @@ static IOTHUB_ACCOUNT_INFO_HANDLE g_iothubAcctInfo3 = NULL;
 
 #define IOTHUB_COUNTER_MAX           10
 #define MAX_CLOUD_TRAVEL_TIME        60.0
+#define DEVICE_CREATE_WAIT           30
 
 TEST_DEFINE_ENUM_TYPE(IOTHUB_TEST_CLIENT_RESULT, IOTHUB_TEST_CLIENT_RESULT_VALUES);
 TEST_DEFINE_ENUM_TYPE(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
@@ -176,6 +177,7 @@ static void ReceiveConfirmationCallback(IOTHUB_CLIENT_CONFIRMATION_RESULT result
     ASSERT_IS_NOT_NULL(userContextCallback, "userContextCallback is NULL");
     if (expectedData != NULL)
     {
+        LogInfo("ReceiveConfirmationCallback device=%s", expectedData->expectedString);
         if (Lock(expectedData->lock) != LOCK_OK)
         {
             ASSERT_FAIL("unable to lock");
@@ -631,20 +633,26 @@ TEST_FUNCTION(IoTHub_HTTP_SendEvent_Shared_e2e)
     {
         transportHandle = IoTHubTransport_Create(HTTP_Protocol, IoTHubAccount_GetIoTHubName(g_iothubAcctInfo3), IoTHubAccount_GetIoTHubSuffix(g_iothubAcctInfo3));
         ASSERT_IS_NOT_NULL(transportHandle, "Failure creating transport handle.");
+
+        // Create device clients
+        iotHubClientHandle1 = IoTHubDeviceClient_CreateWithTransport(transportHandle, &iotHubConfig1);
+        ASSERT_IS_NOT_NULL(iotHubClientHandle1, "Failure creating IothubClient handle device 1");
+
+        iotHubClientHandle2 = IoTHubDeviceClient_CreateWithTransport(transportHandle, &iotHubConfig2);
+        ASSERT_IS_NOT_NULL(iotHubClientHandle2, "Failure creating IothubClient handle device 2");
+
+        ThreadAPI_Sleep(DEVICE_CREATE_WAIT * 1000);
     }
 
     // Send the Event device 1
     {
         IOTHUB_CLIENT_RESULT result;
         // Create the IoT Hub Data
-        iotHubClientHandle1 = IoTHubDeviceClient_CreateWithTransport(transportHandle, &iotHubConfig1);
-        ASSERT_IS_NOT_NULL(iotHubClientHandle1, "Failure creating IothubClient handle device 1");
-
         msgHandle1 = IoTHubMessage_CreateFromByteArray((const unsigned char*)sendData1->expectedString, strlen(sendData1->expectedString));
         ASSERT_IS_NOT_NULL(msgHandle1, "Failure to create message handle");
 
         // act
-        LogInfo("Send the Event device 2");
+        LogInfo("Send the Event device 1");
         result = IoTHubDeviceClient_SendEventAsync(iotHubClientHandle1, msgHandle1, ReceiveConfirmationCallback, sendData1);
         ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Failure calling IoTHubDeviceClient_SendEventAsync");
     }
@@ -653,9 +661,6 @@ TEST_FUNCTION(IoTHub_HTTP_SendEvent_Shared_e2e)
     {
         IOTHUB_CLIENT_RESULT result;
         // Create the IoT Hub Data
-        iotHubClientHandle2 = IoTHubDeviceClient_CreateWithTransport(transportHandle, &iotHubConfig2);
-        ASSERT_IS_NOT_NULL(iotHubClientHandle2, "Failure creating IothubClient handle device 2");
-
         msgHandle2 = IoTHubMessage_CreateFromByteArray((const unsigned char*)sendData2->expectedString, strlen(sendData2->expectedString));
         ASSERT_IS_NOT_NULL(msgHandle2, "Failure to create message handle");
 
