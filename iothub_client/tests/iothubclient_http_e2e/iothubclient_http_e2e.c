@@ -20,6 +20,7 @@
 
 #include "azure_c_shared_utility/buffer_.h"
 #include "azure_c_shared_utility/threadapi.h"
+#include "azure_c_shared_utility/xlogging.h"
 
 static bool g_callbackRecv = false;
 
