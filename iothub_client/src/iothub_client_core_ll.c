@@ -2706,30 +2706,54 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_UploadToBlob(IOTHUB_CLIENT_CORE_LL_HAND
         ((source == NULL) && (size >0))
         )
     {
-        LogError("invalid parameters IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle=%p, const char* destinationFileName=%s, const unsigned char* source=%p, size_t size=%lu", iotHubClientHandle, destinationFileName, source, (unsigned long)size);
+        LogError("invalid parameters IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle=%p, const char* destinationFileName=%s, const unsigned char* source=%p, size_t size=%lu",
+            iotHubClientHandle, destinationFileName, source, (unsigned long)size);
         result = IOTHUB_CLIENT_INVALID_ARG;
     }
     else
     {
-        IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE uploadContext = IoTHubClient_LL_UploadToBlob_CreateContext(iotHubClientHandle->uploadToBlobHandle, destinationFileName);
+        char* uploadCorrelationId;
+        char* azureBlobSasUri;
 
-        if (uploadContext == NULL)
+        if (IoTHubClient_LL_UploadToBlob_InitializeUpload(
+                iotHubClientHandle->uploadToBlobHandle, destinationFileName, &uploadCorrelationId, &azureBlobSasUri) != IOTHUB_CLIENT_OK)
         {
-            LogError("Failed creating upload to blob context");
+            LogError("Failed initializing upload in IoT Hub");
             result = IOTHUB_CLIENT_ERROR;
         }
         else
         {
-            bool uploadSucceeded = true;
+            bool uploadSucceeded;
+            IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE uploadContext = IoTHubClient_LL_UploadToBlob_CreateContext(iotHubClientHandle->uploadToBlobHandle, azureBlobSasUri);
 
-            if (IoTHubClient_LL_UploadToBlob_UploadBlock(uploadContext, 0, source, size) != IOTHUB_CLIENT_OK)
+            if (uploadContext == NULL)
             {
-                LogError("Failed uploading block to Azure Blob Storage");
+                LogError("Failed creating upload to blob context");
                 uploadSucceeded = false;
             }
+            else
+            {
+                if (IoTHubClient_LL_UploadToBlob_PutBlock(uploadContext, 0, source, size) != IOTHUB_CLIENT_OK)
+                {
+                    LogError("Failed uploading block to Azure Blob Storage");
+                    uploadSucceeded = false;
+                }
+                else if (IoTHubClient_LL_UploadToBlob_PutBlockList(uploadContext) != IOTHUB_CLIENT_OK)
+                {
+                    LogError("Failed completing upload to blob.");
+                    uploadSucceeded = false;
+                }
+                else
+                {
+                    uploadSucceeded = true; 
+                }
 
-            if (IoTHubClient_LL_UploadToBlob_Complete(
-                uploadContext, uploadSucceeded, (uploadSucceeded ? 200 : 400), NULL) != IOTHUB_CLIENT_OK)
+                IoTHubClient_LL_UploadToBlob_DestroyContext(uploadContext);
+            }
+
+            // TODO (ewertons): fix the http error status below.
+            if (IoTHubClient_LL_UploadToBlob_NotifyCompletion(
+                    iotHubClientHandle->uploadToBlobHandle, uploadCorrelationId, uploadSucceeded, 400, NULL) != IOTHUB_CLIENT_OK)
             {
                 LogError("Failed completing upload to blob.");
                 result = IOTHUB_CLIENT_ERROR;
@@ -2739,7 +2763,8 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_UploadToBlob(IOTHUB_CLIENT_CORE_LL_HAND
                 result = (uploadSucceeded ? IOTHUB_CLIENT_OK : IOTHUB_CLIENT_ERROR); 
             }
 
-            IoTHubClient_LL_UploadToBlob_DestroyContext(uploadContext);
+            free(uploadCorrelationId);
+            free(azureBlobSasUri);
         }
     }
 
@@ -2774,22 +2799,59 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_UploadMultipleBlocksToBlob(IOTHUB_CLIEN
     }
     else
     {
-        IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE uploadContextHandle = IoTHubClient_LL_UploadToBlob_CreateContext(iotHubClientHandle->uploadToBlobHandle, destinationFileName);
+        char* uploadCorrelationId;
+        char* azureBlobSasUri;
 
-        if (uploadContextHandle == NULL)
+        if (IoTHubClient_LL_UploadToBlob_InitializeUpload(
+                iotHubClientHandle->uploadToBlobHandle, destinationFileName, &uploadCorrelationId, &azureBlobSasUri) != IOTHUB_CLIENT_OK)
         {
-            LogError("Failed creating upload to blob context");
+            LogError("Failed initializing upload in IoT Hub");
             result = IOTHUB_CLIENT_ERROR;
         }
         else
         {
-            UPLOAD_MULTIPLE_BLOCKS_WRAPPER_CONTEXT uploadMultipleBlocksWrapperContext;
-            uploadMultipleBlocksWrapperContext.getDataCallback = getDataCallback;
-            uploadMultipleBlocksWrapperContext.context = context;
+            bool uploadSucceeded;
+            IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE uploadContext = IoTHubClient_LL_UploadToBlob_CreateContext(iotHubClientHandle->uploadToBlobHandle, azureBlobSasUri);
 
-            result = IoTHubClient_LL_UploadToBlob_UploadMultipleBlocks(uploadContextHandle, uploadMultipleBlocksCallbackWrapper, &uploadMultipleBlocksWrapperContext);
+            if (uploadContext == NULL)
+            {
+                LogError("Failed creating upload to blob context");
+                uploadSucceeded = false;
+            }
+            else
+            {
+                UPLOAD_MULTIPLE_BLOCKS_WRAPPER_CONTEXT uploadMultipleBlocksWrapperContext;
+                uploadMultipleBlocksWrapperContext.getDataCallback = getDataCallback;
+                uploadMultipleBlocksWrapperContext.context = context;
 
-            IoTHubClient_LL_UploadToBlob_DestroyContext(uploadContextHandle);
+                if (IoTHubClient_LL_UploadToBlob_UploadMultipleBlocks(
+                        uploadContext, uploadMultipleBlocksCallbackWrapper, &uploadMultipleBlocksWrapperContext) != IOTHUB_CLIENT_OK)
+                {
+                    LogError("Failed to upload multiple blocks to Azure blob");
+                    uploadSucceeded = false;
+                }
+                else
+                {
+                    uploadSucceeded = false;
+                }
+
+                IoTHubClient_LL_UploadToBlob_DestroyContext(uploadContext);
+            }
+
+            // TODO (ewertons): fix the http error status below.
+            if (IoTHubClient_LL_UploadToBlob_NotifyCompletion(
+                    iotHubClientHandle->uploadToBlobHandle, uploadCorrelationId, uploadSucceeded, 400, NULL) != IOTHUB_CLIENT_OK)
+            {
+                LogError("Failed completing upload to blob.");
+                result = IOTHUB_CLIENT_ERROR;
+            }
+            else
+            {
+                result = (uploadSucceeded ? IOTHUB_CLIENT_OK : IOTHUB_CLIENT_ERROR); 
+            }
+
+            free(uploadCorrelationId);
+            free(azureBlobSasUri);
         }
     }
     
@@ -2810,44 +2872,108 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_UploadMultipleBlocksToBlobEx(IOTHUB_CLI
     }
     else
     {
-        IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE uploadContextHandle = IoTHubClient_LL_UploadToBlob_CreateContext(iotHubClientHandle->uploadToBlobHandle, destinationFileName);
+        char* uploadCorrelationId;
+        char* azureBlobSasUri;
 
-        if (uploadContextHandle == NULL)
+        if (IoTHubClient_LL_UploadToBlob_InitializeUpload(
+                iotHubClientHandle->uploadToBlobHandle, destinationFileName, &uploadCorrelationId, &azureBlobSasUri) != IOTHUB_CLIENT_OK)
         {
-            LogError("Failed creating upload to blob context");
+            LogError("Failed initializing upload in IoT Hub");
             result = IOTHUB_CLIENT_ERROR;
         }
         else
         {
-            result = IoTHubClient_LL_UploadToBlob_UploadMultipleBlocks(uploadContextHandle, getDataCallbackEx, context);
+            bool uploadSucceeded;
+            IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE uploadContext = IoTHubClient_LL_UploadToBlob_CreateContext(iotHubClientHandle->uploadToBlobHandle, azureBlobSasUri);
 
-            IoTHubClient_LL_UploadToBlob_DestroyContext(uploadContextHandle);
+            if (uploadContext == NULL)
+            {
+                LogError("Failed creating upload to blob context");
+                uploadSucceeded = false;
+            }
+            else
+            {
+                if (IoTHubClient_LL_UploadToBlob_UploadMultipleBlocks(uploadContext, getDataCallbackEx, context) != IOTHUB_CLIENT_OK)
+                {
+                    LogError("Failed to upload multiple blocks to Azure blob");
+                    uploadSucceeded = false;
+                }
+                else
+                {
+                    uploadSucceeded = false;
+                }
+
+                IoTHubClient_LL_UploadToBlob_DestroyContext(uploadContext);
+            }
+
+            // TODO (ewertons): fix the http error status below.
+            if (IoTHubClient_LL_UploadToBlob_NotifyCompletion(
+                    iotHubClientHandle->uploadToBlobHandle, uploadCorrelationId, uploadSucceeded, 400, NULL) != IOTHUB_CLIENT_OK)
+            {
+                LogError("Failed completing upload to blob.");
+                result = IOTHUB_CLIENT_ERROR;
+            }
+            else
+            {
+                result = (uploadSucceeded ? IOTHUB_CLIENT_OK : IOTHUB_CLIENT_ERROR); 
+            }
+
+            free(uploadCorrelationId);
+            free(azureBlobSasUri);
         }
     }
 
     return result;
 }
 
-IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE IoTHubClientCore_LL_CreateUploadContext(IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle, const char* destinationFileName)
+IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_InitializeUpload(IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle, const char* destinationFileName, char** uploadCorrelationId, char** azureBlobSasUri)
 {
-    IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE result;
+    IOTHUB_CLIENT_RESULT result;
+
     if (
-        (iotHubClientHandle == NULL) ||
-        (destinationFileName == NULL)
+        (iotHubClientHandle == NULL)
         )
     {
-        LogError("invalid parameters IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle=%p, destinationFileName=%p", iotHubClientHandle, destinationFileName);
-        result = NULL;
+        LogError("invalid parameters IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle=%p", iotHubClientHandle);
+        result = IOTHUB_CLIENT_INVALID_ARG;
     }
     else
     {
-        result = IoTHubClient_LL_UploadToBlob_CreateContext(iotHubClientHandle->uploadToBlobHandle, destinationFileName);
+        if (IoTHubClient_LL_UploadToBlob_InitializeUpload(
+                iotHubClientHandle->uploadToBlobHandle, destinationFileName, uploadCorrelationId, azureBlobSasUri) != IOTHUB_CLIENT_OK)
+        {
+            LogError("Failed initializing upload in IoT Hub");
+            result = IOTHUB_CLIENT_ERROR;
+        }
+        else
+        {
+            result = IOTHUB_CLIENT_OK;
+        }
     }
 
     return result;
 }
 
-IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_UploadBlockToBlob(IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE uploadContextHandle, uint32_t blockNumber, const uint8_t* dataPtr, size_t dataSize)
+IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE IoTHubClientCore_LL_CreateUploadContext(IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle, const char* azureBlobSasUri)
+{
+    IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE result;
+    if (
+        (iotHubClientHandle == NULL) ||
+        (azureBlobSasUri == NULL)
+        )
+    {
+        LogError("invalid parameters IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle=%p, azureBlobSasUri=%p", iotHubClientHandle, azureBlobSasUri);
+        result = NULL;
+    }
+    else
+    {
+        result = IoTHubClient_LL_UploadToBlob_CreateContext(iotHubClientHandle->uploadToBlobHandle, azureBlobSasUri);
+    }
+
+    return result;
+}
+
+IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_AzureStoragePutBlock(IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE uploadContextHandle, uint32_t blockNumber, const uint8_t* dataPtr, size_t dataSize)
 {
     IOTHUB_CLIENT_RESULT result;
 
@@ -2862,13 +2988,13 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_UploadBlockToBlob(IOTHUB_CLIENT_LL_UPLO
     }
     else
     {
-        result = IoTHubClient_LL_UploadToBlob_UploadBlock(uploadContextHandle, blockNumber, dataPtr, dataSize);
+        result = IoTHubClient_LL_UploadToBlob_PutBlock(uploadContextHandle, blockNumber, dataPtr, dataSize);
     }
 
     return result;
 }
 
-IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_CompleteUploadToBlob(IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE uploadContextHandle, bool isSuccess, int responseCode, const char* responseMessage)
+IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_AzureStoragePutBlockList(IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE uploadContextHandle)
 {
     IOTHUB_CLIENT_RESULT result;
 
@@ -2881,7 +3007,26 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_CompleteUploadToBlob(IOTHUB_CLIENT_LL_U
     }
     else
     {
-        result = IoTHubClient_LL_UploadToBlob_Complete(uploadContextHandle, isSuccess, responseCode, responseMessage);
+        result = IoTHubClient_LL_UploadToBlob_PutBlockList(uploadContextHandle);
+    }
+
+    return result;
+}
+
+IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_NotifyUploadCompletion(IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle, const char* uploadCorrelationId, bool isSuccess, int responseCode, const char* responseMessage)
+{
+    IOTHUB_CLIENT_RESULT result;
+
+    if (
+        (iotHubClientHandle == NULL)
+        )
+    {
+        LogError("invalid parameters iotHubClientHandle=%p", iotHubClientHandle);
+        result = IOTHUB_CLIENT_INVALID_ARG;
+    }
+    else
+    {
+        result = IoTHubClient_LL_UploadToBlob_NotifyCompletion(iotHubClientHandle->uploadToBlobHandle, uploadCorrelationId, isSuccess, responseCode, responseMessage);
     }
 
     return result;

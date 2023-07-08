@@ -349,30 +349,54 @@ extern "C"
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_UploadMultipleBlocksToBlobAsync, IOTHUB_DEVICE_CLIENT_HANDLE, iotHubClientHandle, const char*, destinationFileName, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK_EX, getDataCallbackEx, void*, context);
 
      /**
-    * @brief    This API creates a context for a new blob upload to Azure Storage.
+    * @brief    This API creates a new upload within Azure IoT Hub, getting back a correlation-id and a
+    *           SAS URI for the Blob upload to the Azure Storage associated with the Azure IoT Hub.
     * @remark   It is part of a set of functions for more granular control over Azure IoT-based blob uploads.
     *           This function is expected to be used along with:
     *           `IoTHubDeviceClient_CreateUploadContext`
-    *           `IoTHubDeviceClient_UploadBlockToBlob`
+    *           `IoTHubDeviceClient_AzureStoragePutBlock`
     *           `IoTHubDeviceClient_DestroyUploadContext`
     *           For the standard less-granular uploads to blob please use either
     *           `IoTHubDeviceClient_UploadToBlobAsync` or `IoTHubDeviceClient_UploadMultipleBlocksToBlobAsync`.
     *
     * @param    iotHubClientHandle      The handle created by a call to the create function.
-    * @param    destinationFileName     name of the file.
+    * @param    destinationFileName     Name of the file in blob storage.
+    * @param    uploadCorrelationId     Variable where to store the correlation-id of the new upload.
+    * @param    azureBlobSasUri         Variable where to store the Azure Storage SAS URI for the new upload.
+    *
+    * @warning  This is a synchronous/blocking function.
+    *           `uploadCorrelationId` and `azureBlobSasUri` must be freed by the calling application
+    *           after the blob upload process is done (e.g., after calling `IoTHubDeviceClient_NotifyUploadCompletion`).
+    *
+    * @return   An IOTHUB_CLIENT_RESULT value indicating the success or failure of the API call.
+    */
+    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_InitializeUpload, IOTHUB_DEVICE_CLIENT_HANDLE, iotHubClientHandle, const char*, destinationFileName, char**, uploadCorrelationId, char**, azureBlobSasUri);
+
+     /**
+    * @brief    This API creates a context for a new blob upload to Azure Storage.
+    * @remark   It is part of a set of functions for more granular control over Azure IoT-based blob uploads.
+    *           This function is expected to be used along with:
+    *           `IoTHubDeviceClient_CreateUploadContext`
+    *           `IoTHubDeviceClient_AzureStoragePutBlock`
+    *           `IoTHubDeviceClient_DestroyUploadContext`
+    *           For the standard less-granular uploads to blob please use either
+    *           `IoTHubDeviceClient_UploadToBlobAsync` or `IoTHubDeviceClient_UploadMultipleBlocksToBlobAsync`.
+    *
+    * @param    iotHubClientHandle      The handle created by a call to the create function.
+    * @param    azureBlobSasUri         The Azure Storage Blob SAS uri obtained with `IoTHubDeviceClient_InitializeUpload`.
     *
     * @warning  This is a synchronous/blocking function.
     *
     * @return   A `IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE` on success or NULL if the function fails.
     */
-    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE, IoTHubDeviceClient_CreateUploadContext, IOTHUB_DEVICE_CLIENT_HANDLE, iotHubClientHandle, const char*, destinationFileName);
+    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE, IoTHubDeviceClient_CreateUploadContext, IOTHUB_DEVICE_CLIENT_HANDLE, iotHubClientHandle, const char*, azureBlobSasUri);
 
     /**
     * @brief    This API upload a single blob block to Azure Storage (performs a PUT BLOCK operation).
     * @remark   It is part of a set of functions for more granular control over Azure IoT-based blob uploads.
     *           This function is expected to be used along with:
     *           `IoTHubDeviceClient_CreateUploadContext`
-    *           `IoTHubDeviceClient_UploadBlockToBlob`
+    *           `IoTHubDeviceClient_AzureStoragePutBlock`
     *           `IoTHubDeviceClient_DestroyUploadContext`
     *           For the standard less-granular uploads to blob please use either
     *           `IoTHubDeviceClient_UploadToBlobAsync` or `IoTHubDeviceClient_UploadMultipleBlocksToBlobAsync`.
@@ -386,40 +410,36 @@ extern "C"
     *
     * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
-    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_UploadBlockToBlob, IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE, uploadContextHandle, uint32_t, blockNumber, const uint8_t*, dataPtr, size_t, dataSize);
+    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_AzureStoragePutBlock, IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE, uploadContextHandle, uint32_t, blockNumber, const uint8_t*, dataPtr, size_t, dataSize);
 
     /**
-    * @brief    This API performs an Azure Storage PUT BLOCK LIST operation and
-    *           notifies Azure IoT Hub of the upload completion.
+    * @brief    This API performs an Azure Storage PUT BLOCK LIST operation.
     * @remark   It is part of a set of functions for more granular control over Azure IoT-based blob uploads.
     *           This function is expected to be used along with:
     *           `IoTHubDeviceClient_CreateUploadContext`
-    *           `IoTHubDeviceClient_UploadBlockToBlob`
+    *           `IoTHubDeviceClient_AzureStoragePutBlock`
     *           `IoTHubDeviceClient_DestroyUploadContext`
     *           For the standard less-granular uploads to blob please use either
     *           `IoTHubDeviceClient_UploadToBlobAsync` or `IoTHubDeviceClient_UploadMultipleBlocksToBlobAsync`.
-    *           If this function fails (due to any HTTP error to either Azure Storage or Azure IoT Hub) it can
+    *           If this function fails (due to any HTTP error to Azure Storage) it can
     *           be run again for a discretionary number of times in an attempt to succeed after, for example,
     *           an internet connectivity disruption is over.  
     *
     * @param    uploadContextHandle    The handle created with `IoTHubDeviceClient_CreateUploadContext`.
-    * @param    isSuccess              A boolean value indicating if the call(s) to `IoTHubDeviceClient_UploadBlockToBlob` succeeded.
-    * @param    responseCode           An user-defined code to signal the status of the upload (e.g., 200 for success, or -1 for abort).
-    * @param    responseMessage        An user-defined status message to go along with `responseCode` on the notification to Azure IoT Hub.
     *
     * @warning  This is a synchronous/blocking function.
     *
     * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
-    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_CompleteUploadToBlob, IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE, uploadContextHandle, bool, isSuccess, int, responseCode, const char*, responseMessage);
+    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_AzureStoragePutBlockList, IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE, uploadContextHandle);
 
     /**
     * @brief    This API destroy a blob upload context previously created with `IoTHubDeviceClient_CreateUploadContext`.
     * @remark   It is part of a set of functions for more granular control over Azure IoT-based blob uploads.
     *           This function is expected to be used along with:
     *           `IoTHubDeviceClient_CreateUploadContext`
-    *           `IoTHubDeviceClient_UploadBlockToBlob`
-    *           `IoTHubDeviceClient_CompleteUploadToBlob`
+    *           `IoTHubDeviceClient_AzureStoragePutBlock`
+    *           `IoTHubDeviceClient_NotifyUploadCompletion`
     *           For the standard less-granular uploads to blob please use either
     *           `IoTHubDeviceClient_UploadToBlobAsync` or `IoTHubDeviceClient_UploadMultipleBlocksToBlobAsync`.
     *
@@ -430,6 +450,31 @@ extern "C"
     * @return   Nothing.
     */
     MOCKABLE_FUNCTION(, void, IoTHubDeviceClient_DestroyUploadContext, IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE, uploadContextHandle);
+
+    /**
+    * @brief    This API notifies Azure IoT Hub of the upload completion.
+    * @remark   It is part of a set of functions for more granular control over Azure IoT-based blob uploads.
+    *           This function is expected to be used along with:
+    *           `IoTHubDeviceClient_CreateUploadContext`
+    *           `IoTHubDeviceClient_AzureStoragePutBlock`
+    *           `IoTHubDeviceClient_DestroyUploadContext`
+    *           For the standard less-granular uploads to blob please use either
+    *           `IoTHubDeviceClient_UploadToBlobAsync` or `IoTHubDeviceClient_UploadMultipleBlocksToBlobAsync`.
+    *           If this function fails (due to any HTTP error to either Azure Storage or Azure IoT Hub) it can
+    *           be run again for a discretionary number of times in an attempt to succeed after, for example,
+    *           an internet connectivity disruption is over.  
+    *
+    * @param    uploadContextHandle    The handle created with `IoTHubDeviceClient_CreateUploadContext`.
+    * @param    uploadCorrelationId    Upload correlation-id obtained with `IoTHubDeviceClient_InitializeUpload`.
+    * @param    isSuccess              A boolean value indicating if the call(s) to `IoTHubDeviceClient_AzureStoragePutBlock` succeeded.
+    * @param    responseCode           An user-defined code to signal the status of the upload (e.g., 200 for success, or -1 for abort).
+    * @param    responseMessage        An user-defined status message to go along with `responseCode` on the notification to Azure IoT Hub.
+    *
+    * @warning  This is a synchronous/blocking function.
+    *
+    * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
+    */
+    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_NotifyUploadCompletion, IOTHUB_DEVICE_CLIENT_HANDLE, iotHubClientHandle, const char*, uploadCorrelationId, bool, isSuccess, int, responseCode, const char*, responseMessage);
 #endif /* DONT_USE_UPLOADTOBLOB */
 
     /**

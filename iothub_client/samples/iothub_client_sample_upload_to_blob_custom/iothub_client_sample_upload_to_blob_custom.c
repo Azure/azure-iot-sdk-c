@@ -74,45 +74,70 @@ int main(void)
         }
         else
         {
-            IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE uploadContextHandle = IoTHubDeviceClient_LL_CreateUploadContext(device_ll_handle, "subdir/hello_world_custom_mb.txt");
+            char* uploadCorrelationId;
+            char* azureBlobSasUri;
+            const char* bla = "subdir/hello_world_custom_mb.txt";
 
-            if (uploadContextHandle == NULL)
+            if (IoTHubDeviceClient_LL_InitializeUpload(
+                    device_ll_handle, bla, &uploadCorrelationId, &azureBlobSasUri) != IOTHUB_CLIENT_OK)
             {
-                (void)printf("hello world failed to create upload context\n");
+                printf("failed initializing upload in IoT Hub\n");
             }
             else
             {
-                bool uploadSuccessful = true;
-                int uploadResultCode = 200;
+                IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE uploadContextHandle = IoTHubDeviceClient_LL_CreateUploadContext(device_ll_handle, azureBlobSasUri);
 
-                for (uint32_t block_number = 0; block_number < 100; block_number++)
+                if (uploadContextHandle == NULL)
                 {
-                    int data_size = snprintf(data_to_upload, sizeof(data_to_upload), data_to_upload_format, block_number);
-
-                    if (IoTHubDeviceClient_LL_UploadBlockToBlob(
-                            uploadContextHandle, block_number, (const uint8_t*)data_to_upload, data_size) != IOTHUB_CLIENT_OK)
-                    {
-                        (void)printf("Failed uploading block number %u to blob. Aborting upload.\n", block_number);
-                        uploadSuccessful = false;
-                        uploadResultCode = 300;
-                        break;
-                    }
-                }
-
-                // Hint: here if there is a failure (e.g., in HTTP transport)
-                //       this function can be called again in a retry loop if desired.
-                if (IoTHubDeviceClient_LL_CompleteUploadToBlob(
-                        uploadContextHandle, uploadSuccessful, uploadResultCode, uploadSuccessful ? "OK" : "Aborted")
-                    != IOTHUB_CLIENT_OK)
-                {
-                    (void)printf("Failed notifying Azure IoT Hub of upload completion.\n");
+                    (void)printf("failed to create upload context\n");
                 }
                 else
                 {
-                    (void)printf("hello world has been created\n");
+                    bool uploadSuccessful = true;
+                    int uploadResultCode = 200;
+
+                    for (uint32_t block_number = 0; block_number < 100; block_number++)
+                    {
+                        int data_size = snprintf(data_to_upload, sizeof(data_to_upload), data_to_upload_format, block_number);
+
+                        if (IoTHubDeviceClient_LL_AzureStoragePutBlock(
+                                uploadContextHandle, block_number, (const uint8_t*)data_to_upload, data_size) != IOTHUB_CLIENT_OK)
+                        {
+                            (void)printf("Failed uploading block number %u to blob. Aborting upload.\n", block_number);
+                            uploadSuccessful = false;
+                            uploadResultCode = 300;
+                            break;
+                        }
+                    }
+
+                    if (uploadSuccessful)
+                    {
+                        if (IoTHubDeviceClient_LL_AzureStoragePutBlockList(uploadContextHandle) != IOTHUB_CLIENT_OK)
+                        {
+                            (void)printf("failed performing Azure Storage Put Blob List.\n");
+                            uploadSuccessful = false;
+                            uploadResultCode = 400;
+                        }
+                    }
+
+                    IoTHubDeviceClient_LL_DestroyUploadContext(uploadContextHandle);
+
+                    // Hint: here if there is a failure (e.g., in HTTP transport)
+                    //       this function can be called again in a retry loop if desired.
+                    if (IoTHubDeviceClient_LL_NotifyUploadCompletion(
+                            device_ll_handle, uploadCorrelationId, uploadSuccessful, uploadResultCode, uploadSuccessful ? "OK" : "Aborted")
+                        != IOTHUB_CLIENT_OK)
+                    {
+                        (void)printf("Failed notifying Azure IoT Hub of upload completion.\n");
+                    }
+                    else
+                    {
+                        (void)printf("hello world has been created\n");
+                    }
                 }
 
-                IoTHubDeviceClient_LL_DestroyUploadContext(uploadContextHandle);
+                free(uploadCorrelationId);
+                free(azureBlobSasUri);
             }
         }
         // Clean up the iothub sdk handle

@@ -2486,41 +2486,62 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_UploadMultipleBlocksToBlobAsync(IOTHUB_CLI
     return result;
 }
 
-IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE IoTHubClientCore_CreateUploadContext(IOTHUB_CLIENT_CORE_HANDLE iotHubClientHandle, const char* destinationFileName)
+IOTHUB_CLIENT_RESULT IoTHubClientCore_InitializeUpload(IOTHUB_CLIENT_CORE_HANDLE iotHubClientHandle, const char* destinationFileName, char** uploadCorrelationId, char** azureBlobSasUri)
 {
-    IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE result;
+    IOTHUB_CLIENT_RESULT result;
 
     if (
-        (iotHubClientHandle == NULL) ||
-        (destinationFileName == NULL))
+        (iotHubClientHandle == NULL)
+        )
     {
-        LogError("invalid parameters iotHubClientHandle = %p , destinationFileName = %p",
-            iotHubClientHandle,
-            destinationFileName
-        );
-        result = NULL;
+        LogError("invalid parameters iotHubClientHandle = %p", iotHubClientHandle);
+        result = IOTHUB_CLIENT_INVALID_ARG;
     }
     else
     {
-        result = IoTHubClientCore_LL_CreateUploadContext(iotHubClientHandle->IoTHubClientLLHandle, destinationFileName);
+        result = IoTHubClientCore_LL_InitializeUpload(iotHubClientHandle->IoTHubClientLLHandle, destinationFileName, uploadCorrelationId, azureBlobSasUri);
     }
 
     return result;
 }
 
-IOTHUB_CLIENT_RESULT IoTHubClientCore_UploadBlockToBlob(IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE uploadContextHandle, uint32_t blockNumber, const uint8_t* dataPtr, size_t dataSize)
+IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE IoTHubClientCore_CreateUploadContext(IOTHUB_CLIENT_CORE_HANDLE iotHubClientHandle, const char* azureBlobSasUri)
 {
-    return IoTHubClientCore_LL_UploadBlockToBlob(uploadContextHandle, blockNumber, dataPtr, dataSize);
+    IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE result;
+
+    if (
+        (iotHubClientHandle == NULL)
+        )
+    {
+        LogError("invalid parameters iotHubClientHandle = %p", iotHubClientHandle);
+        result = NULL;
+    }
+    else
+    {
+        result = IoTHubClientCore_LL_CreateUploadContext(iotHubClientHandle->IoTHubClientLLHandle, azureBlobSasUri);
+    }
+
+    return result;
 }
 
-IOTHUB_CLIENT_RESULT IoTHubClientCore_CompleteUploadToBlob(IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE uploadContextHandle, bool isSuccess, int responseCode, const char* responseMessage)
+IOTHUB_CLIENT_RESULT IoTHubClientCore_AzureStoragePutBlock(IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE uploadContextHandle, uint32_t blockNumber, const uint8_t* dataPtr, size_t dataSize)
 {
-    return IoTHubClientCore_LL_CompleteUploadToBlob(uploadContextHandle, isSuccess, responseCode, responseMessage);
+    return IoTHubClientCore_LL_AzureStoragePutBlock(uploadContextHandle, blockNumber, dataPtr, dataSize);
+}
+
+IOTHUB_CLIENT_RESULT IoTHubClientCore_AzureStoragePutBlockList(IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE uploadContextHandle)
+{
+    return IoTHubClientCore_LL_AzureStoragePutBlockList(uploadContextHandle);
 }
 
 void IoTHubClientCore_DestroyUploadContext(IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE uploadContextHandle)
 {
     IoTHubClientCore_LL_DestroyUploadContext(uploadContextHandle);
+}
+
+IOTHUB_CLIENT_RESULT IoTHubClientCore_NotifyUploadCompletion(IOTHUB_CLIENT_CORE_HANDLE iotHubClientHandle, const char* uploadCorrelationId, bool isSuccess, int responseCode, const char* responseMessage)
+{
+    return IoTHubClientCore_LL_NotifyUploadCompletion(iotHubClientHandle->IoTHubClientLLHandle, uploadCorrelationId, isSuccess, responseCode, responseMessage);
 }
 #endif /*DONT_USE_UPLOADTOBLOB*/
 
