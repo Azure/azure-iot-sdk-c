@@ -877,6 +877,8 @@ jobs:
       testRunTitle: 'openssl_engine'
     condition: succeededOrFailed()
 - job: OSX
+  variables:
+    CodeQL.Enabled: false
   pool:
     name: OSX
   steps:
@@ -914,12 +916,14 @@ jobs:
       mergeTestResults: true
       testRunTitle: 'OSX'
     condition: succeededOrFailed()
-  - task: ms.vss-governance-buildtask.governance-build-task-component-detection.ComponentGovernanceComponentDetection@0
+  - task: ComponentGovernanceComponentDetection@0
     displayName: 'Component Detection'
   - script: rm -rf $(Agent.BuildDirectory)/*
     displayName: 'Cleanup'
     condition: always()
 - job: xcodenative
+  variables:
+    CodeQL.Enabled: false
   pool:
     name: OSX
   displayName: "Xcode Native"
@@ -960,7 +964,7 @@ jobs:
       mergeTestResults: true
       testRunTitle: 'XCode'
     condition: succeededOrFailed()
-  - task: ms.vss-governance-buildtask.governance-build-task-component-detection.ComponentGovernanceComponentDetection@0
+  - task: ComponentGovernanceComponentDetection@0
     displayName: 'Component Detection'
   - script: rm -rf $(Agent.BuildDirectory)/*
     displayName: 'Cleanup'
