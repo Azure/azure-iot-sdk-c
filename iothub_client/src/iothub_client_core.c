@@ -2509,9 +2509,7 @@ IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE IoTHubClientCore_CreateUploadContex
 {
     IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE result;
 
-    if (
-        (iotHubClientHandle == NULL)
-        )
+    if (iotHubClientHandle == NULL)
     {
         LogError("invalid parameters iotHubClientHandle = %p", iotHubClientHandle);
         result = NULL;

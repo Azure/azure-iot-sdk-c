@@ -35,6 +35,7 @@ static const char* connectionString = "[device connection string]";
 static const char* proxyHost = NULL;
 static int proxyPort = 0;
 
+static const char* azureStorageBlobPath = "subdir/hello_world_custom_mb.txt";
 static const char* data_to_upload_format = "Hello World from iothub_client_sample_upload_to_blob_custom: %d\n";
 static char data_to_upload[128];
 
@@ -76,10 +77,9 @@ int main(void)
         {
             char* uploadCorrelationId;
             char* azureBlobSasUri;
-            const char* bla = "subdir/hello_world_custom_mb.txt";
 
             if (IoTHubDeviceClient_LL_InitializeUpload(
-                    device_ll_handle, bla, &uploadCorrelationId, &azureBlobSasUri) != IOTHUB_CLIENT_OK)
+                    device_ll_handle, azureStorageBlobPath, &uploadCorrelationId, &azureBlobSasUri) != IOTHUB_CLIENT_OK)
             {
                 printf("failed initializing upload in IoT Hub\n");
             }

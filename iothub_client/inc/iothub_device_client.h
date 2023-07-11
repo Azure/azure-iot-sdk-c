@@ -355,7 +355,10 @@ extern "C"
     *           This function is expected to be used along with:
     *           `IoTHubDeviceClient_CreateUploadContext`
     *           `IoTHubDeviceClient_AzureStoragePutBlock`
+    *           `IoTHubDeviceClient_AzureStoragePutBlockList`
     *           `IoTHubDeviceClient_DestroyUploadContext`
+    *           `IoTHubDeviceClient_InitializeUpload`
+    *           `IoTHubDeviceClient_NotifyUploadCompletion`
     *           For the standard less-granular uploads to blob please use either
     *           `IoTHubDeviceClient_UploadToBlobAsync` or `IoTHubDeviceClient_UploadMultipleBlocksToBlobAsync`.
     *
@@ -378,7 +381,10 @@ extern "C"
     *           This function is expected to be used along with:
     *           `IoTHubDeviceClient_CreateUploadContext`
     *           `IoTHubDeviceClient_AzureStoragePutBlock`
+    *           `IoTHubDeviceClient_AzureStoragePutBlockList`
     *           `IoTHubDeviceClient_DestroyUploadContext`
+    *           `IoTHubDeviceClient_InitializeUpload`
+    *           `IoTHubDeviceClient_NotifyUploadCompletion`
     *           For the standard less-granular uploads to blob please use either
     *           `IoTHubDeviceClient_UploadToBlobAsync` or `IoTHubDeviceClient_UploadMultipleBlocksToBlobAsync`.
     *
@@ -392,14 +398,19 @@ extern "C"
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE, IoTHubDeviceClient_CreateUploadContext, IOTHUB_DEVICE_CLIENT_HANDLE, iotHubClientHandle, const char*, azureBlobSasUri);
 
     /**
-    * @brief    This API upload a single blob block to Azure Storage (performs a PUT BLOCK operation).
+    * @brief    This API uploads a single blob block to Azure Storage (performs a PUT BLOCK operation).
     * @remark   It is part of a set of functions for more granular control over Azure IoT-based blob uploads.
     *           This function is expected to be used along with:
     *           `IoTHubDeviceClient_CreateUploadContext`
     *           `IoTHubDeviceClient_AzureStoragePutBlock`
+    *           `IoTHubDeviceClient_AzureStoragePutBlockList`
     *           `IoTHubDeviceClient_DestroyUploadContext`
+    *           `IoTHubDeviceClient_InitializeUpload`
+    *           `IoTHubDeviceClient_NotifyUploadCompletion`
     *           For the standard less-granular uploads to blob please use either
     *           `IoTHubDeviceClient_UploadToBlobAsync` or `IoTHubDeviceClient_UploadMultipleBlocksToBlobAsync`.
+    *           For more information about Azure Storage PUT BLOCK, its parameters and behavior, please refer to
+    *           https://learn.microsoft.com/en-us/rest/api/storageservices/put-block
     *
     * @param    uploadContextHandle    The handle created with `IoTHubDeviceClient_CreateUploadContext`.
     * @param    blockNumber            Number of the block being uploaded.
@@ -418,12 +429,17 @@ extern "C"
     *           This function is expected to be used along with:
     *           `IoTHubDeviceClient_CreateUploadContext`
     *           `IoTHubDeviceClient_AzureStoragePutBlock`
+    *           `IoTHubDeviceClient_AzureStoragePutBlockList`
     *           `IoTHubDeviceClient_DestroyUploadContext`
+    *           `IoTHubDeviceClient_InitializeUpload`
+    *           `IoTHubDeviceClient_NotifyUploadCompletion`
     *           For the standard less-granular uploads to blob please use either
     *           `IoTHubDeviceClient_UploadToBlobAsync` or `IoTHubDeviceClient_UploadMultipleBlocksToBlobAsync`.
     *           If this function fails (due to any HTTP error to Azure Storage) it can
     *           be run again for a discretionary number of times in an attempt to succeed after, for example,
-    *           an internet connectivity disruption is over.  
+    *           an internet connectivity disruption is over.
+    *           For more information about Azure Storage PUT BLOCK LIST, please refer to
+    *           https://learn.microsoft.com/en-us/rest/api/storageservices/put-block-list
     *
     * @param    uploadContextHandle    The handle created with `IoTHubDeviceClient_CreateUploadContext`.
     *
@@ -439,6 +455,9 @@ extern "C"
     *           This function is expected to be used along with:
     *           `IoTHubDeviceClient_CreateUploadContext`
     *           `IoTHubDeviceClient_AzureStoragePutBlock`
+    *           `IoTHubDeviceClient_AzureStoragePutBlockList`
+    *           `IoTHubDeviceClient_DestroyUploadContext`
+    *           `IoTHubDeviceClient_InitializeUpload`
     *           `IoTHubDeviceClient_NotifyUploadCompletion`
     *           For the standard less-granular uploads to blob please use either
     *           `IoTHubDeviceClient_UploadToBlobAsync` or `IoTHubDeviceClient_UploadMultipleBlocksToBlobAsync`.
@@ -457,7 +476,10 @@ extern "C"
     *           This function is expected to be used along with:
     *           `IoTHubDeviceClient_CreateUploadContext`
     *           `IoTHubDeviceClient_AzureStoragePutBlock`
+    *           `IoTHubDeviceClient_AzureStoragePutBlockList`
     *           `IoTHubDeviceClient_DestroyUploadContext`
+    *           `IoTHubDeviceClient_InitializeUpload`
+    *           `IoTHubDeviceClient_NotifyUploadCompletion`
     *           For the standard less-granular uploads to blob please use either
     *           `IoTHubDeviceClient_UploadToBlobAsync` or `IoTHubDeviceClient_UploadMultipleBlocksToBlobAsync`.
     *           If this function fails (due to any HTTP error to either Azure Storage or Azure IoT Hub) it can

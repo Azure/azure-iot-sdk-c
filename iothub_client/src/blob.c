@@ -19,6 +19,14 @@ static const char blockListUriMarker[] = "&comp=blocklist";
 static const char blockListLatestTagXmlBegin[] = "<Latest>";
 static const char blockListLatestTagXmlEnd[] = "</Latest>";
 
+// Size of the string containing an Azure Blob Block ID.
+// For more details please see
+// https://learn.microsoft.com/en-us/rest/api/storageservices/put-block?tabs=azure-ad#uri-parameters
+#define AZURE_BLOB_BLOCK_ID_SIZE 7
+
+// Length of the string representation of an Azure Blob Block ID (enough to represent "049999").
+#define AZURE_BLOB_BLOCK_ID_LENGTH 6
+
 static STRING_HANDLE createBlockIdListXml(SINGLYLINKEDLIST_HANDLE blockIDList)
 {
     STRING_HANDLE blockIdListXml;
@@ -147,9 +155,9 @@ BLOB_RESULT Blob_PutBlock(
         result = BLOB_ERROR;
     }
     else
-    {
-        char blockIdString[7]; /*this will contain 000000... 049999*/
-        if (sprintf(blockIdString, "%6u", (unsigned int)blockID) != 6) /*produces 000000... 049999*/
+    {   
+        char blockIdString[AZURE_BLOB_BLOCK_ID_SIZE]; /*this will contain 000000... 049999*/
+        if (sprintf(blockIdString, "%6u", (unsigned int)blockID) != AZURE_BLOB_BLOCK_ID_LENGTH) /*produces 000000... 049999*/
         {
             LogError("failed to sprintf");
             result = BLOB_ERROR;

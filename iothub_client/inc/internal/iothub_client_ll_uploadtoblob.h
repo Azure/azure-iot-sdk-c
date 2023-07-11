@@ -40,15 +40,24 @@ extern "C"
     #define BLOCK_SIZE (100*1024*1024)
 
     typedef struct IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA* IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE;
+
+    /*
+     * @remark `struct IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_STRUCT` contains information specifically
+     *         related to an individual upload request currently active in Azure IoT Hub, mainly
+     *         the correlation-id and Azure Blob SAS URI provided by the Azure IoT Hub when a new
+     *         upload is started. The `struct IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA` on the other hand 
+     *         holds common information (independent from individual upload requests) that is used for
+     *         upload-to-blob Rest API calls to Azure IoT Hub.
+     */    
     typedef struct IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_STRUCT* IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE;
 
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE, IoTHubClient_LL_UploadToBlob_Create, const IOTHUB_CLIENT_CONFIG*, config, IOTHUB_AUTHORIZATION_HANDLE, auth_handle);
 
     /*
-     * @remark This is a function left in this module for legacy compatibility with the exposed public API for 
+     * @remark This is a legacy function that provides compatibility with the exposed public API for 
      *         upload to blob in iothub_(device|module)_client(_ll) that allowed passing a callback for obtaining the 
-     *         blob blocks data. Since there was quite a lot of (specific) logic put into this function that it
-     *         better reside in this API module.
+     *         blob blocks data. Since there was quite a lot of (specific) logic put into this function, it
+     *         better remain in this API module.
      */
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_UploadToBlob_UploadMultipleBlocks, IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE, uploadContextHandle, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK_EX, getDataCallbackEx, void*, context);
 

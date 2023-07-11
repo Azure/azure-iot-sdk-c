@@ -395,6 +395,8 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
      * @param    azureBlobSasUri         Variable where to store the Azure Storage SAS URI for the new upload.
      *
      * @warning  This is a synchronous/blocking function.
+     *           This function only attempts to send HTTP requests once, it does not retry in case of failure.
+     *           Any retries must be explicitly implemented by the calling application.
      *           `uploadCorrelationId` and `azureBlobSasUri` must be freed by the calling application
      *           after the blob upload process is done (e.g., after calling `IoTHubDeviceClient_LL_NotifyUploadCompletion`).
      *
@@ -422,7 +424,7 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
      MOCKABLE_FUNCTION(, IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE, IoTHubDeviceClient_LL_CreateUploadContext, IOTHUB_DEVICE_CLIENT_LL_HANDLE, iotHubClientHandle, const char*, azureBlobSasUri);
 
      /**
-     * @brief    This API upload a single blob block to Azure Storage (performs a PUT BLOCK operation).
+     * @brief    This API uploads a single blob block to Azure Storage (performs a PUT BLOCK operation).
      * @remark   It is part of a set of functions for more granular control over Azure IoT-based blob uploads.
      *           This function is expected to be used along with:
      *           `IoTHubDeviceClient_LL_CreateUploadContext`
@@ -430,6 +432,8 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
      *           `IoTHubDeviceClient_LL_DestroyUploadContext`
      *           For the standard less-granular uploads to blob please use either
      *           `IoTHubDeviceClient_LL_UploadToBlob` or `IoTHubDeviceClient_LL_UploadMultipleBlocksToBlob`.
+     *           For more information about Azure Storage PUT BLOCK, its parameters and behavior, please refer to
+     *           https://learn.microsoft.com/en-us/rest/api/storageservices/put-block
      *
      * @param    uploadContextHandle    The handle created with `IoTHubDeviceClient_LL_CreateUploadContext`.
      * @param    blockNumber            Number of the block being uploaded.
@@ -437,6 +441,8 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
      * @param    dataSize               Size of the block data pointed by `dataPtr`.
      *
      * @warning  This is a synchronous/blocking function.
+     *           This function only attempts to send HTTP requests once, it does not retry in case of failure.
+     *           Any retries must be explicitly implemented by the calling application.
      *
      * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
      */
@@ -451,10 +457,14 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
      *           `IoTHubDeviceClient_LL_DestroyUploadContext`
      *           For the standard less-granular uploads to blob please use either
      *           `IoTHubDeviceClient_LL_UploadToBlob` or `IoTHubDeviceClient_LL_UploadMultipleBlocksToBlob`.
+     *           For more information about Azure Storage PUT BLOCK LIST, please refer to
+     *           https://learn.microsoft.com/en-us/rest/api/storageservices/put-block-list
      *
      * @param    uploadContextHandle    The handle created with `IoTHubDeviceClient_LL_CreateUploadContext`.
      *
      * @warning  This is a synchronous/blocking function.
+     *           This function only attempts to send HTTP requests once, it does not retry in case of failure.
+     *           Any retries must be explicitly implemented by the calling application.
      *
      * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
      */
@@ -498,7 +508,9 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
      * @param    responseMessage        An user-defined status message to go along with `responseCode` on the notification to Azure IoT Hub.
      *
      * @warning  This is a synchronous/blocking function.
-     *
+     *           This function only attempts to send HTTP requests once, it does not retry in case of failure.
+     *           Any retries must be explicitly implemented by the calling application.
+     * 
      * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
      */
      MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_LL_NotifyUploadCompletion, IOTHUB_DEVICE_CLIENT_LL_HANDLE, iotHubClientHandle, const char*, uploadCorrelationId, bool, isSuccess, int, responseCode, const char*, responseMessage);
