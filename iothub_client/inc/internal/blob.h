@@ -47,7 +47,7 @@ extern "C"
 
 MU_DEFINE_ENUM_WITHOUT_INVALID(BLOB_RESULT, BLOB_RESULT_VALUES)
 
-MOCKABLE_FUNCTION(, HTTPAPIEX_HANDLE, Blob_CreateHttpConnection, const char*, blobStorageHostname, const char*, certificates, HTTP_PROXY_OPTIONS*, proxyOptions, const char*, networkInterface, const size_t, timeoutInMilliseconds);
+MOCKABLE_FUNCTION(, HTTPAPIEX_HANDLE, Blob_CreateHttpConnection, const char*, blobStorageHostname, const char*, certificates, const HTTP_PROXY_OPTIONS*, proxyOptions, const char*, networkInterface, const size_t, timeoutInMilliseconds);
 
 MOCKABLE_FUNCTION(, void, Blob_DestroyHttpConnection, HTTPAPIEX_HANDLE, httpApiExHandle);
 

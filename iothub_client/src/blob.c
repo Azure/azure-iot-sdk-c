@@ -79,7 +79,7 @@ static bool removeAndDestroyBlockIdsInList(const void* item, const void* match_c
     return true;
 }
 
-HTTPAPIEX_HANDLE Blob_CreateHttpConnection(const char* blobStorageHostname, const char* certificates, HTTP_PROXY_OPTIONS *proxyOptions, const char* networkInterface, const size_t timeoutInMilliseconds)
+HTTPAPIEX_HANDLE Blob_CreateHttpConnection(const char* blobStorageHostname, const char* certificates, const HTTP_PROXY_OPTIONS *proxyOptions, const char* networkInterface, const size_t timeoutInMilliseconds)
 {
     HTTPAPIEX_HANDLE httpApiExHandle;
     
@@ -142,9 +142,10 @@ BLOB_RESULT Blob_PutBlock(
 {
     BLOB_RESULT result;
 
-    if (blockData == NULL ||
-        blockIDList == NULL ||
-        httpApiExHandle == NULL)
+    if (httpApiExHandle == NULL ||
+        relativePath == NULL ||
+        blockData == NULL ||
+        blockIDList == NULL)
     {
         LogError("invalid argument detected blockData=%p blockIDList=%p relativePath=%p httpApiExHandle=%p", blockData, blockIDList, relativePath, httpApiExHandle);
         result = BLOB_ERROR;
@@ -164,8 +165,9 @@ BLOB_RESULT Blob_PutBlock(
         }
         else
         {
-            STRING_HANDLE blockIdEncodedString = Azure_Base64_Encode_Bytes((const unsigned char*)blockIdString, 6);
-            if (blockIdString == NULL)
+            STRING_HANDLE blockIdEncodedString = Azure_Base64_Encode_Bytes((const unsigned char*)blockIdString, AZURE_BLOB_BLOCK_ID_LENGTH);
+
+            if (blockIdEncodedString == NULL)
             {
                 LogError("unable to Azure_Base64_Encode_Bytes");
                 result = BLOB_ERROR;
@@ -267,7 +269,10 @@ BLOB_RESULT Blob_PutBlockList(
     else if (singlylinkedlist_get_head_item(blockIDList) == NULL)
     {
         // Block ID List is empty, there is nothing to be be sent to Azure Blob Storage.
-        result = BLOB_OK;
+        // In this case we better return error, forcing the caller to call this function only
+        // if at least one call to Blob_PutBlock() succeeds.
+        LogError("Block ID list is empty");
+        result = BLOB_ERROR;
     }
     else
     {
@@ -297,8 +302,10 @@ BLOB_RESULT Blob_PutBlockList(
                 }
                 else
                 {
-                    const char* s = STRING_c_str(blockIdListXml);
-                    BUFFER_HANDLE blockIDListAsBuffer = BUFFER_create((const unsigned char*)s, strlen(s));
+                    const char* blockIdListXmlCharPtr = STRING_c_str(blockIdListXml);
+                    size_t blockIdListXmlLength = STRING_length(blockIdListXml);
+                    BUFFER_HANDLE blockIDListAsBuffer = BUFFER_create((const unsigned char*)blockIdListXmlCharPtr, blockIdListXmlLength);
+
                     if (blockIDListAsBuffer == NULL)
                     {
                         LogError("failed to BUFFER_create");
