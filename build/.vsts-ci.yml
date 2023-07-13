@@ -1038,6 +1038,13 @@ jobs:
   pool: 
     vmImage: 'windows-latest'
   steps:
-  - script: |
-     dotnet build tools\traceabilitytool\traceabilitytool.sln
-    displayName: 'Build'
+  - task: NuGetCommand@2
+    inputs:
+      command: 'restore'
+      restoreSolution: 'tools\traceabilitytool\traceabilitytool.sln'
+      feedsToUse: 'select'
+      vstsFeed: 'f9b79625-2860-4d92-a4ee-57b03fabfd10/805c1538-e9e5-488f-9e17-6c63b6879ace'
+  - task: DotNetCoreCLI@2
+    inputs:
+      command: 'build'
+      projects: 'tools\traceabilitytool\traceabilitytool.sln'
