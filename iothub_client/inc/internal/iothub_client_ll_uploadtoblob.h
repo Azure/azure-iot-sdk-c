@@ -25,10 +25,10 @@
 #ifndef IOTHUB_CLIENT_LL_UPLOADTOBLOB_H
 #define IOTHUB_CLIENT_LL_UPLOADTOBLOB_H
 
-#include "iothub_client_core_ll.h"
+#include "iothub_client_core_common.h"
 #include "internal/iothub_client_authorization.h"
-
 #include "umock_c/umock_c_prod.h"
+
 #ifdef __cplusplus
 #include <cstddef>
 extern "C"

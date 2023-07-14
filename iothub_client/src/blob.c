@@ -6,8 +6,6 @@
 
 #include "azure_c_shared_utility/gballoc.h"
 #include "internal/blob.h"
-#include "internal/iothub_client_ll_uploadtoblob.h"
-
 #include "azure_c_shared_utility/httpapiex.h"
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/azure_base64.h"

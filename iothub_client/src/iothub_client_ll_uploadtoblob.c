@@ -14,6 +14,7 @@
 #include "azure_c_shared_utility/httpapiexsas.h"
 #include "azure_c_shared_utility/shared_util_options.h"
 #include "azure_c_shared_utility/urlencode.h"
+#include "azure_c_shared_utility/crt_abstractions.h"
 
 #include "iothub_client_core_ll.h"
 #include "iothub_client_options.h"
