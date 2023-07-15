@@ -113,7 +113,8 @@ static int send_http_sas_request(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA* uplo
     }
     else
     {
-        HTTPAPIEX_SAS_HANDLE http_sas_handle = HTTPAPIEX_SAS_Create_From_String(IoTHubClient_Auth_Get_DeviceKey(upload_client->authorization_module), STRING_c_str(uri_resource), EMPTY_STRING);
+        const char* uriResourceCharPtr = STRING_c_str(uri_resource);
+        HTTPAPIEX_SAS_HANDLE http_sas_handle = HTTPAPIEX_SAS_Create_From_String(IoTHubClient_Auth_Get_DeviceKey(upload_client->authorization_module), uriResourceCharPtr, EMPTY_STRING);
 
         if (http_sas_handle == NULL)
         {
@@ -122,13 +123,13 @@ static int send_http_sas_request(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA* uplo
         }
         else
         {
-            unsigned int statusCode;
+            unsigned int statusCode = 0;
 
             if (HTTPAPIEX_SAS_ExecuteRequest(
                 http_sas_handle, http_api_handle, HTTPAPI_REQUEST_POST, relative_path, request_header,
                 blobBuffer, &statusCode, NULL, response_buff) != HTTPAPIEX_OK)
             {
-                LogError("unable to HTTPAPIEX_ExecuteRequest");
+                LogError("unable to HTTPAPIEX_SAS_ExecuteRequest");
                 result = MU_FAILURE;
             }
             else if (!IS_HTTP_STATUS_CODE_SUCCESS(statusCode))
@@ -153,7 +154,7 @@ static int send_http_sas_request(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA* uplo
 static int send_http_request(HTTPAPIEX_HANDLE http_api_handle, const char* relative_path, HTTP_HEADERS_HANDLE request_header, BUFFER_HANDLE blobBuffer, BUFFER_HANDLE response_buff)
 {
     int result;
-    unsigned int statusCode;
+    unsigned int statusCode = 0;
     if (HTTPAPIEX_ExecuteRequest(http_api_handle, HTTPAPI_REQUEST_POST, relative_path, request_header,
         blobBuffer, &statusCode, NULL, response_buff) != HTTPAPIEX_OK)
     {
@@ -462,6 +463,7 @@ static HTTPAPIEX_HANDLE createIotHubHttpApiExHandle(IOTHUB_CLIENT_LL_UPLOADTOBLO
                 HTTPAPIEX_Destroy(iotHubHttpApiExHandle);
                 iotHubHttpApiExHandle = NULL;
             }
+            // TODO: proxy username and password can be set through SetOption, but are not used (it was the previous behavior as well). Bug?
         }
     }
 
@@ -490,8 +492,11 @@ static int IoTHubClient_LL_UploadToBlob_GetBlobCredentialsFromIoTHub(
         }
         else
         {
+            // Keep STRING_length separate in an separate call to avoid messing up with unit tests.
+            // For details, see function parameter evaluation order (C99 6.5.2.2p10).
+            size_t blobNameLength = STRING_length(blobName);
             BUFFER_HANDLE blobBuffer = BUFFER_create(
-                (const unsigned char *)STRING_c_str(blobName), STRING_length(blobName));
+                (const unsigned char *)STRING_c_str(blobName), blobNameLength);
 
             if (blobBuffer == NULL)
             {
@@ -555,7 +560,7 @@ static int IoTHubClient_LL_UploadToBlob_GetBlobCredentialsFromIoTHub(
                                 {
                                     if (send_http_sas_request(upload_data, iotHubHttpApiExHandle, STRING_c_str(relativePath), iotHubRequestHttpHeaders, blobBuffer, responseContent) != 0)
                                     {
-                                        LogError("unable to HTTPAPIEX_ExecuteRequest");
+                                        LogError("unable to HTTPAPIEX_SAS_ExecuteRequest");
                                     }
                                     else
                                     {
