@@ -898,7 +898,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_InitializeUpload(IOTHUB_CLIENT
 {
     IOTHUB_CLIENT_RESULT result;
 
-    if (handle == NULL || destinationFileName == NULL || uploadCorrelationId == NULL)
+    if (handle == NULL || destinationFileName == NULL || uploadCorrelationId == NULL || azureBlobSasUri == NULL)
     {
         LogError("invalid argument detected handle=%p destinationFileName=%p uploadCorrelationId=%p azureBlobSasUri=%p",
             handle, destinationFileName, uploadCorrelationId, azureBlobSasUri);
@@ -969,22 +969,9 @@ IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE IoTHubClient_LL_UploadToBlob_Create
     return result;
 }
 
-IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_DestroyContext(IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE uploadContext)
+void IoTHubClient_LL_UploadToBlob_DestroyContext(IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE uploadContext)
 {
-    IOTHUB_CLIENT_RESULT result;
-
-    if (uploadContext == NULL)
-    {
-        LogError("invalid argument detected uploadContext=%p", uploadContext);
-        result = IOTHUB_CLIENT_INVALID_ARG;
-    }
-    else
-    {
-        destroyUploadToBlobContextInstance(uploadContext);
-        result = IOTHUB_CLIENT_OK;
-    }
-
-    return result;
+    destroyUploadToBlobContextInstance(uploadContext);
 }
 
 IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_PutBlock(IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE uploadContext, uint32_t blockNumber, const uint8_t* dataPtr, size_t dataSize)

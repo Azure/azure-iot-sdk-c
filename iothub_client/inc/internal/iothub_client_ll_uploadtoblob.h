@@ -65,7 +65,7 @@ extern "C"
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE, IoTHubClient_LL_UploadToBlob_CreateContext, IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE, handle, const char*, azureBlobSasUri);
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_UploadToBlob_PutBlock, IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE, uploadContext, uint32_t, blockNumber, const uint8_t*, dataPtr, size_t, dataSize);
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_UploadToBlob_PutBlockList, IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE, uploadContext);
-    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_UploadToBlob_DestroyContext, IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE, uploadContext);
+    MOCKABLE_FUNCTION(, void, IoTHubClient_LL_UploadToBlob_DestroyContext, IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE, uploadContext);
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_UploadToBlob_NotifyCompletion, IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE, handle, const char*, uploadCorrelationId, bool, isSuccess, int, responseCode, const char*, responseMessage);
 
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_UploadToBlob_SetOption, IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE, handle, const char*, optionName, const void*, value);

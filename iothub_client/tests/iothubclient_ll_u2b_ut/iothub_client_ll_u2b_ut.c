@@ -41,6 +41,7 @@ static void* my_gballoc_calloc(size_t nmemb, size_t size)
 #include "azure_c_shared_utility/httpapiex.h"
 #include "azure_c_shared_utility/httpapiexsas.h"
 #include "azure_c_shared_utility/strings.h"
+#include "azure_c_shared_utility/singlylinkedlist.h"
 #include "azure_c_shared_utility/urlencode.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/shared_util_options.h"
@@ -76,20 +77,23 @@ MOCKABLE_FUNCTION(, JSON_Object*, json_value_get_object, const JSON_Value *, val
 #define TEST_API_VERSION "?api-version=2016-11-14"
 #define TEST_IOTHUB_SDK_VERSION "1.11.0"
 
-#define TEST_HTTP_HEADERS_HANDLE   (HTTP_HEADERS_HANDLE)0x4443
-#define TEST_HTTPAPIEX_HANDLE      (HTTPAPIEX_HANDLE)0x4444
-#define TEST_HTTPAPIEX_SAS_HANDLE  (HTTPAPIEX_SAS_HANDLE)0x4445
-#define TEST_U2B_CONTEXT_HANDLE    (IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE)0x4446
-#define TEST_JSON_VALUE            (JSON_Value*)0x4447
+#define TEST_HTTP_HEADERS_HANDLE        (HTTP_HEADERS_HANDLE)0x4443
+#define TEST_HTTPAPIEX_HANDLE           (HTTPAPIEX_HANDLE)0x4444
+#define TEST_HTTPAPIEX_SAS_HANDLE       (HTTPAPIEX_SAS_HANDLE)0x4445
+#define TEST_U2B_CONTEXT_HANDLE         (IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE)0x4446
+#define TEST_JSON_VALUE                 (JSON_Value*)0x4447
+#define TEST_SINGLYLINKEDLIST_HANDLE    (SINGLYLINKEDLIST_HANDLE)0x4448
 
 static const char* const testUploadtrustedCertificates = "some certificates";
-static const char* const TEST_SAS_TOKEN = "test_sas_token";
+static const char* const TEST_IOTHUB_SAS_TOKEN = "test_sas_token";
 static const char* const TEST_PRIVATE = "test_private";
 static const char* const TEST_CERT = "test_cert";
 static const unsigned char* TEST_SOURCE = (const unsigned char*)0x3;
 static const size_t TEST_SOURCE_LENGTH = 3;
 static const char* const TEST_DESTINATION_FILENAME = "text.txt";
 static const char* const TEST_BLOB_NAME_CHAR_PTR = "{ \"blobName\": \"text.txt\" }";
+static const char* const TEST_BLOB_SAS_URI = "https://mystorageaccount.blob.core.windows.net/uploadcontainer01/myDeviceId%2fsubdir%text.txt?sv=2018-03-28&sr=b&sig=BuvkhxiMqrFJDYoS4UCZq%2FMkS4rb47doCPvfdgx1iwM%3D&se=2023-07-16T05%3A31%3A08Z&sp=rw";
+static const char* const TEST_UPLOAD_CORRELATION_ID = "MjAyMzA3MTYwNTQxXzVjMzg5NzMzLTlhZTgtNDVmZC1iNjQ0LTIzZDUzMDc5YzgyMF9zdWJkaXIvaGVsbG9fd29ybGRfY3VzdG9tX21iLnR4dF92ZXIyLjA=";
 
 #ifdef __cplusplus
 extern "C"
@@ -199,9 +203,9 @@ static char* my_IoTHubClient_Auth_Get_SasToken(IOTHUB_AUTHORIZATION_HANDLE handl
     (void)scope;
     (void)expiry_time_relative_seconds;
     (void)key_name;
-    size_t l = strlen(TEST_SAS_TOKEN);
+    size_t l = strlen(TEST_IOTHUB_SAS_TOKEN);
     char* result = (char*)my_gballoc_malloc(l+1);
-    strcpy(result, TEST_SAS_TOKEN);
+    strcpy(result, TEST_IOTHUB_SAS_TOKEN);
     return result;
 }
 
@@ -404,7 +408,7 @@ typedef struct UPLOADTOBLOB_TEST_UT_CONTEXT_TAG
 
 static UPLOADTOBLOB_TEST_UT_CONTEXT uploadtoblobTest_Context;
 
-static void setup_IoTHubClient_LL_UploadToBlob_Create_mocks(IOTHUB_CREDENTIAL_TYPE cred_type)
+static void setExpectedCallsFor_IoTHubClient_LL_UploadToBlob_Create(IOTHUB_CREDENTIAL_TYPE cred_type)
 {
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
@@ -519,7 +523,8 @@ static void setParseResultFromIoTHubCalls()
 {
     STRICT_EXPECTED_CALL(json_parse_string(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .SetReturn(TEST_UPLOAD_CORRELATION_ID);
     STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
@@ -533,7 +538,8 @@ static void setParseResultFromIoTHubCalls()
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) // due to mallocAndStrcpy_s mock
         .CallCannotFail();
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
-        .CallCannotFail();
+        .CallCannotFail()
+        .SetReturn(TEST_BLOB_SAS_URI);
     STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) // due to mallocAndStrcpy_s mock
         .CallCannotFail();
@@ -542,7 +548,7 @@ static void setParseResultFromIoTHubCalls()
     STRICT_EXPECTED_CALL(json_value_free(IGNORED_PTR_ARG));
 }
 
-static void setIoTHubClient_LL_UploadToBlob_InitializeUploadCalls(
+static void setExpectedCallsFor_IoTHubClient_LL_UploadToBlob_InitializeUpload(
     IOTHUB_CREDENTIAL_TYPE credentialType,
     size_t blobUploadTimeoutMillisecs,
     bool curlEnableVerboseLogging,
@@ -646,6 +652,7 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
     REGISTER_UMOCK_ALIAS_TYPE(BUFFER_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(char **, void*);
     REGISTER_UMOCK_ALIAS_TYPE(STRING_HANDLE, void*);
+    REGISTER_UMOCK_ALIAS_TYPE(SINGLYLINKEDLIST_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(HTTP_HEADERS_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(HTTP_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(HTTPAPIEX_HANDLE, void*);
@@ -675,6 +682,8 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_copy, MU_FAILURE);
     REGISTER_GLOBAL_MOCK_HOOK(STRING_delete, my_STRING_delete);
     REGISTER_GLOBAL_MOCK_HOOK(URL_EncodeString, my_URL_EncodeString);
+
+    REGISTER_GLOBAL_MOCK_RETURNS(singlylinkedlist_create, TEST_SINGLYLINKEDLIST_HANDLE, NULL);
 
     REGISTER_GLOBAL_MOCK_RETURNS(HTTPHeaders_Alloc, TEST_HTTP_HEADERS_HANDLE, NULL);
 
@@ -749,7 +758,7 @@ TEST_FUNCTION_CLEANUP(TestMethodCleanup)
 TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_Create_sas_token_succeeds)
 {
     //arrange
-    setup_IoTHubClient_LL_UploadToBlob_Create_mocks(IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN);
+    setExpectedCallsFor_IoTHubClient_LL_UploadToBlob_Create(IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN);
 
     //act
     IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE h = IoTHubClient_LL_UploadToBlob_Create(&TEST_CONFIG_SAS, TEST_AUTH_HANDLE);
@@ -765,7 +774,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_Create_sas_token_succeeds)
 TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_Create_x509_succeeds)
 {
     //arrange
-    setup_IoTHubClient_LL_UploadToBlob_Create_mocks(IOTHUB_CREDENTIAL_TYPE_X509);
+    setExpectedCallsFor_IoTHubClient_LL_UploadToBlob_Create(IOTHUB_CREDENTIAL_TYPE_X509);
 
     //act
     IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE h = IoTHubClient_LL_UploadToBlob_Create(&TEST_CONFIG_SAS, TEST_AUTH_HANDLE);
@@ -781,7 +790,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_Create_x509_succeeds)
 TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_Create_x509_ecc_succeeds)
 {
     //arrange
-    setup_IoTHubClient_LL_UploadToBlob_Create_mocks(IOTHUB_CREDENTIAL_TYPE_X509_ECC);
+    setExpectedCallsFor_IoTHubClient_LL_UploadToBlob_Create(IOTHUB_CREDENTIAL_TYPE_X509_ECC);
 
     //act
     IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE h = IoTHubClient_LL_UploadToBlob_Create(&TEST_CONFIG_SAS, TEST_AUTH_HANDLE);
@@ -830,7 +839,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_Create_fails)
     int result = umock_c_negative_tests_init();
     ASSERT_ARE_EQUAL(int, 0, result);
 
-    setup_IoTHubClient_LL_UploadToBlob_Create_mocks(IOTHUB_CREDENTIAL_TYPE_DEVICE_KEY);
+    setExpectedCallsFor_IoTHubClient_LL_UploadToBlob_Create(IOTHUB_CREDENTIAL_TYPE_DEVICE_KEY);
 
     umock_c_negative_tests_snapshot();
 
@@ -929,7 +938,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_UploadMultipleBlocks_handle_NULL_fail
 TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_UploadMultipleBlocks_NULL_callback_fails)
 {
     //arrange
-    setup_IoTHubClient_LL_UploadToBlob_Create_mocks(IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN);
+    setExpectedCallsFor_IoTHubClient_LL_UploadToBlob_Create(IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN);
     IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE h = IoTHubClient_LL_UploadToBlob_Create(&TEST_CONFIG_SAS, TEST_AUTH_HANDLE);
 
     umock_c_reset_all_calls();
@@ -945,7 +954,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_UploadMultipleBlocks_NULL_callback_fa
     IoTHubClient_LL_UploadToBlob_Destroy(h);
 }
 
-TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_InitializeUpload_succeeds)
+TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_InitializeUpload_SAS_succeeds)
 {
     //arrange
     char* uploadCorrelationId;
@@ -961,11 +970,11 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_InitializeUpload_succeeds)
     char* trustedCertificates = NULL;
     HTTP_PROXY_OPTIONS* proxyOptions = NULL;
 
-    setup_IoTHubClient_LL_UploadToBlob_Create_mocks(credentialType);
+    setExpectedCallsFor_IoTHubClient_LL_UploadToBlob_Create(credentialType);
     IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE h = IoTHubClient_LL_UploadToBlob_Create(&TEST_CONFIG_SAS, TEST_AUTH_HANDLE);
 
     umock_c_reset_all_calls();
-    setIoTHubClient_LL_UploadToBlob_InitializeUploadCalls(
+    setExpectedCallsFor_IoTHubClient_LL_UploadToBlob_InitializeUpload(
         credentialType, blobUploadTimeoutMillisecs, curlEnableVerboseLogging, networkInterface,
         useTlsRenegotiation, x509privatekeyType, openSslEngine, trustedCertificates, proxyOptions);
 
@@ -980,7 +989,42 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_InitializeUpload_succeeds)
     IoTHubClient_LL_UploadToBlob_Destroy(h);
 }
 
-TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_InitializeUpload_ALL_OPTIONS_succeeds)
+TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_InitializeUpload_X509_succeeds)
+{
+    //arrange
+    char* uploadCorrelationId;
+    char* azureBlobSasUri;
+
+    IOTHUB_CREDENTIAL_TYPE credentialType = IOTHUB_CREDENTIAL_TYPE_X509;
+    size_t blobUploadTimeoutMillisecs = 0;
+    bool curlEnableVerboseLogging = false;
+    char* networkInterface = NULL;
+    bool useTlsRenegotiation = false;
+    int x509privatekeyType = 1;
+    char* openSslEngine = "pkcs11";
+    char* trustedCertificates = NULL;
+    HTTP_PROXY_OPTIONS* proxyOptions = NULL;
+
+    setExpectedCallsFor_IoTHubClient_LL_UploadToBlob_Create(credentialType);
+    IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE h = IoTHubClient_LL_UploadToBlob_Create(&TEST_CONFIG_SAS, TEST_AUTH_HANDLE);
+
+    umock_c_reset_all_calls();
+    setExpectedCallsFor_IoTHubClient_LL_UploadToBlob_InitializeUpload(
+        credentialType, blobUploadTimeoutMillisecs, curlEnableVerboseLogging, networkInterface,
+        useTlsRenegotiation, x509privatekeyType, openSslEngine, trustedCertificates, proxyOptions);
+
+    //act
+    IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_UploadToBlob_InitializeUpload(h, TEST_DESTINATION_FILENAME, &uploadCorrelationId, &azureBlobSasUri);
+
+    //assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+
+    //cleanup
+    IoTHubClient_LL_UploadToBlob_Destroy(h);
+}
+
+TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_InitializeUpload_SAS_ALL_OPTIONS_succeeds)
 {
     //arrange
     char* uploadCorrelationId;
@@ -999,7 +1043,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_InitializeUpload_ALL_OPTIONS_succeeds
     proxyOptions.username = "proxyusername";
     proxyOptions.password = "proxypassword";
 
-    setup_IoTHubClient_LL_UploadToBlob_Create_mocks(credentialType);
+    setExpectedCallsFor_IoTHubClient_LL_UploadToBlob_Create(credentialType);
     IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE h = IoTHubClient_LL_UploadToBlob_Create(&TEST_CONFIG_SAS, TEST_AUTH_HANDLE);
     (void)IoTHubClient_LL_UploadToBlob_SetOption(h, OPTION_BLOB_UPLOAD_TIMEOUT_SECS, &blobUploadTimeoutSecs);
     (void)IoTHubClient_LL_UploadToBlob_SetOption(h, OPTION_CURL_VERBOSE, &curlEnableVerboseLogging);
@@ -1011,7 +1055,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_InitializeUpload_ALL_OPTIONS_succeeds
     (void)IoTHubClient_LL_UploadToBlob_SetOption(h, OPTION_HTTP_PROXY, &proxyOptions);
 
     umock_c_reset_all_calls();
-    setIoTHubClient_LL_UploadToBlob_InitializeUploadCalls(
+    setExpectedCallsFor_IoTHubClient_LL_UploadToBlob_InitializeUpload(
         credentialType, blobUploadTimeoutSecs, curlEnableVerboseLogging, networkInterface,
         useTlsRenegotiation, x509privatekeyType, openSslEngine, trustedCertificates, &proxyOptions);
 
@@ -1026,7 +1070,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_InitializeUpload_ALL_OPTIONS_succeeds
     IoTHubClient_LL_UploadToBlob_Destroy(h);
 }
 
-TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_InitializeUpload_failure_checks)
+TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_InitializeUpload_SAS_failure_checks)
 {
     //arrange
     char* uploadCorrelationId;
@@ -1045,7 +1089,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_InitializeUpload_failure_checks)
     proxyOptions.username = "proxyusername";
     proxyOptions.password = "proxypassword";
 
-    setup_IoTHubClient_LL_UploadToBlob_Create_mocks(credentialType);
+    setExpectedCallsFor_IoTHubClient_LL_UploadToBlob_Create(credentialType);
     IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE h = IoTHubClient_LL_UploadToBlob_Create(&TEST_CONFIG_SAS, TEST_AUTH_HANDLE);
     (void)IoTHubClient_LL_UploadToBlob_SetOption(h, OPTION_BLOB_UPLOAD_TIMEOUT_SECS, &blobUploadTimeoutSecs);
     (void)IoTHubClient_LL_UploadToBlob_SetOption(h, OPTION_CURL_VERBOSE, &curlEnableVerboseLogging);
@@ -1058,7 +1102,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_InitializeUpload_failure_checks)
     
     ASSERT_ARE_EQUAL(int, 0, umock_c_negative_tests_init());
     umock_c_reset_all_calls();
-    setIoTHubClient_LL_UploadToBlob_InitializeUploadCalls(
+    setExpectedCallsFor_IoTHubClient_LL_UploadToBlob_InitializeUpload(
         credentialType, blobUploadTimeoutSecs, curlEnableVerboseLogging, networkInterface,
         useTlsRenegotiation, x509privatekeyType, openSslEngine, trustedCertificates, &proxyOptions);
     umock_c_negative_tests_snapshot();
@@ -1094,12 +1138,304 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_InitializeUpload_failure_checks)
     IoTHubClient_LL_UploadToBlob_Destroy(h);
 }
 
+TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_InitializeUpload_NULL_handle_fails)
+{
+    //arrange
+    char* uploadCorrelationId;
+    char* azureBlobSasUri;
+    IOTHUB_CREDENTIAL_TYPE credentialType = IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN;
 
+    umock_c_reset_all_calls();
+
+    //act
+    IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_UploadToBlob_InitializeUpload(NULL, TEST_DESTINATION_FILENAME, &uploadCorrelationId, &azureBlobSasUri);
+
+    //assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_NOT_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+
+    //cleanup
+}
+
+TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_InitializeUpload_NULL_destination_file_fails)
+{
+    //arrange
+    char* uploadCorrelationId;
+    char* azureBlobSasUri;
+    IOTHUB_CREDENTIAL_TYPE credentialType = IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN;
+
+    setExpectedCallsFor_IoTHubClient_LL_UploadToBlob_Create(credentialType);
+    IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE h = IoTHubClient_LL_UploadToBlob_Create(&TEST_CONFIG_SAS, TEST_AUTH_HANDLE);
+
+    umock_c_reset_all_calls();
+
+    //act
+    IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_UploadToBlob_InitializeUpload(h, NULL, &uploadCorrelationId, &azureBlobSasUri);
+
+    //assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_NOT_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+
+    //cleanup
+    IoTHubClient_LL_UploadToBlob_Destroy(h);
+}
+
+TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_InitializeUpload_NULL_correlation_arg_fails)
+{
+    //arrange
+    char* azureBlobSasUri;
+    IOTHUB_CREDENTIAL_TYPE credentialType = IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN;
+
+    setExpectedCallsFor_IoTHubClient_LL_UploadToBlob_Create(credentialType);
+    IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE h = IoTHubClient_LL_UploadToBlob_Create(&TEST_CONFIG_SAS, TEST_AUTH_HANDLE);
+
+    umock_c_reset_all_calls();
+
+    //act
+    IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_UploadToBlob_InitializeUpload(h, TEST_DESTINATION_FILENAME, NULL, &azureBlobSasUri);
+
+    //assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_NOT_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+
+    //cleanup
+    IoTHubClient_LL_UploadToBlob_Destroy(h);
+}
+
+TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_InitializeUpload_NULL_SAS_URI_arg_fails)
+{
+    //arrange
+    char* uploadCorrelationId;
+    IOTHUB_CREDENTIAL_TYPE credentialType = IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN;
+
+    setExpectedCallsFor_IoTHubClient_LL_UploadToBlob_Create(credentialType);
+    IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE h = IoTHubClient_LL_UploadToBlob_Create(&TEST_CONFIG_SAS, TEST_AUTH_HANDLE);
+
+    umock_c_reset_all_calls();
+
+    //act
+    IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_UploadToBlob_InitializeUpload(h, TEST_DESTINATION_FILENAME, &uploadCorrelationId, NULL);
+
+    //assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_NOT_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+
+    //cleanup
+    IoTHubClient_LL_UploadToBlob_Destroy(h);
+}
+
+
+static void setExpectedCallsFor_IoTHubClient_LL_UploadToBlob_CreateContext()
+{
+    // createUploadToBlobContextInstance
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_create());
+    // parseAzureBlobSasUri
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(Blob_CreateHttpConnection(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+}
+
+TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_CreateContext_succeeds)
+{
+    //arrange
+    char* uploadCorrelationId;
+    char* azureBlobSasUri;
+
+    IOTHUB_CREDENTIAL_TYPE credentialType = IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN;
+    size_t blobUploadTimeoutMillisecs = 0;
+    bool curlEnableVerboseLogging = false;
+    char* networkInterface = NULL;
+    bool useTlsRenegotiation = false;
+    int x509privatekeyType = 1;
+    char* openSslEngine = "pkcs11";
+    char* trustedCertificates = NULL;
+    HTTP_PROXY_OPTIONS* proxyOptions = NULL;
+
+    setExpectedCallsFor_IoTHubClient_LL_UploadToBlob_Create(credentialType);
+    IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE h = IoTHubClient_LL_UploadToBlob_Create(&TEST_CONFIG_SAS, TEST_AUTH_HANDLE);
+
+    umock_c_reset_all_calls();
+    setExpectedCallsFor_IoTHubClient_LL_UploadToBlob_InitializeUpload(
+        credentialType, blobUploadTimeoutMillisecs, curlEnableVerboseLogging, networkInterface,
+        useTlsRenegotiation, x509privatekeyType, openSslEngine, trustedCertificates, proxyOptions);
+    IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_UploadToBlob_InitializeUpload(h, TEST_DESTINATION_FILENAME, &uploadCorrelationId, &azureBlobSasUri);
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+
+    umock_c_reset_all_calls();
+    setExpectedCallsFor_IoTHubClient_LL_UploadToBlob_CreateContext();
+
+    //act
+    IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE uploadContext = IoTHubClient_LL_UploadToBlob_CreateContext(h, azureBlobSasUri);
+
+    //assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_IS_NOT_NULL(uploadContext);
+
+    //cleanup
+    IoTHubClient_LL_UploadToBlob_DestroyContext(uploadContext);
+    IoTHubClient_LL_UploadToBlob_Destroy(h);
+}
+
+TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_CreateContext_failure_checks)
+{
+    //arrange
+    char* uploadCorrelationId;
+    char* azureBlobSasUri;
+
+    IOTHUB_CREDENTIAL_TYPE credentialType = IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN;
+    size_t blobUploadTimeoutMillisecs = 0;
+    bool curlEnableVerboseLogging = false;
+    char* networkInterface = NULL;
+    bool useTlsRenegotiation = false;
+    int x509privatekeyType = 0;
+    char* openSslEngine = NULL;
+    char* trustedCertificates = NULL;
+    HTTP_PROXY_OPTIONS* proxyOptions = NULL;
+
+    setExpectedCallsFor_IoTHubClient_LL_UploadToBlob_Create(credentialType);
+    IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE h = IoTHubClient_LL_UploadToBlob_Create(&TEST_CONFIG_SAS, TEST_AUTH_HANDLE);
+
+    umock_c_reset_all_calls();
+    setExpectedCallsFor_IoTHubClient_LL_UploadToBlob_InitializeUpload(
+        credentialType, blobUploadTimeoutMillisecs, curlEnableVerboseLogging, networkInterface,
+        useTlsRenegotiation, x509privatekeyType, openSslEngine, trustedCertificates, proxyOptions);
+    IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_UploadToBlob_InitializeUpload(h, TEST_DESTINATION_FILENAME, &uploadCorrelationId, &azureBlobSasUri);
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+
+    ASSERT_ARE_EQUAL(int, 0, umock_c_negative_tests_init());
+    umock_c_reset_all_calls();
+    setExpectedCallsFor_IoTHubClient_LL_UploadToBlob_CreateContext();
+    umock_c_negative_tests_snapshot();
+
+    // act
+    for (int i = 0; i < umock_c_negative_tests_call_count(); i++)
+    {
+        umock_c_negative_tests_reset();
+
+        if (umock_c_negative_tests_can_call_fail(i))
+        {
+            umock_c_negative_tests_reset();
+            umock_c_negative_tests_fail_call(i);
+
+            // arrange
+            char error_msg[64];
+
+            umock_c_negative_tests_reset();
+            umock_c_negative_tests_fail_call(i);
+
+            // act
+            IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE uploadContext =
+                IoTHubClient_LL_UploadToBlob_CreateContext(h, azureBlobSasUri);
+
+            ///assert
+            sprintf(error_msg, "On failed call %lu (%s)", (unsigned long)i, umockcall_stringify(umock_c_get_last_expected_call()));
+            ASSERT_IS_NULL(uploadContext, error_msg);
+        }
+    }
+
+    //cleanup
+    umock_c_negative_tests_deinit();
+    IoTHubClient_LL_UploadToBlob_Destroy(h);
+}
+
+TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_CreateContext_NULL_handle_fails)
+{
+    //arrange
+    umock_c_reset_all_calls();
+
+    //act
+    IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE uploadContext = IoTHubClient_LL_UploadToBlob_CreateContext(NULL, TEST_BLOB_SAS_URI);
+
+    //assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_IS_NULL(uploadContext);
+
+    //cleanup
+}
+
+TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_CreateContext_NULL_SAS_URI_fails)
+{
+    //arrange
+    umock_c_reset_all_calls();
+
+    //act
+    IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE uploadContext =
+        IoTHubClient_LL_UploadToBlob_CreateContext((IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE)0x4567, NULL);
+
+    //assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_IS_NULL(uploadContext);
+
+    //cleanup
+}
+
+TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_DestroyContext_succeeds)
+{
+    //arrange
+    char* uploadCorrelationId;
+    char* azureBlobSasUri;
+
+    IOTHUB_CREDENTIAL_TYPE credentialType = IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN;
+    size_t blobUploadTimeoutMillisecs = 0;
+    bool curlEnableVerboseLogging = false;
+    char* networkInterface = NULL;
+    bool useTlsRenegotiation = false;
+    int x509privatekeyType = 1;
+    char* openSslEngine = "pkcs11";
+    char* trustedCertificates = NULL;
+    HTTP_PROXY_OPTIONS* proxyOptions = NULL;
+
+    setExpectedCallsFor_IoTHubClient_LL_UploadToBlob_Create(credentialType);
+    IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE h = IoTHubClient_LL_UploadToBlob_Create(&TEST_CONFIG_SAS, TEST_AUTH_HANDLE);
+
+    umock_c_reset_all_calls();
+    setExpectedCallsFor_IoTHubClient_LL_UploadToBlob_InitializeUpload(
+        credentialType, blobUploadTimeoutMillisecs, curlEnableVerboseLogging, networkInterface,
+        useTlsRenegotiation, x509privatekeyType, openSslEngine, trustedCertificates, proxyOptions);
+    IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_UploadToBlob_InitializeUpload(h, TEST_DESTINATION_FILENAME, &uploadCorrelationId, &azureBlobSasUri);
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+
+    umock_c_reset_all_calls();
+    setExpectedCallsFor_IoTHubClient_LL_UploadToBlob_CreateContext();
+    IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE uploadContext = IoTHubClient_LL_UploadToBlob_CreateContext(h, azureBlobSasUri);
+
+    umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(HTTPAPIEX_Destroy(TEST_HTTPAPIEX_HANDLE));
+    STRICT_EXPECTED_CALL(Blob_ClearBlockIdList(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+
+    //act
+    IoTHubClient_LL_UploadToBlob_DestroyContext(uploadContext);
+
+    //assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    IoTHubClient_LL_UploadToBlob_Destroy(h);
+}
+
+TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_DestroyContext_NULL_handle_fails)
+{
+    //arrange
+    umock_c_reset_all_calls();
+
+    //act
+    IoTHubClient_LL_UploadToBlob_DestroyContext(NULL);
+
+    //assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+}
 
 // TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_UploadMultipleBlocks_succeeds)
 // {
 //     //arrange
-//     setup_IoTHubClient_LL_UploadToBlob_Create_mocks(IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN);
+//     setExpectedCallsFor_IoTHubClient_LL_UploadToBlob_Create(IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN);
 //     IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE h = IoTHubClient_LL_UploadToBlob_Create(&TEST_CONFIG_SAS, TEST_AUTH_HANDLE);
 
 
@@ -1155,7 +1491,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_SetOption_verbose_succeeds)
 TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_SetOption_x509_cert_succeeds)
 {
     //arrange
-    setup_IoTHubClient_LL_UploadToBlob_Create_mocks(IOTHUB_CREDENTIAL_TYPE_X509);
+    setExpectedCallsFor_IoTHubClient_LL_UploadToBlob_Create(IOTHUB_CREDENTIAL_TYPE_X509);
     IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE h = IoTHubClient_LL_UploadToBlob_Create(&TEST_CONFIG_SAS, TEST_AUTH_HANDLE);
     umock_c_reset_all_calls();
 
@@ -1177,7 +1513,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_SetOption_openssl_private_key_type_su
 {
     int privateKeyType = 1;
     //arrange
-    setup_IoTHubClient_LL_UploadToBlob_Create_mocks(IOTHUB_CREDENTIAL_TYPE_X509);
+    setExpectedCallsFor_IoTHubClient_LL_UploadToBlob_Create(IOTHUB_CREDENTIAL_TYPE_X509);
     IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE h = IoTHubClient_LL_UploadToBlob_Create(&TEST_CONFIG_SAS, TEST_AUTH_HANDLE);
     umock_c_reset_all_calls();
 
@@ -1197,7 +1533,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_SetOption_openssl_engine_type_succeed
 {
     const char* engine = "pkcs11";
     //arrange
-    setup_IoTHubClient_LL_UploadToBlob_Create_mocks(IOTHUB_CREDENTIAL_TYPE_X509);
+    setExpectedCallsFor_IoTHubClient_LL_UploadToBlob_Create(IOTHUB_CREDENTIAL_TYPE_X509);
     IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE h = IoTHubClient_LL_UploadToBlob_Create(&TEST_CONFIG_SAS, TEST_AUTH_HANDLE);
 
     umock_c_reset_all_calls();
@@ -1218,7 +1554,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_SetOption_openssl_engine_type_succeed
 TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_SetOption_Network_Interface)
 {
     //arrange
-    setup_IoTHubClient_LL_UploadToBlob_Create_mocks(IOTHUB_CREDENTIAL_TYPE_X509);
+    setExpectedCallsFor_IoTHubClient_LL_UploadToBlob_Create(IOTHUB_CREDENTIAL_TYPE_X509);
     IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE h = IoTHubClient_LL_UploadToBlob_Create(&TEST_CONFIG_SAS, TEST_AUTH_HANDLE);
 
     umock_c_reset_all_calls();
@@ -1240,7 +1576,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_SetOption_Network_Interface)
 TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_SetOption_x509_cert_twice_succeeds)
 {
     //arrange
-    setup_IoTHubClient_LL_UploadToBlob_Create_mocks(IOTHUB_CREDENTIAL_TYPE_X509);
+    setExpectedCallsFor_IoTHubClient_LL_UploadToBlob_Create(IOTHUB_CREDENTIAL_TYPE_X509);
     IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE h = IoTHubClient_LL_UploadToBlob_Create(&TEST_CONFIG_SAS, TEST_AUTH_HANDLE);
     IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_UploadToBlob_SetOption(h, OPTION_X509_CERT, TEST_CERT);
     umock_c_reset_all_calls();
@@ -1263,7 +1599,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_SetOption_x509_cert_twice_succeeds)
 TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_SetOption_x509_key_succeeds)
 {
     //arrange
-    setup_IoTHubClient_LL_UploadToBlob_Create_mocks(IOTHUB_CREDENTIAL_TYPE_X509);
+    setExpectedCallsFor_IoTHubClient_LL_UploadToBlob_Create(IOTHUB_CREDENTIAL_TYPE_X509);
     IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE h = IoTHubClient_LL_UploadToBlob_Create(&TEST_CONFIG_SAS, TEST_AUTH_HANDLE);
 
     umock_c_reset_all_calls();
@@ -1284,7 +1620,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_SetOption_x509_key_succeeds)
 TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_SetOption_x509_trusted_cert_succeeds)
 {
     //arrange
-    setup_IoTHubClient_LL_UploadToBlob_Create_mocks(IOTHUB_CREDENTIAL_TYPE_X509);
+    setExpectedCallsFor_IoTHubClient_LL_UploadToBlob_Create(IOTHUB_CREDENTIAL_TYPE_X509);
     IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE h = IoTHubClient_LL_UploadToBlob_Create(&TEST_CONFIG_SAS, TEST_AUTH_HANDLE);
 
     umock_c_reset_all_calls();
@@ -1324,7 +1660,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_SetOption_x509_timeout_succeeds)
     //arrange
     size_t timeout = 10;
 
-    setup_IoTHubClient_LL_UploadToBlob_Create_mocks(IOTHUB_CREDENTIAL_TYPE_X509);
+    setExpectedCallsFor_IoTHubClient_LL_UploadToBlob_Create(IOTHUB_CREDENTIAL_TYPE_X509);
     IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE h = IoTHubClient_LL_UploadToBlob_Create(&TEST_CONFIG_SAS, TEST_AUTH_HANDLE);
     umock_c_reset_all_calls();
 
@@ -1344,7 +1680,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_SetOption_tls_renegotiation_succeeds)
     //arrange
     bool set_tls_renegotiaton = true;
 
-    setup_IoTHubClient_LL_UploadToBlob_Create_mocks(IOTHUB_CREDENTIAL_TYPE_X509);
+    setExpectedCallsFor_IoTHubClient_LL_UploadToBlob_Create(IOTHUB_CREDENTIAL_TYPE_X509);
     IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE h = IoTHubClient_LL_UploadToBlob_Create(&TEST_CONFIG_SAS, TEST_AUTH_HANDLE);
     umock_c_reset_all_calls();
 
