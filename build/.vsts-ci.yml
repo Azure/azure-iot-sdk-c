@@ -134,6 +134,9 @@ jobs:
       testRunTitle: 'windowsx64'
     condition: succeededOrFailed()
 - job: windowsx64release
+  variables:
+    CodeQL.Enabled: true
+    CodeQL.Language: cpp
   pool:
     name: 'sdk-c--win-vs2017'
   displayName: 'Windows x64 (Release)'
@@ -1027,3 +1030,21 @@ jobs:
       cd ..
       docker build -t armiotapp:latest . --network=host --file ./ARM/Dockerfile_adjunct
     displayName: 'Build ARM'
+- job: DotNET
+  displayName: .NET
+  variables:
+    CodeQL.Enabled: true
+    CodeQL.Language: csharp
+  pool: 
+    vmImage: 'windows-latest'
+  steps:
+  - task: NuGetCommand@2
+    inputs:
+      command: 'restore'
+      restoreSolution: 'tools\traceabilitytool\traceabilitytool.sln'
+      feedsToUse: 'select'
+      vstsFeed: 'f9b79625-2860-4d92-a4ee-57b03fabfd10/805c1538-e9e5-488f-9e17-6c63b6879ace'
+  - task: DotNetCoreCLI@2
+    inputs:
+      command: 'build'
+      projects: 'tools\traceabilitytool\traceabilitytool.sln'
