@@ -298,16 +298,17 @@ static bool service_client_update_twin(IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE 
                                                     device_to_use->deviceId, twin_json);
     }
 
-    result = twin_response != NULL;
     if (twin_response == NULL)
     {
         LogInfo("IoTHubDeviceTwin_Update(Module)Twin failed.");
+        result = false;
     }
     else
     {
         LogInfo("service_client_update_twin(): Twin response from Service SDK after update is <%s>.",
             twin_response);
         free(twin_response);
+        result = true;
     }
 
     return result;
