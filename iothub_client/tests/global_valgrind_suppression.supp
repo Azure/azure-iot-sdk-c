@@ -638,3 +638,12 @@
    fun:ENGINE_get_pkey_meth
    ...
 }
+{
+    <insert_a_suppression_name_here>
+    drd:ConflictingAccess
+    ...
+    fun:printf
+    fun:sendCompleteCallback
+    fun:IoTHubMessaging_LL_SendMessageComplete
+    ...
+ }
