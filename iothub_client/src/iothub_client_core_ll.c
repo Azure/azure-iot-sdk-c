@@ -2872,8 +2872,8 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_UploadMultipleBlocksToBlobEx(IOTHUB_CLI
     }
     else
     {
-        char* uploadCorrelationId;
-        char* azureBlobSasUri;
+        char* uploadCorrelationId = NULL;
+        char* azureBlobSasUri = NULL;
 
         if (IoTHubClient_LL_UploadToBlob_InitializeUpload(
                 iotHubClientHandle->uploadToBlobHandle, destinationFileName, &uploadCorrelationId, &azureBlobSasUri) != IOTHUB_CLIENT_OK)
@@ -2900,15 +2900,15 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_UploadMultipleBlocksToBlobEx(IOTHUB_CLI
                 }
                 else
                 {
-                    uploadSucceeded = false;
+                    uploadSucceeded = true;
                 }
 
                 IoTHubClient_LL_UploadToBlob_DestroyContext(uploadContext);
             }
 
-            // TODO (ewertons): fix the http error status below.
             if (IoTHubClient_LL_UploadToBlob_NotifyCompletion(
-                    iotHubClientHandle->uploadToBlobHandle, uploadCorrelationId, uploadSucceeded, 400, NULL) != IOTHUB_CLIENT_OK)
+                    iotHubClientHandle->uploadToBlobHandle, uploadCorrelationId, uploadSucceeded,
+                    uploadSucceeded ? 200 : 400, NULL) != IOTHUB_CLIENT_OK)
             {
                 LogError("Failed completing upload to blob.");
                 result = IOTHUB_CLIENT_ERROR;

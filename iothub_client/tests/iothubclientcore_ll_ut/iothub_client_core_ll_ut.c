@@ -229,8 +229,6 @@ static const char* TEST_STRING_VALUE = "Test string value";
 #define TEST_METHOD_ID                      (METHOD_HANDLE)0x61
 #define TEST_IOTHUB_AUTH_HANDLE             (IOTHUB_AUTHORIZATION_HANDLE)0x62
 
-#define TEST_U2B_HANDLE                     (IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE)0x4243
-
 static const char* TEST_PROV_URI = "global.azure-devices-provisioning.net";
 
 #define TEST_METHOD_NAME "method_name"
@@ -258,6 +256,13 @@ static const char* TEST_VAR_DEVICEID = "testDeviceId";
 static const char* TEST_VAR_EDGEHOSTNAME = "testEdgeHost.host";
 static const char* TEST_VAR_EDGEGATEWAYHOST = "testEdgeGatewayHost";
 static const char* TEST_VAR_MODULEID = "testModuleId";
+
+#ifndef DONT_USE_UPLOADTOBLOB
+#define TEST_U2B_HANDLE                     (IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE)0x4243
+#define TEST_U2B_CONTEXT_HANDLE             (IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE)0x4244
+static const char* const TEST_BLOB_SAS_URI = "https://mystorageaccount.blob.core.windows.net/uploadcontainer01/myDeviceId%2fsubdir%text.txt?sv=2018-03-28&sr=b&sig=BuvkhxiMqrFJDYoS4UCZq%2FMkS4rb47doCPvfdgx1iwM%3D&se=2023-07-16T05%3A31%3A08Z&sp=rw";
+static const char* const TEST_UPLOAD_CORRELATION_ID = "MjAyMzA3MTYwNTQxXzVjMzg5NzMzLTlhZTgtNDVmZC1iNjQ0LTIzZDUzMDc5YzgyMF9zdWJkaXIvaGVsbG9fd29ybGRfY3VzdG9tX21iLnR4dF92ZXIyLjA=";
+#endif // DONT_USE_UPLOADTOBLOB
 
 static SINGLYLINKEDLIST_HANDLE test_singlylinkedlist_handle = (SINGLYLINKEDLIST_HANDLE)0x4243;
 static LIST_ITEM_HANDLE find_item_handle = (LIST_ITEM_HANDLE)0x4244;
@@ -794,6 +799,7 @@ TEST_SUITE_INITIALIZE(suite_init)
 
 #ifndef DONT_USE_UPLOADTOBLOB
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE, void*);
+    REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK_EX, void*);
 #endif // DONT_USE_UPLOADTOBLOB
 
@@ -849,6 +855,13 @@ TEST_SUITE_INITIALIZE(suite_init)
 #ifndef DONT_USE_UPLOADTOBLOB
     REGISTER_GLOBAL_MOCK_RETURNS(IoTHubClient_LL_UploadToBlob_Create, TEST_U2B_HANDLE, NULL);
     REGISTER_GLOBAL_MOCK_RETURNS(IoTHubClient_LL_UploadToBlob_SetOption, IOTHUB_CLIENT_OK, IOTHUB_CLIENT_ERROR);
+    REGISTER_GLOBAL_MOCK_RETURNS(IoTHubClient_LL_UploadToBlob_InitializeUpload, IOTHUB_CLIENT_OK, IOTHUB_CLIENT_ERROR);
+    REGISTER_GLOBAL_MOCK_RETURNS(IoTHubClient_LL_UploadToBlob_NotifyCompletion, IOTHUB_CLIENT_OK, IOTHUB_CLIENT_ERROR);
+    REGISTER_GLOBAL_MOCK_RETURNS(IoTHubClient_LL_UploadToBlob_CreateContext, TEST_U2B_CONTEXT_HANDLE, NULL);
+    REGISTER_GLOBAL_MOCK_RETURNS(IoTHubClient_LL_UploadToBlob_PutBlock, IOTHUB_CLIENT_OK, IOTHUB_CLIENT_ERROR);
+    REGISTER_GLOBAL_MOCK_RETURNS(IoTHubClient_LL_UploadToBlob_PutBlockList, IOTHUB_CLIENT_OK, IOTHUB_CLIENT_ERROR);
+    REGISTER_GLOBAL_MOCK_RETURNS(IoTHubClient_LL_UploadToBlob_UploadMultipleBlocks, IOTHUB_CLIENT_OK, IOTHUB_CLIENT_ERROR);
+    
 #endif
 
 #ifdef USE_EDGE_MODULES
@@ -4035,10 +4048,16 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetOption_messageTimeout_when_tickcounter_fail
 TEST_FUNCTION(IoTHubClientCore_LL_UploadToBlob_OK)
 {
     //arrange
+    char* uploadCorrelationId;
+    char* azureBlobSasUri;
+    (void)my_mallocAndStrcpy_s(&uploadCorrelationId, TEST_UPLOAD_CORRELATION_ID);
+    (void)my_mallocAndStrcpy_s(&azureBlobSasUri, TEST_BLOB_SAS_URI);
     IOTHUB_CLIENT_CORE_LL_HANDLE h = IoTHubClientCore_LL_Create(&TEST_CONFIG);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadToBlob_InitializeUpload(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadToBlob_InitializeUpload(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .CopyOutArgumentBuffer_uploadCorrelationId(&uploadCorrelationId, sizeof(char*))
+        .CopyOutArgumentBuffer_azureBlobSasUri(&azureBlobSasUri, sizeof(char*));
     STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadToBlob_CreateContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadToBlob_PutBlock(IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadToBlob_PutBlockList(IGNORED_PTR_ARG));
@@ -4051,8 +4070,8 @@ TEST_FUNCTION(IoTHubClientCore_LL_UploadToBlob_OK)
     IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_UploadToBlob(h, "irrelevantFileName", (const unsigned char*)"a", 1);
 
     ///assert
-    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
 
     ///cleanup
     IoTHubClientCore_LL_Destroy(h);
@@ -4061,14 +4080,19 @@ TEST_FUNCTION(IoTHubClientCore_LL_UploadToBlob_OK)
 TEST_FUNCTION(IoTHubClientCore_LL_UploadToBlob_fails)
 {
     //arrange
+    char* uploadCorrelationId;
+    char* azureBlobSasUri;
+    (void)my_mallocAndStrcpy_s(&uploadCorrelationId, TEST_UPLOAD_CORRELATION_ID);
+    (void)my_mallocAndStrcpy_s(&azureBlobSasUri, TEST_BLOB_SAS_URI);
     IOTHUB_CLIENT_CORE_LL_HANDLE h = IoTHubClientCore_LL_Create(&TEST_CONFIG);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadToBlob_InitializeUpload(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadToBlob_InitializeUpload(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .CopyOutArgumentBuffer_uploadCorrelationId(&uploadCorrelationId, sizeof(char*))
+        .CopyOutArgumentBuffer_azureBlobSasUri(&azureBlobSasUri, sizeof(char*));
     STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadToBlob_CreateContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadToBlob_PutBlock(IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG))
         .SetReturn(IOTHUB_CLIENT_ERROR);
-    STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadToBlob_PutBlockList(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadToBlob_DestroyContext(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadToBlob_NotifyCompletion(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
@@ -4078,8 +4102,8 @@ TEST_FUNCTION(IoTHubClientCore_LL_UploadToBlob_fails)
     IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_UploadToBlob(h, "irrelevantFileName", (const unsigned char*)"a", 1);
 
     ///assert
-    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, result);
 
     ///cleanup
     IoTHubClientCore_LL_Destroy(h);
@@ -4089,11 +4113,13 @@ TEST_FUNCTION(IoTHubClientCore_LL_UploadToBlob_fails)
 TEST_FUNCTION(IoTHubClientCore_LL_UploadToBlob_with_NULL_handle_fails)
 {
     //arrange
+    umock_c_reset_all_calls();
 
     //act
     IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_UploadToBlob(NULL, "irrelevantFileName", (const unsigned char*)"a", 1);
 
     ///assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_INVALID_ARG, result);
 
     ///cleanup
@@ -4109,8 +4135,8 @@ TEST_FUNCTION(IoTHubClientCore_LL_UploadToBlob_with_NULL_fileName_fails)
     IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_UploadToBlob(h, NULL, (const unsigned char*)"a", 1);
 
     ///assert
-    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_INVALID_ARG, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_INVALID_ARG, result);
 
     ///cleanup
     IoTHubClientCore_LL_Destroy(h);
@@ -4126,8 +4152,8 @@ TEST_FUNCTION(IoTHubClientCore_LL_UploadToBlob_with_NULL_source_and_size_greater
     IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_UploadToBlob(h, "someFileName.txt", NULL, 1);
 
     ///assert
-    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_INVALID_ARG, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_INVALID_ARG, result);
 
     ///cleanup
     IoTHubClientCore_LL_Destroy(h);
@@ -4142,6 +4168,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_UploadMultipleBlocksToBlob_with_NULL_handle_fa
     IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_UploadMultipleBlocksToBlob(NULL, "irrelevantFileName", my_FileUpload_GetData_Callback, &context);
 
     ///assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_INVALID_ARG, result);
 
     ///cleanup
@@ -4158,6 +4185,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_UploadMultipleBlocksToBlob_with_NULL_filename_
     IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_UploadMultipleBlocksToBlob(h, NULL, my_FileUpload_GetData_Callback, &context);
 
     ///assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_INVALID_ARG, result);
 
     ///cleanup
@@ -4175,6 +4203,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_UploadMultipleBlocksToBlob_with_NULL_callback_
     IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_UploadMultipleBlocksToBlob(h, "irrelevantFileName", NULL, &context);
 
     ///assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_INVALID_ARG, result);
 
     ///cleanup
@@ -4185,10 +4214,16 @@ TEST_FUNCTION(IoTHubClientCore_LL_UploadMultipleBlocksToBlobEx_succeeds)
 {
     //arrange
     unsigned int context = 1;
+    char* uploadCorrelationId;
+    char* azureBlobSasUri;
+    (void)my_mallocAndStrcpy_s(&uploadCorrelationId, TEST_UPLOAD_CORRELATION_ID);
+    (void)my_mallocAndStrcpy_s(&azureBlobSasUri, TEST_BLOB_SAS_URI);
     IOTHUB_CLIENT_CORE_LL_HANDLE h = IoTHubClientCore_LL_Create(&TEST_CONFIG);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadToBlob_InitializeUpload(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadToBlob_InitializeUpload(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .CopyOutArgumentBuffer_uploadCorrelationId(&uploadCorrelationId, sizeof(char*))
+        .CopyOutArgumentBuffer_azureBlobSasUri(&azureBlobSasUri, sizeof(char*));
     STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadToBlob_CreateContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadToBlob_UploadMultipleBlocks(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadToBlob_DestroyContext(IGNORED_PTR_ARG));
@@ -4200,6 +4235,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_UploadMultipleBlocksToBlobEx_succeeds)
     IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_UploadMultipleBlocksToBlobEx(h, "irrelevantFileName", my_FileUpload_GetData_CallbackEx, &context);
 
     ///assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
 
     ///cleanup
@@ -4210,10 +4246,17 @@ TEST_FUNCTION(IoTHubClientCore_LL_UploadMultipleBlocksToBlobEx_fails)
 {
     //arrange
     unsigned int context = 1;
+    char* uploadCorrelationId;
+    char* azureBlobSasUri;
+    (void)my_mallocAndStrcpy_s(&uploadCorrelationId, TEST_UPLOAD_CORRELATION_ID);
+    (void)my_mallocAndStrcpy_s(&azureBlobSasUri, TEST_BLOB_SAS_URI);
+
     IOTHUB_CLIENT_CORE_LL_HANDLE h = IoTHubClientCore_LL_Create(&TEST_CONFIG);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadToBlob_InitializeUpload(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadToBlob_InitializeUpload(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .CopyOutArgumentBuffer_uploadCorrelationId(&uploadCorrelationId, sizeof(char*))
+        .CopyOutArgumentBuffer_azureBlobSasUri(&azureBlobSasUri, sizeof(char*));
     STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadToBlob_CreateContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadToBlob_UploadMultipleBlocks(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .SetReturn(IOTHUB_CLIENT_ERROR);
@@ -4226,6 +4269,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_UploadMultipleBlocksToBlobEx_fails)
     IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_UploadMultipleBlocksToBlobEx(h, "irrelevantFileName", my_FileUpload_GetData_CallbackEx, &context);
 
     ///assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, result);
 
     ///cleanup
