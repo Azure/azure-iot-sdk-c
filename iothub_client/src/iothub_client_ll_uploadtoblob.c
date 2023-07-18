@@ -750,7 +750,7 @@ static int parseAzureBlobSasUri(const char* sasUri, char** blobStorageHostname, 
     const char* hostnameBegin;
     char* hostname = NULL;
     char* relativePath = NULL;
-    int sasUriLength = strlen(sasUri);
+    size_t sasUriLength = strlen(sasUri);
     
     /*to find the hostname, the following logic is applied:*/
     /*the hostname starts at the first character after "://"*/
