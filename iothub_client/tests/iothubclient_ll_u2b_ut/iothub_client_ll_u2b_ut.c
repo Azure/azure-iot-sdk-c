@@ -254,9 +254,9 @@ static IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT FileUpload_GetData_Callback(IOT
         *data = (unsigned char*)uploadContext->source + (uploadContext->size - uploadContext->toUpload);
         *size = thisBlockSize;
         uploadContext->toUpload -= thisBlockSize;
-
-        return IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_OK;
     }
+
+    return IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_OK;
 }
 
 TEST_DEFINE_ENUM_TYPE       (HTTPAPI_RESULT, HTTPAPI_RESULT_VALUES);
