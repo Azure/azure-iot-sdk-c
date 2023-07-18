@@ -50,6 +50,7 @@ void* my_gballoc_realloc(void* ptr, size_t size)
 #include "iothub_message.h"
 #include "internal/iothub_client_authorization.h"
 #include "internal/iothub_client_diagnostic.h"
+#include "internal/iothub_client_ll_uploadtoblob.h"
 
 #ifdef USE_EDGE_MODULES
 #include "internal/iothub_client_edge.h"
@@ -226,7 +227,9 @@ static const char* TEST_STRING_VALUE = "Test string value";
 #define TEST_RETRY_TIMEOUT_SECS             60
 
 #define TEST_METHOD_ID                      (METHOD_HANDLE)0x61
-#define TEST_IOTHUB_AUTH_HANDLE        (IOTHUB_AUTHORIZATION_HANDLE)0x62
+#define TEST_IOTHUB_AUTH_HANDLE             (IOTHUB_AUTHORIZATION_HANDLE)0x62
+
+#define TEST_U2B_HANDLE                     (IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE)0x4243
 
 static const char* TEST_PROV_URI = "global.azure-devices-provisioning.net";
 
@@ -476,20 +479,6 @@ static void my_CONSTBUFFER_DecRef(CONSTBUFFER_HANDLE constbufferHandle)
 {
     my_gballoc_free(constbufferHandle);
 }
-
-#ifndef DONT_USE_UPLOADTOBLOB
-static IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE my_IoTHubClient_LL_UploadToBlob_Create(const IOTHUB_CLIENT_CONFIG* config, IOTHUB_AUTHORIZATION_HANDLE auth_handle)
-{
-    (void)config;
-    (void)auth_handle;
-    return (IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE)my_gballoc_malloc(1);
-}
-
-static void my_IoTHubClient_LL_UploadToBlob_Destroy(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE handle)
-{
-    my_gballoc_free(handle);
-}
-#endif
 
 #ifdef USE_EDGE_MODULES
 static IOTHUB_CLIENT_EDGE_HANDLE my_IoTHubModuleClient_LL_MethodHandle_Create(const IOTHUB_CLIENT_CONFIG* config, IOTHUB_AUTHORIZATION_HANDLE authorizationHandle, const char* moduleId)
@@ -858,10 +847,8 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(FAKE_IoTHubTransport_DeviceMethod_Response, MU_FAILURE);
 
 #ifndef DONT_USE_UPLOADTOBLOB
-    REGISTER_GLOBAL_MOCK_HOOK(IoTHubClient_LL_UploadToBlob_Create, my_IoTHubClient_LL_UploadToBlob_Create);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubClient_LL_UploadToBlob_Create, NULL);
-    REGISTER_GLOBAL_MOCK_HOOK(IoTHubClient_LL_UploadToBlob_Destroy, my_IoTHubClient_LL_UploadToBlob_Destroy);
-    REGISTER_GLOBAL_MOCK_RETURN(IoTHubClient_LL_UploadToBlob_SetOption, IOTHUB_CLIENT_OK);
+    REGISTER_GLOBAL_MOCK_RETURNS(IoTHubClient_LL_UploadToBlob_Create, TEST_U2B_HANDLE, NULL);
+    REGISTER_GLOBAL_MOCK_RETURNS(IoTHubClient_LL_UploadToBlob_SetOption, IOTHUB_CLIENT_OK, IOTHUB_CLIENT_ERROR);
 #endif
 
 #ifdef USE_EDGE_MODULES
@@ -971,9 +958,6 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_HOOK(singlylinkedlist_find, real_singlylinkedlist_find);
     REGISTER_GLOBAL_MOCK_HOOK(singlylinkedlist_foreach, real_singlylinkedlist_foreach);
     REGISTER_GLOBAL_MOCK_HOOK(singlylinkedlist_remove_if, real_singlylinkedlist_remove_if);
-
-    REGISTER_GLOBAL_MOCK_RETURN(IoTHubClient_LL_UploadToBlob_Impl, IOTHUB_CLIENT_OK);
-    REGISTER_GLOBAL_MOCK_RETURN(IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl, IOTHUB_CLIENT_OK);
 }
 
 TEST_SUITE_CLEANUP(suite_cleanup)
@@ -4054,7 +4038,14 @@ TEST_FUNCTION(IoTHubClientCore_LL_UploadToBlob_OK)
     IOTHUB_CLIENT_CORE_LL_HANDLE h = IoTHubClientCore_LL_Create(&TEST_CONFIG);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadToBlob_Impl(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadToBlob_InitializeUpload(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadToBlob_CreateContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadToBlob_PutBlock(IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadToBlob_PutBlockList(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadToBlob_DestroyContext(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadToBlob_NotifyCompletion(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
 
     //act
     IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_UploadToBlob(h, "irrelevantFileName", (const unsigned char*)"a", 1);
@@ -4073,7 +4064,15 @@ TEST_FUNCTION(IoTHubClientCore_LL_UploadToBlob_fails)
     IOTHUB_CLIENT_CORE_LL_HANDLE h = IoTHubClientCore_LL_Create(&TEST_CONFIG);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadToBlob_Impl(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG)).SetReturn(IOTHUB_CLIENT_ERROR);
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadToBlob_InitializeUpload(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadToBlob_CreateContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadToBlob_PutBlock(IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+        .SetReturn(IOTHUB_CLIENT_ERROR);
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadToBlob_PutBlockList(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadToBlob_DestroyContext(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadToBlob_NotifyCompletion(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
 
     //act
     IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_UploadToBlob(h, "irrelevantFileName", (const unsigned char*)"a", 1);
@@ -4189,7 +4188,13 @@ TEST_FUNCTION(IoTHubClientCore_LL_UploadMultipleBlocksToBlobEx_succeeds)
     IOTHUB_CLIENT_CORE_LL_HANDLE h = IoTHubClientCore_LL_Create(&TEST_CONFIG);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadToBlob_InitializeUpload(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadToBlob_CreateContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadToBlob_UploadMultipleBlocks(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadToBlob_DestroyContext(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadToBlob_NotifyCompletion(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
 
     //act
     IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_UploadMultipleBlocksToBlobEx(h, "irrelevantFileName", my_FileUpload_GetData_CallbackEx, &context);
@@ -4208,7 +4213,14 @@ TEST_FUNCTION(IoTHubClientCore_LL_UploadMultipleBlocksToBlobEx_fails)
     IOTHUB_CLIENT_CORE_LL_HANDLE h = IoTHubClientCore_LL_Create(&TEST_CONFIG);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(IOTHUB_CLIENT_ERROR);
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadToBlob_InitializeUpload(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadToBlob_CreateContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadToBlob_UploadMultipleBlocks(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .SetReturn(IOTHUB_CLIENT_ERROR);
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadToBlob_DestroyContext(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadToBlob_NotifyCompletion(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
 
     //act
     IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_UploadMultipleBlocksToBlobEx(h, "irrelevantFileName", my_FileUpload_GetData_CallbackEx, &context);
