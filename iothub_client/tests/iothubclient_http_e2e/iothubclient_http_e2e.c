@@ -640,9 +640,6 @@ TEST_FUNCTION(IoTHub_HTTP_SendEvent_Shared_e2e)
 
         iotHubClientHandle2 = IoTHubDeviceClient_CreateWithTransport(transportHandle, &iotHubConfig2);
         ASSERT_IS_NOT_NULL(iotHubClientHandle2, "Failure creating IothubClient handle device 2");
-
-        // wait for the device to get created in the hub
-        //ThreadAPI_Sleep(DEVICE_CREATE_WAIT * 1000);
     }
 
     // Send the Event device 1
