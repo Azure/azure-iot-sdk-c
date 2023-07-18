@@ -1029,7 +1029,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_PutBlockList(IOTHUB_CLIENT_LL_
     }
     else
     {
-        unsigned int putBlockListHttpStatus;
+        unsigned int putBlockListHttpStatus = 0;
 
         // Do not PUT BLOCK LIST if result is not success (isSuccess == false)
         // Otherwise we could corrupt a blob with a partial update.
@@ -1185,7 +1185,11 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_UploadMultipleBlocks(IOTHUB_CL
             (void)getDataCallbackEx(FILE_UPLOAD_ERROR, NULL, NULL, context);
             result = IOTHUB_CLIENT_ERROR;
         }
-        else if (IoTHubClient_LL_UploadToBlob_PutBlockList(uploadContextHandle) != IOTHUB_CLIENT_OK)
+        // Checking if blockID is greater than 0 guarantees that PUT BLOCK LIST will only
+        // be attempted if at least one block has indeed been uploaded to Azure Storage.
+        // This behavior follows the behavior of the original implementation of
+        // Upload-to-Blob in azure-iot-sdk-c.
+        else if (blockID > 0 && IoTHubClient_LL_UploadToBlob_PutBlockList(uploadContextHandle) != IOTHUB_CLIENT_OK)
         {
             LogError("Failed to perform Azure Blob Put Block List operation");
             (void)getDataCallbackEx(FILE_UPLOAD_ERROR, NULL, NULL, context);

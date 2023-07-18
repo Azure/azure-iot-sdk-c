@@ -1003,6 +1003,8 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_InitializeUpload_SAS_succeeds)
 
     //cleanup
     IoTHubClient_LL_UploadToBlob_Destroy(h);
+    my_gballoc_free(uploadCorrelationId);
+    my_gballoc_free(azureBlobSasUri);
 }
 
 TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_InitializeUpload_X509_succeeds)
@@ -1038,6 +1040,8 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_InitializeUpload_X509_succeeds)
 
     //cleanup
     IoTHubClient_LL_UploadToBlob_Destroy(h);
+    my_gballoc_free(uploadCorrelationId);
+    my_gballoc_free(azureBlobSasUri);
 }
 
 TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_InitializeUpload_X509_ALL_OPTIONS_succeeds)
@@ -1084,6 +1088,8 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_InitializeUpload_X509_ALL_OPTIONS_suc
 
     //cleanup
     IoTHubClient_LL_UploadToBlob_Destroy(h);
+    my_gballoc_free(uploadCorrelationId);
+    my_gballoc_free(azureBlobSasUri);
 }
 
 TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_InitializeUpload_SAS_failure_checks)
@@ -1144,7 +1150,9 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_InitializeUpload_SAS_failure_checks)
                 h, TEST_DESTINATION_FILENAME, &uploadCorrelationId, &azureBlobSasUri);
 
             ///assert
-            sprintf(error_msg, "On failed call %lu (%s)", (unsigned long)i, umockcall_stringify(umock_c_get_last_expected_call()));
+            char* umock_last_call = umockcall_stringify(umock_c_get_last_expected_call());
+            sprintf(error_msg, "On failed call %lu (%s)", (unsigned long)i, umock_last_call);
+            my_gballoc_free(umock_last_call);
             ASSERT_ARE_NOT_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, error_msg);
         }
     }
@@ -1279,6 +1287,8 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_CreateContext_succeeds)
     //cleanup
     IoTHubClient_LL_UploadToBlob_DestroyContext(uploadContext);
     IoTHubClient_LL_UploadToBlob_Destroy(h);
+    my_gballoc_free(uploadCorrelationId);
+    my_gballoc_free(azureBlobSasUri);
 }
 
 TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_CreateContext_failure_checks)
@@ -1333,7 +1343,9 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_CreateContext_failure_checks)
                 IoTHubClient_LL_UploadToBlob_CreateContext(h, azureBlobSasUri);
 
             ///assert
-            sprintf(error_msg, "On failed call %lu (%s)", (unsigned long)i, umockcall_stringify(umock_c_get_last_expected_call()));
+            char* umock_last_call = umockcall_stringify(umock_c_get_last_expected_call());
+            sprintf(error_msg, "On failed call %lu (%s)", (unsigned long)i, umock_last_call);
+            my_gballoc_free(umock_last_call);
             ASSERT_IS_NULL(uploadContext, error_msg);
         }
     }
@@ -1341,6 +1353,8 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_CreateContext_failure_checks)
     //cleanup
     umock_c_negative_tests_deinit();
     IoTHubClient_LL_UploadToBlob_Destroy(h);
+    my_gballoc_free(uploadCorrelationId);
+    my_gballoc_free(azureBlobSasUri);
 }
 
 TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_CreateContext_NULL_handle_fails)
@@ -1420,6 +1434,8 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_DestroyContext_succeeds)
 
     //cleanup
     IoTHubClient_LL_UploadToBlob_Destroy(h);
+    my_gballoc_free(uploadCorrelationId);
+    my_gballoc_free(azureBlobSasUri);
 }
 
 TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_DestroyContext_NULL_handle_fails)
@@ -1476,6 +1492,8 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_NotifyCompletion_SAS_Success_succeeds
 
     //cleanup
     IoTHubClient_LL_UploadToBlob_Destroy(h);
+    my_gballoc_free(uploadCorrelationId);
+    my_gballoc_free(azureBlobSasUri);
 }
 
 TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_NotifyCompletion_X509_Success_succeeds)
@@ -1518,6 +1536,8 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_NotifyCompletion_X509_Success_succeed
 
     //cleanup
     IoTHubClient_LL_UploadToBlob_Destroy(h);
+    my_gballoc_free(uploadCorrelationId);
+    my_gballoc_free(azureBlobSasUri);
 }
 
 TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_NotifyCompletion_NULL_responseContent_succeeds)
@@ -1560,6 +1580,8 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_NotifyCompletion_NULL_responseContent
 
     //cleanup
     IoTHubClient_LL_UploadToBlob_Destroy(h);
+    my_gballoc_free(uploadCorrelationId);
+    my_gballoc_free(azureBlobSasUri);
 }
 
 TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_NotifyCompletion_failure_checks)
@@ -1615,7 +1637,9 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_NotifyCompletion_failure_checks)
             IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_UploadToBlob_NotifyCompletion(h, uploadCorrelationId, true, 200, "All good");
 
             ///assert
-            sprintf(error_msg, "On failed call %lu (%s)", (unsigned long)i, umockcall_stringify(umock_c_get_last_expected_call()));
+            char* umock_last_call = umockcall_stringify(umock_c_get_last_expected_call());
+            sprintf(error_msg, "On failed call %lu (%s)", (unsigned long)i, umock_last_call);
+            my_gballoc_free(umock_last_call);
             ASSERT_ARE_NOT_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, error_msg);
         }
     }
@@ -1623,6 +1647,8 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_NotifyCompletion_failure_checks)
     //cleanup
     umock_c_negative_tests_deinit();
     IoTHubClient_LL_UploadToBlob_Destroy(h);
+    my_gballoc_free(uploadCorrelationId);
+    my_gballoc_free(azureBlobSasUri);
 }
 
 TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_NotifyCompletion_NULL_handle_fails)
@@ -1711,6 +1737,8 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_PutBlock_succeeds)
     //cleanup
     IoTHubClient_LL_UploadToBlob_DestroyContext(uploadContext);
     IoTHubClient_LL_UploadToBlob_Destroy(h);
+    my_gballoc_free(uploadCorrelationId);
+    my_gballoc_free(azureBlobSasUri);
 }
 
 TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_PutBlock_failure_checks)
@@ -1777,7 +1805,9 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_PutBlock_failure_checks)
             result = IoTHubClient_LL_UploadToBlob_PutBlock(uploadContext, 0 /* block number*/, blockData, blockDataSize);
 
             ///assert
-            sprintf(error_msg, "On failed call %lu (%s)", (unsigned long)i, umockcall_stringify(umock_c_get_last_expected_call()));
+            char* umock_last_call = umockcall_stringify(umock_c_get_last_expected_call());
+            sprintf(error_msg, "On failed call %lu (%s)", (unsigned long)i, umock_last_call);
+            my_gballoc_free(umock_last_call);
             ASSERT_ARE_NOT_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, error_msg);
         }
     }
@@ -1786,6 +1816,8 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_PutBlock_failure_checks)
     umock_c_negative_tests_deinit();
     IoTHubClient_LL_UploadToBlob_DestroyContext(uploadContext);
     IoTHubClient_LL_UploadToBlob_Destroy(h);
+    my_gballoc_free(uploadCorrelationId);
+    my_gballoc_free(azureBlobSasUri);
 }
 
 TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_PutBlock_NULL_handle_fails)
@@ -1906,6 +1938,8 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_PutBlockList_succeeds)
     //cleanup
     IoTHubClient_LL_UploadToBlob_DestroyContext(uploadContext);
     IoTHubClient_LL_UploadToBlob_Destroy(h);
+    my_gballoc_free(uploadCorrelationId);
+    my_gballoc_free(azureBlobSasUri);
 }
 
 TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_PutBlockList_failure_checks)
@@ -1977,7 +2011,9 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_PutBlockList_failure_checks)
             result = IoTHubClient_LL_UploadToBlob_PutBlockList(uploadContext);
 
             ///assert
-            sprintf(error_msg, "On failed call %lu (%s)", (unsigned long)i, umockcall_stringify(umock_c_get_last_expected_call()));
+            char* umock_last_call = umockcall_stringify(umock_c_get_last_expected_call());
+            sprintf(error_msg, "On failed call %lu (%s)", (unsigned long)i, umock_last_call);
+            my_gballoc_free(umock_last_call);
             ASSERT_ARE_NOT_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, error_msg);
         }
     }
@@ -1986,6 +2022,8 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_PutBlockList_failure_checks)
     umock_c_negative_tests_deinit();
     IoTHubClient_LL_UploadToBlob_DestroyContext(uploadContext);
     IoTHubClient_LL_UploadToBlob_Destroy(h);
+    my_gballoc_free(uploadCorrelationId);
+    my_gballoc_free(azureBlobSasUri);
 }
 
 TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_PutBlockList_NULL_handle_fails)
@@ -2107,6 +2145,8 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_UploadMultipleBlocks_20x_succeeds)
     //cleanup
     IoTHubClient_LL_UploadToBlob_DestroyContext(uploadContext);
     IoTHubClient_LL_UploadToBlob_Destroy(h);
+    my_gballoc_free(uploadCorrelationId);
+    my_gballoc_free(azureBlobSasUri);
 }
 
 TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_UploadMultipleBlocks_abort_on_2nd_fails)
@@ -2176,6 +2216,8 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_UploadMultipleBlocks_abort_on_2nd_fai
     //cleanup
     IoTHubClient_LL_UploadToBlob_DestroyContext(uploadContext);
     IoTHubClient_LL_UploadToBlob_Destroy(h);
+    my_gballoc_free(uploadCorrelationId);
+    my_gballoc_free(azureBlobSasUri);
 }
 
 TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_SetOption_handle_NULL_fails)

@@ -534,4 +534,3 @@ TEST_FUNCTION(IoTHub_MQTT_UploadCloseHandle_Before_WorkersComplete)
 #endif // TEST_MQTT
 
 END_TEST_SUITE(iothubclient_uploadtoblob_e2e)
-
