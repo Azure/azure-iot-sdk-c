@@ -81,7 +81,7 @@ HTTPAPIEX_HANDLE Blob_CreateHttpConnection(const char* blobStorageHostname, cons
 {
     HTTPAPIEX_HANDLE httpApiExHandle;
     
-    if ((blobStorageHostname == NULL))
+    if (blobStorageHostname == NULL)
     {
         LogError("One or more required values is NULL, blobStorageHostname=%p", blobStorageHostname);
         httpApiExHandle = NULL;

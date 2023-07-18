@@ -2930,9 +2930,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_InitializeUpload(IOTHUB_CLIENT_CORE_LL_
 {
     IOTHUB_CLIENT_RESULT result;
 
-    if (
-        (iotHubClientHandle == NULL)
-        )
+    if (iotHubClientHandle == NULL)
     {
         LogError("invalid parameters IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle=%p", iotHubClientHandle);
         result = IOTHUB_CLIENT_INVALID_ARG;
@@ -2998,9 +2996,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_AzureStoragePutBlockList(IOTHUB_CLIENT_
 {
     IOTHUB_CLIENT_RESULT result;
 
-    if (
-        (uploadContextHandle == NULL)
-        )
+    if (uploadContextHandle == NULL)
     {
         LogError("invalid parameters uploadContextHandle=%p", uploadContextHandle);
         result = IOTHUB_CLIENT_INVALID_ARG;
@@ -3017,9 +3013,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_NotifyUploadCompletion(IOTHUB_CLIENT_CO
 {
     IOTHUB_CLIENT_RESULT result;
 
-    if (
-        (iotHubClientHandle == NULL)
-        )
+    if (iotHubClientHandle == NULL)
     {
         LogError("invalid parameters iotHubClientHandle=%p", iotHubClientHandle);
         result = IOTHUB_CLIENT_INVALID_ARG;
