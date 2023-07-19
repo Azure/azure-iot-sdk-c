@@ -204,7 +204,7 @@ jobs:
 - job: linuxoptions
   container: linux-c-ubuntu-2004
   pool: 
-    name: 'sdk-c--ubuntu-18'
+    name: 'sdk-c--ubuntu-22'
   displayName: 'Linux with Options'
   steps:
   - script: 'sudo ./jenkins/linux_c_option_test.sh'
@@ -213,7 +213,7 @@ jobs:
 - job: clang
   container: linux-c-ubuntu-clang
   pool: 
-    name: 'sdk-c--ubuntu-18'
+    name: 'sdk-c--ubuntu-22'
   displayName: 'Clang (Debug)'
   steps:
   - script: |
@@ -255,7 +255,7 @@ jobs:
 - job: clang_release
   container: linux-c-ubuntu-clang
   pool: 
-    name: 'sdk-c--ubuntu-18'
+    name: 'sdk-c--ubuntu-22'
   displayName: 'Clang (Release)'
   steps:
   - script: |
@@ -297,7 +297,7 @@ jobs:
 - job: ubuntu2004debug
   container: linux-c-ubuntu-2004
   pool:
-    name: 'sdk-c--ubuntu-18'
+    name: 'sdk-c--ubuntu-22'
   displayName: 'Ubuntu 20.04 (Debug)'
   steps:
   - script: |
@@ -339,7 +339,7 @@ jobs:
 - job: ubuntu2004release
   container: linux-c-ubuntu-2004
   pool:
-    name: 'sdk-c--ubuntu-18'
+    name: 'sdk-c--ubuntu-22'
   displayName: 'Ubuntu 20.04 (Release)'
   steps:
   - script: |
@@ -381,7 +381,7 @@ jobs:
 - job: ubuntu2204build
   container: linux-c-ubuntu-2204
   pool:
-    name: 'sdk-c--ubuntu-18'
+    name: 'sdk-c--ubuntu-22'
   displayName: 'Ubuntu 22.04 Unit Tests (Debug)'
   steps:
   - script: |
@@ -427,7 +427,7 @@ jobs:
 - job: ubuntuRIOT
   container: linux-c-ubuntu-2004
   pool:
-    name: 'sdk-c--ubuntu-18'
+    name: 'sdk-c--ubuntu-22'
   displayName: 'Ubuntu RIOT/DICE'
   steps:
   - script: |
@@ -469,7 +469,7 @@ jobs:
 - job: ubuntu2004dualipstack
   container: linux-c-ubuntu-2004
   pool:
-    name: 'sdk-c--ubuntu-18'
+    name: 'sdk-c--ubuntu-22'
   displayName: 'Ubuntu 20.04 with Dual IP Stack'
   steps:
   - script: |
@@ -511,7 +511,7 @@ jobs:
 - job: ubuntu2204dualipstack
   container: linux-c-ubuntu-2204
   pool:
-    name: 'sdk-c--ubuntu-18'
+    name: 'sdk-c--ubuntu-22'
   displayName: 'Ubuntu 22.04 with Dual IP Stack'
   steps:
   - script: |
@@ -557,7 +557,7 @@ jobs:
 - job: debian
   container: linux-c-debian
   pool: 
-    name: 'sdk-c--ubuntu-18'
+    name: 'sdk-c--ubuntu-22'
   displayName: 'Debian'
   steps:
   - script: |
@@ -597,7 +597,7 @@ jobs:
 - job: linux_installed_deps
   container: linux-c-ubuntu-2004
   pool: 
-    name: 'sdk-c--ubuntu-18'
+    name: 'sdk-c--ubuntu-22'
   displayName: 'Linux with Installed Deps'
   steps:
   - script: |
@@ -627,7 +627,7 @@ jobs:
       IOT_DPS_INDIVIDUAL_REGISTRATION_ID: $(IOT-DPS-INDIVIDUAL-REGISTRATION-ID)
 - job: wolfssl
   pool:
-    name: 'sdk-c--ubuntu-18'
+    name: 'sdk-c--ubuntu-22'
   container: linux-c-ubuntu-wolfssl
   displayName: 'WolfSSL'
   steps:
@@ -670,7 +670,7 @@ jobs:
 - job: bearssl
   container: linux-c-ubuntu-bearssl
   pool:
-    name: 'sdk-c--ubuntu-18'
+    name: 'sdk-c--ubuntu-22'
   displayName: 'BearSSL'
   steps:
   - script: |
@@ -712,7 +712,7 @@ jobs:
 - job: mbedtls
   container: linux-c-ubuntu-mbed
   pool:
-    name: 'sdk-c--ubuntu-18'
+    name: 'sdk-c--ubuntu-22'
   displayName: 'mbedTLS'
   steps:
   - script: |
@@ -754,7 +754,7 @@ jobs:
 - job: cares
   container: linux-c-ubuntu-c-ares
   pool: 
-    name: 'sdk-c--ubuntu-18'
+    name: 'sdk-c--ubuntu-22'
   displayName: 'Linux with C-Ares'
   steps:
   - script: |
@@ -794,7 +794,7 @@ jobs:
 - job: openssl_engine
   container: linux-c-openssl-pkcs11
   pool: 
-    name: 'sdk-c--ubuntu-18'
+    name: 'sdk-c--ubuntu-22'
   displayName: 'OpenSSL with pkcs11 engine and SoftHSM'
   steps:
   - script: |
@@ -930,7 +930,7 @@ jobs:
 - job: raspberrypi
   container: raspberrypi-c-buster
   pool: 
-    name: 'sdk-c--ubuntu-18'
+    name: 'sdk-c--ubuntu-22'
   displayName: "Raspberry Pi"
   steps:
   - script: |
