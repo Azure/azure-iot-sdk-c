@@ -380,7 +380,7 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
 
      /**
      * @brief    This API creates a new upload within Azure IoT Hub, getting back a correlation-id and a
-     *           SAS URI for the Blob upload to the Azure Storage associated with the Azure IoT Hub.
+     *           SAS URI for the Blob access to the Azure Storage associated with the Azure IoT Hub.
      * @remark   It is part of a set of functions for more granular control over Azure IoT-based blob uploads.
      *           This function is expected to be used along with:
      *           `IoTHubDeviceClient_LL_AzureStoragePutBlock`

@@ -49,7 +49,7 @@ static IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT getDataCallback(IOTHUB_CLIENT_F
             // Note that the IoT SDK caller does NOT free(*data), as a typical use case the buffer returned 
             // to the IoT layer may be part of a larger buffer that this callback is chunking up for network sends.
 
-            if (block_count < 100)
+            if (block_count < 10)
             {
                 int len = snprintf(data_to_upload, sizeof(data_to_upload), data_to_upload_format, block_count);
                 if (len < 0 || len >= sizeof(data_to_upload))

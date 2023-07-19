@@ -68,7 +68,7 @@ static STRING_HANDLE createBlockIdListXml(SINGLYLINKEDLIST_HANDLE blockIDList)
     return blockIdListXml;
 }
 
-static bool removeAndDestroyBlockIdsInList(const void* item, const void* match_context, bool* continue_processing)
+static bool removeAndDestroyBlockIdInList(const void* item, const void* match_context, bool* continue_processing)
 {
     (void)match_context;
     STRING_HANDLE blockId = (STRING_HANDLE)item;
@@ -83,7 +83,7 @@ HTTPAPIEX_HANDLE Blob_CreateHttpConnection(const char* blobStorageHostname, cons
     
     if (blobStorageHostname == NULL)
     {
-        LogError("One or more required values is NULL, blobStorageHostname=%p", blobStorageHostname);
+        LogError("Required storage hostname is NULL, blobStorageHostname=%p", blobStorageHostname);
         httpApiExHandle = NULL;
     }
     else
@@ -241,7 +241,7 @@ void Blob_ClearBlockIdList(SINGLYLINKEDLIST_HANDLE blockIdList)
 {
     if (blockIdList != NULL)
     {
-        if (singlylinkedlist_remove_if(blockIdList, removeAndDestroyBlockIdsInList, NULL) != 0)
+        if (singlylinkedlist_remove_if(blockIdList, removeAndDestroyBlockIdInList, NULL) != 0)
         {
             LogError("Failed clearing block ID list");
         }
@@ -327,7 +327,7 @@ BLOB_RESULT Blob_PutBlockList(
                         }
                         else
                         {
-                            (void)singlylinkedlist_remove_if(blockIDList, removeAndDestroyBlockIdsInList, NULL);
+                            (void)singlylinkedlist_remove_if(blockIDList, removeAndDestroyBlockIdInList, NULL);
                             result = BLOB_OK;
                         }
                         BUFFER_delete(blockIDListAsBuffer);

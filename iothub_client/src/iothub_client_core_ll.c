@@ -2706,7 +2706,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_UploadToBlob(IOTHUB_CLIENT_CORE_LL_HAND
         ((source == NULL) && (size >0))
         )
     {
-        LogError("invalid parameters IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle=%p, const char* destinationFileName=%s, const unsigned char* source=%p, size_t size=%lu",
+        LogError("invalid parameters iotHubClientHandle=%p, const char* destinationFileName=%s, const unsigned char* source=%p, size_t size=%lu",
             iotHubClientHandle, destinationFileName, source, (unsigned long)size);
         result = IOTHUB_CLIENT_INVALID_ARG;
     }
@@ -2932,7 +2932,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_InitializeUpload(IOTHUB_CLIENT_CORE_LL_
 
     if (iotHubClientHandle == NULL)
     {
-        LogError("invalid parameters IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle=%p", iotHubClientHandle);
+        LogError("invalid parameter iotHubClientHandle=%p", iotHubClientHandle);
         result = IOTHUB_CLIENT_INVALID_ARG;
     }
     else
@@ -2960,7 +2960,7 @@ IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE IoTHubClientCore_LL_CreateUploadCon
         (azureBlobSasUri == NULL)
         )
     {
-        LogError("invalid parameters IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle=%p, azureBlobSasUri=%p", iotHubClientHandle, azureBlobSasUri);
+        LogError("invalid parameters iotHubClientHandle=%p, azureBlobSasUri=%p", iotHubClientHandle, azureBlobSasUri);
         result = NULL;
     }
     else
@@ -2998,7 +2998,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_AzureStoragePutBlockList(IOTHUB_CLIENT_
 
     if (uploadContextHandle == NULL)
     {
-        LogError("invalid parameters uploadContextHandle=%p", uploadContextHandle);
+        LogError("invalid parameter uploadContextHandle=%p", uploadContextHandle);
         result = IOTHUB_CLIENT_INVALID_ARG;
     }
     else
@@ -3015,7 +3015,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_NotifyUploadCompletion(IOTHUB_CLIENT_CO
 
     if (iotHubClientHandle == NULL)
     {
-        LogError("invalid parameters iotHubClientHandle=%p", iotHubClientHandle);
+        LogError("invalid parameter iotHubClientHandle=%p", iotHubClientHandle);
         result = IOTHUB_CLIENT_INVALID_ARG;
     }
     else

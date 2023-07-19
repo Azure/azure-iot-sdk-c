@@ -128,7 +128,7 @@ static int send_http_sas_request(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA* uplo
             }
             else if (!IS_HTTP_STATUS_CODE_SUCCESS(statusCode))
             {
-                LogError("HTTP response code was %u", statusCode);
+                LogError("HTTP failed response code was %u", statusCode);
                 result = MU_FAILURE;
             }
             else
@@ -249,7 +249,7 @@ static int parseResultFromIoTHub(const char* json_response, char** uploadCorrela
                     }
                     else if (mallocAndStrcpy_s(azureBlobSasUri, STRING_c_str(sas_uri)) != 0)
                     {
-                        LogError("unable to copy Sas URI");
+                        LogError("unable to copy SAS URI");
                         free(*uploadCorrelationId);
                         *uploadCorrelationId = NULL;
                         result = MU_FAILURE;
@@ -289,7 +289,7 @@ static HTTP_HEADERS_HANDLE createIotHubRequestHttpHeaders(IOTHUB_CLIENT_LL_UPLOA
             (HTTPHeaders_AddHeaderNameValuePair(iotHubRequestHttpHeaders, "Accept", HEADER_APP_JSON) != HTTP_HEADERS_OK) ||
             (HTTPHeaders_AddHeaderNameValuePair(iotHubRequestHttpHeaders, "User-Agent", "iothubclient/" IOTHUB_SDK_VERSION) != HTTP_HEADERS_OK))
         {
-            LogError("unable to HTTPHeaders_AddHeaderNameValuePair");
+            LogError("unable to add HTTP headers");
             isError = true;
         }
         else
@@ -661,7 +661,7 @@ static int IoTHubClient_LL_UploadToBlob_NotifyIoTHubOfUploadCompletion(IOTHUB_CL
                     {
                         if (send_http_request(iotHubHttpApiExHandle, STRING_c_str(relativePathNotification), iotHubRequestHttpHeaders, messageBody, NULL) != 0)
                         {
-                            LogError("unable to execute HTTPAPIEX_ExecuteRequest");
+                            LogError("unable to execute send_http_request");
                             result = MU_FAILURE;
                         }
                         else
@@ -674,7 +674,7 @@ static int IoTHubClient_LL_UploadToBlob_NotifyIoTHubOfUploadCompletion(IOTHUB_CL
                     {
                         if (send_http_sas_request(upload_data, iotHubHttpApiExHandle, STRING_c_str(relativePathNotification), iotHubRequestHttpHeaders, messageBody, NULL) != 0)
                         {
-                            LogError("unable to execute HTTPAPIEX_ExecuteRequest");
+                            LogError("unable to execute send_http_sas_request");
                             result = MU_FAILURE;
                         }
                         else
@@ -974,7 +974,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_PutBlock(IOTHUB_CLIENT_LL_UPLO
 
     if (uploadContext == NULL || dataPtr == NULL || dataSize == 0)
     {
-        LogError("invalid argument detected uploadContext=%p, dataPtr=%p, dataSize=%zu", uploadContext, dataPtr, dataSize);
+        LogError("invalid argument uploadContext=%p, dataPtr=%p, dataSize=%zu", uploadContext, dataPtr, dataSize);
         result = IOTHUB_CLIENT_INVALID_ARG;
     }
     else
@@ -1018,7 +1018,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_PutBlockList(IOTHUB_CLIENT_LL_
 
     if (uploadContext == NULL)
     {
-        LogError("invalid argument detected uploadContext=%p", uploadContext);
+        LogError("invalid argument uploadContext=%p", uploadContext);
         result = IOTHUB_CLIENT_INVALID_ARG;
     }
     else

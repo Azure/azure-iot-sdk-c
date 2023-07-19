@@ -96,7 +96,7 @@ int main(void)
                     bool uploadSuccessful = true;
                     int uploadResultCode = 200;
 
-                    for (uint32_t block_number = 0; block_number < 100; block_number++)
+                    for (uint32_t block_number = 0; block_number < 10; block_number++)
                     {
                         int data_size = snprintf(data_to_upload, sizeof(data_to_upload), data_to_upload_format, block_number);
 
@@ -114,7 +114,7 @@ int main(void)
                     {
                         if (IoTHubDeviceClient_LL_AzureStoragePutBlockList(uploadContextHandle) != IOTHUB_CLIENT_OK)
                         {
-                            (void)printf("failed performing Azure Storage Put Blob List.\n");
+                            (void)printf("Failed performing Azure Storage Put Blob List.\n");
                             uploadSuccessful = false;
                             uploadResultCode = 400;
                         }
@@ -123,7 +123,7 @@ int main(void)
                     IoTHubDeviceClient_LL_DestroyUploadContext(uploadContextHandle);
 
                     // Hint: here if there is a failure (e.g., in HTTP transport)
-                    //       this function can be called again in a retry loop if desired.
+                    //       this function should be retried.
                     if (IoTHubDeviceClient_LL_NotifyUploadCompletion(
                             device_ll_handle, uploadCorrelationId, uploadSuccessful, uploadResultCode, uploadSuccessful ? "OK" : "Aborted")
                         != IOTHUB_CLIENT_OK)
@@ -132,7 +132,7 @@ int main(void)
                     }
                     else
                     {
-                        (void)printf("hello world has been created\n");
+                        (void)printf("hello world blob has been created\n");
                     }
                 }
 
