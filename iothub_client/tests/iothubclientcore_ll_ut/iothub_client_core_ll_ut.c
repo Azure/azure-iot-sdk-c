@@ -50,7 +50,10 @@ void* my_gballoc_realloc(void* ptr, size_t size)
 #include "iothub_message.h"
 #include "internal/iothub_client_authorization.h"
 #include "internal/iothub_client_diagnostic.h"
+
+#ifndef DONT_USE_UPLOADTOBLOB
 #include "internal/iothub_client_ll_uploadtoblob.h"
+#endif // DONT_USE_UPLOADTOBLOB
 
 #ifdef USE_EDGE_MODULES
 #include "internal/iothub_client_edge.h"
