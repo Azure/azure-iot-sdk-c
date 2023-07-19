@@ -703,7 +703,7 @@ static int IoTHubClient_LL_UploadToBlob_NotifyIoTHubOfUploadCompletion(IOTHUB_CL
     return result;
 }
 
-static IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT* createUploadToBlobContextInstance()
+static IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT* createUploadToBlobContextInstance(void)
 {
     IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT* result;
 

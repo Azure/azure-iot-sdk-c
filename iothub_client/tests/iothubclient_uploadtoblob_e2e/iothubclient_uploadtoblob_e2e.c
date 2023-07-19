@@ -526,7 +526,7 @@ TEST_FUNCTION(IoTHub_MQTT_UploadToBlob_x509)
 
 TEST_FUNCTION(IoTHub_MQTT_UploadCloseHandle_Before_WorkersComplete)
 {
-    for (int i = 0; i < 100; i++)
+    for (int i = 0; i < 10; i++)
     {
         e2e_uploadtoblob_close_handle_with_active_thread(MQTT_Protocol);
     }

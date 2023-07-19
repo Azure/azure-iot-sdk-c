@@ -268,7 +268,7 @@ TEST_FUNCTION(Blob_CreateHttpConnection_failure_checks)
     umock_c_negative_tests_snapshot();
 
     // act
-    for (int i = 0; i < umock_c_negative_tests_call_count(); i++)
+    for (size_t i = 0; i < umock_c_negative_tests_call_count(); i++)
     {
         umock_c_negative_tests_reset();
 
@@ -561,7 +561,7 @@ TEST_FUNCTION(Blob_PutBlock_failure_checks)
     umock_c_negative_tests_snapshot();
 
     // act
-    for (int i = 0; i < umock_c_negative_tests_call_count(); i++)
+    for (size_t i = 0; i < umock_c_negative_tests_call_count(); i++)
     {
         umock_c_negative_tests_reset();
 
@@ -736,7 +736,7 @@ TEST_FUNCTION(Blob_PutBlockList_failure_checks)
     umock_c_negative_tests_snapshot();
 
     // act
-    for (int i = 0; i < umock_c_negative_tests_call_count(); i++)
+    for (size_t i = 0; i < umock_c_negative_tests_call_count(); i++)
     {
         umock_c_negative_tests_reset();
 

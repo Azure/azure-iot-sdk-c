@@ -1130,7 +1130,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_InitializeUpload_SAS_failure_checks)
     umock_c_negative_tests_snapshot();
 
     // act
-    for (int i = 0; i < umock_c_negative_tests_call_count(); i++)
+    for (size_t i = 0; i < umock_c_negative_tests_call_count(); i++)
     {
         umock_c_negative_tests_reset();
 
@@ -1167,7 +1167,6 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_InitializeUpload_NULL_handle_fails)
     //arrange
     char* uploadCorrelationId;
     char* azureBlobSasUri;
-    IOTHUB_CREDENTIAL_TYPE credentialType = IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN;
 
     umock_c_reset_all_calls();
 
@@ -1323,7 +1322,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_CreateContext_failure_checks)
     umock_c_negative_tests_snapshot();
 
     // act
-    for (int i = 0; i < umock_c_negative_tests_call_count(); i++)
+    for (size_t i = 0; i < umock_c_negative_tests_call_count(); i++)
     {
         umock_c_negative_tests_reset();
 
@@ -1600,6 +1599,8 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_NotifyCompletion_failure_checks)
     char* trustedCertificates = NULL;
     HTTP_PROXY_OPTIONS* proxyOptions = NULL;
 
+    IOTHUB_CLIENT_RESULT result;
+
     setExpectedCallsFor_IoTHubClient_LL_UploadToBlob_Create(credentialType);
     IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE h = IoTHubClient_LL_UploadToBlob_Create(&TEST_CONFIG_SAS, TEST_AUTH_HANDLE);
 
@@ -1607,7 +1608,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_NotifyCompletion_failure_checks)
     setExpectedCallsFor_IoTHubClient_LL_UploadToBlob_InitializeUpload(
         credentialType, blobUploadTimeoutMillisecs, curlEnableVerboseLogging, networkInterface,
         useTlsRenegotiation, x509privatekeyType, openSslEngine, trustedCertificates, proxyOptions);
-    IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_UploadToBlob_InitializeUpload(h, TEST_DESTINATION_FILENAME, &uploadCorrelationId, &azureBlobSasUri);
+    result = IoTHubClient_LL_UploadToBlob_InitializeUpload(h, TEST_DESTINATION_FILENAME, &uploadCorrelationId, &azureBlobSasUri);
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
 
     ASSERT_ARE_EQUAL(int, 0, umock_c_negative_tests_init());
@@ -1618,7 +1619,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_NotifyCompletion_failure_checks)
     umock_c_negative_tests_snapshot();
 
     // act
-    for (int i = 0; i < umock_c_negative_tests_call_count(); i++)
+    for (size_t i = 0; i < umock_c_negative_tests_call_count(); i++)
     {
         umock_c_negative_tests_reset();
 
@@ -1634,7 +1635,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_NotifyCompletion_failure_checks)
             umock_c_negative_tests_fail_call(i);
 
             // act
-            IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_UploadToBlob_NotifyCompletion(h, uploadCorrelationId, true, 200, "All good");
+            result = IoTHubClient_LL_UploadToBlob_NotifyCompletion(h, uploadCorrelationId, true, 200, "All good");
 
             ///assert
             char* umock_last_call = umockcall_stringify(umock_c_get_last_expected_call());
@@ -1786,7 +1787,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_PutBlock_failure_checks)
     umock_c_negative_tests_snapshot();
 
     // act
-    for (int i = 0; i < umock_c_negative_tests_call_count(); i++)
+    for (size_t i = 0; i < umock_c_negative_tests_call_count(); i++)
     {
         umock_c_negative_tests_reset();
 
@@ -1992,7 +1993,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_PutBlockList_failure_checks)
     umock_c_negative_tests_snapshot();
 
     // act
-    for (int i = 0; i < umock_c_negative_tests_call_count(); i++)
+    for (size_t i = 0; i < umock_c_negative_tests_call_count(); i++)
     {
         umock_c_negative_tests_reset();
 
