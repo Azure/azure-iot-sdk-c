@@ -9,9 +9,6 @@ resources:
   - container: linux-c-ubuntu-2004
     endpoint: csdk-containers
     image: csdkcontainerregistry.azurecr.io/linux-c-ubuntu-2004:latest
-  - container: linux-c-ubuntu-1804
-    endpoint: csdk-containers
-    image: csdkcontainerregistry.azurecr.io/linux-c-ubuntu-1804:latest
   - container: linux-c-ubuntu-wolfssl
     endpoint: csdk-containers
     image: csdkcontainerregistry.azurecr.io/linux-c-ubuntu-wolfssl:latest
@@ -296,48 +293,6 @@ jobs:
       testResultsFiles: '**/Test.xml'
       mergeTestResults: true
       testRunTitle: 'clang_release'
-    condition: succeededOrFailed()
-- job: ubuntu1804
-  container: linux-c-ubuntu-1804
-  pool:
-    name: 'sdk-c--ubuntu-18'
-  displayName: 'Ubuntu 18.04'
-  steps:
-  - script: |
-      sudo -E ./jenkins/ubuntu_c.sh
-    displayName: 'Build'
-  - script: |
-      export OPENSSL_ia32cap=0x00000000
-      sudo chmod -R 755 .
-      cd cmake && sudo -E ../build_all/linux/run_tests.sh
-    displayName: "Run Tests"
-    env:
-      IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
-      IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
-      IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
-      IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
-      IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
-      IOTHUB_POLICY_KEY: $(IOTHUB-POLICY-KEY)
-      STORAGE_ACCOUNT_CONNECTION_STRING: $(STORAGE-ACCOUNT-CONNECTION-STRING)
-      IOT_DPS_CONNECTION_STRING: $(IOT-DPS-CONNECTION-STRING)
-      IOT_DPS_ID_SCOPE: $(IOT-DPS-ID-SCOPE)
-      IOTHUB_CA_ROOT_CERT: $(IOTHUB-CA-ROOT-CERT)
-      IOTHUB_CA_ROOT_CERT_KEY: $(IOTHUB-CA-ROOT-CERT-KEY)
-      IOT_DPS_GLOBAL_ENDPOINT: $(IOT-DPS-GLOBAL-ENDPOINT)
-      IOTHUB_DEVICE_CONN_STRING_INVALIDCERT: $(IOTHUB-DEVICE-CONN-STRING-INVALIDCERT)
-      IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
-      DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
-      PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
-      IOT_DPS_INDIVIDUAL_X509_CERTIFICATE: $(IOTHUB-E2E-X509-ECC-CERT-BASE64)
-      IOT_DPS_INDIVIDUAL_X509_KEY: $(IOTHUB-E2E-X509-ECC-PRIVATE-KEY-BASE64)
-      IOT_DPS_INDIVIDUAL_REGISTRATION_ID: $(IOT-DPS-INDIVIDUAL-REGISTRATION-ID)
-  - task: PublishTestResults@2
-    displayName: 'Publish Ubuntu 18 Results'
-    inputs:
-      testRunner: CTest
-      testResultsFiles: '**/Test.xml'
-      mergeTestResults: true
-      testRunTitle: 'ubuntu1804'
     condition: succeededOrFailed()
 - job: ubuntu2004debug
   container: linux-c-ubuntu-2004
