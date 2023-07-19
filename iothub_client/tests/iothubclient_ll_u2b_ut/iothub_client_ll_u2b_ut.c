@@ -1150,9 +1150,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_InitializeUpload_SAS_failure_checks)
                 h, TEST_DESTINATION_FILENAME, &uploadCorrelationId, &azureBlobSasUri);
 
             ///assert
-            char* umock_last_call = umockcall_stringify(umock_c_get_last_expected_call());
-            sprintf(error_msg, "On failed call %lu (%s)", (unsigned long)i, umock_last_call);
-            my_gballoc_free(umock_last_call);
+            sprintf(error_msg, "On failed call %lu", (unsigned long)i);
             ASSERT_ARE_NOT_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, error_msg);
         }
     }
@@ -1342,9 +1340,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_CreateContext_failure_checks)
                 IoTHubClient_LL_UploadToBlob_CreateContext(h, azureBlobSasUri);
 
             ///assert
-            char* umock_last_call = umockcall_stringify(umock_c_get_last_expected_call());
-            sprintf(error_msg, "On failed call %lu (%s)", (unsigned long)i, umock_last_call);
-            my_gballoc_free(umock_last_call);
+            sprintf(error_msg, "On failed call %lu", (unsigned long)i);
             ASSERT_IS_NULL(uploadContext, error_msg);
         }
     }
@@ -1638,9 +1634,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_NotifyCompletion_failure_checks)
             result = IoTHubClient_LL_UploadToBlob_NotifyCompletion(h, uploadCorrelationId, true, 200, "All good");
 
             ///assert
-            char* umock_last_call = umockcall_stringify(umock_c_get_last_expected_call());
-            sprintf(error_msg, "On failed call %lu (%s)", (unsigned long)i, umock_last_call);
-            my_gballoc_free(umock_last_call);
+            sprintf(error_msg, "On failed call %lu", (unsigned long)i);
             ASSERT_ARE_NOT_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, error_msg);
         }
     }
@@ -1806,9 +1800,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_PutBlock_failure_checks)
             result = IoTHubClient_LL_UploadToBlob_PutBlock(uploadContext, 0 /* block number*/, blockData, blockDataSize);
 
             ///assert
-            char* umock_last_call = umockcall_stringify(umock_c_get_last_expected_call());
-            sprintf(error_msg, "On failed call %lu (%s)", (unsigned long)i, umock_last_call);
-            my_gballoc_free(umock_last_call);
+            sprintf(error_msg, "On failed call %lu", (unsigned long)i);
             ASSERT_ARE_NOT_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, error_msg);
         }
     }
@@ -2012,9 +2004,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_PutBlockList_failure_checks)
             result = IoTHubClient_LL_UploadToBlob_PutBlockList(uploadContext);
 
             ///assert
-            char* umock_last_call = umockcall_stringify(umock_c_get_last_expected_call());
-            sprintf(error_msg, "On failed call %lu (%s)", (unsigned long)i, umock_last_call);
-            my_gballoc_free(umock_last_call);
+            sprintf(error_msg, "On failed call %lu", (unsigned long)i);
             ASSERT_ARE_NOT_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, error_msg);
         }
     }
