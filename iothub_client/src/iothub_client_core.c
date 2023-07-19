@@ -2490,9 +2490,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_InitializeUpload(IOTHUB_CLIENT_CORE_HANDLE
 {
     IOTHUB_CLIENT_RESULT result;
 
-    if (
-        (iotHubClientHandle == NULL)
-        )
+    if (iotHubClientHandle == NULL)
     {
         LogError("invalid parameters iotHubClientHandle = %p", iotHubClientHandle);
         result = IOTHUB_CLIENT_INVALID_ARG;
