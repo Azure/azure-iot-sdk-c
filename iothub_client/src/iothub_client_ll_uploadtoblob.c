@@ -29,12 +29,6 @@
 #define API_VERSION "?api-version=2016-11-14"
 
 static const char* const RESPONSE_BODY_FORMAT = "{\"correlationId\":\"%s\", \"isSuccess\":%s, \"statusCode\":%d, \"statusDescription\":\"%s\"}";
-static const char* const RESPONSE_BODY_ABORTED_MESSAGE = "file upload aborted";
-static const char* const RESPONSE_BODY_BLOCK_SIZE_EXCEEDED_MESSAGE = "block data size exceeded";
-static const char* const RESPONSE_BODY_BLOCK_COUNT_EXCEEDED_MESSAGE = "block count exceeded";
-static const char* const RESPONSE_BODY_PUT_BLOCK_FAILED_MESSAGE = "put block failed";
-static const char* const RESPONSE_BODY_PUT_BLOCK_LIST_FAILED_MESSAGE = "put block list failed";
-static const int RESPONSE_BODY_ERROR_RETURN_CODE = -1;
 static const char* const RESPONSE_BODY_SUCCESS_BOOLEAN_STRING = "true";
 static const char* const RESPONSE_BODY_ERROR_BOOLEAN_STRING = "false";
 
@@ -1126,8 +1120,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_UploadMultipleBlocks(IOTHUB_CL
     else
     {
         unsigned int blockID = 0;
-        unsigned int uploadHttpStatus;
-        const char* responseToIoTHub = RESPONSE_BODY_ABORTED_MESSAGE;
+        bool isError;
         unsigned char const * blockDataPtr = NULL;
         size_t blockDataSize = 0;
         IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT getDataReturnValue;
@@ -1139,16 +1132,14 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_UploadMultipleBlocks(IOTHUB_CL
             if (getDataReturnValue == IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_ABORT)
             {
                 LogInfo("Upload to blob has been aborted by the user");
-                uploadHttpStatus = HTTP_STATUS_CODE_BAD_REQUEST;
-                responseToIoTHub = RESPONSE_BODY_ABORTED_MESSAGE;
+                isError = true;
                 break;
             }
             else if (blockDataPtr == NULL || blockDataSize == 0)
             {
                 // This is how the user indicates that there is no more data to be uploaded,
                 // and the function can end with success result.
-                uploadHttpStatus = HTTP_STATUS_CODE_OK;
-                responseToIoTHub = EMPTY_STRING;
+                isError = false;
                 break;
             }
             else
@@ -1156,22 +1147,19 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_UploadMultipleBlocks(IOTHUB_CL
                 if (blockDataSize > BLOCK_SIZE)
                 {
                     LogError("tried to upload block of size %lu, max allowed size is %d", (unsigned long)blockDataSize, BLOCK_SIZE);
-                    uploadHttpStatus = HTTP_STATUS_CODE_BAD_REQUEST;
-                    responseToIoTHub = RESPONSE_BODY_BLOCK_SIZE_EXCEEDED_MESSAGE;
+                    isError = true;
                     break;
                 }
                 else if (blockID >= MAX_BLOCK_COUNT)
                 {
                     LogError("unable to upload more than %lu blocks in one blob", (unsigned long)MAX_BLOCK_COUNT);
-                    uploadHttpStatus = HTTP_STATUS_CODE_BAD_REQUEST;
-                    responseToIoTHub = RESPONSE_BODY_BLOCK_COUNT_EXCEEDED_MESSAGE;
+                    isError = true;
                     break;
                 }
                 else if (IoTHubClient_LL_UploadToBlob_PutBlock(uploadContextHandle, blockID, blockDataPtr, blockDataSize) != IOTHUB_CLIENT_OK)
                 {
                     LogError("failed uploading block to blob");
-                    uploadHttpStatus = HTTP_STATUS_CODE_BAD_REQUEST;
-                    responseToIoTHub = RESPONSE_BODY_PUT_BLOCK_FAILED_MESSAGE;
+                    isError = true;
                     break;
                 }
 
@@ -1180,7 +1168,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_UploadMultipleBlocks(IOTHUB_CL
         }
         while(true);
 
-        if (!IS_HTTP_STATUS_CODE_SUCCESS(uploadHttpStatus))
+        if (isError)
         {
             (void)getDataCallbackEx(FILE_UPLOAD_ERROR, NULL, NULL, context);
             result = IOTHUB_CLIENT_ERROR;
