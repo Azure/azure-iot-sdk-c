@@ -13,7 +13,7 @@ jobs:
   timeoutInMinutes: 800
   container: linux-c-ubuntu-2004
   pool: 
-    name: 'sdk-c--ubuntu-18'
+    name: 'sdk-c--ubuntu-22'
   displayName: 'Longhaul: Linux'
   steps:
   - script: |
