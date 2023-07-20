@@ -135,6 +135,7 @@ int main(void)
 
                     if (uploadSuccessful)
                     {
+                        // This function can also be retried if any errors occur.
                         if (IoTHubDeviceClient_LL_AzureStoragePutBlockList(azureStorageClientHandle) != IOTHUB_CLIENT_OK)
                         {
                             (void)printf("Failed performing Azure Storage Put Blob List.\n");

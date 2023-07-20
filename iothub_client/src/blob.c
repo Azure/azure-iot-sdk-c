@@ -25,6 +25,9 @@ static const char blockListLatestTagXmlEnd[] = "</Latest>";
 // Length of the string representation of an Azure Blob Block ID (enough to represent "049999").
 #define AZURE_BLOB_BLOCK_ID_LENGTH 6
 
+#define IS_HTTP_STATUS_CODE_SUCCESS(x)      ((x) >= 100 && (x) < 300)
+
+
 static STRING_HANDLE createBlockIdListXml(SINGLYLINKEDLIST_HANDLE blockIDList)
 {
     STRING_HANDLE blockIdListXml;
@@ -206,18 +209,20 @@ BLOB_RESULT Blob_PutBlock(
                         }
                         else
                         {
+                            unsigned int httpResponseStatusCode = 0;
+
                             if (HTTPAPIEX_ExecuteRequest(
-                                httpApiExHandle,
-                                HTTPAPI_REQUEST_PUT,
-                                STRING_c_str(newRelativePath),
-                                NULL,
-                                blockData,
-                                httpStatus,
-                                NULL,
-                                httpResponse) != HTTPAPIEX_OK
-                                )
+                                    httpApiExHandle,
+                                    HTTPAPI_REQUEST_PUT,
+                                    STRING_c_str(newRelativePath),
+                                    NULL,
+                                    blockData,
+                                    &httpResponseStatusCode,
+                                    NULL,
+                                    httpResponse) != HTTPAPIEX_OK ||
+                                    !IS_HTTP_STATUS_CODE_SUCCESS(httpResponseStatusCode))
                             {
-                                LogError("unable to HTTPAPIEX_ExecuteRequest");
+                                LogError("unable to HTTPAPIEX_ExecuteRequest (HTTP response status %u)", httpResponseStatusCode);
                                 (void)singlylinkedlist_remove(blockIDList, newListItem);
                                 STRING_delete(blockIdEncodedString);
                                 result = BLOB_HTTP_ERROR;
@@ -225,6 +230,11 @@ BLOB_RESULT Blob_PutBlock(
                             else
                             {
                                 result = BLOB_OK;
+                            }
+
+                            if (httpStatus != NULL)
+                            {
+                                *httpStatus = httpResponseStatusCode;
                             }
                         }
 
@@ -311,18 +321,20 @@ BLOB_RESULT Blob_PutBlockList(
                     }
                     else
                     {
+                        unsigned int httpResponseStatusCode = 0;
+
                         if (HTTPAPIEX_ExecuteRequest(
-                            httpApiExHandle,
-                            HTTPAPI_REQUEST_PUT,
-                            STRING_c_str(newRelativePath),
-                            NULL,
-                            blockIDListAsBuffer,
-                            httpStatus,
-                            NULL,
-                            httpResponse
-                        ) != HTTPAPIEX_OK)
+                                httpApiExHandle,
+                                HTTPAPI_REQUEST_PUT,
+                                STRING_c_str(newRelativePath),
+                                NULL,
+                                blockIDListAsBuffer,
+                                &httpResponseStatusCode,
+                                NULL,
+                                httpResponse) != HTTPAPIEX_OK ||
+                                !IS_HTTP_STATUS_CODE_SUCCESS(httpResponseStatusCode))
                         {
-                            LogError("unable to HTTPAPIEX_ExecuteRequest");
+                            LogError("unable to HTTPAPIEX_ExecuteRequest (HTTP response status %u)", httpResponseStatusCode);
                             result = BLOB_HTTP_ERROR;
                         }
                         else
@@ -330,6 +342,12 @@ BLOB_RESULT Blob_PutBlockList(
                             (void)singlylinkedlist_remove_if(blockIDList, removeAndDestroyBlockIdInList, NULL);
                             result = BLOB_OK;
                         }
+
+                        if (httpStatus != NULL)
+                        {
+                            *httpStatus = httpResponseStatusCode;
+                        }
+                        
                         BUFFER_delete(blockIDListAsBuffer);
                     }
                 }

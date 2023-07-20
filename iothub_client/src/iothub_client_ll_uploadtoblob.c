@@ -157,7 +157,7 @@ static int send_http_request(HTTPAPIEX_HANDLE http_api_handle, const char* relat
     }
     else if (!IS_HTTP_STATUS_CODE_SUCCESS(statusCode))
     {
-        LogError("HTTP code was %u", statusCode);
+        LogError("HTTP failed response code was %u", statusCode);
         result = MU_FAILURE;
     }
     else
