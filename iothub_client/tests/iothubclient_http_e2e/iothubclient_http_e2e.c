@@ -20,6 +20,7 @@
 
 #include "azure_c_shared_utility/buffer_.h"
 #include "azure_c_shared_utility/threadapi.h"
+#include "azure_c_shared_utility/xlogging.h"
 
 static bool g_callbackRecv = false;
 
@@ -43,6 +44,7 @@ static IOTHUB_ACCOUNT_INFO_HANDLE g_iothubAcctInfo3 = NULL;
 
 #define IOTHUB_COUNTER_MAX           10
 #define MAX_CLOUD_TRAVEL_TIME        60.0
+#define DEVICE_CREATE_WAIT           30
 
 TEST_DEFINE_ENUM_TYPE(IOTHUB_TEST_CLIENT_RESULT, IOTHUB_TEST_CLIENT_RESULT_VALUES);
 TEST_DEFINE_ENUM_TYPE(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
@@ -54,6 +56,7 @@ typedef struct EXPECTED_SEND_DATA_TAG
     bool wasFound;
     bool dataWasRecv;
     LOCK_HANDLE lock;
+    IOTHUB_CLIENT_CONFIRMATION_RESULT result;
 } EXPECTED_SEND_DATA;
 
 typedef struct EXPECTED_RECEIVE_DATA_TAG
@@ -171,16 +174,25 @@ static int IoTHubCallbackMultipleEvents(void* context, const char* data, size_t 
 static void ReceiveConfirmationCallback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* userContextCallback)
 {
     EXPECTED_SEND_DATA* expectedData = (EXPECTED_SEND_DATA*)userContextCallback;
-    (void)result;
+    ASSERT_IS_NOT_NULL(userContextCallback, "userContextCallback is NULL");
     if (expectedData != NULL)
     {
+        LogInfo("ReceiveConfirmationCallback device=%s", expectedData->expectedString);
         if (Lock(expectedData->lock) != LOCK_OK)
         {
             ASSERT_FAIL("unable to lock");
         }
         else
         {
-            expectedData->dataWasRecv = true;
+            expectedData->result = result;
+            if (result == IOTHUB_CLIENT_CONFIRMATION_OK)
+            {
+                expectedData->dataWasRecv = true;
+            }
+            else
+            {
+                LogError("ReceiveConfirmationCallback failed result=%s", MU_ENUM_TO_STRING(IOTHUB_CLIENT_CONFIRMATION_RESULT, result));
+            }
             (void)Unlock(expectedData->lock);
         }
     }
@@ -308,7 +320,7 @@ static void ReceiveUserContext_Destroy(EXPECTED_RECEIVE_DATA* data)
 
 static EXPECTED_SEND_DATA* EventData_Create(void)
 {
-    EXPECTED_SEND_DATA* result = (EXPECTED_SEND_DATA*)malloc(sizeof(EXPECTED_SEND_DATA));
+    EXPECTED_SEND_DATA* result = (EXPECTED_SEND_DATA*)calloc(1, sizeof(EXPECTED_SEND_DATA));
     if (result != NULL)
     {
         if ((result->lock = Lock_Init()) == NULL)
@@ -412,7 +424,7 @@ static void SendEvent(IOTHUB_PROVISIONED_DEVICE* deviceToUse)
     }
     else
     {
-        ASSERT_IS_TRUE(sendData->dataWasRecv, "Failure sending data to IotHub"); // was found is written by the callback...
+        ASSERT_IS_TRUE(sendData->dataWasRecv, "Failure sending event to IotHub, result=%s", MU_ENUM_TO_STRING(IOTHUB_CLIENT_CONFIRMATION_RESULT, sendData->result)); // was found is written by the callback...
         (void)Unlock(sendData->lock);
     }
 
@@ -621,19 +633,24 @@ TEST_FUNCTION(IoTHub_HTTP_SendEvent_Shared_e2e)
     {
         transportHandle = IoTHubTransport_Create(HTTP_Protocol, IoTHubAccount_GetIoTHubName(g_iothubAcctInfo3), IoTHubAccount_GetIoTHubSuffix(g_iothubAcctInfo3));
         ASSERT_IS_NOT_NULL(transportHandle, "Failure creating transport handle.");
+
+        // Create device clients
+        iotHubClientHandle1 = IoTHubDeviceClient_CreateWithTransport(transportHandle, &iotHubConfig1);
+        ASSERT_IS_NOT_NULL(iotHubClientHandle1, "Failure creating IothubClient handle device 1");
+
+        iotHubClientHandle2 = IoTHubDeviceClient_CreateWithTransport(transportHandle, &iotHubConfig2);
+        ASSERT_IS_NOT_NULL(iotHubClientHandle2, "Failure creating IothubClient handle device 2");
     }
 
     // Send the Event device 1
     {
         IOTHUB_CLIENT_RESULT result;
         // Create the IoT Hub Data
-        iotHubClientHandle1 = IoTHubDeviceClient_CreateWithTransport(transportHandle, &iotHubConfig1);
-        ASSERT_IS_NOT_NULL(iotHubClientHandle1, "Failure creating IothubClient handle device 1");
-
         msgHandle1 = IoTHubMessage_CreateFromByteArray((const unsigned char*)sendData1->expectedString, strlen(sendData1->expectedString));
         ASSERT_IS_NOT_NULL(msgHandle1, "Failure to create message handle");
 
         // act
+        LogInfo("Send the Event device 1");
         result = IoTHubDeviceClient_SendEventAsync(iotHubClientHandle1, msgHandle1, ReceiveConfirmationCallback, sendData1);
         ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Failure calling IoTHubDeviceClient_SendEventAsync");
     }
@@ -642,13 +659,11 @@ TEST_FUNCTION(IoTHub_HTTP_SendEvent_Shared_e2e)
     {
         IOTHUB_CLIENT_RESULT result;
         // Create the IoT Hub Data
-        iotHubClientHandle2 = IoTHubDeviceClient_CreateWithTransport(transportHandle, &iotHubConfig2);
-        ASSERT_IS_NOT_NULL(iotHubClientHandle2, "Failure creating IothubClient handle device 2");
-
         msgHandle2 = IoTHubMessage_CreateFromByteArray((const unsigned char*)sendData2->expectedString, strlen(sendData2->expectedString));
         ASSERT_IS_NOT_NULL(msgHandle2, "Failure to create message handle");
 
         // act
+        LogInfo("Send the Event device 2");
         result = IoTHubDeviceClient_SendEventAsync(iotHubClientHandle2, msgHandle2, ReceiveConfirmationCallback, sendData2);
         ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Failure calling IoTHubDeviceClient_SendEventAsync");
     }
@@ -689,8 +704,8 @@ TEST_FUNCTION(IoTHub_HTTP_SendEvent_Shared_e2e)
         ThreadAPI_Sleep(100);
     }
 
-    ASSERT_IS_TRUE(dataWasRecv1, "Failure sending data to IotHub, device 1");
-    ASSERT_IS_TRUE(dataWasRecv2, "Failure sending data to IotHub, device 2");
+    ASSERT_IS_TRUE(dataWasRecv1, "Failure sending data to IotHub, device 1, result=%s", MU_ENUM_TO_STRING(IOTHUB_CLIENT_CONFIRMATION_RESULT, sendData1->result));
+    ASSERT_IS_TRUE(dataWasRecv2, "Failure sending data to IotHub, device 2, result=%s", MU_ENUM_TO_STRING(IOTHUB_CLIENT_CONFIRMATION_RESULT, sendData2->result));
 
 
     {
