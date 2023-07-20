@@ -5,6 +5,12 @@
 // Checking of return codes and error values shall be omitted for brevity.  Please practice sound engineering practices
 // when writing production code.
 
+// This sample is also uses a much more improved API for performing
+// Azure IoT Hub-backed Azure Storage Blob uploads by:
+// Explicitly getting a SAS token for the Blob storage (usable by external tools such as az_copy).
+// Using the the built-in Azure Storage Blob new upload client.
+// Showing how to retry blob upload per block (as opposed to the entire file).
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -34,8 +40,8 @@ static const char* connectionString = "[device connection string]";
 static const char* proxyHost = NULL;
 static int proxyPort = 0;
 
-static const char* azureStorageBlobPath = "subdir/hello_world_custom_mb.txt";
-static const char* data_to_upload_format = "Hello World from iothub_client_sample_upload_to_blob_custom: %d\n";
+static const char* azureStorageBlobPath = "subdir/hello_world_mb_with_retry.txt";
+static const char* data_to_upload_format = "Hello World from iothub_client_sample_upload_to_blob_with_retry: %d\n";
 static char data_to_upload[128];
 
 #define SAMPLE_MAX_RETRY_COUNT          3
@@ -80,13 +86,17 @@ int main(void)
             char* uploadCorrelationId;
             char* azureBlobSasUri;
 
-            if (IoTHubDeviceClient_LL_InitializeUpload(
+            if (IoTHubDeviceClient_LL_AzureStorageInitializeBlobUpload(
                     device_ll_handle, azureStorageBlobPath, &uploadCorrelationId, &azureBlobSasUri) != IOTHUB_CLIENT_OK)
             {
                 printf("failed initializing upload in IoT Hub\n");
             }
             else
             {
+                // The SAS URI obtained above (azureBlobSasUri) can be used with other tools
+                // like az_copy or Azure Storage SDK instead of the API functions
+                // built-in this SDK shown below.
+
                 IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE azureStorageClientHandle = IoTHubDeviceClient_LL_AzureStorageCreateClient(device_ll_handle, azureBlobSasUri);
 
                 if (azureStorageClientHandle == NULL)
@@ -150,7 +160,7 @@ int main(void)
 
                     while (true)
                     {
-                        if (IoTHubDeviceClient_LL_NotifyUploadCompletion(
+                        if (IoTHubDeviceClient_LL_AzureStorageNotifyBlobUploadCompletion(
                                 device_ll_handle, uploadCorrelationId, uploadSuccessful, uploadResultCode, uploadSuccessful ? "OK" : "Aborted")
                             == IOTHUB_CLIENT_OK)
                         {

@@ -363,8 +363,8 @@ extern "C"
     *           `IoTHubDeviceClient_AzureStoragePutBlock`
     *           `IoTHubDeviceClient_AzureStoragePutBlockList`
     *           `IoTHubDeviceClient_AzureStorageDestroyClient`
-    *           `IoTHubDeviceClient_InitializeUpload`
-    *           `IoTHubDeviceClient_NotifyUploadCompletion`
+    *           `IoTHubDeviceClient_AzureStorageInitializeBlobUpload`
+    *           `IoTHubDeviceClient_AzureStorageNotifyBlobUploadCompletion`
     *           For simpler/less-granular control of uploads to Azure blob storage please use either
     *           `IoTHubDeviceClient_UploadToBlobAsync` or `IoTHubDeviceClient_UploadMultipleBlocksToBlobAsync`.
     *
@@ -375,11 +375,11 @@ extern "C"
     *
     * @warning  This is a synchronous/blocking function.
     *           `uploadCorrelationId` and `azureBlobSasUri` must be freed by the calling application
-    *           after the blob upload process is done (e.g., after calling `IoTHubDeviceClient_NotifyUploadCompletion`).
+    *           after the blob upload process is done (e.g., after calling `IoTHubDeviceClient_AzureStorageNotifyBlobUploadCompletion`).
     *
     * @return   An IOTHUB_CLIENT_RESULT value indicating the success or failure of the API call.
     */
-    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_InitializeUpload, IOTHUB_DEVICE_CLIENT_HANDLE, iotHubClientHandle, const char*, destinationFileName, char**, uploadCorrelationId, char**, azureBlobSasUri);
+    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_AzureStorageInitializeBlobUpload, IOTHUB_DEVICE_CLIENT_HANDLE, iotHubClientHandle, const char*, destinationFileName, char**, uploadCorrelationId, char**, azureBlobSasUri);
 
      /**
     * @brief    This API creates a client for a new blob upload to Azure Storage.
@@ -389,13 +389,13 @@ extern "C"
     *           `IoTHubDeviceClient_AzureStoragePutBlock`
     *           `IoTHubDeviceClient_AzureStoragePutBlockList`
     *           `IoTHubDeviceClient_AzureStorageDestroyClient`
-    *           `IoTHubDeviceClient_InitializeUpload`
-    *           `IoTHubDeviceClient_NotifyUploadCompletion`
+    *           `IoTHubDeviceClient_AzureStorageInitializeBlobUpload`
+    *           `IoTHubDeviceClient_AzureStorageNotifyBlobUploadCompletion`
     *           For simpler/less-granular control of uploads to Azure blob storage please use either
     *           `IoTHubDeviceClient_UploadToBlobAsync` or `IoTHubDeviceClient_UploadMultipleBlocksToBlobAsync`.
     *
     * @param    iotHubClientHandle      The handle created by a call to the create function.
-    * @param    azureBlobSasUri         The Azure Storage Blob SAS uri obtained with `IoTHubDeviceClient_InitializeUpload`.
+    * @param    azureBlobSasUri         The Azure Storage Blob SAS uri obtained with `IoTHubDeviceClient_AzureStorageInitializeBlobUpload`.
     *
     * @warning  This is a synchronous/blocking function.
     *
@@ -411,8 +411,8 @@ extern "C"
     *           `IoTHubDeviceClient_AzureStoragePutBlock`
     *           `IoTHubDeviceClient_AzureStoragePutBlockList`
     *           `IoTHubDeviceClient_AzureStorageDestroyClient`
-    *           `IoTHubDeviceClient_InitializeUpload`
-    *           `IoTHubDeviceClient_NotifyUploadCompletion`
+    *           `IoTHubDeviceClient_AzureStorageInitializeBlobUpload`
+    *           `IoTHubDeviceClient_AzureStorageNotifyBlobUploadCompletion`
     *           For simpler/less-granular control of uploads to Azure blob storage please use either
     *           `IoTHubDeviceClient_UploadToBlobAsync` or `IoTHubDeviceClient_UploadMultipleBlocksToBlobAsync`.
     *           For more information about Azure Storage PUT BLOCK, its parameters and behavior, please refer to
@@ -437,8 +437,8 @@ extern "C"
     *           `IoTHubDeviceClient_AzureStoragePutBlock`
     *           `IoTHubDeviceClient_AzureStoragePutBlockList`
     *           `IoTHubDeviceClient_AzureStorageDestroyClient`
-    *           `IoTHubDeviceClient_InitializeUpload`
-    *           `IoTHubDeviceClient_NotifyUploadCompletion`
+    *           `IoTHubDeviceClient_AzureStorageInitializeBlobUpload`
+    *           `IoTHubDeviceClient_AzureStorageNotifyBlobUploadCompletion`
     *           For simpler/less-granular control of uploads to Azure blob storage please use either
     *           `IoTHubDeviceClient_UploadToBlobAsync` or `IoTHubDeviceClient_UploadMultipleBlocksToBlobAsync`.
     *           If this function fails (due to any HTTP error to Azure Storage) it can
@@ -463,8 +463,8 @@ extern "C"
     *           `IoTHubDeviceClient_AzureStoragePutBlock`
     *           `IoTHubDeviceClient_AzureStoragePutBlockList`
     *           `IoTHubDeviceClient_AzureStorageDestroyClient`
-    *           `IoTHubDeviceClient_InitializeUpload`
-    *           `IoTHubDeviceClient_NotifyUploadCompletion`
+    *           `IoTHubDeviceClient_AzureStorageInitializeBlobUpload`
+    *           `IoTHubDeviceClient_AzureStorageNotifyBlobUploadCompletion`
     *           For simpler/less-granular control of uploads to Azure blob storage please use either
     *           `IoTHubDeviceClient_UploadToBlobAsync` or `IoTHubDeviceClient_UploadMultipleBlocksToBlobAsync`.
     *
@@ -484,8 +484,8 @@ extern "C"
     *           `IoTHubDeviceClient_AzureStoragePutBlock`
     *           `IoTHubDeviceClient_AzureStoragePutBlockList`
     *           `IoTHubDeviceClient_AzureStorageDestroyClient`
-    *           `IoTHubDeviceClient_InitializeUpload`
-    *           `IoTHubDeviceClient_NotifyUploadCompletion`
+    *           `IoTHubDeviceClient_AzureStorageInitializeBlobUpload`
+    *           `IoTHubDeviceClient_AzureStorageNotifyBlobUploadCompletion`
     *           For simpler/less-granular control of uploads to Azure blob storage please use either
     *           `IoTHubDeviceClient_UploadToBlobAsync` or `IoTHubDeviceClient_UploadMultipleBlocksToBlobAsync`.
     *           If this function fails (due to any HTTP error to either Azure Storage or Azure IoT Hub) it can
@@ -493,7 +493,7 @@ extern "C"
     *           an internet connectivity disruption is over.  
     *
     * @param    azureStorageClientHandle    The handle created with `IoTHubDeviceClient_AzureStorageCreateClient`.
-    * @param    uploadCorrelationId    Upload correlation-id obtained with `IoTHubDeviceClient_InitializeUpload`.
+    * @param    uploadCorrelationId    Upload correlation-id obtained with `IoTHubDeviceClient_AzureStorageInitializeBlobUpload`.
     * @param    isSuccess              A boolean value indicating if the call(s) to `IoTHubDeviceClient_AzureStoragePutBlock` succeeded.
     * @param    responseCode           An user-defined code to signal the status of the upload (e.g., 200 for success, or -1 for abort).
     * @param    responseMessage        An user-defined status message to go along with `responseCode` on the notification to Azure IoT Hub.
@@ -502,7 +502,7 @@ extern "C"
     *
     * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
-    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_NotifyUploadCompletion, IOTHUB_DEVICE_CLIENT_HANDLE, iotHubClientHandle, const char*, uploadCorrelationId, bool, isSuccess, int, responseCode, const char*, responseMessage);
+    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_AzureStorageNotifyBlobUploadCompletion, IOTHUB_DEVICE_CLIENT_HANDLE, iotHubClientHandle, const char*, uploadCorrelationId, bool, isSuccess, int, responseCode, const char*, responseMessage);
 #endif /* DONT_USE_UPLOADTOBLOB */
 
     /**

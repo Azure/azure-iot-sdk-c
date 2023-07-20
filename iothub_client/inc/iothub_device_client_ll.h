@@ -392,7 +392,7 @@ typedef IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE IOTHUB_CLIENT_LL_AZURE_STOR
      * @remark   It is part of a set of functions for more granular control over Azure IoT-based blob uploads.
      *           This function is expected to be used along with:
      *           `IoTHubDeviceClient_LL_AzureStoragePutBlock`
-     *           `IoTHubDeviceClient_LL_NotifyUploadCompletion`
+     *           `IoTHubDeviceClient_LL_AzureStorageNotifyBlobUploadCompletion`
      *           `IoTHubDeviceClient_LL_AzureStorageDestroyClient`
      *           For simpler/less-granular control of uploads to Azure blob storage please use either
      *           `IoTHubDeviceClient_LL_UploadToBlob` or `IoTHubDeviceClient_LL_UploadMultipleBlocksToBlob`.
@@ -406,24 +406,24 @@ typedef IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE IOTHUB_CLIENT_LL_AZURE_STOR
      *           This function only attempts to send HTTP requests once, it does not retry in case of failure.
      *           Any retries must be explicitly implemented by the calling application.
      *           `uploadCorrelationId` and `azureBlobSasUri` must be freed by the calling application
-     *           after the blob upload process is done (e.g., after calling `IoTHubDeviceClient_LL_NotifyUploadCompletion`).
+     *           after the blob upload process is done (e.g., after calling `IoTHubDeviceClient_LL_AzureStorageNotifyBlobUploadCompletion`).
      *
      * @return   An IOTHUB_CLIENT_RESULT value indicating the success or failure of the API call.
      */
-     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_LL_InitializeUpload, IOTHUB_DEVICE_CLIENT_LL_HANDLE, iotHubClientHandle, const char*, destinationFileName, char**, uploadCorrelationId, char**, azureBlobSasUri);
+     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_LL_AzureStorageInitializeBlobUpload, IOTHUB_DEVICE_CLIENT_LL_HANDLE, iotHubClientHandle, const char*, destinationFileName, char**, uploadCorrelationId, char**, azureBlobSasUri);
 
      /**
      * @brief    This API creates a client for a new blob upload to Azure Storage.
      * @remark   It is part of a set of functions for more granular control over Azure IoT-based blob uploads.
      *           This function is expected to be used along with:
      *           `IoTHubDeviceClient_LL_AzureStoragePutBlock`
-     *           `IoTHubDeviceClient_LL_NotifyUploadCompletion`
+     *           `IoTHubDeviceClient_LL_AzureStorageNotifyBlobUploadCompletion`
      *           `IoTHubDeviceClient_LL_AzureStorageDestroyClient`
      *           For simpler/less-granular control of uploads to Azure blob storage please use either
      *           `IoTHubDeviceClient_LL_UploadToBlob` or `IoTHubDeviceClient_LL_UploadMultipleBlocksToBlob`.
      *
      * @param    iotHubClientHandle      The handle created by a call to the create function.
-     * @param    azureBlobSasUri         The Azure Storage Blob SAS uri obtained with `IoTHubDeviceClient_InitializeUpload`.
+     * @param    azureBlobSasUri         The Azure Storage Blob SAS uri obtained with `IoTHubDeviceClient_LL_AzureStorageInitializeBlobUpload`.
      *
      * @warning  This is a synchronous/blocking function.
      *
@@ -436,7 +436,7 @@ typedef IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE IOTHUB_CLIENT_LL_AZURE_STOR
      * @remark   It is part of a set of functions for more granular control over Azure IoT-based blob uploads.
      *           This function is expected to be used along with:
      *           `IoTHubDeviceClient_LL_AzureStorageCreateClient`
-     *           `IoTHubDeviceClient_LL_NotifyUploadCompletion`
+     *           `IoTHubDeviceClient_LL_AzureStorageNotifyBlobUploadCompletion`
      *           `IoTHubDeviceClient_LL_AzureStorageDestroyClient`
      *           For simpler/less-granular control of uploads to Azure blob storage please use either
      *           `IoTHubDeviceClient_LL_UploadToBlob` or `IoTHubDeviceClient_LL_UploadMultipleBlocksToBlob`.
@@ -461,7 +461,7 @@ typedef IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE IOTHUB_CLIENT_LL_AZURE_STOR
      * @remark   It is part of a set of functions for more granular control over Azure IoT-based blob uploads.
      *           This function is expected to be used along with:
      *           `IoTHubDeviceClient_LL_AzureStorageCreateClient`
-     *           `IoTHubDeviceClient_LL_NotifyUploadCompletion`
+     *           `IoTHubDeviceClient_LL_AzureStorageNotifyBlobUploadCompletion`
      *           `IoTHubDeviceClient_LL_AzureStorageDestroyClient`
      *           For simpler/less-granular control of uploads to Azure blob storage please use either
      *           `IoTHubDeviceClient_LL_UploadToBlob` or `IoTHubDeviceClient_LL_UploadMultipleBlocksToBlob`.
@@ -484,7 +484,7 @@ typedef IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE IOTHUB_CLIENT_LL_AZURE_STOR
      *           This function is expected to be used along with:
      *           `IoTHubDeviceClient_LL_AzureStorageCreateClient`
      *           `IoTHubDeviceClient_LL_AzureStoragePutBlock`
-     *           `IoTHubDeviceClient_LL_NotifyUploadCompletion`
+     *           `IoTHubDeviceClient_LL_AzureStorageNotifyBlobUploadCompletion`
      *           For simpler/less-granular control of uploads to Azure blob storage please use either
      *           `IoTHubDeviceClient_LL_UploadToBlob` or `IoTHubDeviceClient_LL_UploadMultipleBlocksToBlob`.
      *
@@ -510,7 +510,7 @@ typedef IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE IOTHUB_CLIENT_LL_AZURE_STOR
      *           an internet connectivity disruption is over.  
      *
      * @param    azureStorageClientHandle    The handle created with `IoTHubDeviceClient_LL_AzureStorageCreateClient`.
-     * @param    uploadCorrelationId    Upload correlation-id obtained with `IoTHubDeviceClient_LL_InitializeUpload`.
+     * @param    uploadCorrelationId    Upload correlation-id obtained with `IoTHubDeviceClient_LL_AzureStorageInitializeBlobUpload`.
      * @param    isSuccess              A boolean value indicating if the call(s) to `IoTHubDeviceClient_LL_AzureStoragePutBlock` succeeded.
      * @param    responseCode           An user-defined code to signal the status of the upload (e.g., 200 for success, or -1 for abort).
      * @param    responseMessage        An user-defined status message to go along with `responseCode` on the notification to Azure IoT Hub.
@@ -521,7 +521,7 @@ typedef IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE IOTHUB_CLIENT_LL_AZURE_STOR
      * 
      * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
      */
-     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_LL_NotifyUploadCompletion, IOTHUB_DEVICE_CLIENT_LL_HANDLE, iotHubClientHandle, const char*, uploadCorrelationId, bool, isSuccess, int, responseCode, const char*, responseMessage);
+     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_LL_AzureStorageNotifyBlobUploadCompletion, IOTHUB_DEVICE_CLIENT_LL_HANDLE, iotHubClientHandle, const char*, uploadCorrelationId, bool, isSuccess, int, responseCode, const char*, responseMessage);
 #endif /*DONT_USE_UPLOADTOBLOB*/
 
     /**

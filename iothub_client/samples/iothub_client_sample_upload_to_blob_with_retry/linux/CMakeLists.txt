@@ -6,7 +6,7 @@ cmake_minimum_required(VERSION 3.5)
 cmake_policy(SET CMP0074 NEW)
 cmake_policy(SET CMP0012 NEW)
 
-project(iothub_client_sample_upload_to_blob_custom)
+project(iothub_client_sample_upload_to_blob_with_retry)
 
 if(WIN32)
     message(FATAL_ERROR "This CMake file only supports Linux builds!")
@@ -17,13 +17,13 @@ find_package(azure_iot_sdks REQUIRED)
 add_definitions(-DSET_TRUSTED_CERT_IN_SAMPLES)
 include_directories("../../../../certs")
 
-set(iothub_client_sample_upload_to_blob_custom_c_files
-    ../iothub_client_sample_upload_to_blob_custom.c
+set(iothub_client_sample_upload_to_blob_with_retry_c_files
+    ../iothub_client_sample_upload_to_blob_with_retry.c
     ../../../../certs/certs.c
 )
 
-add_executable(iothub_client_sample_upload_to_blob_custom ${iothub_client_sample_upload_to_blob_custom_c_files})
+add_executable(iothub_client_sample_upload_to_blob_with_retry ${iothub_client_sample_upload_to_blob_with_retry_c_files})
 
-target_link_libraries(iothub_client_sample_upload_to_blob_custom
+target_link_libraries(iothub_client_sample_upload_to_blob_with_retry
     iothub_client
 )
