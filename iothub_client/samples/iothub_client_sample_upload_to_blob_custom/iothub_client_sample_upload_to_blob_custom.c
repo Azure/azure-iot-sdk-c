@@ -5,8 +5,6 @@
 // Checking of return codes and error values shall be omitted for brevity.  Please practice sound engineering practices
 // when writing production code.
 
-#ifndef DONT_USE_UPLOADTOBLOB
-
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -89,9 +87,9 @@ int main(void)
             }
             else
             {
-                IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE uploadContextHandle = IoTHubDeviceClient_LL_CreateUploadContext(device_ll_handle, azureBlobSasUri);
+                IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE azureStorageClientHandle = IoTHubDeviceClient_LL_AzureStorageCreateClient(device_ll_handle, azureBlobSasUri);
 
-                if (uploadContextHandle == NULL)
+                if (azureStorageClientHandle == NULL)
                 {
                     (void)printf("failed to create upload context\n");
                 }
@@ -110,7 +108,7 @@ int main(void)
                         while (true)
                         {
                             if (IoTHubDeviceClient_LL_AzureStoragePutBlock(
-                                    uploadContextHandle, block_number, (const uint8_t*)data_to_upload, data_size) == IOTHUB_CLIENT_OK)
+                                    azureStorageClientHandle, block_number, (const uint8_t*)data_to_upload, data_size) == IOTHUB_CLIENT_OK)
                             {
                                 // Block upload succeeded. Continuing with next block.
                                 break;
@@ -137,7 +135,7 @@ int main(void)
 
                     if (uploadSuccessful)
                     {
-                        if (IoTHubDeviceClient_LL_AzureStoragePutBlockList(uploadContextHandle) != IOTHUB_CLIENT_OK)
+                        if (IoTHubDeviceClient_LL_AzureStoragePutBlockList(azureStorageClientHandle) != IOTHUB_CLIENT_OK)
                         {
                             (void)printf("Failed performing Azure Storage Put Blob List.\n");
                             uploadSuccessful = false;
@@ -145,7 +143,7 @@ int main(void)
                         }
                     }
 
-                    IoTHubDeviceClient_LL_DestroyUploadContext(uploadContextHandle);
+                    IoTHubDeviceClient_LL_AzureStorageDestroyClient(azureStorageClientHandle);
 
                     attemptCount = 1;
 
@@ -195,4 +193,4 @@ int main(void)
 
     return 0;
 }
-#endif /*DONT_USE_UPLOADTOBLOB*/
+

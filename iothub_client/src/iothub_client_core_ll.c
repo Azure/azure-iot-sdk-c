@@ -2952,7 +2952,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_InitializeUpload(IOTHUB_CLIENT_CORE_LL_
     return result;
 }
 
-IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE IoTHubClientCore_LL_CreateUploadContext(IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle, const char* azureBlobSasUri)
+IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE IoTHubClientCore_LL_AzureStorageCreateClient(IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle, const char* azureBlobSasUri)
 {
     IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE result;
     if (
@@ -2971,39 +2971,39 @@ IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE IoTHubClientCore_LL_CreateUploadCon
     return result;
 }
 
-IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_AzureStoragePutBlock(IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE uploadContextHandle, uint32_t blockNumber, const uint8_t* dataPtr, size_t dataSize)
+IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_AzureStoragePutBlock(IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE azureStorageClientHandle, uint32_t blockNumber, const uint8_t* dataPtr, size_t dataSize)
 {
     IOTHUB_CLIENT_RESULT result;
 
     if (
-        (uploadContextHandle == NULL) ||
+        (azureStorageClientHandle == NULL) ||
         (dataPtr == NULL) ||
         (dataSize == 0)
         )
     {
-        LogError("invalid parameters uploadContextHandle=%p, dataPtr=%p, dataSize=%zu", uploadContextHandle, dataPtr, dataSize);
+        LogError("invalid parameters azureStorageClientHandle=%p, dataPtr=%p, dataSize=%zu", azureStorageClientHandle, dataPtr, dataSize);
         result = IOTHUB_CLIENT_INVALID_ARG;
     }
     else
     {
-        result = IoTHubClient_LL_UploadToBlob_PutBlock(uploadContextHandle, blockNumber, dataPtr, dataSize);
+        result = IoTHubClient_LL_UploadToBlob_PutBlock(azureStorageClientHandle, blockNumber, dataPtr, dataSize);
     }
 
     return result;
 }
 
-IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_AzureStoragePutBlockList(IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE uploadContextHandle)
+IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_AzureStoragePutBlockList(IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE azureStorageClientHandle)
 {
     IOTHUB_CLIENT_RESULT result;
 
-    if (uploadContextHandle == NULL)
+    if (azureStorageClientHandle == NULL)
     {
-        LogError("invalid parameter uploadContextHandle=%p", uploadContextHandle);
+        LogError("invalid parameter azureStorageClientHandle=%p", azureStorageClientHandle);
         result = IOTHUB_CLIENT_INVALID_ARG;
     }
     else
     {
-        result = IoTHubClient_LL_UploadToBlob_PutBlockList(uploadContextHandle);
+        result = IoTHubClient_LL_UploadToBlob_PutBlockList(azureStorageClientHandle);
     }
 
     return result;
@@ -3026,11 +3026,11 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_NotifyUploadCompletion(IOTHUB_CLIENT_CO
     return result;
 }
 
-void IoTHubClientCore_LL_DestroyUploadContext(IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE uploadContextHandle)
+void IoTHubClientCore_LL_AzureStorageDestroyClient(IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE azureStorageClientHandle)
 {
-    if (uploadContextHandle != NULL)
+    if (azureStorageClientHandle != NULL)
     {
-        IoTHubClient_LL_UploadToBlob_DestroyContext(uploadContextHandle);
+        IoTHubClient_LL_UploadToBlob_DestroyContext(azureStorageClientHandle);
     }
 }
 #endif // DONT_USE_UPLOADTOBLOB

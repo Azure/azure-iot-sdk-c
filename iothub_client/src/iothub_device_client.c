@@ -120,24 +120,24 @@ IOTHUB_CLIENT_RESULT IoTHubDeviceClient_InitializeUpload(IOTHUB_DEVICE_CLIENT_HA
     return IoTHubClientCore_InitializeUpload((IOTHUB_CLIENT_CORE_HANDLE)iotHubClientHandle, destinationFileName, uploadCorrelationId, azureBlobSasUri);
 }
 
-IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE IoTHubDeviceClient_CreateUploadContext(IOTHUB_DEVICE_CLIENT_HANDLE iotHubClientHandle, const char* azureBlobSasUri)
+IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE IoTHubDeviceClient_AzureStorageCreateClient(IOTHUB_DEVICE_CLIENT_HANDLE iotHubClientHandle, const char* azureBlobSasUri)
 {
-    return IoTHubClientCore_CreateUploadContext((IOTHUB_CLIENT_CORE_HANDLE)iotHubClientHandle, azureBlobSasUri);
+    return IoTHubClientCore_AzureStorageCreateClient((IOTHUB_CLIENT_CORE_HANDLE)iotHubClientHandle, azureBlobSasUri);
 }
 
-IOTHUB_CLIENT_RESULT IoTHubDeviceClient_AzureStoragePutBlock(IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE uploadContextHandle, uint32_t blockNumber, const uint8_t* dataPtr, size_t dataSize)
+IOTHUB_CLIENT_RESULT IoTHubDeviceClient_AzureStoragePutBlock(IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE azureStorageClientHandle, uint32_t blockNumber, const uint8_t* dataPtr, size_t dataSize)
 {
-    return IoTHubClientCore_AzureStoragePutBlock(uploadContextHandle, blockNumber, dataPtr, dataSize);
+    return IoTHubClientCore_AzureStoragePutBlock(azureStorageClientHandle, blockNumber, dataPtr, dataSize);
 }
 
-IOTHUB_CLIENT_RESULT IoTHubDeviceClient_AzureStoragePutBlockList(IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE uploadContextHandle)
+IOTHUB_CLIENT_RESULT IoTHubDeviceClient_AzureStoragePutBlockList(IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE azureStorageClientHandle)
 {
-    return IoTHubClientCore_AzureStoragePutBlockList(uploadContextHandle);
+    return IoTHubClientCore_AzureStoragePutBlockList(azureStorageClientHandle);
 }
 
-void IoTHubDeviceClient_DestroyUploadContext(IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE uploadContextHandle)
+void IoTHubDeviceClient_AzureStorageDestroyClient(IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE azureStorageClientHandle)
 {
-    IoTHubClientCore_DestroyUploadContext(uploadContextHandle);
+    IoTHubClientCore_AzureStorageDestroyClient(azureStorageClientHandle);
 }
 
 IOTHUB_CLIENT_RESULT IoTHubDeviceClient_NotifyUploadCompletion(IOTHUB_DEVICE_CLIENT_HANDLE iotHubClientHandle, const char* uploadCorrelationId, bool isSuccess, int responseCode, const char* responseMessage)

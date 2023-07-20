@@ -1108,13 +1108,13 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_NotifyCompletion(IOTHUB_CLIENT
     return result;
 }
 
-IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_UploadMultipleBlocks(IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE uploadContextHandle, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK_EX getDataCallbackEx, void* context)
+IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_UploadMultipleBlocks(IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE azureStorageClientHandle, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK_EX getDataCallbackEx, void* context)
 {
     IOTHUB_CLIENT_RESULT result;
 
-    if (uploadContextHandle == NULL || getDataCallbackEx == NULL)
+    if (azureStorageClientHandle == NULL || getDataCallbackEx == NULL)
     {
-        LogError("invalid argument detected uploadContextHandle=%p getDataCallbackEx=%p", uploadContextHandle, getDataCallbackEx);
+        LogError("invalid argument detected azureStorageClientHandle=%p getDataCallbackEx=%p", azureStorageClientHandle, getDataCallbackEx);
         result = IOTHUB_CLIENT_INVALID_ARG;
     }
     else
@@ -1156,7 +1156,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_UploadMultipleBlocks(IOTHUB_CL
                     isError = true;
                     break;
                 }
-                else if (IoTHubClient_LL_UploadToBlob_PutBlock(uploadContextHandle, blockID, blockDataPtr, blockDataSize) != IOTHUB_CLIENT_OK)
+                else if (IoTHubClient_LL_UploadToBlob_PutBlock(azureStorageClientHandle, blockID, blockDataPtr, blockDataSize) != IOTHUB_CLIENT_OK)
                 {
                     LogError("failed uploading block to blob");
                     isError = true;
@@ -1177,7 +1177,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_UploadMultipleBlocks(IOTHUB_CL
         // be attempted if at least one block has indeed been uploaded to Azure Storage.
         // This behavior follows the behavior of the original implementation of
         // Upload-to-Blob in azure-iot-sdk-c.
-        else if (blockID > 0 && IoTHubClient_LL_UploadToBlob_PutBlockList(uploadContextHandle) != IOTHUB_CLIENT_OK)
+        else if (blockID > 0 && IoTHubClient_LL_UploadToBlob_PutBlockList(azureStorageClientHandle) != IOTHUB_CLIENT_OK)
         {
             LogError("Failed to perform Azure Blob Put Block List operation");
             (void)getDataCallbackEx(FILE_UPLOAD_ERROR, NULL, NULL, context);
