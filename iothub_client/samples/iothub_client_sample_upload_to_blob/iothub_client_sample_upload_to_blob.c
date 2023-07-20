@@ -35,6 +35,7 @@ static const char* connectionString = "[device connection string]";
 static const char* proxyHost = NULL;
 static int proxyPort = 0;
 
+static const char* azureStorageBlobPath = "subdir/hello_world.txt";
 #define HELLO_WORLD "Hello World from IoTHubDeviceClient_LL_UploadToBlob"
 
 int main(void)
@@ -73,7 +74,7 @@ int main(void)
         }
         else
         {
-            if (IoTHubDeviceClient_LL_UploadToBlob(device_ll_handle, "subdir/hello_world.txt", (const unsigned char*)HELLO_WORLD, sizeof(HELLO_WORLD) - 1) != IOTHUB_CLIENT_OK)
+            if (IoTHubDeviceClient_LL_UploadToBlob(device_ll_handle, azureStorageBlobPath, (const unsigned char*)HELLO_WORLD, sizeof(HELLO_WORLD) - 1) != IOTHUB_CLIENT_OK)
             {
                 (void)printf("hello world failed to upload\n");
             }
