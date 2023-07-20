@@ -50,7 +50,10 @@ static void my_gballoc_free(void* s)
 #define TEST_LIST_ITEM_HANDLE           (LIST_ITEM_HANDLE)0x4446
 #define TEST_STRING_HANDLE              (STRING_HANDLE)0x4447
 #define HTTP_OK                 200
-#define HTTP_NOT_FOUND          404
+#define HTTP_UNAUTHORIZED       401
+
+const unsigned int HTTP_STATUS_200 = HTTP_OK;
+const unsigned int HTTP_STATUS_401 = HTTP_UNAUTHORIZED;
 
 TEST_DEFINE_ENUM_TYPE(HTTPAPI_REQUEST_TYPE, HTTPAPI_REQUEST_TYPE_VALUES);
 IMPLEMENT_UMOCK_C_ENUM_TYPE(HTTPAPI_REQUEST_TYPE, HTTPAPI_REQUEST_TYPE_VALUES);
@@ -106,10 +109,6 @@ static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
     (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error :%s", MU_ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
     ASSERT_FAIL(temp_str);
 }
-
-static BUFFER_HANDLE testValidBufferHandle; /*assigned in TEST_SUITE_INITIALIZE*/
-static const unsigned int TwoHundred = HTTP_OK;
-static const unsigned int FourHundredFour = HTTP_NOT_FOUND;
 
 // Allocate test content during initial test setup only.  This buffer is very large,
 // which means significant performance degradation on Valgrind tests if we were to
@@ -172,9 +171,6 @@ TEST_SUITE_INITIALIZE(TestSuiteInitialize)
     REGISTER_TYPE(HTTPAPIEX_RESULT, HTTPAPIEX_RESULT);
     REGISTER_TYPE(HTTP_HEADERS_RESULT, HTTP_HEADERS_RESULT);
 
-    testValidBufferHandle = BUFFER_create((const unsigned char*)"a", 1);
-    ASSERT_IS_NOT_NULL(testValidBufferHandle);
-
     testUploadToBlobContent = gballoc_malloc(testUploadToBlobContentMaxSize);
     ASSERT_IS_NOT_NULL(testUploadToBlobContent);
 
@@ -183,8 +179,6 @@ TEST_SUITE_INITIALIZE(TestSuiteInitialize)
 
 TEST_SUITE_CLEANUP(TestClassCleanup)
 {
-
-    BUFFER_delete(testValidBufferHandle);
     gballoc_free(testUploadToBlobContent);
 
     umock_c_deinit();
@@ -371,7 +365,8 @@ TEST_FUNCTION(Blob_PutBlock_happy_path_succeeds)
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
         .CallCannotFail();
     STRICT_EXPECTED_CALL(HTTPAPIEX_ExecuteRequest(
-        TEST_HTTPAPIEX_HANDLE, HTTPAPI_REQUEST_PUT, IGNORED_PTR_ARG, IGNORED_PTR_ARG, blockData, &responseHttpStatus, IGNORED_PTR_ARG, responseContent));
+        TEST_HTTPAPIEX_HANDLE, HTTPAPI_REQUEST_PUT, IGNORED_PTR_ARG, IGNORED_PTR_ARG, blockData, IGNORED_PTR_ARG, IGNORED_PTR_ARG, responseContent))
+        .CopyOutArgumentBuffer_statusCode(&HTTP_STATUS_200, sizeof(unsigned int));
     STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
 
     ///act
@@ -381,6 +376,42 @@ TEST_FUNCTION(Blob_PutBlock_happy_path_succeeds)
     ///assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     ASSERT_ARE_EQUAL(int, BLOB_OK, result);
+
+    ///cleanup
+}
+
+TEST_FUNCTION(Blob_PutBlock_401_fails)
+{
+    ///arrange
+    unsigned int blockId = 0;
+    BUFFER_HANDLE blockData = TEST_BUFFER_HANDLE;
+    SINGLYLINKEDLIST_HANDLE blockIdList = TEST_SINGLYLINKEDLIST_HANDLE;
+    unsigned int responseHttpStatus = 0;
+    BUFFER_HANDLE responseContent = TEST_BUFFER_HANDLE;
+
+    umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(Azure_Base64_Encode_Bytes(IGNORED_PTR_ARG, 6));
+    STRICT_EXPECTED_CALL(singlylinkedlist_add(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_construct(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+        .CallCannotFail();
+    STRICT_EXPECTED_CALL(HTTPAPIEX_ExecuteRequest(
+        TEST_HTTPAPIEX_HANDLE, HTTPAPI_REQUEST_PUT, IGNORED_PTR_ARG, IGNORED_PTR_ARG, blockData, IGNORED_PTR_ARG, IGNORED_PTR_ARG, responseContent))
+        .CopyOutArgumentBuffer_statusCode(&HTTP_STATUS_401, sizeof(unsigned int));
+    STRICT_EXPECTED_CALL(singlylinkedlist_remove(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+
+    ///act
+    BLOB_RESULT result = Blob_PutBlock(
+        TEST_HTTPAPIEX_HANDLE, TEST_RELATIVE_PATH_1, blockId, blockData, blockIdList, &responseHttpStatus, responseContent);
+
+    ///assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(int, BLOB_HTTP_ERROR, result);
+    ASSERT_ARE_EQUAL(int, HTTP_STATUS_401, responseHttpStatus);
 
     ///cleanup
 }
@@ -490,7 +521,8 @@ TEST_FUNCTION(Blob_PutBlock_NULL_response_status_succeeds)
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
         .CallCannotFail();
     STRICT_EXPECTED_CALL(HTTPAPIEX_ExecuteRequest(
-        TEST_HTTPAPIEX_HANDLE, HTTPAPI_REQUEST_PUT, IGNORED_PTR_ARG, IGNORED_PTR_ARG, blockData, NULL, IGNORED_PTR_ARG, responseContent));
+        TEST_HTTPAPIEX_HANDLE, HTTPAPI_REQUEST_PUT, IGNORED_PTR_ARG, IGNORED_PTR_ARG, blockData, NULL, IGNORED_PTR_ARG, responseContent))
+        .CopyOutArgumentBuffer_statusCode(&HTTP_STATUS_200, sizeof(unsigned int));
     STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
 
     ///act
@@ -522,7 +554,8 @@ TEST_FUNCTION(Blob_PutBlock_NULL_response_content_succeeds)
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
         .CallCannotFail();
     STRICT_EXPECTED_CALL(HTTPAPIEX_ExecuteRequest(
-        TEST_HTTPAPIEX_HANDLE, HTTPAPI_REQUEST_PUT, IGNORED_PTR_ARG, IGNORED_PTR_ARG, blockData, &responseHttpStatus, IGNORED_PTR_ARG, responseContent));
+        TEST_HTTPAPIEX_HANDLE, HTTPAPI_REQUEST_PUT, IGNORED_PTR_ARG, IGNORED_PTR_ARG, blockData, IGNORED_PTR_ARG, IGNORED_PTR_ARG, responseContent))
+        .CopyOutArgumentBuffer_statusCode(&HTTP_STATUS_200, sizeof(unsigned int));
     STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
 
     ///act
@@ -605,7 +638,8 @@ TEST_FUNCTION(Blob_PutBlock_blockId_max_succeeds)
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
         .CallCannotFail();
     STRICT_EXPECTED_CALL(HTTPAPIEX_ExecuteRequest(
-        TEST_HTTPAPIEX_HANDLE, HTTPAPI_REQUEST_PUT, IGNORED_PTR_ARG, IGNORED_PTR_ARG, blockData, &responseHttpStatus, IGNORED_PTR_ARG, responseContent));
+        TEST_HTTPAPIEX_HANDLE, HTTPAPI_REQUEST_PUT, IGNORED_PTR_ARG, IGNORED_PTR_ARG, blockData, IGNORED_PTR_ARG, IGNORED_PTR_ARG, responseContent))
+        .CopyOutArgumentBuffer_statusCode(&HTTP_STATUS_200, sizeof(unsigned int));
     STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
 
     ///act
@@ -673,7 +707,8 @@ TEST_FUNCTION(Blob_PutBlockList_happy_path_succeeds)
     STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(HTTPAPIEX_ExecuteRequest(
-        TEST_HTTPAPIEX_HANDLE, HTTPAPI_REQUEST_PUT, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, &responseHttpStatus, IGNORED_PTR_ARG, responseContent));
+        TEST_HTTPAPIEX_HANDLE, HTTPAPI_REQUEST_PUT, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, responseContent))
+        .CopyOutArgumentBuffer_statusCode(&HTTP_STATUS_200, sizeof(unsigned int));
     STRICT_EXPECTED_CALL(singlylinkedlist_remove_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
@@ -686,6 +721,56 @@ TEST_FUNCTION(Blob_PutBlockList_happy_path_succeeds)
     ///assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     ASSERT_ARE_EQUAL(int, BLOB_OK, result);
+
+    ///cleanup
+}
+
+TEST_FUNCTION(Blob_PutBlockList_401_fails)
+{
+    ///arrange
+    SINGLYLINKEDLIST_HANDLE blockIdList = TEST_SINGLYLINKEDLIST_HANDLE;
+    unsigned int responseHttpStatus = 0;
+    BUFFER_HANDLE responseContent = TEST_BUFFER_HANDLE;
+
+    umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG));
+    // createBlockIdListXml(1 block)
+    STRICT_EXPECTED_CALL(STRING_construct(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG))
+        .CallCannotFail()
+        .SetReturn(TEST_STRING_HANDLE);
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_get_next_item(IGNORED_PTR_ARG))
+        .CallCannotFail()
+        .SetReturn(NULL);
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    // Back to Blob_PutBlockList
+    STRICT_EXPECTED_CALL(STRING_construct(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_length(IGNORED_PTR_ARG))
+        .CallCannotFail()
+        .SetReturn(100);
+    STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(HTTPAPIEX_ExecuteRequest(
+        TEST_HTTPAPIEX_HANDLE, HTTPAPI_REQUEST_PUT, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, responseContent))
+        .CopyOutArgumentBuffer_statusCode(&HTTP_STATUS_401, sizeof(unsigned int));
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+
+    ///act
+    BLOB_RESULT result = Blob_PutBlockList(
+        TEST_HTTPAPIEX_HANDLE, TEST_RELATIVE_PATH_1, blockIdList, &responseHttpStatus, responseContent);
+
+    ///assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(int, BLOB_HTTP_ERROR, result);
+    ASSERT_ARE_EQUAL(int, HTTP_STATUS_401, responseHttpStatus);
 
     ///cleanup
 }
@@ -893,7 +978,8 @@ TEST_FUNCTION(Blob_PutBlockList_no_response_content_succeeds)
     STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(HTTPAPIEX_ExecuteRequest(
-        TEST_HTTPAPIEX_HANDLE, HTTPAPI_REQUEST_PUT, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, &responseHttpStatus, IGNORED_PTR_ARG, NULL));
+        TEST_HTTPAPIEX_HANDLE, HTTPAPI_REQUEST_PUT, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, NULL))
+        .CopyOutArgumentBuffer_statusCode(&HTTP_STATUS_200, sizeof(unsigned int));
     STRICT_EXPECTED_CALL(singlylinkedlist_remove_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
