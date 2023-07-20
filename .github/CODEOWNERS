@@ -3,7 +3,8 @@
 ###########
 
 # Catch all for whole project
-* @CIPop @ericwol-msft @ewertons @jspaith @preethi826 @RLeclair @vaavva
+* @CIPop @ericwol-msft @ewertons @RLeclair @vaavva @zhkon
 
 # README Files
-*.md @CIPop @ericwol-msft @ewertons @jspaith @preethi826 @RLeclair @vaavva @wduraes
+*.md @CIPop @ericwol-msft @ewertons @RLeclair @vaavva @zhkon
+

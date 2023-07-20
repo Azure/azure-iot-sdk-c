@@ -486,7 +486,7 @@ char* IoTHubDeviceTwin_UpdateDeviceOrModuleTwin(IOTHUB_SERVICE_CLIENT_DEVICE_TWI
         }
         else if (sendHttpRequestTwin(serviceClientDeviceTwinHandle, IOTHUB_TWIN_REQUEST_UPDATE, deviceId, moduleId, updateJson, responseBuffer) != IOTHUB_DEVICE_TWIN_OK)
         {
-            LogError("Failure sending HTTP request for create device");
+            LogError("Failure sending HTTP request for twin update");
             BUFFER_delete(responseBuffer);
             BUFFER_delete(updateJson);
             result = NULL;
