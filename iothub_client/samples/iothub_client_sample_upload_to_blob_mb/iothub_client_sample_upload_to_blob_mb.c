@@ -33,6 +33,7 @@ static const char* connectionString = "[device connection string]";
 /*Optional string with http proxy host and integer for http proxy port (Linux only)         */
 static const char* proxyHost = NULL;
 static int proxyPort = 0;
+static const char* azureStorageBlobPath = "subdir/hello_world_mb.txt";
 static const char* data_to_upload_format = "Hello World from IoTHubDeviceClient_LL_UploadToBlob block: %d\n";
 static char data_to_upload[128];
 static int block_count = 0;
@@ -48,7 +49,7 @@ static IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT getDataCallback(IOTHUB_CLIENT_F
             // Note that the IoT SDK caller does NOT free(*data), as a typical use case the buffer returned 
             // to the IoT layer may be part of a larger buffer that this callback is chunking up for network sends.
 
-            if (block_count < 100)
+            if (block_count < 10)
             {
                 int len = snprintf(data_to_upload, sizeof(data_to_upload), data_to_upload_format, block_count);
                 if (len < 0 || len >= sizeof(data_to_upload))
@@ -103,6 +104,11 @@ int main(void)
     }
     else
     {
+#ifndef WIN32
+        size_t log = 1;
+        (void)IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_CURL_VERBOSE, &log);
+#endif // !WIN32
+
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
         // Setting the Trusted Certificate. This is only necessary on systems without
         // built in certificate stores.
@@ -119,7 +125,7 @@ int main(void)
         }
         else
         {
-            if (IoTHubDeviceClient_LL_UploadMultipleBlocksToBlob(device_ll_handle, "subdir/hello_world_mb.txt", getDataCallback, NULL) != IOTHUB_CLIENT_OK)
+            if (IoTHubDeviceClient_LL_UploadMultipleBlocksToBlob(device_ll_handle, azureStorageBlobPath, getDataCallback, NULL) != IOTHUB_CLIENT_OK)
             {
                 (void)printf("hello world failed to upload\n");
             }

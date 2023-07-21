@@ -25,10 +25,10 @@
 #ifndef IOTHUB_CLIENT_LL_UPLOADTOBLOB_H
 #define IOTHUB_CLIENT_LL_UPLOADTOBLOB_H
 
-#include "iothub_client_core_ll.h"
+#include "iothub_client_core_common.h"
 #include "internal/iothub_client_authorization.h"
-
 #include "umock_c/umock_c_prod.h"
+
 #ifdef __cplusplus
 #include <cstddef>
 extern "C"
@@ -41,9 +41,33 @@ extern "C"
 
     typedef struct IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA* IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE;
 
+    /*
+     * @remark `struct IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_STRUCT` contains information specifically
+     *         related to an individual upload request currently active in Azure IoT Hub, mainly
+     *         the correlation-id and Azure Blob SAS URI provided by the Azure IoT Hub when a new
+     *         upload is started. The `struct IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA` on the other hand 
+     *         holds common information (independent from individual upload requests) that is used for
+     *         upload-to-blob Rest API calls to Azure IoT Hub.
+     */    
+    typedef struct IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_STRUCT* IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE;
+
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE, IoTHubClient_LL_UploadToBlob_Create, const IOTHUB_CLIENT_CONFIG*, config, IOTHUB_AUTHORIZATION_HANDLE, auth_handle);
-    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_UploadToBlob_Impl, IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE, handle, const char*, destinationFileName, const unsigned char*, source, size_t, size);
-    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl, IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE, handle, const char*, destinationFileName, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK_EX, getDataCallbackEx, void*, context);
+
+    /*
+     * @remark This is a legacy function that provides compatibility with the exposed public API for 
+     *         upload to blob in iothub_(device|module)_client(_ll) that allowed passing a callback for obtaining the 
+     *         blob blocks data. Since there was quite a lot of (specific) logic put into this function, it
+     *         better remain in this API module.
+     */
+    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_UploadToBlob_UploadMultipleBlocks, IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE, azureStorageClientHandle, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK_EX, getDataCallbackEx, void*, context);
+
+    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_UploadToBlob_InitializeUpload, IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE, handle, const char*, destinationFileName, char**, uploadCorrelationId, char**, azureBlobSasUri);
+    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE, IoTHubClient_LL_UploadToBlob_CreateContext, IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE, handle, const char*, azureBlobSasUri);
+    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_UploadToBlob_PutBlock, IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE, uploadContext, uint32_t, blockNumber, const uint8_t*, dataPtr, size_t, dataSize);
+    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_UploadToBlob_PutBlockList, IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE, uploadContext);
+    MOCKABLE_FUNCTION(, void, IoTHubClient_LL_UploadToBlob_DestroyContext, IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE, uploadContext);
+    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_UploadToBlob_NotifyCompletion, IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE, handle, const char*, uploadCorrelationId, bool, isSuccess, int, responseCode, const char*, responseMessage);
+
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_UploadToBlob_SetOption, IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE, handle, const char*, optionName, const void*, value);
     MOCKABLE_FUNCTION(, void, IoTHubClient_LL_UploadToBlob_Destroy, IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE, handle);
 

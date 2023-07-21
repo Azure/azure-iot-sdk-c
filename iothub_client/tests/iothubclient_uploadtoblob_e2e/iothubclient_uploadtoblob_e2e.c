@@ -501,6 +501,7 @@ TEST_FUNCTION_INITIALIZE(TestMethodInitialize)
 }
 
 #ifdef TEST_MQTT
+
 TEST_FUNCTION(IoTHub_MQTT_UploadMultipleBlocksToBlobEx)
 {
     e2e_uploadtoblob_multiblock_test(MQTT_Protocol, true, false, false);
@@ -530,4 +531,3 @@ TEST_FUNCTION(IoTHub_MQTT_UploadCloseHandle_Before_WorkersComplete)
 #endif // TEST_MQTT
 
 END_TEST_SUITE(iothubclient_uploadtoblob_e2e)
-

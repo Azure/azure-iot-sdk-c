@@ -114,6 +114,37 @@ IOTHUB_CLIENT_RESULT IoTHubDeviceClient_UploadMultipleBlocksToBlobAsync(IOTHUB_D
 {
     return IoTHubClientCore_UploadMultipleBlocksToBlobAsync((IOTHUB_CLIENT_CORE_HANDLE)iotHubClientHandle, destinationFileName, NULL, getDataCallbackEx, context);
 }
+
+IOTHUB_CLIENT_RESULT IoTHubDeviceClient_AzureStorageInitializeBlobUpload(IOTHUB_DEVICE_CLIENT_HANDLE iotHubClientHandle, const char* destinationFileName, char** uploadCorrelationId, char** azureBlobSasUri)
+{
+    return IoTHubClientCore_InitializeUpload((IOTHUB_CLIENT_CORE_HANDLE)iotHubClientHandle, destinationFileName, uploadCorrelationId, azureBlobSasUri);
+}
+
+IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE IoTHubDeviceClient_AzureStorageCreateClient(IOTHUB_DEVICE_CLIENT_HANDLE iotHubClientHandle, const char* azureBlobSasUri)
+{
+    return IoTHubClientCore_AzureStorageCreateClient((IOTHUB_CLIENT_CORE_HANDLE)iotHubClientHandle, azureBlobSasUri);
+}
+
+IOTHUB_CLIENT_RESULT IoTHubDeviceClient_AzureStoragePutBlock(IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE azureStorageClientHandle, uint32_t blockNumber, const uint8_t* dataPtr, size_t dataSize)
+{
+    return IoTHubClientCore_AzureStoragePutBlock(azureStorageClientHandle, blockNumber, dataPtr, dataSize);
+}
+
+IOTHUB_CLIENT_RESULT IoTHubDeviceClient_AzureStoragePutBlockList(IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE azureStorageClientHandle)
+{
+    return IoTHubClientCore_AzureStoragePutBlockList(azureStorageClientHandle);
+}
+
+void IoTHubDeviceClient_AzureStorageDestroyClient(IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE azureStorageClientHandle)
+{
+    IoTHubClientCore_AzureStorageDestroyClient(azureStorageClientHandle);
+}
+
+IOTHUB_CLIENT_RESULT IoTHubDeviceClient_AzureStorageNotifyBlobUploadCompletion(IOTHUB_DEVICE_CLIENT_HANDLE iotHubClientHandle, const char* uploadCorrelationId, bool isSuccess, int responseCode, const char* responseMessage)
+{
+    return IoTHubClientCore_NotifyUploadCompletion((IOTHUB_CLIENT_CORE_HANDLE)iotHubClientHandle, uploadCorrelationId, isSuccess, responseCode, responseMessage);
+}
+
 #endif /*DONT_USE_UPLOADTOBLOB*/
 
 IOTHUB_CLIENT_RESULT IoTHubDeviceClient_SendTelemetryAsync(IOTHUB_DEVICE_CLIENT_HANDLE iotHubClientHandle, IOTHUB_MESSAGE_HANDLE telemetryMessageHandle, IOTHUB_CLIENT_TELEMETRY_CALLBACK telemetryConfirmationCallback, void* userContextCallback)
