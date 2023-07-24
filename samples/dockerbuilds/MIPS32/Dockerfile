@@ -99,6 +99,7 @@ RUN echo "SET(ENV{LDFLAGS} -L${TOOLCHAIN_PREFIX}/lib)" >> toolchain.cmake
 RUN echo "SET(OPENSSL_ROOT_DIR ${TOOLCHAIN_PREFIX})" >> toolchain.cmake
 RUN echo "SET(set_trusted_cert_in_samples true CACHE BOOL \"Force use of TrustedCerts option\" FORCE)" >> toolchain.cmake
 RUN echo "include_directories(${TOOLCHAIN_PREFIX}/include)" >> toolchain.cmake
+RUN echo "include_directories(${TOOLCHAIN_PREFIX}/include/azureiot)" >> toolchain.cmake
 
 RUN cmake -DCMAKE_TOOLCHAIN_FILE=toolchain.cmake ..
 RUN cmake --build .
