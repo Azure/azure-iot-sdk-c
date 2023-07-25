@@ -1,4 +1,5 @@
 FROM ubuntu:latest
+ARG TARGET_BRANCH=main
 
 #########################################
 # start from home directory
@@ -80,6 +81,8 @@ WORKDIR ..
 
 RUN git clone https://github.com/azure/azure-iot-sdk-c.git
 WORKDIR azure-iot-sdk-c
+RUN git fetch origin $TARGET_BRANCH
+RUN git checkout FETCH_HEAD
 RUN git submodule update --init
 RUN mkdir cmake
 WORKDIR cmake

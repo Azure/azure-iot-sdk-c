@@ -959,7 +959,7 @@ jobs:
     displayName: 'Setup'
   - script: |
       cd samples/dockerbuilds/MIPS32
-      docker build -t mipsiotbuild:latest . --network=host
+      docker build --build-arg TARGET_BRANCH=$BUILD_SOURCEBRANCH -t mipsiotbuild:latest . --network=host
       cd ..
       docker build -t mipsiotapp:latest . --network=host --file ./MIPS32/Dockerfile_adjunct
     displayName: 'Build MIPS32'
@@ -981,7 +981,7 @@ jobs:
     displayName: 'Setup'
   - script: |
       cd samples/dockerbuilds/ARM
-      docker build -t armiotbuild:latest . --network=host
+      docker build --build-arg TARGET_BRANCH=$BUILD_SOURCEBRANCH -t armiotbuild:latest . --network=host
       cd ..
       docker build -t armiotapp:latest . --network=host --file ./ARM/Dockerfile_adjunct
     displayName: 'Build ARM'
