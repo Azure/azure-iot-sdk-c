@@ -1,5 +1,6 @@
 FROM ubuntu:latest
 ARG DEBIAN_FRONTEND=noninteractive
+ARG TARGET_BRANCH=main
 
 #########################################
 # start from home directory
@@ -74,6 +75,8 @@ WORKDIR ..
 # Build Azure C SDK
 RUN git clone https://github.com/azure/azure-iot-sdk-c.git
 WORKDIR azure-iot-sdk-c
+RUN git fetch origin $TARGET_BRANCH
+RUN git checkout FETCH_HEAD
 RUN git submodule update --init
 RUN mkdir cmake
 WORKDIR cmake
