@@ -18,9 +18,6 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_CLIENT_CORE_LL_HAND
 #include "umock_c/umock_c_prod.h"
 #include "iothub_transport_ll.h"
 #include "iothub_client_core_common.h"
-#ifndef DONT_USE_UPLOADTOBLOB
-#include "internal/iothub_client_ll_uploadtoblob.h"
-#endif
 
 #ifdef __cplusplus
 extern "C"

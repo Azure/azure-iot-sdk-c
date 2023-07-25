@@ -41,16 +41,6 @@ extern "C"
 
     typedef struct IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA* IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE;
 
-    /*
-     * @remark `struct IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_STRUCT` contains information specifically
-     *         related to an individual upload request currently active in Azure IoT Hub, mainly
-     *         the correlation-id and Azure Blob SAS URI provided by the Azure IoT Hub when a new
-     *         upload is started. The `struct IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA` on the other hand 
-     *         holds common information (independent from individual upload requests) that is used for
-     *         upload-to-blob Rest API calls to Azure IoT Hub.
-     */    
-    typedef struct IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_STRUCT* IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE;
-
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE, IoTHubClient_LL_UploadToBlob_Create, const IOTHUB_CLIENT_CONFIG*, config, IOTHUB_AUTHORIZATION_HANDLE, auth_handle);
 
     /*
