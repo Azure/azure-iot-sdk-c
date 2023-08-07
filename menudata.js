@@ -60,7 +60,7 @@ var menudata={children:[
 {text:"p",url:"globals_p.html#index_p"}]},
 {text:"Functions",url:"globals_func.html",children:[
 {text:"i",url:"globals_func.html#index_i"},
-{text:"p",url:"globals_func.html#index_p"}]},
+{text:"p",url:"globals_func_p.html#index_p"}]},
 {text:"Typedefs",url:"globals_type.html"},
 {text:"Enumerations",url:"globals_enum.html"},
 {text:"Macros",url:"globals_defs.html"}]}]}]}

@@ -87,6 +87,10 @@ Typedefs</h2></td></tr>
 <tr class="memitem:ac0a6393bbcbec2e1b580e8c4c127f4c1"><td class="memItemLeft" align="right" valign="top">typedef IOTHUB_CLIENT_CORE_HANDLE&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__device__client_8h.html#ac0a6393bbcbec2e1b580e8c4c127f4c1">IOTHUB_DEVICE_CLIENT_HANDLE</a></td></tr>
 <tr class="memdesc:ac0a6393bbcbec2e1b580e8c4c127f4c1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handle corresponding to a convenience layer device client instance.  <a href="iothub__device__client_8h.html#ac0a6393bbcbec2e1b580e8c4c127f4c1">More...</a><br /></td></tr>
 <tr class="separator:ac0a6393bbcbec2e1b580e8c4c127f4c1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0f5a12bcc263d2bae9cc9c4f39550832"><td class="memItemLeft" align="right" valign="top"><a id="a0f5a12bcc263d2bae9cc9c4f39550832"></a>
+typedef <a class="el" href="iothub__client__core__common_8h.html#ae1c8abb1b9188ea74233fd6d763e88ea">IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__device__client_8h.html#a0f5a12bcc263d2bae9cc9c4f39550832">IOTHUB_CLIENT_AZURE_STORAGE_CLIENT_HANDLE</a></td></tr>
+<tr class="memdesc:a0f5a12bcc263d2bae9cc9c4f39550832"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handle for Upload-to-Blob API Functions. <br /></td></tr>
+<tr class="separator:a0f5a12bcc263d2bae9cc9c4f39550832"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
@@ -150,6 +154,24 @@ Functions</h2></td></tr>
 <tr class="memitem:a973fec89efccbd3bb0af1c703a6adc79"><td class="memItemLeft" align="right" valign="top"><a class="el" href="iothub__client__core__common_8h.html#ae8e8840cc715c54bc60465f3f110d40f">IOTHUB_CLIENT_RESULT</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__device__client_8h.html#a973fec89efccbd3bb0af1c703a6adc79">IoTHubDeviceClient_UploadMultipleBlocksToBlobAsync</a> (<a class="el" href="iothub__device__client_8h.html#ac0a6393bbcbec2e1b580e8c4c127f4c1">IOTHUB_DEVICE_CLIENT_HANDLE</a> iotHubClientHandle, const char *destinationFileName, <a class="el" href="iothub__client__core__common_8h.html#a0d9944dec4c4dd2bdd75cebb466dcf6c">IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK_EX</a> getDataCallbackEx, void *context)</td></tr>
 <tr class="memdesc:a973fec89efccbd3bb0af1c703a6adc79"><td class="mdescLeft">&#160;</td><td class="mdescRight">Uploads a file to a Blob storage in chunks, fed through the callback function provided by the user.  <a href="iothub__device__client_8h.html#a973fec89efccbd3bb0af1c703a6adc79">More...</a><br /></td></tr>
 <tr class="separator:a973fec89efccbd3bb0af1c703a6adc79"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae7af4ffc07333154ebf28ce4bb6da06a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="iothub__client__core__common_8h.html#ae8e8840cc715c54bc60465f3f110d40f">IOTHUB_CLIENT_RESULT</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__device__client_8h.html#ae7af4ffc07333154ebf28ce4bb6da06a">IoTHubDeviceClient_AzureStorageInitializeBlobUpload</a> (<a class="el" href="iothub__device__client_8h.html#ac0a6393bbcbec2e1b580e8c4c127f4c1">IOTHUB_DEVICE_CLIENT_HANDLE</a> iotHubClientHandle, const char *destinationFileName, char **uploadCorrelationId, char **azureBlobSasUri)</td></tr>
+<tr class="memdesc:ae7af4ffc07333154ebf28ce4bb6da06a"><td class="mdescLeft">&#160;</td><td class="mdescRight">This API creates a new upload within Azure IoT Hub, getting back a correlation-id and a SAS URI for the Blob upload to the Azure Storage associated with the Azure IoT Hub.  <a href="iothub__device__client_8h.html#ae7af4ffc07333154ebf28ce4bb6da06a">More...</a><br /></td></tr>
+<tr class="separator:ae7af4ffc07333154ebf28ce4bb6da06a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9d1370b3093a3656ce8b4345611b3951"><td class="memItemLeft" align="right" valign="top"><a class="el" href="iothub__device__client_8h.html#a0f5a12bcc263d2bae9cc9c4f39550832">IOTHUB_CLIENT_AZURE_STORAGE_CLIENT_HANDLE</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__device__client_8h.html#a9d1370b3093a3656ce8b4345611b3951">IoTHubDeviceClient_AzureStorageCreateClient</a> (<a class="el" href="iothub__device__client_8h.html#ac0a6393bbcbec2e1b580e8c4c127f4c1">IOTHUB_DEVICE_CLIENT_HANDLE</a> iotHubClientHandle, const char *azureBlobSasUri)</td></tr>
+<tr class="memdesc:a9d1370b3093a3656ce8b4345611b3951"><td class="mdescLeft">&#160;</td><td class="mdescRight">This API creates a client for a new blob upload to Azure Storage.  <a href="iothub__device__client_8h.html#a9d1370b3093a3656ce8b4345611b3951">More...</a><br /></td></tr>
+<tr class="separator:a9d1370b3093a3656ce8b4345611b3951"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6a59b9886d7738ded1d8bb2b4e3ebe15"><td class="memItemLeft" align="right" valign="top"><a class="el" href="iothub__client__core__common_8h.html#ae8e8840cc715c54bc60465f3f110d40f">IOTHUB_CLIENT_RESULT</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__device__client_8h.html#a6a59b9886d7738ded1d8bb2b4e3ebe15">IoTHubDeviceClient_AzureStoragePutBlock</a> (<a class="el" href="iothub__device__client_8h.html#a0f5a12bcc263d2bae9cc9c4f39550832">IOTHUB_CLIENT_AZURE_STORAGE_CLIENT_HANDLE</a> azureStorageClientHandle, uint32_t blockNumber, const uint8_t *dataPtr, size_t dataSize)</td></tr>
+<tr class="memdesc:a6a59b9886d7738ded1d8bb2b4e3ebe15"><td class="mdescLeft">&#160;</td><td class="mdescRight">This API uploads a single blob block to Azure Storage (performs a PUT BLOCK operation).  <a href="iothub__device__client_8h.html#a6a59b9886d7738ded1d8bb2b4e3ebe15">More...</a><br /></td></tr>
+<tr class="separator:a6a59b9886d7738ded1d8bb2b4e3ebe15"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab2624c94142ebbd45f4ade3f519df05c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="iothub__client__core__common_8h.html#ae8e8840cc715c54bc60465f3f110d40f">IOTHUB_CLIENT_RESULT</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__device__client_8h.html#ab2624c94142ebbd45f4ade3f519df05c">IoTHubDeviceClient_AzureStoragePutBlockList</a> (<a class="el" href="iothub__device__client_8h.html#a0f5a12bcc263d2bae9cc9c4f39550832">IOTHUB_CLIENT_AZURE_STORAGE_CLIENT_HANDLE</a> azureStorageClientHandle)</td></tr>
+<tr class="memdesc:ab2624c94142ebbd45f4ade3f519df05c"><td class="mdescLeft">&#160;</td><td class="mdescRight">This API performs an Azure Storage PUT BLOCK LIST operation.  <a href="iothub__device__client_8h.html#ab2624c94142ebbd45f4ade3f519df05c">More...</a><br /></td></tr>
+<tr class="separator:ab2624c94142ebbd45f4ade3f519df05c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a77fb5f61764c24fbbc131b5cb625739d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__device__client_8h.html#a77fb5f61764c24fbbc131b5cb625739d">IoTHubDeviceClient_AzureStorageDestroyClient</a> (<a class="el" href="iothub__device__client_8h.html#a0f5a12bcc263d2bae9cc9c4f39550832">IOTHUB_CLIENT_AZURE_STORAGE_CLIENT_HANDLE</a> azureStorageClientHandle)</td></tr>
+<tr class="memdesc:a77fb5f61764c24fbbc131b5cb625739d"><td class="mdescLeft">&#160;</td><td class="mdescRight">This API destroys an instance previously created with <code>IoTHubDeviceClient_AzureStorageCreateClient</code>.  <a href="iothub__device__client_8h.html#a77fb5f61764c24fbbc131b5cb625739d">More...</a><br /></td></tr>
+<tr class="separator:a77fb5f61764c24fbbc131b5cb625739d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4c266a785b276bf740eff0396a5208f5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="iothub__client__core__common_8h.html#ae8e8840cc715c54bc60465f3f110d40f">IOTHUB_CLIENT_RESULT</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__device__client_8h.html#a4c266a785b276bf740eff0396a5208f5">IoTHubDeviceClient_AzureStorageNotifyBlobUploadCompletion</a> (<a class="el" href="iothub__device__client_8h.html#ac0a6393bbcbec2e1b580e8c4c127f4c1">IOTHUB_DEVICE_CLIENT_HANDLE</a> iotHubClientHandle, const char *uploadCorrelationId, bool isSuccess, int responseCode, const char *responseMessage)</td></tr>
+<tr class="memdesc:a4c266a785b276bf740eff0396a5208f5"><td class="mdescLeft">&#160;</td><td class="mdescRight">This API notifies Azure IoT Hub of the upload completion.  <a href="iothub__device__client_8h.html#a4c266a785b276bf740eff0396a5208f5">More...</a><br /></td></tr>
+<tr class="separator:a4c266a785b276bf740eff0396a5208f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1fad3559ed97ab0c715f4108ec5b1c64"><td class="memItemLeft" align="right" valign="top"><a class="el" href="iothub__client__core__common_8h.html#ae8e8840cc715c54bc60465f3f110d40f">IOTHUB_CLIENT_RESULT</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__device__client_8h.html#a1fad3559ed97ab0c715f4108ec5b1c64">IoTHubDeviceClient_SendMessageDisposition</a> (<a class="el" href="iothub__device__client_8h.html#ac0a6393bbcbec2e1b580e8c4c127f4c1">IOTHUB_DEVICE_CLIENT_HANDLE</a> iotHubClientHandle, <a class="el" href="iothub__message_8h.html#a98782b8f57e3f751b4f0196de946432c">IOTHUB_MESSAGE_HANDLE</a> message, <a class="el" href="iothub__client__core__common_8h.html#a96cfa82412891d077ec835922ed5b626">IOTHUBMESSAGE_DISPOSITION_RESULT</a> disposition)</td></tr>
 <tr class="memdesc:a1fad3559ed97ab0c715f4108ec5b1c64"><td class="mdescLeft">&#160;</td><td class="mdescRight">This API sends an acknowledgement to Azure IoT Hub that a cloud-to-device message has been received and frees resources associated with the message.  <a href="iothub__device__client_8h.html#a1fad3559ed97ab0c715f4108ec5b1c64">More...</a><br /></td></tr>
 <tr class="separator:a1fad3559ed97ab0c715f4108ec5b1c64"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -194,6 +216,274 @@ Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Function Documentation</h2>
+<a id="a9d1370b3093a3656ce8b4345611b3951"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9d1370b3093a3656ce8b4345611b3951">&#9670;&nbsp;</a></span>IoTHubDeviceClient_AzureStorageCreateClient()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="iothub__device__client_8h.html#a0f5a12bcc263d2bae9cc9c4f39550832">IOTHUB_CLIENT_AZURE_STORAGE_CLIENT_HANDLE</a> IoTHubDeviceClient_AzureStorageCreateClient </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="iothub__device__client_8h.html#ac0a6393bbcbec2e1b580e8c4c127f4c1">IOTHUB_DEVICE_CLIENT_HANDLE</a>&#160;</td>
+          <td class="paramname"><em>iotHubClientHandle</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>azureBlobSasUri</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>This API creates a client for a new blob upload to Azure Storage. </p>
+<dl class="section remark"><dt>Remarks</dt><dd>It is part of a set of functions for more granular control over Azure IoT-based blob uploads. This function is expected to be used along with: <code>IoTHubDeviceClient_AzureStorageCreateClient</code> <code>IoTHubDeviceClient_AzureStoragePutBlock</code> <code>IoTHubDeviceClient_AzureStoragePutBlockList</code> <code>IoTHubDeviceClient_AzureStorageDestroyClient</code> <code>IoTHubDeviceClient_AzureStorageInitializeBlobUpload</code> <code>IoTHubDeviceClient_AzureStorageNotifyBlobUploadCompletion</code> For simpler/less-granular control of uploads to Azure blob storage please use either <code>IoTHubDeviceClient_UploadToBlobAsync</code> or <code>IoTHubDeviceClient_UploadMultipleBlocksToBlobAsync</code>.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">iotHubClientHandle</td><td>The handle created by a call to the create function. </td></tr>
+    <tr><td class="paramname">azureBlobSasUri</td><td>The Azure Storage Blob SAS uri obtained with <code>IoTHubDeviceClient_AzureStorageInitializeBlobUpload</code>.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section warning"><dt>Warning</dt><dd>This is a synchronous/blocking function.</dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>A <code>IOTHUB_CLIENT_AZURE_STORAGE_CLIENT_HANDLE</code> on success or NULL if the function fails. </dd></dl>
+
+</div>
+</div>
+<a id="a77fb5f61764c24fbbc131b5cb625739d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a77fb5f61764c24fbbc131b5cb625739d">&#9670;&nbsp;</a></span>IoTHubDeviceClient_AzureStorageDestroyClient()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void IoTHubDeviceClient_AzureStorageDestroyClient </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="iothub__device__client_8h.html#a0f5a12bcc263d2bae9cc9c4f39550832">IOTHUB_CLIENT_AZURE_STORAGE_CLIENT_HANDLE</a>&#160;</td>
+          <td class="paramname"><em>azureStorageClientHandle</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>This API destroys an instance previously created with <code>IoTHubDeviceClient_AzureStorageCreateClient</code>. </p>
+<dl class="section remark"><dt>Remarks</dt><dd>It is part of a set of functions for more granular control over Azure IoT-based blob uploads. This function is expected to be used along with: <code>IoTHubDeviceClient_AzureStorageCreateClient</code> <code>IoTHubDeviceClient_AzureStoragePutBlock</code> <code>IoTHubDeviceClient_AzureStoragePutBlockList</code> <code>IoTHubDeviceClient_AzureStorageDestroyClient</code> <code>IoTHubDeviceClient_AzureStorageInitializeBlobUpload</code> <code>IoTHubDeviceClient_AzureStorageNotifyBlobUploadCompletion</code> For simpler/less-granular control of uploads to Azure blob storage please use either <code>IoTHubDeviceClient_UploadToBlobAsync</code> or <code>IoTHubDeviceClient_UploadMultipleBlocksToBlobAsync</code>.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">azureStorageClientHandle</td><td>The handle created with <code>IoTHubDeviceClient_AzureStorageCreateClient</code>.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section warning"><dt>Warning</dt><dd>This is a synchronous/blocking function.</dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Nothing. </dd></dl>
+
+</div>
+</div>
+<a id="ae7af4ffc07333154ebf28ce4bb6da06a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae7af4ffc07333154ebf28ce4bb6da06a">&#9670;&nbsp;</a></span>IoTHubDeviceClient_AzureStorageInitializeBlobUpload()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="iothub__client__core__common_8h.html#ae8e8840cc715c54bc60465f3f110d40f">IOTHUB_CLIENT_RESULT</a> IoTHubDeviceClient_AzureStorageInitializeBlobUpload </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="iothub__device__client_8h.html#ac0a6393bbcbec2e1b580e8c4c127f4c1">IOTHUB_DEVICE_CLIENT_HANDLE</a>&#160;</td>
+          <td class="paramname"><em>iotHubClientHandle</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>destinationFileName</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char **&#160;</td>
+          <td class="paramname"><em>uploadCorrelationId</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char **&#160;</td>
+          <td class="paramname"><em>azureBlobSasUri</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>This API creates a new upload within Azure IoT Hub, getting back a correlation-id and a SAS URI for the Blob upload to the Azure Storage associated with the Azure IoT Hub. </p>
+<dl class="section remark"><dt>Remarks</dt><dd>It is part of a set of functions for more granular control over Azure IoT-based blob uploads. This function is expected to be used along with: <code>IoTHubDeviceClient_AzureStorageCreateClient</code> <code>IoTHubDeviceClient_AzureStoragePutBlock</code> <code>IoTHubDeviceClient_AzureStoragePutBlockList</code> <code>IoTHubDeviceClient_AzureStorageDestroyClient</code> <code>IoTHubDeviceClient_AzureStorageInitializeBlobUpload</code> <code>IoTHubDeviceClient_AzureStorageNotifyBlobUploadCompletion</code> For simpler/less-granular control of uploads to Azure blob storage please use either <code>IoTHubDeviceClient_UploadToBlobAsync</code> or <code>IoTHubDeviceClient_UploadMultipleBlocksToBlobAsync</code>.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">iotHubClientHandle</td><td>The handle created by a call to the create function. </td></tr>
+    <tr><td class="paramname">destinationFileName</td><td>Name of the file in blob storage. </td></tr>
+    <tr><td class="paramname">uploadCorrelationId</td><td>Variable where to store the correlation-id of the new upload. </td></tr>
+    <tr><td class="paramname">azureBlobSasUri</td><td>Variable where to store the Azure Storage SAS URI for the new upload.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section warning"><dt>Warning</dt><dd>This is a synchronous/blocking function. <code>uploadCorrelationId</code> and <code>azureBlobSasUri</code> must be freed by the calling application after the blob upload process is done (e.g., after calling <code>IoTHubDeviceClient_AzureStorageNotifyBlobUploadCompletion</code>).</dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>An IOTHUB_CLIENT_RESULT value indicating the success or failure of the API call. </dd></dl>
+
+</div>
+</div>
+<a id="a4c266a785b276bf740eff0396a5208f5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4c266a785b276bf740eff0396a5208f5">&#9670;&nbsp;</a></span>IoTHubDeviceClient_AzureStorageNotifyBlobUploadCompletion()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="iothub__client__core__common_8h.html#ae8e8840cc715c54bc60465f3f110d40f">IOTHUB_CLIENT_RESULT</a> IoTHubDeviceClient_AzureStorageNotifyBlobUploadCompletion </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="iothub__device__client_8h.html#ac0a6393bbcbec2e1b580e8c4c127f4c1">IOTHUB_DEVICE_CLIENT_HANDLE</a>&#160;</td>
+          <td class="paramname"><em>iotHubClientHandle</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>uploadCorrelationId</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>isSuccess</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>responseCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>responseMessage</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>This API notifies Azure IoT Hub of the upload completion. </p>
+<dl class="section remark"><dt>Remarks</dt><dd>It is part of a set of functions for more granular control over Azure IoT-based blob uploads. This function is expected to be used along with: <code>IoTHubDeviceClient_AzureStorageCreateClient</code> <code>IoTHubDeviceClient_AzureStoragePutBlock</code> <code>IoTHubDeviceClient_AzureStoragePutBlockList</code> <code>IoTHubDeviceClient_AzureStorageDestroyClient</code> <code>IoTHubDeviceClient_AzureStorageInitializeBlobUpload</code> <code>IoTHubDeviceClient_AzureStorageNotifyBlobUploadCompletion</code> For simpler/less-granular control of uploads to Azure blob storage please use either <code>IoTHubDeviceClient_UploadToBlobAsync</code> or <code>IoTHubDeviceClient_UploadMultipleBlocksToBlobAsync</code>. If this function fails (due to any HTTP error to either Azure Storage or Azure IoT Hub) it can be run again for a discretionary number of times in an attempt to succeed after, for example, an internet connectivity disruption is over. <br  />
+</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">azureStorageClientHandle</td><td>The handle created with <code>IoTHubDeviceClient_AzureStorageCreateClient</code>. </td></tr>
+    <tr><td class="paramname">uploadCorrelationId</td><td>Upload correlation-id obtained with <code>IoTHubDeviceClient_AzureStorageInitializeBlobUpload</code>. </td></tr>
+    <tr><td class="paramname">isSuccess</td><td>A boolean value indicating if the call(s) to <code>IoTHubDeviceClient_AzureStoragePutBlock</code> succeeded. </td></tr>
+    <tr><td class="paramname">responseCode</td><td>An user-defined code to signal the status of the upload (e.g., 200 for success, or -1 for abort). </td></tr>
+    <tr><td class="paramname">responseMessage</td><td>An user-defined status message to go along with <code>responseCode</code> on the notification to Azure IoT Hub.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section warning"><dt>Warning</dt><dd>This is a synchronous/blocking function.</dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>IOTHUB_CLIENT_OK upon success or an error code upon failure. </dd></dl>
+
+</div>
+</div>
+<a id="a6a59b9886d7738ded1d8bb2b4e3ebe15"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6a59b9886d7738ded1d8bb2b4e3ebe15">&#9670;&nbsp;</a></span>IoTHubDeviceClient_AzureStoragePutBlock()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="iothub__client__core__common_8h.html#ae8e8840cc715c54bc60465f3f110d40f">IOTHUB_CLIENT_RESULT</a> IoTHubDeviceClient_AzureStoragePutBlock </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="iothub__device__client_8h.html#a0f5a12bcc263d2bae9cc9c4f39550832">IOTHUB_CLIENT_AZURE_STORAGE_CLIENT_HANDLE</a>&#160;</td>
+          <td class="paramname"><em>azureStorageClientHandle</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>blockNumber</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const uint8_t *&#160;</td>
+          <td class="paramname"><em>dataPtr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dataSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>This API uploads a single blob block to Azure Storage (performs a PUT BLOCK operation). </p>
+<dl class="section remark"><dt>Remarks</dt><dd>It is part of a set of functions for more granular control over Azure IoT-based blob uploads. This function is expected to be used along with: <code>IoTHubDeviceClient_AzureStorageCreateClient</code> <code>IoTHubDeviceClient_AzureStoragePutBlock</code> <code>IoTHubDeviceClient_AzureStoragePutBlockList</code> <code>IoTHubDeviceClient_AzureStorageDestroyClient</code> <code>IoTHubDeviceClient_AzureStorageInitializeBlobUpload</code> <code>IoTHubDeviceClient_AzureStorageNotifyBlobUploadCompletion</code> For simpler/less-granular control of uploads to Azure blob storage please use either <code>IoTHubDeviceClient_UploadToBlobAsync</code> or <code>IoTHubDeviceClient_UploadMultipleBlocksToBlobAsync</code>. For more information about Azure Storage PUT BLOCK, its parameters and behavior, please refer to <a href="https://learn.microsoft.com/en-us/rest/api/storageservices/put-block">https://learn.microsoft.com/en-us/rest/api/storageservices/put-block</a></dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">azureStorageClientHandle</td><td>The handle created with <code>IoTHubDeviceClient_AzureStorageCreateClient</code>. </td></tr>
+    <tr><td class="paramname">blockNumber</td><td>Number of the block being uploaded. </td></tr>
+    <tr><td class="paramname">dataPtr</td><td>Pointer to the block data to be uploaded to Azure Storage blob. </td></tr>
+    <tr><td class="paramname">dataSize</td><td>Size of the block data pointed by <code>dataPtr</code>.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section warning"><dt>Warning</dt><dd>This is a synchronous/blocking function.</dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>IOTHUB_CLIENT_OK upon success or an error code upon failure. </dd></dl>
+
+</div>
+</div>
+<a id="ab2624c94142ebbd45f4ade3f519df05c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab2624c94142ebbd45f4ade3f519df05c">&#9670;&nbsp;</a></span>IoTHubDeviceClient_AzureStoragePutBlockList()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="iothub__client__core__common_8h.html#ae8e8840cc715c54bc60465f3f110d40f">IOTHUB_CLIENT_RESULT</a> IoTHubDeviceClient_AzureStoragePutBlockList </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="iothub__device__client_8h.html#a0f5a12bcc263d2bae9cc9c4f39550832">IOTHUB_CLIENT_AZURE_STORAGE_CLIENT_HANDLE</a>&#160;</td>
+          <td class="paramname"><em>azureStorageClientHandle</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>This API performs an Azure Storage PUT BLOCK LIST operation. </p>
+<dl class="section remark"><dt>Remarks</dt><dd>It is part of a set of functions for more granular control over Azure IoT-based blob uploads. This function is expected to be used along with: <code>IoTHubDeviceClient_AzureStorageCreateClient</code> <code>IoTHubDeviceClient_AzureStoragePutBlock</code> <code>IoTHubDeviceClient_AzureStoragePutBlockList</code> <code>IoTHubDeviceClient_AzureStorageDestroyClient</code> <code>IoTHubDeviceClient_AzureStorageInitializeBlobUpload</code> <code>IoTHubDeviceClient_AzureStorageNotifyBlobUploadCompletion</code> For simpler/less-granular control of uploads to Azure blob storage please use either <code>IoTHubDeviceClient_UploadToBlobAsync</code> or <code>IoTHubDeviceClient_UploadMultipleBlocksToBlobAsync</code>. If this function fails (due to any HTTP error to Azure Storage) it can be run again for a discretionary number of times in an attempt to succeed after, for example, an internet connectivity disruption is over. For more information about Azure Storage PUT BLOCK LIST, please refer to <a href="https://learn.microsoft.com/en-us/rest/api/storageservices/put-block-list">https://learn.microsoft.com/en-us/rest/api/storageservices/put-block-list</a></dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">azureStorageClientHandle</td><td>The handle created with <code>IoTHubDeviceClient_AzureStorageCreateClient</code>.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section warning"><dt>Warning</dt><dd>This is a synchronous/blocking function.</dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>IOTHUB_CLIENT_OK upon success or an error code upon failure. </dd></dl>
+
+</div>
+</div>
 <a id="ace8d1bb4134aa07dc83ed771a5eb1fb7"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ace8d1bb4134aa07dc83ed771a5eb1fb7">&#9670;&nbsp;</a></span>IoTHubDeviceClient_Create()</h2>
 

@@ -205,7 +205,9 @@ Provisioning Client SDK</h2>
 <tr class="markdownTableHead">
 <th class="markdownTableHeadNone">Features   </th><th class="markdownTableHeadNone">mqtt   </th><th class="markdownTableHeadNone">mqtt-ws   </th><th class="markdownTableHeadNone">amqp   </th><th class="markdownTableHeadNone">amqp-ws   </th><th class="markdownTableHeadNone">https   </th><th class="markdownTableHeadNone">Description    </th></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone">TPM Individual Enrollment   </td><td class="markdownTableBodyNone">:heavy_minus_sign:   </td><td class="markdownTableBodyNone">:heavy_minus_sign:   </td><td class="markdownTableBodyNone">:heavy_check_mark:   </td><td class="markdownTableBodyNone">:heavy_check_mark:   </td><td class="markdownTableBodyNone">:heavy_check_mark:   </td><td class="markdownTableBodyNone">This SDK supports connecting your device to the Device Provisioning Service via <a href="https://docs.microsoft.com/azure/iot-dps/concepts-service#enrollment">individual enrollment</a> using <a href="https://docs.microsoft.com/azure/iot-dps/concepts-security#trusted-platform-module-tpm">Trusted Platform Module</a>. This <a href="https://docs.microsoft.com/azure/iot-dps/quick-create-simulated-device">quickstart</a> reviews how to create a simulated device for individual enrollment with TPM. TPM over MQTT is currently not supported by the Device Provisioning Service.    </td></tr>
+<td class="markdownTableBodyNone">TPM Individual Enrollment   </td><td class="markdownTableBodyNone">:heavy_minus_sign:   </td><td class="markdownTableBodyNone">:heavy_minus_sign:   </td><td class="markdownTableBodyNone">:warning:   </td><td class="markdownTableBodyNone">:warning:   </td><td class="markdownTableBodyNone">:warning:   </td><td class="markdownTableBodyNone">🚨We are announcing the deprecation of the utpm-c library support and DPS-TPM authentication support within the Azure IoT C-SDK.🚨 Starting May 2023, Microsoft will not provide support for this library. Existing applications using this library will continue to work as-is. We strongly recommend switching to DPS-X509 authentication using the <a href="https://github.com/Azure/azure-iot-sdk-c/blob/main/iothub_client/devdoc/iothubclient_c_library.md#openssl-engine-examples">tpm2tss OpenSSL Engine</a>. <br  />
+<br  />
+Connecting your device to the Device Provisioning Service via <a href="https://docs.microsoft.com/azure/iot-dps/concepts-service#enrollment">individual enrollment</a> using <a href="https://docs.microsoft.com/azure/iot-dps/concepts-security#trusted-platform-module-tpm">Trusted Platform Module</a> will continue to work as-is. This <a href="https://docs.microsoft.com/azure/iot-dps/quick-create-simulated-device">quickstart</a> reviews how to create a simulated device for individual enrollment with TPM. TPM over MQTT is currently not supported by the Device Provisioning Service.    </td></tr>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">X.509 Individual Enrollment   </td><td class="markdownTableBodyNone">:heavy_check_mark:   </td><td class="markdownTableBodyNone">:heavy_check_mark:   </td><td class="markdownTableBodyNone">:heavy_check_mark:   </td><td class="markdownTableBodyNone">:heavy_check_mark:   </td><td class="markdownTableBodyNone">:heavy_check_mark:   </td><td class="markdownTableBodyNone">This SDK supports connecting your device to the Device Provisioning Service via <a href="https://docs.microsoft.com/azure/iot-dps/concepts-service#enrollment">individual enrollment</a> using <a href="https://docs.microsoft.com/azure/iot-dps/concepts-security#leaf-certificate">X.509 leaf certificate</a>. This <a href="https://docs.microsoft.com/azure/iot-dps/quick-create-simulated-device-x509">quickstart</a> reviews how to create a simulated device for individual enrollment with X.509.    </td></tr>
 <tr class="markdownTableRowOdd">
@@ -272,7 +274,7 @@ SDK Folder Structure</h1>
 <p><code>/iothub_client</code></p>
 <p>Contains Azure IoT Hub client components that provide the raw messaging capabilities of the library. Refer to the API documentation and samples for information on how to use it.</p>
 <ul>
-<li>build: has one subfolder for each platform (e.g. Windows, Linux, Mbed). Contains makefiles, batch files, and solutions that are used to generate the library binaries.</li>
+<li>build: has one subfolder for each platform (e.g. Windows, Linux). Contains makefiles, batch files, and solutions that are used to generate the library binaries.</li>
 <li>devdoc: contains requirements, designs notes, manuals.</li>
 <li>inc: public include files.</li>
 <li>src: client libraries source files.</li>
@@ -313,13 +315,13 @@ LTS Schedule</h3>
 <tr class="markdownTableHead">
 <th class="markdownTableHeadCenter">Package   </th><th class="markdownTableHeadCenter">GitHub Branch   </th><th class="markdownTableHeadCenter">LTS Tag   </th><th class="markdownTableHeadCenter">LTS Start Date   </th><th class="markdownTableHeadCenter">Maintenance End Date    </th></tr>
 <tr class="markdownTableRowOdd">
+<td class="markdownTableBodyCenter">vcpkg: 2023-04-20   </td><td class="markdownTableBodyCenter">lts_01_2023   </td><td class="markdownTableBodyCenter">LTS_01_2023_Ref02   </td><td class="markdownTableBodyCenter">2023-04-20   </td><td class="markdownTableBodyCenter">2024-04-20    </td></tr>
+<tr class="markdownTableRowEven">
 <td class="markdownTableBodyCenter">vcpkg: 2023-01-13   </td><td class="markdownTableBodyCenter">lts_01_2023   </td><td class="markdownTableBodyCenter">LTS_01_2023_Ref01   </td><td class="markdownTableBodyCenter">2023-01-13   </td><td class="markdownTableBodyCenter">2024-01-13    </td></tr>
-<tr class="markdownTableRowEven">
-<td class="markdownTableBodyCenter">vcpkg: 2022-09-15   </td><td class="markdownTableBodyCenter">lts_07_2022   </td><td class="markdownTableBodyCenter">LTS_07_2022_Ref02   </td><td class="markdownTableBodyCenter">2022-09-15   </td><td class="markdownTableBodyCenter">2023-09-15    </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyCenter">vcpkg: 2022-07-18   </td><td class="markdownTableBodyCenter">lts_07_2022   </td><td class="markdownTableBodyCenter">LTS_07_2022_Ref01   </td><td class="markdownTableBodyCenter">2022-07-18   </td><td class="markdownTableBodyCenter">2023-07-18    </td></tr>
+<td class="markdownTableBodyCenter">vcpkg: 2022-09-15   </td><td class="markdownTableBodyCenter">lts_07_2022   </td><td class="markdownTableBodyCenter">LTS_07_2022_Ref02   </td><td class="markdownTableBodyCenter">2022-09-15   </td><td class="markdownTableBodyCenter">2023-09-15    </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyCenter">vcpkg: 2022-01-21   </td><td class="markdownTableBodyCenter">lts_01_2022   </td><td class="markdownTableBodyCenter">LTS_01_2022_Ref01   </td><td class="markdownTableBodyCenter">2022-01-21   </td><td class="markdownTableBodyCenter">2023-01-21   </td></tr>
+<td class="markdownTableBodyCenter">vcpkg: 2022-07-18   </td><td class="markdownTableBodyCenter">lts_07_2022   </td><td class="markdownTableBodyCenter">LTS_07_2022_Ref01   </td><td class="markdownTableBodyCenter">2022-07-18   </td><td class="markdownTableBodyCenter">2023-07-18   </td></tr>
 </table>
 <h2><a class="anchor" id="autotoc_md26"></a>
 Release Example</h2>
