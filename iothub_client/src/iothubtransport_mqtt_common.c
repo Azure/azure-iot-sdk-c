@@ -48,6 +48,8 @@
 #define SAS_TOKEN_DEFAULT_LEN               10
 #define RESEND_TIMEOUT_VALUE_MIN            1*60
 #define TELEMETRY_MSG_TIMEOUT_MIN           2*60
+#define MQTT_MESSAGE_DUP_FLAG_TRUE          true
+#define MQTT_MESSAGE_DUP_FLAG_FALSE         false
 #define DEFAULT_CONNECTION_INTERVAL         30
 #define FAILED_CONN_BACKOFF_VALUE           5
 #define STATUS_CODE_FAILURE_VALUE           500
@@ -1025,7 +1027,7 @@ static STRING_HANDLE addPropertiesTouMqttMessage(IOTHUB_MESSAGE_HANDLE iothub_me
 //
 // publishTelemetryMsg invokes the umqtt layer to send a PUBLISH message.
 //
-static int publishTelemetryMsg(PMQTTTRANSPORT_HANDLE_DATA transport_data, MQTT_MESSAGE_DETAILS_LIST* mqttMsgEntry, const unsigned char* payload, size_t len)
+static int publishTelemetryMsg(PMQTTTRANSPORT_HANDLE_DATA transport_data, MQTT_MESSAGE_DETAILS_LIST* mqttMsgEntry, const unsigned char* payload, size_t len, bool isDuplicate)
 {
     int result;
     STRING_HANDLE msgTopic = addPropertiesTouMqttMessage(mqttMsgEntry->iotHubMessageEntry->messageHandle, STRING_c_str(transport_data->topic_MqttEvent), transport_data->auto_url_encode_decode);
@@ -1044,7 +1046,12 @@ static int publishTelemetryMsg(PMQTTTRANSPORT_HANDLE_DATA transport_data, MQTT_M
         }
         else
         {
-            if (tickcounter_get_current_ms(transport_data->msgTickCounter, &mqttMsgEntry->msgPublishTime) != 0)
+            if (mqttmessage_setIsDuplicateMsg(mqttMsg, isDuplicate) != 0)
+            {
+                LogError("Failed setting DUP flag");
+                result = MU_FAILURE;
+            }
+            else if (tickcounter_get_current_ms(transport_data->msgTickCounter, &mqttMsgEntry->msgPublishTime) != 0)
             {
                 LogError("Failed retrieving tickcounter info");
                 result = MU_FAILURE;
@@ -2501,7 +2508,7 @@ static void ProcessPendingTelemetryMessages(PMQTTTRANSPORT_HANDLE_DATA transport
                 }
                 else
                 {
-                    if (publishTelemetryMsg(transport_data, msg_detail_entry, messagePayload, messageLength) != 0)
+                    if (publishTelemetryMsg(transport_data, msg_detail_entry, messagePayload, messageLength, MQTT_MESSAGE_DUP_FLAG_TRUE) != 0)
                     {
                         (void)DList_RemoveEntryList(current_entry);
                         notifyApplicationOfSendMessageComplete(msg_detail_entry->iotHubMessageEntry, transport_data, IOTHUB_CLIENT_CONFIRMATION_ERROR);
@@ -3161,7 +3168,7 @@ static void ProcessPublishStateDoWork(PMQTTTRANSPORT_HANDLE_DATA transport_data)
                 mqttMsgEntry->msgCreationTime = current_ms;
                 mqttMsgEntry->iotHubMessageEntry = iothubMsgList;
                 mqttMsgEntry->packet_id = getNextPacketId(transport_data);
-                if (publishTelemetryMsg(transport_data, mqttMsgEntry, messagePayload, messageLength) != 0)
+                if (publishTelemetryMsg(transport_data, mqttMsgEntry, messagePayload, messageLength, MQTT_MESSAGE_DUP_FLAG_FALSE) != 0)
                 {
                     (void)(DList_RemoveEntryList(currentListEntry));
                     notifyApplicationOfSendMessageComplete(iothubMsgList, transport_data, IOTHUB_CLIENT_CONFIRMATION_ERROR);
