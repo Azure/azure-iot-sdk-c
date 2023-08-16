@@ -116,4 +116,3 @@ IOTHUB_CLIENT_RESULT IoTHubClient_UploadMultipleBlocksToBlobAsyncEx(IOTHUB_CLIEN
 }
 
 #endif /*DONT_USE_UPLOADTOBLOB*/
-
