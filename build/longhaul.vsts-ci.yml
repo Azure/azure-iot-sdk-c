@@ -58,10 +58,10 @@ jobs:
   displayName: 'Longhaul: Windows'
   steps:
   - script: |
-      call jenkins\longhaul_c.cmd
+      call jenkins\longhaul_c.cmd --platform x64
     displayName: 'Build'
   - script: |
-        call jenkins\windows_c_VsDevCmd.cmd x86
+        call jenkins\windows_c_VsDevCmd.cmd x64
         cd cmake && ctest -T test --no-compress-output -C "Debug" -V -j 16 --schedule-random
     displayName: 'Run Tests'
     env:
