@@ -3291,4 +3291,3 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_GenericMethodInvoke(IOTHUB_CLIENT_CORE_
 #endif
 
 /*end*/
-
