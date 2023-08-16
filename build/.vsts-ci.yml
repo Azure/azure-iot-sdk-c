@@ -131,6 +131,7 @@ jobs:
       testRunTitle: 'windowsx64'
     condition: succeededOrFailed()
 - job: windowsx64release
+  timeoutInMinutes: 90
   variables:
     CodeQL.Enabled: true
     CodeQL.Language: cpp
@@ -838,7 +839,7 @@ jobs:
   variables:
     CodeQL.Enabled: false
   pool:
-    name: OSX
+    vmImage: 'macOS-11'
   steps:
   - script: |
       ./jenkins/osx_gcc_openssl.sh
@@ -883,7 +884,7 @@ jobs:
   variables:
     CodeQL.Enabled: false
   pool:
-    name: OSX
+    vmImage: 'macOS-11'
   displayName: "Xcode Native"
   steps:
   - script: |
@@ -989,7 +990,7 @@ jobs:
   displayName: .NET
   variables:
     CodeQL.Enabled: true
-    CodeQL.Language: csharp
+    CodeQL.Language: csharp,python
   pool: 
     vmImage: 'windows-latest'
   steps:
