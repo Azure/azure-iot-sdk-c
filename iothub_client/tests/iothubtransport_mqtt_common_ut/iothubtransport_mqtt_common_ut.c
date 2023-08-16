@@ -840,6 +840,8 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_RETURN(mqtt_client_publish, 0);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(mqtt_client_publish, MU_FAILURE);
 
+    REGISTER_GLOBAL_MOCK_RETURNS(mqttmessage_setIsDuplicateMsg, 0, MU_FAILURE);
+
     REGISTER_GLOBAL_MOCK_RETURN(mqttmessage_create, TEST_MQTT_MESSAGE_HANDLE);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(mqttmessage_create, NULL);
 
@@ -1470,6 +1472,7 @@ static void setup_IoTHubTransport_MQTT_Common_DoWork_events_mocks(
     {
         EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
         EXPECTED_CALL(mqttmessage_create_in_place(IGNORED_NUM_ARG, IGNORED_PTR_ARG, DELIVER_AT_LEAST_ONCE, IGNORED_PTR_ARG, appMsgSize));
+        STRICT_EXPECTED_CALL(mqttmessage_setIsDuplicateMsg(IGNORED_PTR_ARG, resend));
         STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(mqtt_client_publish(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(mqttmessage_destroy(TEST_MQTT_MESSAGE_HANDLE));
