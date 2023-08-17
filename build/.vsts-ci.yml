@@ -139,6 +139,7 @@ jobs:
     name: 'sdk-c--win-vs2017'
   displayName: 'Windows x64 (Release)'
   steps:
+  - task: CodeQL3000Init@0
   - script: |
       call jenkins\windows_c_release.cmd --platform x64
     displayName: 'Build'
@@ -174,6 +175,8 @@ jobs:
       mergeTestResults: true
       testRunTitle: 'windowsx64release'
     condition: succeededOrFailed()
+  - task: CodeQL3000Finalize@0
+    condition: always()
 - job: windowsdynamic
   pool:
     name: 'sdk-c--win-vs2017'
@@ -989,7 +992,7 @@ jobs:
 - job: DotNET
   displayName: .NET
   variables:
-    Codeql.Enabled: true
+    Codeql.Enabled: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
     Codeql.Language: csharp,python
   pool: 
     vmImage: 'windows-latest'
