@@ -131,7 +131,7 @@ jobs:
       testRunTitle: 'windowsx64'
     condition: succeededOrFailed()
 - job: windowsx64release
-  timeoutInMinutes: 120
+  timeoutInMinutes: 150
   variables:
     CodeQL.Enabled: true
     CodeQL.Language: cpp
