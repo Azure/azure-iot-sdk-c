@@ -989,11 +989,12 @@ jobs:
 - job: DotNET
   displayName: .NET
   variables:
-    CodeQL.Enabled: true
-    CodeQL.Language: csharp,python
+    Codeql.Enabled: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
+    Codeql.Language: csharp,python
   pool: 
     vmImage: 'windows-latest'
   steps:
+  - task: CodeQL3000Init@0
   - task: NuGetCommand@2
     inputs:
       command: 'restore'
@@ -1004,3 +1005,5 @@ jobs:
     inputs:
       command: 'build'
       projects: 'tools\traceabilitytool\traceabilitytool.sln'
+  - task: CodeQL3000Finalize@0
+    condition: always()
