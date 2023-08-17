@@ -989,7 +989,7 @@ jobs:
 - job: DotNET
   displayName: .NET
   variables:
-    Codeql.Enabled: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
+    Codeql.Enabled: true
     Codeql.Language: csharp,python
   pool: 
     vmImage: 'windows-latest'
