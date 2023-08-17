@@ -131,9 +131,9 @@ jobs:
       testRunTitle: 'windowsx64'
     condition: succeededOrFailed()
 - job: windowsx64release
-  timeoutInMinutes: 90
+  timeoutInMinutes: 120
   variables:
-    CodeQL.Enabled: true
+    CodeQL.Enabled: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
     CodeQL.Language: cpp
   pool:
     name: 'sdk-c--win-vs2017'
@@ -143,6 +143,8 @@ jobs:
   - script: |
       call jenkins\windows_c_release.cmd --platform x64
     displayName: 'Build'
+  - task: CodeQL3000Finalize@0
+    condition: always()
   - script: |
       call jenkins\windows_c_VsDevCmd.cmd x64
       cd cmake && ctest -T test --no-compress-output -C "Release" -V -j 16 --schedule-random
@@ -175,8 +177,6 @@ jobs:
       mergeTestResults: true
       testRunTitle: 'windowsx64release'
     condition: succeededOrFailed()
-  - task: CodeQL3000Finalize@0
-    condition: always()
 - job: windowsdynamic
   pool:
     name: 'sdk-c--win-vs2017'
