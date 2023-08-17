@@ -133,7 +133,7 @@ jobs:
 - job: windowsx64release
   timeoutInMinutes: 120
   variables:
-    CodeQL.Enabled: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
+    CodeQL.Enabled: true
     CodeQL.Language: cpp
   pool:
     name: 'sdk-c--win-vs2017'
