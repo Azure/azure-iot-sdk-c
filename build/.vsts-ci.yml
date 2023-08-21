@@ -55,7 +55,7 @@ jobs:
     displayName: 'Check Submodules Match'
 - job: windowsx86
   pool:
-    name: 'sdk-c--win-vs2017'
+    name: 'sdk-c--win-vs2022'
   displayName: "Windows x86"
   steps:
   - script: |
@@ -92,7 +92,7 @@ jobs:
     condition: succeededOrFailed()
 - job: windowsx64debug
   pool:
-    name: 'sdk-c--win-vs2017'
+    name: 'sdk-c--win-vs2022'
   displayName: 'Windows x64 (Debug)'
   steps:
   - script: |
@@ -136,7 +136,7 @@ jobs:
     CodeQL.Enabled: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
     CodeQL.Language: cpp
   pool:
-    name: 'sdk-c--win-vs2017'
+    name: 'sdk-c--win-vs2022'
   displayName: 'Windows x64 (Release)'
   steps:
   - task: CodeQL3000Init@0
@@ -179,7 +179,7 @@ jobs:
     condition: succeededOrFailed()
 - job: windowsdynamic
   pool:
-    name: 'sdk-c--win-vs2017'
+    name: 'sdk-c--win-vs2022'
   displayName: "Windows Dynamic"
   steps:
   - script: |
