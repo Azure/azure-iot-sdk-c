@@ -1186,4 +1186,3 @@ int message_create_IoTHubMessage_from_uamqp_message(MESSAGE_HANDLE uamqp_message
 
     return result;
 }
-
