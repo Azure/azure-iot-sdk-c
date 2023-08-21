@@ -55,7 +55,7 @@ jobs:
     displayName: 'Check Submodules Match'
 - job: windowsx86
   pool:
-    name: 'sdk-c--win-vs2017'
+    name: 'sdk-c--win-vs2022'
   displayName: "Windows x86"
   steps:
   - script: |
@@ -92,7 +92,7 @@ jobs:
     condition: succeededOrFailed()
 - job: windowsx64debug
   pool:
-    name: 'sdk-c--win-vs2017'
+    name: 'sdk-c--win-vs2022'
   displayName: 'Windows x64 (Debug)'
   steps:
   - script: |
@@ -131,16 +131,20 @@ jobs:
       testRunTitle: 'windowsx64'
     condition: succeededOrFailed()
 - job: windowsx64release
+  timeoutInMinutes: 150
   variables:
-    CodeQL.Enabled: true
+    CodeQL.Enabled: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
     CodeQL.Language: cpp
   pool:
-    name: 'sdk-c--win-vs2017'
+    name: 'sdk-c--win-vs2022'
   displayName: 'Windows x64 (Release)'
   steps:
+  - task: CodeQL3000Init@0
   - script: |
       call jenkins\windows_c_release.cmd --platform x64
     displayName: 'Build'
+  - task: CodeQL3000Finalize@0
+    condition: always()
   - script: |
       call jenkins\windows_c_VsDevCmd.cmd x64
       cd cmake && ctest -T test --no-compress-output -C "Release" -V -j 16 --schedule-random
@@ -175,7 +179,7 @@ jobs:
     condition: succeededOrFailed()
 - job: windowsdynamic
   pool:
-    name: 'sdk-c--win-vs2017'
+    name: 'sdk-c--win-vs2022'
   displayName: "Windows Dynamic"
   steps:
   - script: |
@@ -838,7 +842,7 @@ jobs:
   variables:
     CodeQL.Enabled: false
   pool:
-    name: OSX
+    vmImage: 'macOS-11'
   steps:
   - script: |
       ./jenkins/osx_gcc_openssl.sh
@@ -883,7 +887,7 @@ jobs:
   variables:
     CodeQL.Enabled: false
   pool:
-    name: OSX
+    vmImage: 'macOS-11'
   displayName: "Xcode Native"
   steps:
   - script: |
@@ -988,11 +992,12 @@ jobs:
 - job: DotNET
   displayName: .NET
   variables:
-    CodeQL.Enabled: true
-    CodeQL.Language: csharp
+    Codeql.Enabled: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
+    Codeql.Language: csharp,python
   pool: 
     vmImage: 'windows-latest'
   steps:
+  - task: CodeQL3000Init@0
   - task: NuGetCommand@2
     inputs:
       command: 'restore'
@@ -1003,3 +1008,5 @@ jobs:
     inputs:
       command: 'build'
       projects: 'tools\traceabilitytool\traceabilitytool.sln'
+  - task: CodeQL3000Finalize@0
+    condition: always()

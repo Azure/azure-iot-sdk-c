@@ -656,7 +656,7 @@
     fun:IoTHubMessaging_LL_SendMessageComplete
     ...
  }
-  {
+ {
     <insert_a_suppression_name_here>
     drd:ConflictingAccess
     ...
@@ -664,4 +664,17 @@
     fun:openCompleteCallback
     fun:IoTHubMessaging_LL_ReceiverStateChanged
     ...
- }
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: possible
+   ...
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:HTTPAPI_ExecuteRequest
+   ...
+   fun:ThreadWrapper
+   fun:start_thread
+   fun:clone
+}
