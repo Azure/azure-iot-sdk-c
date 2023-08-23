@@ -7,5 +7,5 @@ int main(void)
 {
     size_t failedTestCount = 0;
     RUN_TEST_SUITE(prov_x509_client_e2e, failedTestCount);
-    return failedTestCount;
+    return (int)failedTestCount;
 }

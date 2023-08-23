@@ -7,5 +7,5 @@ int main(void)
 {
     size_t failedTestCount = 0;
     RUN_TEST_SUITE(prov_transport_amqp_common_ut, failedTestCount);
-    return failedTestCount;
+    return (int)failedTestCount;
 }
