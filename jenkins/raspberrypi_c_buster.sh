@@ -11,7 +11,6 @@ set -o pipefail # Exit if pipe failed
 cat /etc/*release | grep VERSION*
 gcc --version
 openssl version
-curl --version
 
 # assume directory is root of downloaded repo
 mkdir cmake
