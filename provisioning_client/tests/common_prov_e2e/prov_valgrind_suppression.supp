@@ -372,3 +372,43 @@
   fun:RunTests
   fun:main
 }
+{
+   <insert_a_suppression_name_here>
+   Helgrind:Misc
+   fun:mutex_destroy_WRK
+   obj:/usr/lib/x86_64-linux-gnu/libp11-kit.so.0.3.0
+   fun:_dl_fini
+   fun:__run_exit_handlers
+   fun:exit
+   fun:(below main)
+}
+{
+   <insert_a_suppression_name_here>
+   Helgrind:Misc
+   fun:mutex_destroy_WRK
+   fun:_dl_fini
+   fun:__run_exit_handlers
+   fun:exit
+   fun:(below main)
+}
+{
+   <insert_a_suppression_name_here>
+   drd:MutexErr
+   fun:pthread_mutex_destroy_intercept
+   fun:pthread_mutex_destroy
+   obj:/usr/lib/x86_64-linux-gnu/libp11-kit.so.0.3.0
+   fun:_dl_fini
+   fun:__run_exit_handlers
+   fun:exit
+   fun:(below main)
+}
+{
+   <insert_a_suppression_name_here>
+   drd:MutexErr
+   fun:pthread_mutex_destroy_intercept
+   fun:pthread_mutex_destroy
+   fun:_dl_fini
+   fun:__run_exit_handlers
+   fun:exit
+   fun:(below main)
+}

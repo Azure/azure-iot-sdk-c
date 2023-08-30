@@ -26,7 +26,7 @@ ENV TOOLCHAIN_ARM=gcc-arm-10.3-2021.07-x86_64-arm-none-linux-gnueabihf
 ENV TOOLCHAIN_PLATFORM=arm-none-linux-gnueabihf
 ENV TOOLCHAIN_SYSROOT=${WORK_ROOT}/${TOOLCHAIN_ARM}
 ENV TOOLCHAIN_BIN=${WORK_ROOT}/${TOOLCHAIN_ARM}/bin
-ENV OPENSSL_ROOT_DIR=${WORK_ROOT}/openssl-OpenSSL_1_1_1f
+ENV OPENSSL_ROOT_DIR=${WORK_ROOT}/openssl-1.1.1v
 ENV TOOLCHAIN_PREFIX=${WORK_ROOT}/ARM
 ENV AR=${TOOLCHAIN_BIN}/${TOOLCHAIN_PLATFORM}-ar
 ENV CC=${TOOLCHAIN_BIN}/${TOOLCHAIN_PLATFORM}-gcc
@@ -43,9 +43,9 @@ RUN tar -xvf ./${TOOLCHAIN_ARM}.tar.xz
 
 #########################################
 # Download and Configure OpenSSL
-RUN wget https://github.com/openssl/openssl/archive/refs/tags/OpenSSL_1_1_1f.tar.gz 
-RUN tar -xvf ./OpenSSL_1_1_1f.tar.gz 
-WORKDIR openssl-OpenSSL_1_1_1f 
+RUN wget https://github.com/openssl/openssl/releases/download/OpenSSL_1_1_1v/openssl-1.1.1v.tar.gz 
+RUN tar -xvf ./openssl-1.1.1v.tar.gz 
+WORKDIR openssl-1.1.1v 
 RUN ./Configure linux-armv4 --prefix=${TOOLCHAIN_PREFIX} --openssldir=${OPENSSL_ROOT_DIR} no-tests shared 
 RUN make 
 RUN make install_sw
