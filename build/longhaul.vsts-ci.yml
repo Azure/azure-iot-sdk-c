@@ -54,7 +54,7 @@ jobs:
 - job: longhaul_windows
   timeoutInMinutes: 800
   pool:
-    name: 'sdk-c--win-vs2017'
+    name: 'sdk-c--win-vs2022'
   displayName: 'Longhaul: Windows'
   steps:
   - script: |
