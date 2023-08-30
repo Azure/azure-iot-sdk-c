@@ -21,9 +21,9 @@ resources:
   - container: linux-c-ubuntu-c-ares
     endpoint: csdk-containers
     image: csdkcontainerregistry.azurecr.io/linux-c-ubuntu-c-ares:latest
-  - container: linux-c-debian
+  - container: linux-c-debian-buster
     endpoint: csdk-containers
-    image: csdkcontainerregistry.azurecr.io/linux-c-debian:latest
+    image: csdkcontainerregistry.azurecr.io/linux-c-debian-buster:latest
   - container: linux-c-ubuntu-clang
     endpoint: csdk-containers
     image: csdkcontainerregistry.azurecr.io/linux-c-ubuntu-clang:latest
@@ -562,7 +562,7 @@ jobs:
   container: linux-c-debian
   pool: 
     name: 'sdk-c--ubuntu-22'
-  displayName: 'Debian'
+  displayName: 'Debian (Buster)'
   steps:
   - script: |
       sudo ./jenkins/debian_c.sh
