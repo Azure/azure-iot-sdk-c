@@ -559,7 +559,7 @@ jobs:
       testRunTitle: 'ubuntu2204dualipstack'
     condition: succeededOrFailed()
 - job: debian
-  container: linux-c-debian
+  container: linux-c-debian-Buster
   pool: 
     name: 'sdk-c--ubuntu-22'
   displayName: 'Debian (Buster)'
