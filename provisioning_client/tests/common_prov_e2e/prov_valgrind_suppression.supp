@@ -402,3 +402,13 @@
    fun:exit
    fun:(below main)
 }
+{
+   <insert_a_suppression_name_here>
+   drd:MutexErr
+   fun:pthread_mutex_destroy_intercept
+   fun:pthread_mutex_destroy
+   fun:_dl_fini
+   fun:__run_exit_handlers
+   fun:exit
+   fun:(below main)
+}
