@@ -619,9 +619,6 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
     static void setup_cleanup_prov_info_mocks(void)
     {
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     }
 
     static void setup_destroy_prov_info_mocks(void)
