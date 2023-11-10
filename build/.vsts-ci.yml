@@ -50,9 +50,10 @@ jobs:
       sudo apt-get install -y nodejs
     displayName: 'Setup'
   - script: |
-      npm install check_submodules
+      npm install check_submodules --loglevel verbose
+      cd
       dir /home/vsts/work/SourceRootMapping
-      dir .\\..\\..
+      dir .\\..
       set
       ./../../node_modules/.bin/check_submodules . main
     displayName: 'Check Submodules Match'
