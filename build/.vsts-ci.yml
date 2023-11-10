@@ -52,7 +52,8 @@ jobs:
   - script: |
       npm install check_submodules
       dir /home/vsts/work/SourceRootMapping
-      dir .\..\..
+      dir .\\..\\..
+      set
       ./../../node_modules/.bin/check_submodules . main
     displayName: 'Check Submodules Match'
 - job: windowsx86
