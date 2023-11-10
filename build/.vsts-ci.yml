@@ -53,7 +53,8 @@ jobs:
       npm install check_submodules --loglevel verbose
       npm root -g
       dir /home/vsts/work/SourceRootMapping
-      dir /s
+      dir /usr/local/lib/node_modules
+      dir
       set
       ./../../node_modules/.bin/check_submodules . main
     displayName: 'Check Submodules Match'
