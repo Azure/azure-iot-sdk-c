@@ -51,11 +51,14 @@ jobs:
     displayName: 'Setup'
   - script: |
       npm install check_submodules
-      dir node_modules
+      dir node_modules/check_submodules
       cd ..
       dir
+      echo 
       cd ..
       dir
+      dir 1
+      dir _temp
       ./../../node_modules/.bin/check_submodules . main
     displayName: 'Check Submodules Match'
 - job: windowsx86
