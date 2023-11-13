@@ -52,8 +52,8 @@ jobs:
   - script: |
       npm install check_submodules
       echo 0
-      dir
-      call jenkins\windows_c.cmd
+      dir jenkins
+      call jenkins/windows_c.cmd
       dir node_modules/check_submodules
       echo 1
       cd ..
