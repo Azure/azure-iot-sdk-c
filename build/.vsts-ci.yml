@@ -55,8 +55,11 @@ jobs:
       echo 1
       cd ..
       dir
+      echo 1a
       dir a
+      echo 1b
       dir b
+      echo 1s
       dir s
       echo 2
       cd ..
@@ -66,7 +69,11 @@ jobs:
       echo 3
       cd ..
       dir
-      ./../../node_modules/.bin/check_submodules . main
+      tree
+      echo 4
+      cd ..
+      dir
+      dir      ./../../node_modules/.bin/check_submodules . main
     displayName: 'Check Submodules Match'
 - job: windowsx86
   pool:
