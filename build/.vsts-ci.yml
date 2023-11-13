@@ -51,6 +51,7 @@ jobs:
     displayName: 'Setup'
   - script: |
       npm install check_submodules
+      call jenkins\windows_c.cmd
       dir node_modules/check_submodules
       echo 1
       cd ..
@@ -69,7 +70,6 @@ jobs:
       echo 3
       cd ..
       dir
-      tree
       echo 4
       cd ..
       dir
