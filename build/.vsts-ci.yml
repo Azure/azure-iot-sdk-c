@@ -54,11 +54,14 @@ jobs:
       dir node_modules/check_submodules
       cd ..
       dir
+      dir a
+      dir b
+      dir s
       echo 
       cd ..
       dir
       dir 1
-      dir _temp
+      dir _tasks
       ./../../node_modules/.bin/check_submodules . main
     displayName: 'Check Submodules Match'
 - job: windowsx86
