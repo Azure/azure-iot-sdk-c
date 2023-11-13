@@ -2,5 +2,10 @@
 @REM Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 setlocal
+echo on
 
-dir /S
+echo start script
+dir
+dir /s
+tree
+echo end script
