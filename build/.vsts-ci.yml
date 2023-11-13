@@ -52,6 +52,8 @@ jobs:
   - script: |
       npm install check_submodules
       dir node_modules
+      cmd /c "dir .\.."
+      cmd /c "dir .\..\,,"
       ./../../node_modules/.bin/check_submodules . main
     displayName: 'Check Submodules Match'
 - job: windowsx86
