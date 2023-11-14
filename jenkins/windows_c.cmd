@@ -2,10 +2,16 @@
 @REM Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 setlocal
-echo on
 
-echo start script
-dir
-dir /s
-tree
-echo end script
+ver
+msbuild -version
+
+set build-root=%~dp0..
+rem // resolve to fully qualified path
+for %%i in ("%build-root%") do set build-root=%%~fi
+
+REM -- C --
+cd %build-root%\build_all\windows
+call build.cmd --run-unittests --run-e2e-tests --provisioning --use-edge-modules --config Debug %*
+if errorlevel 1 goto :eof
+cd %build-root%
