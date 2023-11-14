@@ -54,29 +54,10 @@ jobs:
       echo 0
       dir jenkins
       dir node_modules/check_submodules
-      find ./../.. -type d -print
+      dir ./../../1/s/node_modules/.bin
       echo
-      echo 1
-      cd ..
-      dir
-      echo 1a
-      dir a
-      echo 1b
-      dir b
-      echo 1s
-      dir s
-      echo 2
-      cd ..
-      dir
-      dir 1
-      dir _tasks
-      echo 3
-      cd ..
-      dir
-      echo 4
-      cd ..
-      dir
-      dir      ./../../node_modules/.bin/check_submodules . main
+      echo 1   
+      node_modules/.bin/check_submodules . main
     displayName: 'Check Submodules Match'
 - job: windowsx86
   pool:
