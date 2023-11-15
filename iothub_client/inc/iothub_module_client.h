@@ -140,8 +140,7 @@ extern "C"
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubModuleClient_SetConnectionStatusCallback, IOTHUB_MODULE_CLIENT_HANDLE, iotHubModuleClientHandle, IOTHUB_CLIENT_CONNECTION_STATUS_CALLBACK, connectionStatusCallback, void*, userContextCallback);
 
     /**
-    * @brief    Sets up the connection status callback to be invoked representing the status of
-    * the connection to IOT Hub. This is a blocking call.
+    * @brief    Sets the Retry Policy feature to control how immediatelly and frequently the SDK will attempt to re-connect to the Azure IoT Hub in case a connection issue occurs.
     *
     * @param    iotHubModuleClientHandle         The handle created by a call to the create function.
     * @param    retryPolicy                      The policy to use to reconnect to IoT Hub when a
@@ -149,22 +148,17 @@ extern "C"
     * @param    retryTimeoutLimitInSeconds       Maximum amount of time(seconds) to attempt reconnection when a
     *                                            connection drops to IOT Hub.
     *
-    * @warning: Do not call IoTHubModuleClient_Destroy() from inside your application's callback.
-    *
     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubModuleClient_SetRetryPolicy, IOTHUB_MODULE_CLIENT_HANDLE, iotHubModuleClientHandle, IOTHUB_CLIENT_RETRY_POLICY, retryPolicy, size_t, retryTimeoutLimitInSeconds);
 
     /**
-    * @brief    Sets up the connection status callback to be invoked representing the status of
-    * the connection to IOT Hub. This is a blocking call.
+    * @brief    Gets the Retry Policy setting and timeout value for the current retry policy.
     *
     * @param    iotHubModuleClientHandle         The handle created by a call to the create function.
     * @param    retryPolicy                      Out parameter containing the policy to use to reconnect to IoT Hub.
-    * @param    retryTimeoutLimitInSeconds       Out parameter containing maximum amount of time in seconds to attempt reconnection
-    to IOT Hub.
-    *
-    * @warning: Do not call IoTHubModuleClient_Destroy() from inside your application's callback.
+    * @param    retryTimeoutLimitInSeconds       Out parameter containing maximum amount of time, in seconds, to attempt reconnection
+    *                                            to IOT Hub for the specified retry policy.
     *
     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
