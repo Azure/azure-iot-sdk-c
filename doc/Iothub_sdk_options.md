@@ -67,7 +67,7 @@ You can use the options below for the IoT Hub Device Client, the IoT Hub Module 
 | `"x509privatekey"`                | SU_OPTION_X509_PRIVATE_KEY      | const char*        | Sets the private key for the RSA x509 certificate.  (Also available from [iothub_client_options.h][iothub-client-options-h] as `OPTION_X509_PRIVATE_KEY`.)
 | `"x509EccCertificate"`            | OPTION_X509_ECC_CERT            | const char*        | Sets the ECC x509 certificate used for connection authentication
 | `"x509EccAliasKey"`               | OPTION_X509_ECC_KEY             | const char*        | Sets the private key for the ECC x509 certificate
-| `"proxy_data"`                    | OPTION_HTTP_PROXY               | [HTTP_PROXY_OPTIONS*][shared-util-options-h]| Http proxy data object used for proxy connection to IoT Hub
+| `"proxy_data"`                    | OPTION_HTTP_PROXY               | [HTTP_PROXY_OPTIONS*][shared-util-options-h]| Http proxy data object used for proxy connection to IoT Hub (HTTP-only, HTTPS proxy is not supported)
 | `"tls_version"`                   | OPTION_TLS_VERSION              | int*               | TLS version to use for openssl, 10 for version 1.0, 11 for version 1.1, 12 for version 1.2.  (**DEPRECATED**: TLS 1.0 and 1.1 are not secure and should not be used.  This option is included only for backward compatibility.)
 
 
@@ -145,7 +145,7 @@ The following options are supported when performing file uploads.  They are decl
 | `"x509certificate"`          | OPTION_X509_CERT                | const char*       | Sets an RSA x509 certificate used for connection authentication
 | `"x509privatekey"`           | OPTION_X509_PRIVATE_KEY         | const char*       | Sets the private key for the RSA x509 certificate
 | `"TrustedCerts"`             | OPTION_TRUSTED_CERT             | const char*       | Azure Server certificate used to validate TLS connection to IoT Hub and Azure Storage
-| `"proxy_data"`               | OPTION_HTTP_PROXY               | [HTTP_PROXY_OPTIONS*][shared-util-options-h] | Http proxy data object used for proxy connection to IoT Hub and Azure Storage
+| `"proxy_data"`               | OPTION_HTTP_PROXY               | [HTTP_PROXY_OPTIONS*][shared-util-options-h] | Http proxy data object used for proxy connection to IoT Hub and Azure Storage (HTTP-only, HTTPS proxy is not supported)
 | `"network_interface_upload_to_blob"`| OPTION_NETWORK_INTERFACE_UPLOAD_TO_BLOB | const char* | Set the interface name to use as outgoing network interface for upload to blob.  NOTE: Not all HTTP clients support this option. It is currently only supported when using cURL.
 | `"blob_upload_tls_renegotiation"`| OPTION_BLOB_UPLOAD_TLS_RENEGOTIATION | bool* | *[HTTP Compact](https://github.com/Azure/azure-c-shared-utility/blob/master/devdoc/httpapi_compact_requirements.md) only; not supported when using other HTTP stacks such as cURL and WinHTTP.*   Tells HTTP stack to enable TLS renegotiation when using client certificates.  Non-HTTP Compact stacks will use their defaults for this.
 
