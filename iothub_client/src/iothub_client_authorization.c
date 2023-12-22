@@ -393,6 +393,10 @@ char* IoTHubClient_Auth_Get_SasToken(IOTHUB_AUTHORIZATION_HANDLE handle, const c
             {
                 memset(&dev_auth_cred, 0, sizeof(DEVICE_AUTH_CREDENTIAL_INFO));
                 uint64_t expiry_time = sec_since_epoch + handle->token_expiry_time_sec;
+                if (expiry_time < sec_since_epoch)
+                {
+                    expiry_time = UINT64_MAX;
+                }
                 dev_auth_cred.sas_info.expiry_seconds = expiry_time;
                 dev_auth_cred.sas_info.token_scope = scope;
                 dev_auth_cred.sas_info.key_name = key_name;
@@ -455,6 +459,11 @@ char* IoTHubClient_Auth_Get_SasToken(IOTHUB_AUTHORIZATION_HANDLE handle, const c
                 else
                 {
                     uint64_t expiry_time = sec_since_epoch + handle->token_expiry_time_sec;
+                    if (expiry_time < sec_since_epoch)
+                    {
+                        expiry_time = UINT64_MAX;
+                    }
+
                     if ( (sas_token = SASToken_CreateString(handle->device_key, scope, key_name, expiry_time)) == NULL)
                     {
                         LogError("Failed creating sas_token");
