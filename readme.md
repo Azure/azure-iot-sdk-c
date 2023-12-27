@@ -281,6 +281,8 @@ Below is a table showing the mapping of the LTS branches to the packages release
   | vcpkg: 2023-01-13 | lts_01_2023 | LTS_01_2023_Ref01 | 2023-01-13 | 2024-01-13 |
   | vcpkg: 2022-09-15 | lts_07_2022 | LTS_07_2022_Ref02 | 2022-09-15 | 2023-09-15 |
 
+'Maintenance End Date' refers to the end of life support of the related version.
+
 ## Release Example
 
 Below is a hypothetical example of versioning and tagging for the C SDK. `minor` versions are distinguished by color.
