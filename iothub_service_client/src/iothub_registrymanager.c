@@ -1225,7 +1225,7 @@ static IOTHUB_REGISTRYMANAGER_RESULT sendHttpRequestCRUD(IOTHUB_REGISTRYMANAGER_
             }
             else if (HTTPAPIEX_SAS_ExecuteRequest(httpExApiSasHandle, httpExApiHandle, httpApiRequestType, relativePath, httpHeader, deviceJsonBuffer, &statusCode, NULL, responseBuffer) != HTTPAPIEX_OK)
             {
-                LogError("HTTPAPIEX_SAS_ExecuteRequest failed");
+                LogError("HTTPAPIEX_SAS_ExecuteRequest failed. Host:%s", registryManagerHandle->hostname);
                 result = IOTHUB_REGISTRYMANAGER_HTTPAPI_ERROR;
             }
             else

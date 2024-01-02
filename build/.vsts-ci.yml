@@ -3,12 +3,12 @@ variables:
   runCodesignValidationInjection: false
 resources:
   containers:
+  - container: linux-c-ubuntu-2204
+    endpoint: csdk-containers
+    image: csdkcontainerregistry.azurecr.io/linux-c-ubuntu-2204:latest
   - container: linux-c-ubuntu-2004
     endpoint: csdk-containers
     image: csdkcontainerregistry.azurecr.io/linux-c-ubuntu-2004:latest
-  - container: linux-c-ubuntu-1804
-    endpoint: csdk-containers
-    image: csdkcontainerregistry.azurecr.io/linux-c-ubuntu-1804:latest
   - container: linux-c-ubuntu-wolfssl
     endpoint: csdk-containers
     image: csdkcontainerregistry.azurecr.io/linux-c-ubuntu-wolfssl:latest
@@ -21,9 +21,9 @@ resources:
   - container: linux-c-ubuntu-c-ares
     endpoint: csdk-containers
     image: csdkcontainerregistry.azurecr.io/linux-c-ubuntu-c-ares:latest
-  - container: linux-c-debian
+  - container: linux-c-debian-buster
     endpoint: csdk-containers
-    image: csdkcontainerregistry.azurecr.io/linux-c-debian:latest
+    image: csdkcontainerregistry.azurecr.io/linux-c-debian-buster:latest
   - container: linux-c-ubuntu-clang
     endpoint: csdk-containers
     image: csdkcontainerregistry.azurecr.io/linux-c-ubuntu-clang:latest
@@ -35,6 +35,8 @@ resources:
     image: csdkcontainerregistry.azurecr.io/raspberrypi-c-buster:brown
 jobs:
 - job: checksubmodule
+  variables:
+    CodeQL.Enabled: false
   pool:
     vmImage: 'ubuntu-20.04'
   displayName: "Check Submodules"
@@ -50,19 +52,19 @@ jobs:
       sudo apt-get install -y nodejs
     displayName: 'Setup'
   - script: |
-      npm install check_submodules
-      ./../../node_modules/.bin/check_submodules . main
+      npm install check_submodules 
+      node_modules/.bin/check_submodules . main
     displayName: 'Check Submodules Match'
 - job: windowsx86
   pool:
-    name: 'sdk-c--win-vs2017'
+    name: 'sdk-c--win-vs2022'
   displayName: "Windows x86"
   steps:
   - script: |
-      call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\Tools\VsDevCmd.bat"
       call jenkins\windows_c.cmd
     displayName: 'Build'
   - script: |
+      call jenkins\windows_c_VsDevCmd.cmd x86
       cd cmake && ctest -T test --no-compress-output -C "Debug" -V -j 16 --schedule-random
     displayName: "Run Tests"
     env:
@@ -90,20 +92,17 @@ jobs:
       mergeTestResults: true
       testRunTitle: 'windowsx86'
     condition: succeededOrFailed()
-  - script: cd .. && rd /Q /S $(Agent.BuildDirectory)\s
-    displayName: 'Cleanup'
-    condition: always()
 - job: windowsx64debug
   pool:
-    name: 'sdk-c--win-vs2017'
+    name: 'sdk-c--win-vs2022'
   displayName: 'Windows x64 (Debug)'
   steps:
   - script: |
-      call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\Tools\VsDevCmd.bat"
       call jenkins\windows_c.cmd --platform x64
     displayName: 'Build'
   - script: |
-        cd cmake && ctest -T test --no-compress-output -C "Debug" -V -j 16 --schedule-random
+      call jenkins\windows_c_VsDevCmd.cmd x64
+      cd cmake && ctest -T test --no-compress-output -C "Debug" -V -j 16 --schedule-random
     displayName: "Run Tests"
     env:
       IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
@@ -133,20 +132,24 @@ jobs:
       mergeTestResults: true
       testRunTitle: 'windowsx64'
     condition: succeededOrFailed()
-  - script: cd .. && rd /Q /S $(Agent.BuildDirectory)\s
-    displayName: 'Cleanup'
-    condition: always()
 - job: windowsx64release
+  timeoutInMinutes: 150
+  variables:
+    CodeQL.Enabled: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
+    CodeQL.Language: cpp
   pool:
-    name: 'sdk-c--win-vs2017'
+    name: 'sdk-c--win-vs2022'
   displayName: 'Windows x64 (Release)'
   steps:
+  - task: CodeQL3000Init@0
   - script: |
-      call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\Tools\VsDevCmd.bat"
       call jenkins\windows_c_release.cmd --platform x64
     displayName: 'Build'
+  - task: CodeQL3000Finalize@0
+    condition: always()
   - script: |
-        cd cmake && ctest -T test --no-compress-output -C "Release" -V -j 16 --schedule-random
+      call jenkins\windows_c_VsDevCmd.cmd x64
+      cd cmake && ctest -T test --no-compress-output -C "Release" -V -j 16 --schedule-random
     displayName: "Run Tests"
     env:
       IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
@@ -176,16 +179,13 @@ jobs:
       mergeTestResults: true
       testRunTitle: 'windowsx64release'
     condition: succeededOrFailed()
-  - script: cd .. && rd /Q /S $(Agent.BuildDirectory)\s
-    displayName: 'Cleanup'
-    condition: always()
 - job: windowsdynamic
   pool:
-    name: 'sdk-c--win-vs2017'
+    name: 'sdk-c--win-vs2022'
   displayName: "Windows Dynamic"
   steps:
   - script: |
-      call "%ProgramFiles(x86)%\Microsoft Visual Studio\2017\Enterprise\Common7\Tools\VsDevCmd.bat"
+      call jenkins\windows_c_VsDevCmd.cmd
       call jenkins\windows_c_build_as_dynamic.cmd
     displayName: 'Build'
     env:
@@ -207,25 +207,19 @@ jobs:
       IOT_DPS_INDIVIDUAL_X509_CERTIFICATE: $(IOTHUB-E2E-X509-ECC-CERT-BASE64)
       IOT_DPS_INDIVIDUAL_X509_KEY: $(IOTHUB-E2E-X509-ECC-PRIVATE-KEY-BASE64)
       IOT_DPS_INDIVIDUAL_REGISTRATION_ID: $(IOT-DPS-INDIVIDUAL-REGISTRATION-ID)
-  - script: cd .. && rd /Q /S $(Agent.BuildDirectory)\s
-    displayName: 'Cleanup'
-    condition: always()
 - job: linuxoptions
   container: linux-c-ubuntu-2004
   pool: 
-    name: 'sdk-c--ubuntu-18'
+    name: 'sdk-c--ubuntu-22'
   displayName: 'Linux with Options'
   steps:
   - script: 'sudo ./jenkins/linux_c_option_test.sh'
     displayName: 'Build'
     condition: always()
-  - script: sudo rm -rf $(Agent.BuildDirectory)/*
-    displayName: 'Cleanup'
-    condition: always()
 - job: clang
   container: linux-c-ubuntu-clang
   pool: 
-    name: 'sdk-c--ubuntu-18'
+    name: 'sdk-c--ubuntu-22'
   displayName: 'Clang (Debug)'
   steps:
   - script: |
@@ -264,13 +258,10 @@ jobs:
       mergeTestResults: true
       testRunTitle: 'clang'
     condition: succeededOrFailed()
-  - script: sudo rm -rf $(Agent.BuildDirectory)/*
-    displayName: 'Cleanup'
-    condition: always()
 - job: clang_release
   container: linux-c-ubuntu-clang
   pool: 
-    name: 'sdk-c--ubuntu-18'
+    name: 'sdk-c--ubuntu-22'
   displayName: 'Clang (Release)'
   steps:
   - script: |
@@ -309,58 +300,10 @@ jobs:
       mergeTestResults: true
       testRunTitle: 'clang_release'
     condition: succeededOrFailed()
-  - script: sudo rm -rf $(Agent.BuildDirectory)/*
-    displayName: 'Cleanup'
-    condition: always()
-- job: ubuntu1804
-  container: linux-c-ubuntu-1804
-  pool:
-    name: 'sdk-c--ubuntu-18'
-  displayName: 'Ubuntu 18.04'
-  steps:
-  - script: |
-      sudo -E ./jenkins/ubuntu_c.sh
-    displayName: 'Build'
-  - script: |
-      export OPENSSL_ia32cap=0x00000000
-      sudo chmod -R 755 .
-      cd cmake && sudo -E ../build_all/linux/run_tests.sh
-    displayName: "Run Tests"
-    env:
-      IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
-      IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
-      IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
-      IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
-      IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
-      IOTHUB_POLICY_KEY: $(IOTHUB-POLICY-KEY)
-      STORAGE_ACCOUNT_CONNECTION_STRING: $(STORAGE-ACCOUNT-CONNECTION-STRING)
-      IOT_DPS_CONNECTION_STRING: $(IOT-DPS-CONNECTION-STRING)
-      IOT_DPS_ID_SCOPE: $(IOT-DPS-ID-SCOPE)
-      IOTHUB_CA_ROOT_CERT: $(IOTHUB-CA-ROOT-CERT)
-      IOTHUB_CA_ROOT_CERT_KEY: $(IOTHUB-CA-ROOT-CERT-KEY)
-      IOT_DPS_GLOBAL_ENDPOINT: $(IOT-DPS-GLOBAL-ENDPOINT)
-      IOTHUB_DEVICE_CONN_STRING_INVALIDCERT: $(IOTHUB-DEVICE-CONN-STRING-INVALIDCERT)
-      IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
-      DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
-      PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
-      IOT_DPS_INDIVIDUAL_X509_CERTIFICATE: $(IOTHUB-E2E-X509-ECC-CERT-BASE64)
-      IOT_DPS_INDIVIDUAL_X509_KEY: $(IOTHUB-E2E-X509-ECC-PRIVATE-KEY-BASE64)
-      IOT_DPS_INDIVIDUAL_REGISTRATION_ID: $(IOT-DPS-INDIVIDUAL-REGISTRATION-ID)
-  - task: PublishTestResults@2
-    displayName: 'Publish Ubuntu 18 Results'
-    inputs:
-      testRunner: CTest
-      testResultsFiles: '**/Test.xml'
-      mergeTestResults: true
-      testRunTitle: 'ubuntu1804'
-    condition: succeededOrFailed()
-  - script: sudo rm -rf $(Agent.BuildDirectory)/*
-    displayName: 'Cleanup'
-    condition: always()
 - job: ubuntu2004debug
   container: linux-c-ubuntu-2004
   pool:
-    name: 'sdk-c--ubuntu-18'
+    name: 'sdk-c--ubuntu-22'
   displayName: 'Ubuntu 20.04 (Debug)'
   steps:
   - script: |
@@ -399,13 +342,10 @@ jobs:
       mergeTestResults: true
       testRunTitle: 'ubuntu2004debug'
     condition: succeededOrFailed()
-  - script: sudo rm -rf $(Agent.BuildDirectory)/*
-    displayName: 'Cleanup'
-    condition: always()
 - job: ubuntu2004release
   container: linux-c-ubuntu-2004
   pool:
-    name: 'sdk-c--ubuntu-18'
+    name: 'sdk-c--ubuntu-22'
   displayName: 'Ubuntu 20.04 (Release)'
   steps:
   - script: |
@@ -444,13 +384,56 @@ jobs:
       mergeTestResults: true
       testRunTitle: 'ubuntu2004release'
     condition: succeededOrFailed()
-  - script: sudo rm -rf $(Agent.BuildDirectory)/*
-    displayName: 'Cleanup'
-    condition: always()
+- job: ubuntu2204build
+  container: linux-c-ubuntu-2204
+  pool:
+    name: 'sdk-c--ubuntu-22'
+  displayName: 'Ubuntu 22.04 Unit Tests (Debug)'
+  steps:
+  - script: |
+      cat /etc/*release | grep VERSION*
+      gcc --version
+      openssl version
+      curl --version
+      sudo -E env PATH="$PATH" ./build_all/linux/build.sh --run-unittests --provisioning --use-hsmsymmkey --use-hsmsas --use-hsmx509 --use-edge-modules --config Debug
+    displayName: 'Build'
+  - script: |
+      export OPENSSL_ia32cap=0x00000000
+      sudo chmod -R 755 .
+      cd cmake && sudo -E ../build_all/linux/run_tests.sh
+    displayName: "Run Tests"
+    env:
+      IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
+      IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
+      IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
+      IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
+      IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
+      IOTHUB_POLICY_KEY: $(IOTHUB-POLICY-KEY)
+      STORAGE_ACCOUNT_CONNECTION_STRING: $(STORAGE-ACCOUNT-CONNECTION-STRING)
+      IOT_DPS_CONNECTION_STRING: $(IOT-DPS-CONNECTION-STRING)
+      IOT_DPS_ID_SCOPE: $(IOT-DPS-ID-SCOPE)
+      IOTHUB_CA_ROOT_CERT: $(IOTHUB-CA-ROOT-CERT)
+      IOTHUB_CA_ROOT_CERT_KEY: $(IOTHUB-CA-ROOT-CERT-KEY)
+      IOT_DPS_GLOBAL_ENDPOINT: $(IOT-DPS-GLOBAL-ENDPOINT)
+      IOTHUB_DEVICE_CONN_STRING_INVALIDCERT: $(IOTHUB-DEVICE-CONN-STRING-INVALIDCERT)
+      IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
+      DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
+      PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
+      IOT_DPS_INDIVIDUAL_X509_CERTIFICATE: $(IOTHUB-E2E-X509-ECC-CERT-BASE64)
+      IOT_DPS_INDIVIDUAL_X509_KEY: $(IOTHUB-E2E-X509-ECC-PRIVATE-KEY-BASE64)
+      IOT_DPS_INDIVIDUAL_REGISTRATION_ID: $(IOT-DPS-INDIVIDUAL-REGISTRATION-ID)
+  - task: PublishTestResults@2
+    displayName: 'Publish Ubuntu 22 (Debug) Results'
+    inputs:
+      testRunner: CTest
+      testResultsFiles: '**/Test.xml'
+      mergeTestResults: true
+      testRunTitle: 'ubuntu2004debug'
+    condition: succeededOrFailed()
 - job: ubuntuRIOT
   container: linux-c-ubuntu-2004
   pool:
-    name: 'sdk-c--ubuntu-18'
+    name: 'sdk-c--ubuntu-22'
   displayName: 'Ubuntu RIOT/DICE'
   steps:
   - script: |
@@ -489,14 +472,99 @@ jobs:
       mergeTestResults: true
       testRunTitle: 'ubuntuRIOT'
     condition: succeededOrFailed()
-  - script: sudo rm -rf $(Agent.BuildDirectory)/*
-    displayName: 'Cleanup'
-    condition: always()
+- job: ubuntu2004dualipstack
+  container: linux-c-ubuntu-2004
+  pool:
+    name: 'sdk-c--ubuntu-22'
+  displayName: 'Ubuntu 20.04 with Dual IP Stack'
+  steps:
+  - script: |
+      export OPENSSL_ia32cap=0x00000000
+      sudo chmod -R 755 .
+      sudo -E ./jenkins/ubuntu_c_ipv6_dual_stack.sh
+    displayName: 'Build'
+  - script: |
+      cd cmake && sudo -E ../build_all/linux/run_tests.sh
+    displayName: "Run Tests"
+    env:
+      IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
+      IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
+      IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
+      IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
+      IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
+      IOTHUB_POLICY_KEY: $(IOTHUB-POLICY-KEY)
+      STORAGE_ACCOUNT_CONNECTION_STRING: $(STORAGE-ACCOUNT-CONNECTION-STRING)
+      IOT_DPS_CONNECTION_STRING: $(IOT-DPS-CONNECTION-STRING)
+      IOT_DPS_ID_SCOPE: $(IOT-DPS-ID-SCOPE)
+      IOTHUB_CA_ROOT_CERT: $(IOTHUB-CA-ROOT-CERT)
+      IOTHUB_CA_ROOT_CERT_KEY: $(IOTHUB-CA-ROOT-CERT-KEY)
+      IOT_DPS_GLOBAL_ENDPOINT: $(IOT-DPS-GLOBAL-ENDPOINT)
+      IOTHUB_DEVICE_CONN_STRING_INVALIDCERT: $(IOTHUB-DEVICE-CONN-STRING-INVALIDCERT)
+      IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
+      DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
+      PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
+      IOT_DPS_INDIVIDUAL_X509_CERTIFICATE: $(IOTHUB-E2E-X509-ECC-CERT-BASE64)
+      IOT_DPS_INDIVIDUAL_X509_KEY: $(IOTHUB-E2E-X509-ECC-PRIVATE-KEY-BASE64)
+      IOT_DPS_INDIVIDUAL_REGISTRATION_ID: $(IOT-DPS-INDIVIDUAL-REGISTRATION-ID)
+  - task: PublishTestResults@2
+    displayName: 'Publish Ubuntu 20.04 with Dual IP Stack Results'
+    inputs:
+      testRunner: CTest
+      testResultsFiles: '**/Test.xml'
+      mergeTestResults: true
+      testRunTitle: 'ubuntu2004dualipstack'
+    condition: succeededOrFailed()
+- job: ubuntu2204dualipstack
+  container: linux-c-ubuntu-2204
+  pool:
+    name: 'sdk-c--ubuntu-22'
+  displayName: 'Ubuntu 22.04 with Dual IP Stack'
+  steps:
+  - script: |
+      cat /etc/*release | grep VERSION*
+      gcc --version
+      openssl version
+      curl --version
+      sudo -E env PATH="$PATH" ./build_all/linux/build.sh --run-unittests --run-e2e-tests --provisioning --use-hsmsymmkey --use-hsmsas --use-hsmx509 --use-edge-modules --use-ipv6-dualstack --config Debug
+    displayName: 'Build'
+  - script: |
+      export OPENSSL_ia32cap=0x00000000
+      sudo chmod -R 755 .
+      cd cmake && sudo -E ../build_all/linux/run_tests.sh
+    displayName: "Run Tests"
+    env:
+      IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
+      IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
+      IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
+      IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
+      IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
+      IOTHUB_POLICY_KEY: $(IOTHUB-POLICY-KEY)
+      STORAGE_ACCOUNT_CONNECTION_STRING: $(STORAGE-ACCOUNT-CONNECTION-STRING)
+      IOT_DPS_CONNECTION_STRING: $(IOT-DPS-CONNECTION-STRING)
+      IOT_DPS_ID_SCOPE: $(IOT-DPS-ID-SCOPE)
+      IOTHUB_CA_ROOT_CERT: $(IOTHUB-CA-ROOT-CERT)
+      IOTHUB_CA_ROOT_CERT_KEY: $(IOTHUB-CA-ROOT-CERT-KEY)
+      IOT_DPS_GLOBAL_ENDPOINT: $(IOT-DPS-GLOBAL-ENDPOINT)
+      IOTHUB_DEVICE_CONN_STRING_INVALIDCERT: $(IOTHUB-DEVICE-CONN-STRING-INVALIDCERT)
+      IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
+      DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
+      PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
+      IOT_DPS_INDIVIDUAL_X509_CERTIFICATE: $(IOTHUB-E2E-X509-ECC-CERT-BASE64)
+      IOT_DPS_INDIVIDUAL_X509_KEY: $(IOTHUB-E2E-X509-ECC-PRIVATE-KEY-BASE64)
+      IOT_DPS_INDIVIDUAL_REGISTRATION_ID: $(IOT-DPS-INDIVIDUAL-REGISTRATION-ID)
+  - task: PublishTestResults@2
+    displayName: 'Publish Ubuntu 22.04 with Dual IP Stack Results'
+    inputs:
+      testRunner: CTest
+      testResultsFiles: '**/Test.xml'
+      mergeTestResults: true
+      testRunTitle: 'ubuntu2204dualipstack'
+    condition: succeededOrFailed()
 - job: debian
-  container: linux-c-debian
+  container: linux-c-debian-Buster
   pool: 
-    name: 'sdk-c--ubuntu-18'
-  displayName: 'Debian'
+    name: 'sdk-c--ubuntu-22'
+  displayName: 'Debian (Buster)'
   steps:
   - script: |
       sudo ./jenkins/debian_c.sh
@@ -532,13 +600,10 @@ jobs:
       mergeTestResults: true
       testRunTitle: 'debian'
     condition: succeededOrFailed()
-  - script: sudo rm -rf $(Agent.BuildDirectory)/*
-    displayName: 'Cleanup'
-    condition: always()
 - job: linux_installed_deps
   container: linux-c-ubuntu-2004
   pool: 
-    name: 'sdk-c--ubuntu-18'
+    name: 'sdk-c--ubuntu-22'
   displayName: 'Linux with Installed Deps'
   steps:
   - script: |
@@ -566,12 +631,9 @@ jobs:
       IOT_DPS_INDIVIDUAL_X509_CERTIFICATE: $(IOTHUB-E2E-X509-ECC-CERT-BASE64)
       IOT_DPS_INDIVIDUAL_X509_KEY: $(IOTHUB-E2E-X509-ECC-PRIVATE-KEY-BASE64)
       IOT_DPS_INDIVIDUAL_REGISTRATION_ID: $(IOT-DPS-INDIVIDUAL-REGISTRATION-ID)
-  - script: sudo rm -rf $(Agent.BuildDirectory)/*
-    displayName: 'Cleanup'
-    condition: always()
 - job: wolfssl
   pool:
-    name: 'sdk-c--ubuntu-18'
+    name: 'sdk-c--ubuntu-22'
   container: linux-c-ubuntu-wolfssl
   displayName: 'WolfSSL'
   steps:
@@ -611,13 +673,10 @@ jobs:
       mergeTestResults: true
       testRunTitle: 'wolfssl'
     condition: succeededOrFailed()
-  - script: sudo rm -rf $(Agent.BuildDirectory)/*
-    displayName: 'Cleanup'
-    condition: always()
 - job: bearssl
   container: linux-c-ubuntu-bearssl
   pool:
-    name: 'sdk-c--ubuntu-18'
+    name: 'sdk-c--ubuntu-22'
   displayName: 'BearSSL'
   steps:
   - script: |
@@ -656,13 +715,10 @@ jobs:
       mergeTestResults: true
       testRunTitle: 'bearssl'
     condition: succeededOrFailed()
-  - script: sudo rm -rf $(Agent.BuildDirectory)/*
-    displayName: 'Cleanup'
-    condition: always()
 - job: mbedtls
   container: linux-c-ubuntu-mbed
   pool:
-    name: 'sdk-c--ubuntu-18'
+    name: 'sdk-c--ubuntu-22'
   displayName: 'mbedTLS'
   steps:
   - script: |
@@ -701,13 +757,10 @@ jobs:
       mergeTestResults: true
       testRunTitle: 'mbedtls'
     condition: succeededOrFailed()
-  - script: sudo rm -rf $(Agent.BuildDirectory)/*
-    displayName: 'Cleanup'
-    condition: always()
 - job: cares
   container: linux-c-ubuntu-c-ares
   pool: 
-    name: 'sdk-c--ubuntu-18'
+    name: 'sdk-c--ubuntu-22'
   displayName: 'Linux with C-Ares'
   steps:
   - script: |
@@ -744,13 +797,10 @@ jobs:
       mergeTestResults: true
       testRunTitle: 'cares'
     condition: succeededOrFailed()
-  - script: sudo rm -rf $(Agent.BuildDirectory)/*
-    displayName: 'Cleanup'
-    condition: always()
 - job: openssl_engine
   container: linux-c-openssl-pkcs11
   pool: 
-    name: 'sdk-c--ubuntu-18'
+    name: 'sdk-c--ubuntu-22'
   displayName: 'OpenSSL with pkcs11 engine and SoftHSM'
   steps:
   - script: |
@@ -790,12 +840,11 @@ jobs:
       mergeTestResults: true
       testRunTitle: 'openssl_engine'
     condition: succeededOrFailed()
-  - script: sudo rm -rf $(Agent.BuildDirectory)/*
-    displayName: 'Cleanup'
-    condition: always()
 - job: OSX
+  variables:
+    CodeQL.Enabled: false
   pool:
-    name: OSX
+    vmImage: 'macOS-13'
   steps:
   - script: |
       ./jenkins/osx_gcc_openssl.sh
@@ -831,12 +880,16 @@ jobs:
       mergeTestResults: true
       testRunTitle: 'OSX'
     condition: succeededOrFailed()
+  - task: ComponentGovernanceComponentDetection@0
+    displayName: 'Component Detection'
   - script: rm -rf $(Agent.BuildDirectory)/*
     displayName: 'Cleanup'
     condition: always()
 - job: xcodenative
+  variables:
+    CodeQL.Enabled: false
   pool:
-    name: OSX
+    vmImage: 'macOS-13'
   displayName: "Xcode Native"
   steps:
   - script: |
@@ -845,7 +898,7 @@ jobs:
     displayName: 'Build'
   - script: |
       export DYLD_LIBRARY_PATH=/usr/local/Cellar/curl/7.61.0/lib
-      cd cmake && ctest -T test --no-compress-output -C "Debug" -V -j $TEST_JOB_COUNT --schedule-random
+      cd cmake && ctest -T test --no-compress-output -C "Debug" -V -j 8 --schedule-random
     displayName: "Run Tests"
     env:
       IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
@@ -875,13 +928,15 @@ jobs:
       mergeTestResults: true
       testRunTitle: 'XCode'
     condition: succeededOrFailed()
+  - task: ComponentGovernanceComponentDetection@0
+    displayName: 'Component Detection'
   - script: rm -rf $(Agent.BuildDirectory)/*
     displayName: 'Cleanup'
     condition: always()
 - job: raspberrypi
   container: raspberrypi-c-buster
   pool: 
-    name: 'sdk-c--ubuntu-18'
+    name: 'sdk-c--ubuntu-22'
   displayName: "Raspberry Pi"
   steps:
   - script: |
@@ -892,5 +947,68 @@ jobs:
      chmod +x jenkins/raspberrypi_c_buster.sh
       ./jenkins/raspberrypi_c_buster.sh
     displayName: 'Build'
-  - script: sudo rm -rf $(Agent.BuildDirectory)/*
-    displayName: 'Cleanup'
+- job: crosscompile_mips32
+  pool:
+    vmImage: 'ubuntu-20.04'
+  displayName: "Cross Compile (MIPS32)"
+  steps:
+  - script: |
+      sudo apt-get update && sudo apt-get install -y \
+      curl \
+      git \
+      python-software-properties \
+      build-essential \
+      pkg-config \
+      docker.io
+      sudo curl -sL https://deb.nodesource.com/setup_16.x | bash -
+      sudo apt-get install -y nodejs
+    displayName: 'Setup'
+  - script: |
+      cd samples/dockerbuilds/MIPS32
+      docker build --build-arg TARGET_BRANCH=$BUILD_SOURCEBRANCH -t mipsiotbuild:latest . --network=host
+      cd ..
+      docker build -t mipsiotapp:latest . --network=host --file ./MIPS32/Dockerfile_adjunct
+    displayName: 'Build MIPS32'
+- job: crosscompile_arm
+  pool:
+    vmImage: 'ubuntu-20.04'
+  displayName: "Cross Compile (ARM)"
+  steps:
+  - script: |
+      sudo apt-get update && sudo apt-get install -y \
+      curl \
+      git \
+      python-software-properties \
+      build-essential \
+      pkg-config \
+      docker.io
+      sudo curl -sL https://deb.nodesource.com/setup_16.x | bash -
+      sudo apt-get install -y nodejs
+    displayName: 'Setup'
+  - script: |
+      cd samples/dockerbuilds/ARM
+      docker build --build-arg TARGET_BRANCH=$BUILD_SOURCEBRANCH -t armiotbuild:latest . --network=host
+      cd ..
+      docker build -t armiotapp:latest . --network=host --file ./ARM/Dockerfile_adjunct
+    displayName: 'Build ARM'
+- job: DotNET
+  displayName: .NET
+  variables:
+    Codeql.Enabled: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
+    Codeql.Language: csharp,python
+  pool: 
+    vmImage: 'windows-latest'
+  steps:
+  - task: CodeQL3000Init@0
+  - task: NuGetCommand@2
+    inputs:
+      command: 'restore'
+      restoreSolution: 'tools\traceabilitytool\traceabilitytool.sln'
+      feedsToUse: 'select'
+      vstsFeed: 'f9b79625-2860-4d92-a4ee-57b03fabfd10/805c1538-e9e5-488f-9e17-6c63b6879ace'
+  - task: DotNetCoreCLI@2
+    inputs:
+      command: 'build'
+      projects: 'tools\traceabilitytool\traceabilitytool.sln'
+  - task: CodeQL3000Finalize@0
+    condition: always()

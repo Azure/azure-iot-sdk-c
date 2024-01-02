@@ -50,10 +50,15 @@ static const char* CONN_MODULE_PART = ";ModuleId=";
 #define DEVICE_GUID_SIZE            37
 
 const int TEST_CREATE_MAX_RETRIES = 10;
+const int TEST_DELETE_MAX_RETRIES = 10;
 const int TEST_METHOD_INVOKE_MAX_RETRIES = 3;
 const int TEST_SLEEP_THROTTLE_MSEC = 5 * 1000;
+const int TEST_SLEEP_AFTER_CREATED_DEVICE_MSEC = 30 * 1000;
 const int TEST_SLEEP_BETWEEN_CREATION_FAILURES_MSEC = 30 * 1000;
+const int TEST_SLEEP_BETWEEN_DELETE_FAILURES_MSEC = 30 * 1000;
 const int TEST_SLEEP_BETWEEN_METHOD_INVOKE_FAILURES_MSEC = 30 * 1000;
+
+#define NSLOOKUP_MAX_COMMAND_SIZE 128
 
 typedef struct IOTHUB_ACCOUNT_INFO_TAG
 {
@@ -105,7 +110,7 @@ static int generateDeviceName(const char* prefix, char** deviceName)
             }
             else
             {
-                LogInfo("Created Device %s.", *deviceName);
+                LogInfo("Generated unique device name %s.", *deviceName);
                 result = 0;
             }
         }
@@ -283,26 +288,48 @@ static void freeDeviceInfoFields(IOTHUB_DEVICE* deviceInfo)
 // put on hub means that we need to have a basic retry on creation.
 static IOTHUB_REGISTRYMANAGER_RESULT createTestDeviceWithRetry(IOTHUB_REGISTRYMANAGER_HANDLE iothub_registrymanager_handle, IOTHUB_REGISTRY_DEVICE_CREATE* deviceCreateInfo, IOTHUB_DEVICE* deviceInfo)
 {
-    IOTHUB_REGISTRYMANAGER_RESULT result;
+    IOTHUB_REGISTRYMANAGER_RESULT result = IOTHUB_REGISTRYMANAGER_ERROR;
     int creationAttempts = 0;
+    bool doesDeviceExist = false;
 
-    ThreadAPI_Sleep(TEST_SLEEP_THROTTLE_MSEC);  // prevent Too Many Requests (429) error from service
+    ThreadAPI_Sleep(TEST_SLEEP_THROTTLE_MSEC + gb_rand() % 10);  // prevent Too Many Requests (429) error from service
     while (true)
     {
-        LogInfo("Invoking registry manager to create device %s", deviceCreateInfo->deviceId);
-        if ((result = IoTHubRegistryManager_CreateDevice(iothub_registrymanager_handle, deviceCreateInfo, deviceInfo)) == IOTHUB_REGISTRYMANAGER_OK)
+        if (doesDeviceExist == false)
         {
-            break;
+            LogInfo("Invoking registry manager to create device %s", deviceCreateInfo->deviceId);
+            result = IoTHubRegistryManager_CreateDevice(iothub_registrymanager_handle, deviceCreateInfo, deviceInfo);
+            if (result == IOTHUB_REGISTRYMANAGER_OK)
+            {
+                LogInfo("Device created with status %s", MU_ENUM_TO_STRING(IOTHUB_REGISTRYMANAGER_RESULT, result));
+                ThreadAPI_Sleep(TEST_SLEEP_AFTER_CREATED_DEVICE_MSEC);  // allow ARM cache to update
+                break;
+            }
+            else if (result == IOTHUB_REGISTRYMANAGER_DEVICE_EXIST)
+            {
+                doesDeviceExist = true;
+            }
+        }
+        
+        if (doesDeviceExist)
+        {
+            ThreadAPI_Sleep(TEST_SLEEP_AFTER_CREATED_DEVICE_MSEC);  // allow ARM cache to update
+            LogInfo("Invoking registry manager to get device %s", deviceCreateInfo->deviceId);
+            result = IoTHubRegistryManager_GetDevice(iothub_registrymanager_handle, deviceCreateInfo->deviceId, deviceInfo);
+            if (result == IOTHUB_REGISTRYMANAGER_OK)
+            {
+                break;
+            }
         }
 
         creationAttempts++;
         if (creationAttempts == TEST_CREATE_MAX_RETRIES)
         {
-            LogError("Creating device %s failed with error %d.  Exhausted retry attempts.  Failing test", deviceCreateInfo->deviceId, result);
+            LogError("Creating device %s failed with error %s (%d).  Exhausted retry attempts.  Failing test", deviceCreateInfo->deviceId, MU_ENUM_TO_STRING(IOTHUB_REGISTRYMANAGER_RESULT, result), result);
             break;
         }
             
-        LogError("Creating device %s failed with error %d.  Sleeping %d milliseconds", deviceCreateInfo->deviceId, result, TEST_SLEEP_BETWEEN_CREATION_FAILURES_MSEC);
+        LogError("Creating device %s failed with error %s (%d).  Sleeping %d milliseconds", deviceCreateInfo->deviceId, MU_ENUM_TO_STRING(IOTHUB_REGISTRYMANAGER_RESULT, result), result, TEST_SLEEP_BETWEEN_CREATION_FAILURES_MSEC);
         ThreadAPI_Sleep(TEST_SLEEP_BETWEEN_CREATION_FAILURES_MSEC + gb_rand() % 15);  // sleep with jitter
     }
 
@@ -312,16 +339,33 @@ static IOTHUB_REGISTRYMANAGER_RESULT createTestDeviceWithRetry(IOTHUB_REGISTRYMA
 // Provides same functionality as createTestDeviceWithRetry, except with modules instead of devices.
 static IOTHUB_REGISTRYMANAGER_RESULT createTestModuleWithRetry(IOTHUB_REGISTRYMANAGER_HANDLE iothub_registrymanager_handle, IOTHUB_REGISTRY_MODULE_CREATE* moduleCreateInfo, IOTHUB_MODULE* moduleInfo)
 {
-    IOTHUB_REGISTRYMANAGER_RESULT result;
+    IOTHUB_REGISTRYMANAGER_RESULT result = IOTHUB_REGISTRYMANAGER_ERROR;
     int creationAttempts = 0;
+    bool doesDeviceExist = false;
 
-    ThreadAPI_Sleep(TEST_SLEEP_THROTTLE_MSEC);  // prevent Too Many Requests (429) error from service
+    ThreadAPI_Sleep(TEST_SLEEP_THROTTLE_MSEC + gb_rand() % 10);  // prevent Too Many Requests (429) error from service
     while (true)
     {
-        LogInfo("Invoking registry manager to create device/module %s/%s", moduleCreateInfo->deviceId, moduleCreateInfo->moduleId);
-        if ((result = IoTHubRegistryManager_CreateModule(iothub_registrymanager_handle, moduleCreateInfo, moduleInfo)) == IOTHUB_REGISTRYMANAGER_OK)
+        if (doesDeviceExist == false)
         {
-            break;
+            LogInfo("Invoking registry manager to create device/module %s/%s", moduleCreateInfo->deviceId, moduleCreateInfo->moduleId);
+            result = IoTHubRegistryManager_CreateModule(iothub_registrymanager_handle, moduleCreateInfo, moduleInfo);
+            if (result == IOTHUB_REGISTRYMANAGER_OK)
+            {
+                break;
+            }
+        }
+        
+        if (result == IOTHUB_REGISTRYMANAGER_DEVICE_EXIST)
+        {
+            doesDeviceExist = true;
+            ThreadAPI_Sleep(TEST_SLEEP_AFTER_CREATED_DEVICE_MSEC);  // allow ARM cache to update
+            LogInfo("Invoking registry manager to get device/module %s/%s", moduleCreateInfo->deviceId, moduleCreateInfo->moduleId);
+            result = IoTHubRegistryManager_GetModule(iothub_registrymanager_handle, moduleCreateInfo->deviceId, moduleCreateInfo->moduleId, moduleInfo);
+            if (result == IOTHUB_REGISTRYMANAGER_OK)
+            {
+                break;
+            }
         }
 
         creationAttempts++;
@@ -529,7 +573,7 @@ static int updateTestModuleWithRetry(IOTHUB_REGISTRYMANAGER_HANDLE iothub_regist
         }
             
         LogError("Updating device/module %s/%s failed with error %d.  Sleeping %d milliseconds", deviceToProvision->deviceId, deviceToProvision->moduleId, result, TEST_SLEEP_BETWEEN_CREATION_FAILURES_MSEC);
-        ThreadAPI_Sleep(TEST_SLEEP_BETWEEN_CREATION_FAILURES_MSEC);
+        ThreadAPI_Sleep(TEST_SLEEP_BETWEEN_CREATION_FAILURES_MSEC + gb_rand() % 15);
     }
 
     return result;
@@ -809,10 +853,15 @@ void IoTHubAccount_deinit(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle)
             {
                 if (provisioned_device->deviceId != NULL)
                 {
-                    iothub_registrymanager_result = IoTHubRegistryManager_DeleteDevice(acctInfo->iothub_registrymanager_handle, provisioned_device->deviceId);
-                    if (iothub_registrymanager_result != IOTHUB_REGISTRYMANAGER_OK)
+                    for (int i = 0; i < TEST_DELETE_MAX_RETRIES; i++)
                     {
-                        LogError("IoTHubRegistryManager_DeleteDevice failed for SAS Based Device \"%s\"\r\n", provisioned_device->deviceId);
+                        iothub_registrymanager_result = IoTHubRegistryManager_DeleteDevice(acctInfo->iothub_registrymanager_handle, provisioned_device->deviceId);
+                        if (iothub_registrymanager_result == IOTHUB_REGISTRYMANAGER_OK)
+                        {
+                            break;
+                        }
+                        LogError("IoTHubRegistryManager_DeleteDevice failed (%d) for SAS Based Device \"%s\"\r\n", i, provisioned_device->deviceId);
+                        ThreadAPI_Sleep(TEST_SLEEP_BETWEEN_DELETE_FAILURES_MSEC + gb_rand() % 15);  // sleep with jitter
                     }
                 }
 
@@ -1137,3 +1186,58 @@ const IOTHUB_MESSAGING_HANDLE IoTHubAccount_GetMessagingHandle(IOTHUB_ACCOUNT_IN
     return result;
 }
 
+IOTHUB_GATEWAY_VERSION IoTHubAccount_GetIoTHubVersion(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle)
+{
+    IOTHUB_GATEWAY_VERSION result = IOTHUB_GATEWAY_VERSION_UNDEFINED;
+
+    const char* iotHubFqdn = IoTHubAccount_GetIoTHostName(acctHandle);
+
+    LogInfo("nslookup: check %s", iotHubFqdn);
+
+    if (iotHubFqdn != NULL)
+    {
+        const char* IoTHubGwV1Suffix = "ihsu-";
+        const char* IoTHubGwV2Suffix = "gateway-prod-gw-";
+        const char* nslookup_fmt = "nslookup %s";
+        char command[NSLOOKUP_MAX_COMMAND_SIZE];
+        char stdoutLine[128];
+
+        int commandLength = snprintf(command, NSLOOKUP_MAX_COMMAND_SIZE, nslookup_fmt, iotHubFqdn);
+
+        if (commandLength > 0 && commandLength < NSLOOKUP_MAX_COMMAND_SIZE)
+        {
+#if defined(__APPLE__) || defined(AZIOT_LINUX)
+            FILE* stdOut = popen(command, "r");
+#else
+            FILE* stdOut = _popen(command, "r");
+#endif
+
+            while (fgets(stdoutLine, sizeof(stdoutLine), stdOut) != NULL)
+            {
+                LogInfo("nslookup: %s", stdoutLine);
+
+                if (strstr(stdoutLine, "Name:") == stdoutLine)
+                {
+                    if (strstr(stdoutLine, IoTHubGwV1Suffix) != NULL)
+                    {
+                        result = IOTHUB_GATEWAY_VERSION_1;
+                    }
+                    else if (strstr(stdoutLine, IoTHubGwV2Suffix) != NULL)
+                    {
+                        result = IOTHUB_GATEWAY_VERSION_2;
+                    }
+
+                    break;
+                }
+            }
+
+#if defined(__APPLE__) || defined(AZIOT_LINUX)
+            (void)pclose(stdOut);
+#else
+            (void)_pclose(stdOut);
+#endif
+        }
+    }
+
+    return result;
+}

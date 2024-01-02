@@ -11,7 +11,7 @@ jobs:
 - job: ubuntu2004
   container: linux-c-ubuntu-2004
   pool: 
-    name: 'sdk-c--ubuntu-18'
+    name: 'sdk-c--ubuntu-22'
   displayName: 'Ubuntu 20.04'
   steps:
   - script: |
@@ -39,6 +39,4 @@ jobs:
       IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
       DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
       PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
-  - script: sudo rm -rf $(Agent.BuildDirectory)/*
-    displayName: 'cleanup'
     condition: always()

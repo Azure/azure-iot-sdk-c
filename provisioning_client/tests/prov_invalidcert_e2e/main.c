@@ -7,5 +7,5 @@ int main(void)
 {
     size_t failedTestCount = 0;
     RUN_TEST_SUITE(prov_invalidcert_e2e, failedTestCount);
-    return failedTestCount;
+    return (int)failedTestCount;
 }

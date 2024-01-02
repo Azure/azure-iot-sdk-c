@@ -142,31 +142,29 @@ if EXIST %cmake-root%\cmake (
 )
 
 echo CMAKE Output Path: %cmake-root%\cmake
+rd /Q /S %cmake-root%\cmake
 mkdir %cmake-root%\cmake
 rem no error checking
 pushd %cmake-root%\cmake
 
+call %build-root%\jenkins\windows_c_VsDevCmd.cmd %build-platform%
+
+where cmake
+cmake --version
+
 if %build-platform% == x64 (
     echo ***Running CMAKE for Win64***
-    cmake -LAH -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_sfc_tests:BOOL=%CMAKE_run_sfc_tests% -Duse_cppunittest:BOOL=OFF -Drun_unittests:BOOL=%CMAKE_run_unittests% %build-root% -Duse_prov_client:BOOL=%prov_auth% -G "Visual Studio 15 2017" -A x64 -Duse_edge_modules=%use_edge_modules% -DCMAKE_BUILD_TYPE=$build_config
+    cmake -LAH -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_sfc_tests:BOOL=%CMAKE_run_sfc_tests% -Duse_cppunittest:BOOL=OFF -Drun_unittests:BOOL=%CMAKE_run_unittests% %build-root% -Duse_prov_client:BOOL=%prov_auth% -G %VSVERSION% -A x64 -Duse_edge_modules=%use_edge_modules% -DCMAKE_BUILD_TYPE=%build-config%
     if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 ) else if %build-platform% == arm (
     echo ***Running CMAKE for ARM***
-    cmake -LAH -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_sfc_tests:BOOL=%CMAKE_run_sfc_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% %build-root% -Duse_prov_client:BOOL=%prov_auth% -G "Visual Studio 15 2017" -A ARM  -Duse_edge_modules=%use_edge_modules% -DCMAKE_BUILD_TYPE=$build_config
+    cmake -LAH -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_sfc_tests:BOOL=%CMAKE_run_sfc_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% %build-root% -Duse_prov_client:BOOL=%prov_auth% -G %VSVERSION% -A ARM -Duse_edge_modules=%use_edge_modules% -DCMAKE_BUILD_TYPE=%build-config%
     if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 ) else (
     echo ***Running CMAKE for Win32***
-    cmake -LAH -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_sfc_tests:BOOL=%CMAKE_run_sfc_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% %build-root% -Duse_prov_client:BOOL=%prov_auth% -G "Visual Studio 15 2017" -A Win32 -Duse_edge_modules=%use_edge_modules% -DCMAKE_BUILD_TYPE=$build_config
+    cmake -LAH -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_sfc_tests:BOOL=%CMAKE_run_sfc_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% %build-root% -Duse_prov_client:BOOL=%prov_auth% -G %VSVERSION% -A Win32 -Duse_edge_modules=%use_edge_modules% -DCMAKE_BUILD_TYPE=%build-config%
     if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 )
-
-echo ***checking msbuild***
-where /q msbuild
-IF ERRORLEVEL 1 (
-echo ***setting VC paths***
-    IF EXIST "%ProgramFiles(x86)%\Microsoft Visual Studio\2017\Enterprise\Common7\Tools\VsMSBuildCmd.bat" call "%ProgramFiles(x86)%\Microsoft Visual Studio\2017\Enterprise\Common7\Tools\VsMSBuildCmd.bat"
-)
-where msbuild
 
 if %make%==yes (
     echo build-config is %build-config%

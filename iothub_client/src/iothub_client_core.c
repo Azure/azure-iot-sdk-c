@@ -2486,6 +2486,59 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_UploadMultipleBlocksToBlobAsync(IOTHUB_CLI
     return result;
 }
 
+IOTHUB_CLIENT_RESULT IoTHubClientCore_InitializeUpload(IOTHUB_CLIENT_CORE_HANDLE iotHubClientHandle, const char* destinationFileName, char** uploadCorrelationId, char** azureBlobSasUri)
+{
+    IOTHUB_CLIENT_RESULT result;
+
+    if (iotHubClientHandle == NULL)
+    {
+        LogError("invalid parameter iotHubClientHandle = %p", iotHubClientHandle);
+        result = IOTHUB_CLIENT_INVALID_ARG;
+    }
+    else
+    {
+        result = IoTHubClientCore_LL_InitializeUpload(iotHubClientHandle->IoTHubClientLLHandle, destinationFileName, uploadCorrelationId, azureBlobSasUri);
+    }
+
+    return result;
+}
+
+IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE IoTHubClientCore_AzureStorageCreateClient(IOTHUB_CLIENT_CORE_HANDLE iotHubClientHandle, const char* azureBlobSasUri)
+{
+    IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE result;
+
+    if (iotHubClientHandle == NULL)
+    {
+        LogError("invalid parameter iotHubClientHandle = %p", iotHubClientHandle);
+        result = NULL;
+    }
+    else
+    {
+        result = IoTHubClientCore_LL_AzureStorageCreateClient(iotHubClientHandle->IoTHubClientLLHandle, azureBlobSasUri);
+    }
+
+    return result;
+}
+
+IOTHUB_CLIENT_RESULT IoTHubClientCore_AzureStoragePutBlock(IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE azureStorageClientHandle, uint32_t blockNumber, const uint8_t* dataPtr, size_t dataSize)
+{
+    return IoTHubClientCore_LL_AzureStoragePutBlock(azureStorageClientHandle, blockNumber, dataPtr, dataSize);
+}
+
+IOTHUB_CLIENT_RESULT IoTHubClientCore_AzureStoragePutBlockList(IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE azureStorageClientHandle)
+{
+    return IoTHubClientCore_LL_AzureStoragePutBlockList(azureStorageClientHandle);
+}
+
+void IoTHubClientCore_AzureStorageDestroyClient(IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE azureStorageClientHandle)
+{
+    IoTHubClientCore_LL_AzureStorageDestroyClient(azureStorageClientHandle);
+}
+
+IOTHUB_CLIENT_RESULT IoTHubClientCore_NotifyUploadCompletion(IOTHUB_CLIENT_CORE_HANDLE iotHubClientHandle, const char* uploadCorrelationId, bool isSuccess, int responseCode, const char* responseMessage)
+{
+    return IoTHubClientCore_LL_NotifyUploadCompletion(iotHubClientHandle->IoTHubClientLLHandle, uploadCorrelationId, isSuccess, responseCode, responseMessage);
+}
 #endif /*DONT_USE_UPLOADTOBLOB*/
 
 IOTHUB_CLIENT_RESULT IoTHubClientCore_SendEventToOutputAsync(IOTHUB_CLIENT_CORE_HANDLE iotHubClientHandle, IOTHUB_MESSAGE_HANDLE eventMessageHandle, const char* outputName, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK eventConfirmationCallback, void* userContextCallback)

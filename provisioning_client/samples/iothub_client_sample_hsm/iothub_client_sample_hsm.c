@@ -27,15 +27,9 @@
 #include "certs.h"
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
 
-static const char* iothub_uri = "<iothub_uri>";
-static const char* device_id = "<device_id>";
-static const char* conn_string = "HostName=<hostname>;DeviceId=<device_id>;UseProvisioning=true";
-
-#ifdef USE_OPENSSL
-    static bool g_using_cert = true;
-#else
-    static bool g_using_cert = false;
-#endif // USE_OPENSSL
+#define iothub_uri "<iothub_uri>"
+#define device_id "<device_id>"
+#define conn_string "HostName=<hostname>;DeviceId=<device_id>;UseProvisioning=true"
 
 typedef struct IOTHUB_CLIENT_SAMPLE_INFO_TAG
 {

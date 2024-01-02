@@ -5,7 +5,8 @@
 @echo off
 
 ver
-msbuild -version
+where cmake
+cmake --version
 
 set current-path=%~dp0
 rem // remove trailing slash

@@ -33,6 +33,15 @@ extern "C"
     */
     typedef void(*IOTHUB_CLIENT_FILE_UPLOAD_CALLBACK)(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, void* userContextCallback);
 
+/** @remark `struct IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_STRUCT` contains information specifically
+ *          related to an individual upload request currently active in Azure IoT Hub, mainly
+ *          the correlation-id and Azure Blob SAS URI provided by the Azure IoT Hub when a new
+ *          upload is started. The `struct IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA` on the other hand 
+ *          holds common information (independent from individual upload requests) that is used for
+ *          upload-to-blob Rest API calls to Azure IoT Hub.
+ */
+typedef struct IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_STRUCT* IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE;
+
 #define IOTHUB_CLIENT_RESULT_VALUES       \
     IOTHUB_CLIENT_OK,                     \
     IOTHUB_CLIENT_INVALID_ARG,            \
@@ -146,6 +155,11 @@ extern "C"
 
     /** @brief Enumeration passed to the application callback indicating connection status changes
     *          to IoT Hub.
+    *   @remark @c IOTHUB_CLIENT_CONNECTION_AUTHENTICATED means the device or module client is ready
+    *           to communicate with the Azure IoT Hub, being both connected and authenticated.
+    *           @c IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED means the device or module client is not
+    *           ready to communicate with the Azure IoT Hub. See the corresponding value of
+    *           @c IOTHUB_CLIENT_CONNECTION_STATUS_REASON for more details.
     */
     MU_DEFINE_ENUM_WITHOUT_INVALID(IOTHUB_CLIENT_CONNECTION_STATUS, IOTHUB_CLIENT_CONNECTION_STATUS_VALUES);
 
@@ -161,6 +175,54 @@ extern "C"
     IOTHUB_CLIENT_CONNECTION_QUOTA_EXCEEDED                \
 
     /** @brief Enumeration passed to the application callback indicating reason that connection was unsuccessful.
+    *   @remark Each of the values of @c IOTHUB_CLIENT_CONNECTION_STATUS_REASON has a specific semantics
+    *           depending on the transport protocol used. Here is a brief description of the reasons for each
+    *           transport protocol:
+    *           @c IOTHUB_CLIENT_CONNECTION_EXPIRED_SAS_TOKEN
+    *               MQTT: The SAS token used in the current MQTT connection is expired
+    *                     and the client must reconnect with a new SAS token.
+    *               AMQP: Not applicable.
+    *               HTTP: Not applicable.
+    *           @c IOTHUB_CLIENT_CONNECTION_DEVICE_DISABLED
+    *               MQTT: An MQTT CONNECT to the Azure IoT Hub was rejected.
+    *               AMQP: Not applicable.
+    *               HTTP: Not applicable.
+    *           @c IOTHUB_CLIENT_CONNECTION_BAD_CREDENTIAL
+    *               MQTT: Not applicable.
+    *               AMQP: A SAS-based authentication request failed.
+    *               HTTP: Not applicable.
+    *           @c IOTHUB_CLIENT_CONNECTION_RETRY_EXPIRED
+    *               MQTT: The MQTT transport has made its maximum number of attempts to reconnect
+    *                     to the Azure IoT Hub and it will no longer try.
+    *               AMQP: The AMQP transport has made its maximum number of attempts to reconnect
+    *                     to the Azure IoT Hub and it will no longer try.
+    *               HTTP: Not applicable.
+    *           @c IOTHUB_CLIENT_CONNECTION_NO_NETWORK
+    *               MQTT: An MQTT CONNECT packet failed to be sent to the Azure IoT Hub for any reason.
+    *               AMQP: A network connection issue was detected, which includes socket errors,
+    *                     failures on AMQP ATTACH to CBS link (for authentication).
+    *               HTTP: Not applicable.
+    *           @c IOTHUB_CLIENT_CONNECTION_COMMUNICATION_ERROR
+    *               MQTT: A telemetry message timed out receiving a PUBACK from the Azure IoT Hub,
+    *                     there was an error sending a PUBACK or PUBREC to Azure IoT Hub, or
+    *                     an I/O error occurred when using WebSockets.
+    *               AMQP: Authentication request timed out, received an unexpected link DETACH from
+    *                     Azure IoT Hub, or a link ATTACH timed out.
+    *               HTTP: Not applicable.
+    *           @c IOTHUB_CLIENT_CONNECTION_OK
+    *               Applicable to all transport protocols.
+    *               The Azure IoT C SDK client is connected and ready to
+    *               communicate with the Azure IoT Hub. This reason is applicable only to
+    *               @c IOTHUB_CLIENT_CONNECTION_AUTHENTICATED.
+    *           @c IOTHUB_CLIENT_CONNECTION_NO_PING_RESPONSE
+    *               MQTT: The MQTT transport timed out waiting for a ping response from the Azure IoT Hub.
+    *               AMQP: Not applicable.
+    *               HTTP: Not applicable.
+    *           @c IOTHUB_CLIENT_CONNECTION_QUOTA_EXCEEDED
+    *               MQTT: Not applicable.
+    *               AMQP: The Azure IoT Hub rejected a telemetry message because the maximum daily
+    *                     quota of telemetry messages has been reached.
+    *               HTTP: Not applicable.
     */
     MU_DEFINE_ENUM_WITHOUT_INVALID(IOTHUB_CLIENT_CONNECTION_STATUS_REASON, IOTHUB_CLIENT_CONNECTION_STATUS_REASON_VALUES);
 

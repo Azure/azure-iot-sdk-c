@@ -78,13 +78,6 @@ typedef enum CLIENT_STATE_TAG
     CLIENT_STATE_ERROR
 } CLIENT_STATE;
 
-typedef struct IOTHUB_REQ_INFO_TAG
-{
-    char* iothub_url;
-    char* iothub_key;
-    char* device_id;
-} IOTHUB_REQ_INFO;
-
 typedef struct PROV_INSTANCE_INFO_TAG
 {
     PROV_DEVICE_CLIENT_REGISTER_DEVICE_CALLBACK register_callback;
@@ -113,8 +106,6 @@ typedef struct PROV_INSTANCE_INFO_TAG
     bool is_connected;
 
     PROV_AUTH_TYPE hsm_type;
-
-    IOTHUB_REQ_INFO iothub_info;
 
     CLIENT_STATE prov_state;
 
@@ -709,12 +700,6 @@ static void cleanup_prov_info(PROV_INSTANCE_INFO* prov_info)
     }
     free(prov_info->registration_id);
     prov_info->registration_id = NULL;
-    free(prov_info->iothub_info.device_id);
-    prov_info->iothub_info.device_id = NULL;
-    free(prov_info->iothub_info.iothub_key);
-    prov_info->iothub_info.iothub_key = NULL;
-    free(prov_info->iothub_info.iothub_url);
-    prov_info->iothub_info.iothub_url = NULL;
     prov_info->auth_attempts_made = 0;
 }
 

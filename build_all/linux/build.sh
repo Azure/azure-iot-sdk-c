@@ -29,6 +29,7 @@ hsm_type_sastoken=OFF
 hsm_type_symm_key=OFF
 hsm_type_x509=OFF
 hsm_type_riot=OFF
+enable_ipv6=OFF
 build_config=Debug
 
 usage ()
@@ -58,6 +59,7 @@ usage ()
     echo " --use-hsmsas                  Build with HSM for TPM"  
     echo " --use-hsmx509                 Build with HSM for X509 Client Authentication" 
     echo " --use-hsmriot                 Build with HSM for RIoT/DICE" 
+    echo " --use-ipv6-dualstack          Build with IPv6 dual stack support"
     echo " --config <value>              [Debug] build configuration (e.g. Debug, Release)"
     exit 1
 }
@@ -112,6 +114,7 @@ process_args ()
               "--use-hsmsas")  hsm_type_sastoken=ON;;
               "--use-hsmx509") hsm_type_riot=OFF; hsm_type_x509=ON;;
               "--use-hsmriot") hsm_type_riot=ON; hsm_type_x509=OFF;;
+              "--use-ipv6-dualstack") enable_ipv6=ON;;
               "--config") save_next_arg=4;;
               * ) usage;;
           esac
@@ -136,7 +139,7 @@ rm -r -f $build_folder
 mkdir -m777 -p $build_folder
 pushd $build_folder
 echo "Generating Build Files"
-cmake $toolchainfile $cmake_install_prefix $build_root -Drun_valgrind:BOOL=$run_valgrind -DcompileOption_C:STRING="$extracloptions" -Drun_e2e_tests:BOOL=$run_e2e_tests -Drun_sfc_tests:BOOL=$run_sfc_tests -Drun_longhaul_tests=$run_longhaul_tests -Duse_amqp:BOOL=$build_amqp -Duse_http:BOOL=$build_http -Duse_mqtt:BOOL=$build_mqtt -Ddont_use_uploadtoblob:BOOL=$no_blob -Drun_unittests:BOOL=$run_unittests -Dno_logging:BOOL=$no_logging -Duse_prov_client:BOOL=$prov_auth -Duse_tpm_simulator:BOOL=$prov_use_tpm_simulator -Duse_edge_modules=$use_edge_modules -Dhsm_type_riot=$hsm_type_riot -Dhsm_type_x509=$hsm_type_x509 -Dhsm_type_symm_key=$hsm_type_symm_key -Dhsm_type_sastoken=$hsm_type_sastoken -DCMAKE_BUILD_TYPE=$build_config
+cmake $toolchainfile $cmake_install_prefix $build_root -Drun_valgrind:BOOL=$run_valgrind -DcompileOption_C:STRING="$extracloptions" -Drun_e2e_tests:BOOL=$run_e2e_tests -Drun_sfc_tests:BOOL=$run_sfc_tests -Drun_longhaul_tests=$run_longhaul_tests -Duse_amqp:BOOL=$build_amqp -Duse_http:BOOL=$build_http -Duse_mqtt:BOOL=$build_mqtt -Ddont_use_uploadtoblob:BOOL=$no_blob -Drun_unittests:BOOL=$run_unittests -Dno_logging:BOOL=$no_logging -Duse_prov_client:BOOL=$prov_auth -Duse_tpm_simulator:BOOL=$prov_use_tpm_simulator -Duse_edge_modules=$use_edge_modules -Dhsm_type_riot=$hsm_type_riot -Dhsm_type_x509=$hsm_type_x509 -Dhsm_type_symm_key=$hsm_type_symm_key -Dhsm_type_sastoken=$hsm_type_sastoken -Denable_ipv6=$enable_ipv6 -DCMAKE_BUILD_TYPE=$build_config
 chmod --recursive ugo+rw ../cmake
 
 # Set the default cores

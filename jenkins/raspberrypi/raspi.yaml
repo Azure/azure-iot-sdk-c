@@ -15,7 +15,7 @@ variables:
 jobs:
 - job: Cross_Compile
   pool:
-    vmImage: ubuntu-18.04
+    vmImage: ubuntu-20.04
   steps:
   - task: UsePythonVersion@0
     inputs:
@@ -56,7 +56,7 @@ jobs:
   - script: |
       cd $(Build.SourcesDirectory) &&
       echo "saving patch from ${CommitToPass} to HEAD" &&
-      git diff -p origin/${CommitToPass} > ${AGENT_BUILDDIRECTORY}/patchfile &&
+      git diff -p origin/${CommitToPass} --binary > ${AGENT_BUILDDIRECTORY}/patchfile &&
       mkdir -p $(Build.ArtifactStagingDirectory)/raspi-c &&
       cp ${AGENT_BUILDDIRECTORY}/patchfile $(Build.ArtifactStagingDirectory)/raspi-c &&
       mv ${AGENT_BUILDDIRECTORY}/patchfile ${CLIENTLIBRARY_FRAMEWORKROOT}/jenkins/raspberrypi

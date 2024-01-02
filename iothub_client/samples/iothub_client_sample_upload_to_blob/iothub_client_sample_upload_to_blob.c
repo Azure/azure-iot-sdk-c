@@ -20,7 +20,7 @@ and removing calls to _DoWork will yield the same results. */
 
 #include "azure_c_shared_utility/shared_util_options.h"
 #include "iothub_message.h"
-#include "iothubtransporthttp.h"
+#include "iothubtransportmqtt.h"
 
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
 #include "certs.h"
@@ -35,6 +35,7 @@ static const char* connectionString = "[device connection string]";
 static const char* proxyHost = NULL;
 static int proxyPort = 0;
 
+static const char* azureStorageBlobPath = "subdir/hello_world.txt";
 #define HELLO_WORLD "Hello World from IoTHubDeviceClient_LL_UploadToBlob"
 
 int main(void)
@@ -45,7 +46,7 @@ int main(void)
     (void)IoTHub_Init();
     (void)printf("Starting the IoTHub client sample upload to blob...\r\n");
 
-    device_ll_handle = IoTHubDeviceClient_LL_CreateFromConnectionString(connectionString, HTTP_Protocol);
+    device_ll_handle = IoTHubDeviceClient_LL_CreateFromConnectionString(connectionString, MQTT_Protocol);
     if (device_ll_handle == NULL)
     {
         (void)printf("Failure creating IotHub device. Hint: Check your connection string.\r\n");
@@ -73,7 +74,7 @@ int main(void)
         }
         else
         {
-            if (IoTHubDeviceClient_LL_UploadToBlob(device_ll_handle, "subdir/hello_world.txt", (const unsigned char*)HELLO_WORLD, sizeof(HELLO_WORLD) - 1) != IOTHUB_CLIENT_OK)
+            if (IoTHubDeviceClient_LL_UploadToBlob(device_ll_handle, azureStorageBlobPath, (const unsigned char*)HELLO_WORLD, sizeof(HELLO_WORLD) - 1) != IOTHUB_CLIENT_OK)
             {
                 (void)printf("hello world failed to upload\n");
             }

@@ -271,6 +271,7 @@ DATA_PUBLISHER_RESULT DataPublisher_CancelTransaction(TRANSACTION_HANDLE transac
         {
             Destroy_AGENT_DATA_TYPE((AGENT_DATA_TYPE*)transaction->Values[i].Value);
             free((char*)transaction->Values[i].PropertyPath);
+            transaction->Values[i].PropertyPath = NULL;
             free((AGENT_DATA_TYPE*)transaction->Values[i].Value);
         }
 

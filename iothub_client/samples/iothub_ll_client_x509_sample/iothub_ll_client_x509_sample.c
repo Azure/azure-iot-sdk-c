@@ -46,10 +46,6 @@ and removing calls to _DoWork will yield the same results. */
     #include "iothubtransporthttp.h"
 #endif // SAMPLE_HTTP
 
-#ifdef MBED_BUILD_TIMESTAMP
-    #define SET_TRUSTED_CERT_IN_SAMPLES
-#endif // MBED_BUILD_TIMESTAMP
-
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
     #include "certs.h"
 #endif // SET_TRUSTED_CERT_IN_SAMPLES

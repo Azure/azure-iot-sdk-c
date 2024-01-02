@@ -1,15 +1,13 @@
 # Azure IoT C SDKs and Libraries
 
 [![Build Status](https://azure-iot-sdks.visualstudio.com/azure-iot-sdks/_apis/build/status/c/integrate-into-repo-C)](https://azure-iot-sdks.visualstudio.com/azure-iot-sdks/_build/latest?definitionId=85)
-
-## Important branch rename information
-As of [December 1, 2021](https://github.com/Azure/azure-iot-sdk-c/commit/de09b35289313665f0d359835c661f8cb2a0fdf1), we have changed the default branch of this repo from `master` to `main`.  This may impact both your local clones of this repro made before this change as well as tools you have referencing `master`.  See [here](./doc/master_to_main_rename.md) for more information.
+  
 
 ## Introduction
 The Azure IOT Hub Device SDK allows applications written in C99 or later or C++ to communicate easily with [Azure IoT Hub](https://azure.microsoft.com/services/iot-hub/), [Azure IoT Central][Azure-IoT-Central] and to
  [Azure IoT Device Provisioning][Azure-IoT-Device-Provisioning].  This repo includes the source code for the libraries, setup instructions, and samples demonstrating use scenarios.
 
-For constrained devices - where memory is measured in kilobytes and not megabytes - there are even lighter weight SDK options available.  See [Other Azure IoT SDKs](#other-azure-iot-sdks) for more.
+For **constrained devices**, where memory is measured in kilobytes and not megabytes, there are even lighter weight SDK options available.  See [Other Azure IoT SDKs](https://learn.microsoft.com/azure/iot-develop/concepts-using-c-sdk-and-embedded-c-sdk) to learn more.
 
 ## Table of Contents
 - [Azure IoT C SDKs and Libraries](#azure-iot-c-sdks-and-libraries)
@@ -29,6 +27,7 @@ For constrained devices - where memory is measured in kilobytes and not megabyte
     - [Provisioning Client SDK](#provisioning-client-sdk)
   - [OS Platforms and Hardware Compatibility](#os-platforms-and-hardware-compatibility)
   - [Porting the Azure IoT Device Client SDK for C to New Devices](#porting-the-azure-iot-device-client-sdk-for-c-to-new-devices)
+  - [Deprecation Notes](#deprecation-notes)
   - [Contribution, Feedback and Issues](#contribution-feedback-and-issues)
   - [Support](#support)
   - [Read More](#read-more)
@@ -44,8 +43,8 @@ For constrained devices - where memory is measured in kilobytes and not megabyte
 
 All Azure IoT SDK users are advised to be aware of upcoming TLS certificate changes for Azure IoT Hub and Device Provisioning Service
 that will impact the SDK's ability to connect to these services. In October 2022, both services will migrate from the current
-[Baltimore CyberTrust CA Root](https://baltimore-cybertrust-root.chain-demos.digicert.com/info/index.html) to the
-[DigiCert Global G2 CA root](https://global-root-g2.chain-demos.digicert.com/info/index.html). There will be a
+[Baltimore CyberTrust CA Root](https://www.digicert.com/kb/digicert-root-certificates.htm#otherroots) to the
+[DigiCert Global G2 CA root](https://www.digicert.com/kb/digicert-root-certificates.htm#otherroots). There will be a
 transition period beforehand where your IoT devices must have both the Baltimore and Digicert public certificates
 which may be hardcoded in their application or flashed onto your WiFi module in order to prevent connectivity issues.
 
@@ -58,14 +57,13 @@ For a more in depth explanation as to why the IoT services are doing this, pleas
 
 ## Getting the SDK
 
-> Please note, for constrained device scenarios like mbed and Arduino, there are better, lighter weight SDK options available.  See [Other Azure IoT SDKs](#other-azure-iot-sdks) for more.
+> Please note, for constrained device scenarios like mbed and Arduino, there are better, lighter weight SDK options available.  See [Other Azure IoT SDKs](https://learn.microsoft.com/azure/iot-develop/concepts-using-c-sdk-and-embedded-c-sdk) to learn more.
 
 ### Packages
 
 The simplest way to get started with the Azure IoT SDKs on supported platforms is to use the following packages and libraries:
 
-- mbed:                                      [Device SDK library on MBED](./iothub_client/readme.md#mbed)
-- Arduino:                                   [Device SDK library in the Arduino IDE](./iothub_client/readme.md#arduino)
+- Arduino:                                   [Device SDK library in the Arduino IDE](https://aka.ms/arduino)
 - Windows:                                   [Device SDK on Vcpkg](./doc/setting_up_vcpkg.md#setup-c-sdk-vcpkg-for-windows-development-environment)
 - iOS:                                       [Device SDK on CocoaPod](https://cocoapods.org/pods/AzureIoTHubClient)
 
@@ -74,7 +72,7 @@ The simplest way to get started with the Azure IoT SDKs on supported platforms i
   - Authentication is limited to SAS keys on iOS. No certificate-based authentication is officially supported.
   - The Device Provisioning Client is not supported on iOS. Only the Azure IoT Hub device client is supported.
 
-For a more complete iOS experience including the two missing features above, please see our sample native Swift library built on top of the Embedded C SDK [here](https://github.com/Azure-Samples/azure-sdk-for-c-swift).
+  For a more complete **iOS experience** including the two missing features above, please see our sample [native Swift library](https://github.com/Azure-Samples/azure-sdk-for-c-swift) built on top of the Embedded C SDK.
 
 ### Linux
 
@@ -139,7 +137,7 @@ This repository contains [provisioning client SDK](./provisioning_client) for th
 
 | Features                    | mqtt               | mqtt-ws            | amqp               | amqp-ws            | https              | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 |-----------------------------|--------------------|--------------------|--------------------|--------------------|--------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| TPM Individual Enrollment   | :heavy_minus_sign: | :heavy_minus_sign: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | This SDK supports connecting your device to the Device Provisioning Service via [individual enrollment](https://docs.microsoft.com/azure/iot-dps/concepts-service#enrollment) using [Trusted Platform Module](https://docs.microsoft.com/azure/iot-dps/concepts-security#trusted-platform-module-tpm).  This [quickstart](https://docs.microsoft.com/azure/iot-dps/quick-create-simulated-device) reviews how to create a simulated device for individual enrollment with TPM. TPM over MQTT is currently not supported by the Device Provisioning Service.                                                                                                                                                                                                               |
+| TPM Individual Enrollment   | :heavy_minus_sign: | :heavy_minus_sign: | :warning: | :warning: | :warning: | 🚨We are announcing the deprecation of the utpm-c library support and DPS-TPM authentication support within the Azure IoT C-SDK.🚨 Starting May 2023, Microsoft will not provide support for this library. Existing applications using this library will continue to work as-is. We strongly recommend switching to DPS-X509 authentication using the [tpm2tss OpenSSL Engine](https://github.com/Azure/azure-iot-sdk-c/blob/main/iothub_client/devdoc/iothubclient_c_library.md#openssl-engine-examples). <br/><br/>Connecting your device to the Device Provisioning Service via [individual enrollment](https://docs.microsoft.com/azure/iot-dps/concepts-service#enrollment) using [Trusted Platform Module](https://docs.microsoft.com/azure/iot-dps/concepts-security#trusted-platform-module-tpm) will continue to work as-is.  This [quickstart](https://docs.microsoft.com/azure/iot-dps/quick-create-simulated-device) reviews how to create a simulated device for individual enrollment with TPM. TPM over MQTT is currently not supported by the Device Provisioning Service.                                                                                                                                                                                                               |
 | X.509 Individual Enrollment | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | This SDK supports connecting your device to the Device Provisioning Service via [individual enrollment](https://docs.microsoft.com/azure/iot-dps/concepts-service#enrollment) using [X.509 leaf certificate](https://docs.microsoft.com/azure/iot-dps/concepts-security#leaf-certificate).  This [quickstart](https://docs.microsoft.com/azure/iot-dps/quick-create-simulated-device-x509) reviews how to create a simulated device for individual enrollment with X.509. |
 | X.509 Enrollment Group      | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | This SDK supports connecting your device to the Device Provisioning Service via [enrollment group](https://docs.microsoft.com/azure/iot-dps/concepts-service#enrollment) using [X.509 root certificate](https://docs.microsoft.com/azure/iot-dps/concepts-security#root-certificate).
 
@@ -167,6 +165,14 @@ The C SDKs and Libraries:
 In the repository you will find instructions and build tools to compile and run the device client SDK for C on Linux, Windows and microcontroller platforms (refer to the links above for more information on compiling the device client for C).
 
 If you are considering porting the device client SDK for C to a new platform, check out the [porting guide](https://github.com/Azure/azure-c-shared-utility/blob/master/devdoc/porting_guide.md) document.
+
+## Deprecation Notes
+
+  `MBED OS`
+
+  - Packages of azure-iot-sdk-c for MBED OS have been deprecated in January, 2023.
+
+  See also [Deprecated Folders](#deprecated-folders) below for other relevant notes.
 
 ## Contribution, Feedback and Issues
 
@@ -211,7 +217,7 @@ This folder contains application development guides and device setup instruction
 
 Contains Azure IoT Hub client components that provide the raw messaging capabilities of the library. Refer to the API documentation and samples for information on how to use it.
 
-   * build: has one subfolder for each platform (e.g. Windows, Linux, Mbed). Contains makefiles, batch files, and solutions that are used to generate the library binaries.
+   * build: has one subfolder for each platform (e.g. Windows, Linux). Contains makefiles, batch files, and solutions that are used to generate the library binaries.
    * devdoc: contains requirements, designs notes, manuals.
    * inc: public include files.
    * src: client libraries source files.
@@ -270,9 +276,12 @@ Below is a table showing the mapping of the LTS branches to the packages release
 
   | Package | GitHub Branch | LTS Tag | LTS Start Date | Maintenance End Date |
   | :-----: | :-----------: | :-----: | :------------: | :------------------: |
-  | vcpkg: 2022-07-18 | lts_07_2022 | LTS_07_2022_Ref01 | 2022-07-18 | 2023-07-18 |
-  | vcpkg: 2022-01-21 | lts_01_2022 | LTS_01_2022_Ref01 | 2022-01-21 | 2023-01-21 |
-  | vcpkg: 2021-09-09 | lts_07_2021 | LTS_07_2021_Ref01 | 2021-08-11 | 2022-08-11 |
+  | vcpkg: 2023-08-07 | lts_08_2023 | LTS_08_2023 | 2023-08-07 | 2024-08-07 |
+  | vcpkg: 2023-04-20 | lts_01_2023 | LTS_01_2023_Ref02 | 2023-04-20 | 2024-04-20 |
+  | vcpkg: 2023-01-13 | lts_01_2023 | LTS_01_2023_Ref01 | 2023-01-13 | 2024-01-13 |
+  | vcpkg: 2022-09-15 | lts_07_2022 | LTS_07_2022_Ref02 | 2022-09-15 | 2023-09-15 |
+
+'Maintenance End Date' refers to the end of life support of the related version.
 
 ## Release Example
 
@@ -300,7 +309,7 @@ Microsoft collects performance and usage information which may be used to provid
 [c-sdk-intro]: https://azure.microsoft.com/documentation/articles/iot-hub-device-sdk-c-intro/
 [c-porting-guide]: https://github.com/Azure/azure-c-shared-utility/blob/master/devdoc/porting_guide.md
 [c-cross-compile]: doc/SDK_cross_compile_example.md
-[c-api-reference]: https://docs.microsoft.com/azure/iot-hub/iot-c-sdk-ref/
+[c-api-reference]: https://azure.github.io/azure-iot-sdk-c/files.html
 [about-iot-sdks]:https://docs.microsoft.com/azure/iot-develop/about-iot-sdks
 [Azure-IoT-Central]: https://docs.microsoft.com/azure/iot-central/
 [Azure-IoT-Device-Provisioning]: https://docs.microsoft.com/azure/iot-dps/

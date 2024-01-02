@@ -66,6 +66,11 @@
 
 #include "iothub_client_core_common.h"
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 /** @brief Current version of @p IOTHUB_CLIENT_PROPERTY_REPORTED structure.  */
 #define IOTHUB_CLIENT_PROPERTY_REPORTED_STRUCT_VERSION_1 1
 
@@ -288,5 +293,9 @@ MOCKABLE_FUNCTION(, void, IoTHubClient_Properties_DeserializerProperty_Destroy, 
 *          @p IoTHubClient_Properties_Deserializer_GetNext() become invalid.
 */
 MOCKABLE_FUNCTION(, void, IoTHubClient_Properties_Deserializer_Destroy, IOTHUB_CLIENT_PROPERTIES_DESERIALIZER_HANDLE, propertiesDeserializerHandle);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* IOTHUB_CLIENT_PROPERTIES_H */

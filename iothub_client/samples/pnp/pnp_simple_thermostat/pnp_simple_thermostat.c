@@ -92,9 +92,6 @@ static const char g_maxMinCommandResponseFormat[] = "{\"maxTemp\":%.2f,\"minTemp
 // Format string for sending maxTempSinceLastReboot property.
 static const char g_maxTempSinceLastRebootPropertyFormat[] = "%.2f";
 
-// Format of the body when responding to a targetTemperature.
-static const char g_targetTemperaturePropertyResponseFormat[] = "%.2f";
-
 // Metadata to add to telemetry messages.
 static const char g_jsonContentType[] = "application/json";
 static const char g_utf8EncodingType[] = "utf8";
@@ -190,12 +187,12 @@ static bool BuildMaxMinCommandResponse(IOTHUB_CLIENT_COMMAND_RESPONSE* commandRe
     }
     // We must allocate the response buffer.  It is returned to the IoTHub SDK in the command callback and the SDK in turn sends this to the server.  
     // The SDK takes responsibility for the buffer and will free it.
-    else if ((responseBuilder = calloc(1, responseBuilderSize + 1)) == NULL)
+    else if ((responseBuilder = calloc(1, (size_t)responseBuilderSize + 1)) == NULL)
     {
         LogError("Unable to allocate %lu bytes", (unsigned long)(responseBuilderSize + 1));
         result = false;
     }
-    else if ((responseBuilderSize = snprintf((char*)responseBuilder, responseBuilderSize + 1, g_maxMinCommandResponseFormat, g_maxTemperature, g_minTemperature, g_allTemperatures / g_numTemperatureUpdates, g_ProgramStartTime, currentTime)) < 0)
+    else if ((responseBuilderSize = snprintf((char*)responseBuilder, (size_t)responseBuilderSize + 1, g_maxMinCommandResponseFormat, g_maxTemperature, g_minTemperature, g_allTemperatures / g_numTemperatureUpdates, g_ProgramStartTime, currentTime)) < 0)
     {
         LogError("snprintf to output buffer for command response");
         result = false;

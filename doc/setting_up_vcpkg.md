@@ -15,23 +15,6 @@ The Azure IoT C SDK uses [vcpkg](https://github.com/microsoft/vcpkg) primarily f
     -Dwarnings_as_errors=OFF
 ```
 
-The `use-prov-client` feature uses the syntax: `vcpkg install azure-iot-sdk-c[use-prov-client]` and builds using additional CMake flags:
-```
-    -Dhsm_type_symm_key=ON
-    -Duse_prov_client=ON
-```
-
-The `public-preview` feature allows you to build and install the azure-iot-sdk-c from a provided public-preview hash. The `REF` hash used can be found in the [portfile.cmake](https://github.com/microsoft/vcpkg/blob/master/ports/azure-iot-sdk-c/portfile.cmake) file. To access this feature, use the syntax: `vcpkg install azure-iot-sdk-c[public-preview]`. The following CMake flags will be set:
-
-```
-    -Dskip_samples=ON
-    -Duse_installed_dependencies=ON
-    -Duse_default_uuid=ON
-    -Dbuild_as_dynamic=OFF
-    -Duse_edge_modules=ON
-    -Dwarnings_as_errors=OFF
-```
-
 There are no other configuration options via vcpkg available.
 
 > NOTE: If your application requires specific CMake flags not shown above, please build and install directly from the source code.  See [devbox_setup.md](https://github.com/Azure/azure-iot-sdk-c/blob/main/doc/devbox_setup.md) for further information.
@@ -54,7 +37,7 @@ The most recent [portfile.cmake](https://github.com/microsoft/vcpkg/blob/master/
         ```powershell
         # Install azure-iot-sdk-c package with integration
         .\vcpkg.exe integrate install
-        .\vcpkg.exe install azure-iot-sdk-c
+        .\vcpkg.exe install azure-iot-sdk-c:x64-windows
         popd
 
         # Open the Azure IoT C SDK telemetry sample solution for Visual Studio.
@@ -67,10 +50,10 @@ The most recent [portfile.cmake](https://github.com/microsoft/vcpkg/blob/master/
 
         ```powershell
         # Install azure-iot-sdk-c package
-        .\vcpkg.exe install azure-iot-sdk-c
+        .\vcpkg.exe install azure-iot-sdk-c:x64-windows
 
         # Export nuget package locally
-        .\vcpkg.exe export azure-iot-sdk-c --nuget
+        .\vcpkg.exe export azure-iot-sdk-c:x64-windows --nuget
         popd
 
         # Open the Azure IoT C SDK telemetry sample solution for Visual Studio.

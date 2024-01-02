@@ -32,6 +32,8 @@ set(${theseTestsName}_h_files
 #C compiler doesn't like to complain about the same thing
 if(WIN32)
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4505")
+elseif(LINUX OR MACOSX)
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations")
 endif()
 
 build_c_test_artifacts(${theseTestsName} ON "tests/UnitTests")

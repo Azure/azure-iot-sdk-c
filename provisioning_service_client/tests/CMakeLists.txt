@@ -3,6 +3,8 @@
 
 cmake_minimum_required (VERSION 3.5)
 
+enable_address_sanitize()
+
 #this is CMakeLists for provisioning service client tests folder
 add_unittest_directory(provisioning_sc_attestation_ut)
 add_unittest_directory(provisioning_sc_enrollment_ut)

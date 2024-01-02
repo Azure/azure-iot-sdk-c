@@ -13,7 +13,7 @@ jobs:
   timeoutInMinutes: 800
   container: linux-c-ubuntu-2004
   pool: 
-    name: 'sdk-c--ubuntu-18'
+    name: 'sdk-c--ubuntu-22'
   displayName: 'Longhaul: Linux'
   steps:
   - script: |
@@ -54,14 +54,14 @@ jobs:
 - job: longhaul_windows
   timeoutInMinutes: 800
   pool:
-    name: 'sdk-c--win-vs2017'
+    name: 'sdk-c--win-vs2022'
   displayName: 'Longhaul: Windows'
   steps:
   - script: |
-      call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\Tools\VsDevCmd.bat"
-      call jenkins\longhaul_c.cmd
+      call jenkins\longhaul_c.cmd --platform x64
     displayName: 'Build'
   - script: |
+        call jenkins\windows_c_VsDevCmd.cmd x64
         cd cmake && ctest -T test --no-compress-output -C "Debug" -V -j 16 --schedule-random
     displayName: 'Run Tests'
     env:

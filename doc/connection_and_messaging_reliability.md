@@ -67,13 +67,13 @@ The design of the Azure IoT C SDK is composed of layers, each of them assigned s
 | Protocol Transport        | [iothubtransport\*](https://github.com/Azure/azure-iot-sdk-c/tree/main/iothub_client/inc)                         | Provides an interface between the specific protocol API (e.g., [uamqp](https://github.com/Azure/azure-uamqp-c), [umqtt](https://github.com/Azure/azure-umqtt-c)) and the upper client SDK. It is responsible for part of the business logic, the message queuing and timeout control, options handling. |
 | Protocol API              | [uamqp](https://github.com/Azure/azure-uamqp-c), [umqtt](https://github.com/Azure/azure-umqtt-c) or native HTTP API | Implements the specific application protocol (either AMQP, MQTT or HTTP, respectivelly)                                                                                                                                                                                                                  |
 | TLS                       | [tlsio\_\*](https://github.com/Azure/azure-c-shared-utility/tree/master/adapters)                                   | Provides a wrapper over the specific TLS API (Schannel, openssl, wolfssl, mbedtls), using the [xio](https://github.com/Azure/azure-c-shared-utility/blob/master/inc/azure_c_shared_utility/xio.h) interface that the device client SDK uses                                                              |
-| Socket                    | [socketio\_\*](https://github.com/Azure/azure-c-shared-utility/tree/master/adapters)                                | Provides a wrapper over the specific socket API ([win32, berkeley, mbed](https://github.com/Azure/azure-c-shared-utility/tree/master/adapters)), using the [xio](https://github.com/Azure/azure-c-shared-utility/blob/master/inc/azure_c_shared_utility/xio.h) interface that the device client SDK uses |
+| Socket                    | [socketio\_\*](https://github.com/Azure/azure-c-shared-utility/tree/master/adapters)                                | Provides a wrapper over the specific socket API ([win32, berkeley](https://github.com/Azure/azure-c-shared-utility/tree/master/adapters)), using the [xio](https://github.com/Azure/azure-c-shared-utility/blob/master/inc/azure_c_shared_utility/xio.h) interface that the device client SDK uses |
 
 When an Azure IoT device client instance is created, this is the typical\* sequence within the SDK:
 
 1. User creates a new device client instance using, e.g., IoTHubClient\_CreateFromConnectionString;
 
-2. The device client instance creates a transport protocol instance based on the selection from the user (AMQP\_Protocol, [MQTT\_Protocol](https://github.com/Azure/azure-iot-sdk-c/blob/2018-05-04/iothub_client/inc/iothubtransportmqtt.h#L13), [AMQP\_Protocol\_over\_WebSocketsTls](https://github.com/Azure/azure-iot-sdk-c/blob/2018-05-04/iothub_client/inc/iothubtransportamqp_websockets.h#L15), [MQTT\_WebSocket\_Protocol](https://github.com/Azure/azure-iot-sdk-c/blob/2018-05-04/iothub_client/inc/iothubtransportmqtt_websockets.h#L15) or [HTTP\_Protocol](https://github.com/Azure/azure-iot-sdk-c/blob/2018-05-04/iothub_client/inc/iothubtransporthttp.h#L14));
+2. The device client instance creates a transport protocol instance based on the selection from the user (AMQP\_Protocol, [MQTT\_Protocol](https://github.com/Azure/azure-iot-sdk-c/blob/main/iothub_client/inc/iothubtransportmqtt.h#L13), [AMQP\_Protocol\_over\_WebSocketsTls](https://github.com/Azure/azure-iot-sdk-c/blob/main/iothub_client/inc/iothubtransportamqp_websockets.h#L15), [MQTT\_WebSocket\_Protocol](https://github.com/Azure/azure-iot-sdk-c/blob/main/iothub_client/inc/iothubtransportmqtt_websockets.h#L15) or [HTTP\_Protocol](https://github.com/Azure/azure-iot-sdk-c/blob/main/iothub_client/inc/iothubtransporthttp.h#L14));
 
 3. The transport protocol then creates:
 
@@ -121,8 +121,8 @@ Some aspects of the detection of connection issues are specific to the transport
 
 | **Protocol** | **Connection Issue Detection**                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 |--------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| AMQP         | Besides regular detection through callbacks from uAMQP, the AMQP protocol transport will mark a connection to the Azure IoT hub as faulty if [5 (five)](https://github.com/Azure/azure-iot-sdk-c/blob/2018-05-04/iothub_client/src/iothubtransport_amqp_common.c#L47) or more consecutive failures occur on any of these: **A)** Attempting to subscribe for Commands, Device Methods or Twin Desired Properties, **B)** sending Telemetry messages (either by timeouts or active failures returned by uAMQP api), **C)** responding to Device Method invokations, **D)** refreshing CBS authentication tokens. |
-| MQTT         | Besides regular detection through callbacks from uMQTT, the MQTT protocol transport will attempt to publish messages up to [two times](https://github.com/Azure/azure-iot-sdk-c/blob/2018-05-04/iothub_client/src/iothubtransport_mqtt_common.c#L46) (waiting [60 seconds](https://github.com/Azure/azure-iot-sdk-c/blob/2018-05-04/iothub_client/src/iothubtransport_mqtt_common.c#L45) between attempts) before raising a failure.                                                                                                                                                                            |
+| AMQP         | Besides regular detection through callbacks from uAMQP, the AMQP protocol transport will mark a connection to the Azure IoT hub as faulty if [5 (five)](https://github.com/Azure/azure-iot-sdk-c/blob/main/iothub_client/src/iothubtransport_amqp_common.c#L47) or more consecutive failures occur on any of these: **A)** Attempting to subscribe for Commands, Device Methods or Twin Desired Properties, **B)** sending Telemetry messages (either by timeouts or active failures returned by uAMQP api), **C)** responding to Device Method invokations, **D)** refreshing CBS authentication tokens. |
+| MQTT         | Besides regular detection through callbacks from uMQTT, the MQTT protocol transport will attempt to publish messages up to [two times](https://github.com/Azure/azure-iot-sdk-c/blob/main/iothub_client/src/iothubtransport_mqtt_common.c#L46) (waiting [60 seconds](https://github.com/Azure/azure-iot-sdk-c/blob/main/iothub_client/src/iothubtransport_mqtt_common.c#L45) between attempts) before raising a failure.                                                                                                                                                                            |
 | HTTP         | HTTP connections to the Azure IoT Hub are not persistent. Each outgoing message to the hub results in a new connection and is closed as soon as the I/O is completed. Incoming messages from the Hub are received by the device client through polling mechanisms, where the the HTTP connection follows the same lifecycle above. If connection failures occur, the protocol transport simply keeps retrying the operation until it succeeds.                                                                                                                                                                  |
 
 ### The Connection Retry Logic
@@ -171,7 +171,7 @@ Once a connection issue is detected, the transport protocol will initiate its co
 
 The Azure IoT Device Client C SDK implements asynchronous operations through the \*\_DoWork() model it uses.
 
-All API functions that result in I/O (like [*IoTHubClient\_LL\_SendEventAsync*](https://github.com/Azure/azure-iot-sdk-c/blob/2018-05-04/iothub_client/inc/iothub_client_ll.h#L354) or [*IoTHubClient\_LL\_SetMessageCallback*](https://github.com/Azure/azure-iot-sdk-c/blob/2018-05-04/iothub_client/inc/iothub_client_ll.h#L385)) are actually queued or stored, taking effect only when [*IoTHubClient\_LL\_DoWork*](https://github.com/Azure/azure-iot-sdk-c/blob/2018-05-04/iothub_client/inc/iothub_client_ll.h#L461) is invoked\* AND the connection with the Azure IoT Hub is established.
+All API functions that result in I/O (like [*IoTHubClient\_LL\_SendEventAsync*](https://github.com/Azure/azure-iot-sdk-c/blob/main/iothub_client/inc/iothub_client_ll.h#L354) or [*IoTHubClient\_LL\_SetMessageCallback*](https://github.com/Azure/azure-iot-sdk-c/blob/main/iothub_client/inc/iothub_client_ll.h#L385)) are actually queued or stored, taking effect only when [*IoTHubClient\_LL\_DoWork*](https://github.com/Azure/azure-iot-sdk-c/blob/main/iothub_client/inc/iothub_client_ll.h#L461) is invoked\* AND the connection with the Azure IoT Hub is established.
 
 \* IoTHubClient\_LL\_DoWork is invoked internally automatically if using the iothub\_client multi-threaded API.
 
@@ -181,7 +181,7 @@ For example, while the device client is in re-connection mode,
 
 - New subscriptions for cloud-to-device messages (e.g., Commands) will be stored, but result in an actual request for subscription to the Azure IoT Hub only the device client re-connects.
 
-For clarity it is worth mentioning that while the Azure IoT Device Client is re-connecting, it has no means to receive any messages from the Azure IoT Hub. During that time any attempts to send Commands or invoke Device Methods to the given device client (using for example the [Azure IoT Service Client C SDK](https://github.com/Azure/azure-iot-sdk-c/tree/2018-05-04/iothub_service_client)) will result in failure returned by the Azure IoT Hub to the source of those requests.
+For clarity it is worth mentioning that while the Azure IoT Device Client is re-connecting, it has no means to receive any messages from the Azure IoT Hub. During that time any attempts to send Commands or invoke Device Methods to the given device client will result in failure returned by the Azure IoT Hub to the source of those requests.
 
 ### Timeout Controls over Outgoing Messages
 
@@ -257,17 +257,21 @@ The logic is as follows:
 
 Currently the default Retry Policy in the Azure IoT Device Client C SDK is IOTHUB\_CLIENT\_RETRY\_EXPONENTIAL\_BACKOFF\_WITH\_JITTER (with no timeout), but it can be set by using the following SDK function:
 
-In [iothub\_client module](https://github.com/Azure/azure-iot-sdk-c/blob/2018-05-04/iothub_client/inc/iothub_client.h#L188):
+In [iothub\_client module](https://github.com/Azure/azure-iot-sdk-c/blob/main/iothub_client/inc/iothub_client.h#L188):
 
-IOTHUB\_CLIENT\_RESULT IoTHubClient\_SetRetryPolicy( IOTHUB\_CLIENT\_HANDLE iotHubClientHandle, IOTHUB\_CLIENT\_RETRY\_POLICY retryPolicy, size\_t retryTimeoutLimitInSeconds);
+```c
+IOTHUB_CLIENT_RESULT IoTHubClient_SetRetryPolicy( IOTHUB_CLIENT_HANDLE iotHubClientHandle, IOTHUB_CLIENT_RETRY_POLICY retryPolicy, size_t retryTimeoutLimitInSeconds);
+```
 
-Or if using the [iothub\_client\_ll module](https://github.com/Azure/azure-iot-sdk-c/blob/2018-05-04/iothub_client/inc/iothub_client_ll.h#L419):
+Or if using the [iothub\_client\_ll module](https://github.com/Azure/azure-iot-sdk-c/blob/main/iothub_client/inc/iothub_client_ll.h#L419):
 
-IOTHUB\_CLIENT\_RESULT IoTHubClient\_LL\_SetRetryPolicy( IOTHUB\_CLIENT\_LL\_HANDLE iotHubClientHandle, IOTHUB\_CLIENT\_RETRY\_POLICY retryPolicy, size\_t retryTimeoutLimitInSeconds);
+```c
+IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetRetryPolicy( IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_RETRY_POLICY retryPolicy, size_t retryTimeoutLimitInSeconds);
+```
 
 If retryTimeoutLimitInSeconds is set as 0 (zero) the timeout for retry policies is disabled.
 
-The [current retry policies](https://github.com/Azure/azure-iot-sdk-c/blob/2018-05-04/iothub_client/inc/iothub_client_ll.h#L53) available for the argument retryPolicy are:
+The [current retry policies](https://github.com/Azure/azure-iot-sdk-c/blob/main/iothub_client/inc/iothub_client_ll.h#L53) available for the argument retryPolicy are:
 
 |Policy|Description|Example|
 |-|-|-|
@@ -286,13 +290,17 @@ The Azure IoT Device Client C SDK provides a callback option to notify the upper
 
 To access it the user can invoke one of the functions below, passing a callback function.
 
-On [iothub\_client](https://github.com/Azure/azure-iot-sdk-c/blob/2018-05-04/iothub_client/inc/iothub_client.h#L171) module:
+On [iothub\_client](https://github.com/Azure/azure-iot-sdk-c/blob/main/iothub_client/inc/iothub_client.h#L171) module:
 
-IOTHUB\_CLIENT\_RESULT IoTHubClient\_SetConnectionStatusCallback(IOTHUB\_CLIENT\_HANDLE iotHubClientHandle, IOTHUB\_CLIENT\_CONNECTION\_STATUS\_CALLBACK connectionStatusCallback, void\* userContextCallback);
+```c
+IOTHUB_CLIENT_RESULT IoTHubClient_SetConnectionStatusCallback(IOTHUB_CLIENT_HANDLE iotHubClientHandle, IOTHUB_CLIENT_CONNECTION_STATUS_CALLBACK connectionStatusCallback, void* userContextCallback);
+```
 
-On [iothub\_client\_ll](https://github.com/Azure/azure-iot-sdk-c/blob/2018-05-04/iothub_client/inc/iothub_client_ll.h#L402) module:
+On [iothub\_client\_ll](https://github.com/Azure/azure-iot-sdk-c/blob/main/iothub_client/inc/iothub_client_ll.h#L402) module:
 
-IOTHUB\_CLIENT\_RESULT IoTHubClient\_LL\_SetConnectionStatusCallback(IOTHUB\_CLIENT\_LL\_HANDLE iotHubClientHandle, IOTHUB\_CLIENT\_CONNECTION\_STATUS\_CALLBACK connectionStatusCallback, void\* userContextCallback);
+```c
+IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetConnectionStatusCallback(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_CONNECTION_STATUS_CALLBACK connectionStatusCallback, void* userContextCallback);
+```
 
 This callback will be invoked in these specific situations:
 
@@ -300,25 +308,72 @@ This callback will be invoked in these specific situations:
 
 - When the device client gets disconnected due to any issues;
 
-> These include network availability and IoT hub connectivity issues, authentication failures.
+  > These include network availability and IoT hub connectivity issues, authentication failures.
 
 - When the device client ceases attempting to re-connect (if the Retry Policy no longer allows to).
 
-Please take a look [here](https://github.com/Azure/azure-iot-sdk-c/blob/2018-05-04/iothub_client/inc/iothub_client_ll.h#L144) for more info on the possible status and reasons.
+The type `IOTHUB\_CLIENT\_CONNECTION\_STATUS\_CALLBACK` is [defined](https://github.com/Azure/azure-iot-sdk-c/blob/main/iothub_client/inc/iothub_client_ll.h#L183) as:
+```c
+typedef void(*IOTHUB_CLIENT_CONNECTION_STATUS_CALLBACK)(IOTHUB_CLIENT_CONNECTION_STATUS result, IOTHUB_CLIENT_CONNECTION_STATUS_REASON reason, void* userContextCallback);
+```
+
+The user application must provide a function that matches the function pointer definition above to provide it as an argument to any of the `*_SetConnectionStatusCallback` functions above.
+
+For reference, the connection status and reason enumerations (`IOTHUB_CLIENT_CONNECTION_STATUS` and `IOTHUB_CLIENT_CONNECTION_STATUS_REASON`, respectively) are defined in [iothub_client_core_common.h](https://github.com/Azure/azure-iot-sdk-c/blob/main/iothub_client/inc/iothub_client_core_common.h#L143).
+
+
+#### Understanding IOTHUB_CLIENT_CONNECTION_STATUS
+
+Indicates whether or not the device client is connected to the Azure IoT Hub.
+
+|Value|Description|
+|-|-|
+|IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED|Effectively means the device client is not ready to communicate with the Azure IoT Hub. The device client could be in any state from completely disconnected to not yet authenticated, including when brief disconnections occur for SAS token refreshes. See the list of IOTHUB_CLIENT_CONNECTION_STATUS_REASON status below for further details.|
+|IOTHUB_CLIENT_CONNECTION_AUTHENTICATED|The device client is **ready** to communicate with the Azure IoT Hub, being both connected and authenticated.|
+
+#### Understanding IOTHUB_CLIENT_CONNECTION_STATUS_REASON
+
+This enumeration provides a more specific reason for the current connection status of the device client. Its values depend on the transport protocol chosen by the user application for the Azure IoT C SDK client (AMQP, MQTT or HTTP) and on error granularity provided by the Azure IoT Hub.
+
+An `IOTHUB_CLIENT_CONNECTION_OK` is applicable to `IOTHUB_CLIENT_CONNECTION_AUTHENTICATED` only.
+
+All the other values of `IOTHUB_CLIENT_CONNECTION_STATUS_REASON` are applicable to `IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED` only. 
+
+Please see a description of the values according to each transport protocol supported by the Azure IoT C SDK:
+
+|Value|MQTT|AMQP|HTTP|
+|-|-|-|-|
+|IOTHUB_CLIENT_CONNECTION_OK|The Azure IoT C SDK client is connected and ready to communicate with the Azure IoT Hub.|Same|Same|
+|IOTHUB_CLIENT_CONNECTION_COMMUNICATION_ERROR|If a telemetry message [times out receiving a PUBACK](https://github.com/Azure/azure-iot-sdk-c/blob/main/iothub_client/src/iothubtransport_mqtt_common.c#L2287) from the Azure IoT Hub, or if there is [an error](https://github.com/Azure/azure-iot-sdk-c/blob/main/iothub_client/src/iothubtransport_mqtt_common.c#L2269) sending a [PUBACK or PUBREC](https://github.com/Azure/azure-umqtt-c/blob/master/src/mqtt_client.c#L667) to Azure IoT Hub or if an [I/O error occurs when using WebSockets](https://github.com/Azure/azure-umqtt-c/blob/master/src/mqtt_client.c#L226).|If the [AMQP transport](https://github.com/Azure/azure-iot-sdk-c/blob/main/iothub_client/src/iothubtransport_amqp_common.c#306) encounters an authentication timeout, unexpected link DETACH from Azure IoT Hub, or link ATTACH timeouts.|**Not applicable**.|
+|IOTHUB_CLIENT_CONNECTION_NO_NETWORK|If an MQTT CONNECT packet [fails to be sent](https://github.com/Azure/azure-iot-sdk-c/blob/main/iothub_client/src/iothubtransport_mqtt_common.c#L2264) to the Azure IoT Hub for any reason.|If the AMQP transport detects a [network connection issue](https://github.com/Azure/azure-iot-sdk-c/blob/main/iothub_client/src/iothubtransport_amqp_common.c#L720), which includes socket errors, failures on AMQP ATTACH to CBS link (for authentication).|**Not applicable**.|
+|IOTHUB_CLIENT_CONNECTION_BAD_CREDENTIAL|**Not applicable.**. The MQTT transport does [map some MQTT CONNECT return code values](https://github.com/Azure/azure-iot-sdk-c/blob/main/iothub_client/src/iothubtransport_mqtt_common.c#L2116) to this status code, but these MQTT CONNECT return codes are not supported by the Azure IoT Hub. See [note](#azure-iot-hub-limitations-on-mqtt-connect-result-codes) below.|If a SAS-based authentication request [fails](https://github.com/Azure/azure-iot-sdk-c/blob/main/iothub_client/src/iothubtransport_amqp_common.c#L302). See Azure IoT Hub documentation on [device authentication](https://learn.microsoft.com/azure/iot-hub/iot-hub-dev-guide-sas?tabs=node#authenticating-a-device-to-iot-hub) for more details.|**Not applicable**.|
+|IOTHUB_CLIENT_CONNECTION_DEVICE_DISABLED|Raised by the [MQTT transport](https://github.com/Azure/azure-iot-sdk-c/blob/main/iothub_client/src/iothubtransport_mqtt_common.c#L2114) if an MQTT CONNECT to the Azure IoT Hub is rejected. See [note](#azure-iot-hub-limitations-on-mqtt-connect-result-codes) below.|**Not applicable.**|**Not applicable.**|
+|IOTHUB_CLIENT_CONNECTION_RETRY_EXPIRED|The MQTT transport has made its [maximum number of attempts to reconnect](https://github.com/Azure/azure-iot-sdk-c/blob/main/iothub_client/src/iothubtransport_mqtt_common.c#L2818) to the Azure IoT Hub and it will no longer try.|The AMQP transport has made its [maximum number of attempts to reconnect](https://github.com/Azure/azure-iot-sdk-c/blob/main/iothub_client/src/iothubtransport_amqp_common.c#L267) to the Azure IoT Hub and it will no longer try.|**Not applicable**. Each new HTTP request sent to the Azure IoT Hub is done over a new HTTP connection.|
+|IOTHUB_CLIENT_CONNECTION_EXPIRED_SAS_TOKEN|The SAS token used in the current [MQTT](https://github.com/Azure/azure-iot-sdk-c/blob/main/iothub_client/src/iothubtransport_mqtt_common.c#L2870) connection is expired and the client must reconnect with a new SAS token. This is an implicit dependency on MQTT v3.1.1, which is not capable of refreshing authentication information in the same connection.|**Not applicable.** The AMQP protocol is capable of [refreshing authentication](https://github.com/Azure/azure-iot-sdk-c/blob/main/iothub_client/src/iothubtransport_amqp_cbs_auth.c#L572) within the same connection.|**Not applicable.** A [new SAS token is generated](https://github.com/Azure/azure-c-shared-utility/blob/master/src/httpapiexsas.c#L168) for each HTTP request sent to the Azure IoT Hub.|
+|IOTHUB_CLIENT_CONNECTION_NO_PING_RESPONSE|The MQTT transport timed out waiting for a ping response from the Azure IoT Hub.|**Not applicable.**|**Not applicable.**|
+|IOTHUB_CLIENT_CONNECTION_QUOTA_EXCEEDED|**Not applicable.**|The Azure IoT Hub rejected a telemetry message because the maximum daily quota of telemetry messages has been reached.|**Not applicable.**|
+
+##### Azure IoT Hub Limitations on MQTT CONNECT Result Codes
+
+The Azure IoT Hub does not support all the MQTT CONNECT return code values defined in the [MQTT v3.1.1 specification](http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Table_3.1_-), always returning `Not Authorized` (MQTT CONNECT Return Code 5) on MQTT CONNECT failure.
 
 ### Current Configuration Options
 
-Most of the options exposed by the public API of the Azure IoT Device Client C SDK are listed on the header file [\`iothub\_client\_options.h](https://github.com/Azure/azure-iot-sdk-c/blob/2018-05-04/iothub_client/inc/iothub_client_options.h).
+Most of the options exposed by the public API of the Azure IoT Device Client C SDK are listed on the header file [\`iothub\_client\_options.h](https://github.com/Azure/azure-iot-sdk-c/blob/main/iothub_client/inc/iothub_client_options.h).
 
 They can be set by one of the \_SetOption functions depending on the module used:
 
-On [iothub\_client](https://github.com/Azure/azure-iot-sdk-c/blob/2018-05-04/iothub_client/inc/iothub_client.h#L269):
+On [iothub\_client](https://github.com/Azure/azure-iot-sdk-c/blob/main/iothub_client/inc/iothub_client.h#L269):
 
-IOTHUB\_CLIENT\_RESULT IoTHubClient\_SetOption( IOTHUB\_CLIENT\_HANDLE iotHubClientHandle, const char\* optionName, const void\* value);
+```c
+IOTHUB_CLIENT_RESULT IoTHubClient_SetOption( IOTHUB_CLIENT_HANDLE iotHubClientHandle, const char* optionName, const void* value);
+```
 
-On [iothub\_client\_ll](https://github.com/Azure/azure-iot-sdk-c/blob/2018-05-04/iothub_client/inc/iothub_client_ll.h#L506):
+On [iothub\_client\_ll](https://github.com/Azure/azure-iot-sdk-c/blob/main/iothub_client/inc/iothub_client_ll.h#L506):
 
-IOTHUB\_CLIENT\_RESULT IoTHubClient\_LL\_SetOption( IOTHUB\_CLIENT\_LL\_HANDLE iotHubClientHandle, const char\* optionName, const void\* value);
+```c
+IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetOption( IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, const char* optionName, const void* value);
+```
 
 Here is a list of the specific options that apply to connection and messaging reliability:
 
@@ -326,8 +381,8 @@ Here is a list of the specific options that apply to connection and messaging re
 |-|-|-|-|
 |OPTION_MESSAGE_TIMEOUT|const tickcounter_ms_t*|Timeout for iothub client messages waiting to be sent to the IoTHub|See [description above](#Known-Issue:-Duplicated-Timeout-Control-for-Sending-Telemetry-Messages) for details.</br></br>The default value is zero (disabled).|
 |"event_send_timeout_secs"|size_t*|AMQP and AMQP over WebSockets transports|Maximum amount of time, in seconds, the AMQP protocol transport will wait for a Telemetry message to complete sending.</br></br>If reached, the callback function passed to IoTHubDeviceClient_LL_SendEventAsync or IoTHubDeviceClient_SendEventAsync is invoked with result IOTHUB_CLIENT_CONFIRMATION_MESSAGE_TIMEOUT.</br></br>The default value 5 minutes.|
-|OPTION_SERVICE_SIDE_KEEP_ALIVE_FREQ_SECS|size_t*|AMQP and AMQP over WebSockets transports|[See code comments](https://github.com/Azure/azure-iot-sdk-c/blob/2018-05-04/iothub_client/inc/iothub_client_options.h#L47).|
-|OPTION_REMOTE_IDLE_TIMEOUT_RATIO|double*|AMQP and AMQP over WebSockets transports|[See code comments](https://github.com/Azure/azure-iot-sdk-c/blob/2018-05-04/iothub_client/inc/iothub_client_options.h#L59).|
+|OPTION_SERVICE_SIDE_KEEP_ALIVE_FREQ_SECS|size_t*|AMQP and AMQP over WebSockets transports|[See code comments](https://github.com/Azure/azure-iot-sdk-c/blob/main/iothub_client/inc/iothub_client_options.h#L47).|
+|OPTION_REMOTE_IDLE_TIMEOUT_RATIO|double*|AMQP and AMQP over WebSockets transports|[See code comments](https://github.com/Azure/azure-iot-sdk-c/blob/main/iothub_client/inc/iothub_client_options.h#L59).|
 |OPTION_KEEP_ALIVE|int*|MQTT and MQTT over WebSockets protocol transports|Frequency in seconds that the transport protocol will be sending MQTT pings to the Azure IoT Hub.</br></br>The lower this number, more responsive the device client (when using MQTT) will be to connection issues. However, slightly more data traffic it will generate.</br></br>The default value is 4 minutes.|
 |OPTION_CONNECTION_TIMEOUT|int*|MQTT and MQTT over WebSockets protocol transports|While connecting, it is the maximum number of seconds the device client (when using MQTT) will wait for the connection to complete (CONNACK).</br></br>The default value is 30 seconds.|
 

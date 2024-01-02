@@ -44,7 +44,6 @@ if(LINUX)
         aziotsharedutil
         umqtt
         pthread
-        curl
         m
     )
 

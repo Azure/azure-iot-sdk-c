@@ -7,6 +7,10 @@ compileAsC99()
 
 usePermissiveRulesForSamplesAndTests()
 
+if(${LINUX})
+    add_definitions(-DAZIOT_LINUX)
+endif()
+
 set(iothub_test_c_files
     ./src/iothubtest.c
     ./src/iothub_account.c
