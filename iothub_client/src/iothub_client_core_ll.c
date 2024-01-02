@@ -533,9 +533,9 @@ static int update_distributed_tracing_settings_from_twin(IOTHUB_DISTRIBUTED_TRAC
         LogError("Error calling IoTHubClient_DistributedTracing_UpdateFromTwin");
         result = MU_FAILURE;
     }
-    else if (reportedStatePayload != NULL && IoTHubClient_LL_SendReportedState(iotHubClientHandle, (const unsigned char*)STRING_c_str(reportedStatePayload), STRING_length(reportedStatePayload), NULL, NULL) != IOTHUB_CLIENT_OK)
+    else if (reportedStatePayload != NULL && IoTHubClientCore_LL_SendReportedState(iotHubClientHandle, (const unsigned char*)STRING_c_str(reportedStatePayload), STRING_length(reportedStatePayload), NULL, NULL) != IOTHUB_CLIENT_OK)
     {
-        LogError("IoTHubClient_LL_SendReportedState failed");
+        LogError("IoTHubClientCore_LL_SendReportedState failed");
         result = MU_FAILURE;
     }
     else
