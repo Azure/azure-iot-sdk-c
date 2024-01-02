@@ -5,6 +5,9 @@
 // Checking of return codes and error values shall be omitted for brevity.  Please practice sound engineering practices
 // when writing production code.
 
+// NOTE: There are limitations and alternatives in this SDK's implementation of multiplexing.  See
+// ../../../doc/multiplexing_limitations.md for additional details.
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -116,7 +119,7 @@ int main(void)
         }
         else
         {
-            // Set any option that are neccessary.
+            // Set any option that are necessary.
             // For available options please see the iothub_sdk_options.md documentation
             //bool traceOn = true;
             //IoTHubDeviceClient_SetOption(device_handle1, OPTION_LOG_TRACE, &traceOn);

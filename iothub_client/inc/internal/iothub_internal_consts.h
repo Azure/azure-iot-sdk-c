@@ -9,14 +9,14 @@ extern "C"
 {
 #endif
 
-    static const char* IOTHUB_API_VERSION = "2020-09-30";
-    static const char* SECURITY_INTERFACE_INTERNAL_ID = "iothub-interface-internal-id";
-    static const char* SECURITY_INTERFACE_INTERNAL_ID_VALUE = "security*azureiot*com^SecurityAgent^1*0*0";
-    static const char* SECURITY_INTERFACE_ID = "iothub-interface-id";
-    static const char* SECURITY_INTERFACE_ID_MQTT = "ifid";
-    static const char* SECURITY_INTERFACE_ID_VALUE = "urn:azureiot:Security:SecurityAgent:1";
-    static const char* SECURITY_MESSAGE_SCHEMA = "iothub-message-schema";
-    static const char* SECURITY_MESSAGE_SCHEMA_VALUE = "sevent";
+    #define IOTHUB_API_VERSION "2020-09-30"
+    #define SECURITY_INTERFACE_INTERNAL_ID "iothub-interface-internal-id"
+    #define SECURITY_INTERFACE_INTERNAL_ID_VALUE "security*azureiot*com^SecurityAgent^1*0*0"
+    #define SECURITY_INTERFACE_ID "iothub-interface-id"
+    #define SECURITY_INTERFACE_ID_MQTT "ifid"
+    #define SECURITY_INTERFACE_ID_VALUE "urn:azureiot:Security:SecurityAgent:1"
+    #define SECURITY_MESSAGE_SCHEMA "iothub-message-schema"
+    #define SECURITY_MESSAGE_SCHEMA_VALUE "sevent"
 
 #ifdef __cplusplus
 }

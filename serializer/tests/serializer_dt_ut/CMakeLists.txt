@@ -4,6 +4,10 @@
 cmake_minimum_required (VERSION 3.5)
 
 compileAsC99()
+if (MSVC)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -bigobj")
+endif()
+
 set(theseTestsName serializer_dt_ut)
 
 include_directories(${SERIALIZER_INC_FOLDER})
@@ -12,8 +16,8 @@ include_directories(${IOTHUB_CLIENT_INC_FOLDER})
 generate_cppunittest_wrapper(${theseTestsName})
 
 set(${theseTestsName}_c_files
-    ./real_vector.c
-    ./real_crt_abstractions.c
+    ${SHARED_UTIL_REAL_TEST_FOLDER}/real_vector.c
+    ${SHARED_UTIL_REAL_TEST_FOLDER}/real_crt_abstractions.c
 )
 
 set(${theseTestsName}_h_files

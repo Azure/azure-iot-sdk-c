@@ -176,7 +176,7 @@ static HTTPAPIEX_SAS_HANDLE createHttpExApiSasHandle()
     HTTPAPIEX_SAS_HANDLE result;
     STRING_HANDLE uriResource;
 
-    if ((uriResource = STRING_construct(IoTHubAccount_GetIoTHubHostName(g_iothubAcctInfo))) == NULL)
+    if ((uriResource = STRING_construct(IoTHubAccount_GetIoTHostName(g_iothubAcctInfo))) == NULL)
     {
         LogError("STRING_construct failed for uriResource");
         result = NULL;
@@ -379,7 +379,7 @@ static int ds_e2e_send_device_streaming_request_async(const char* deviceId, cons
 
     HTTPAPIEX_HANDLE httpExApiHandle;
 
-    if ((httpExApiHandle = HTTPAPIEX_Create(IoTHubAccount_GetIoTHubHostName(g_iothubAcctInfo))) == NULL)
+    if ((httpExApiHandle = HTTPAPIEX_Create(IoTHubAccount_GetHubHostName(g_iothubAcctInfo))) == NULL)
     {
         LogError("Failed sending Device Streaming request");
         result = MU_FAILURE;

@@ -165,12 +165,18 @@ const char* AMQP_ADDRESS_PATH_FMT = "/devices/%s/messages/deviceBound";
 const char* AMQP_SEND_TARGET_ADDRESS_FMT = "amqps://%s/messages/deviceBound";
 const char* AMQP_SEND_AUTHCID_FMT = "iothubowner@sas.root.%s";
 
+const char* DEFAULT_TARGET_NETWORK_INTERFACE = "eth0";
+#define ENV_VAR_E2E_TARGET_NETWORK_INTERFACE               "IOTHUB_E2E_TARGET_NETWORK_INTERFACE"
+#define ENV_VAR_E2E_TARGET_NETWORK_INTERFACE_MAX_LENGTH    32
+
 #define THREAD_CONTINUE             0
 #define THREAD_END                  1
 #define MAX_DRAIN_TIME              1000.0
 #define MAX_SHORT_VALUE             32767         /* maximum (signed) short value */
 #define INDEFINITE_TIME             ((time_t)-1)
 #define CONNECTION_2_MIN_TIMEOUT    (2 * 60 * 1000) 
+#define RETRY_COUNT                 4
+#define RETRY_DELAY_SECONDS         60
 
 MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(IOTHUB_TEST_CLIENT_RESULT, IOTHUB_TEST_CLIENT_RESULT_VALUES);
 
@@ -223,6 +229,11 @@ typedef struct MESSAGE_RECEIVER_CONTEXT_TAG
     void* context;
     bool message_received;
 } MESSAGE_RECEIVER_CONTEXT;
+
+typedef struct MESSAGE_RECEIVER_STATE_CHANGED_CONTEXT_TAG
+{
+    MESSAGE_RECEIVER_STATE state;
+} MESSAGE_RECEIVER_STATE_CHANGED_CONTEXT;
 
 static AMQP_CONN_INFO* createAmqpConnection(IOTHUB_VALIDATION_INFO* devhubValInfo, size_t partitionCount, time_t receiveTimeRangeStart);
 
@@ -431,6 +442,7 @@ static int RetrieveIotHubClientInfo(const char* pszIotConnString, IOTHUB_VALIDAT
         {
             LogError("Failure allocating hostName in RetrieveIotHubClientInfo endHost: %d beginHost: %d.", endHost, beginName);
             free(dvhInfo->iotHubName);
+            dvhInfo->iotHubName = NULL;
             result = MU_FAILURE;
         }
         else if (sscanf(pszIotConnString, "HostName=%[^.].%[^;];SharedAccessKeyName=*;SharedAccessKey=*", dvhInfo->iotHubName, dvhInfo->hostName + endName - beginName + 1) != 2)
@@ -438,6 +450,8 @@ static int RetrieveIotHubClientInfo(const char* pszIotConnString, IOTHUB_VALIDAT
             LogError("Failure retrieving string values in RetrieveIotHubClientInfo.");
             free(dvhInfo->iotHubName);
             free(dvhInfo->hostName);
+            dvhInfo->iotHubName = NULL;
+            dvhInfo->hostName = NULL;
             result = MU_FAILURE;
         }
         else
@@ -472,6 +486,7 @@ static int RetrieveEventHubClientInfo(const char* pszconnString, IOTHUB_VALIDATI
         {
             LogError("Failure allocating partnerHost in RetrieveEventHubClientInfo endHost: %d beginHost: %d.", endHost, beginHost);
             free(dvhInfo->partnerName);
+            dvhInfo->partnerName = NULL;
             result = MU_FAILURE;
         }
         else if (sscanf(pszconnString, "Endpoint=sb://%[^.].%[^/]/;SharedAccessKeyName=owner;SharedAccessKey=%*s", dvhInfo->partnerName, dvhInfo->partnerHost) != 2)
@@ -479,6 +494,8 @@ static int RetrieveEventHubClientInfo(const char* pszconnString, IOTHUB_VALIDATI
             LogError("Failure retrieving string values in RetrieveEventHubClientInfo.");
             free(dvhInfo->partnerName);
             free(dvhInfo->partnerHost);
+            dvhInfo->partnerName = NULL;
+            dvhInfo->partnerHost = NULL;
             result = MU_FAILURE;
         }
         else
@@ -722,11 +739,46 @@ static AMQP_VALUE on_message_received(const void* context, MESSAGE_HANDLE messag
             if (msg_received_context->msgCallback(msg_received_context->context, (const char*)binary_data.bytes, binary_data.length) != 0)
             {
                 msg_received_context->message_received = true;
+                LogInfo("AMQP message received");
             }
         }
     }
 
     return messaging_delivery_accepted();
+}
+
+static const char* message_receiver_state_string(MESSAGE_RECEIVER_STATE state)
+{
+    char* result = "unknown";
+    switch (state)
+    {
+        case MESSAGE_RECEIVER_STATE_IDLE:
+            result = "MESSAGE_RECEIVER_STATE_IDLE";
+            break;
+        case MESSAGE_RECEIVER_STATE_OPENING:
+            result = "MESSAGE_RECEIVER_STATE_OPENING";
+            break;
+        case MESSAGE_RECEIVER_STATE_OPEN:
+            result = "MESSAGE_RECEIVER_STATE_OPEN";
+            break;
+        case MESSAGE_RECEIVER_STATE_CLOSING:
+            result = "MESSAGE_RECEIVER_STATE_CLOSING";
+            break;
+        case MESSAGE_RECEIVER_STATE_ERROR:
+            result = "MESSAGE_RECEIVER_STATE_ERROR";
+            break;
+        case MESSAGE_RECEIVER_STATE_INVALID:
+            result = "MESSAGE_RECEIVER_STATE_INVALID";
+            break;
+    }
+    return result;
+}
+
+static void on_message_receiver_state_changed(const void* context, MESSAGE_RECEIVER_STATE new_state, MESSAGE_RECEIVER_STATE previous_state)
+{
+    MESSAGE_RECEIVER_STATE_CHANGED_CONTEXT* msg_received_context = (MESSAGE_RECEIVER_STATE_CHANGED_CONTEXT*)context;
+    LogInfo("message_receiver_state_changed: new_state=%s, previous_state=%s", message_receiver_state_string(new_state), message_receiver_state_string(previous_state));
+    msg_received_context->state = new_state;
 }
 
 // After this new code is seasoned and confirmed good, there shall be some consolidation of *Listen* APIs and their callbacks.
@@ -781,6 +833,21 @@ static AMQP_VALUE on_message_received_new(const void* context, MESSAGE_HANDLE me
         }
     }
 
+    return result;
+}
+
+static int messagereceiver_open_with_retry(MESSAGE_RECEIVER_HANDLE message_receiver, ON_MESSAGE_RECEIVED on_message_received, void* callback_context)
+{
+    int result = -1;
+    for (int i = 0; i < RETRY_COUNT; i++)
+    {
+        result = messagereceiver_open(message_receiver, on_message_received, callback_context);
+        if (result == 0)
+        {
+            break;
+        }
+        ThreadAPI_Sleep(1000 * RETRY_DELAY_SECONDS);
+    }
     return result;
 }
 
@@ -1091,7 +1158,7 @@ static void on_connection_state_changed(void* context, CONNECTION_STATE new_conn
 
     IOTHUB_VALIDATION_INFO* devhubValInfo = (IOTHUB_VALIDATION_INFO*)context;
     if (devhubValInfo->isEventListenerConnected && 
-        (new_connection_state == CONNECTION_STATE_END || new_connection_state == CONNECTION_STATE_ERROR) &&
+        (new_connection_state == CONNECTION_STATE_END || new_connection_state == CONNECTION_STATE_ERROR || new_connection_state == CONNECTION_STATE_DISCARDING) &&
         (previous_connection_state == CONNECTION_STATE_START ||
             previous_connection_state == CONNECTION_STATE_HDR_RCVD ||
             previous_connection_state == CONNECTION_STATE_HDR_SENT ||
@@ -1266,7 +1333,7 @@ static AMQP_CONN_INFO* createAmqpConnection(IOTHUB_VALIDATION_INFO* devhubValInf
                                             destroyAmqpConnection(result);
                                             result = NULL;
                                         }
-                                        else if (messagereceiver_open(result->message_receiver, on_message_received_new, devhubValInfo) != 0)
+                                        else if (messagereceiver_open_with_retry(result->message_receiver, on_message_received_new, devhubValInfo) != 0)
                                         {
                                             LogError("Failed opening message receiver.");
                                             destroyAmqpConnection(result);
@@ -1421,6 +1488,7 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEvent(IOTHUB_TEST_HANDLE devhubHan
         char* eh_hostname = CreateReceiveHostName(devhubValInfo);
         if (eh_hostname == NULL)
         {
+            LogError("Failed getting eh_hostname.");
             result = IOTHUB_TEST_CLIENT_ERROR;
         }
         else
@@ -1428,6 +1496,7 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEvent(IOTHUB_TEST_HANDLE devhubHan
             char* receive_address = CreateReceiveAddress(devhubValInfo, partitionCount);
             if (receive_address == NULL)
             {
+                LogError("Failed getting receive_address.");
                 result = IOTHUB_TEST_CLIENT_ERROR;
             }
             else
@@ -1474,6 +1543,7 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEvent(IOTHUB_TEST_HANDLE devhubHan
 #endif // SET_TRUSTED_CERT
 
                     /* create the SASL client IO using the TLS IO */
+                    LogInfo("IoTHubTest_ListenForEvent: SASL client IO using the TLS IO.");
                     SASLCLIENTIO_CONFIG sasl_io_config;
                     sasl_io_config.underlying_io = tls_io;
                     sasl_io_config.sasl_mechanism = sasl_mechanism_handle;
@@ -1511,6 +1581,7 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEvent(IOTHUB_TEST_HANDLE devhubHan
                         }
                         else
                         {
+                            LogInfo("IoTHubTest_ListenForEvent: Create AMQP filter.");
                             /* create the filter set to be used for the source of the link */
                             filter_set filter_set = amqpvalue_create_map();
                             AMQP_VALUE filter_key = amqpvalue_create_symbol(filter_name);
@@ -1565,20 +1636,23 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEvent(IOTHUB_TEST_HANDLE devhubHan
                                     }
                                     else
                                     {
+                                        LogInfo("IoTHubTest_ListenForEvent: Create message receiver.");
                                         MESSAGE_RECEIVER_CONTEXT message_receiver_context;
                                         message_receiver_context.msgCallback = msgCallback;
                                         message_receiver_context.context = context;
                                         message_receiver_context.message_received = false;
                                         MESSAGE_RECEIVER_HANDLE message_receiver = NULL;
 
+                                        MESSAGE_RECEIVER_STATE_CHANGED_CONTEXT message_receiver_state_changed_context = {0};
+
                                         /* create a message receiver */
-                                        message_receiver = messagereceiver_create(link, NULL, NULL);
+                                        message_receiver = messagereceiver_create(link, on_message_receiver_state_changed, &message_receiver_state_changed_context);
                                         if (message_receiver == NULL)
                                         {
                                             LogError("Failed creating message receiver.");
                                             result = IOTHUB_TEST_CLIENT_ERROR;
                                         }
-                                        else if (messagereceiver_open(message_receiver, on_message_received, &message_receiver_context) != 0)
+                                        else if (messagereceiver_open_with_retry(message_receiver, on_message_received, &message_receiver_context) != 0)
                                         {
                                             LogError("Failed opening message receiver.");
                                             result = IOTHUB_TEST_CLIENT_ERROR;
@@ -1590,18 +1664,24 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEvent(IOTHUB_TEST_HANDLE devhubHan
                                             time_t beginExecutionTime = time(NULL);
                                             double timespan;
 
+                                            LogInfo("IoTHubTest_ListenForEvent: Waiting for message_received.");
                                             while ((nowExecutionTime = time(NULL)), timespan = difftime(nowExecutionTime, beginExecutionTime), timespan < maxDrainTimeInSeconds)
                                             {
                                                 connection_dowork(connection);
                                                 ThreadAPI_Sleep(10);
 
-                                                if (message_receiver_context.message_received)
+                                                if (message_receiver_context.message_received || message_receiver_state_changed_context.state == MESSAGE_RECEIVER_STATE_ERROR)
                                                 {
                                                     break;
                                                 }
                                             }
 
-                                            if (!message_receiver_context.message_received)
+                                            if (message_receiver_state_changed_context.state == MESSAGE_RECEIVER_STATE_ERROR)
+                                            {
+                                                LogError("message receiver entered an error state.");
+                                                result = IOTHUB_TEST_CLIENT_ERROR;
+                                            }
+                                            else if (!message_receiver_context.message_received)
                                             {
                                                 LogError("No message was received, timed out.");
                                                 result = IOTHUB_TEST_CLIENT_ERROR;
@@ -1929,6 +2009,26 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_SendMessage(IOTHUB_TEST_HANDLE devhubHandle
             saslmechanism_destroy(sasl_mechanism_handle);
         }
     }
+
+    return result;
+}
+
+const char* IoTHubTest_GetTargetNetworkInterface()
+{
+    const char* result = NULL;
+    static char networkInterface[ENV_VAR_E2E_TARGET_NETWORK_INTERFACE_MAX_LENGTH];
+    char* envNetworkInterfaceVal = getenv(ENV_VAR_E2E_TARGET_NETWORK_INTERFACE);
+
+    if (envNetworkInterfaceVal != NULL)
+    {
+        (void)strcpy(networkInterface, envNetworkInterfaceVal);
+    }
+    else
+    {
+        (void)strcpy(networkInterface, DEFAULT_TARGET_NETWORK_INTERFACE);
+    }
+
+    result = networkInterface;
 
     return result;
 }

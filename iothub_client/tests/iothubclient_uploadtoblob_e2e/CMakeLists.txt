@@ -8,11 +8,6 @@ set(theseTestsName iothubclient_uploadtoblob_e2e)
 
 generate_cppunittest_wrapper(${theseTestsName})
 
-set(${theseTestsName}_nuget_test_files
-    ${theseTestsName}.c
-    ../../../certs/certs.c
-)
-
 set(${theseTestsName}_c_files
     ../../../certs/certs.c
 )
@@ -45,14 +40,6 @@ if(WIN32)
            )
            addSupportedTransportsToTest(${theseTestsName}_exe)
    endif()
-
-   if(TARGET ${theseTestsName}_nuget_exe)
-           target_link_libraries(${theseTestsName}_nuget_exe
-                   iothub_test
-                   iothub_service_client
-                   rpcrt4
-        )
-    endif()
 else()
     if(APPLE)
         target_link_libraries(${theseTestsName}_exe pthread)

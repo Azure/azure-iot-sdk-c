@@ -7,5 +7,5 @@ int main(void)
 {
     size_t failedTestCount = 0;
     RUN_TEST_SUITE(iothubclient_amqp_e2e_sfc, failedTestCount);
-    return failedTestCount;
+    return (int)failedTestCount;
 }

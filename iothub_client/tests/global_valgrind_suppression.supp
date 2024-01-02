@@ -26,11 +26,27 @@
     fun:vfprintf
 }
 {
-    DRD Conflicting store by thread in sprintf
+    DRD Conflicting store by thread in sprintf (debug)
     drd:ConflictingAccess
     ...
     fun:sprintf
     fun:EventData_Create
+}
+{
+   DRD Conflicting store by thread in sprintf (release)
+   drd:ConflictingAccess
+   ...
+   fun:__sprintf_chk
+   fun:EventData_Create
+   ...
+}
+{
+   RACE Conflicting store by thread in sprintf (release)
+   Helgrind:Race
+   ...
+   fun:__sprintf_chk
+   fun:EventData_Create
+   ...
 }
 {
     Race conflicting store by thread in EventData_Create/sprintf    
@@ -300,4 +316,405 @@
    fun:TestSuiteInitialize
    fun:RunTests
    fun:main
+}
+{
+   DRD thinks LOCK_HANDLE is not a mutex
+   drd:MutexErr
+   fun:pthread_mutex_destroy
+   obj:/usr/lib/x86_64-linux-gnu/libp11-kit.so.0.3.0
+   fun:_dl_fini
+   fun:__run_exit_handlers
+   fun:exit
+   fun:(below main)
+}
+{
+   DRD thinks LOCK_HANDLE is not a mutex
+   drd:MutexErr
+   fun:pthread_mutex_destroy
+   fun:_dl_fini
+   fun:__run_exit_handlers
+   fun:exit
+   fun:(below main)
+}
+{
+   Helgrind thinks LOCK_HANDLE is not a mutex
+   Helgrind:Misc
+   obj:/usr/lib/x86_64-linux-gnu/valgrind/vgpreload_helgrind-amd64-linux.so
+   fun:_dl_fini
+   fun:__run_exit_handlers
+   fun:exit
+   fun:(below main)
+}
+{
+   Helgrind thinks LOCK_HANDLE is not a mutex
+   Helgrind:Misc
+   obj:/usr/lib/x86_64-linux-gnu/valgrind/vgpreload_helgrind-amd64-linux.so
+   obj:/usr/lib/x86_64-linux-gnu/libp11-kit.so.0.3.0
+   fun:_dl_fini
+   fun:__run_exit_handlers
+   fun:exit
+   fun:(below main)
+}
+{
+   get_time_ms Race
+   Helgrind:Race
+   fun:get_time_ms
+   fun:tickcounter_get_current_ms
+   ...
+}
+{
+   get_time_ms get_current_ms ConflictingAccess
+   drd:ConflictingAccess
+   fun:get_time_ms
+   fun:tickcounter_get_current_ms
+   ...
+}
+{
+   get_time_ms tickcounter_create ConflictingAccess
+   drd:ConflictingAccess
+   fun:get_time_ms
+   fun:tickcounter_create
+   ...
+}
+{
+   get_time_ms tickcounter_create Race
+   Helgrind:Race
+   fun:get_time_ms
+   fun:tickcounter_create
+   ...
+}
+{
+   client_connect_to_hub printf ConflictingAccess
+   drd:ConflictingAccess
+   fun:mempcpy
+   fun:_IO_new_file_xsputn
+   fun:_IO_file_xsputn@@GLIBC_2.2.5
+   fun:__vfprintf_internal
+   fun:printf
+   fun:client_connect_to_hub
+   fun:e2e_d2c_with_svc_fault_ctrl_error_message_callback
+   fun:RunTests
+   fun:(below main)
+}
+{
+  OpenSSL leak
+  Memcheck:Leak
+  match-leak-kinds: definite
+  fun:malloc
+  fun:RSA_meth_dup
+  obj:*
+  obj:*
+  obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+  fun:ENGINE_ctrl_cmd_string
+  fun:ENGINE_by_id
+  obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+  fun:CONF_modules_load
+  fun:CONF_modules_load_file
+  obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+  obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+  fun:__pthread_once_slow
+  fun:CRYPTO_THREAD_run_once
+  fun:OPENSSL_init_crypto
+  fun:OPENSSL_init_ssl
+  obj:/usr/lib/x86_64-linux-gnu/libcurl.so.4.6.0
+}
+{
+  <insert_a_suppression_name_here>
+  Memcheck:Leak
+  match-leak-kinds: definite
+  fun:malloc
+  fun:CRYPTO_zalloc
+  fun:EC_KEY_METHOD_new
+  obj:*
+  obj:*
+  obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+  fun:ENGINE_ctrl_cmd_string
+  fun:ENGINE_by_id
+  obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+  fun:CONF_modules_load
+  fun:CONF_modules_load_file
+  obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+  obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+  fun:__pthread_once_slow
+  fun:CRYPTO_THREAD_run_once
+  fun:OPENSSL_init_crypto
+  fun:OPENSSL_init_ssl
+  obj:/usr/lib/x86_64-linux-gnu/libcurl.so.4.6.0
+  obj:/usr/lib/x86_64-linux-gnu/libcurl.so.4.6.0
+  fun:HTTPAPI_Init
+  fun:HTTPAPIEX_Init
+  fun:platform_init
+  fun:IoTHub_Init
+  fun:device_method_e2e_init
+  fun:TestSuiteInitialize
+  fun:RunTests
+  fun:main
+}
+{
+  <insert_a_suppression_name_here>
+  Memcheck:Leak
+  match-leak-kinds: definite
+  fun:malloc
+  fun:CRYPTO_zalloc
+  fun:ENGINE_new
+  obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+  obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+  fun:__pthread_once_slow
+  fun:CRYPTO_THREAD_run_once
+  fun:OPENSSL_init_crypto
+  obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+  obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+  fun:__pthread_once_slow
+  fun:CRYPTO_THREAD_run_once
+  fun:OPENSSL_init_crypto
+  fun:OPENSSL_init_ssl
+  obj:/usr/lib/x86_64-linux-gnu/libcurl.so.4.6.0
+  obj:/usr/lib/x86_64-linux-gnu/libcurl.so.4.6.0
+  fun:HTTPAPI_Init
+  fun:HTTPAPIEX_Init
+  fun:platform_init
+  fun:TestSuiteInitialize
+  fun:RunTests
+  fun:main
+}
+{
+  <insert_a_suppression_name_here>
+  Memcheck:Leak
+  match-leak-kinds: definite
+  fun:malloc
+  fun:CRYPTO_zalloc
+  fun:ENGINE_new
+  obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+  obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+  fun:__pthread_once_slow
+  fun:CRYPTO_THREAD_run_once
+  fun:OPENSSL_init_crypto
+  obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+  obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+  fun:__pthread_once_slow
+  fun:CRYPTO_THREAD_run_once
+  fun:OPENSSL_init_crypto
+  fun:OPENSSL_init_ssl
+  obj:/usr/lib/x86_64-linux-gnu/libcurl.so.4.6.0
+  obj:/usr/lib/x86_64-linux-gnu/libcurl.so.4.6.0
+  fun:HTTPAPI_Init
+  fun:HTTPAPIEX_Init
+  fun:platform_init
+  fun:IoTHub_Init
+  fun:TestSuiteInitialize
+  fun:RunTests
+  fun:main
+}
+{
+  <insert_a_suppression_name_here>
+  Memcheck:Leak
+  match-leak-kinds: definite
+  fun:malloc
+  fun:CRYPTO_zalloc
+  fun:EC_KEY_METHOD_new
+  obj:*
+  obj:*
+  obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+  fun:ENGINE_ctrl_cmd_string
+  fun:ENGINE_by_id
+  obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+  fun:CONF_modules_load
+  fun:CONF_modules_load_file
+  obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+  obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+  fun:__pthread_once_slow
+  fun:CRYPTO_THREAD_run_once
+  fun:OPENSSL_init_crypto
+  fun:OPENSSL_init_ssl
+  obj:/usr/lib/x86_64-linux-gnu/libcurl.so.4.6.0
+  obj:/usr/lib/x86_64-linux-gnu/libcurl.so.4.6.0
+  fun:HTTPAPI_Init
+  fun:HTTPAPIEX_Init
+  fun:platform_init
+  fun:IoTHub_Init
+  fun:e2e_init
+  fun:TestSuiteInitialize
+  fun:RunTests
+  fun:main
+}
+{
+  <insert_a_suppression_name_here>
+  Memcheck:Leak
+  match-leak-kinds: definite
+  fun:malloc
+  fun:CRYPTO_zalloc
+  fun:EC_KEY_METHOD_new
+  obj:*
+  obj:*
+  obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+  fun:ENGINE_ctrl_cmd_string
+  fun:ENGINE_by_id
+  obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+  fun:CONF_modules_load
+  fun:CONF_modules_load_file
+  obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+  obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+  fun:__pthread_once_slow
+  fun:CRYPTO_THREAD_run_once
+  fun:OPENSSL_init_crypto
+  fun:OPENSSL_init_ssl
+  obj:/usr/lib/x86_64-linux-gnu/libcurl.so.4.6.0
+  obj:/usr/lib/x86_64-linux-gnu/libcurl.so.4.6.0
+  fun:HTTPAPI_Init
+  fun:HTTPAPIEX_Init
+  fun:platform_init
+  fun:e2e_uploadblob_init
+  fun:TestSuiteInitialize
+  fun:RunTests
+  fun:main
+}
+{
+  <insert_a_suppression_name_here>
+  Memcheck:Leak
+  match-leak-kinds: definite
+  fun:malloc
+  fun:CRYPTO_zalloc
+  fun:EC_KEY_METHOD_new
+  obj:*
+  obj:*
+  obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+  fun:ENGINE_ctrl_cmd_string
+  fun:ENGINE_by_id
+  obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+  fun:CONF_modules_load
+  fun:CONF_modules_load_file
+  obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+  obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+  fun:__pthread_once_slow
+  fun:CRYPTO_THREAD_run_once
+  fun:OPENSSL_init_crypto
+  fun:OPENSSL_init_ssl
+  obj:/usr/lib/x86_64-linux-gnu/libcurl.so.4.6.0
+  obj:/usr/lib/x86_64-linux-gnu/libcurl.so.4.6.0
+  fun:HTTPAPI_Init
+  fun:HTTPAPIEX_Init
+  fun:platform_init
+  fun:IoTHub_Init
+  fun:dt_e2e_init
+  fun:TestSuiteInitialize
+  fun:RunTests
+  fun:main
+}
+{
+  <insert_a_suppression_name_here>
+  Memcheck:Leak
+  match-leak-kinds: definite
+  fun:malloc
+  fun:CRYPTO_zalloc
+  fun:EC_KEY_METHOD_new
+  obj:*
+  obj:*
+  obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+  fun:ENGINE_ctrl_cmd_string
+  fun:ENGINE_by_id
+  obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+  fun:CONF_modules_load
+  fun:CONF_modules_load_file
+  obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+  obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+  fun:__pthread_once_slow
+  fun:CRYPTO_THREAD_run_once
+  fun:OPENSSL_init_crypto
+  fun:OPENSSL_init_ssl
+  obj:/usr/lib/x86_64-linux-gnu/libcurl.so.4.6.0
+  obj:/usr/lib/x86_64-linux-gnu/libcurl.so.4.6.0
+  fun:HTTPAPI_Init
+  fun:HTTPAPIEX_Init
+  fun:platform_init
+  fun:IoTHub_Init
+  fun:TestSuiteInitialize
+  fun:RunTests
+  fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   ...
+   fun:ENGINE_get_pkey_meth
+   ...
+}
+{
+    <insert_a_suppression_name_here>
+    drd:ConflictingAccess
+    ...
+    fun:printf
+    fun:sendCompleteCallback
+    fun:IoTHubMessaging_LL_SendMessageComplete
+    ...
+ }
+ {
+    <insert_a_suppression_name_here>
+    drd:ConflictingAccess
+    ...
+    fun:puts
+    fun:sendCompleteCallback
+    fun:IoTHubMessaging_LL_SendMessageComplete
+    ...
+ }
+ {
+    <insert_a_suppression_name_here>
+    drd:ConflictingAccess
+    ...
+    fun:printf
+    fun:openCompleteCallback
+    fun:IoTHubMessaging_LL_ReceiverStateChanged
+    ...
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: possible
+   ...
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:HTTPAPI_ExecuteRequest
+   ...
+   fun:ThreadWrapper
+   fun:start_thread
+   fun:clone
+}
+{
+   <insert_a_suppression_name_here>
+   Helgrind:Misc
+   fun:mutex_destroy_WRK
+   obj:/usr/lib/x86_64-linux-gnu/libp11-kit.so.0.3.0
+   fun:_dl_fini
+   fun:__run_exit_handlers
+   fun:exit
+   fun:(below main)
+}
+{
+   <insert_a_suppression_name_here>
+   Helgrind:Misc
+   fun:mutex_destroy_WRK
+   fun:_dl_fini
+   fun:__run_exit_handlers
+   fun:exit
+   fun:(below main)
+}
+{
+   <insert_a_suppression_name_here>
+   drd:MutexErr
+   fun:pthread_mutex_destroy_intercept
+   fun:pthread_mutex_destroy
+   fun:_dl_fini
+   fun:__run_exit_handlers
+   fun:exit
+   fun:(below main)
+}
+{
+   <insert_a_suppression_name_here>
+   drd:MutexErr
+   fun:pthread_mutex_destroy_intercept
+   fun:pthread_mutex_destroy
+   obj:/usr/lib/x86_64-linux-gnu/libp11-kit.so.0.3.0
+   fun:_dl_fini
+   fun:__run_exit_handlers
+   fun:exit
+   fun:(below main)
 }

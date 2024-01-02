@@ -1,14 +1,18 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+// Helper routines for PnP based samples to interact with Device Provisioning Service
+
 #ifndef PNP_DPS_LL_H
 #define PNP_DPS_LL_H
 
 #include "iothub_device_client_ll.h"
-#include "pnp_device_client_ll.h"
+#include "pnp_sample_config.h"
 
 #ifndef USE_PROV_MODULE_FULL
-#error "Missing cmake flag for DPS"
+// DPS is not brought in all configurations of the SDK.  If you hit this error,
+// rerun CMake with the flags <-Duse_prov_client=ON -Dhsm_type_symm_key=ON -Drun_e2e_tests=OFF>
+#error "Missing CMake flag for DPS"
 #endif
 
 //

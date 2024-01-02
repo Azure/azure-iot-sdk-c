@@ -4,6 +4,10 @@
 cmake_minimum_required (VERSION 3.5)
 
 compileAsC99()
+if (MSVC)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -bigobj")
+endif()
+
 set(theseTestsName prov_transport_amqp_common_ut)
 
 generate_cppunittest_wrapper(${theseTestsName})
@@ -15,4 +19,10 @@ set(${theseTestsName}_c_files
 set(${theseTestsName}_h_files
 )
 
-build_c_test_artifacts(${theseTestsName} ON "tests/azure_prov_device_tests")
+file(COPY ../common_prov_e2e/prov_valgrind_suppression.supp DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+build_c_test_artifacts(${theseTestsName} ON "tests/azure_prov_device_tests"
+    ADDITIONAL_LIBS
+        prov_amqp_transport
+    VALGRIND_SUPPRESSIONS_FILE 
+        prov_valgrind_suppression.supp
+)

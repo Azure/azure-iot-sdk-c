@@ -54,7 +54,8 @@ endif()
 
 target_link_libraries(prov_dev_client_ll_sample
     iothub_client
-    prov_device_ll_client)
-
-link_security_client(prov_dev_client_ll_sample)
-linkSharedUtil(prov_dev_client_ll_sample)
+    prov_device_ll_client
+    prov_auth_client
+    aziotsharedutil
+    hsm_security_client
+)

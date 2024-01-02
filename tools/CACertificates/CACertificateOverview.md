@@ -18,7 +18,7 @@ A more detailed document explaining Edge and showing its use of certificates gen
 
 ## Note about Edge Devices
 
-To generate device certificates for the device running Edge itself, use the [Edge device using X.509 certificates](https://docs.microsoft.com/en-us/azure/iot-edge/how-to-auto-provision-x509-certs) guide.  
+To generate device certificates for the device running Edge itself, use the [Edge device using X.509 certificates](https://docs.microsoft.com/azure/iot-edge/how-to-auto-provision-x509-certs) guide.  
 
 To generate device certificates for leaf devices that are connecting via an Edge gateway, see the instructions below.
 
@@ -109,8 +109,8 @@ This will create files mydevice* that contain the public key, private key, and P
 
 #### IoT Leaf Device
 
-* Run `./certGen.sh create_device_certificate mydevice` to create the new device certificate.  
-  This will create the files ./certs/new-device.* that contain the public key and PFX and ./private/new-device.key.pem that contains the device's private key.  
+* Run `./certGen.sh create_device_certificate mydevice` to create the new device certificate, which will chain directly to the root CA. 
+  * If the device certificate needs to be signed by an intermediate CA instead, run `./certGen.sh create_device_certificate_from_intermediate mydevice` to chain the device certificate to the intermediate certificate. __Note:__ When using chains with more than one level, the device must send all chain certificates up to but not including the one configured on the service during TLS handshake. This is required for the service to create a valid chain.
 
 * `cd ./certs && cat new-device.cert.pem azure-iot-test-only.intermediate.cert.pem azure-iot-test-only.root.ca.cert.pem > new-device-full-chain.cert.pem` to get the public key.
 
@@ -130,5 +130,5 @@ From start menu, open `manage computer certificates` and navigate Certificates -
 
 Bash outputs certificates to the current working directory, so there is no analogous system cleanup needed.
 
-[the official documentation]: https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-security-x509-get-started
-[Edge gateway creation documentation]: https://docs.microsoft.com/en-us/azure/iot-edge/how-to-create-gateway-device
+[the official documentation]: https://docs.microsoft.com/azure/iot-hub/iot-hub-security-x509-get-started
+[Edge gateway creation documentation]: https://docs.microsoft.com/azure/iot-edge/how-to-create-gateway-device

@@ -36,14 +36,14 @@ echo "Clone the back compat repo"
 git clone https://github.com/Azure/azure-iot-c-back-compat.git --recursive
 
 back_compat_root="$clone_root/azure-iot-c-back-compat"
-back_compat_build=$back_compat_root"/cmake"
+
+pushd $back_compat_root
 
 # Now run back compat
-rm -rf $back_compat_build
-mkdir -p $back_compat_build
-pushd $back_compat_build
-cmake $back_compat_root
+rm -rf cmake
+mkdir -p cmake
+pushd cmake
+cmake ..
 make --jobs=$CORES
 
-ctest -j $CORES --output-on-failure --schedule-random
 popd

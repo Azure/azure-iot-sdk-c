@@ -34,16 +34,14 @@ static void my_gballoc_free(void* ptr)
 #define ENABLE_MOCKS
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/lock.h"
-#include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/vector.h"
-#include "azure_c_shared_utility/crt_abstractions.h"
 #include "iothub_client_core_common.h"
 
 #include "iothub_client_core.h"
-#include "internal/iothub_transport_ll_private.h"
 #include "internal/iothub_client_private.h"
 #undef ENABLE_MOCKS
 
+#include "internal/iothub_transport_ll_private.h"
 #include "internal/iothubtransport.h"
 
 #define ENABLE_MOCKS
@@ -447,8 +445,6 @@ TEST_FUNCTION(IoTHubTransport_Create_success)
     IoTHubTransport_Destroy(handle);
 }
 
-//Tests_SRS_IOTHUBTRANSPORT_17_009: [ IoTHubTransport_Create shall clean up any resources it creates if the function does not succeed. ]
-//Tests_SRS_IOTHUBTRANSPORT_17_039: [ If the Vector creation fails, IoTHubTransport_Create shall return NULL. ]
 TEST_FUNCTION(IoTHubTransport_Create_fails)
 {
     int negativeTestsInitResult = umock_c_negative_tests_init();
@@ -464,7 +460,7 @@ TEST_FUNCTION(IoTHubTransport_Create_fails)
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
 
-        char tmp_msg[64];
+        char tmp_msg[128];
         sprintf(tmp_msg, "IoTHubTransport_Create failure in test %lu/%lu", (unsigned long)index, (unsigned long)count);
 
         TRANSPORT_HANDLE handle = NULL;

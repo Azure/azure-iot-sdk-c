@@ -504,7 +504,6 @@ static X509_ATTESTATION_HANDLE create_dummy_processed_attestation(X509_CERTIFICA
 
 /* UNIT TESTS BEGIN */
 
-/*Tests_X509_ATTESTATION_22_001: [ If the given handle, x509_att is NULL, x509Attestation_getCertificateType shall fail and return X509_CERTIFICATE_TYPE_NONE ]*/
 TEST_FUNCTION(x509Attesation_getCertificateType_null_handle)
 {
     //arrange
@@ -519,7 +518,6 @@ TEST_FUNCTION(x509Attesation_getCertificateType_null_handle)
     //cleanup
 }
 
-/*Tests_X509_ATTESTATION_22_002: [ Otherwise, x509Attestation_getCertificateType shall return the certificate type of x509_att ]*/
 TEST_FUNCTION(x509Attestation_getCertificateType_client)
 {
     //arrange
@@ -537,7 +535,6 @@ TEST_FUNCTION(x509Attestation_getCertificateType_client)
     x509Attestation_destroy(x509_att);
 }
 
-/*Tests_X509_ATTESTATION_22_002: [ Otherwise, x509Attestation_getCertificateType shall return the certificate type of x509_att ]*/
 TEST_FUNCTION(x509Attestation_getCertificateType_signing)
 {
     //arrange
@@ -555,7 +552,6 @@ TEST_FUNCTION(x509Attestation_getCertificateType_signing)
     x509Attestation_destroy(x509_att);
 }
 
-/*Tests_X509_ATTESTATION_22_002: [ Otherwise, x509Attestation_getCertificateType shall return the certificate type of x509_att ]*/
 TEST_FUNCTION(x509Attestation_getCertificateType_ca)
 {
     //arrange
@@ -573,7 +569,6 @@ TEST_FUNCTION(x509Attestation_getCertificateType_ca)
     x509Attestation_destroy(x509_att);
 }
 
-/*Tests_X509_ATTESTATION_22_003: [ If the given handle, x509_att is NULL, x509Attestation_getPrimaryCertificate shall fail and return NULL ]*/
 TEST_FUNCTION(x509Attestation_getPrimaryCertificate_null)
 {
     //arrange
@@ -588,7 +583,6 @@ TEST_FUNCTION(x509Attestation_getPrimaryCertificate_null)
     //cleanup
 }
 
-/*Tests_X509_ATTESTATION_22_004: [ If x509_att is an X509 attestation with client certificate(s), x509Attestation_getPrimaryCertificate shall return the primary client certificate as an X509_CERTIFICATE_HANDLE ]*/
 TEST_FUNCTION(x509Attestation_getPrimaryCertificate_client)
 {
     //arrange
@@ -606,7 +600,6 @@ TEST_FUNCTION(x509Attestation_getPrimaryCertificate_client)
     x509Attestation_destroy(x509_att);
 }
 
-/*Tests_X509_ATTESTATION_22_005: [ If x509_att is an X509 attestation with signing certificate(s), x509Attestation_getPrimaryCertificate shall return the primary signing certificate as an X509_CERTIFICATE_HANDLE ]*/
 TEST_FUNCTION(x509Attestation_getPrimaryCertificate_signing)
 {
     //arrange
@@ -624,7 +617,6 @@ TEST_FUNCTION(x509Attestation_getPrimaryCertificate_signing)
     x509Attestation_destroy(x509_att);
 }
 
-/*Tests_X509_ATTESTATION_22_006: [ If x509_att is another type of X509 attestation, x509Attestation_getPrimaryCertificate shall fail and return NULL ]*/
 TEST_FUNCTION(x509Attestation_getPrimaryCertificate_ca_ref)
 {
     //arrange
@@ -642,7 +634,6 @@ TEST_FUNCTION(x509Attestation_getPrimaryCertificate_ca_ref)
     x509Attestation_destroy(x509_att);
 }
 
-/*Tests_X509_ATTESTATION_22_007: [ If the given handle, x509_att is NULL, x509Attestation_getSecondaryCertificate shall fail and return NULL ]*/
 TEST_FUNCTION(x509Attestation_getSecondaryCertificate_null)
 {
     //arrange
@@ -657,7 +648,6 @@ TEST_FUNCTION(x509Attestation_getSecondaryCertificate_null)
     //cleanup
 }
 
-/*Tests_X509_ATTESTATION_22_008: [ If x509_att is an X509 attestation with client certificate(s), x509Attestation_getSecondaryCertificate shall return the secondary client certificate as an X509_CERTIFICATE_HANDLE ]*/
 TEST_FUNCTION(x509Attestation_getSecondaryCertificate_client)
 {
     //arrange
@@ -675,7 +665,6 @@ TEST_FUNCTION(x509Attestation_getSecondaryCertificate_client)
     x509Attestation_destroy(x509_att);
 }
 
-/*Tests_X509_ATTESTATION_22_009: [ If x509_att is an X509 attestation with signing certificate(s), x509Attestation_getSecondaryCertificate shall return the secondary signing certificate as an X509_CERTIFICATE_HANDLE ]*/
 TEST_FUNCTION(x509Attestation_getSecondaryCertificate_signing)
 {
     //arrange
@@ -693,7 +682,6 @@ TEST_FUNCTION(x509Attestation_getSecondaryCertificate_signing)
     x509Attestation_destroy(x509_att);
 }
 
-/*Test_X509_ATTESTATION_22_010: [ If x509_att is another type of X509 attestation, x509Attestation_getSecondaryCertificate shall fail and return NULL ]*/
 TEST_FUNCTION(x509Attestation_getSecondaryCertificate_ca)
 {
     //arrange
@@ -711,7 +699,6 @@ TEST_FUNCTION(x509Attestation_getSecondaryCertificate_ca)
     x509Attestation_destroy(x509_att);
 }
 
-/*Tests_X509_ATTESTATION_22_035: [ If x509_att does not have a secondary certificate, x509Attestation_getSecondaryCertificate shall return NULL ]*/
 TEST_FUNCTION(x509Attestation_getSecondaryCertificate_no_secondary_cert)
 {
     //arrange
@@ -729,7 +716,6 @@ TEST_FUNCTION(x509Attestation_getSecondaryCertificate_no_secondary_cert)
     x509Attestation_destroy(x509_att);
 }
 
-/*Tests_X509_ATTESTATION_22_011: [ If the given handle, x509_cert is NULL, x509Certificate_getSubjectName shall fail and return NULL ]*/
 TEST_FUNCTION(x509Certificate_getSubjectName_null)
 {
     //arrange
@@ -763,7 +749,6 @@ TEST_FUNCTION(x509Certificate_getSubjectName_unprocessed)
     x509Attestation_destroy(x509_att);
 }
 
-/*Tests_X509_ATTESTATION_22_013: [ Otherwise, x509Certificate_getSubjectName shall return the subject name from x509_cert ]*/
 TEST_FUNCTION(x509Certificate_getSubjectName_processed)
 {
     //arrange
@@ -781,7 +766,6 @@ TEST_FUNCTION(x509Certificate_getSubjectName_processed)
     x509Attestation_destroy(x509_att);
 }
 
-/*Tests_X509_ATTESTATION_22_014: [ If the given handle, x509_cert is NULL, x509Certificate_getSha1Thumbprint shall fail and return NULL ]*/
 TEST_FUNCTION(x509Certificate_getSha1Thumbprint_null)
 {
     //arrange
@@ -796,7 +780,6 @@ TEST_FUNCTION(x509Certificate_getSha1Thumbprint_null)
     //cleanup
 }
 
-/*Tests_X509_ATTESTATION_22_015: [ If the given handle, x509_cert has not yet been processed by the Provisioning Service, x509Certificate_getSha1Thumbprint shall fail and return NULL ]*/
 TEST_FUNCTION(x509Certificate_getSha1Thumbprint_unprocessed)
 {
     //arrange
@@ -815,7 +798,6 @@ TEST_FUNCTION(x509Certificate_getSha1Thumbprint_unprocessed)
     x509Attestation_destroy(x509_att);
 }
 
-/*Tests_X509_ATTESTATION_22_016: [ Otherwise, x509Certificate_getSha1Thumbprint shall return the sha1 thumbprint from x509_cert ]*/
 TEST_FUNCTION(x509Certificate_getSha1Thumbprint_processed)
 {
     //arrange
@@ -833,7 +815,6 @@ TEST_FUNCTION(x509Certificate_getSha1Thumbprint_processed)
     x509Attestation_destroy(x509_att);
 }
 
-/*Tests_X509_ATTESTATION_22_017: [ If the given handle, x509_cert is NULL, x509Certificate_getSha256Thumbprint shall fail and return NULL ]*/
 TEST_FUNCTION(x509Certificate_getSha256Thumbprint_null)
 {
     //arrange
@@ -848,7 +829,6 @@ TEST_FUNCTION(x509Certificate_getSha256Thumbprint_null)
     //cleanup
 }
 
-/*Tests_X509_ATTESTATION_22_018: [ If the given handle, x509_cert has not yet been processed by the Provisioning Service, x509Certificate_getSha256Thumbprint shall fail and return NULL ]*/
 TEST_FUNCTION(x509Certificate_getSha256Thumbprint_unprocessed)
 {
     //arrange
@@ -867,7 +847,6 @@ TEST_FUNCTION(x509Certificate_getSha256Thumbprint_unprocessed)
     x509Attestation_destroy(x509_att);
 }
 
-/*Tests_X509_ATTESTATION_22_019: [ Otherwise, x509Certificate_getSha256Thumbprint shall return the sha256 thumbprint from x509_cert ]*/
 TEST_FUNCTION(x509Certificate_getSha256Thumbprint_processed)
 {
     //arrange
@@ -885,7 +864,6 @@ TEST_FUNCTION(x509Certificate_getSha256Thumbprint_processed)
     x509Attestation_destroy(x509_att);
 }
 
-/*Tests_X509_ATTESTATION_22_020: [ If the given handle, x509_cert is NULL, x509Certificate_getIssuerName shall fail and return NULL ]*/
 TEST_FUNCTION(x509Certificate_getIssuerName_null)
 {
     //arrange
@@ -900,7 +878,6 @@ TEST_FUNCTION(x509Certificate_getIssuerName_null)
     //cleanup
 }
 
-/*Tests_X509_ATTESTATION_22_021: [ If the given handle, x509_cert has not yet been processed by the Provisioning Service, x509Certificate_getIssuerName shall fail and return NULL ]*/
 TEST_FUNCTION(x509Certificate_getIssuerName_unprocessed)
 {
     //arrange
@@ -919,7 +896,6 @@ TEST_FUNCTION(x509Certificate_getIssuerName_unprocessed)
     x509Attestation_destroy(x509_att);
 }
 
-/*Tests_X509_ATTESTATION_22_022: [ Otherwise, x509Certificate_getIssuerName shall return the issuer name from x509_cert ]*/
 TEST_FUNCTION(x509Certificate_getIssuerName_processed)
 {
     //arrange
@@ -937,7 +913,6 @@ TEST_FUNCTION(x509Certificate_getIssuerName_processed)
     x509Attestation_destroy(x509_att);
 }
 
-/*Tests_X509_ATTESTATION_22_023: [ If the given handle, x509_cert is NULL, x509Certificate_getNotBeforeUtc shall fail and return NULL ]*/
 TEST_FUNCTION(x509Certificate_getNotBeforeUtc_null)
 {
     //arrange
@@ -952,7 +927,6 @@ TEST_FUNCTION(x509Certificate_getNotBeforeUtc_null)
     //cleanup
 }
 
-/*Tests_X509_ATTESTATION_22_024: [ If the given handle, x509_cert has not yet been processed by the Provisioning Service, x509Certificate_getNotBeforeUtc shall fail and return NULL ]*/
 TEST_FUNCTION(x509Certificate_getNotBeforeUtc_unprocessed)
 {
     //arrange
@@ -971,7 +945,6 @@ TEST_FUNCTION(x509Certificate_getNotBeforeUtc_unprocessed)
     x509Attestation_destroy(x509_att);
 }
 
-/*Tests_X509_ATTESTATION_22_025: [ Otherwise, x509Certificate_getNotBeforeUtc shall return the "not before utc" from x509_cert ]*/
 TEST_FUNCTION(x509Certificate_getNotBeforeUtc_processed)
 {
     //arrange
@@ -989,7 +962,6 @@ TEST_FUNCTION(x509Certificate_getNotBeforeUtc_processed)
     x509Attestation_destroy(x509_att);
 }
 
-/*Tests_X509_ATTESTATION_22_026: [ If the given handle, x509_cert is NULL, x509Certificate_getNotAfterUtc shall fail and return NULL ]*/
 TEST_FUNCTION(x509Certificate_getNotAfterUtc_null)
 {
     //arrange
@@ -1004,7 +976,6 @@ TEST_FUNCTION(x509Certificate_getNotAfterUtc_null)
     //cleanup
 }
 
-/*Tests_X509_ATTESTATION_22_027: [ If the given handle, x509_cert has not yet been processed by the Provisioning Service, x509Certificate_getNotAfterUtc shall fail and return NULL ]*/
 TEST_FUNCTION(x509Certificate_getNotAfterUtc_unprocessed)
 {
     //arrange
@@ -1023,7 +994,6 @@ TEST_FUNCTION(x509Certificate_getNotAfterUtc_unprocessed)
     x509Attestation_destroy(x509_att);
 }
 
-/*Tests_X509_ATTESTATION_22_028: [ Otherwise, x509Certificate_getNotAfterUtc shall return the "not after utc" from x509_cert ]*/
 TEST_FUNCTION(x509Certificate_getNotAfterUtc_processed)
 {
     //arrange
@@ -1041,7 +1011,6 @@ TEST_FUNCTION(x509Certificate_getNotAfterUtc_processed)
     x509Attestation_destroy(x509_att);
 }
 
-/*Tests_X509_ATTESTATION_22_029: [ If the given handle, x509_cert is NULL, x509Certificate_getSerialNumber shall fail and return NULL ]*/
 TEST_FUNCTION(x509Certificate_getSerialNumber_null)
 {
     //arrange
@@ -1056,7 +1025,6 @@ TEST_FUNCTION(x509Certificate_getSerialNumber_null)
     //cleanup
 }
 
-/*Tests_X509_ATTESTATION_22_030: [ If the given handle, x509_cert has not yet been processed by the Provisioning Service, x509Certificate_getSerialNumber shall fail and return NULL ]*/
 TEST_FUNCTION(x509Certificate_getSerialNumber_unprocessed)
 {
     //arrange
@@ -1075,7 +1043,6 @@ TEST_FUNCTION(x509Certificate_getSerialNumber_unprocessed)
     x509Attestation_destroy(x509_att);
 }
 
-/*Tests_X509_ATTESTATION_22_031: [ Otherwise, x509Certificate_getSerialNumber shall return the serial number from x509_cert ]*/
 TEST_FUNCTION(x509Certificate_getSerialNumber_processed)
 {
     //arrange
@@ -1093,7 +1060,6 @@ TEST_FUNCTION(x509Certificate_getSerialNumber_processed)
     x509Attestation_destroy(x509_att);
 }
 
-/*Tests_X509_ATTESTATION_22_032: [ If the given handle, x509_cert is NULL, x509Certificate_getVersion shall fail and return NULL ]*/
 TEST_FUNCTION(x509Certificate_getVersion_null)
 {
     //arrange
@@ -1108,7 +1074,6 @@ TEST_FUNCTION(x509Certificate_getVersion_null)
     //cleanup
 }
 
-/*Tests_X509_ATTESTATION_22_033: [ If the given handle, x509_cert has not yet been processed by the Provisioning Service, x509Certificate_getVersion shall fail and return NULL ]*/
 TEST_FUNCTION(x509Certificate_getVersion_unprocessed)
 {
     //arrange
@@ -1127,7 +1092,6 @@ TEST_FUNCTION(x509Certificate_getVersion_unprocessed)
     x509Attestation_destroy(x509_att);
 }
 
-/*Tests_X509_ATTESTATION_22_034: [ Otherwise, x509Certificate_getVersion shall return the version from x509_cert ]*/
 TEST_FUNCTION(x509Certificate_getVersion_processed)
 {
     //arrange

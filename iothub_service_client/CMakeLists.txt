@@ -73,18 +73,14 @@ if (${build_as_dynamic})
         WINDOWS_EXPORT_ALL_SYMBOLS YES
         PDB_NAME "iothub_service_client_dll"
         VERSION ${IOT_SDK_VERSION}
-        SOVERSION ${IOT_SDK_VERION_MAJOR}
+        SOVERSION ${IOT_SDK_VERSION_MAJOR}
         BUILD_WITH_INSTALL_RPATH TRUE
     )
     set (install_libs ${install_libs} iothub_service_client_dll)
 endif()
-setSdkTargetBuildProperties(iothub_service_client)
+applyXcodeBuildFlagsIfNeeded(iothub_service_client)
 
-if(NOT ${nuget_e2e_tests})
-    target_link_libraries(iothub_service_client uamqp parson)
-else()
-    target_link_libraries(iothub_service_client parson)
-endif()
+target_link_libraries(iothub_service_client uamqp parson)
 
 if (NOT ${ARCHITECTURE} STREQUAL "ARM")
     if (NOT ${skip_samples})

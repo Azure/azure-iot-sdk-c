@@ -94,22 +94,12 @@ if (${build_as_dynamic})
         WINDOWS_EXPORT_ALL_SYMBOLS YES
         PDB_NAME "serializer_dll"
         VERSION ${IOT_SDK_VERSION}
-        SOVERSION ${IOT_SDK_VERION_MAJOR}
+        SOVERSION ${IOT_SDK_VERSION_MAJOR}
         BUILD_WITH_INSTALL_RPATH TRUE
     )
     set (install_libs ${install_libs} serializer_dll)
 endif()
-setSdkTargetBuildProperties(serializer)
-
-if (NOT ${skip_samples})
-    if(WIN32)
-        if (NOT ${ARCHITECTURE} STREQUAL "ARM")
-            add_subdirectory(samples)
-        endif()
-    else()
-        add_subdirectory(samples)
-    endif()
-endif()
+applyXcodeBuildFlagsIfNeeded(serializer)
 
 if(NOT IN_OPENWRT)
     # Disable tests for OpenWRT

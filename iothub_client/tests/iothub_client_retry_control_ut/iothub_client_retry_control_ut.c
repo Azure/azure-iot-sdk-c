@@ -39,6 +39,7 @@ void real_free(void* ptr)
 #include "azure_c_shared_utility/agenttime.h"
 #include "azure_c_shared_utility/optionhandler.h"
 #include "iothub_client_core_ll.h"
+#include "azure_c_shared_utility/tickcounter.h"
 #undef ENABLE_MOCKS
 
 #include "internal/iothub_client_retry_control.h"
@@ -59,7 +60,8 @@ static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 
 #define INDEFINITE_TIME                     ((time_t)-1)
 #define TEST_OPTIONHANDLER_HANDLE           (OPTIONHANDLER_HANDLE)0x7771
-
+#define TEST_TICKCOUNTER_HANDLE             (TICK_COUNTER_HANDLE)0x7772
+#define SECONDS_TO_TICKS(x)                 (x * 1000)
 
 static time_t TEST_current_time;
 
@@ -121,15 +123,20 @@ static time_t add_seconds(time_t base_time, int seconds)
 
 static void run_and_verify_should_retry(RETRY_CONTROL_HANDLE handle, time_t first_retry_time, time_t last_retry_time, time_t current_time, double secs_since_first_retry, double secs_since_last_retry, RETRY_ACTION expected_retry_action, bool is_first_check)
 {
+    tickcounter_ms_t tickcount;
+
     // arrange
     umock_c_reset_all_calls();
     if (is_first_check)
     {
-        STRICT_EXPECTED_CALL(get_time(NULL)).SetReturn(current_time);
+        tickcount = SECONDS_TO_TICKS(current_time);
+        STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CopyOutArgumentBuffer_current_ms(&tickcount, sizeof(tickcount));
+
     }
     else
     {
-        STRICT_EXPECTED_CALL(get_time(NULL)).SetReturn(current_time);
+        tickcount = SECONDS_TO_TICKS(current_time);
+        STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CopyOutArgumentBuffer_current_ms(&tickcount, sizeof(tickcount));
         STRICT_EXPECTED_CALL(get_difftime(current_time, first_retry_time)).SetReturn(secs_since_first_retry);
 
         if (expected_retry_action != RETRY_ACTION_STOP_RETRYING)
@@ -140,7 +147,8 @@ static void run_and_verify_should_retry(RETRY_CONTROL_HANDLE handle, time_t firs
 
     if (expected_retry_action == RETRY_ACTION_RETRY_NOW)
     {
-        STRICT_EXPECTED_CALL(get_time(NULL)).SetReturn(current_time);
+        tickcount = SECONDS_TO_TICKS(current_time);
+        STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CopyOutArgumentBuffer_current_ms(&tickcount, sizeof(tickcount));
     }
 
     // act
@@ -218,6 +226,7 @@ static void register_umock_alias_types()
     REGISTER_UMOCK_ALIAS_TYPE(pfCloneOption, void*);
     REGISTER_UMOCK_ALIAS_TYPE(pfDestroyOption, void*);
     REGISTER_UMOCK_ALIAS_TYPE(pfSetOption, void*);
+    REGISTER_UMOCK_ALIAS_TYPE(TICK_COUNTER_HANDLE, void*);
 }
 
 static void register_global_mock_hooks()
@@ -237,12 +246,15 @@ static void register_global_mock_returns()
 
     REGISTER_GLOBAL_MOCK_RETURN(OptionHandler_FeedOptions, OPTIONHANDLER_OK);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(OptionHandler_FeedOptions, OPTIONHANDLER_ERROR);
+    REGISTER_GLOBAL_MOCK_RETURN(tickcounter_create, TEST_TICKCOUNTER_HANDLE);
 }
 
 
 static RETRY_CONTROL_HANDLE create_retry_control(IOTHUB_CLIENT_RETRY_POLICY policy_name, unsigned int max_retry_time_in_secs)
 {
     umock_c_reset_all_calls();
+    EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
+    EXPECTED_CALL(tickcounter_create());
     EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
     RETRY_CONTROL_HANDLE handle = retry_control_create(policy_name, max_retry_time_in_secs);
 
@@ -297,7 +309,6 @@ TEST_FUNCTION_CLEANUP(TestMethodCleanup)
     TEST_MUTEX_RELEASE(g_testByTest);
 }
 
-// Tests_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_003: [If malloc fails, `retry_control_create` shall fail and return NULL]
 TEST_FUNCTION(create_malloc_fails)
 {
     // arrange
@@ -321,13 +332,37 @@ TEST_FUNCTION(create_malloc_fails)
     umock_c_reset_all_calls();
 }
 
-// Tests_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_002: [`retry_control_create` shall allocate memory for the retry control instance structure (a.k.a. `retry_control`)]
-// Tests_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_009: [If no errors occur, `retry_control_create` shall return a handle to `retry_control`]
+TEST_FUNCTION(tickcounter_create_fails)
+{
+    // arrange
+    ASSERT_ARE_EQUAL(int, 0, umock_c_negative_tests_init());
+
+    umock_c_reset_all_calls();
+    EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
+    EXPECTED_CALL(tickcounter_create());
+    EXPECTED_CALL(free(IGNORED_PTR_ARG));
+    umock_c_negative_tests_snapshot();
+
+    umock_c_negative_tests_fail_call(1);
+
+    // act
+    RETRY_CONTROL_HANDLE handle = retry_control_create(IOTHUB_CLIENT_RETRY_EXPONENTIAL_BACKOFF_WITH_JITTER, 10);
+
+    // assert
+    ASSERT_IS_NULL(handle);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    // cleanup
+    umock_c_negative_tests_deinit();
+    umock_c_reset_all_calls();
+}
+
 TEST_FUNCTION(create_success)
 {
     // arrange
     umock_c_reset_all_calls();
     EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
+    EXPECTED_CALL(tickcounter_create());
 
     // act
     RETRY_CONTROL_HANDLE handle = retry_control_create(IOTHUB_CLIENT_RETRY_EXPONENTIAL_BACKOFF_WITH_JITTER, 10);
@@ -340,7 +375,6 @@ TEST_FUNCTION(create_success)
     retry_control_destroy(handle);
 }
 
-// Tests_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_055: [If `retry_control_handle` is NULL, `retry_control_destroy` shall return]
 TEST_FUNCTION(destroy_NULL_handle)
 {
     // arrange
@@ -355,15 +389,17 @@ TEST_FUNCTION(destroy_NULL_handle)
     // cleanup
 }
 
-// Tests_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_056: [`retry_control_destroy` shall destroy `retry_control_handle` using free()]
 TEST_FUNCTION(destroy_success)
 {
     // arrange
     umock_c_reset_all_calls();
     EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
+    EXPECTED_CALL(tickcounter_create());
+    EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
     RETRY_CONTROL_HANDLE handle = retry_control_create(IOTHUB_CLIENT_RETRY_EXPONENTIAL_BACKOFF_WITH_JITTER, 10);
 
     umock_c_reset_all_calls();
+    EXPECTED_CALL(tickcounter_destroy(IGNORED_PTR_ARG));
     EXPECTED_CALL(free(IGNORED_PTR_ARG));
 
     // act
@@ -375,7 +411,6 @@ TEST_FUNCTION(destroy_success)
     // cleanup
 }
 
-// Tests_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_057: [If `start_time` is INDEFINITE_TIME, `is_timeout_reached` shall fail and return non-zero]
 TEST_FUNCTION(is_timeout_reached_INDEFINITE_start_time)
 {
     // arrange
@@ -392,7 +427,6 @@ TEST_FUNCTION(is_timeout_reached_INDEFINITE_start_time)
     // cleanup
 }
 
-// Tests_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_058: [If `is_timed_out` is NULL, `is_timeout_reached` shall fail and return non-zero]
 TEST_FUNCTION(is_timeout_reached_NULL_is_timed_out)
 {
     // arrange
@@ -408,9 +442,6 @@ TEST_FUNCTION(is_timeout_reached_NULL_is_timed_out)
     // cleanup
 }
 
-// Tests_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_059: [`is_timeout_reached` shall obtain the `current_time` using get_time()]
-// Tests_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_061: [If (`current_time` - `start_time`) is greater or equal to `timeout_in_secs`, `is_timed_out` shall be set to true]
-// Tests_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_063: [If no errors occur, `is_timeout_reached` shall return 0]
 TEST_FUNCTION(is_timeout_reached_TRUE_success)
 {
     // arrange
@@ -430,7 +461,6 @@ TEST_FUNCTION(is_timeout_reached_TRUE_success)
     // cleanup
 }
 
-// Tests_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_062: [If (`current_time` - `start_time`) is less than `timeout_in_secs`, `is_timed_out` shall be set to false]
 TEST_FUNCTION(is_timeout_reached_FALSE_success)
 {
     // arrange
@@ -450,7 +480,6 @@ TEST_FUNCTION(is_timeout_reached_FALSE_success)
     // cleanup
 }
 
-// Tests_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_060: [If get_time() fails, `is_timeout_reached` shall fail and return non-zero]
 TEST_FUNCTION(is_timeout_reached_failure_checks)
 {
     // arrange
@@ -469,7 +498,6 @@ TEST_FUNCTION(is_timeout_reached_failure_checks)
     // cleanup
 }
 
-// Tests_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_045: [If `retry_control_handle`, `retry_control_retrieve_options` shall fail and return NULL]
 TEST_FUNCTION(Retrieve_Options_NULL_handle)
 {
     // arrange
@@ -485,11 +513,6 @@ TEST_FUNCTION(Retrieve_Options_NULL_handle)
     // cleanup
 }
 
-// Tests_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_007: [`retry_control->max_jitter_percent` shall be set to 5]
-// Tests_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_046: [An instance of OPTIONHANDLER_HANDLE (a.k.a. `options`) shall be created using OptionHandler_Create]
-// Tests_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_050: [`retry_control->initial_wait_time_in_secs` shall be added to `options` using OptionHandler_Add]
-// Tests_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_051: [`retry_control->max_jitter_percent` shall be added to `options` using OptionHandler_Add]
-// Tests_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_054: [If no errors occur, `retry_control_retrieve_options` shall return the OPTIONHANDLER_HANDLE instance]
 TEST_FUNCTION(Retrieve_Options_success)
 {
     // arrange
@@ -516,9 +539,6 @@ TEST_FUNCTION(Retrieve_Options_success)
     retry_control_destroy(handle);
 }
 
-// Tests_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_047: [If OptionHandler_Create fails, `retry_control_retrieve_options` shall fail and return NULL]
-// Tests_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_052: [If any call to OptionHandler_Add fails, `retry_control_retrieve_options` shall fail and return NULL]
-// Tests_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_053: [If any failures occur, `retry_control_retrieve_options` shall release any memory it has allocated]
 TEST_FUNCTION(Retrieve_Options_failure_checks)
 {
     // arrange
@@ -542,7 +562,7 @@ TEST_FUNCTION(Retrieve_Options_failure_checks)
     for (i = 0; i < umock_c_negative_tests_call_count(); i++)
     {
         // arrange
-        char error_msg[64];
+        char error_msg[128];
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(i);
@@ -559,7 +579,6 @@ TEST_FUNCTION(Retrieve_Options_failure_checks)
     retry_control_destroy(handle);
 }
 
-// Tests_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_036: [If `retry_control_handle`, `name` or `value` are NULL, `retry_control_set_option` shall fail and return non-zero]
 TEST_FUNCTION(Set_Options_NULL_handle)
 {
     // arrange
@@ -575,7 +594,6 @@ TEST_FUNCTION(Set_Options_NULL_handle)
     // cleanup
 }
 
-// Tests_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_036: [If `retry_control_handle`, `name` or `value` are NULL, `retry_control_set_option` shall fail and return non-zero]
 TEST_FUNCTION(Set_Options_NULL_name)
 {
     // arrange
@@ -594,7 +612,6 @@ TEST_FUNCTION(Set_Options_NULL_name)
     retry_control_destroy(handle);
 }
 
-// Tests_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_036: [If `retry_control_handle`, `name` or `value` are NULL, `retry_control_set_option` shall fail and return non-zero]
 TEST_FUNCTION(Set_Options_NULL_value)
 {
     // arrange
@@ -613,7 +630,6 @@ TEST_FUNCTION(Set_Options_NULL_value)
     retry_control_destroy(handle);
 }
 
-// Tests_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_037: [If `name` is "initial_wait_time_in_secs" and `value` is less than 1, `retry_control_set_option` shall fail and return non-zero]
 TEST_FUNCTION(Set_Options_INVALID_initial_wait_time_in_secs)
 {
     // arrange
@@ -633,7 +649,6 @@ TEST_FUNCTION(Set_Options_INVALID_initial_wait_time_in_secs)
     retry_control_destroy(handle);
 }
 
-// Tests_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_039: [If `name` is "max_jitter_percent" and `value` is less than 0 or greater than 100, `retry_control_set_option` shall fail and return non-zero]
 TEST_FUNCTION(Set_Options_INVALID_max_jitter_percent)
 {
     // arrange
@@ -653,8 +668,6 @@ TEST_FUNCTION(Set_Options_INVALID_max_jitter_percent)
     retry_control_destroy(handle);
 }
 
-// Tests_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_041: [If `name` is "retry_control_options", value shall be fed to `retry_control` using OptionHandler_FeedOptions]
-// Tests_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_044: [If no errors occur, `retry_control_set_option` shall return 0]
 TEST_FUNCTION(Set_Options_success)
 {
     // arrange
@@ -674,7 +687,6 @@ TEST_FUNCTION(Set_Options_success)
     retry_control_destroy(handle);
 }
 
-// Tests_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_042: [If OptionHandler_FeedOptions fails, `retry_control_set_option` shall fail and return non-zero]
 TEST_FUNCTION(Set_Options_failure_checks)
 {
     // arrange
@@ -690,7 +702,7 @@ TEST_FUNCTION(Set_Options_failure_checks)
     for (i = 0; i < umock_c_negative_tests_call_count(); i++)
     {
         // arrange
-        char error_msg[64];
+        char error_msg[128];
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(i);
@@ -708,7 +720,6 @@ TEST_FUNCTION(Set_Options_failure_checks)
     retry_control_destroy(handle);
 }
 
-// Tests_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_043: [If `name` is not a supported option, `retry_control_set_option` shall fail and return non-zero]
 TEST_FUNCTION(Set_Options_UNSUPPORTED_name)
 {
     // arrange
@@ -736,7 +747,6 @@ TEST_FUNCTION(Set_Options_UNSUPPORTED_name)
     retry_control_destroy(handle);
 }
 
-// Tests_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_010: [If `retry_control_handle` or `retry_action` are NULL, `retry_control_should_retry` shall fail and return non-zero]
 TEST_FUNCTION(Should_Retry_NULL_handle)
 {
     // arrange
@@ -751,7 +761,6 @@ TEST_FUNCTION(Should_Retry_NULL_handle)
     // cleanup
 }
 
-// Tests_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_010: [If `retry_control_handle` or `retry_action` are NULL, retry_control_should_retry shall fail and return non-zero]
 TEST_FUNCTION(Should_Retry_NULL_retry_action)
 {
     // arrange
@@ -767,15 +776,16 @@ TEST_FUNCTION(Should_Retry_NULL_retry_action)
     retry_control_destroy(handle);
 }
 
-// Tests_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_012: [If get_time() fails, `retry_control_should_retry` shall fail and return non-zero]
 TEST_FUNCTION(Should_Retry_failure)
 {
     // arrange
+    tickcounter_ms_t tickcount;
     unsigned int max_retry_time_in_secs = 15;
     RETRY_CONTROL_HANDLE handle = create_retry_control(IOTHUB_CLIENT_RETRY_EXPONENTIAL_BACKOFF, max_retry_time_in_secs);
 
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(get_time(NULL)).SetReturn(INDEFINITE_TIME);
+    tickcount = (tickcounter_ms_t)INDEFINITE_TIME;
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CopyOutArgumentBuffer_current_ms(&tickcount, sizeof(tickcount));
 
     // act
     RETRY_ACTION retry_action;
@@ -789,23 +799,25 @@ TEST_FUNCTION(Should_Retry_failure)
     retry_control_destroy(handle);
 }
 
-// Tests_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_022: [If get_time() fails, the evaluation function shall return non-zero]
-// Tests_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_014: [If evaluate_retry_action() fails, `retry_control_should_retry` shall fail and return non-zero]
 TEST_FUNCTION(Should_Retry_evaluate_retry_action_failure)
 {
     // arrange
+    tickcounter_ms_t tickcount;
     unsigned int max_retry_time_in_secs = 15;
     RETRY_CONTROL_HANDLE handle = create_retry_control(IOTHUB_CLIENT_RETRY_EXPONENTIAL_BACKOFF, max_retry_time_in_secs);
 
     // This first call succeeds because retry_count is 0
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(get_time(NULL)).SetReturn(TEST_current_time);
-    STRICT_EXPECTED_CALL(get_time(NULL)).SetReturn(TEST_current_time);
+    tickcount = SECONDS_TO_TICKS(TEST_current_time);
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CopyOutArgumentBuffer_current_ms(&tickcount, sizeof(tickcount));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CopyOutArgumentBuffer_current_ms(&tickcount, sizeof(tickcount));
+
     RETRY_ACTION retry_action;
     (void)retry_control_should_retry(handle, &retry_action);
 
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(get_time(NULL)).SetReturn(INDEFINITE_TIME);
+    tickcount = (tickcounter_ms_t)INDEFINITE_TIME;
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CopyOutArgumentBuffer_current_ms(&tickcount, sizeof(tickcount));
 
     // act
     int result = retry_control_should_retry(handle, &retry_action);
@@ -818,18 +830,20 @@ TEST_FUNCTION(Should_Retry_evaluate_retry_action_failure)
     retry_control_destroy(handle);
 }
 
-// Tests_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_014: [If evaluate_retry_action() fails, retry_control_should_retry shall fail and return non-zero]
-// Tests_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_020: [If `retry_control->last_retry_time` is INDEFINITE_TIME and policy is not IOTHUB_CLIENT_RETRY_IMMEDIATE, the evaluation function shall return non-zero]
 TEST_FUNCTION(Should_Retry_INDEFINITE_last_retry_time)
 {
     // arrange
+    tickcounter_ms_t tickcount;
     unsigned int max_retry_time_in_secs = 15;
     RETRY_CONTROL_HANDLE handle = create_retry_control(IOTHUB_CLIENT_RETRY_EXPONENTIAL_BACKOFF, max_retry_time_in_secs);
 
     // This first call succeeds because retry_count is 0
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(get_time(NULL)).SetReturn(TEST_current_time);
-    STRICT_EXPECTED_CALL(get_time(NULL)).SetReturn(INDEFINITE_TIME);
+    tickcount = SECONDS_TO_TICKS(TEST_current_time);
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CopyOutArgumentBuffer_current_ms(&tickcount, sizeof(tickcount));
+    tickcount = (tickcounter_ms_t)INDEFINITE_TIME;
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CopyOutArgumentBuffer_current_ms(&tickcount, sizeof(tickcount));
+
     RETRY_ACTION retry_action;
     (void)retry_control_should_retry(handle, &retry_action);
 
@@ -846,10 +860,10 @@ TEST_FUNCTION(Should_Retry_INDEFINITE_last_retry_time)
     retry_control_destroy(handle);
 }
 
-// Tests_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_023: [If `retry_control->max_retry_time_in_secs` is not 0 and (`current_time` - `retry_control->first_retry_time`) is greater than or equal to `retry_control->max_retry_time_in_secs`, `retry_action` shall be set to RETRY_ACTION_STOP_RETRYING]
 TEST_FUNCTION(Should_Retry_NO_MAX_RETRY_TIME_success)
 {
     // arrange
+    tickcounter_ms_t tickcount;
     unsigned int max_retry_time_in_secs = 0;
     RETRY_CONTROL_HANDLE handle = create_retry_control(IOTHUB_CLIENT_RETRY_IMMEDIATE, max_retry_time_in_secs);
 
@@ -858,12 +872,16 @@ TEST_FUNCTION(Should_Retry_NO_MAX_RETRY_TIME_success)
 
     // This first call succeeds because retry_count is 0
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(get_time(NULL)).SetReturn(first_try_time);
+    tickcount = SECONDS_TO_TICKS(first_try_time);
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CopyOutArgumentBuffer_current_ms(&tickcount, sizeof(tickcount));
+
     RETRY_ACTION retry_action;
     (void)retry_control_should_retry(handle, &retry_action);
 
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(get_time(NULL)).SetReturn(next_try_time);
+    tickcount = SECONDS_TO_TICKS(next_try_time);
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CopyOutArgumentBuffer_current_ms(&tickcount, sizeof(tickcount));
+
     // no get_difftime gets invoked.
 
     // act
@@ -878,23 +896,6 @@ TEST_FUNCTION(Should_Retry_NO_MAX_RETRY_TIME_success)
     retry_control_destroy(handle);
 }
 
-// Tests_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_004: [The parameters passed to `retry_control_create` shall be saved into `retry_control`]
-// Tests_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_005: [If `policy_name` is IOTHUB_CLIENT_RETRY_EXPONENTIAL_BACKOFF or IOTHUB_CLIENT_RETRY_EXPONENTIAL_BACKOFF_WITH_JITTER, `retry_control->initial_wait_time_in_secs` shall be set to 1]
-// Tests_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_008: [The remaining fields in `retry_control` shall be initialized according to retry_control_reset()]
-// Tests_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_011: [If `retry_control->first_retry_time` is INDEFINITE_TIME, it shall be set using get_time()]
-// Tests_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_013: [evaluate_retry_action() shall be invoked]
-// Tests_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_015: [If `retry_action` is set to RETRY_ACTION_RETRY_NOW, `retry_control->retry_count` shall be incremented by 1]
-// Tests_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_016: [If `retry_action` is set to RETRY_ACTION_RETRY_NOW and policy is not IOTHUB_CLIENT_RETRY_IMMEDIATE, `retry_control->last_retry_time` shall be set using get_time()]
-// Tests_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_017: [If `retry_action` is set to RETRY_ACTION_RETRY_NOW and policy is not IOTHUB_CLIENT_RETRY_IMMEDIATE, `retry_control->current_wait_time_in_secs` shall be set using calculate_next_wait_time()]
-// Tests_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_018: [If no errors occur, `retry_control_should_retry` shall return 0]
-// Tests_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_019: [If `retry_control->retry_count` is 0, `retry_action` shall be set to RETRY_ACTION_RETRY_NOW]
-// Tests_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_021: [`current_time` shall be set using get_time()]
-// Tests_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_023: [If `retry_control->max_retry_time_in_secs` is not 0 and (`current_time` - `retry_control->first_retry_time`) is greater than or equal to `retry_control->max_retry_time_in_secs`, `retry_action` shall be set to RETRY_ACTION_STOP_RETRYING]
-// Tests_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_024: [Otherwise, if (`current_time` - `retry_control->last_retry_time`) is less than `retry_control->current_wait_time_in_secs`, `retry_action` shall be set to RETRY_ACTION_RETRY_LATER]
-// Tests_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_025: [Otherwise, if (`current_time` - `retry_control->last_retry_time`) is greater or equal to `retry_control->current_wait_time_in_secs`, `retry_action` shall be set to RETRY_ACTION_RETRY_NOW]
-// Tests_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_026: [If no errors occur, the evaluation function shall return 0]
-// Tests_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_032: [If `retry_control->policy_name` is IOTHUB_CLIENT_RETRY_EXPONENTIAL_BACKOFF_WITH_JITTER, `calculate_next_wait_time` shall return ((pow(2, `retry_control->retry_count` - 1) * `retry_control->initial_wait_time_in_secs`) * (1 + (`retry_control->max_jitter_percent` / 100) * (rand() / RAND_MAX)))]
-// Tests_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_040: [If `name` is "max_jitter_percent", value shall be saved on `retry_control->max_jitter_percent`]
 TEST_FUNCTION(Should_Retry_EXPONENTIAL_BACKOFF_WITH_JITTER_success)
 {
     // arrange
@@ -914,8 +915,6 @@ TEST_FUNCTION(Should_Retry_EXPONENTIAL_BACKOFF_WITH_JITTER_success)
     retry_control_destroy(handle);
 }
 
-// Tests_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_031: [If `retry_control->policy_name` is IOTHUB_CLIENT_RETRY_EXPONENTIAL_BACKOFF, `calculate_next_wait_time` shall return (pow(2, `retry_control->retry_count` - 1) * `retry_control->initial_wait_time_in_secs`)]
-// Tests_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_038: [If `name` is "initial_wait_time_in_secs", `value` shall be saved on `retry_control->initial_wait_time_in_secs`]
 TEST_FUNCTION(Should_Retry_EXPONENTIAL_BACKOFF_success)
 {
     // arrange
@@ -936,7 +935,6 @@ TEST_FUNCTION(Should_Retry_EXPONENTIAL_BACKOFF_success)
     retry_control_destroy(handle);
 }
 
-// Tests_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_029: [If `retry_control->policy_name` is IOTHUB_CLIENT_RETRY_INTERVAL, `calculate_next_wait_time` shall return `retry_control->initial_wait_time_in_secs`]
 TEST_FUNCTION(Should_Retry_INTERVAL_success)
 {
     // arrange
@@ -953,8 +951,6 @@ TEST_FUNCTION(Should_Retry_INTERVAL_success)
     retry_control_destroy(handle);
 }
 
-// Tests_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_006: [Otherwise `retry_control->initial_wait_time_in_secs` shall be set to 5]
-// Tests_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_030: [If `retry_control->policy_name` is IOTHUB_CLIENT_RETRY_LINEAR_BACKOFF, `calculate_next_wait_time` shall return (`retry_control->initial_wait_time_in_secs` * (`retry_control->retry_count`))]
 TEST_FUNCTION(Should_Retry_LINEAR_BACKOFF_success)
 {
     // arrange
@@ -971,7 +967,6 @@ TEST_FUNCTION(Should_Retry_LINEAR_BACKOFF_success)
     retry_control_destroy(handle);
 }
 
-// Tests_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_033: [If `retry_control->policy_name` is IOTHUB_CLIENT_RETRY_RANDOM, `calculate_next_wait_time` shall return (`retry_control->initial_wait_time_in_secs` * (rand() / RAND_MAX))]
 // This test must be replaced. Create an auxiliary module for get_rand() in c-shared-utilities and test using that
 /*
 TEST_FUNCTION(Should_Retry_RANDOM_success)
@@ -1039,8 +1034,6 @@ TEST_FUNCTION(Should_Retry_RANDOM_success)
 }
 */
 
-// Tests_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_020: [If `retry_control->last_retry_time` is INDEFINITE_TIME and policy is not IOTHUB_CLIENT_RETRY_IMMEDIATE, the evaluation function shall return non-zero]
-// Tests_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_028: [If `retry_control->policy_name` is IOTHUB_CLIENT_RETRY_IMMEDIATE, retry_action shall be set to RETRY_ACTION_RETRY_NOW]
 TEST_FUNCTION(Should_Retry_RETRY_IMMEDIATE_success)
 {
     // arrange
@@ -1051,7 +1044,9 @@ TEST_FUNCTION(Should_Retry_RETRY_IMMEDIATE_success)
     time_t current_time = TEST_current_time;
 
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(get_time(NULL)).SetReturn(current_time);
+    tickcounter_ms_t tickcount = SECONDS_TO_TICKS(current_time);
+
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CopyOutArgumentBuffer_current_ms(&tickcount, sizeof(tickcount));
 
     unsigned int i;
     for (i = 0; i <= max_retry_time_in_secs; i++)
@@ -1062,7 +1057,8 @@ TEST_FUNCTION(Should_Retry_RETRY_IMMEDIATE_success)
         if (i > 0)
         {
             // i.e., if it's not the first call to _should_retry.
-            STRICT_EXPECTED_CALL(get_time(NULL)).SetReturn(current_time);
+            tickcount = SECONDS_TO_TICKS(current_time);
+            STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CopyOutArgumentBuffer_current_ms(&tickcount, sizeof(tickcount));
             STRICT_EXPECTED_CALL(get_difftime(current_time, first_time)).SetReturn(i);
         }
 
@@ -1088,7 +1084,6 @@ TEST_FUNCTION(Should_Retry_RETRY_IMMEDIATE_success)
     retry_control_destroy(handle);
 }
 
-// Tests_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_027: [If `retry_control->policy_name` is IOTHUB_CLIENT_RETRY_NONE, retry_action shall be set to RETRY_ACTION_STOP_RETRYING and return immediatelly with result 0]
 TEST_FUNCTION(Should_Retry_RETRY_NONE_success)
 {
     // arrange
@@ -1114,8 +1109,6 @@ TEST_FUNCTION(Should_Retry_RETRY_NONE_success)
     retry_control_destroy(handle);
 }
 
-// Tests_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_034: [If `retry_control_handle` is NULL, `retry_control_reset` shall return]
-// Tests_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_035: [`retry_control` shall have fields `retry_count` and `current_wait_time_in_secs` set to 0 (zero), `first_retry_time` and `last_retry_time` set to INDEFINITE_TIME]
 TEST_FUNCTION(Reset_success)
 {
     // arrange
@@ -1127,7 +1120,8 @@ TEST_FUNCTION(Reset_success)
 
     // This first call succeeds because retry_count is 0
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(get_time(NULL)).SetReturn(first_try_time);
+    tickcounter_ms_t tickcount = SECONDS_TO_TICKS(first_try_time);
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CopyOutArgumentBuffer_current_ms(&tickcount, sizeof(tickcount));
     RETRY_ACTION retry_action;
     int result = retry_control_should_retry(handle, &retry_action);
     ASSERT_ARE_EQUAL(int, 0, result);
@@ -1135,7 +1129,8 @@ TEST_FUNCTION(Reset_success)
 
     // At this point the retry control reached the max_retry_time_in_secs.
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(get_time(NULL)).SetReturn(next_try_time);
+    tickcount = SECONDS_TO_TICKS(next_try_time);
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CopyOutArgumentBuffer_current_ms(&tickcount, sizeof(tickcount));
     STRICT_EXPECTED_CALL(get_difftime(next_try_time, first_try_time)).SetReturn(max_retry_time_in_secs);
     result = retry_control_should_retry(handle, &retry_action);
     ASSERT_ARE_EQUAL(int, 0, result);
@@ -1146,8 +1141,7 @@ TEST_FUNCTION(Reset_success)
 
     // assert
     umock_c_reset_all_calls();
-    // notice "next_try_time" below.
-    STRICT_EXPECTED_CALL(get_time(NULL)).SetReturn(next_try_time);
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CopyOutArgumentBuffer_current_ms(&tickcount, sizeof(tickcount));
     // The return is RETRY_ACTION_RETRY_NOW because retry_count is 0.
     result = retry_control_should_retry(handle, &retry_action);
 

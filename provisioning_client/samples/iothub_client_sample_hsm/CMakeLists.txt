@@ -40,15 +40,16 @@ if(${use_openssl})
     endif()
 endif()
 
-if (${use_mqtt})
-    target_link_libraries(iothub_client_sample_hsm iothub_client_mqtt_transport)
-endif()
 if (${use_amqp})
-    target_link_libraries(iothub_client_sample_hsm iothub_client_amqp_transport)
     linkUAMQP(iothub_client_sample_hsm)
 endif()
 
-target_link_libraries(iothub_client_sample_hsm iothub_client)
-
-link_security_client(iothub_client_sample_hsm)
-linkSharedUtil(iothub_client_sample_hsm)
+# prov_auth_client must come after the transport selection
+target_link_libraries(iothub_client_sample_hsm
+    $<$<BOOL:${use_mqtt}>:iothub_client_mqtt_transport>
+    $<$<BOOL:${use_amqp}>:iothub_client_amqp_transport>
+    iothub_client
+    prov_auth_client
+    aziotsharedutil
+    hsm_security_client
+)

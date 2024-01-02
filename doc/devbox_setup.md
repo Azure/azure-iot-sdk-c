@@ -11,13 +11,13 @@ This document describes how to prepare your development environment to use the *
 
 ## Set up a Windows development environment
 
-- Install [Visual Studio 2019][visual-studio]. You can use the **Visual Studio Community** free download if you meet the licensing requirements.  (**Visual Studio 2017** is also supported.)
+- Install [Visual Studio 2022][visual-studio]. You can use the **Visual Studio Community** free download if you meet the licensing requirements.  (**Visual Studio 2017** and **Visual Studio 2019** are also supported.)
 
 > Be sure to include Visual C++.
 
 - Install [git]. Confirm git is in your PATH by typing `git version` from a command prompt.
 
-- Install CMake, either by including it in your Visual Studio 2019 install or installing directly from [CMake.org][CMake]. Make sure it is in your PATH by typing `cmake -version` from a command prompt. CMake will be used to create Visual Studio projects to build libraries and samples.
+- Install CMake, either by including it in your Visual Studio install or installing directly from [CMake.org][CMake]. Make sure it is in your PATH by typing `cmake -version` from a command prompt. CMake will be used to create Visual Studio projects to build libraries and samples.
 
 - Locate the tag name for the [latest release][latest-release] of the SDK.
 
@@ -35,7 +35,7 @@ git submodule update --init
 
 ### Building sample applications using vcpkg to build the SDK
 
-The sample applications can be build with the help of the C SDK libraries and headers built with vcpkg.  vcpkg is a package manager that facilitates building C and C++ libraries. To install the vcpkg C SDK libraries and headers, follow these steps [Setup C SDK vcpkg for Windows development environment](.doc/setting_up_vcpkg.md#setup-c-sdk-vcpkg-for-windows-development-environment).
+The sample applications can be build with the help of the C SDK libraries and headers built with vcpkg.  vcpkg is a package manager that facilitates building C and C++ libraries. To install the vcpkg C SDK libraries and headers, follow these steps [Setup C SDK vcpkg for Windows development environment](setting_up_vcpkg.md#setup-c-sdk-vcpkg-for-windows-development-environment).
 
 Note: vcpkg manager creates a directory with all the headers and generates the C SDK .lib files on your machine. If you are using Visual Studio (from 2017) the command 'vcpkg integrate install' lets Visual Studio knows where the vcpkg headers and lib directories are located. If you're using other IDEs, just add the vcpkg directories to your compiler/linker include paths.
 
@@ -57,7 +57,7 @@ Build the sample project.
 
 In some cases, you may want to build the SDK locally for development and testing purposes (without using vcpkg). First, take the following steps to generate project files:
 
-- Open a "Developer Command Prompt for VS2017" or "Developer Command Prompt for VS2019".
+- Open a "Developer Command Prompt for VS 2022" or "Developer Command Prompt for VS2019" or "Developer Command Prompt for VS2017".
 
 - Run the following CMake commands from the root of the repository:
 
@@ -69,9 +69,11 @@ cd cmake
   cmake .. -G "Visual Studio 15 2017" ## For Visual Studio 2017
 # or
   cmake .. -G "Visual Studio 16 2019" -A Win32
+# or
+  cmake .. -G "Visual Studio 17 2022" -A Win32
 ```
 
-> This builds x86 libraries. To build for x64 for Visual Studio 2017, `cmake .. -G "Visual Studio 15 2017 Win64"` or for Visual Studio 2019, `cmake .. -G "Visual Studio 16 2019 -A x64"`
+> This builds x86 libraries. To build for x64 for Visual Studio 2017: `cmake .. -G "Visual Studio 15 2017 Win64"`, for Visual Studio 2019: `cmake .. -G "Visual Studio 16 2019" -A x64`, or for Visual Studio 2022: `cmake .. -G "Visual Studio 17 2022" -A x64`
 
 When the project generation completes successfully, you will see a Visual Studio solution file (.sln) under the `cmake` folder. To build the SDK, do one of the following:
 
@@ -86,13 +88,13 @@ cmake --build . -- /m /p:Configuration=Release
 > There are many CMake configuration options available for building the SDK. For example, you can disable one of the available protocol stacks by adding an argument to the CMake project generation command:
 
 ```Shell
-cmake -G "Visual Studio 15 2017" -Duse_amqp=OFF .. // same with 2017 and 2019 generator (see above)
+cmake -G "Visual Studio 15 2017" -Duse_amqp=OFF .. // same with 2017, 2019, and 2022 generator (see above)
 ```
 
 > Also, you can build and run unit tests:
 
 ```Shell
-cmake -G "Visual Studio 15 2017" -Drun_unittests=ON ..  // same with 2017 and 2019 generator (see above)
+cmake -G "Visual Studio 15 2017" -Drun_unittests=ON ..  // same with 2017, 2019, and 2022 generator (see above)
 cmake --build . -- /m /p:Configuration=Debug
 ctest -C "debug" -V
 ```
@@ -123,9 +125,10 @@ This section describes how to set up a development environment for the C SDK on 
   sudo apt-get update
   sudo apt-get install -y git cmake build-essential curl libcurl4-openssl-dev libssl-dev uuid-dev ca-certificates
   ```
-  NOTE: If you are planning to use HTTP with wolfSSL, you must configure curl before installation.
-  1. Download the latest [curl](https://github.com/curl/curl/releases).
-  2. See curl [documentation](https://curl.se/docs/install.html) to use the wolfSSL option for configuration.  Install.
+  NOTE: If you are planning to use HTTP other than with the default OpenSSL, (i.e., wolfSSL or mbedTLS), you must configure cURL before installation.
+  1. Download the latest [cURL](https://github.com/curl/curl/releases).
+  2. See curl [documentation](https://curl.se/docs/install.html) to use the wolfSSL or mbedTLS option for configuration.  
+  3. Configure, build, and install cURL.
 
 - Verify that CMake is at least version **2.8.12**:
 
@@ -376,10 +379,10 @@ make
 [azure-shared-c-utility]:https://github.com/Azure/azure-c-shared-utility
 [azure-uamqp-c]:https://github.com/Azure/azure-uamqp-c
 [azure-umqtt-c]:https://github.com/Azure/azure-umqtt-c
-[sln-file]:https://msdn.microsoft.com/en-us/library/bb165951.aspx
+[sln-file]:https://msdn.microsoft.com/library/bb165951.aspx
 [git]:http://www.git-scm.com
 [CMake]:https://cmake.org/
-[MSBuild]:https://msdn.microsoft.com/en-us/library/0k6kkbsd.aspx
+[MSBuild]:https://msdn.microsoft.com/library/0k6kkbsd.aspx
 [Compilation and Installation]:https://wiki.openssl.org/index.php/Compilation_and_Installation#Windows
 [Ubuntu]:http://www.ubuntu.com/desktop
 [gcc]:https://gcc.gnu.org/
@@ -390,6 +393,6 @@ make
 [clang]:https://clang.llvm.org/
 [device_samples]: ../iothub_client/samples/
 [latest-release]:https://github.com/Azure/azure-iot-sdk-c/releases/latest
-[Windows 10 IoT Core]:https://docs.microsoft.com/en-us/windows/iot-core/develop-your-app/buildingappsforiotcore
+[Windows 10 IoT Core]:https://docs.microsoft.com/windows/iot-core/develop-your-app/buildingappsforiotcore
 [vcpkg]:https://github.com/Microsoft/vcpkg
 [windows-and-openssl]:./windows_and_openssl.md

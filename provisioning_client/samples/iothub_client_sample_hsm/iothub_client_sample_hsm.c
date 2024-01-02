@@ -27,15 +27,9 @@
 #include "certs.h"
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
 
-static const char* iothub_uri = "<iothub_uri>";
-static const char* device_id = "<device_id>";
-static const char* conn_string = "HostName=<hostname>;DeviceId=<device_id>;UseProvisioning=true";
-
-#ifdef USE_OPENSSL
-    static bool g_using_cert = true;
-#else
-    static bool g_using_cert = false;
-#endif // USE_OPENSSL
+#define iothub_uri "<iothub_uri>"
+#define device_id "<device_id>"
+#define conn_string "HostName=<hostname>;DeviceId=<device_id>;UseProvisioning=true"
 
 typedef struct IOTHUB_CLIENT_SAMPLE_INFO_TAG
 {
@@ -101,7 +95,7 @@ int main(void)
         (void)IoTHubDeviceClient_LL_SetMessageCallback(device_ll_handle, receive_msg_callback, &iothub_info);
         (void)IoTHubDeviceClient_LL_SetConnectionStatusCallback(device_ll_handle, connection_status_callback, &iothub_info);
 
-        // Set any option that are neccessary.
+        // Set any option that are necessary.
         // For available options please see the iothub_sdk_options.md documentation
         //bool traceOn = true;
         //IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_LOG_TRACE, &traceOn);

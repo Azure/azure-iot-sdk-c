@@ -411,9 +411,6 @@ DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubSchemaClientMocks, , int, mallocAndStrcpy_s,
 
 #define IGNORED_INT_ARG FRONTDOOR_DEVICE_KEY
 
-/* Requirements tested by the virtue of using the exposed API:
-Tests_SRS_SCHEMALIB_99_001:[ IoTHubSchemaClient shall expose the following API ... ] */
-
 BEGIN_TEST_SUITE(serializer_ut)
 
         TEST_SUITE_INITIALIZE(TestClassInitialize)
@@ -459,7 +456,6 @@ BEGIN_TEST_SUITE(serializer_ut)
 
         /* serializer_init */
 
-        /* Tests_SRS_SCHEMALIB_99_076:[serializer_init shall pass the value of overrideSchemaNamespace argument to CodeFirst_Init.] */
         TEST_FUNCTION(serializer_init_Passes_The_Override_Schema_Namespace_to_CodeFirst)
         {
             // arrange
@@ -474,7 +470,6 @@ BEGIN_TEST_SUITE(serializer_ut)
             ASSERT_ARE_EQUAL(SERIALIZER_RESULT, SERIALIZER_OK, result);
         }
 
-        /* Tests_SRS_SCHEMALIB_99_007:[ On error SERIALIZER_CODEFIRST_INIT_FAILED shall be returned.] */
         TEST_FUNCTION(IoTHubSchemaClient_When_CodeFirst_Init_Fails_Init_Fails)
         {
             // arrange
@@ -490,7 +485,6 @@ BEGIN_TEST_SUITE(serializer_ut)
             ASSERT_ARE_EQUAL(SERIALIZER_RESULT, SERIALIZER_CODEFIRST_INIT_FAILED, result);
         }
 
-        /* Tests_SRS_SCHEMALIB_99_074:[serializer_init when already initialized shall return SERIALIZER_ALREADY_INIT.] */
         TEST_FUNCTION(serializer_init_After_Init_Fails)
         {
             // arrange
@@ -507,7 +501,6 @@ BEGIN_TEST_SUITE(serializer_ut)
             ASSERT_ARE_EQUAL(SERIALIZER_RESULT, SERIALIZER_ALREADY_INIT, result);
         }
 
-        /* Tests_SRS_SCHEMALIB_99_075:[When an serializer_init call fails for any reason the previous initialization state shall be preserved. The initialized state shall only be changed on a succesfull Init.] */
         TEST_FUNCTION(IoTHubSchemaClient_After_CodeFirst_Init_Fails_A_Second_Init_Succeeds)
         {
             // arrange
@@ -529,7 +522,6 @@ BEGIN_TEST_SUITE(serializer_ut)
 
         /* serializer_deinit */
 
-        /* Tests_SRS_SCHEMALIB_99_025:[ serializer_deinit shall de-initialize all modules initialized be IoTHubSchemaClient_Start.] */
         TEST_FUNCTION(serializer_deinit_When_Only_Init_Deinitializes_Just_The_Modules_Initialized_By_Init)
         {
             // arrange
@@ -548,7 +540,6 @@ BEGIN_TEST_SUITE(serializer_ut)
             // uMock checks the calls
         }
 
-        /* Tests_SRS_SCHEMALIB_99_025:[ serializer_deinit shall de-initialize all modules initialized be IoTHubSchemaClient_Start.] */
         TEST_FUNCTION(serializer_deinit_Deinitializes_All_Modules)
         {
             // arrange
@@ -567,7 +558,6 @@ BEGIN_TEST_SUITE(serializer_ut)
             // uMock checks the calls
         }
 
-        /* Tests_SRS_SCHEMALIB_99_044:[ If IoTHubSchemaClient is not initialized, serializer_deinit shall not attempt to de-initialize any module.] */
         TEST_FUNCTION(serializer_deinit_When_Not_Initialized_Does_Not_Deinitialize_Any_Module)
         {
             // arrange
@@ -580,7 +570,6 @@ BEGIN_TEST_SUITE(serializer_ut)
             // uMock checks the calls
         }
 
-        /* Tests_SRS_SCHEMALIB_99_044:[ If IoTHubSchemaClient is not initialized, serializer_deinit shall not attempt to de-initialize any module.] */
         TEST_FUNCTION(serializer_deinit_After_Init_And_Deinit_Does_Not_Deinitialize_Any_Module)
         {
             // arrange
@@ -600,7 +589,6 @@ BEGIN_TEST_SUITE(serializer_ut)
 
         /* serializer_setconfig */
 
-        /* Tests_SRS_SCHEMALIB_99_137:[ If the value argument is NULL, serializer_setconfig shall return SERIALIZER_INVALID_ARG.] */
         TEST_FUNCTION(serializer_setconfig_fails_when_value_argument_is_NULL)
         {
             // arrange
@@ -611,7 +599,6 @@ BEGIN_TEST_SUITE(serializer_ut)
             ASSERT_ARE_EQUAL(SERIALIZER_RESULT, SERIALIZER_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_SCHEMALIB_99_138:[ If the which argument is not one of the declared members of the SERIALIZER_CONFIG enum, serializer_setconfig shall return SERIALIZER_INVALID_ARG.] */
         TEST_FUNCTION(serializer_setconfig_fails_when_SERIALIZER_CONFIG_arg_is_invalid)
         {
             // arrange
@@ -624,7 +611,6 @@ BEGIN_TEST_SUITE(serializer_ut)
             ASSERT_ARE_EQUAL(SERIALIZER_RESULT, SERIALIZER_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_SCHEMALIB_99_142:[ When the which argument is TransmitDelayedBufferMaxSize, serializer_setconfig shall invoke DataPublisher_SetMaxBufferSize with the dereferenced value argument, and shall return SERIALIZER_OK.] */
         TEST_FUNCTION(serializer_setconfig_passes_the_max_delayed_buffer_size_to_the_data_publisher)
         {
             // arrange

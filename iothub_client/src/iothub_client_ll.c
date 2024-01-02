@@ -24,7 +24,7 @@
 
 #ifndef DONT_USE_UPLOADTOBLOB
 #include "internal/iothub_client_ll_uploadtoblob.h"
-#endif
+#endif // DONT_USE_UPLOADTOBLOB
 
 IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateFromConnectionString(const char* connectionString, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 {
@@ -137,5 +137,3 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadMultipleBlocksToBlobEx(IOTHUB_CLIENT_
     return IoTHubClientCore_LL_UploadMultipleBlocksToBlobEx((IOTHUB_CLIENT_CORE_LL_HANDLE)iotHubClientHandle, destinationFileName, getDataCallbackEx, context);
 }
 #endif
-
-

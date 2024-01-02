@@ -137,6 +137,35 @@ IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_UploadMultipleBlocksToBlob(IOTHUB_DEV
     return IoTHubClientCore_LL_UploadMultipleBlocksToBlobEx((IOTHUB_CLIENT_CORE_LL_HANDLE)iotHubClientHandle, destinationFileName, getDataCallbackEx, context);
 }
 
+IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_AzureStorageInitializeBlobUpload(IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, const char* destinationFileName, char** uploadCorrelationId, char** azureBlobSasUri)
+{
+    return IoTHubClientCore_LL_InitializeUpload((IOTHUB_CLIENT_CORE_LL_HANDLE)iotHubClientHandle, destinationFileName, uploadCorrelationId, azureBlobSasUri);
+}
+
+IOTHUB_CLIENT_LL_AZURE_STORAGE_CLIENT_HANDLE IoTHubDeviceClient_LL_AzureStorageCreateClient(IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, const char* azureBlobSasUri)
+{
+    return IoTHubClientCore_LL_AzureStorageCreateClient((IOTHUB_CLIENT_CORE_LL_HANDLE)iotHubClientHandle, azureBlobSasUri);
+}
+
+IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_AzureStoragePutBlock(IOTHUB_CLIENT_LL_AZURE_STORAGE_CLIENT_HANDLE azureStorageClientHandle, uint32_t blockNumber, const uint8_t* dataPtr, size_t dataSize)
+{
+    return IoTHubClientCore_LL_AzureStoragePutBlock(azureStorageClientHandle, blockNumber, dataPtr, dataSize);
+}
+
+IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_AzureStoragePutBlockList(IOTHUB_CLIENT_LL_AZURE_STORAGE_CLIENT_HANDLE azureStorageClientHandle)
+{
+    return IoTHubClientCore_LL_AzureStoragePutBlockList(azureStorageClientHandle);
+}
+
+void IoTHubDeviceClient_LL_AzureStorageDestroyClient(IOTHUB_CLIENT_LL_AZURE_STORAGE_CLIENT_HANDLE azureStorageClientHandle)
+{
+    IoTHubClientCore_LL_AzureStorageDestroyClient(azureStorageClientHandle);
+}
+
+IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_AzureStorageNotifyBlobUploadCompletion(IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, const char* uploadCorrelationId, bool isSuccess, int responseCode, const char* responseMessage)
+{
+    return IoTHubClientCore_LL_NotifyUploadCompletion((IOTHUB_CLIENT_CORE_LL_HANDLE)iotHubClientHandle, uploadCorrelationId, isSuccess, responseCode, responseMessage);
+}
 #endif
 
 IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_SetStreamRequestCallback(IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, DEVICE_STREAM_C2D_REQUEST_CALLBACK streamRequestCallback, void* context)
@@ -147,4 +176,29 @@ IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_SetStreamRequestCallback(IOTHUB_DEVIC
 IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_EnablePolicyConfiguration(IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, POLICY_CONFIGURATION_TYPE policyType, bool enablePolicyConfiguration)
 {
     return IoTHubClientCore_LL_EnablePolicyConfiguration((IOTHUB_DEVICE_CLIENT_LL_HANDLE)iotHubClientHandle, policyType, enablePolicyConfiguration);
+}
+
+IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_SendTelemetryAsync(IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_MESSAGE_HANDLE telemetryMessageHandle, IOTHUB_CLIENT_TELEMETRY_CALLBACK telemetryConfirmationCallback, void* userContextCallback)
+{
+    return IoTHubClientCore_LL_SendEventAsync((IOTHUB_CLIENT_CORE_LL_HANDLE)iotHubClientHandle, telemetryMessageHandle, (IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK)telemetryConfirmationCallback, userContextCallback);
+}
+
+IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_SendPropertiesAsync(IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, const unsigned char* properties, size_t propertiesLength, IOTHUB_CLIENT_PROPERTY_ACKNOWLEDGED_CALLBACK propertyAcknowledgedCallback, void* userContextCallback)
+{
+    return IoTHubClientCore_LL_SendReportedState((IOTHUB_CLIENT_CORE_LL_HANDLE)iotHubClientHandle, properties, propertiesLength, (IOTHUB_CLIENT_REPORTED_STATE_CALLBACK)propertyAcknowledgedCallback, userContextCallback);
+}
+
+IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_SubscribeToCommands(IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_COMMAND_CALLBACK_ASYNC commandCallback, void* userContextCallback)
+{
+    return IoTHubClientCore_LL_SubscribeToCommands((IOTHUB_CLIENT_CORE_LL_HANDLE)iotHubClientHandle, commandCallback, userContextCallback);
+}
+
+IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_GetPropertiesAsync(IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle,  IOTHUB_CLIENT_PROPERTIES_RECEIVED_CALLBACK propertyCallback,  void* userContextCallback)
+{
+    return IoTHubClientCore_LL_GetTwinAsync((IOTHUB_CLIENT_CORE_LL_HANDLE)iotHubClientHandle, (IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK)propertyCallback, userContextCallback);
+}
+
+IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_GetPropertiesAndSubscribeToUpdatesAsync(IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_PROPERTIES_RECEIVED_CALLBACK propertiesCallback, void* userContextCallback)
+{
+    return IoTHubClientCore_LL_SetDeviceTwinCallback((IOTHUB_CLIENT_CORE_LL_HANDLE)iotHubClientHandle, (IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK)propertiesCallback, userContextCallback);
 }

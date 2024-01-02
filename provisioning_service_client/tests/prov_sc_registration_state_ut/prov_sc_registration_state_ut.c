@@ -203,7 +203,6 @@ static DEVICE_REGISTRATION_STATE_HANDLE make_dummy_drs()
 
 /* UNIT TESTS BEGIN */
 
-/*Tests_PROV_DEVICE_REGISTRATION_STATE_22_001: [ If the given handle, drs is NULL, deviceRegistrationState_getRegistrationId shall fail and return NULL ]*/
 TEST_FUNCTION(deviceRegistrationState_getRegistrationId_null)
 {
     //arrange
@@ -218,7 +217,6 @@ TEST_FUNCTION(deviceRegistrationState_getRegistrationId_null)
     //cleanup
 }
 
-/*Tests_PROV_DEVICE_REGISTRATION_STATE_22_002: [ Otherwise, deviceRegistrationState_getRegistrationId shall return the registration id contained in drs ]*/
 TEST_FUNCTION(deviceRegistrationState_getRegistrationId_success)
 {
     //arrange
@@ -235,7 +233,6 @@ TEST_FUNCTION(deviceRegistrationState_getRegistrationId_success)
     deviceRegistrationState_destroy(drs);
 }
 
-/*Tests_PROV_DEVICE_REGISTRATION_STATE_22_003: [ If the given handle, drs is NULL, deviceRegistrationState_getCreatedDateTime shall fail and return NULL ]*/
 TEST_FUNCTION(deviceRegistrationState_getCreatedDateTime_null)
 {
     //arrange
@@ -250,7 +247,6 @@ TEST_FUNCTION(deviceRegistrationState_getCreatedDateTime_null)
     //cleanup
 }
 
-/*Tests_PROV_DEVICE_REGISTRATION_STATE_22_004: [ Otherwise, deviceRegistrationState_getCreatedDateTime shall return the created date time contained in drs ]*/
 TEST_FUNCTION(deviceRegistrationState_getCreatedDateTime_success)
 {
     //arrange
@@ -267,7 +263,6 @@ TEST_FUNCTION(deviceRegistrationState_getCreatedDateTime_success)
     deviceRegistrationState_destroy(drs);
 }
 
-/*Tests_PROV_DEVICE_REGISTRATION_STATE_22_005: [ If the given handle, drs is NULL, deviceRegistrationState_getDeviceId shall fail and return NULL ]*/
 TEST_FUNCTION(deviceRegistrationState_getDeviceId_null)
 {
     //arrange
@@ -282,7 +277,6 @@ TEST_FUNCTION(deviceRegistrationState_getDeviceId_null)
     //cleanup
 }
 
-/*Tests_PROV_DEVICE_REGISTRATION_STATE_22_006: [ Otherwise, deviceRegistrationState_getDeviceId shall return the device id contained in drs ]*/
 TEST_FUNCTION(deviceRegistrationState_getDeviceId_success)
 {
     //arrange
@@ -299,7 +293,6 @@ TEST_FUNCTION(deviceRegistrationState_getDeviceId_success)
     deviceRegistrationState_destroy(drs);
 }
 
-/*Tests_PROV_DEVICE_REGISTRATION_STATE_22_007: [ If the given handle, drs is NULL, deviceRegistrationState_getRegistrationStatus shall fail and return REGISTRATION_STATUS_ERROR ]*/
 TEST_FUNCTION(deviceRegistrationState_getRegistrationStatus_null)
 {
     //arrange
@@ -314,7 +307,6 @@ TEST_FUNCTION(deviceRegistrationState_getRegistrationStatus_null)
     //cleanup
 }
 
-/*Tests_PROV_DEVICE_REGISTRATION_STATE_22_008: [ Otherwise, deviceRegistrationState_getRegistrationStatus shall return the registration status contained in drs ]*/
 TEST_FUNCTION(deviceRegistrationState_getRegistrationStatus_success)
 {
     //arrange
@@ -331,7 +323,6 @@ TEST_FUNCTION(deviceRegistrationState_getRegistrationStatus_success)
     deviceRegistrationState_destroy(drs);
 }
 
-/*Tests_PROV_DEVICE_REGISTRATION_STATE_22_009: [ If the given handle, drs is NULL, deviceRegistrationState_getUpdatedDateTime shall fail and return NULL ]*/
 TEST_FUNCTION(deviceRegistrationState_getUpdatedDateTime_null)
 {
     //arrange
@@ -346,7 +337,6 @@ TEST_FUNCTION(deviceRegistrationState_getUpdatedDateTime_null)
     //cleanup
 }
 
-/*Tests_PROV_DEVICE_REGISTRATION_STATE_22_010: [ Otherwise, deviceRegistrationState_getUpdatedDateTime shall return the updated date time contained in drs ]*/
 TEST_FUNCTION(deviceRegistrationState_getUpdatedDateTime_success)
 {
     //arrange
@@ -363,7 +353,6 @@ TEST_FUNCTION(deviceRegistrationState_getUpdatedDateTime_success)
     deviceRegistrationState_destroy(drs);
 }
 
-/*Tests_PROV_DEVICE_REGISTRATION_STATE_22_011: [ If the given handle, drs is NULL, deviceRegistrationState_getErrorCode shall fail and return -1 ]*/
 TEST_FUNCTION(deviceRegistrationState_getErrorCode_null)
 {
     //arrange
@@ -378,7 +367,6 @@ TEST_FUNCTION(deviceRegistrationState_getErrorCode_null)
     //cleanup
 }
 
-/*Tests_PROV_DEVICE_REGISTRATION_STATE_22_012: [ Otherwise, deviceRegistrationState_getErrorCode shall return the error code contained in drs ]*/
 TEST_FUNCTION(deviceRegistrationState_getErrorCode_success)
 {
     //arrange
@@ -395,7 +383,6 @@ TEST_FUNCTION(deviceRegistrationState_getErrorCode_success)
     deviceRegistrationState_destroy(drs);
 }
 
-/*Tests_PROV_DEVICE_REGISTRATION_STATE_22_013: [ If the given handle, drs is NULL, deviceRegistrationState_getErrorMessage shall fail and return NULL ]*/
 TEST_FUNCTION(deviceRegistrationState_getErrorMessage_null)
 {
     //arrange
@@ -410,7 +397,6 @@ TEST_FUNCTION(deviceRegistrationState_getErrorMessage_null)
     //cleanup
 }
 
-/*Tests_PROV_DEVICE_REGISTRATION_STATE_22_014: [ Otherwise, deviceRegistrationState_getErrorMessage shall return the error message contained in drs ]*/
 TEST_FUNCTION(deviceRegistrationState_getErrorMessage_success)
 {
     //arrange
@@ -427,7 +413,6 @@ TEST_FUNCTION(deviceRegistrationState_getErrorMessage_success)
     deviceRegistrationState_destroy(drs);
 }
 
-/*Tests_PROV_DEVICE_REGISTRATION_STATE_22_015: [ If the given handle, drs is NULL, deviceRegistrationState_getEtag shall fail and return NULL ]*/
 TEST_FUNCTION(deviceRegistrationState_getEtag_null)
 {
     //arrange
@@ -442,7 +427,6 @@ TEST_FUNCTION(deviceRegistrationState_getEtag_null)
     //cleanup
 }
 
-/*Tests_PROV_DEVICE_REGISTRATION_STATE_22_016: [ Otherwise, deviceRegistrationState_getEtag shall return the etag contained in drs ]*/
 TEST_FUNCTION(deviceRegistrationState_getEtag_success)
 {
     //arrange

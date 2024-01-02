@@ -1,5 +1,11 @@
 # CocoaPods for Microsoft Azure IoT
 
+## Warning
+
+**Cocoapods support is deprecated and will be removed on June 1, 2023**
+
+## Contents
+
 The [Microsoft Azure IoT C SDK](https://github.com/azure/azure-iot-sdk-c) is available as five Objective-C [CocoaPods](https://cocoapods.org/):
 
 * [AzureIoTUtility](https://cocoapods.org/?q=AzureIoTUtility) contains the [Azure IoT C Shared Utility library](https://github.com/Azure/azure-c-shared-utility)
@@ -11,6 +17,13 @@ The [Microsoft Azure IoT C SDK](https://github.com/azure/azure-iot-sdk-c) is ava
 ## Samples
 
 Samples in Swift for iOS are [here](https://github.com/Azure-Samples/azure-iot-samples-ios.git).
+
+   **iOS Limitations**
+
+  - Authentication is limited to SAS keys on iOS. No certificate-based authentication is officially supported.
+  - The Device Provisioning Client is not supported on iOS. Only the Azure IoT Hub device client is supported.
+
+  For a more complete **iOS experience** including the two missing features above, please see our sample [native Swift library](https://github.com/Azure-Samples/azure-sdk-for-c-swift) built on top of the Embedded C SDK.
 
 ## Using Azure IoT CocoaPods with Objective-C
 

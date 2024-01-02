@@ -7,6 +7,8 @@ if(${LINUX})
    add_definitions(-DAZIOT_LINUX)
 endif()
 
+enable_address_sanitize()
+
 usePermissiveRulesForSdkSamplesAndTests()
 
 # addSupportedTransportsToTest determines transport dependencies based on which transports are enabled via cmake and
@@ -57,6 +59,7 @@ add_unittest_directory(iothubclientcore_ut)
 add_unittest_directory(iothubdeviceclient_ut)
 add_unittest_directory(iothubmessage_ut)
 add_unittest_directory(iothubtransport_ut)
+add_unittest_directory(iothub_client_properties_ut)
 add_unittest_directory(iothub_client_retry_control_ut)
 add_unittest_directory(message_queue_ut)
 
@@ -65,7 +68,7 @@ add_unittest_directory(iothubmoduleclient_ut)
 
 add_unittest_directory(iothub_client_streaming_ut)
 
-if(${use_http} AND NOT (${use_wolfssl} OR ${use_bearssl}))
+if(${use_http} AND NOT (${use_wolfssl} OR ${use_bearssl} OR ${use_mbedtls}))
     add_unittest_directory(iothubtransporthttp_ut)
     add_e2etest_directory(iothubclient_http_e2e)
 endif()

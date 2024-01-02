@@ -15,4 +15,10 @@ set(${theseTestsName}_c_files
 set(${theseTestsName}_h_files
 )
 
-build_c_test_artifacts(${theseTestsName} ON "tests/azure_prov_device_tests")
+file(COPY ../common_prov_e2e/prov_valgrind_suppression.supp DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+build_c_test_artifacts(${theseTestsName} ON "tests/azure_prov_device_tests"
+    ADDITIONAL_LIBS
+        prov_http_transport
+    VALGRIND_SUPPRESSIONS_FILE 
+        prov_valgrind_suppression.supp
+)

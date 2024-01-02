@@ -12,15 +12,15 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "iothub.h"
-#include "iothub_device_client.h"
-#include "iothub_client_options.h"
-#include "iothub_message.h"
+#include "azureiot/iothub.h"
+#include "azureiot/iothub_device_client.h"
+#include "azureiot/iothub_client_options.h"
+#include "azureiot/iothub_message.h"
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/platform.h"
 #include "azure_c_shared_utility/shared_util_options.h"
-#include "iothubtransportmqtt.h"
+#include "azureiot/iothubtransportmqtt.h"
 
 /* This sample uses the convenience APIs of iothub_client for example purposes. */
 
@@ -38,7 +38,7 @@ static size_t g_message_count_send_confirmations = 0;
 static void send_confirm_callback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* userContextCallback)
 {
     (void)userContextCallback;
-    // When a message is sent this callback will get envoked
+    // When a message is sent this callback will get invoked
     g_message_count_send_confirmations++;
     (void)printf("Confirmation callback received for message %lu with result %s\r\n", (unsigned long)g_message_count_send_confirmations, MU_ENUM_TO_STRING(IOTHUB_CLIENT_CONFIRMATION_RESULT, result));
 }

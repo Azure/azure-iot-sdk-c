@@ -85,7 +85,6 @@ WITH_DATA(double, moreSpeed)
 END_NAMESPACE(schemaWithSpeed)
 
 /* WITH_DATA's name argument shall be one of the following data types: */
-/* Tests_SRS_SERIALIZER_99_133:[a model type introduced previously by DECLARE_MODEL] */
 BEGIN_NAMESPACE(JukeBoxes)
 
 DECLARE_MODEL(Song,
@@ -473,7 +472,6 @@ BEGIN_TEST_SUITE(AgentMacros_ut)
         }
     }
 
-    /* Tests_SRS_SERIALIZER_99_001:[For each completed schema declaration block, a unique storage container for schema metadata shall be available in the translation unit at runtime.] */
     TEST_FUNCTION(Empty_schema_declaration_clause_should_create_empty_schema_metadata)
     {
         // arrange
@@ -770,9 +768,6 @@ BEGIN_TEST_SUITE(AgentMacros_ut)
 
     /* GET_MODEL_HANDLE */
 
-    /* Tests_SRS_SERIALIZER_99_110:[ The GET_MODEL_HANDLE function macro shall first register the schema by calling CodeFirst_RegisterSchema, passing schemaNamespace and a pointer to the metadata generated in the schema declaration block.] */
-    /* Tests_SRS_SERIALIZER_99_094:[ GET_MODEL_HANDLE shall then call Schema_GetModelByName, passing the schemaHandle obtained from CodeFirst_RegisterSchema and modelName arguments, to retrieve the SCHEMA_MODEL_TYPE_HANDLE corresponding to the modelName argument.] */
-    /* Tests_SRS_SERIALIZER_99_112:[ GET_MODEL_HANDLE will return the handle for the named model.] */
     TEST_FUNCTION(GET_MODEL_HANDLE_Shall_Call_Register_SchemaAnd_Returns_The_Result_Of_GetModelByName)
     {
         // arrange
@@ -788,9 +783,6 @@ BEGIN_TEST_SUITE(AgentMacros_ut)
         ASSERT_ARE_EQUAL(void_ptr, (void*)TEST_MODEL_HANDLE, modelHandle);
     }
 
-    /* Tests_SRS_SERIALIZER_99_110:[ The GET_MODEL_HANDLE function macro shall first register the schema by calling CodeFirst_RegisterSchema, passing schemaNamespace and a pointer to the metadata generated in the schema declaration block.] */
-    /* Tests_SRS_SERIALIZER_99_094:[ GET_MODEL_HANDLE shall then call Schema_GetModelByName, passing the schemaHandle obtained from CodeFirst_RegisterSchema and modelName arguments, to retrieve the SCHEMA_MODEL_TYPE_HANDLE corresponding to the modelName argument.] */
-    /* Tests_SRS_SERIALIZER_99_112:[ GET_MODEL_HANDLE will return the handle for the named model.] */
     TEST_FUNCTION(When_Schema_Get_Model_By_Name_Returns_NULL_GET_MODEL_HANDLE_Returns_NULL)
     {
         // arrange
@@ -809,10 +801,6 @@ BEGIN_TEST_SUITE(AgentMacros_ut)
 
     /* CREATE_MODEL_INSTANCE */
 
-    /* Tests_SRS_SERIALIZER_99_104:[ CREATE_MODEL_INSTANCE shall call GET_MODEL_HANDLE, passing schemaNamespace and modelName, to get a model handle representing the model defined in the corresponding schema declaration block.] */
-    /* Tests_SRS_SERIALIZER_99_106:[ CREATE_MODEL_INSTANCE shall call CodeFirst_CreateDevice, passing the model handle (SCHEMA_MODEL_TYPE_HANDLE]*/
-    /* Tests_SRS_SERIALIZER_99_108:[ If CodeFirst_CreateDevice succeeds, CREATE_MODEL_INSTANCE shall return a pointer to an instance of the C struct representing the model for the device.] */
-    /* Tests_SRS_SERIALIZER_01_003: [If the argument serializerIncludePropertyPath is not specified, CREATE_MODEL_INSTANCE shall pass false to CodeFirst_Create.] */
     TEST_FUNCTION(CREATE_DEVICE_calls_CodeFirst_Device_Create_With_The_Model_Handle_1)
     {
         // arrange
@@ -829,10 +817,6 @@ BEGIN_TEST_SUITE(AgentMacros_ut)
         ASSERT_IS_NOT_NULL(myDevice);
     }
 
-    /* Tests_SRS_SERIALIZER_99_104:[ CREATE_MODEL_INSTANCE shall call GET_MODEL_HANDLE, passing schemaNamespace and modelName, to get a model handle representing the model defined in the corresponding schema declaration block.] */
-    /* Tests_SRS_SERIALIZER_99_106:[ CREATE_MODEL_INSTANCE shall call CodeFirst_CreateDevice, passing the model handle (SCHEMA_MODEL_TYPE_HANDLE]*/
-    /* Tests_SRS_SERIALIZER_99_108:[ If CodeFirst_CreateDevice succeeds, CREATE_MODEL_INSTANCE shall return a pointer to an instance of the C struct representing the model for the device.] */
-    /* Tests_SRS_SERIALIZER_01_003: [If the argument serializerIncludePropertyPath is not specified, CREATE_MODEL_INSTANCE shall pass false to CodeFirst_Create.] */
     TEST_FUNCTION(CREATE_DEVICE_calls_CodeFirst_Device_Create_With_The_Model_Handle_2)
     {
         // arrange
@@ -849,10 +833,6 @@ BEGIN_TEST_SUITE(AgentMacros_ut)
         ASSERT_IS_NOT_NULL(myDevice);
     }
 
-    /* Tests_SRS_SERIALIZER_99_104:[ CREATE_MODEL_INSTANCE shall call GET_MODEL_HANDLE, passing schemaNamespace and modelName, to get a model handle representing the model defined in the corresponding schema declaration block.] */
-    /* Tests_SRS_SERIALIZER_99_106:[ CREATE_MODEL_INSTANCE shall call CodeFirst_CreateDevice, passing the model handle (SCHEMA_MODEL_TYPE_HANDLE]*/
-    /* Tests_SRS_SERIALIZER_99_108:[ If CodeFirst_CreateDevice succeeds, CREATE_MODEL_INSTANCE shall return a pointer to an instance of the C struct representing the model for the device.] */
-    /* Tests_SRS_SERIALIZER_01_003: [If the argument serializerIncludePropertyPath is not specified, CREATE_MODEL_INSTANCE shall pass false to CodeFirst_Create.] */
     TEST_FUNCTION(CREATE_DEVICE_When_GetModelByName_Returns_NULL_Then_NULL_Is_Passed_To_Create_Device)
     {
         // arrange
@@ -870,7 +850,6 @@ BEGIN_TEST_SUITE(AgentMacros_ut)
         ASSERT_IS_NOT_NULL(myDevice);
     }
 
-    /* Tests_SRS_SERIALIZER_01_002: [If the argument serializerIncludePropertyPath is specified, its value shall be passed to CodeFirst_Create.] */
     TEST_FUNCTION(CREATE_DEVICE_with_includePropertyPath_true_passes_true_to_CodeFirst_CreateDevice)
     {
         // arrange
@@ -887,7 +866,6 @@ BEGIN_TEST_SUITE(AgentMacros_ut)
         ASSERT_IS_NOT_NULL(myDevice);
     }
 
-    /* Tests_SRS_SERIALIZER_01_002: [If the argument serializerIncludePropertyPath is specified, its value shall be passed to CodeFirst_Create.] */
     TEST_FUNCTION(CREATE_DEVICE_with_includePropertyPath_true_passes_false_to_CodeFirst_CreateDevice)
     {
         // arrange
@@ -904,7 +882,6 @@ BEGIN_TEST_SUITE(AgentMacros_ut)
         ASSERT_IS_NOT_NULL(myDevice);
     }
 
-    /* Tests_SRS_SERIALIZER_99_107:[ If CodeFirst_CreateDevice fails, CREATE_MODEL_INSTANCE shall return NULL.] */
     TEST_FUNCTION(When_CodeFirst_CreateDevice_Returns_NULL_Then_CREATE_DEVICE_Fails)
     {
         // arrange
@@ -924,7 +901,6 @@ BEGIN_TEST_SUITE(AgentMacros_ut)
 
     /* DESTROY_MODEL_INSTANCE */
 
-    /* Tests_SRS_SERIALIZER_99_109:[ DESTROY_MODEL_INSTANCE shall call CodeFirst_DestroyDevice, passing the pointer returned from CREATE_MODEL_INSTANCE, to release all resources associated with the device.] */
     TEST_FUNCTION(DESTROY_DEVICE_Calls_CodeFirst_DestroyDevice)
     {
         // arrange
@@ -943,8 +919,6 @@ BEGIN_TEST_SUITE(AgentMacros_ut)
 
     /* SEND */
 
-    /* Tests_SRS_SERIALIZER_99_113:[ SERIALIZE shall call CodeFirst_SendAsync, passing a destination, destinationSize, the number of properties to publish, and pointers to the values for each property.] */
-    /* Tests_SRS_SERIALIZER_99_117:[ If CodeFirst_SendAsync succeeds, SEND will return CODEFIRST_OK.] */
     TEST_FUNCTION(SEND_With_One_Property_Succeeds)
     {
         // arrange
@@ -962,8 +936,6 @@ BEGIN_TEST_SUITE(AgentMacros_ut)
         
     }
 
-    /* Tests_SRS_SERIALIZER_99_113:[ SERIALIZE shall call CodeFirst_SendAsync, passing a destination, destinationSize, the number of properties to publish, and pointers to the values for each property.] */
-    /* Tests_SRS_SERIALIZER_99_114:[ If CodeFirst_SendAsync fails, SEND shall return IOT_AGENT_SEND_FAILED.] */
     TEST_FUNCTION(When_CodeFirst_Send_Fails_SEND_Fails)
     {
         // arrange
@@ -983,8 +955,6 @@ BEGIN_TEST_SUITE(AgentMacros_ut)
 
     }
 
-    /* Tests_SRS_SERIALIZER_99_113:[ SERIALIZE shall call CodeFirst_SendAsync, passing a destination, destinationSize, the number of properties to publish, and pointers to the values for each property.] */
-    /* Tests_SRS_SERIALIZER_99_117:[ If CodeFirst_SendAsync succeeds, SEND will return CODEFIRST_OK.] */
     TEST_FUNCTION(SEND_With_2_Properties_Succeeds)
     {
         // arrange
@@ -1021,7 +991,6 @@ BEGIN_TEST_SUITE(AgentMacros_ut)
         DESTROY_MODEL_INSTANCE(jukebox);
     }
 
-    /*Tests_SRS_SERIALIZER_02_018: [EXECUTE_COMMAND macro shall call CodeFirst_ExecuteCommand passing device, command.]*/
     TEST_FUNCTION(EXECUTE_COMMAND_calls_CodeFirst_ExecuteCommand_1)
     {
         /// arrange
@@ -1042,7 +1011,6 @@ BEGIN_TEST_SUITE(AgentMacros_ut)
         DESTROY_MODEL_INSTANCE(jukebox);
     }
 
-    /*Tests_SRS_SERIALIZER_02_018: [EXECUTE_COMMAND macro shall call CodeFirst_ExecuteCommand passing device, command.]*/
     TEST_FUNCTION(EXECUTE_COMMAND_calls_CodeFirst_ExecuteCommand_2)
     {
         /// arrange
@@ -1064,7 +1032,6 @@ BEGIN_TEST_SUITE(AgentMacros_ut)
         DESTROY_MODEL_INSTANCE(jukebox);
     }
 
-    /*Tests_SRS_SERIALIZER_02_018: [EXECUTE_COMMAND macro shall call CodeFirst_ExecuteCommand passing device, command.]*/
     TEST_FUNCTION(EXECUTE_COMMAND_calls_CodeFirst_ExecuteCommand_3)
     {
         /// arrange

@@ -38,6 +38,8 @@
 #define json_object_get_name                real_json_object_get_name
 #define json_object_dotget_value            real_json_object_dotget_value
 #define json_object_remove                  real_json_object_remove
+#define json_value_get_type                 real_json_value_get_type
+
 #include "parson.h"
 
 #ifndef COMPILING_REAL_PARSON_C
@@ -75,6 +77,8 @@
 #undef json_object_get_name
 #undef json_object_dotget_value
 #undef json_object_remove
+#undef json_value_get_type
+
 #endif
 
 #endif

@@ -13,6 +13,10 @@
 #include "iothub_client_core_ll.h"
 #include "azure_c_shared_utility/shared_util_options.h"
 
+#ifdef USE_HTTP
+#include "iothubtransporthttp.h"
+#endif
+
 #ifdef USE_MQTT
 #include "iothubtransportmqtt.h"
 #include "iothubtransportmqtt_websockets.h"
@@ -54,12 +58,24 @@ BEGIN_TEST_SUITE(iothubclient_openssl_engine_e2e)
 
 static void connection_status_callback(IOTHUB_CLIENT_CONNECTION_STATUS status, IOTHUB_CLIENT_CONNECTION_STATUS_REASON reason, void* user_ctx)
 {
+    // Important: this function is NOT called when the protocol is HTTP.
+
     CONNECTION_STATUS_INFO* conn_status = (CONNECTION_STATUS_INFO*)user_ctx;
     ASSERT_IS_NOT_NULL(conn_status, "connection status callback context is NULL");
 
     conn_status->status_set = true;
     conn_status->current_status = status;
     conn_status->currentStatusReason = reason;
+}
+
+static void send_confirmation_callback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* user_ctx)
+{
+    // This is necessary to prove that a successful transmission took place for HTTP.
+
+    CONNECTION_STATUS_INFO* conn_status = (CONNECTION_STATUS_INFO*)user_ctx;
+    ASSERT_IS_NOT_NULL(conn_status, "connection status callback context is NULL");
+    
+    conn_status->status_set = true;
 }
 
 static IOTHUB_DEVICE_CLIENT_LL_HANDLE create_client(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, CONNECTION_STATUS_INFO* conn_status)
@@ -125,9 +141,12 @@ static void run_openssl_engine_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
     conn_status.currentStatusReason = IOTHUB_CLIENT_CONNECTION_OK;
 
     IOTHUB_DEVICE_CLIENT_LL_HANDLE dev_handle = create_client(protocol, &conn_status);
+    IOTHUB_MESSAGE_HANDLE message = IoTHubMessage_CreateFromString("openssl engine test");
 
+    IoTHubDeviceClient_LL_SendEventAsync(dev_handle, message, send_confirmation_callback, &conn_status);
     wait_for_connection(dev_handle, &conn_status);
 
+    IoTHubMessage_Destroy(message);
     IoTHubDeviceClient_LL_Destroy(dev_handle);
 }
 
@@ -148,6 +167,13 @@ TEST_SUITE_CLEANUP(TestClassCleanup)
 TEST_FUNCTION_INITIALIZE(TestMethodInitialize)
 {
 }
+
+#ifdef USE_HTTP
+TEST_FUNCTION(IoTHub_HTTP_openssl_engine_e2e)
+{
+    run_openssl_engine_test(HTTP_Protocol);
+}
+#endif
 
 #ifdef USE_MQTT
 TEST_FUNCTION(IoTHub_MQTT_openssl_engine_e2e)

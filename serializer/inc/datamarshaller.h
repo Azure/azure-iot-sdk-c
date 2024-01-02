@@ -14,7 +14,6 @@ extern "C"
 {
 #endif
 
-/*Codes_SRS_DATA_MARSHALLER_99_002:[ DataMarshaller shall have the following interface]*/
 #define DATA_MARSHALLER_RESULT_VALUES           \
 DATA_MARSHALLER_OK,                             \
 DATA_MARSHALLER_INVALID_ARG,                    \

@@ -8,29 +8,23 @@
 #include "azure_c_shared_utility/xlogging.h"
 
 #include "hsm_client_data.h"
-#include "x509_info.h"
 #include "tpm_msr.h"
 #include "symm_key.h"
+
+#ifdef HSM_TYPE_RIOT
+#include "riot_info.h"
+#endif
 
 #define DATA_SIG_LENGTH     1024
 
 typedef struct IOTHUB_HSM_IMPL_TAG
 {
+#ifdef HSM_TYPE_RIOT    
     X509_INFO_HANDLE x509_info;
+#endif
     TPM_INFO_HANDLE tpm_info;
     SYMM_KEY_INFO_HANDLE key_info;
 } IOTHUB_HSM_IMPL;
-
-int hsm_client_x509_init(void)
-{
-    int result = 0;
-    initialize_device();
-    return result;
-}
-
-void hsm_client_x509_deinit(void)
-{
-}
 
 int hsm_client_tpm_init(void)
 {
@@ -51,25 +45,6 @@ void hsm_client_key_deinit(void)
 {
 }
 
-HSM_CLIENT_HANDLE iothub_hsm_x509_create(void)
-{
-    IOTHUB_HSM_IMPL* result;
-    result = malloc(sizeof(IOTHUB_HSM_IMPL));
-    if (result == NULL)
-    {
-        (void)printf("Failure: malloc IOTHUB_HSM_IMPL.");
-    }
-    else
-    {
-        memset(result, 0, sizeof(IOTHUB_HSM_IMPL));
-        if ((result->x509_info = x509_info_create()) == NULL)
-        {
-            (void)printf("Failure: x509_info_create.");
-        }
-    }
-    return (HSM_CLIENT_HANDLE)result;
-}
-
 HSM_CLIENT_HANDLE iothub_hsm_tpm_create(void)
 {
     IOTHUB_HSM_IMPL* result;
@@ -84,7 +59,9 @@ HSM_CLIENT_HANDLE iothub_hsm_tpm_create(void)
         if ((result->tpm_info = tpm_msr_create()) == NULL)
         {
             (void)printf("Failure: tpm_msr_create.");
+#ifdef HSM_TYPE_RIOT
             x509_info_destroy(result->x509_info);
+#endif
             free(result);
             result = NULL;
         }
@@ -118,101 +95,13 @@ void iothub_hsm_destroy(HSM_CLIENT_HANDLE handle)
     if (handle != NULL)
     {
         IOTHUB_HSM_IMPL* hsm_impl = (IOTHUB_HSM_IMPL*)handle;
+#ifdef HSM_TYPE_RIOT
         x509_info_destroy(hsm_impl->x509_info);
+#endif
         tpm_msr_destroy(hsm_impl->tpm_info);
         symm_key_info_destroy(hsm_impl->key_info);
         free(hsm_impl);
     }
-}
-
-char* iothub_x509_hsm_get_certificate(HSM_CLIENT_HANDLE handle)
-{
-    char* result;
-    if (handle == NULL)
-    {
-        (void)printf("Invalid handle value specified");
-        result = NULL;
-    }
-    else
-    {
-        IOTHUB_HSM_IMPL* hsm_impl = (IOTHUB_HSM_IMPL*)handle;
-        const char* certificate = x509_info_get_cert(hsm_impl->x509_info);
-        if (certificate == NULL)
-        {
-            LogError("Failed retrieving certificate");
-            result = NULL;
-        }
-        else
-        {
-            if (mallocAndStrcpy_s(&result, certificate) != 0)
-            {
-                /* Codes_SRS_HSM_CLIENT_RIOT_07_013: [ If any failure is encountered hsm_client_riot_get_certificate shall return NULL ] */
-                LogError("Failed to allocate cert buffer.");
-                result = NULL;
-            }
-        }
-    }
-    return result;
-}
-
-char* iothub_x509_hsm_get_alias_key(HSM_CLIENT_HANDLE handle)
-{
-    char* result;
-    if (handle == NULL)
-    {
-        (void)printf("Invalid handle value specified");
-        result = NULL;
-    }
-    else
-    {
-        IOTHUB_HSM_IMPL* hsm_impl = (IOTHUB_HSM_IMPL*)handle;
-        const char* key = x509_info_get_key(hsm_impl->x509_info);
-        if (key == NULL)
-        {
-            LogError("Failed retrieving certificate");
-            result = NULL;
-        }
-        else
-        {
-            if (mallocAndStrcpy_s(&result, key) != 0)
-            {
-                /* Codes_SRS_HSM_CLIENT_RIOT_07_013: [ If any failure is encountered hsm_client_riot_get_certificate shall return NULL ] */
-                LogError("Failed to allocate cert buffer.");
-                result = NULL;
-            }
-        }
-    }
-    return result;
-}
-
-char* iothub_hsm_get_common_name(HSM_CLIENT_HANDLE handle)
-{
-    char* result;
-    if (handle == NULL)
-    {
-        (void)printf("Invalid handle value specified");
-        result = NULL;
-    }
-    else
-    {
-        IOTHUB_HSM_IMPL* hsm_impl = (IOTHUB_HSM_IMPL*)handle;
-        const char* cn = x509_info_get_cn(hsm_impl->x509_info);
-        if (cn == NULL)
-        {
-            LogError("Failed retrieving certificate");
-            result = NULL;
-        }
-        else
-        {
-            if (mallocAndStrcpy_s(&result, cn) != 0)
-            {
-                /* Codes_SRS_HSM_CLIENT_RIOT_07_013: [ If any failure is encountered hsm_client_riot_get_certificate shall return NULL ] */
-                LogError("Failed to allocate cert buffer.");
-                result = NULL;
-            }
-        }
-    }
-    return result;
 }
 
 int iothub_tpm_hsm_get_endorsement_key(HSM_CLIENT_HANDLE handle, unsigned char** key, size_t* key_len)
@@ -312,7 +201,6 @@ int iothub_tpm_hsm_sign_with_identity(HSM_CLIENT_HANDLE handle, const unsigned c
         {
             if ((*key = (unsigned char*)malloc(length)) == NULL)
             {
-                /* Codes_SRS_HSM_CLIENT_TPM_07_023: [ If an error is encountered hsm_client_tpm_sign_data shall return NULL. ] */
                 printf("Failure creating buffer handle");
                 result = __LINE__;
             }
@@ -393,8 +281,127 @@ char* iothub_hsm_get_registry_id(HSM_CLIENT_HANDLE handle)
         {
             if (mallocAndStrcpy_s(&result, reg_id) != 0)
             {
-                /* Codes_SRS_HSM_CLIENT_RIOT_07_013: [ If any failure is encountered hsm_client_riot_get_certificate shall return NULL ] */
                 LogError("Failed to allocate register Id.");
+                result = NULL;
+            }
+        }
+    }
+    return result;
+}
+
+#ifdef HSM_TYPE_RIOT
+
+int hsm_client_x509_init(void)
+{
+    int result = 0;
+    initialize_device();
+    return result;
+}
+
+void hsm_client_x509_deinit(void)
+{
+    // no-op.
+}
+
+HSM_CLIENT_HANDLE iothub_hsm_x509_create(void)
+{
+    IOTHUB_HSM_IMPL* result;
+    result = malloc(sizeof(IOTHUB_HSM_IMPL));
+    if (result == NULL)
+    {
+        (void)printf("Failure: malloc IOTHUB_HSM_IMPL.");
+    }
+    else
+    {
+        memset(result, 0, sizeof(IOTHUB_HSM_IMPL));
+        if ((result->x509_info = x509_info_create()) == NULL)
+        {
+            (void)printf("Failure: x509_info_create.");
+        }
+    }
+    return (HSM_CLIENT_HANDLE)result;
+}
+
+char* iothub_x509_hsm_get_certificate(HSM_CLIENT_HANDLE handle)
+{
+    char* result;
+    if (handle == NULL)
+    {
+        (void)printf("Invalid handle value specified");
+        result = NULL;
+    }
+    else
+    {
+        IOTHUB_HSM_IMPL* hsm_impl = (IOTHUB_HSM_IMPL*)handle;
+        const char* certificate = x509_info_get_cert(hsm_impl->x509_info);
+        if (certificate == NULL)
+        {
+            LogError("Failed retrieving certificate");
+            result = NULL;
+        }
+        else
+        {
+            if (mallocAndStrcpy_s(&result, certificate) != 0)
+            {
+                LogError("Failed to allocate cert buffer.");
+                result = NULL;
+            }
+        }
+    }
+    return result;
+}
+
+char* iothub_x509_hsm_get_alias_key(HSM_CLIENT_HANDLE handle)
+{
+    char* result;
+    if (handle == NULL)
+    {
+        (void)printf("Invalid handle value specified");
+        result = NULL;
+    }
+    else
+    {
+        IOTHUB_HSM_IMPL* hsm_impl = (IOTHUB_HSM_IMPL*)handle;
+        const char* key = x509_info_get_key(hsm_impl->x509_info);
+        if (key == NULL)
+        {
+            LogError("Failed retrieving certificate key");
+            result = NULL;
+        }
+        else
+        {
+            if (mallocAndStrcpy_s(&result, key) != 0)
+            {
+                LogError("Failed to allocate cert buffer.");
+                result = NULL;
+            }
+        }
+    }
+    return result;
+}
+
+char* iothub_hsm_get_common_name(HSM_CLIENT_HANDLE handle)
+{
+    char* result;
+    if (handle == NULL)
+    {
+        (void)printf("Invalid handle value specified");
+        result = NULL;
+    }
+    else
+    {
+        IOTHUB_HSM_IMPL* hsm_impl = (IOTHUB_HSM_IMPL*)handle;
+        const char* cn = x509_info_get_cn(hsm_impl->x509_info);
+        if (cn == NULL)
+        {
+            LogError("Failed retrieving certificate CN");
+            result = NULL;
+        }
+        else
+        {
+            if (mallocAndStrcpy_s(&result, cn) != 0)
+            {
+                LogError("Failed to allocate cert buffer.");
                 result = NULL;
             }
         }
@@ -416,6 +423,8 @@ const HSM_CLIENT_X509_INTERFACE* hsm_client_x509_interface(void)
 {
     return &x509_interface;
 }
+
+#endif // HSM_TYPE_RIOT
 
 static const HSM_CLIENT_TPM_INTERFACE tpm_interface =
 {

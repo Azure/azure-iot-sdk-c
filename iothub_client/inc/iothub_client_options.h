@@ -22,8 +22,17 @@ extern "C"
     static STATIC_VAR_UNUSED const char* OPTION_RETRY_MAX_DELAY_SECS = "retry_max_delay_secs";
 
     static STATIC_VAR_UNUSED const char* OPTION_LOG_TRACE = "logtrace";
+
+#ifndef OPTION_X509_CERT_DEF
+#define OPTION_X509_CERT_DEF
     static STATIC_VAR_UNUSED const char* OPTION_X509_CERT = "x509certificate";
+#endif
+
+#ifndef OPTION_X509_PRIVATE_KEY_DEF
+#define OPTION_X509_PRIVATE_KEY_DEF
     static STATIC_VAR_UNUSED const char* OPTION_X509_PRIVATE_KEY = "x509privatekey";
+#endif
+
     static STATIC_VAR_UNUSED const char* OPTION_KEEP_ALIVE = "keepalive";
     static STATIC_VAR_UNUSED const char* OPTION_CONNECTION_TIMEOUT = "connect_timeout";
 
@@ -51,6 +60,8 @@ extern "C"
     static STATIC_VAR_UNUSED const char* const OPTION_NETWORK_INTERFACE_UPLOAD_TO_BLOB = "network_interface_upload_to_blob";
     static STATIC_VAR_UNUSED const char* OPTION_PRODUCT_INFO = "product_info";
     static STATIC_VAR_UNUSED const char* OPTION_DT_MODEL_ID = "dt_model_id";
+
+    static STATIC_VAR_UNUSED const char* OPTION_BLOB_UPLOAD_TLS_RENEGOTIATION = "blob_upload_tls_renegotiation";
 
     /*
     * @brief    Specifies the Digital Twin Model Id of the connection. Only valid for use with MQTT Transport

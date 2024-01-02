@@ -29,6 +29,13 @@ For a list of tested configurations [click here][device-catalog].
 The IoT Hub Device SDK is available as [CocoaPods](https://cocoapods.org/) for Mac and iOS device development.
 Details for how to use the CocoaPods are available [here](/iothub_client/samples/ios).
 
+   **iOS Limitations**
+
+  - Authentication is limited to SAS keys on iOS. No certificate-based authentication is officially supported.
+  - The Device Provisioning Client is not supported on iOS. Only the Azure IoT Hub device client is supported.
+
+  For a more complete **iOS experience** including the two missing features above, please see our sample [native Swift library](https://github.com/Azure-Samples/azure-sdk-for-c-swift) built on top of the Embedded C SDK.
+
 <a name="vcpkgpackage"></a>
 
 ### Vcpkg packages for Windows devices
@@ -37,36 +44,12 @@ When developing for Windows devices, you can leverage the Vcpkg package manager 
 The Windows [samples in this repository][samples] show how to use the azure-iot-sdk-c Vcpkg package along with its dependencies in your C project.
 To install Microsoft Azure IoTHub vcpkg, follow the instructions at [Setup C SDK vcpkg for Windows development environment](/doc/setting_up_vcpkg.md#setup-c-sdk-vcpkg-for-windows-development-environment)
 
-<a name="mbed"></a>
-
-### mbed library for mbed Developer Workspace
-
-For developers creating device applications on the [mbed](http://mbed.org) platform, we have published a library and samples that will get you started in minutes witH Azure IoT Hub. This library and the samples have been tested with the following boards:
-
-* Freescale FRDMK64-F
-* Renesas GR-PEACH
-* SADE.IO GSM Gateway
-
-To use the samples and the Azure IoT device SDK library in your mbed applications, here are the basic steps:
-
-* Prepare your device as instructed by the device manufacturer to connect it to the mbed development environment
-* In the [mbed Developer Workspace](https://developer.mbed.org/compiler/) click **Import** on the main menu. Then click the **Click here to import from URL** link next to the mbed globe logo.
-* In the popup window, enter the link for the sample code you want to try (you can find Azure IoT Hub samples [here](https://developer.mbed.org/users/AzureIoTClient/code/)).
-* Adapt the code to use the right credentials for your device, and click **Compile** to generate the binary for your board.
-* Download the binary to your device and run.
-
-You can find detailed instructions for each of the tested devices in the Azure IoT [device catalog][device-catalog]:
-
-* [Freescale FRDMK64-F](../doc/mbed_get_started.md)
-* [Renesas GR-PEACH](https://catalog.azureiotsuite.com/details?title=GR_Peach-_-Renesas-Electronics-RZA1H-on-board&source=home-page)
-* [SADE.IO GSM Gateway](https://catalog.azureiotsuite.com/details?title=SADE-IoT-Cloud-Family-_-GSM-Gateway&source=home-page)
-
 <a name="arduino"></a>
 
 ### Arduino IDE library
 
 If you are developing on Arduino, you can leverage the Azure IoT library available in the Arduino IDE library manager.
-You can find the list of supported boards as well as the instructions for using the library on Arduino devices in the [azure-iot-arduino GitHub repository](https://github.com/azure/azure-iot-arduino) directly.
+You can find the list of supported boards as well as the instructions for using the library on Arduino devices in the [azure-iot-arduino GitHub repository](https://aka.ms/arduino) directly.
 
 <a name="compile"></a>
 
@@ -78,9 +61,14 @@ Detailed instructions can be found below for each platforms:
 * [Setting up a Windows development environment](../doc/devbox_setup.md#windows)
 * [Setting up a Linux development environment](../doc/devbox_setup.md#linux)
 * [Setting up a Mac OS X development environment](../doc/devbox_setup.md#macos)
-* [Cross compile the C device SDK (targeting Raspbian and using Ubuntu as host)](../doc/SDK_cross_compile_example.md)
 
 <a name="samples"></a>
+
+## CMake
+
+The C device SDK uses [CMake](https://cmake.org/) for compiler independent configuration and generates native build files and workspaces that can be used in the compiler environment of your choice.
+
+* [SDK CMake integration with your application](../doc/how_to_use_azure_iot_sdk_c_with_cmake.md)
 
 ## Samples
 
@@ -95,12 +83,11 @@ In addition to the simple samples found in the current repository, you can find 
 * [Setup IoT Hub][setup-iothub]
 * [Azure IoT device SDK for C tutorial][c-sdk-intro]
 * [How to port the C libraries to other OS platforms][c-porting-guide]
-* [Cross compilation example][c-cross-compile]
 * [C SDKs API reference][c-api-reference]
 
 
 [iot-dev-center]: http://azure.com/iotdev
-[iot-hub-documentation]: https://docs.microsoft.com/en-us/azure/iot-hub/
+[iot-hub-documentation]: https://docs.microsoft.com/azure/iot-hub/
 [device-catalog]: https://catalog.azureiotsuite.com
 [devbox-setup]: ../doc/devbox_setup.md
 [setup-iothub]: https://aka.ms/howtocreateazureiothub

@@ -22,14 +22,22 @@ if(${use_sample_trusted_cert})
 endif()
 
 # Set up the include and library paths
-include_directories($ENV{TOOLCHAIN_PREFIX}/include/)
-include_directories($ENV{TOOLCHAIN_PREFIX}/include/azureiot)
+include_directories(${CMAKE_INSTALL_PREFIX}/include/)
+include_directories(${CMAKE_INSTALL_PREFIX}/include/azureiot)
+link_directories(/usr/local/lib)
 link_directories($ENV{TOOLCHAIN_PREFIX}/lib)
 
 add_executable(myapp ${iothub_c_files})
 
 # Redundant in this case but shows how to rename your output executable
-set_target_properties(myapp PROPERTIES OUTPUT_NAME "myapp") 
+set_target_properties(myapp PROPERTIES OUTPUT_NAME "myapp")
+
+# If OpenSSL::SSL OR OpenSSL::Crypto are not set then you need to run
+# the find package for openssl
+if (NOT TARGET OpenSSL::SSL OR NOT TARGET OpenSSL::Crypto OR NOT ${OPENSSL_INCLUDE_DIR})
+    find_package(OpenSSL REQUIRED)
+endif()
+include_directories(${OPENSSL_INCLUDE_DIR})
 
 # List the libraries required by the link step
-target_link_libraries(myapp iothub_client_mqtt_transport iothub_client umqtt aziotsharedutil parson pthread curl ssl crypto m )
+target_link_libraries(myapp iothub_client prov_device_client iothub_client_mqtt_transport prov_auth_client umqtt hsm_security_client utpm dl aziotsharedutil parson pthread curl OpenSSL::SSL OpenSSL::Crypto m )

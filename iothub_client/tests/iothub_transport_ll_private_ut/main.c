@@ -7,5 +7,5 @@ int main(void)
 {
     size_t failedTestCount = 0;
     RUN_TEST_SUITE(iothub_transport_ll_private_ut, failedTestCount);
-    return failedTestCount;
+    return (int)failedTestCount;
 }

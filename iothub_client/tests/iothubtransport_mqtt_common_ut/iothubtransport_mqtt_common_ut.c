@@ -16,6 +16,8 @@
 #pragma warning(disable: 4054) /* MSC incorrectly fires this */
 #endif
 
+static size_t TEST_METHOD_ID_VALUE = 0x1010;
+
 static void* my_gballoc_malloc(size_t size)
 {
     return malloc(size);
@@ -23,7 +25,11 @@ static void* my_gballoc_malloc(size_t size)
 
 static void my_gballoc_free(void* ptr)
 {
-    free(ptr);
+    if (ptr != (void*)TEST_METHOD_ID_VALUE &&
+        ptr != (void*)&TEST_METHOD_ID_VALUE)
+    {
+        free(ptr);
+    }
 }
 
 void* my_gballoc_realloc(void* ptr, size_t size)
@@ -55,19 +61,19 @@ void* my_gballoc_realloc(void* ptr, size_t size)
 #include "azure_umqtt_c/mqtt_client.h"
 
 #include "internal/iothub_message_private.h"
-#include "internal/iothub_client_private.h"
 #include "iothub_client_options.h"
 #include "internal/iothub_client_retry_control.h"
 
 #include "azure_c_shared_utility/xio.h"
-#include "azure_c_shared_utility/tlsio.h"
 
 #include "azure_c_shared_utility/tickcounter.h"
-#include "azure_c_shared_utility/lock.h"
 #include "azure_c_shared_utility/string_tokenizer.h"
 #include "azure_c_shared_utility/urlencode.h"
 #include "azure_c_shared_utility/string_token.h"
 #include "internal/iothub_transport_ll_private.h"
+
+#define RESEND_TIMEOUT_VALUE_MS            1*60*1000 // should match value in iothubtransport_mqtt_common.c * 1000 so it's in ms
+#define MSG_TIMEOUT_VALUE_MS               2*60*1000 // should match value in iothubtransport_mqtt_common.c * 1000 so it's in ms
 
 MOCKABLE_FUNCTION(, bool, Transport_MessageCallbackFromInput, IOTHUB_MESSAGE_HANDLE, message, void*, ctx);
 MOCKABLE_FUNCTION(, bool, Transport_MessageCallback, IOTHUB_MESSAGE_HANDLE, message, void*, ctx);
@@ -179,6 +185,9 @@ static const char* TEST_MQTT_INPUT_MISSING_INPUT_QUEUE_NAME = "devices/thisIsDev
 static const char* TEST_INPUT_QUEUE_1 = "input1";
 static const char* TEST_MQTT_DEV_TWIN_MSG_TOPIC = "$iothub/twin/$res/200/?$rid=2";
 static const char* TEST_MQTT_DEV_METHOD_MSG = "$iothub/methods/POST/method_name/?$rid=b";
+static const char* TEST_MQTT_DEV_TWIN_MSG_TOPIC_MISSING_REQUEST_ID = "$iothub/twin/$res/200";
+static const char* TEST_MQTT_DEV_TWIN_MSG_TOPIC_INVALID_REQUEST_ID = "$iothub/twin/$res/200/?$NotSetRequestId=2";
+
 
 static const char* TEST_MQTT_EVENT_TOPIC = "devices/thisIsDeviceID/messages/events/";
 static const char* TEST_MQTT_SAS_TOKEN = "thisIsIotHubName.thisIsIotHubSuffix/devices/thisIsDeviceID";
@@ -195,6 +204,7 @@ static const char* TEST_DIAG_ID = "1234abcd";
 static const char* TEST_DIAG_CREATION_TIME_UTC = "1506054516.100";
 static const char* TEST_MESSAGE_CREATION_TIME_UTC = "2010-01-01T01:00:00.000Z";
 static const char* TEST_OUTPUT_NAME = "TestOutputName";
+static const char* TEST_COMPONENT_NAME = "TestComponentName";
 
 static const char* PROPERTY_SEPARATOR = "&";
 static const char* DIAGNOSTIC_CONTEXT_CREATION_TIME_UTC_PROPERTY = "creationtimeutc";
@@ -248,7 +258,6 @@ static CONSTBUFFER_HANDLE TEST_CONST_BUFFER_HANDLE = (CONSTBUFFER_HANDLE)0x2331;
 
 static const unsigned char* TEST_DEVICE_METHOD_RESPONSE = (const unsigned char*)0x62;
 static size_t TEST_DEVICE_RESP_LENGTH = 1;
-static size_t TEST_METHOD_ID_VALUE = 12;
 static METHOD_HANDLE TEST_METHOD_ID = &TEST_METHOD_ID_VALUE;
 static METHOD_HANDLE g_method_handle_value = NULL;
 
@@ -848,6 +857,8 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_RETURN(mqtt_client_publish, 0);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(mqtt_client_publish, MU_FAILURE);
 
+    REGISTER_GLOBAL_MOCK_RETURNS(mqttmessage_setIsDuplicateMsg, 0, MU_FAILURE);
+
     REGISTER_GLOBAL_MOCK_RETURN(mqttmessage_create, TEST_MQTT_MESSAGE_HANDLE);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(mqttmessage_create, NULL);
 
@@ -901,8 +912,6 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubClient_Auth_Get_Credential_Type, IOTHUB_CREDENTIAL_TYPE_UNKNOWN);
     REGISTER_GLOBAL_MOCK_HOOK(IoTHubClient_Auth_Get_SasToken, my_IoTHubClient_Auth_Get_SasToken);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubClient_Auth_Get_SasToken, NULL);
-    REGISTER_GLOBAL_MOCK_RETURN(IoTHubClient_Auth_Is_SasToken_Valid, SAS_TOKEN_STATUS_VALID);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubClient_Auth_Is_SasToken_Valid, SAS_TOKEN_STATUS_FAILED);
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubClient_Auth_Get_SasToken_Expiry, 3600);
 
     REGISTER_GLOBAL_MOCK_HOOK(DList_InitializeListHead, real_DList_InitializeListHead);
@@ -1286,48 +1295,6 @@ static void setup_IoTHubTransport_MQTT_Common_DoWork_mocks()
     STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
 }
 
-static void setup_IoTHubTransport_MQTT_Common_DoWork_emtpy_msg_mocks(void)
-{
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_SasToken_Expiry(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubMessage_GetContentType(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubMessage_GetString(IGNORED_PTR_ARG)).SetReturn("");
-    EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
-    STRICT_EXPECTED_CALL(STRING_construct(IGNORED_PTR_ARG));
-
-    //Add Properties
-    STRICT_EXPECTED_CALL(IoTHubMessage_Properties(IGNORED_PTR_ARG));
-    EXPECTED_CALL(Map_GetInternals(TEST_MESSAGE_PROP_MAP, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubMessage_IsSecurityMessage(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubMessage_GetDistributedTracingSystemProperty(IGNORED_PTR_ARG)).SetReturn(DISTRIBUTED_TRACING_TEST_TRACESTATE);
-    STRICT_EXPECTED_CALL(IoTHubMessage_GetCorrelationId(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubMessage_GetMessageId(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubMessage_GetContentTypeSystemProperty(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubMessage_GetContentEncodingSystemProperty(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubMessage_GetMessageCreationTimeUtcSystemProperty(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(URL_EncodeString(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubMessage_GetDiagnosticPropertyData(IGNORED_PTR_ARG));
-
-    STRICT_EXPECTED_CALL(IoTHubMessage_GetOutputName(IGNORED_PTR_ARG));
-    EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
-    EXPECTED_CALL(mqttmessage_create_in_place(IGNORED_NUM_ARG, IGNORED_PTR_ARG, DELIVER_AT_LEAST_ONCE, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mqtt_client_publish(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mqttmessage_destroy(TEST_MQTT_MESSAGE_HANDLE));
-    EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-
-    EXPECTED_CALL(DList_RemoveEntryList(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    // removeExpiredTwinRequests
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-}
-
 static void setup_invoke_message_callback_mocks(IOTHUB_CLIENT_CONFIRMATION_RESULT expected, bool removeEntryList, bool removeHeadList)
 {
     if (removeEntryList)
@@ -1346,7 +1313,7 @@ static void setup_invoke_message_callback_mocks(IOTHUB_CLIENT_CONFIRMATION_RESUL
     EXPECTED_CALL(free(IGNORED_PTR_ARG));
 }
 
-static void setup_IoTHubTransport_MQTT_Common_DoWork_resend_events_mocks(
+static void setup_IoTHubTransport_MQTT_Common_DoWork_events_mocks(
     const char* const** ppKeys,
     const char* const** ppValues,
     size_t propCount,
@@ -1361,6 +1328,7 @@ static void setup_IoTHubTransport_MQTT_Common_DoWork_resend_events_mocks(
     const char* message_creation_time_utc,
     bool auto_urlencode,
     const char* output_name,
+    const char* component_name,
     bool security_msg)
 {
     TEST_DIAG_DATA.diagnosticId = (char*)diag_id;
@@ -1368,6 +1336,37 @@ static void setup_IoTHubTransport_MQTT_Common_DoWork_resend_events_mocks(
     STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_SasToken_Expiry(IGNORED_PTR_ARG));
+    if (resend) {
+        #ifdef RUN_SFC_TESTS
+            STRICT_EXPECTED_CALL(IoTHubMessage_Properties(msg_handle));
+            if (propCount == 0)
+            {
+                EXPECTED_CALL(Map_GetInternals(TEST_MESSAGE_PROP_MAP, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+            }
+            else
+            {
+                STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MESSAGE_PROP_MAP, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+                    .CopyOutArgumentBuffer(2, &ppKeys, sizeof(ppKeys))
+                    .CopyOutArgumentBuffer(3, &ppValues, sizeof(ppValues))
+                    .CopyOutArgumentBuffer(4, &propCount, sizeof(propCount));
+
+                for (size_t i=0; i < propCount; i++)
+                {
+                    if (auto_urlencode)
+                    {
+                        STRICT_EXPECTED_CALL(URL_EncodeString((const char*)ppKeys[i]));
+                        STRICT_EXPECTED_CALL(URL_EncodeString((const char*)ppValues[i]));
+                        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
+                        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
+                        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+                        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+                    }
+                }
+            }
+        #endif //RUN_SFC_TESTS
+        STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
+    }
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(IoTHubMessage_GetContentType(msg_handle));
     if (msg_handle == TEST_IOTHUB_MSG_STRING)
     {
@@ -1380,6 +1379,7 @@ static void setup_IoTHubTransport_MQTT_Common_DoWork_resend_events_mocks(
     if (!resend)
     {
         EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     }
     EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
     STRICT_EXPECTED_CALL(STRING_construct(IGNORED_PTR_ARG));
@@ -1396,7 +1396,7 @@ static void setup_IoTHubTransport_MQTT_Common_DoWork_resend_events_mocks(
             .CopyOutArgumentBuffer(3, &ppValues, sizeof(ppValues))
             .CopyOutArgumentBuffer(4, &propCount, sizeof(propCount));
 
-        for (size_t i = 0; i < propCount; i++)
+        for (size_t i=0; i < propCount; i++)
         {
             if (auto_urlencode)
             {
@@ -1410,6 +1410,7 @@ static void setup_IoTHubTransport_MQTT_Common_DoWork_resend_events_mocks(
         }
     }
     STRICT_EXPECTED_CALL(IoTHubMessage_IsSecurityMessage(IGNORED_PTR_ARG)).SetReturn(security_msg);
+
     if (security_msg)
     {
         STRICT_EXPECTED_CALL(URL_EncodeString(IGNORED_PTR_ARG));
@@ -1417,6 +1418,7 @@ static void setup_IoTHubTransport_MQTT_Common_DoWork_resend_events_mocks(
         STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
     }
     STRICT_EXPECTED_CALL(IoTHubMessage_GetDistributedTracingSystemProperty(IGNORED_PTR_ARG)).SetReturn(DISTRIBUTED_TRACING_TEST_TRACESTATE);
+
     STRICT_EXPECTED_CALL(IoTHubMessage_GetCorrelationId(IGNORED_PTR_ARG)).SetReturn(core_id);
     if (auto_urlencode && (core_id != NULL))
     {
@@ -1439,7 +1441,7 @@ static void setup_IoTHubTransport_MQTT_Common_DoWork_resend_events_mocks(
         STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
     }
     STRICT_EXPECTED_CALL(IoTHubMessage_GetContentEncodingSystemProperty(IGNORED_PTR_ARG)).SetReturn(content_encoding);
-    if (auto_urlencode && (content_encoding != NULL))
+    if (security_msg || (auto_urlencode && (content_encoding != NULL)))
     {
         STRICT_EXPECTED_CALL(URL_EncodeString(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
@@ -1452,6 +1454,7 @@ static void setup_IoTHubTransport_MQTT_Common_DoWork_resend_events_mocks(
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
         STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
     }
+
     STRICT_EXPECTED_CALL(URL_EncodeString(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
@@ -1491,6 +1494,7 @@ static void setup_IoTHubTransport_MQTT_Common_DoWork_resend_events_mocks(
     {
         setup_invoke_message_callback_mocks(IOTHUB_CLIENT_CONFIRMATION_ERROR, true, false);
     }
+
     STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     // removeExpiredTwinRequests
@@ -1590,19 +1594,23 @@ static void setup_IoTHubTransport_MQTT_Common_DoWork_events_mocks(
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
         STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
     }
-    STRICT_EXPECTED_CALL(IoTHubMessage_GetMessageCreationTimeUtcSystemProperty(IGNORED_PTR_ARG)).SetReturn(message_creation_time_utc);
-    if (auto_urlencode && (message_creation_time_utc != NULL))
+
+    STRICT_EXPECTED_CALL(IoTHubMessage_GetOutputName(IGNORED_PTR_ARG)).SetReturn(output_name);
+    if (auto_urlencode && output_name != NULL)
     {
         STRICT_EXPECTED_CALL(URL_EncodeString(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
         STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
     }
-    if (security_msg)
+    
+    STRICT_EXPECTED_CALL(IoTHubMessage_GetComponentName(IGNORED_PTR_ARG)).SetReturn(component_name);
+    if (auto_urlencode && (component_name != NULL))
     {
         STRICT_EXPECTED_CALL(URL_EncodeString(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
         STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
     }
+
     STRICT_EXPECTED_CALL(URL_EncodeString(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
@@ -1626,9 +1634,9 @@ static void setup_IoTHubTransport_MQTT_Common_DoWork_events_mocks(
     //Publish
     if (validMessage)
     {
-        STRICT_EXPECTED_CALL(IoTHubMessage_GetOutputName(IGNORED_PTR_ARG)).SetReturn(output_name);
         EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
         EXPECTED_CALL(mqttmessage_create_in_place(IGNORED_NUM_ARG, IGNORED_PTR_ARG, DELIVER_AT_LEAST_ONCE, IGNORED_PTR_ARG, appMsgSize));
+        STRICT_EXPECTED_CALL(mqttmessage_setIsDuplicateMsg(IGNORED_PTR_ARG, resend));
         STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(mqtt_client_publish(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(mqttmessage_destroy(TEST_MQTT_MESSAGE_HANDLE));
@@ -1643,8 +1651,10 @@ static void setup_IoTHubTransport_MQTT_Common_DoWork_events_mocks(
     {
         setup_invoke_message_callback_mocks(IOTHUB_CLIENT_CONFIRMATION_ERROR, true, false);
     }
-    STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    if (!resend) {
+        STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    }
     // removeExpiredTwinRequests
     STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
 }
@@ -1733,7 +1743,7 @@ static void setup_message_recv_callback_device_twin_mocks(const char* token_type
         .CallCannotFail();
     STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(0);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
-        .SetReturn("4")
+        .SetReturn("?$rid=4")
         .IgnoreArgument_handle()
         .CallCannotFail();
 
@@ -1898,7 +1908,6 @@ static void set_expected_calls_for_proxy_default_copy()
     STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "bleah"));
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_001: [If parameter config is NULL then IoTHubTransport_MQTT_Common_Create shall return NULL.] */
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_Create_with_NULL_parameter_Succeed)
 {
     //arrange
@@ -1912,7 +1921,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Create_with_NULL_parameter_Succeed)
     //cleanup
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_002: [If the parameter config's variables upperConfig or waitingToSend are NULL then IoTHubTransport_MQTT_Common_Create shall return NULL.] */
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_Create_with_NULL_config_parameter_fails)
 {
     //arrange
@@ -1928,7 +1936,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Create_with_NULL_config_parameter_fail
     //cleanup
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_002: [If the parameter config's variables upperConfig or waitingToSend are NULL then IoTHubTransport_MQTT_Common_Create shall return NULL.] */
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_Create_with_NULL_waitingToSend_fails)
 {
     // arrange
@@ -1943,7 +1950,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Create_with_NULL_waitingToSend_fails)
     ASSERT_IS_NULL(result);
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_009: [If any error is encountered then IoTHubTransport_MQTT_Common_Create shall return NULL.] */
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_Create_with_NULL_protocol_fails)
 {
     // arrange
@@ -1958,7 +1964,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Create_with_NULL_protocol_fails)
     ASSERT_IS_NULL(result);
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_003: [If the upperConfig's variables deviceId, deviceKey, iotHubName, protocol, or iotHubSuffix are NULL then IoTHubTransport_MQTT_Common_Create shall return NULL.] */
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_Create_with_NULL_device_id_fails)
 {
     // arrange
@@ -1972,7 +1977,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Create_with_NULL_device_id_fails)
     ASSERT_IS_NULL(result);
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_005: [If the upperConfig's variables deviceKey, iotHubName, or iotHubSuffix are empty strings then IoTHubTransport_MQTT_Common_Create shall return NULL.] */
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_Create_with_deviceSasToken_blank_fails)
 {
     // arrange
@@ -1999,7 +2003,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Create_with_deviceKey_blank_fails)
     ASSERT_IS_NULL(result);
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_003: [If the upperConfig's variables deviceId, deviceKey, iotHubName, protocol, or iotHubSuffix are NULL then IoTHubTransport_MQTT_Common_Create shall return NULL.] */
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_Create_with_NULL_iothub_name_fails)
 {
     // arrange
@@ -2013,7 +2016,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Create_with_NULL_iothub_name_fails)
     ASSERT_IS_NULL(result);
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_006: [If the upperConfig's variables deviceId is an empty strings or length is greater then 128 then IoTHubTransport_MQTT_Common_Create shall return NULL.] */
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_Create_with_very_long_device_id_fails)
 {
     // arrange
@@ -2027,7 +2029,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Create_with_very_long_device_id_fails)
     ASSERT_IS_NULL(result);
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_003: [If the upperConfig's variables deviceId, deviceKey, iotHubName, protocol, or iotHubSuffix are NULL then IoTHubTransport_MQTT_Common_Create shall return NULL.] */
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_Create_with_empty_device_id_fails)
 {
     // arrange
@@ -2041,7 +2042,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Create_with_empty_device_id_fails)
     ASSERT_IS_NULL(result);
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_003: [If the upperConfig's variables deviceId, deviceKey, iotHubName, protocol, or iotHubSuffix are NULL then IoTHubTransport_MQTT_Common_Create shall return NULL.] */
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_Create_with_empty_device_key_fails)
 {
     // arrange
@@ -2055,7 +2055,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Create_with_empty_device_key_fails)
     ASSERT_IS_NULL(result);
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_03_003: [If both deviceKey & deviceSasToken fields are NOT NULL then IoTHubTransport_MQTT_Common_Create shall return NULL.]*/
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_Create_with_both_deviceKey_and_deviceSasToken_defined_fails)
 {
     // arrange
@@ -2070,7 +2069,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Create_with_both_deviceKey_and_deviceS
     ASSERT_IS_NULL(result);
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_003: [If the upperConfig's variables deviceId, deviceKey, iotHubName, protocol, or iotHubSuffix are NULL then IoTHubTransport_MQTT_Common_Create shall return NULL.] */
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_Create_with_empty_iothub_name_fails)
 {
     // arrange
@@ -2084,9 +2082,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Create_with_empty_iothub_name_fails)
     ASSERT_IS_NULL(result);
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_010: [IoTHubTransport_MQTT_Common_Create shall allocate memory to save its internal state where all topics, hostname, device_id, device_key, sasTokenSr and client handle shall be saved.] */
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_011: [On Success IoTHubTransport_MQTT_Common_Create shall return a non-NULL value.] */
-// Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_005: [ MQTT transport shall use EXPONENTIAL_WITH_BACK_OFF as default retry policy ]
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_Create_validConfig_Succeed)
 {
     // arrange
@@ -2123,7 +2118,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Create_callbacks_NULL_fail)
     IoTHubTransport_MQTT_Common_Destroy(result);
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_007: [If the upperConfig's variables protocolGatewayHostName is non-Null and the length is an empty string then IoTHubTransport_MQTT_Common_Create shall return NULL.] */
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_Create_with_NULL_protocol_gateway_hostname_Succeeds)
 {
     // arrange
@@ -2181,9 +2175,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Create_with_Module_Succeeds)
     IoTHubTransport_MQTT_Common_Destroy(result);
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_003: [If the upperConfig's variables deviceId, deviceKey, iotHubName, protocol, or iotHubSuffix are NULL then IoTHubTransport_MQTT_Common_Create shall return NULL.] */
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_009: [If any error is encountered then IoTHubTransport_MQTT_Common_Create shall return NULL.] */
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_011: [On Success IoTHubTransport_MQTT_Common_Create shall return a non-NULL value.] */
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_Create_validConfig_fail)
 {
     // arrange
@@ -2207,7 +2198,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Create_validConfig_fail)
             umock_c_negative_tests_reset();
             umock_c_negative_tests_fail_call(index);
 
-            char tmp_msg[64];
+            char tmp_msg[128];
             sprintf(tmp_msg, "IoTHubTransport_MQTT_Common_Create failure in test %lu/%lu", (unsigned long)index, (unsigned long)count);
             TRANSPORT_LL_HANDLE result = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport, &transport_cb_info, transport_cb_ctx);
 
@@ -2220,7 +2211,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Create_validConfig_fail)
     umock_c_negative_tests_deinit();
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_012: [IoTHubTransport_MQTT_Common_Destroy shall do nothing if parameter handle is NULL.] */
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_Destroy_parameter_NULL_succeed)
 {
     // arrange
@@ -2275,7 +2265,6 @@ static void IoTHubTransport_MQTT_Common_Destroy_Unsubscribe_impl(bool useModelId
 
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_013: [If the parameter subscribe is true then IoTHubTransport_MQTT_Common_Destroy shall call IoTHubTransport_MQTT_Common_Unsubscribe.] */
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_Destroy_Unsubscribe_succeeds)
 {
     IoTHubTransport_MQTT_Common_Destroy_Unsubscribe_impl(false);
@@ -2312,7 +2301,6 @@ static void set_expected_calls_for_free_transport_handle_data()
     EXPECTED_CALL(gballoc_free(NULL));
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_014: [IoTHubTransport_MQTT_Common_Destroy shall free all the resources currently in use.] */
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_Destroy_One_Message_Ack_succeeds)
 {
     // arrange
@@ -2350,8 +2338,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Destroy_One_Message_Ack_succeeds)
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_014: [IoTHubTransport_MQTT_Common_Destroy shall free all the resources currently in use even during
-       disconnect timeout.] */
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_Destroy_disconnect_timeout_succeeds)
 {
     // arrange
@@ -2393,7 +2379,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Destroy_disconnect_timeout_succeeds)
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_014: [IoTHubTransport_MQTT_Common_Destroy shall free all the resources currently in use.] */
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_Destroy_succeeds)
 {
     // arrange
@@ -2478,7 +2463,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Destroy_from_disconnected_state)
 }
 
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_015: [If parameter handle is NULL than IoTHubTransport_MQTT_Common_Subscribe shall return a non-zero value.] */
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_Subscribe_parameter_NULL_fail)
 {
     // arrange
@@ -2490,8 +2474,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Subscribe_parameter_NULL_fail)
     ASSERT_ARE_NOT_EQUAL(int, 0, res);
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_016: [IoTHubTransport_MQTT_Common_Subscribe shall set a flag to enable mqtt_client_subscribe to be called to subscribe to the Message Topic.] */
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_018: [On success IoTHubTransport_MQTT_Common_Subscribe shall return 0.] */
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_Subscribe_Succeed)
 {
     // arrange
@@ -2546,7 +2528,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Subscribe_With_Module_fail)
 
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_017: [Upon failure IoTHubTransport_MQTT_Common_Subscribe shall return a non-zero value.] */
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_Subscribe_fail)
 {
     // arrange
@@ -2579,7 +2560,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Subscribe_fail)
             umock_c_negative_tests_reset();
             umock_c_negative_tests_fail_call(index);
 
-            char tmp_msg[64];
+            char tmp_msg[128];
             sprintf(tmp_msg, "IoTHubTransport_MQTT_Common_DoWork failure in test %lu/%lu", (unsigned long)index, (unsigned long)count);
 
             IoTHubTransport_MQTT_Common_DoWork(handle);
@@ -2591,7 +2572,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Subscribe_fail)
     umock_c_negative_tests_deinit();
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_017: [Upon failure IoTHubTransport_MQTT_Common_Subscribe shall return a non-zero value.] */
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_Subscribe_set_subscribe_type_Succeed)
 {
     // arrange
@@ -2621,7 +2601,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Subscribe_set_subscribe_type_Succeed)
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-/* Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_25_041: [**If any handle is NULL then IoTHubTransport_MQTT_Common_SetRetryPolicy shall return resultant line.] */
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_SetRetryPolicy_parameter_NULL_fail)
 {
     // arrange
@@ -2633,7 +2612,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_SetRetryPolicy_parameter_NULL_fail)
     ASSERT_ARE_NOT_EQUAL(int, 0, res);
 }
 
-// Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_009: [ If retry_control_create() fails then IoTHubTransport_MQTT_Common_SetRetryPolicy shall revert to previous retry policy and return non-zero value ]
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_SetRetryPolicy_failure)
 {
     // arrange
@@ -2657,9 +2635,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_SetRetryPolicy_failure)
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-// Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_006: [ IoTHubTransport_MQTT_Common_SetRetryPolicy shall set the retry logic by calling retry_control_create() with `retryPolicy` and `retryTimeoutLimitinSeconds` as parameters]
-/*Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_25_042: [**If the retry logic is not already created then IoTHubTransport_MQTT_Common_SetRetryPolicy shall create retry logic by calling CreateRetryLogic with retry policy and retryTimeout as parameters]*/
-/*Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_25_045: [**If retry logic for specified parameters of retry policy and retryTimeoutLimitInSeconds is created successfully then IoTHubTransport_MQTT_Common_SetRetryPolicy shall return 0]*/
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_SetRetryPolicy_success)
 {
     // arrange
@@ -2683,7 +2658,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_SetRetryPolicy_success)
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-/*Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_25_043: [**If the retry logic is already created then IoTHubTransport_MQTT_Common_SetRetryPolicy shall destroy existing retry logic and create retry logic by calling CreateRetryLogic with retry policy and retryTimeout as parameters]*/
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_SetRetryPolicy_change_policy_success)
 {
     // arrange
@@ -2710,7 +2684,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_SetRetryPolicy_change_policy_success)
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_020: [ IoTHubTransport_MQTT_Common_Unsubscribe shall call mqtt_client_unsubscribe to unsubscribe the mqtt message topic.] */
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_Unsubscribe_Succeed)
 {
     // arrange
@@ -2735,7 +2708,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Unsubscribe_Succeed)
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_019: [ If parameter handle is NULL then IoTHubTransport_MQTT_Common_Unsubscribe shall do nothing.] */
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_Unsubscribe_handle_NULL_fail)
 {
     // arrange
@@ -2749,7 +2721,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Unsubscribe_handle_NULL_fail)
     //cleanup
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_049: [ If subscribe_state is set to IOTHUB_DEVICE_TWIN_DESIRED_STATE then IoTHubTransport_MQTT_Common_Unsubscribe_DeviceTwin shall send the get state topic to the mqtt client. ] */
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_Unsubscribe_DeviceTwin_Succeed)
 {
     // arrange
@@ -2772,7 +2743,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Unsubscribe_DeviceTwin_Succeed)
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_049: [ If subscribe_state is set to IOTHUB_DEVICE_TWIN_DESIRED_STATE then IoTHubTransport_MQTT_Common_Unsubscribe_DeviceTwin shall send the get state topic to the mqtt client. ] */
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_Unsubscribe_DeviceTwin_No_subscribe_Succeed)
 {
     // arrange
@@ -2792,7 +2762,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Unsubscribe_DeviceTwin_No_subscribe_Su
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_048: [If the parameter handle is NULL than IoTHubTransport_MQTT_Common_Unsubscribe_DeviceTwin shall do nothing.] */
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_Unsubscribe_DeviceTwin_handle_NULL_fail)
 {
     // arrange
@@ -2806,8 +2775,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Unsubscribe_DeviceTwin_handle_NULL_fai
     //cleanup
 }
 
-// Tests_SRS_IOTHUB_MQTT_TRANSPORT_09_002: [ The request shall be queued to be sent when the transport is connected, through DoWork ]
-// Tests_SRS_IOTHUB_MQTT_TRANSPORT_09_004: [ If no failure occurs, IoTHubTransport_MQTT_Common_GetTwinAsync shall return IOTHUB_CLIENT_OK ]
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_GetTwinAsync_Succeed)
 {
     // arrange
@@ -2833,7 +2800,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_GetTwinAsync_Succeed)
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-// Tests_SRS_IOTHUB_MQTT_TRANSPORT_09_001: [ If `handle` or `completionCallback` are `NULL` than `IoTHubTransport_MQTT_Common_GetTwinAsync` shall return IOTHUB_CLIENT_INVALID_ARG. ]
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_GetTwinAsync_NULL_handle_failure)
 {
     // arrange
@@ -2849,7 +2815,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_GetTwinAsync_NULL_handle_failure)
     //cleanup
 }
 
-// Tests_SRS_IOTHUB_MQTT_TRANSPORT_09_001: [ If `handle` or `completionCallback` are `NULL` than `IoTHubTransport_MQTT_Common_GetTwinAsync` shall return IOTHUB_CLIENT_INVALID_ARG. ]
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_GetTwinAsync_NULL_completionCallback_failure)
 {
     // arrange
@@ -2871,7 +2836,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_GetTwinAsync_NULL_completionCallback_f
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-// Tests_SRS_IOTHUB_MQTT_TRANSPORT_09_003: [ If any failure occurs, IoTHubTransport_MQTT_Common_GetTwinAsync shall return IOTHUB_CLIENT_ERROR ]
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_GetTwinAsync_fails)
 {
     // arrange
@@ -2902,7 +2866,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_GetTwinAsync_fails)
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
 
-        char tmp_msg[64];
+        char tmp_msg[128];
         sprintf(tmp_msg, "Failure in test %lu/%lu", (unsigned long)index, (unsigned long)count);
         IOTHUB_CLIENT_RESULT result = IoTHubTransport_MQTT_Common_GetTwinAsync(handle, on_get_device_twin_completed_callback, (void*)0x4445);
 
@@ -2957,7 +2921,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Destroy_return_pending_get_twin_reques
     //cleanup
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_032: [IoTHubTransport_MQTT_Common_SetOption shall pass down the option to xio_setoption if the option parameter is not a known option string for the MQTT transport.] */
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_SetOption_invokes_xio_setoption_when_option_not_consumed_by_mqtt_transport)
 {
     // arrange
@@ -2987,7 +2950,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_SetOption_invokes_xio_setoption_when_o
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_021: [If any parameter is NULL then IoTHubTransport_MQTT_Common_SetOption shall return IOTHUB_CLIENT_INVALID_ARG.] */
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_SetOption_option_NULL_fail)
 {
     // arrange
@@ -3010,7 +2972,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_SetOption_option_NULL_fail)
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_021: [If any parameter is NULL then IoTHubTransport_MQTT_Common_SetOption shall return IOTHUB_CLIENT_INVALID_ARG.] */
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_SetOption_value_NULL_fail)
 {
     // arrange
@@ -3031,7 +2992,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_SetOption_value_NULL_fail)
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_039: [If the option parameter is set to "x509certificate" then the value shall be a const char of the certificate to be used for x509.] */
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_SetOption_x509Certificate_no_509_fail)
 {
     // arrange
@@ -3130,7 +3090,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_SetOption_x509Private_key_succeed)
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_031: [If the option parameter is set to "logtrace" then the value shall be a bool_ptr and the value will determine if the mqtt client log is on or off.] */
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_SetOption_succeed)
 {
     // arrange
@@ -3159,7 +3118,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_SetOption_succeed)
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_036: [If the option parameter is set to "keepalive" then the value shall be a int_ptr and the value will determine the mqtt keepalive time that is set for pings.] */
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_SetOption_keepAlive_succeed)
 {
     // arrange
@@ -3183,7 +3141,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_SetOption_keepAlive_succeed)
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_038: [If the client is connected when the keepalive is set then IoTHubTransport_MQTT_Common_SetOption shall disconnect and reconnect with the specified keepalive value.] */
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_SetOption_keepAlive_previous_connection_succeed)
 {
     // arrange
@@ -3223,7 +3180,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_SetOption_keepAlive_previous_connectio
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_032: [IoTHubTransport_MQTT_Common_SetOption shall pass down the option to xio_setoption if the option parameter is not a known option string for the MQTT transport.] */
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_SetOption_xio_create_fail)
 {
     // arrange
@@ -3251,7 +3207,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_SetOption_xio_create_fail)
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_132: [IoTHubTransport_MQTT_Common_SetOption shall return IOTHUB_CLIENT_INVALID_ARG xio_setoption fails] */
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_SetOption_fails_when_xio_setoption_fails)
 {
     // arrange
@@ -3283,7 +3238,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_SetOption_fails_when_xio_setoption_fai
 }
 
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_037 : [If the option parameter is set to supplied int_ptr keepalive is the same value as the existing keepalive then IoTHubTransport_MQTT_Common_SetOption shall do nothing.] */
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_SetOption_keepAlive_same_value_succeed)
 {
     // arrange
@@ -3313,9 +3267,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_SetOption_keepAlive_same_value_succeed
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-/* Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_001: [ If `option` is `proxy_data`, `value` shall be used as an `HTTP_PROXY_OPTIONS*`. ]*/
-/* Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_002: [ The fields `host_address`, `port`, `username` and `password` shall be saved for later used (needed when creating the underlying IO to be used by the transport). ]*/
-/* Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_008: [ If setting the `proxy_data` option succeeds, `IoTHubTransport_MQTT_Common_SetOption` shall return `IOTHUB_CLIENT_OK` ]*/
 TEST_FUNCTION(SetOption_with_proxy_data_copies_the_options_for_later_use)
 {
     // arrange
@@ -3347,7 +3298,6 @@ TEST_FUNCTION(SetOption_with_proxy_data_copies_the_options_for_later_use)
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-/* Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_003: [ If `host_address` is NULL, `IoTHubTransport_MQTT_Common_SetOption` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`. *]*/
 TEST_FUNCTION(SetOption_proxy_data_with_NULL_host_address_fails)
 {
     // arrange
@@ -3376,7 +3326,6 @@ TEST_FUNCTION(SetOption_proxy_data_with_NULL_host_address_fails)
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-/* Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_021: [ If any parameter is NULL then IoTHubTransport_MQTT_Common_SetOption shall return IOTHUB_CLIENT_INVALID_ARG.]*/
 TEST_FUNCTION(SetOption_proxy_data_with_NULL_option_value_fails)
 {
     // arrange
@@ -3397,8 +3346,6 @@ TEST_FUNCTION(SetOption_proxy_data_with_NULL_option_value_fails)
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-/* Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_005: [ `username` and `password` shall be allowed to be NULL. ]*/
-/* Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_008: [ If setting the `proxy_data` option succeeds, `IoTHubTransport_MQTT_Common_SetOption` shall return `IOTHUB_CLIENT_OK` ]*/
 TEST_FUNCTION(SetOption_proxy_data_with_NULL_username_and_password_saves_only_the_hostname)
 {
     // arrange
@@ -3428,7 +3375,6 @@ TEST_FUNCTION(SetOption_proxy_data_with_NULL_username_and_password_saves_only_th
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-/* Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_006: [ If only one of `username` and `password` is NULL, `IoTHubTransport_MQTT_Common_SetOption` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`. ]*/
 TEST_FUNCTION(SetOption_proxy_data_with_NULL_username_but_non_NULL_password_fails)
 {
     // arrange
@@ -3457,7 +3403,6 @@ TEST_FUNCTION(SetOption_proxy_data_with_NULL_username_but_non_NULL_password_fail
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-/* Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_006: [ If only one of `username` and `password` is NULL, `IoTHubTransport_MQTT_Common_SetOption` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`. ]*/
 TEST_FUNCTION(SetOption_proxy_data_with_NULL_password_but_non_NULL_username_fails)
 {
     // arrange
@@ -3486,7 +3431,6 @@ TEST_FUNCTION(SetOption_proxy_data_with_NULL_password_but_non_NULL_username_fail
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-/* Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_009: [ When setting the proxy options succeeds any previously saved proxy options shall be freed. ]*/
 TEST_FUNCTION(SetOption_proxy_data_frees_previously_Saved_proxy_options)
 {
     // arrange
@@ -3532,7 +3476,6 @@ TEST_FUNCTION(SetOption_proxy_data_frees_previously_Saved_proxy_options)
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-/* Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_004: [ If copying `host_address`, `username` or `password` fails, `IoTHubTransport_MQTT_Common_SetOption` shall fail and return `IOTHUB_CLIENT_ERROR`. ]*/
 TEST_FUNCTION(when_allocating_proxy_name_fails_SetOption_proxy_data_fails)
 {
     // arrange
@@ -3563,7 +3506,6 @@ TEST_FUNCTION(when_allocating_proxy_name_fails_SetOption_proxy_data_fails)
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-/* Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_004: [ If copying `host_address`, `username` or `password` fails, `IoTHubTransport_MQTT_Common_SetOption` shall fail and return `IOTHUB_CLIENT_ERROR`. ]*/
 TEST_FUNCTION(when_allocating_username_fails_SetOption_proxy_data_fails)
 {
     // arrange
@@ -3596,7 +3538,6 @@ TEST_FUNCTION(when_allocating_username_fails_SetOption_proxy_data_fails)
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-/* Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_004: [ If copying `host_address`, `username` or `password` fails, `IoTHubTransport_MQTT_Common_SetOption` shall fail and return `IOTHUB_CLIENT_ERROR`. ]*/
 TEST_FUNCTION(when_allocating_password_fails_SetOption_proxy_data_fails)
 {
     // arrange
@@ -3631,7 +3572,6 @@ TEST_FUNCTION(when_allocating_password_fails_SetOption_proxy_data_fails)
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-/* Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_009: [ When setting the proxy options succeeds any previously saved proxy options shall be freed. ]*/
 TEST_FUNCTION(when_allocating_proxy_name_fails_SetOption_proxy_data_does_not_free_previous_proxy_options)
 {
     // arrange
@@ -3671,7 +3611,6 @@ TEST_FUNCTION(when_allocating_proxy_name_fails_SetOption_proxy_data_does_not_fre
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-/* Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_009: [ When setting the proxy options succeeds any previously saved proxy options shall be freed. ]*/
 TEST_FUNCTION(when_allocating_username_fails_SetOption_proxy_data_does_not_free_previous_proxy_options)
 {
     // arrange
@@ -3713,7 +3652,6 @@ TEST_FUNCTION(when_allocating_username_fails_SetOption_proxy_data_does_not_free_
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-/* Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_009: [ When setting the proxy options succeeds any previously saved proxy options shall be freed. ]*/
 TEST_FUNCTION(when_allocating_password_fails_SetOption_proxy_data_does_not_free_previous_proxy_options)
 {
     // arrange
@@ -3757,7 +3695,6 @@ TEST_FUNCTION(when_allocating_password_fails_SetOption_proxy_data_does_not_free_
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-/* Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_009: [ When setting the proxy options succeeds any previously saved proxy options shall be freed. ]*/
 TEST_FUNCTION(SetOption_proxy_data_with_NULL_hostname_does_not_free_previous_proxy_options)
 {
     // arrange
@@ -3795,7 +3732,6 @@ TEST_FUNCTION(SetOption_proxy_data_with_NULL_hostname_does_not_free_previous_pro
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-/* Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_009: [ When setting the proxy options succeeds any previously saved proxy options shall be freed. ]*/
 TEST_FUNCTION(SetOption_proxy_data_with_NULL_username_and_non_NULL_password_does_not_free_previous_proxy_options)
 {
     // arrange
@@ -3833,7 +3769,6 @@ TEST_FUNCTION(SetOption_proxy_data_with_NULL_username_and_non_NULL_password_does
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-/* Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_011: [ If no `proxy_data` option has been set, NULL shall be passed as the argument `mqtt_transport_proxy_options` when calling the function `get_io_transport` passed in `IoTHubTransport_MQTT_Common__Create`. ]*/
 TEST_FUNCTION(SetOption_xio_option_get_underlying_TLS_when_proxy_data_was_not_set_passes_down_NULL)
 {
     // arrange
@@ -3862,7 +3797,6 @@ TEST_FUNCTION(SetOption_xio_option_get_underlying_TLS_when_proxy_data_was_not_se
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-/* Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_010: [ If the `proxy_data` option has been set, the proxy options shall be filled in the argument `mqtt_transport_proxy_options` when calling the function `get_io_transport` passed in `IoTHubTransport_MQTT_Common__Create` to obtain the underlying IO handle. ]*/
 TEST_FUNCTION(SetOption_xio_option_get_underlying_TLS_when_proxy_data_was_set_passes_down_the_proxy_options)
 {
     // arrange
@@ -3909,7 +3843,6 @@ TEST_FUNCTION(SetOption_xio_option_get_underlying_TLS_when_proxy_data_was_set_pa
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-/* Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_007: [ If the underlying IO has already been created, then `IoTHubTransport_MQTT_Common_SetOption` shall fail and return `IOTHUB_CLIENT_ERROR`. ]*/
 TEST_FUNCTION(SetOption_proxy_data_when_underlying_IO_is_already_created_fails)
 {
     // arrange
@@ -3943,7 +3876,6 @@ TEST_FUNCTION(SetOption_proxy_data_when_underlying_IO_is_already_created_fails)
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-/* Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_012: [ `IoTHubTransport_MQTT_Common_Destroy` shall free the stored proxy options. ]*/
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_Destroy_frees_the_proxy_options)
 {
     // arrange
@@ -4084,7 +4016,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_mqtt_operation_complete_msgInfo_NULL_s
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_026: [IoTHubTransport_MQTT_Common_DoWork shall do nothing if parameter handle and/or iotHubClientHandle is NULL.] */
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_parameter_handle_NULL_fail)
 {
     // arrange
@@ -4095,7 +4026,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_parameter_handle_NULL_fail)
 
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_026: [IoTHubTransport_MQTT_Common_DoWork shall do nothing if parameter handle and/or iotHubClientHandle is NULL.] */
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_all_parameters_NULL_fail)
 {
     // arrange
@@ -4106,7 +4036,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_all_parameters_NULL_fail)
 
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_027: [IoTHubTransport_MQTT_Common_DoWork shall inspect the "waitingToSend" DLIST passed in config structure.] */
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_mqtt_client_connect_fail)
 {
     // arrange
@@ -4163,6 +4092,7 @@ static void set_expected_calls_for_first_gettwin_dowork()
     STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_SasToken_Expiry(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(DList_RemoveEntryList(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
     // STRING_construct_sprintf
@@ -4229,7 +4159,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_send_get_twin_succeed)
     STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .SetReturn(0);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
-        .SetReturn("2");
+        .SetReturn("?$rid=2");
     STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(STRING_TOKENIZER_destroy(IGNORED_PTR_ARG));
 
@@ -4257,6 +4187,7 @@ static void set_expected_calls_for_DoWork_for_twin_timeouts()
     STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_SasToken_Expiry(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
 }
@@ -4319,7 +4250,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_send_get_twin_timesout)
 }
 
 
-// Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_008: [ Upon successful connection the retry control shall be reset using retry_control_reset() ]
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_Retry_Policy_First_connect_succeed_calls_retry_control_reset)
 {
     // arrange
@@ -4381,7 +4311,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_Retry_Policy_First_Connect_Fail
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-// Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_007: [ IoTHubTransport_MQTT_Common_DoWork shall try to reconnect according to the current retry policy set ]
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_Retry_Policy_Connection_Break_Wait_2_Times_Success)
 {
     // arrange
@@ -4544,7 +4473,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_Retry_Policy_Connection_Break_2
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_027: [IoTHubTransport_MQTT_Common_DoWork shall inspect the "waitingToSend" DLIST passed in config structure.] */
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_no_messages_succeed)
 {
     // arrange
@@ -4599,7 +4527,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_no_messages_fail)
             umock_c_negative_tests_reset();
             umock_c_negative_tests_fail_call(index);
 
-            char tmp_msg[64];
+            char tmp_msg[128];
             sprintf(tmp_msg, "IoTHubTransport_MQTT_Common_DoWork failure in test %lu/%lu", (unsigned long)index, (unsigned long)count);
 
             IoTHubTransport_MQTT_Common_DoWork(handle);
@@ -4639,63 +4567,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_SAS_token_from_user_succeed)
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_SAS_token_from_user_invalid_callback_connection_status)
-{
-    // arrange
-    IOTHUBTRANSPORT_CONFIG config = { 0 };
-    SetupIothubTransportConfigWithKeyAndSasToken(&config, TEST_DEVICE_ID, NULL, TEST_DEVICE_SAS, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME, NULL);
-
-    TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport, &transport_cb_info, transport_cb_ctx);
-    umock_c_reset_all_calls();
-
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG)).SetReturn(IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN);
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Is_SasToken_Valid(IGNORED_PTR_ARG)).SetReturn(SAS_TOKEN_STATUS_INVALID);
-    STRICT_EXPECTED_CALL(Transport_ConnectionStatusCallBack(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_EXPIRED_SAS_TOKEN, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    // removeExpiredTwinRequests
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-
-    // act
-    IoTHubTransport_MQTT_Common_DoWork(handle);
-
-    //assert
-    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-
-    //cleanup
-    IoTHubTransport_MQTT_Common_Destroy(handle);
-}
-
-TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_SAS_token_from_user_failed_callback_connection_status)
-{
-    // arrange
-    IOTHUBTRANSPORT_CONFIG config = { 0 };
-    SetupIothubTransportConfigWithKeyAndSasToken(&config, TEST_DEVICE_ID, NULL, TEST_DEVICE_SAS, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME, NULL);
-
-    TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport, &transport_cb_info, transport_cb_ctx);
-    umock_c_reset_all_calls();
-
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG)).SetReturn(IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN);
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Is_SasToken_Valid(IGNORED_PTR_ARG)).SetReturn(SAS_TOKEN_STATUS_FAILED);
-    STRICT_EXPECTED_CALL(Transport_ConnectionStatusCallBack(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_BAD_CREDENTIAL, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    // removeExpiredTwinRequests
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-
-    // act
-    IoTHubTransport_MQTT_Common_DoWork(handle);
-
-    //assert
-    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-
-    //cleanup
-    IoTHubTransport_MQTT_Common_Destroy(handle);
-}
-
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_041: [If both deviceKey and deviceSasToken fields are NULL then IoTHubTransport_MQTT_Common_Create shall assume a x509 authentication.] */
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_x509_succeed)
 {
     // arrange
@@ -4721,7 +4592,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_x509_succeed)
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_027: [IoTHubTransport_MQTT_Common_DoWork shall inspect the "waitingToSend" DLIST passed in config structure.] */
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_with_1_event_item_succeeds)
 {
     // arrange
@@ -4750,7 +4620,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_with_1_event_item_succeeds)
     IoTHubTransport_MQTT_Common_DoWork(handle);
     umock_c_reset_all_calls();
 
-    setup_IoTHubTransport_MQTT_Common_DoWork_events_mocks(NULL, NULL, 0, TEST_IOTHUB_MSG_BYTEARRAY, false, NULL, NULL, NULL, NULL, NULL, NULL, NULL, false, NULL, false);
+    setup_IoTHubTransport_MQTT_Common_DoWork_events_mocks(NULL, NULL, 0, TEST_IOTHUB_MSG_BYTEARRAY, false, NULL, NULL, NULL, NULL, NULL, NULL, NULL, false, NULL, NULL, false);
 
     // act
     IoTHubTransport_MQTT_Common_DoWork(handle);
@@ -4793,6 +4663,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_get_item_fails)
     STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_SasToken_Expiry(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(IoTHubMessage_GetContentType(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(IoTHubMessage_GetString(IGNORED_PTR_ARG)).SetReturn(NULL);
 
@@ -4848,6 +4719,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_x509_no_expire_success)
     STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG)).SetReturn(IOTHUB_CREDENTIAL_TYPE_X509);
 
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(IoTHubMessage_GetContentType(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(IoTHubMessage_GetString(IGNORED_PTR_ARG)).SetReturn(NULL);
 
@@ -4898,7 +4770,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_with_emtpy_item_succeeds)
     IoTHubTransport_MQTT_Common_DoWork(handle);
     umock_c_reset_all_calls();
 
-    setup_IoTHubTransport_MQTT_Common_DoWork_emtpy_msg_mocks();
+    setup_IoTHubTransport_MQTT_Common_DoWork_events_mocks(NULL, NULL, 0, TEST_IOTHUB_MSG_STRING, false, NULL, NULL, NULL, NULL, NULL, NULL, NULL, false, NULL, NULL, false);
 
     // act
     IoTHubTransport_MQTT_Common_DoWork(handle);
@@ -4934,7 +4806,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_with_security_msg_succeeds)
     IoTHubTransport_MQTT_Common_DoWork(handle);
     umock_c_reset_all_calls();
 
-    setup_IoTHubTransport_MQTT_Common_DoWork_events_mocks(NULL, NULL, 0, TEST_IOTHUB_MSG_STRING, false, NULL, NULL, NULL, "json/application", NULL, NULL, NULL, false, NULL, true);
+    setup_IoTHubTransport_MQTT_Common_DoWork_events_mocks(NULL, NULL, 0, TEST_IOTHUB_MSG_STRING, false, NULL, NULL, NULL, "json/application", NULL, NULL, NULL, false, NULL, NULL, true);
 
     // act
     IoTHubTransport_MQTT_Common_DoWork(handle);
@@ -4971,7 +4843,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_with_1_event_item_fail)
     IoTHubTransport_MQTT_Common_DoWork(handle);
     umock_c_reset_all_calls();
 
-    setup_IoTHubTransport_MQTT_Common_DoWork_events_mocks(NULL, NULL, 0, TEST_IOTHUB_MSG_BYTEARRAY, false, NULL, NULL, NULL, NULL, NULL, NULL, NULL, false, NULL, false);
+    setup_IoTHubTransport_MQTT_Common_DoWork_events_mocks(NULL, NULL, 0, TEST_IOTHUB_MSG_BYTEARRAY, false, NULL, NULL, NULL, NULL, NULL, NULL, NULL, false, NULL, NULL, false);
     umock_c_negative_tests_snapshot();
 
     // act
@@ -4983,7 +4855,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_with_1_event_item_fail)
             umock_c_negative_tests_reset();
             umock_c_negative_tests_fail_call(index);
 
-            char tmp_msg[64];
+            char tmp_msg[128];
             sprintf(tmp_msg, "IoTHubTransport_MQTT_Common_DoWork failure in test %lu/%lu", (unsigned long)index, (unsigned long)count);
 
             IoTHubTransport_MQTT_Common_DoWork(handle);
@@ -5031,7 +4903,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_with_1_event_item_with_properti
     IoTHubTransport_MQTT_Common_DoWork(handle);
     umock_c_reset_all_calls();
 
-    setup_IoTHubTransport_MQTT_Common_DoWork_events_mocks((const char* const**)&keys, (const char* const**)&values, propCount, TEST_IOTHUB_MSG_BYTEARRAY, false, NULL, NULL, NULL, NULL, NULL, NULL, NULL, false, NULL, false);
+    setup_IoTHubTransport_MQTT_Common_DoWork_events_mocks((const char* const**)&keys, (const char* const**)&values, propCount, TEST_IOTHUB_MSG_BYTEARRAY, false, NULL, NULL, NULL, NULL, NULL, NULL, NULL, false, NULL, NULL, false);
 
     // act
     IoTHubTransport_MQTT_Common_DoWork(handle);
@@ -5077,7 +4949,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_with_1_event_item_with_2_proper
     IoTHubTransport_MQTT_Common_DoWork(handle);
     umock_c_reset_all_calls();
 
-    setup_IoTHubTransport_MQTT_Common_DoWork_events_mocks((const char* const**)&keys, (const char* const**)&values, propCount, TEST_IOTHUB_MSG_BYTEARRAY, false, NULL, NULL, NULL, NULL, NULL, NULL, NULL, false, NULL, false);
+    setup_IoTHubTransport_MQTT_Common_DoWork_events_mocks((const char* const**)&keys, (const char* const**)&values, propCount, TEST_IOTHUB_MSG_BYTEARRAY, false, NULL, NULL, NULL, NULL, NULL, NULL, NULL, false, NULL, NULL, false);
 
     // act
     IoTHubTransport_MQTT_Common_DoWork(handle);
@@ -5125,7 +4997,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_with_1_event_item_with_properti
     IoTHubTransport_MQTT_Common_DoWork(handle);
     umock_c_reset_all_calls();
 
-    setup_IoTHubTransport_MQTT_Common_DoWork_events_mocks((const char* const**)&keys, (const char* const**)&values, propCount, TEST_IOTHUB_MSG_BYTEARRAY, false, NULL, NULL, NULL, NULL, NULL, NULL, NULL, true, NULL, false);
+    setup_IoTHubTransport_MQTT_Common_DoWork_events_mocks((const char* const**)&keys, (const char* const**)&values, propCount, TEST_IOTHUB_MSG_BYTEARRAY, false, NULL, NULL, NULL, NULL, NULL, NULL, NULL, true, NULL, NULL, false);
 
     // act
     IoTHubTransport_MQTT_Common_DoWork(handle);
@@ -5173,7 +5045,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_with_1_event_item_with_2_proper
     IoTHubTransport_MQTT_Common_DoWork(handle);
     umock_c_reset_all_calls();
 
-    setup_IoTHubTransport_MQTT_Common_DoWork_events_mocks((const char* const**)&keys, (const char* const**)&values, propCount, TEST_IOTHUB_MSG_BYTEARRAY, false, NULL, NULL, NULL, NULL, NULL, NULL, NULL, true, NULL, false);
+    setup_IoTHubTransport_MQTT_Common_DoWork_events_mocks((const char* const**)&keys, (const char* const**)&values, propCount, TEST_IOTHUB_MSG_BYTEARRAY, false, NULL, NULL, NULL, NULL, NULL, NULL, NULL, true, NULL, NULL, false);
 
     // act
     IoTHubTransport_MQTT_Common_DoWork(handle);
@@ -5185,7 +5057,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_with_1_event_item_with_2_proper
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-/* Test_SRS_IOTHUB_MQTT_TRANSPORT_07_033: [IoTHubTransport_MQTT_Common_DoWork shall iterate through the Waiting Acknowledge messages looking for any message that has been waiting longer than 2 min.]*/
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_no_resend_message_succeeds)
 {
     // arrange
@@ -5226,7 +5097,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_no_resend_message_succeeds)
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-/* Test_SRS_IOTHUB_MQTT_TRANSPORT_07_033: [IoTHubTransport_MQTT_Common_DoWork shall iterate through the Waiting Acknowledge messages looking for any message that has been waiting longer than 2 min.]*/
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_resend_message_succeeds)
 {
     // arrange
@@ -5253,8 +5123,8 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_resend_message_succeeds)
     IoTHubTransport_MQTT_Common_DoWork(handle);
     umock_c_reset_all_calls();
 
-    g_current_ms += 5 * 60 * 1000;
-    setup_IoTHubTransport_MQTT_Common_DoWork_resend_events_mocks(NULL, NULL, 0, TEST_IOTHUB_MSG_STRING, false, NULL, NULL, NULL, NULL, NULL, NULL, NULL, false, NULL, false);
+    g_current_ms += 5*60*1000;
+    setup_IoTHubTransport_MQTT_Common_DoWork_events_mocks(NULL, NULL, 0, TEST_IOTHUB_MSG_STRING, false, NULL, NULL, NULL, NULL, NULL, NULL, NULL, false, NULL, NULL, false);
 
     // act
     IoTHubTransport_MQTT_Common_DoWork(handle);
@@ -5266,8 +5136,72 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_resend_message_succeeds)
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-/* Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_034: [ If IoTHubTransport_MQTT_Common_DoWork has previously resent the message two times then it shall fail the message and reconnect to IoTHub ... ]*/
-/* Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_057: [ ... then go through all the rest of the waiting messages and reset the retryCount on the message. ]*/
+/*  This test covers the scenario where there are multiple disconnects and
+    reconnects in a row and the packet is resent each time without expiring by count.
+*/
+TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_resend_multiple_disconnects)
+{
+    CONNECT_ACK connack = { true, CONNECTION_ACCEPTED };
+    SUBSCRIBE_ACK suback;
+    QOS_VALUE QosValue[] = { DELIVER_AT_LEAST_ONCE };
+    IOTHUB_MESSAGE_LIST message1;
+    TRANSPORT_LL_HANDLE handle;
+
+    // arrange
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
+    SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME, NULL);
+
+    handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport, &transport_cb_info, transport_cb_ctx);
+
+    IoTHubTransport_MQTT_Common_DoWork(handle);
+    g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_CONNACK, &connack, g_callbackCtx);
+    IoTHubTransport_MQTT_Common_DoWork(handle);
+
+    suback.packetId = 1234;
+    suback.qosCount = 1;
+    suback.qosReturn = QosValue;
+    g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_SUBSCRIBE_ACK, &suback, g_callbackCtx);
+    IoTHubTransport_MQTT_Common_DoWork(handle);
+
+    // create packet & add to sending queue
+    memset(&message1, 0, sizeof(IOTHUB_MESSAGE_LIST));
+    message1.messageHandle = TEST_IOTHUB_MSG_STRING;
+    DList_InsertTailList(config.waitingToSend, &(message1.entry));
+
+    // Send packet 1st time
+    IoTHubTransport_MQTT_Common_DoWork(handle);
+
+    // Disconnect
+    g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_DISCONNECT, NULL, g_callbackCtx);
+
+    // Reconnect
+    g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_CONNACK, &connack, g_callbackCtx);
+
+    // Dowork where packet is resent 1st time
+    IoTHubTransport_MQTT_Common_DoWork(handle);
+
+    // Disconnect
+    g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_DISCONNECT, NULL, g_callbackCtx);
+    // setup is now complete
+    umock_c_reset_all_calls();
+
+    // Reconnect
+    setup_connection_success_mocks();
+
+    // DoWork where packet is resent 2nd time (wouldn't happen without unlimited resend on reconnect)
+    setup_IoTHubTransport_MQTT_Common_DoWork_events_mocks(NULL, NULL, 0, TEST_IOTHUB_MSG_STRING, true, NULL, NULL, NULL, NULL, NULL, NULL, NULL, false, NULL, NULL, false);
+
+    // act
+    g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_CONNACK, &connack, g_callbackCtx);
+    IoTHubTransport_MQTT_Common_DoWork(handle);
+
+    //assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    IoTHubTransport_MQTT_Common_Destroy(handle);
+}
+
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_message_timeout_succeeds)
 {
     CONNECT_ACK connack = { true, CONNECTION_ACCEPTED };
@@ -5299,21 +5233,19 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_message_timeout_succeeds)
 
     IoTHubTransport_MQTT_Common_DoWork(handle);
 
-    g_current_ms += 5 * 60 * 1000;
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .CopyOutArgumentBuffer(2, &g_current_ms, sizeof(g_current_ms));
-    IoTHubTransport_MQTT_Common_DoWork(handle);
+    for (int i = 1; i < (MSG_TIMEOUT_VALUE_MS) / (RESEND_TIMEOUT_VALUE_MS); i++)
+    {
+        g_current_ms += RESEND_TIMEOUT_VALUE_MS;
+        IoTHubTransport_MQTT_Common_DoWork(handle);
+    }
     umock_c_reset_all_calls();
 
-    g_current_ms += 5 * 60 * 1000;
+    g_current_ms += RESEND_TIMEOUT_VALUE_MS;
     STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .CopyOutArgumentBuffer(2, &g_current_ms, sizeof(g_current_ms));
     STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_SasToken_Expiry(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
-
     STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-
     STRICT_EXPECTED_CALL(DList_InitializeListHead(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_PTR_ARG, IOTHUB_CLIENT_CONFIRMATION_MESSAGE_TIMEOUT, transport_cb_ctx));
@@ -5328,9 +5260,11 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_message_timeout_succeeds)
     }
     STRICT_EXPECTED_CALL(mqtt_client_clear_xio(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(xio_destroy(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Transport_ConnectionStatusCallBack(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_RETRY_EXPIRED, transport_cb_ctx));
+    STRICT_EXPECTED_CALL(Transport_ConnectionStatusCallBack(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_COMMUNICATION_ERROR, transport_cb_ctx));
+    STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
 
     // removeExpiredTwinRequests
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
 
     // act
@@ -5343,8 +5277,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_message_timeout_succeeds)
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-/* Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_034: [ If IoTHubTransport_MQTT_Common_DoWork has previously resent the message two times then it shall fail the message and reconnect to IoTHub ... ]*/
-/* Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_057: [ ... then go through all the rest of the waiting messages and reset the retryCount on the message. ]*/
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_2_message_timeout_succeeds)
 {
     CONNECT_ACK connack = { true, CONNECTION_ACCEPTED };
@@ -5381,18 +5313,24 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_2_message_timeout_succeeds)
 
     IoTHubTransport_MQTT_Common_DoWork(handle);
 
-    g_current_ms += 5 * 60 * 1000;
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .CopyOutArgumentBuffer(2, &g_current_ms, sizeof(g_current_ms));
-    IoTHubTransport_MQTT_Common_DoWork(handle);
+    for (int i = 1; i < (MSG_TIMEOUT_VALUE_MS) / (RESEND_TIMEOUT_VALUE_MS); i++)
+    {
+        g_current_ms += RESEND_TIMEOUT_VALUE_MS;
+        IoTHubTransport_MQTT_Common_DoWork(handle);
+    }
+
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_SasToken_Expiry(IGNORED_PTR_ARG));
+
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .CopyOutArgumentBuffer(2, &g_current_ms, sizeof(g_current_ms));
+
     STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
 
-    g_current_ms += 5 * 60 * 1000;
+    g_current_ms += RESEND_TIMEOUT_VALUE_MS;
     STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .CopyOutArgumentBuffer(2, &g_current_ms, sizeof(g_current_ms));
 
@@ -5410,13 +5348,14 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_2_message_timeout_succeeds)
     }
     STRICT_EXPECTED_CALL(mqtt_client_clear_xio(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(xio_destroy(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Transport_ConnectionStatusCallBack(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_RETRY_EXPIRED, transport_cb_ctx));
+    STRICT_EXPECTED_CALL(Transport_ConnectionStatusCallBack(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_COMMUNICATION_ERROR, transport_cb_ctx));
 
     STRICT_EXPECTED_CALL(DList_InitializeListHead(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_PTR_ARG, IOTHUB_CLIENT_CONFIRMATION_MESSAGE_TIMEOUT, transport_cb_ctx));
     STRICT_EXPECTED_CALL(DList_RemoveEntryList(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Transport_ConnectionStatusCallBack(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_COMMUNICATION_ERROR, transport_cb_ctx));
 
     // removeExpiredTwinRequests
     STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
@@ -5431,7 +5370,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_2_message_timeout_succeeds)
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-/* Test_SRS_IOTHUB_MQTT_TRANSPORT_07_055: [ IoTHubTransport_MQTT_Common_DoWork shall send a device twin get property message upon successfully retrieving a SUBACK on device twin topics. ] */
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_device_twin_resend_message_succeeds)
 {
     // arrange
@@ -5495,9 +5433,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_device_twin_resend_message_succ
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_027: [IoTHubTransport_MQTT_Common_DoWork shall inspect the "waitingToSend" DLIST passed in config structure.] */
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_029: [IoTHubTransport_MQTT_Common_DoWork shall create a MQTT_MESSAGE_HANDLE and pass this to a call to mqtt_client_publish.] */
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_030: [IoTHubTransport_MQTT_Common_DoWork shall call mqtt_client_dowork everytime it is called if it is connected.] */
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_with_1_event_item_STRING_type_succeeds)
 {
     // arrange
@@ -5526,7 +5461,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_with_1_event_item_STRING_type_s
     IoTHubTransport_MQTT_Common_DoWork(handle);
     umock_c_reset_all_calls();
 
-    setup_IoTHubTransport_MQTT_Common_DoWork_events_mocks(NULL, NULL, 0, TEST_IOTHUB_MSG_STRING, false, NULL, NULL, NULL, NULL, NULL, NULL, NULL, false, NULL, false);
+    setup_IoTHubTransport_MQTT_Common_DoWork_events_mocks(NULL, NULL, 0, TEST_IOTHUB_MSG_STRING, false, NULL, NULL, NULL, NULL, NULL, NULL, NULL, false, NULL, NULL, false);
 
     // act
     IoTHubTransport_MQTT_Common_DoWork(handle);
@@ -5539,10 +5474,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_with_1_event_item_STRING_type_s
 }
 
 // As of now, this test covers: message id, correlation id, content type, content encoding, diagId, diagCreationTimeUtc.
-// Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_010: [ `IoTHubTransport_MQTT_Common_DoWork` shall check for the ContentType property and if found add the `value` as a system property in the format of `$.ct=<value>` ]
-// Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_011: [ `IoTHubTransport_MQTT_Common_DoWork` shall check for the ContentEncoding property and if found add the `value` as a system property in the format of `$.ce=<value>` ]
-// Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_014: [ `IoTHubTransport_MQTT_Common_DoWork` shall check for the diagnostic properties including diagid and diagCreationTimeUtc and if found both add them as system property in the format of `$.diagid` and `$.diagctx` respectively]
-// Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_31_060: [ `IoTHubTransport_MQTT_Common_DoWork` shall check for the OutputName property and if found add the value as a system property in the format of $.on=<value> ]
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_with_message_system_properties_succeeds)
 {
     // arrange
@@ -5572,7 +5503,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_with_message_system_properties_
     umock_c_reset_all_calls();
 
     setup_IoTHubTransport_MQTT_Common_DoWork_events_mocks(NULL, NULL, 0, TEST_IOTHUB_MSG_STRING, false,
-        "msg_id", "core_id", TEST_CONTENT_TYPE, TEST_CONTENT_ENCODING, TEST_DIAG_ID, TEST_DIAG_CREATION_TIME_UTC, TEST_MESSAGE_CREATION_TIME_UTC, false, TEST_OUTPUT_NAME, false);
+        "msg_id", "core_id", TEST_CONTENT_TYPE, TEST_CONTENT_ENCODING, TEST_DIAG_ID, TEST_DIAG_CREATION_TIME_UTC, TEST_MESSAGE_CREATION_TIME_UTC, false, TEST_OUTPUT_NAME, TEST_COMPONENT_NAME, false);
 
     // act
     IoTHubTransport_MQTT_Common_DoWork(handle);
@@ -5615,7 +5546,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_with_message_system_properties_
     umock_c_reset_all_calls();
 
     setup_IoTHubTransport_MQTT_Common_DoWork_events_mocks(NULL, NULL, 0, TEST_IOTHUB_MSG_STRING, false,
-        "msg_id", "core_id", TEST_CONTENT_TYPE, TEST_CONTENT_ENCODING, TEST_DIAG_ID, TEST_DIAG_CREATION_TIME_UTC, TEST_MESSAGE_CREATION_TIME_UTC, true, NULL, false);
+        "msg_id", "core_id", TEST_CONTENT_TYPE, TEST_CONTENT_ENCODING, TEST_DIAG_ID, TEST_DIAG_CREATION_TIME_UTC, TEST_MESSAGE_CREATION_TIME_UTC, true, NULL, TEST_COMPONENT_NAME, false);
 
     // act
     IoTHubTransport_MQTT_Common_DoWork(handle);
@@ -5627,7 +5558,87 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_with_message_system_properties_
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-// Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_015: [ `IoTHubTransport_MQTT_Common_DoWork` shall check whether diagid and diagCreationTimeUtc be present simultaneously, treat as error if not]
+/*  This test covers the scenario where upon reconnect, there are both packets
+    in the waiting to send queue and the waiting for ack queue. It ensures
+    packets are sent in order after a disconnect.
+*/
+TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_reconnect_send_order)
+{
+    CONNECT_ACK connack = { true, CONNECTION_ACCEPTED };
+    SUBSCRIBE_ACK suback;
+    PUBLISH_ACK puback;
+    puback.packetId = 2;
+    QOS_VALUE QosValue[] = { DELIVER_AT_LEAST_ONCE };
+    IOTHUB_MESSAGE_LIST message1;
+    IOTHUB_MESSAGE_LIST message2;
+    IOTHUB_MESSAGE_LIST message3;
+    TRANSPORT_LL_HANDLE handle;
+
+    // arrange
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
+    SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME, NULL);
+
+    handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport, &transport_cb_info, transport_cb_ctx);
+
+    IoTHubTransport_MQTT_Common_DoWork(handle);
+    g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_CONNACK, &connack, g_callbackCtx);
+    IoTHubTransport_MQTT_Common_DoWork(handle);
+
+    suback.packetId = 1234;
+    suback.qosCount = 1;
+    suback.qosReturn = QosValue;
+    g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_SUBSCRIBE_ACK, &suback, g_callbackCtx);
+    IoTHubTransport_MQTT_Common_DoWork(handle);
+
+    // create first 2 packets
+    memset(&message1, 0, sizeof(IOTHUB_MESSAGE_LIST));
+    message1.messageHandle = TEST_IOTHUB_MSG_STRING;
+    DList_InsertTailList(config.waitingToSend, &(message1.entry));
+
+    memset(&message2, 0, sizeof(IOTHUB_MESSAGE_LIST));
+    message2.messageHandle = TEST_IOTHUB_MSG_STRING;
+    DList_InsertTailList(config.waitingToSend, &(message2.entry));
+
+
+    // Send first 2 packets
+    IoTHubTransport_MQTT_Common_DoWork(handle);
+    IoTHubTransport_MQTT_Common_DoWork(handle);
+
+    // receive first puback
+    setup_invoke_message_callback_mocks(IOTHUB_CLIENT_CONFIRMATION_OK, true, false);
+    g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_PUBLISH_ACK, &puback, g_callbackCtx);
+
+    // add 1 more packets to waiting to send queue (so we have one packet in waiting to send and one in waiting to ack)
+    memset(&message3, 0, sizeof(IOTHUB_MESSAGE_LIST));
+    message3.messageHandle = TEST_IOTHUB_MSG_STRING;
+    DList_InsertTailList(config.waitingToSend, &(message3.entry));
+
+    // Disconnect
+    g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_DISCONNECT, NULL, g_callbackCtx);
+    // setup is now complete
+    umock_c_reset_all_calls();
+
+    // Reconnect
+    setup_connection_success_mocks();
+
+    // DoWork where packet 2 is resent
+    setup_IoTHubTransport_MQTT_Common_DoWork_events_mocks(NULL, NULL, 0, TEST_IOTHUB_MSG_STRING, true, NULL, NULL, NULL, NULL, NULL, NULL, NULL, false, NULL, NULL, false);
+
+    // DoWork where packet 3 is sent for the first time
+    setup_IoTHubTransport_MQTT_Common_DoWork_events_mocks(NULL, NULL, 0, TEST_IOTHUB_MSG_STRING, false, NULL, NULL, NULL, NULL, NULL, NULL, NULL, false, NULL, NULL, false);
+
+    // act
+    g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_CONNACK, &connack, g_callbackCtx);
+    IoTHubTransport_MQTT_Common_DoWork(handle);
+    IoTHubTransport_MQTT_Common_DoWork(handle);
+
+    //assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    IoTHubTransport_MQTT_Common_Destroy(handle);
+}
+
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_with_message_incomplete_diagnostic_system_properties_fails)
 {
     // arrange
@@ -5657,7 +5668,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_with_message_incomplete_diagnos
     umock_c_reset_all_calls();
 
     setup_IoTHubTransport_MQTT_Common_DoWork_events_mocks(NULL, NULL, 0, TEST_IOTHUB_MSG_STRING, false,
-        NULL, NULL, NULL, NULL, TEST_DIAG_ID, NULL, NULL, false, NULL, false);
+        NULL, NULL, NULL, NULL, TEST_DIAG_ID, NULL, NULL, false, NULL, NULL, false);
 
     // act
     IoTHubTransport_MQTT_Common_DoWork(handle);
@@ -5669,7 +5680,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_with_message_incomplete_diagnos
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_034: [If IoTHubTransport_MQTT_Common_DoWork has resent the message two times then it shall fail the message and reconnect to IoTHub ... ] */
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_resend_max_recount_reached_message_succeeds)
 {
     // arrange
@@ -5759,7 +5769,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_connectFailCount_exceed_succeed
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-// Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_001: [ IoTHubTransport_MQTT_Common_DoWork shall trigger reconnection if the mqtt_client_connect does not complete within `keepalive` seconds]
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_mqtt_client_connect_times_out)
 {
     // arrange
@@ -5806,7 +5815,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_mqtt_client_connect_times_out)
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-// Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_030: [ IoTHubTransport_MQTT_Common_DoWork shall call mqtt_client_dowork everytime it is called if it is connected. ]
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_mqtt_client_connecting_times_out)
 {
     // arrange
@@ -5845,7 +5853,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_mqtt_client_connecting_times_ou
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-/* Test_SRS_IOTHUB_MQTT_TRANSPORT_07_023: [IoTHubTransport_MQTT_Common_GetSendStatus shall return IOTHUB_CLIENT_INVALID_ARG if called with NULL parameter.] */
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_GetSendStatus_InvalidHandleArgument_fail)
 {
     // arrange
@@ -5869,7 +5876,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_GetSendStatus_InvalidHandleArgument_fa
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-/* Test_SRS_IOTHUB_MQTT_TRANSPORT_07_023: [IoTHubTransport_MQTT_Common_GetSendStatus shall return IOTHUB_CLIENT_INVALID_ARG if called with NULL parameter.] */
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_GetSendStatus_InvalidStatusArgument_fail)
 {
     // arrange
@@ -5891,7 +5897,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_GetSendStatus_InvalidStatusArgument_fa
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_024: [IoTHubTransport_MQTT_Common_GetSendStatus shall return IOTHUB_CLIENT_OK and status IOTHUB_CLIENT_SEND_STATUS_IDLE if there are currently no event items to be sent or being sent.] */
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_GetSendStatus_empty_waitingToSend_and_empty_waitingforAck_success)
 {
     // arrange
@@ -5919,7 +5924,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_GetSendStatus_empty_waitingToSend_and_
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_025: [IoTHubTransport_MQTT_Common_GetSendStatus shall return IOTHUB_CLIENT_OK and status IOTHUB_CLIENT_SEND_STATUS_BUSY if there are currently event items to be sent or being sent.] */
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_GetSendStatus_waitingToSend_not_empty_success)
 {
     // arrange
@@ -6181,7 +6185,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MqttOpCompleteCallback_PUBLISH_ACK_suc
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_051: [ If msgHandle or callbackCtx is NULL, mqtt_notification_callback shall do nothing. ] */
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_message_NULL_fail)
 {
     // arrange
@@ -6203,7 +6206,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_message_NULL_fail)
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_051: [ If msgHandle or callbackCtx is NULL, mqtt_notification_callback shall do nothing. ] */
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_context_NULL_fail)
 {
     // arrange
@@ -6225,7 +6227,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_context_NULL_fail)
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_051: [ If msgHandle or callbackCtx is NULL, mqtt_notification_callback shall do nothing. ] */
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_Message_context_NULL_fail)
 {
     // arrange
@@ -6247,7 +6248,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_Message_context_NULL_fail)
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_056: [ If type is IOTHUB_TYPE_TELEMETRY, then on success mqtt_notification_callback shall call IoTHubClientCore_LL_MessageCallback. ] */
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_succeed)
 {
     // arrange
@@ -6271,7 +6271,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_succeed)
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_055: [ if device_twin_msg_type is not RETRIEVE_PROPERTIES then mqtt_notification_callback shall call IoTHubClientCore_LL_ReportedStateComplete ] */
 TEST_FUNCTION(IoTHubTransportMqtt_MessageRecv_device_twin_succeed)
 {
     // arrange
@@ -6319,6 +6318,101 @@ TEST_FUNCTION(IoTHubTransportMqtt_MessageRecv_device_twin_succeed)
 
     //cleanup
     IoTHubTransport_MQTT_Common_Destroy(handle);
+}
+
+static void test_invalid_mqtt_twin_topic_setup(const char* mqtt_topic, const char* status_code, const char* response_id)
+{
+    // arrange
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
+    SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME, NULL);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport, &transport_cb_info, transport_cb_ctx);
+    (void)IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin(handle);
+
+    CONNECT_ACK connack = { true, CONNECTION_ACCEPTED };
+    g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_CONNACK, &connack, g_callbackCtx);
+    IoTHubTransport_MQTT_Common_DoWork(handle);
+
+    QOS_VALUE QosValue[] = { DELIVER_AT_LEAST_ONCE };
+    SUBSCRIBE_ACK suback;
+    suback.packetId = 2;
+    suback.qosCount = 1;
+    suback.qosReturn = QosValue;
+    g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_SUBSCRIBE_ACK, &suback, g_callbackCtx);
+
+    IoTHubTransport_MQTT_Common_DoWork(handle);
+    CONSTBUFFER cbuff;
+    cbuff.buffer = appMessage;
+    cbuff.size = appMsgSize;
+    STRICT_EXPECTED_CALL(CONSTBUFFER_GetContent(IGNORED_PTR_ARG)).SetReturn(&cbuff);
+    IOTHUB_DEVICE_TWIN device_twin;
+    device_twin.report_data_handle = TEST_CONST_BUFFER_HANDLE;
+    device_twin.item_id = 1;
+    IOTHUB_IDENTITY_INFO identity_info;
+    identity_info.device_twin = &device_twin;
+    (void)IoTHubTransport_MQTT_Common_ProcessItem(handle, IOTHUB_TYPE_DEVICE_TWIN, &identity_info);
+
+    umock_c_reset_all_calls();
+
+    g_tokenizerIndex = 1;
+
+    STRICT_EXPECTED_CALL(mqttmessage_getTopicName(TEST_MQTT_MESSAGE_HANDLE)).SetReturn(mqtt_topic);
+    STRICT_EXPECTED_CALL(STRING_TOKENIZER_create_from_char(IGNORED_PTR_ARG)).IgnoreArgument_input();
+    STRICT_EXPECTED_CALL(STRING_new());
+    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(0);
+    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(0);
+    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(0);
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn("res");
+
+    if (status_code != NULL)
+    {
+        STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(0);
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(status_code);
+
+        if (response_id != NULL)
+        {
+            STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(0);
+            STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(response_id);
+        }
+        else
+        {
+            STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(1);
+        }
+    }
+    else
+    {
+        STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(1);
+    }
+
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        .IgnoreArgument_handle();
+    STRICT_EXPECTED_CALL(STRING_TOKENIZER_destroy(IGNORED_PTR_ARG))
+        .IgnoreArgument_t();
+
+    // act
+    ASSERT_IS_NOT_NULL(g_fnMqttMsgRecv);
+    g_fnMqttMsgRecv(TEST_MQTT_MESSAGE_HANDLE, g_callbackCtx);
+
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    IoTHubTransport_MQTT_Common_Destroy(handle);
+}
+
+TEST_FUNCTION(IoTHubTransportMqtt_MessageRecv_device_twin_missing_status_code_fails)
+{
+    test_invalid_mqtt_twin_topic_setup(TEST_MQTT_DEV_TWIN_MSG_TOPIC_INVALID_REQUEST_ID, NULL, NULL);
+}
+
+TEST_FUNCTION(IoTHubTransportMqtt_MessageRecv_device_twin_invalid_request_id_fails)
+{
+    test_invalid_mqtt_twin_topic_setup(TEST_MQTT_DEV_TWIN_MSG_TOPIC_INVALID_REQUEST_ID, "200", "?$NotSetRequestId=2");
+}
+
+TEST_FUNCTION(IoTHubTransportMqtt_MessageRecv_device_twin_missing_request_id_fails)
+{
+    test_invalid_mqtt_twin_topic_setup(TEST_MQTT_DEV_TWIN_MSG_TOPIC_MISSING_REQUEST_ID, "200", NULL);
 }
 
 TEST_FUNCTION(IoTHubTransportMqtt_MessageRecv_device_twin_fail)
@@ -6370,7 +6464,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_MessageRecv_device_twin_fail)
             umock_c_negative_tests_reset();
             umock_c_negative_tests_fail_call(index);
 
-            char tmp_msg[64];
+            char tmp_msg[128];
             sprintf(tmp_msg, "MessageRecv_device_twin failure in test %lu/%lu", (unsigned long)index, (unsigned long)count);
 
             g_fnMqttMsgRecv(TEST_MQTT_MESSAGE_HANDLE, g_callbackCtx);
@@ -6492,7 +6586,6 @@ TEST_FUNCTION(IoTHubTransportMqtt_reported_property_timeout)
 }
 
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_054: [ If type is IOTHUB_TYPE_DEVICE_TWIN, then on success if msg_type is RETRIEVE_PROPERTIES then mqtt_notification_callback shall call IoTHubClientCore_LL_RetrievePropertyComplete... ]*/
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_sys_Properties_succeed)
 {
     // arrange
@@ -6614,9 +6707,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_sys_Properties_succee
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_054: [ If type is IOTHUB_TYPE_DEVICE_TWIN, then on success if msg_type is RETRIEVE_PROPERTIES then mqtt_notification_callback shall call IoTHubClientCore_LL_RetrievePropertyComplete... ]*/
-// Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_012: [ If type is IOTHUB_TYPE_TELEMETRY and the system property `$.ct` is defined, its value shall be set on the IOTHUB_MESSAGE_HANDLE's ContentType property ]
-// Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_013: [ If type is IOTHUB_TYPE_TELEMETRY and the system property `$.ce` is defined, its value shall be set on the IOTHUB_MESSAGE_HANDLE's ContentEncoding property ]
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_Properties_succeed)
 {
     // arrange
@@ -6718,7 +6808,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_Properties_succeed_au
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_054: [ If type is IOTHUB_TYPE_DEVICE_TWIN, then on success if msg_type is RETRIEVE_PROPERTIES then mqtt_notification_callback shall call IoTHubClientCore_LL_RetrievePropertyComplete... ]*/
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_Properties_fail)
 {
     // arrange
@@ -6796,7 +6885,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_Properties_fail_autod
             umock_c_negative_tests_reset();
             umock_c_negative_tests_fail_call(index);
 
-            char tmp_msg[64];
+            char tmp_msg[128];
             sprintf(tmp_msg, "g_fnMqttMsgRecv failure in test %lu/%lu", (unsigned long)index, (unsigned long)count);
 
             g_tokenizerIndex = 6;
@@ -6816,7 +6905,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_Properties_fail_autod
     umock_c_negative_tests_deinit();
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_054: [ If type is IOTHUB_TYPE_DEVICE_TWIN, then on success if msg_type is RETRIEVE_PROPERTIES then mqtt_notification_callback shall call IoTHubClientCore_LL_RetrievePropertyComplete... ]*/
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_messagecallback_fail)
 {
     // arrange
@@ -6853,7 +6941,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_messagecallback_fail)
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_053: [ If type is IOTHUB_TYPE_DEVICE_METHODS, then on success mqtt_notification_callback shall call IoTHubClientCore_LL_DeviceMethodComplete. ] */
 TEST_FUNCTION(IoTHubTransportMqtt_MessageRecv_device_method_succeed)
 {
     // arrange
@@ -6880,7 +6967,6 @@ TEST_FUNCTION(IoTHubTransportMqtt_MessageRecv_device_method_succeed)
 
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_053: [ If type is IOTHUB_TYPE_DEVICE_METHODS, then on success mqtt_notification_callback shall call IoTHubClientCore_LL_DeviceMethodComplete. ] */
 TEST_FUNCTION(IoTHubTransportMqtt_MessageRecv_device_method_fail)
 {
     // arrange
@@ -6890,6 +6976,8 @@ TEST_FUNCTION(IoTHubTransportMqtt_MessageRecv_device_method_fail)
     IOTHUBTRANSPORT_CONFIG config = { 0 };
     SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME, NULL);
 
+    pfTransport_DeviceMethod_Complete_Callback old_method_complete_cb = transport_cb_info.method_complete_cb;
+    transport_cb_info.method_complete_cb = my_Transport_DeviceMethod_Complete_Callback;
     TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport, &transport_cb_info, transport_cb_ctx);
     g_tokenizerIndex = 6;
     IoTHubTransport_MQTT_Common_DoWork(handle);
@@ -6908,21 +6996,27 @@ TEST_FUNCTION(IoTHubTransportMqtt_MessageRecv_device_method_fail)
             umock_c_negative_tests_reset();
             umock_c_negative_tests_fail_call(index);
 
-            char tmp_msg[64];
+            char tmp_msg[128];
             sprintf(tmp_msg, "IoTHubTransport_MQTT_Common_DoWork failure in test %lu/%lu", (unsigned long)index, (unsigned long)count);
 
             g_fnMqttMsgRecv(TEST_MQTT_MESSAGE_HANDLE, g_callbackCtx);
+
+            if (g_method_handle_value != NULL)
+            {
+                IoTHubTransport_MQTT_Common_DeviceMethod_Response(handle, g_method_handle_value, TEST_DEVICE_METHOD_RESPONSE, TEST_DEVICE_RESP_LENGTH, TEST_DEVICE_STATUS_CODE);
+                g_method_handle_value = NULL;
+            }
         }
     }
 
     // assert
 
     //cleanup
+    transport_cb_info.method_complete_cb = old_method_complete_cb;
     IoTHubTransport_MQTT_Common_Destroy(handle);
     umock_c_negative_tests_deinit();
 }
 
-// Tests_SRS_IOTHUB_MQTT_TRANSPORT_03_001: [ IoTHubTransport_MQTT_Common_Register shall return NULL if deviceId, or both deviceKey and deviceSasToken are NULL.]
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_Register_deviceKey_null_and_deviceSasToken_null_returns_null)
 {
     // arrange
@@ -6950,7 +7044,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Register_deviceKey_null_and_deviceSasT
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-//Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_43_001: [ IoTHubTransport_MQTT_Common_Register shall return NULL if deviceKey is NULL when credential type is IOTHUB_CREDENTIAL_TYPE_DEVICE_KEY ]
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_Register_deviceKey_provided_null_returns_null)
 {
     // arrange
@@ -6989,7 +7082,6 @@ static void set_expected_call_for_get_cred_and_devicekey()
     STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_DeviceKey(IGNORED_PTR_ARG));
 }
 
-// Tests_SRS_IOTHUB_MQTT_TRANSPORT_17_004: [ IoTHubTransport_MQTT_Common_Register shall return the TRANSPORT_LL_HANDLE as the IOTHUB_DEVICE_HANDLE. ]
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_Register_succeeds_returns_transport)
 {
     // arrange
@@ -7019,7 +7111,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Register_succeeds_returns_transport)
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-// Tests_SRS_IOTHUB_MQTT_TRANSPORT_17_004: [ IoTHubTransport_MQTT_Common_Register shall return the TRANSPORT_LL_HANDLE as the IOTHUB_DEVICE_HANDLE. ]
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_Register_twice_fails_second_time)
 {
     // arrange
@@ -7052,7 +7143,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Register_twice_fails_second_time)
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-// Tests_SRS_IOTHUB_MQTT_TRANSPORT_17_003: [ IoTHubTransport_MQTT_Common_Register shall return NULL if deviceId or deviceKey do not match the deviceId and deviceKey passed in during IoTHubTransport_MQTT_Common_Create.]
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_Register_deviceKey_mismatch_returns_null)
 {
     // arrange
@@ -7081,7 +7171,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Register_deviceKey_mismatch_returns_nu
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-// Tests_SRS_IOTHUB_MQTT_TRANSPORT_17_003: [ IoTHubTransport_MQTT_Common_Register shall return NULL if deviceId or deviceKey do not match the deviceId and deviceKey passed in during IoTHubTransport_MQTT_Common_Create.]
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_Register_deviceid_mismatch_returns_null)
 {
     // arrange
@@ -7109,7 +7198,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Register_deviceid_mismatch_returns_nul
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-// Tests_SRS_IOTHUB_MQTT_TRANSPORT_17_002: [ IoTHubTransport_MQTT_Common_Register shall return NULL if device or waitingToSend are NULL.]
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_Register_wts_null_returns_null)
 {
     // arrange
@@ -7136,7 +7224,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Register_wts_null_returns_null)
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-// Tests_SRS_IOTHUB_MQTT_TRANSPORT_17_002: [ IoTHubTransport_MQTT_Common_Register shall return NULL if device or waitingToSend are NULL.]
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_Register_device_null_returns_null)
 {
     // arrange
@@ -7157,7 +7244,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Register_device_null_returns_null)
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-// Tests_SRS_IOTHUB_MQTT_TRANSPORT_03_001: [ IoTHubTransport_MQTT_Common_Register shall return NULL if deviceId, or both deviceKey and deviceSasToken are NULL.]
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_Register_deviceId_null_returns_null)
 {
     // arrange
@@ -7183,7 +7269,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Register_deviceId_null_returns_null)
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-// Tests_SRS_IOTHUB_MQTT_TRANSPORT_03_002: [ IoTHubTransport_MQTT_Common_Register shall return NULL if both deviceKey and deviceSasToken are provided.]
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_Register_deviceKey_and_deviceSasToken_both_provided_returns_null)
 {
     // arrange
@@ -7239,7 +7324,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Register_deviceKey_null_and_deviceSas_
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-// Tests_SRS_IOTHUB_MQTT_TRANSPORT_17_001: [ IoTHubTransport_MQTT_Common_Register shall return NULL if the TRANSPORT_LL_HANDLE is NULL.]
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_Register_transport_null_returns_null)
 {
     // arrange
@@ -7266,7 +7350,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Register_transport_null_returns_null)
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-// Tests_SRS_IOTHUB_MQTT_TRANSPORT_17_005: [ IoTHubTransport_MQTT_Common_Unregister shall return. ]
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_Unregister_succeeds)
 {
     // arrange
@@ -7296,7 +7379,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Unregister_succeeds)
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-// Tests_SRS_IOTHUB_MQTT_TRANSPORT_17_004: [ IoTHubTransport_MQTT_Common_Register shall return the TRANSPORT_LL_HANDLE as the IOTHUB_DEVICE_HANDLE. ]
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_Register_Unregister_Register_returns_handle)
 {
     // arrange
@@ -7329,7 +7411,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Register_Unregister_Register_returns_h
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-/*Tests_SRS_IOTHUB_MQTT_TRANSPORT_02_001: [ If handle is NULL then IoTHubTransport_MQTT_Common_GetHostname shall fail and return NULL. ]*/
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_GetHostname_with_NULL_handle_fails)
 {
     //arrange
@@ -7344,7 +7425,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_GetHostname_with_NULL_handle_fails)
     //cleanup
 }
 
-/*Tests_SRS_IOTHUB_MQTT_TRANSPORT_02_002: [ Otherwise IoTHubTransport_MQTT_Common_GetHostname shall return a non-NULL STRING_HANDLE containg the hostname. ]*/
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_GetHostname_with_non_NULL_handle_succeeds)
 {
     //arrange
@@ -7369,8 +7449,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_GetHostname_with_non_NULL_handle_succe
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_045: [If 'subscribe_state' is set to IOTHUB_DEVICE_TWIN_NOTIFICATION_STATE then IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin shall construct the string $iothub/twin/PATCH/properties/desired] */
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_047: [On success IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin shall return 0.] */
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin_Succeed)
 {
     // arrange
@@ -7396,8 +7474,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin_Succeed)
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_044: [`IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin` shall construct the get state topic string and the notify state topic string.] */
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_047: [On success IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin shall return 0.] */
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin_DoWork_Succeed)
 {
     // arrange
@@ -7426,7 +7502,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin_DoWork_Succeed)
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_054: [ IoTHubTransport_MQTT_Common_DoWork shall subscribe to the Notification and get_state Topics if they are defined. ] */
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin_DoWork_fails)
 {
     // arrange
@@ -7459,7 +7534,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin_DoWork_fails)
             umock_c_negative_tests_reset();
             umock_c_negative_tests_fail_call(index);
 
-            char tmp_msg[64];
+            char tmp_msg[128];
             sprintf(tmp_msg, "IoTHubTransport_MQTT_Common_DoWork failure in test %lu/%lu", (unsigned long)index, (unsigned long)count);
 
             IoTHubTransport_MQTT_Common_DoWork(handle);
@@ -7473,7 +7548,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin_DoWork_fails)
     umock_c_negative_tests_deinit();
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_054: [ IoTHubTransport_MQTT_Common_DoWork shall subscribe to the Notification and get_state Topics if they are defined. ] */
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin_DoWork_2nd_fails)
 {
     // arrange
@@ -7528,7 +7602,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin_DoWork_2nd_fails)
 
             g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_SUBSCRIBE_ACK, &suback, g_callbackCtx);
 
-            char tmp_msg[64];
+            char tmp_msg[128];
             sprintf(tmp_msg, "IoTHubTransport_MQTT_Common_DoWork failure in test %lu/%lu", (unsigned long)index, (unsigned long)count);
 
             IoTHubTransport_MQTT_Common_DoWork(handle);
@@ -7542,8 +7616,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin_DoWork_2nd_fails)
     umock_c_negative_tests_deinit();
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_045: [If 'subscribe_state' is set to IOTHUB_DEVICE_TWIN_NOTIFICATION_STATE then IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin shall construct the string $iothub/twin/PATCH/properties/desired] */
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_047: [On success IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin shall return 0.] */
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin_notify_Succeed)
 {
     // arrange
@@ -7584,7 +7656,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin_handle_NULL_fail)
     //cleanup
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_043: [If the subscribe_state has been previously subscribed IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin shall return a non-zero value.] */
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin_fail)
 {
     // arrange
@@ -7625,7 +7696,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin_fail)
     umock_c_negative_tests_deinit();
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_043: [If the subscribe_state has been previously subscribed IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin shall return a non-zero value.] */
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin_notify_fail)
 {
     // arrange
@@ -7665,10 +7735,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin_notify_fail)
     umock_c_negative_tests_deinit();
 }
 
-/*Tests_SRS_IOTHUB_MQTT_TRANSPORT_12_003: [ IoTHubTransport_MQTT_Common_Subscribe_DeviceMethod shall set the signaling flag for DEVICE_METHOD topic for the receiver's topic list. ]*/
-/*Tests_SRS_IOTHUB_MQTT_TRANSPORT_12_004: [ IoTHubTransport_MQTT_Common_Subscribe_DeviceMethod shall construct the DEVICE_METHOD topic string for subscribe. ]*/
-/*Tests_SRS_IOTHUB_MQTT_TRANSPORT_12_005: [ IoTHubTransport_MQTT_Common_Subscribe_DeviceMethod shall schedule the send of the subscription. ]*/
-/*Tests_SRS_IOTHUB_MQTT_TRANSPORT_12_007: [ On success IoTHubTransport_MQTT_Common_Subscribe_DeviceMethod shall return 0. ]*/
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_Subscribe_DeviceMethod_Succeed)
 {
     // arrange
@@ -7694,7 +7760,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Subscribe_DeviceMethod_Succeed)
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-/*Tests_SRS_IOTHUB_MQTT_TRANSPORT_12_001: [ If the parameter 'handle' is NULL than IoTHubTransport_MQTT_Common_Subscribe_DeviceMethod shall return a non-zero value. ]*/
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_Subscribe_DeviceMethod_handle_NULL_fail)
 {
     // arrange
@@ -7710,7 +7775,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Subscribe_DeviceMethod_handle_NULL_fai
     //cleanup
 }
 
-/*Tests_SRS_IOTHUB_MQTT_TRANSPORT_12_006: [ Upon failure IoTHubTransport_MQTT_Common_Subscribe_DeviceMethod shall return a non-zero value. ]*/
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_Subscribe_DeviceMethod_fail)
 {
     // arrange
@@ -7750,11 +7814,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Subscribe_DeviceMethod_fail)
     umock_c_negative_tests_deinit();
 }
 
-/*Tests_SRS_IOTHUB_MQTT_TRANSPORT_12_008: [ If the parameter 'handle' is NULL than IoTHubTransport_MQTT_Common_Unsubscribe_DeviceMethod shall do nothing and return. ]*/
-/*Tests_SRS_IOTHUB_MQTT_TRANSPORT_12_009: [ If the MQTT transport has not been subscribed to DEVICE_METHOD topic IoTHubTransport_MQTT_Common_Unsubscribe_DeviceMethod shall do nothing and return. ]*/
-/*Tests_SRS_IOTHUB_MQTT_TRANSPORT_12_010: [ IoTHubTransport_MQTT_Common_Unsubscribe_DeviceMethod shall construct the DEVICE_METHOD topic string for unsubscribe. ]*/
-/*Tests_SRS_IOTHUB_MQTT_TRANSPORT_12_011: [ IoTHubTransport_MQTT_Common_Unsubscribe_DeviceMethod shall send the unsubscribe. ]*/
-/*Tests_SRS_IOTHUB_MQTT_TRANSPORT_12_012: [ IoTHubTransport_MQTT_Common_Unsubscribe_DeviceMethod shall removes the signaling flag for DEVICE_METHOD topic from the receiver's topic list. ]*/
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_Unsubscribe_DeviceMethod_handle_OK)
 {
     // arrange
@@ -7863,7 +7922,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_ProcessItem_Succeed)
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-/* Tests_SRS_IOTHUBCLIENT_LL_07_001: [ If handle or iothub_item are NULL then IoTHubTransport_MQTT_Common_ProcessItem shall return IOTHUB_PROCESS_ERROR.]*/
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_ProcessItem_iothub_item_NULL_fail)
 {
     // arrange
@@ -7893,7 +7951,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_ProcessItem_iothub_item_NULL_fail)
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-/* Tests_SRS_IOTHUBCLIENT_LL_07_001: [ If handle or iothub_item are NULL then IoTHubTransport_MQTT_Common_ProcessItem shall return IOTHUB_PROCESS_ERROR.]*/
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_ProcessItem_NULL_handle_fail)
 {
     // arrange
@@ -7915,7 +7972,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_ProcessItem_NULL_handle_fail)
     //cleanup
 }
 
-/* Tests_SRS_IOTHUBCLIENT_LL_07_002: [ If the mqtt is not ready to publish messages IoTHubTransport_MQTT_Common_ProcessItem shall return IOTHUB_PROCESS_NOT_CONNECTED.]*/
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_ProcessItem_not_connected_Succeed)
 {
     // arrange
@@ -7947,7 +8003,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_ProcessItem_not_connected_Succeed)
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-/* Tests_SRS_IOTHUBCLIENT_LL_07_006: [ If the item_type is not a supported type IoTHubTransport_MQTT_Common_ProcessItem shall return IOTHUB_PROCESS_CONTINUE.] */
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_ProcessItem_continue_Succeed)
 {
     // arrange
@@ -7991,7 +8046,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_ProcessItem_continue_Succeed)
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-/* Tests_SRS_IOTHUBCLIENT_LL_07_004: [ If any errors are encountered IoTHubTransport_MQTT_Common_ProcessItem shall return IOTHUB_PROCESS_ERROR. ]*/
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_ProcessItem_fail)
 {
     // arrange
@@ -8039,7 +8093,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_ProcessItem_fail)
             umock_c_negative_tests_reset();
             umock_c_negative_tests_fail_call(index);
 
-            char tmp_msg[64];
+            char tmp_msg[128];
             sprintf(tmp_msg, "IoTHubTransport_MQTT_Common_ProcessItem failure in test %lu/%lu", (unsigned long)index, (unsigned long)count);
 
             IOTHUB_PROCESS_ITEM_RESULT result_item = IoTHubTransport_MQTT_Common_ProcessItem(handle, IOTHUB_TYPE_DEVICE_TWIN, &identity_info);
@@ -8053,10 +8107,11 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_ProcessItem_fail)
     umock_c_negative_tests_deinit();
 }
 
-/* Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_041: [ If the parameter handle is NULL than IoTHubTransport_MQTT_Common_DeviceMethod_Response shall return a non-zero value. ] */
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_DeviceMethod_Response_handle_NULL_fail)
 {
     // arrange
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
 
     // act
     int result = IoTHubTransport_MQTT_Common_DeviceMethod_Response(NULL, TEST_METHOD_ID, TEST_DEVICE_METHOD_RESPONSE, TEST_DEVICE_RESP_LENGTH, TEST_DEVICE_STATUS_CODE);
@@ -8068,7 +8123,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DeviceMethod_Response_handle_NULL_fail
     //cleanup
 }
 
-/* Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_042: [ IoTHubTransport_MQTT_Common_DeviceMethod_Response shall publish an mqtt message for the device method response. ] */
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_DeviceMethod_Response_succeeds)
 {
     // arrange
@@ -8098,7 +8152,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DeviceMethod_Response_succeeds)
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-/* Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_042: [ IoTHubTransport_MQTT_Common_DeviceMethod_Response shall publish an mqtt message for the device method response. ] */
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_DeviceMethod_Response_NULL_RESPONSE_succeeds)
 {
     // arrange
@@ -8128,7 +8181,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DeviceMethod_Response_NULL_RESPONSE_su
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-/* Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_051: [ If any error is encountered, IoTHubTransport_MQTT_Common_DeviceMethod_Response shall return a non-zero value. ] */
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_DeviceMethod_Response_fail)
 {
     // arrange
@@ -8175,7 +8227,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DeviceMethod_Response_fail)
     umock_c_negative_tests_deinit();
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_10_001: [If messageData is NULL, IoTHubTransport_MQTT_Common_SendMessageDisposition shall fail and return IOTHUB_CLIENT_ERROR.] */
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_SendMessageDisposition_NULL_fails)
 {
     //arrange
@@ -8206,7 +8257,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_SendMessageDisposition_NULL_fails)
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_10_002: [If any of the messageData fields are NULL, IoTHubTransport_MQTT_Common_SendMessageDisposition shall fail and return IOTHUB_CLIENT_ERROR. ] */
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_SendMessageDisposition_Message_NULL_fails)
 {
     //arrange
@@ -8242,7 +8292,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_SendMessageDisposition_Message_NULL_fa
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_10_00#: [IoTHubTransport_MQTT_Common_SendMessageDisposition shall release the given data and return IOTHUB_CLIENT_OK. ] */
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_SendMessageDisposition_succeeds)
 {
     //arrange
@@ -8284,8 +8333,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_SendMessageDisposition_succeeds)
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-// Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_31_070: [ On success IoTHubTransport_MQTT_Common_Subscribe_InputQueue shall return 0.]
-// Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_31_067: [ IoTHubTransport_MQTT_Common_Subscribe_InputQueue shall set a flag to enable mqtt_client_subscribe to be called to subscribe to the input queue Message Topic.]
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_Subscribe_InputQueue_Succeed)
 {
     // arrange
@@ -8312,8 +8359,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Subscribe_InputQueue_Succeed)
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-// Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_31_066: [ If parameter handle is NULL than IoTHubTransport_MQTT_Common_Subscribe_InputQueue shall return a non-zero value.]
-// Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_31_069: [ Upon failure IoTHubTransport_MQTT_Common_Subscribe_InputQueue shall return a non-zero value.]
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_Subscribe_InputQueue_Message_NULL_fails)
 {
     // arrange
@@ -8337,7 +8382,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Subscribe_InputQueue_Message_NULL_fail
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-// Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_31_073: [ If module ID is not set on the transpont, IoTHubTransport_MQTT_Common_Unsubscribe_InputQueue shall fail.]
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_Subscribe_InputQueue_ModuleId_Null_fails)
 {
     // arrange
@@ -8361,7 +8405,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Subscribe_InputQueue_ModuleId_Null_fai
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-// Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_31_072: [ IoTHubTransport_MQTT_Common_Unsubscribe_InputQueue shall call mqtt_client_unsubscribe to unsubscribe the mqtt input queue message topic.]
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_Unsubscribe_InputQueue_Succeed)
 {
     // arrange
@@ -8384,7 +8427,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Unsubscribe_InputQueue_Succeed)
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-// Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_31_071: [ If parameter handle is NULL then IoTHubTransport_MQTT_Common_Unsubscribe_InputQueue shall do nothing.]
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_Unsubscribe_InputQueue_Handle_Null_fails)
 {
     // arrange
@@ -8397,7 +8439,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Unsubscribe_InputQueue_Handle_Null_fai
     //cleanup
 }
 
-// Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_31_072: [ IoTHubTransport_MQTT_Common_Unsubscribe_InputQueue shall call mqtt_client_unsubscribe to unsubscribe the mqtt input queue message topic.]
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_Unsubscribe_InputQueue_No_InputQueue_fails)
 {
     // arrange
@@ -8417,8 +8458,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Unsubscribe_InputQueue_No_InputQueue_f
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_044: [`IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin` shall construct the get state topic string and the notify state topic string.] */
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_047: [On success IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin shall return 0.] */
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_Subscribe_InputQueue_DoWork_Succeed)
 {
     // arrange
@@ -8479,7 +8518,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Subscribe_InputQueue_DoWork_fails)
             umock_c_negative_tests_reset();
             umock_c_negative_tests_fail_call(index);
 
-            char tmp_msg[64];
+            char tmp_msg[128];
             sprintf(tmp_msg, "IoTHubTransport_MQTT_Common_DoWork failure in test %lu/%lu", (unsigned long)index, (unsigned long)count);
 
             IoTHubTransport_MQTT_Common_DoWork(handle);
@@ -8573,10 +8612,6 @@ static void setup_message_recv_with_input_queue_mocks(
     }
 }
 
-// Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_31_061: [ If the message is sent to an input queue, `IoTHubTransport_MQTT_Common_DoWork` shall parse out to the input queue name and store it in the message with IoTHubMessage_SetInputName ]
-// Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_31_063: [ If type is IOTHUB_TYPE_TELEMETRY and the system property `$.cdid` is defined, its value shall be set on the IOTHUB_MESSAGE_HANDLE's ConnectionDeviceId property ]
-// Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_31_064: [ If type is IOTHUB_TYPE_TELEMETRY and the system property `$.cmid` is defined, its value shall be set on the IOTHUB_MESSAGE_HANDLE's ConnectionModuleId property ]
-// Tests_SRS_IOTHUB_MQTT_TRANSPORT_31_065: [ If type is IOTHUB_TYPE_TELEMETRY and sent to an input queue, then on success `mqtt_notification_callback` shall call `IoTHubClient_LL_MessageCallbackFromInput`. ]
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_InputQueue_succeed)
 {
     // arrange
@@ -8602,8 +8637,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_InputQueue_succeed)
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-// Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_31_061: [ If the message is sent to an input queue, `IoTHubTransport_MQTT_Common_DoWork` shall parse out to the input queue name and store it in the message with IoTHubMessage_SetInputName ]
-// Tests_SRS_IOTHUB_MQTT_TRANSPORT_31_065: [ If type is IOTHUB_TYPE_TELEMETRY and sent to an input queue, then on success `mqtt_notification_callback` shall call `IoTHubClient_LL_MessageCallbackFromInput`. ]
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_InputQueue_no_system_properties_succeed)
 {
     // arrange
@@ -8648,7 +8681,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_InputQueue_no_system_
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-// Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_31_062: [ If IoTHubTransport_MQTT_Common_DoWork receives a malformatted inputQueue, it shall fail ]
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_InputQueue_missing_queue_name_fail)
 {
     // arrange
@@ -8680,7 +8712,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_InputQueue_missing_qu
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-// Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_31_062: [ If IoTHubTransport_MQTT_Common_DoWork receives a malformatted inputQueue, it shall fail ]
 TEST_FUNCTION(IoTHubTransportMqtt_MessageRecv_with_InputQueue_fail)
 {
     // arrange
@@ -9023,4 +9054,3 @@ TEST_FUNCTION(IoTHubTransport_MQTT_GetSupportedPlatformInfo_NULL_info)
 }
 
 END_TEST_SUITE(iothubtransport_mqtt_common_ut)
-

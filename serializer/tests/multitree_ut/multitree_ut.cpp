@@ -380,8 +380,6 @@ TEST_FUNCTION_CLEANUP(clean)
 
 }
 
-/*Tests_SRS_MULTITREE_99_005:[ MultiTree_Create creates a new tree.]*/
-/*Tests_SRS_MULTITREE_99_006:[ MultiTree_Create returns a non-NULL pointer if the tree has been sucesfully created.]*/
 TEST_FUNCTION(MultiTree_Create_succeeds)
 {
     ///arrange
@@ -401,7 +399,6 @@ TEST_FUNCTION(MultiTree_Create_succeeds)
     MultiTree_Destroy(res);
 }
 
-/*Tests_SRS_MULTITREE_99_052:[ If any of the arguments passed to MultiTree_Create is NULL, the call shall return NULL.]*/
 TEST_FUNCTION(MultiTree_Create_With_NULL_Clone_Function_Fails)
 {
     ///arrange
@@ -414,7 +411,6 @@ TEST_FUNCTION(MultiTree_Create_With_NULL_Clone_Function_Fails)
     ASSERT_IS_NULL(res);
 }
 
-/*Tests_SRS_MULTITREE_99_052:[ If any of the arguments passed to MultiTree_Create is NULL, the call shall return NULL.]*/
 TEST_FUNCTION(MultiTree_Create_With_NULL_Free_Function_Fails)
 {
     ///arrange
@@ -446,7 +442,6 @@ TEST_FUNCTION(MultiTree_Create_if_calloc_fails_then_it_fails)
     MultiTree_Destroy(res);
 }
 
-/*Tests_SRS_MULTITREE_99_018:[ If the treeHandle parameter is NULL, MULTITREE_INVALID_ARG shall be returned.]*/
 TEST_FUNCTION(MultiTree_AddLeaf_with_NULL_handle_fails)
 {
     ///arrange
@@ -459,7 +454,6 @@ TEST_FUNCTION(MultiTree_AddLeaf_with_NULL_handle_fails)
     ASSERT_ARE_EQUAL(MULTITREE_RESULT, MULTITREE_INVALID_ARG, res);
 }
 
-/*Tests_SRS_MULTITREE_99_019:[ If parameter destinationPath is NULL, MULTITREE_INVALID_ARG shall be returned.]*/
 TEST_FUNCTION(MultiTree_AddLeaf_with_NULL_path_fails)
 {
     ///arrange
@@ -481,7 +475,6 @@ TEST_FUNCTION(MultiTree_AddLeaf_with_NULL_path_fails)
     MultiTree_Destroy(treeHandle);
 }
 
-/*Tests_SRS_MULTITREE_99_020:[ If parameter value is NULL, MULTITREE_INVALID_ARG shall be returned.]*/
 TEST_FUNCTION(MultiTree_AddLeaf_with_NULL_value_fails)
 {
     ///arrange
@@ -503,7 +496,6 @@ TEST_FUNCTION(MultiTree_AddLeaf_with_NULL_value_fails)
     MultiTree_Destroy(treeHandle);
 }
 
-/*Tests_SRS_MULTITREE_99_050:[ If destinationPath a string with zero characters, MULTITREE_EMPTY_CHILD_NAME shall be returned.]*/
 TEST_FUNCTION(MultiTree_AddLeaf_with_empty_destination_fails)
 {
     ///arrange
@@ -521,7 +513,6 @@ TEST_FUNCTION(MultiTree_AddLeaf_with_empty_destination_fails)
     mocks.ResetAllCalls();
 }
 
-/*Tests_SRS_MULTITREE_99_034:[ The function returns MULTITREE_OK when data has been stored in the tree.]*/
 TEST_FUNCTION(MultiTree_AddLeaf_creates_a_child_in_root)
 {
     ///arrange
@@ -539,7 +530,6 @@ TEST_FUNCTION(MultiTree_AddLeaf_creates_a_child_in_root)
     mocks.ResetAllCalls(); /*not caring about what gets called*/
 }
 
-/*Tests_SRS_MULTITREE_99_034:[ The function returns MULTITREE_OK when data has been stored in the tree.]*/
 TEST_FUNCTION(MultiTree_AddLeaf_creates_a_child_in_root_alternate)
 {
     ///arrange
@@ -557,7 +547,6 @@ TEST_FUNCTION(MultiTree_AddLeaf_creates_a_child_in_root_alternate)
     mocks.ResetAllCalls(); /*not caring about what gets called*/
 }
 
-/*Tests_SRS_MULTITREE_99_021:[ If the node already has a value assigned to it, MULTITREE_ALREADY_HAS_A_VALUE shall be returned and the existing value shall not be changed.]*/
 TEST_FUNCTION(MultiTree_AddLeaf_creates_a_child_in_root_twice_is_error)
 {
     ///arrange
@@ -576,7 +565,6 @@ TEST_FUNCTION(MultiTree_AddLeaf_creates_a_child_in_root_twice_is_error)
     mocks.ResetAllCalls(); /*not caring about what gets called*/
 }
 
-/*Tests_SRS_MULTITREE_99_021:[ If the node already has a value assigned to it, MULTITREE_ALREADY_HAS_A_VALUE shall be returned and the existing value shall not be changed.]*/
 TEST_FUNCTION(MultiTree_AddLeaf_creates_a_child_in_root_twice_is_error_alternate)
 {
     ///arrange
@@ -595,7 +583,6 @@ TEST_FUNCTION(MultiTree_AddLeaf_creates_a_child_in_root_twice_is_error_alternate
     mocks.ResetAllCalls(); /*not caring about what gets called*/
 }
 
-/*Tests_SRS_MULTITREE_99_021:[ If the node already has a value assigned to it, MULTITREE_ALREADY_HAS_A_VALUE shall be returned and the existing value shall not be changed.]*/
 TEST_FUNCTION(MultiTree_AddLeaf_creates_a_child_in_root_twice_is_error_alternate_2)
 {
     ///arrange
@@ -614,7 +601,6 @@ TEST_FUNCTION(MultiTree_AddLeaf_creates_a_child_in_root_twice_is_error_alternate
     mocks.ResetAllCalls(); /*not caring about what gets called*/
 }
 
-/*Tests_SRS_MULTITREE_99_021:[ If the node already has a value assigned to it, MULTITREE_ALREADY_HAS_A_VALUE shall be returned and the existing value shall not be changed.]*/
 TEST_FUNCTION(MultiTree_AddLeaf_creates_a_child_in_root_twice_is_error_alternate_3)
 {
     ///arrange
@@ -633,7 +619,6 @@ TEST_FUNCTION(MultiTree_AddLeaf_creates_a_child_in_root_twice_is_error_alternate
     mocks.ResetAllCalls(); /*not caring about what gets called*/
 }
 
-/*Tests_SRS_MULTITREE_99_021:[ If the node already has a value assigned to it, MULTITREE_ALREADY_HAS_A_VALUE shall be returned and the existing value shall not be changed.]*/
 /*the following test shall create a child of a child and then attept to assign some value to the father of the leaf*/
 /*any assignemnt of values should fail*/
 TEST_FUNCTION(MultiTree_AddLeaf_assign_a_value_to_a_leaf_is_error)
@@ -654,7 +639,6 @@ TEST_FUNCTION(MultiTree_AddLeaf_assign_a_value_to_a_leaf_is_error)
     mocks.ResetAllCalls(); /*not caring about what gets called*/
 }
 
-/*Tests_SRS_MULTITREE_99_021:[ If the node already has a value assigned to it, MULTITREE_ALREADY_HAS_A_VALUE shall be returned and the existing value shall not be changed.]*/
 /*the following test shall create a child of a child and then attept to assign some value to child of child*/
 /*any assignemnt of values should fail*/
 TEST_FUNCTION(MultiTree_AddLeaf_assign_a_value_to_a_leaf_is_error_2)
@@ -675,9 +659,6 @@ TEST_FUNCTION(MultiTree_AddLeaf_assign_a_value_to_a_leaf_is_error_2)
     mocks.ResetAllCalls(); /*not caring about what gets called*/
 }
 
-/*Tests_SRS_MULTITREE_99_022:[ If a child along the path does not exist, it shall be created.] */
-/*Tests_SRS_MULTITREE_99_023:[ The newly created children along the path shall have a NULL value by default.]*/
-/*Tests_SRS_MULTITREE_99_034:[The function returns MULTITREE_OK when data has been stored in the tree.]*/
 /*this test goes deep down to child314*/
 /*to check if a child is created along the path, several calls are done to check the structure of the tree*/
 TEST_FUNCTION(MultiTree_AddLeaf_creates_children_in_the_path)
@@ -770,9 +751,6 @@ TEST_FUNCTION(MultiTree_AddLeaf_creates_children_in_the_path)
     mocks.ResetAllCalls(); /*not caring about what gets called*/
 }
 
-/*Tests_SRS_MULTITREE_99_022:[ If a child along the path does not exist, it shall be created.] */
-/*Tests_SRS_MULTITREE_99_023:[ The newly created children along the path shall have a NULL value by default.]*/
-/*Tests_SRS_MULTITREE_99_017:[ Subsequent names designate hierarchical children in the tree. The last child designates the child that will receive the value.]*/
 /*this test goes deep down to child314*/
 /*to check if a child is created along the path, several calls are done to check the structure of the tree*/
 /*this test creates 2 children (314, 312) and does all teh checks*/
@@ -896,7 +874,6 @@ TEST_FUNCTION(MultiTree_AddLeaf_creates_children_in_the_path_2)
     mocks.ResetAllCalls(); /*not caring about what gets called*/
 }
 
-/*Tests_SRS_MULTITREE_99_024:[ if a child name is empty (such as in  '/child1//child12'), MULTITREE_EMPTY_CHILD_NAME shall be returned.]*/
 TEST_FUNCTION(MultiTree_AddLeaf_with_empty_name_fails)
 {
     ///arrange
@@ -914,7 +891,6 @@ TEST_FUNCTION(MultiTree_AddLeaf_with_empty_name_fails)
     mocks.ResetAllCalls();
 }
 
-/*Tests_SRS_MULTITREE_99_024:[ if a child name is empty (such as in  '/child1//child12'), MULTITREE_EMPTY_CHILD_NAME shall be returned.]*/
 TEST_FUNCTION(MultiTree_AddLeaf_with_empty_name_fails_2)
 {
     ///arrange
@@ -932,7 +908,6 @@ TEST_FUNCTION(MultiTree_AddLeaf_with_empty_name_fails_2)
     mocks.ResetAllCalls();
 }
 
-/*Tests_SRS_MULTITREE_99_024:[ if a child name is empty (such as in  '/child1//child12', MULTITREE_EMPTY_CHILD_NAME shall be returned.]*/
 TEST_FUNCTION(MultiTree_AddLeaf_with_empty_name_fails_3)
 {
     ///arrange
@@ -950,7 +925,6 @@ TEST_FUNCTION(MultiTree_AddLeaf_with_empty_name_fails_3)
     mocks.ResetAllCalls();
 }
 
-/*Tests_SRS_MULTITREE_99_024:[ if a child name is empty (such as in  '/child1//child12'), MULTITREE_EMPTY_CHILD_NAME shall be returned.]*/
 TEST_FUNCTION(MultiTree_AddLeaf_with_empty_name_fails_3_dot_5)
 {
     ///arrange
@@ -968,7 +942,6 @@ TEST_FUNCTION(MultiTree_AddLeaf_with_empty_name_fails_3_dot_5)
     mocks.ResetAllCalls();
 }
 
-/*Tests_SRS_MULTITREE_99_024:[ if a child name is empty (such as in  '/child1//child12'), MULTITREE_EMPTY_CHILD_NAME shall be returned.]*/
 TEST_FUNCTION(MultiTree_AddLeaf_with_empty_name_fails_4)
 {
     ///arrange
@@ -986,7 +959,6 @@ TEST_FUNCTION(MultiTree_AddLeaf_with_empty_name_fails_4)
     mocks.ResetAllCalls();
 }
 
-/*Tests_SRS_MULTITREE_99_024:[ if a child name is empty (such as in  '/child1//child12'), MULTITREE_EMPTY_CHILD_NAME shall be returned.]*/
 TEST_FUNCTION(MultiTree_AddLeaf_with_empty_name_fails_5)
 {
     ///arrange
@@ -1004,7 +976,6 @@ TEST_FUNCTION(MultiTree_AddLeaf_with_empty_name_fails_5)
     mocks.ResetAllCalls();
 }
 
-/*Tests_SRS_MULTITREE_99_014:[DestinationPath is a string in the following format: /child1/child12 or child1/child12] */
 /*we shall use the alternate paths to construct the complete tree*/
 TEST_FUNCTION(MultiTree_AddLeaf_with_alternate_names_succeeds)
 {
@@ -1035,7 +1006,6 @@ TEST_FUNCTION(MultiTree_AddLeaf_with_alternate_names_succeeds)
     mocks.ResetAllCalls();
 }
 
-/*Tests_SRS_MULTITREE_99_014:[DestinationPath is a string in the following format: /child1/child12 or child1/child12] */
 /*we shall use the alternate paths to construct the complete tree*/
 TEST_FUNCTION(MultiTree_AddLeaf_with_natural_names_succeeds)
 {
@@ -1066,8 +1036,6 @@ TEST_FUNCTION(MultiTree_AddLeaf_with_natural_names_succeeds)
     mocks.ResetAllCalls();
 }
 
-/*Tests_SRS_MULTITREE_99_029:[ This function writes in *count the number of direct children for a tree node specified by the parameter treeHandle]*/
-/*Tests_SRS_MULTITREE_99_035:[ The function shall return MULTITREE_OK when *count contains the number of children of the node pointed to be parameter treeHandle.]*/
 TEST_FUNCTION(MultiTree_GetChildCount_for_a_new_tree_returns_0)
 {
     ///arrange
@@ -1087,8 +1055,6 @@ TEST_FUNCTION(MultiTree_GetChildCount_for_a_new_tree_returns_0)
     mocks.ResetAllCalls();
 }
 
-/*Tests_SRS_MULTITREE_99_029:[ This function writes in *count the number of direct children for a tree node specified by the parameter treeHandle]*/
-/*Tests_SRS_MULTITREE_99_035:[ The function shall return MULTITREE_OK when *count contains the number of children of the node pointed to be parameter treeHandle.]*/
 TEST_FUNCTION(MultiTree_GetChildCount_for_a_tree_with_1_child_return_1)
 {
     ///arrange
@@ -1109,8 +1075,6 @@ TEST_FUNCTION(MultiTree_GetChildCount_for_a_tree_with_1_child_return_1)
     mocks.ResetAllCalls();
 }
 
-/*Tests_SRS_MULTITREE_99_029:[ This function writes in *count the number of direct children for a tree node specified by the parameter treeHandle]*/
-/*Tests_SRS_MULTITREE_99_035:[ The function shall return MULTITREE_OK when *count contains the number of children of the node pointed to be parameter treeHandle.]*/
 TEST_FUNCTION(MultiTree_GetChildCount_for_a_tree_with_2_children_return_2)
 {
     ///arrange
@@ -1132,7 +1096,6 @@ TEST_FUNCTION(MultiTree_GetChildCount_for_a_tree_with_2_children_return_2)
     mocks.ResetAllCalls();
 }
 
-/*Tests_SRS_MULTITREE_99_027:[If treeHandle is NULL, the function returns MULTITREE_INVALID_ARG.]*/
 TEST_FUNCTION(MultiTree_GetChildCount_with_NULL_handle_fails)
 {
     ///arrange
@@ -1146,7 +1109,6 @@ TEST_FUNCTION(MultiTree_GetChildCount_with_NULL_handle_fails)
     ASSERT_ARE_EQUAL(MULTITREE_RESULT, MULTITREE_INVALID_ARG, res);
 }
 
-/*Tests_SRS_MULTITREE_99_028:[If parameter count is NULL, the function returns MULTITREE_INVALID_ARG.]*/
 TEST_FUNCTION(MultiTree_GetChildCount_with_NULL_count_fails)
 {
     ///arrange
@@ -1164,7 +1126,6 @@ TEST_FUNCTION(MultiTree_GetChildCount_with_NULL_count_fails)
     mocks.ResetAllCalls();
 }
 
-/*Tests_SRS_MULTITREE_99_031:[ If parameter treeHandle is NULL, the function returns MULTITREE_INVALID_ARG.]*/
 TEST_FUNCTION(MultiTree_GetChild_with_NULL_treeHandle_fails)
 {
     ///arrange
@@ -1178,7 +1139,6 @@ TEST_FUNCTION(MultiTree_GetChild_with_NULL_treeHandle_fails)
     ASSERT_ARE_EQUAL(MULTITREE_RESULT, MULTITREE_INVALID_ARG, res);
 }
 
-/*Tests_SRS_MULTITREE_99_032:[ If parameter index is out of range, the function shall return MULTITREE_OUT_OF_RANGE_INDEX]*/
 TEST_FUNCTION(MultiTree_GetChild_with_index_out_of_range_fails_1)
 {
     ///arrange
@@ -1197,7 +1157,6 @@ TEST_FUNCTION(MultiTree_GetChild_with_index_out_of_range_fails_1)
     mocks.ResetAllCalls();
 }
 
-/*Tests_SRS_MULTITREE_99_032:[ If parameter index is out of range, the function shall return MULTITREE_OUT_OF_RANGE_INDEX]*/
 TEST_FUNCTION(MultiTree_GetChild_with_index_out_of_range_fails_2)
 {
     ///arrange
@@ -1216,7 +1175,6 @@ TEST_FUNCTION(MultiTree_GetChild_with_index_out_of_range_fails_2)
     mocks.ResetAllCalls();
 }
 
-/*Tests_SRS_MULTITREE_99_032:[ If parameter index is out of range, the function shall return MULTITREE_OUT_OF_RANGE_INDEX]*/
 TEST_FUNCTION(MultiTree_GetChild_with_index_out_of_range_fails_3)
 {
     ///arrange
@@ -1236,7 +1194,6 @@ TEST_FUNCTION(MultiTree_GetChild_with_index_out_of_range_fails_3)
     mocks.ResetAllCalls();
 }
 
-/*Tests_SRS_MULTITREE_99_032:[ If parameter index is out of range, the function shall return MULTITREE_OUT_OF_RANGE_INDEX]*/
 TEST_FUNCTION(MultiTree_GetChild_with_index_out_of_range_fails_4)
 {
     ///arrange
@@ -1256,7 +1213,6 @@ TEST_FUNCTION(MultiTree_GetChild_with_index_out_of_range_fails_4)
     mocks.ResetAllCalls();
 }
 
-/*Tests_SRS_MULTITREE_99_032:[ If parameter index is out of range, the function shall return MULTITREE_OUT_OF_RANGE_INDEX]*/
 TEST_FUNCTION(MultiTree_GetChild_with_index_out_of_range_fails_5)
 {
     ///arrange
@@ -1277,7 +1233,6 @@ TEST_FUNCTION(MultiTree_GetChild_with_index_out_of_range_fails_5)
     mocks.ResetAllCalls();
 }
 
-/*Tests_SRS_MULTITREE_99_033:[ If parameter childHandle is NULL, the function shall return MULTITREE_INVALID_ARG.]*/
 TEST_FUNCTION(MultiTree_GetChild_with_NULL_child_handle_fails)
 {
     ///arrange
@@ -1296,8 +1251,6 @@ TEST_FUNCTION(MultiTree_GetChild_with_NULL_child_handle_fails)
     mocks.ResetAllCalls();
 }
 
-/*Tests_SRS_MULTITREE_99_030:[ This function writes in *childHandle parameter the 'index'th child of the node pointed to by parameter treeHandle]*/
-/*Tests_SRS_MULTITREE_99_035:[ The function returns MULTITREE_OK when *childHandle contains a handle to the 'index'th child of the tree designated by parameter treeHandle.]*/
 TEST_FUNCTION(MultiTree_GetChild_succeeds)
 {
     ///arrange
@@ -1345,7 +1298,6 @@ TEST_FUNCTION(MultiTree_GetName_with_NULL_handle_fails)
     ASSERT_ARE_EQUAL(MULTITREE_RESULT, MULTITREE_INVALID_ARG, res);
 }
 
-/*Tests_SRS_MULTITREE_99_038:[If destination is NULL, the function shall return MULTITREE_INVALID_ARG.]*/
 TEST_FUNCTION(MultiTree_GetName_with_NULL_destination_fails)
 {
     ///arrange
@@ -1366,7 +1318,6 @@ TEST_FUNCTION(MultiTree_GetName_with_NULL_destination_fails)
     mocks.ResetAllCalls();
 }
 
-/*Tests_SRS_MULTITREE_99_051:[ The function returns MULTITREE_EMPTY_CHILD_NAME when used with the root of the tree.]*/
 TEST_FUNCTION(MultiTree_GetName_for_root_returns_EMPTY_NAME)
 {
     ///arrange
@@ -1384,8 +1335,6 @@ TEST_FUNCTION(MultiTree_GetName_for_root_returns_EMPTY_NAME)
     mocks.ResetAllCalls();
 }
 
-/*Tests_SRS_MULTITREE_99_039:[ The function returns MULTITREE_OK when destination contains the name of the root node of the tree designated by treeHandle parameter.]*/
-/*Tests_SRS_MULTITREE_99_036:[ This function fills the buffer pointed to by parameter destination with the name of the root node of the tree designated by parameter treeHandle.]*/
 TEST_FUNCTION(MultiTree_GetName_succeeds)
 {
     ///arrange
@@ -1407,7 +1356,6 @@ TEST_FUNCTION(MultiTree_GetName_succeeds)
     mocks.ResetAllCalls();
 }
 
-/*Tests_SRS_MULTITREE_99_042:[ If treeHandle is NULL, the function shall return MULTITREE_INVALID_ARG.]*/
 TEST_FUNCTION(MultiTree_GetValue_with_NULL_handle_fails)
 {
     ///arrange
@@ -1421,7 +1369,6 @@ TEST_FUNCTION(MultiTree_GetValue_with_NULL_handle_fails)
     ASSERT_ARE_EQUAL(MULTITREE_RESULT, MULTITREE_INVALID_ARG, res);
 }
 
-/*Tests_SRS_MULTITREE_99_044:[ If there is no value in the node then MULTITREE_EMPTY_VALUE shall be returned.]*/
 TEST_FUNCTION(MultiTree_GetValue_with_empty_value_fails_1)
 {
     ///arrange
@@ -1440,7 +1387,6 @@ TEST_FUNCTION(MultiTree_GetValue_with_empty_value_fails_1)
     mocks.ResetAllCalls();
 }
 
-/*Tests_SRS_MULTITREE_99_044:[ If there is no value in the node then MULTITREE_EMPTY_VALUE shall be returned.]*/
 TEST_FUNCTION(MultiTree_GetValue_with_empty_value_fails_2)
 {
     ///arrange
@@ -1462,7 +1408,6 @@ TEST_FUNCTION(MultiTree_GetValue_with_empty_value_fails_2)
 }
 
 
-/*Tests_SRS_MULTITREE_99_043:[ If destination is NULL, the function shall return MULTITREE_INVALID_ARG.]*/
 TEST_FUNCTION(MultiTree_GetValue_with_NULL_buffer_fails)
 {
     ///arrange
@@ -1480,7 +1425,6 @@ TEST_FUNCTION(MultiTree_GetValue_with_NULL_buffer_fails)
     mocks.ResetAllCalls();
 }
 
-/*Tests_SRS_MULTITREE_99_043:[ If destination is NULL, the function shall return MULTITREE_INVALID_ARG.]*/
 TEST_FUNCTION(MultiTree_GetValue_with_root_returns_EMPTY_VALUE)
 {
     ///arrange
@@ -1499,8 +1443,6 @@ TEST_FUNCTION(MultiTree_GetValue_with_root_returns_EMPTY_VALUE)
     mocks.ResetAllCalls();
 }
 
-/*Tests_SRS_MULTITREE_99_045:[ The function shall return MULTITREE_OK when destination contains the value of the root node of the tree designated by treeHandle parameter.]*/
-/*Tests_SRS_MULTITREE_99_041:[This function updates the *destination parameter to the internally stored value.]*/
 TEST_FUNCTION(MultiTree_GetValue_suceeds)
 {
     ///arrange
@@ -1523,7 +1465,6 @@ TEST_FUNCTION(MultiTree_GetValue_suceeds)
     mocks.ResetAllCalls();
 }
 
-/*Tests_SRS_MULTITREE_99_047:[This function frees any system resource used by the tree designated by parameter treeHandle*/
 TEST_FUNCTION(MultiTree_Destroy_with_NULL_handle_Does_Not_Crash_And_Burn)
 {
     ///arrange
@@ -1536,8 +1477,6 @@ TEST_FUNCTION(MultiTree_Destroy_with_NULL_handle_Does_Not_Crash_And_Burn)
     // no explicit assert, no exception expected
 }
 
-/*Tests_SRS_MULTITREE_99_047:[This function frees any system resource used by the tree designated by parameter treeHandle*/
-/*Tests_SRS_MULTITREE_99_048:[ The function returns MULTITREE_OK when all system resources used by the tree have been freed.]*/
 TEST_FUNCTION(MultiTree_Destroy_with_an_empty_tree_calls_free_once)
 {
     ///arrange
@@ -1556,8 +1495,6 @@ TEST_FUNCTION(MultiTree_Destroy_with_an_empty_tree_calls_free_once)
 
 }
 
-/*Tests_SRS_MULTITREE_99_047:[This function frees any system resource used by the tree designated by parameter treeHandle*/
-/*Tests_SRS_MULTITREE_99_048:[ The function returns MULTITREE_OK when all system resources used by the tree have been freed.]*/
 TEST_FUNCTION(MultiTree_Destroy_with_one_child_tree_calls_free_5_times)
 {
     /*the 5 times are:
@@ -1579,8 +1516,6 @@ TEST_FUNCTION(MultiTree_Destroy_with_one_child_tree_calls_free_5_times)
 
 }
 
-/*Tests_SRS_MULTITREE_99_047:[This function frees any system resource used by the tree designated by parameter treeHandle*/
-/*Tests_SRS_MULTITREE_99_048:[ The function returns MULTITREE_OK when all system resources used by the tree have been freed.]*/
 TEST_FUNCTION(MultiTree_Destroy_with_child_child_tree_calls_free_8_times)
 {
     /*the 8 times are:
@@ -1605,8 +1540,6 @@ TEST_FUNCTION(MultiTree_Destroy_with_child_child_tree_calls_free_8_times)
     mocks.ResetAllCalls();
 }
 
-/*Tests_SRS_MULTITREE_99_047:[This function frees any system resource used by the tree designated by parameter treeHandle*/
-/*Tests_SRS_MULTITREE_99_048:[ The function returns MULTITREE_OK when all system resources used by the tree have been freed.]*/
 TEST_FUNCTION(MultiTree_Destroy_with_2_child_child_tree_calls_free_8_times)
 {
     /*the 8 times are:
@@ -1635,7 +1568,6 @@ TEST_FUNCTION(MultiTree_Destroy_with_2_child_child_tree_calls_free_8_times)
 
 /* MultiTree_AddChild */
 
-/* Tests_SRS_MULTITREE_99_055:[ If any argument is NULL, MultiTree_AddChild shall return MULTITREE_INVALID_ARG.] */
 TEST_FUNCTION(MultiTree_AddChild_With_NULL_TreeHandle_Fails)
 {
     ///arrange
@@ -1650,7 +1582,6 @@ TEST_FUNCTION(MultiTree_AddChild_With_NULL_TreeHandle_Fails)
     ASSERT_ARE_EQUAL(MULTITREE_RESULT, MULTITREE_INVALID_ARG, result);
 }
 
-/* Tests_SRS_MULTITREE_99_055:[ If any argument is NULL, MultiTree_AddChild shall return MULTITREE_INVALID_ARG.] */
 TEST_FUNCTION(MultiTree_AddChild_With_NULL_ChildName_Fails)
 {
     ///arrange
@@ -1673,7 +1604,6 @@ TEST_FUNCTION(MultiTree_AddChild_With_NULL_ChildName_Fails)
     MultiTree_Destroy(treeHandle);
 }
 
-/* Tests_SRS_MULTITREE_99_055:[ If any argument is NULL, MultiTree_AddChild shall return MULTITREE_INVALID_ARG.] */
 TEST_FUNCTION(MultiTree_AddChild_With_NULL_ChildHandle_Fails)
 {
     ///arrange
@@ -1694,9 +1624,6 @@ TEST_FUNCTION(MultiTree_AddChild_With_NULL_ChildHandle_Fails)
     MultiTree_Destroy(treeHandle);
 }
 
-/* Tests_SRS_MULTITREE_99_053:[ MultiTree_AddChild shall add a new node with the name childName to the multi tree node identified by treeHandle] */
-/* Tests_SRS_MULTITREE_99_062:[ The new node handle shall be returned in the childHandle argument.] */
-/* Tests_SRS_MULTITREE_99_054:[ On success, MultiTree_AddChild shall return MULTITREE_OK.] */
 TEST_FUNCTION(MultiTree_AddChild_With_Correct_Arguments_Succeeds)
 {
     ///arrange
@@ -1730,7 +1657,6 @@ TEST_FUNCTION(MultiTree_AddChild_With_Correct_Arguments_Succeeds)
     MultiTree_Destroy(treeHandle);
 }
 
-/* Tests_SRS_MULTITREE_99_066:[ If the childName argument is an empty string, MultiTree_AddChild shall return MULTITREE_EMPTY_CHILD_NAME.] */
 TEST_FUNCTION(MultiTree_AddChild_With_Empty_ChildName_Fails)
 {
     ///arrange
@@ -1752,7 +1678,6 @@ TEST_FUNCTION(MultiTree_AddChild_With_Empty_ChildName_Fails)
     MultiTree_Destroy(treeHandle);
 }
 
-/* Tests_SRS_MULTITREE_99_061:[ If a child node with the same name already exists, MultiTree_AddChild shall return MULTITREE_ALREADY_HAS_A_VALUE.] */
 TEST_FUNCTION(MultiTree_AddChild_With_Same_ChildName_Twice_Fails)
 {
     ///arrange
@@ -1773,7 +1698,6 @@ TEST_FUNCTION(MultiTree_AddChild_With_Same_ChildName_Twice_Fails)
     mocks.ResetAllCalls(); /*not caring about what gets called*/
 }
 
-/* Tests_SRS_MULTITREE_99_061:[ If a child node with the same name already exists, MultiTree_AddChild shall return MULTITREE_ALREADY_HAS_A_VALUE.] */
 TEST_FUNCTION(MultiTree_AddChild_With_2_Different_Child_Names_Succeeds)
 {
     ///arrange
@@ -1821,7 +1745,6 @@ TEST_FUNCTION(MultiTree_AddChild_With_2_Different_Child_Names_Succeeds)
 
 /* MultiTree_GetChildByName */
 
-/* Tests_SRS_MULTITREE_99_065:[ If any argument is NULL, MultiTree_GetChildByName shall return MULTITREE_INVALID_ARG.] */
 TEST_FUNCTION(MultiTree_GetChildByName_With_NULL_TreeHandle_Fails)
 {
     ///arrange
@@ -1837,7 +1760,6 @@ TEST_FUNCTION(MultiTree_GetChildByName_With_NULL_TreeHandle_Fails)
     mocks.ResetAllCalls();
 }
 
-/* Tests_SRS_MULTITREE_99_065:[ If any argument is NULL, MultiTree_GetChildByName shall return MULTITREE_INVALID_ARG.] */
 TEST_FUNCTION(MultiTree_GetChildByName_With_NULL_ChildName_Fails)
 {
     ///arrange
@@ -1855,7 +1777,6 @@ TEST_FUNCTION(MultiTree_GetChildByName_With_NULL_ChildName_Fails)
     mocks.ResetAllCalls();
 }
 
-/* Tests_SRS_MULTITREE_99_065:[ If any argument is NULL, MultiTree_GetChildByName shall return MULTITREE_INVALID_ARG.] */
 TEST_FUNCTION(MultiTree_GetChildByName_With_NULL_ChildHandle_Fails)
 {
     ///arrange
@@ -1872,9 +1793,6 @@ TEST_FUNCTION(MultiTree_GetChildByName_With_NULL_ChildHandle_Fails)
     mocks.ResetAllCalls();
 }
 
-/* Tests_SRS_MULTITREE_99_063:[ MultiTree_GetChildByName shall retrieve the handle of the child node childName from the treeNode node.] */
-/* Tests_SRS_MULTITREE_99_067:[ The child node handle shall be returned in the childHandle argument.] */
-/* Tests_SRS_MULTITREE_99_064:[ On success, MultiTree_GetChildByName shall return MULTITREE_OK.] */
 TEST_FUNCTION(MultiTree_GetChildByName_When_The_Child_Exists_Succeeds)
 {
     ///arrange
@@ -1896,7 +1814,6 @@ TEST_FUNCTION(MultiTree_GetChildByName_When_The_Child_Exists_Succeeds)
     mocks.ResetAllCalls();
 }
 
-/* Tests_SRS_MULTITREE_99_068:[ If the specified child is not found, MultiTree_GetChildByName shall return MULTITREE_CHILD_NOT_FOUND.] */
 TEST_FUNCTION(MultiTree_GetChildByName_When_No_Child_Exists_Fails)
 {
     ///arrange
@@ -1914,7 +1831,6 @@ TEST_FUNCTION(MultiTree_GetChildByName_When_No_Child_Exists_Fails)
     mocks.ResetAllCalls();
 }
 
-/* Tests_SRS_MULTITREE_99_068:[ If the specified child is not found, MultiTree_GetChildByName shall return MULTITREE_CHILD_NOT_FOUND.] */
 TEST_FUNCTION(MultiTree_GetChildByName_When_The_Child_Is_Not_Found_In_The_Children_List_Fails)
 {
     ///arrange
@@ -1937,7 +1853,6 @@ TEST_FUNCTION(MultiTree_GetChildByName_When_The_Child_Is_Not_Found_In_The_Childr
 
 /* MultiTree_GetLeafValue */
 
-/* Tests_SRS_MULTITREE_99_055:[ If any argument is NULL, MultiTree_GetLeafValue shall return MULTITREE_INVALID_ARG.] */
 TEST_FUNCTION(MultiTree_GetLeafValue_When_The_TreeHandle_Is_NULL_Fails)
 {
     ///arrange
@@ -1951,7 +1866,6 @@ TEST_FUNCTION(MultiTree_GetLeafValue_When_The_TreeHandle_Is_NULL_Fails)
     ASSERT_ARE_EQUAL(MULTITREE_RESULT, MULTITREE_INVALID_ARG, result);
 }
 
-/* Tests_SRS_MULTITREE_99_055:[ If any argument is NULL, MultiTree_GetLeafValue shall return MULTITREE_INVALID_ARG.] */
 TEST_FUNCTION(MultiTree_GetLeafValue_When_The_LeafPath_Is_NULL_Fails)
 {
     ///arrange
@@ -1971,7 +1885,6 @@ TEST_FUNCTION(MultiTree_GetLeafValue_When_The_LeafPath_Is_NULL_Fails)
     mocks.ResetAllCalls();
 }
 
-/* Tests_SRS_MULTITREE_99_055:[ If any argument is NULL, MultiTree_GetLeafValue shall return MULTITREE_INVALID_ARG.] */
 TEST_FUNCTION(MultiTree_GetLeafValue_When_The_Value_Buffer_Is_NULL_Fails)
 {
     ///arrange
@@ -1990,7 +1903,6 @@ TEST_FUNCTION(MultiTree_GetLeafValue_When_The_Value_Buffer_Is_NULL_Fails)
     mocks.ResetAllCalls();
 }
 
-/* Tests_SRS_MULTITREE_99_058:[ The last child designates the child that will receive the value. If a child name is empty (such as in  '/child1//child12'), MULTITREE_EMPTY_CHILD_NAME shall be returned.] */
 TEST_FUNCTION(MultiTree_GetLeafValue_With_An_Empty_Leaf_Path_Fails)
 {
     ///arrange
@@ -2010,7 +1922,6 @@ TEST_FUNCTION(MultiTree_GetLeafValue_With_An_Empty_Leaf_Path_Fails)
     mocks.ResetAllCalls();
 }
 
-/* Tests_SRS_MULTITREE_99_058:[ The last child designates the child that will receive the value. If a child name is empty (such as in  '/child1//child12'), MULTITREE_EMPTY_CHILD_NAME shall be returned.] */
 TEST_FUNCTION(MultiTree_GetLeafValue_With_A_Slash_As_Leaf_Path_Fails)
 {
     ///arrange
@@ -2030,8 +1941,6 @@ TEST_FUNCTION(MultiTree_GetLeafValue_With_A_Slash_As_Leaf_Path_Fails)
     mocks.ResetAllCalls();
 }
 
-/* Tests_SRS_MULTITREE_99_053:[ MultiTree_GetLeafValue shall copy into the destination argument the value of the node identified by the leafPath argument.] */
-/* Tests_SRS_MULTITREE_99_054:[ On success, MultiTree_GetLeafValue shall return MULTITREE_OK.] */
 TEST_FUNCTION(MultiTree_GetLeafValue_With_A_Correct_Child_Path_Succeeds)
 {
     ///arrange
@@ -2052,11 +1961,6 @@ TEST_FUNCTION(MultiTree_GetLeafValue_With_A_Correct_Child_Path_Succeeds)
     mocks.ResetAllCalls();
 }
 
-/* Tests_SRS_MULTITREE_99_053:[ MultiTree_GetLeafValue shall copy into the destination argument the value of the node identified by the leafPath argument.] */
-/* Tests_SRS_MULTITREE_99_054:[ On success, MultiTree_GetLeafValue shall return MULTITREE_OK.] */
-/* Tests_SRS_MULTITREE_99_056:[ The leafPath argument is a string in the following format: /child1/child12 or child1/child12.] */
-/* Tests_SRS_MULTITREE_99_057:[ Subsequent names designate hierarchical children in the tree.] */
-/* Tests_SRS_MULTITREE_99_058:[ The last child designates the child that will receive the value.] */
 TEST_FUNCTION(MultiTree_GetLeafValue_With_A_Correct_Child_Path_For_A_Tree_With_2_Levels_Succeeds)
 {
     ///arrange
@@ -2077,10 +1981,6 @@ TEST_FUNCTION(MultiTree_GetLeafValue_With_A_Correct_Child_Path_For_A_Tree_With_2
     mocks.ResetAllCalls();
 }
 
-/* Tests_SRS_MULTITREE_99_056:[ The leafPath argument is a string in the following format: /child1/child12 or child1/child12.] */
-/* Tests_SRS_MULTITREE_99_057:[ Subsequent names designate hierarchical children in the tree.] */
-/* Tests_SRS_MULTITREE_99_058:[ The last child designates the child that will receive the value.] */
-/* Tests_SRS_MULTITREE_99_071:[ When the child node is not found, MultiTree_GetLeafValue shall return MULTITREE_CHILD_NOT_FOUND.] */
 TEST_FUNCTION(MultiTree_GetLeafValue_For_A_Child_That_Does_Not_Exist_But_All_Nodes_Up_To_Last_Exist_Fails)
 {
     ///arrange
@@ -2100,10 +2000,6 @@ TEST_FUNCTION(MultiTree_GetLeafValue_For_A_Child_That_Does_Not_Exist_But_All_Nod
     mocks.ResetAllCalls();
 }
 
-/* Tests_SRS_MULTITREE_99_056:[ The leafPath argument is a string in the following format: /child1/child12 or child1/child12.] */
-/* Tests_SRS_MULTITREE_99_057:[ Subsequent names designate hierarchical children in the tree.] */
-/* Tests_SRS_MULTITREE_99_058:[ The last child designates the child that will receive the value.] */
-/* Tests_SRS_MULTITREE_99_071:[ When the child node is not found, MultiTree_GetLeafValue shall return MULTITREE_CHILD_NOT_FOUND.] */
 TEST_FUNCTION(MultiTree_GetLeafValue_For_A_Child_With_Bad_Leaf_Path_On_First_Level_Fails)
 {
     ///arrange
@@ -2123,7 +2019,6 @@ TEST_FUNCTION(MultiTree_GetLeafValue_For_A_Child_With_Bad_Leaf_Path_On_First_Lev
     mocks.ResetAllCalls();
 }
 
-/* Tests_SRS_MULTITREE_99_069:[ If a child name is empty (such as in  '/child1//child12'), MULTITREE_EMPTY_CHILD_NAME shall be returned.] */
 TEST_FUNCTION(MultiTree_GetLeafValue_With_An_Empty_Child_Name_At_Level_1_Fails)
 {
     ///arrange
@@ -2143,7 +2038,6 @@ TEST_FUNCTION(MultiTree_GetLeafValue_With_An_Empty_Child_Name_At_Level_1_Fails)
     mocks.ResetAllCalls();
 }
 
-/* Tests_SRS_MULTITREE_99_071:[ When the child node is not found, MultiTree_GetLeafValue shall return MULTITREE_CHILD_NOT_FOUND.] */
 TEST_FUNCTION(MultiTree_GetLeafValue_On_A_Node_With_No_Children_Fails)
 {
     ///arrange
@@ -2164,7 +2058,6 @@ TEST_FUNCTION(MultiTree_GetLeafValue_On_A_Node_With_No_Children_Fails)
     mocks.ResetAllCalls();
 }
 
-/* Tests_SRS_MULTITREE_99_070:[ If an attempt is made to get the value for a node that does not have a value set, then MultiTree_GetLeafValue shall return MULTITREE_EMPTY_VALUE.] */
 TEST_FUNCTION(MultiTree_GetLeafValue_On_A_Child_Node_With_No_Value_Fails)
 {
     ///arrange
@@ -2187,7 +2080,6 @@ TEST_FUNCTION(MultiTree_GetLeafValue_On_A_Child_Node_With_No_Value_Fails)
 
 /* MultiTree_SetValue */
 
-/* Tests_SRS_MULTITREE_99_074:[ If any argument is NULL, MultiTree_SetValue shall return MULTITREE_INVALID_ARG.] */
 TEST_FUNCTION(MultiTree_SetValue_With_A_NULL_treeHandle_Fails)
 {
     ///arrange
@@ -2200,7 +2092,6 @@ TEST_FUNCTION(MultiTree_SetValue_With_A_NULL_treeHandle_Fails)
     ASSERT_ARE_EQUAL(MULTITREE_RESULT, MULTITREE_INVALID_ARG, result);
 }
 
-/* Tests_SRS_MULTITREE_99_074:[ If any argument is NULL, MultiTree_SetValue shall return MULTITREE_INVALID_ARG.] */
 TEST_FUNCTION(MultiTree_SetValue_With_A_NULL_value_Fails)
 {
     ///arrange
@@ -2219,8 +2110,6 @@ TEST_FUNCTION(MultiTree_SetValue_With_A_NULL_value_Fails)
     mocks.ResetAllCalls(); /*not caring about what gets called*/
 }
 
-/* Tests_SRS_MULTITREE_99_072:[ MultiTree_SetValue shall set the value of the node indicated by the treeHandle argument to the value of the argument value.] */
-/* Tests_SRS_MULTITREE_99_073:[ On success, MultiTree_SetValue shall return MULTITREE_OK.] */
 TEST_FUNCTION(MultiTree_SetValue_With_Valid_Arguments_Succeeds)
 {
     ///arrange
@@ -2242,8 +2131,6 @@ TEST_FUNCTION(MultiTree_SetValue_With_Valid_Arguments_Succeeds)
     mocks.ResetAllCalls(); /*not caring about what gets called*/
 }
 
-/* Tests_SRS_MULTITREE_99_072:[ MultiTree_SetValue shall set the value of the node indicated by the treeHandle argument to the value of the argument value.] */
-/* Tests_SRS_MULTITREE_99_073:[ On success, MultiTree_SetValue shall return MULTITREE_OK.] */
 TEST_FUNCTION(MultiTree_SetValue_On_A_Node_That_Has_A_Value_Fails)
 {
     ///arrange
@@ -2264,7 +2151,6 @@ TEST_FUNCTION(MultiTree_SetValue_On_A_Node_That_Has_A_Value_Fails)
     mocks.ResetAllCalls(); /*not caring about what gets called*/
 }
 
-/* Tests_SRS_MULTITREE_99_078:[ If any argument is NULL, MultiTree_DeleteChild shall return MULTITREE_INVALID_ARG.] */
 TEST_FUNCTION(MultiTree_DeleteChild_With_A_NULL_treeHandle_Fails)
 {
     ///arrange
@@ -2279,7 +2165,6 @@ TEST_FUNCTION(MultiTree_DeleteChild_With_A_NULL_treeHandle_Fails)
     mocks.ResetAllCalls();
 }
 
-/* Tests_SRS_MULTITREE_99_078:[ If any argument is NULL, MultiTree_DeleteChild shall return MULTITREE_INVALID_ARG.] */
 TEST_FUNCTION(MultiTree_DeleteChild_With_A_NULL_childname_Fails)
 {
     ///arrange
@@ -2296,7 +2181,6 @@ TEST_FUNCTION(MultiTree_DeleteChild_With_A_NULL_childname_Fails)
     mocks.ResetAllCalls();
 }
 
-/* Tests_SRS_MULTITREE_99_079:[ If childName is not found, MultiTree_DeleteChild shall return MULTITREE_CHILD_NOT_FOUND.] */
 TEST_FUNCTION(MultiTree_DeleteChild_With_No_Match_Fails)
 {
     ///arrange
@@ -2320,7 +2204,6 @@ TEST_FUNCTION(MultiTree_DeleteChild_With_No_Match_Fails)
     mocks.ResetAllCalls();
 }
 
-/* Tests_SRS_MULTITREE_99_079:[ If childName is not found, MultiTree_DeleteChild shall return MULTITREE_CHILD_NOT_FOUND.] */
 TEST_FUNCTION(MultiTree_DeleteChild_With_No_Match_On_Empty_Tree_Fails)
 {
     ///arrange
@@ -2370,7 +2253,6 @@ void VerifyMultiTreeExpectedAfterDeleteChild(MULTITREE_HANDLE treeHandle, const 
     ASSERT_ARE_EQUAL(int, 0, strcmp(secondChildName, STRING_c_str(global_bufferTemp)));
 }
 
-/* Tests_SRS_MULTITREE_99_079:[ If childName is not found, MultiTree_DeleteChild shall return MULTITREE_CHILD_NOT_FOUND.] */
 TEST_FUNCTION(MultiTree_DeleteChild_With_Child_First_Node_Succeeds)
 {
     ///arrange
@@ -2395,7 +2277,6 @@ TEST_FUNCTION(MultiTree_DeleteChild_With_Child_First_Node_Succeeds)
     mocks.ResetAllCalls();
 }
 
-/* Tests_SRS_MULTITREE_99_079:[ If childName is not found, MultiTree_DeleteChild shall return MULTITREE_CHILD_NOT_FOUND.] */
 TEST_FUNCTION(MultiTree_DeleteChild_With_Child_Middle_Node_Succeeds)
 {
     ///arrange
@@ -2420,7 +2301,6 @@ TEST_FUNCTION(MultiTree_DeleteChild_With_Child_Middle_Node_Succeeds)
     mocks.ResetAllCalls();
 }
 
-/* Tests_SRS_MULTITREE_99_079:[ If childName is not found, MultiTree_DeleteChild shall return MULTITREE_CHILD_NOT_FOUND.] */
 TEST_FUNCTION(MultiTree_DeleteChild_With_Child_Last_Node_Succeeds)
 {
     ///arrange
@@ -2445,7 +2325,6 @@ TEST_FUNCTION(MultiTree_DeleteChild_With_Child_Last_Node_Succeeds)
     mocks.ResetAllCalls();
 }
 
-/* Tests_SRS_MULTITREE_99_079:[ If childName is not found, MultiTree_DeleteChild shall return MULTITREE_CHILD_NOT_FOUND.] */
 TEST_FUNCTION(MultiTree_DeleteChild_With_Only_Node_Succeeds)
 {
     ///arrange

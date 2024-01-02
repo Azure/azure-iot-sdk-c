@@ -17,7 +17,7 @@
 #include "azure_c_shared_utility/buffer_.h"
 #include "azure_c_shared_utility/strings_types.h"
 #include "azure_c_shared_utility/httpapiex.h"
-#include "iothub_client_core_ll.h"
+#include "azure_c_shared_utility/singlylinkedlist.h"
 #include "azure_c_shared_utility/shared_util_options.h"
 
 #ifdef __cplusplus
@@ -46,35 +46,47 @@ extern "C"
 
 MU_DEFINE_ENUM_WITHOUT_INVALID(BLOB_RESULT, BLOB_RESULT_VALUES)
 
-/**
-* @brief  Synchronously uploads a byte array to blob storage
-*
-* @param  SASURI            The URI to use to upload data
-* @param  getDataCallbackEx A callback to be invoked to acquire the file chunks to be uploaded, as well as to indicate the status of the upload of the previous block.
-* @param  context           Any data provided by the user to serve as context on getDataCallback.
-* @param  httpStatus        A pointer to an out argument receiving the HTTP status (available only when the return value is BLOB_OK)
-* @param  httpResponse      A BUFFER_HANDLE that receives the HTTP response from the server (available only when the return value is BLOB_OK)
-* @param  certificates      A null terminated string containing CA certificates to be used
-* @param    proxyOptions    A structure that contains optional web proxy information
-* @param  networkInterface    An optional null terminated string containing the network interface
-*
-* @return    A @c BLOB_RESULT. BLOB_OK means the blob has been uploaded successfully. Any other value indicates an error
-*/
-MOCKABLE_FUNCTION(, BLOB_RESULT, Blob_UploadMultipleBlocksFromSasUri, const char*, SASURI, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK_EX, getDataCallbackEx, void*, context, unsigned int*, httpStatus, BUFFER_HANDLE, httpResponse, const char*, certificates, HTTP_PROXY_OPTIONS*, proxyOptions, const char*, networkInterface)
+MOCKABLE_FUNCTION(, HTTPAPIEX_HANDLE, Blob_CreateHttpConnection, const char*, blobStorageHostname, const char*, certificates, const HTTP_PROXY_OPTIONS*, proxyOptions, const char*, networkInterface, const size_t, timeoutInMilliseconds);
+
+MOCKABLE_FUNCTION(, void, Blob_DestroyHttpConnection, HTTPAPIEX_HANDLE, httpApiExHandle);
+
+MOCKABLE_FUNCTION(, void, Blob_ClearBlockIdList, SINGLYLINKEDLIST_HANDLE, blockIdList);
 
 /**
-* @brief  Synchronously uploads a byte array as a new block to blob storage
+* @brief  Synchronously uploads a byte array as a new block to blob storage (put block operation)
 *
-* @param  requestContent      The data to upload
-* @param  blockId             The block id (from 00000 to 49999)
-* @param  xml                 The XML file containing the blockId list
+* @param  httpApiExHandle     The HTTP connection handle
 * @param  relativePath        The destination path within the storage
-* @param  httpApiExHandle     The connection handle
+* @param  blockID             The block id (from 00000 to 49999)
+* @param  blockData           The data to upload
+* @param  blockIDList         The list where to store the block IDs
 * @param  httpStatus          A pointer to an out argument receiving the HTTP status (available only when the return value is BLOB_OK)
 * @param  httpResponse        A BUFFER_HANDLE that receives the HTTP response from the server (available only when the return value is BLOB_OK)
 */
-//MOCKABLE_FUNCTION(, BLOB_RESULT, Blob_UploadNextBlock, BUFFER_HANDLE, requestContent, unsigned int, blockID, STRING_HANDLE, xml, const char*, relativePath, HTTPAPIEX_HANDLE, httpApiExHandle, unsigned int*, httpStatus, BUFFER_HANDLE, httpResponse)
-MOCKABLE_FUNCTION(, BLOB_RESULT, Blob_UploadBlock, HTTPAPIEX_HANDLE, httpApiExHandle, const char*, relativePath, BUFFER_HANDLE, requestContent, unsigned int, blockID, STRING_HANDLE, blockIDList, unsigned int*, httpStatus, BUFFER_HANDLE, httpResponse)
+MOCKABLE_FUNCTION(, BLOB_RESULT, Blob_PutBlock,
+        HTTPAPIEX_HANDLE, httpApiExHandle,
+        const char*, relativePath,
+        unsigned int, blockID,
+        BUFFER_HANDLE, blockData,
+        SINGLYLINKEDLIST_HANDLE, blockIDList,
+        unsigned int*, httpStatus,
+        BUFFER_HANDLE, httpResponse)
+
+/**
+* @brief  Synchronously sends a put block list request to Azure Storage
+*
+* @param  httpApiExHandle     The HTTP connection handle
+* @param  relativePath        The destination path within the storage
+* @param  blockIDList         The list containing the block IDs to report
+* @param  httpStatus          A pointer to an out argument receiving the HTTP status (available only when the return value is BLOB_OK)
+* @param  httpResponse        A BUFFER_HANDLE that receives the HTTP response from the server (available only when the return value is BLOB_OK)
+*/
+MOCKABLE_FUNCTION(, BLOB_RESULT, Blob_PutBlockList,
+    HTTPAPIEX_HANDLE, httpApiExHandle,
+    const char*, relativePath,
+    SINGLYLINKEDLIST_HANDLE, blockIDList,
+    unsigned int*, httpStatus,
+    BUFFER_HANDLE, httpResponse)
 #ifdef __cplusplus
 }
 #endif

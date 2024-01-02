@@ -5,6 +5,10 @@ cmake_minimum_required (VERSION 3.5)
 
 usePermissiveRulesForSdkSamplesAndTests()
 
+if(LINUX OR MACOSX)
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations")
+endif()
+
 #this is CMakeLists for serializer e2e folder
 if(${run_unittests})
 add_subdirectory(agentmacros_ut)
@@ -31,6 +35,6 @@ add_subdirectory(serializer_dt_int)
 add_subdirectory(serializer_dt_ut)
 endif()
 
-if(${use_amqp} AND ${use_http} AND (${run_e2e_tests} OR ${nuget_e2e_tests}))
+if(${use_amqp} AND ${use_http} AND ${run_e2e_tests})
     add_subdirectory(serializer_e2e)
 endif()

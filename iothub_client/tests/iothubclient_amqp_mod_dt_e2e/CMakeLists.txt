@@ -20,15 +20,6 @@ set(${theseTestsName}_c_files
     ../common_dt_e2e/iothubclient_common_dt_e2e.c
 )
 
-set(${theseTestsName}_nuget_test_files
-    ${theseTestsName}.c
-    ../common_dt_e2e/iothubclient_common_dt_e2e.c
-)
-
-set(${theseTestsName}_nuget_c_files
-    ../../../certs/certs.c
-)
-
 set(${theseTestsName}_c_files
     ../../../certs/certs.c
     ../../../deps/parson/parson.c
@@ -86,14 +77,6 @@ if(WIN32)
             rpcrt4
         )
         linkUAMQP(${theseTestsName}_exe)
-    endif()
-
-    if(TARGET ${theseTestsName}_nuget_exe)
-           target_link_libraries(${theseTestsName}_nuget_exe
-                   iothub_test
-                   iothub_service_client
-                   rpcrt4
-           )
     endif()
 else()
     if(UNIX) #LINUX OR APPLE

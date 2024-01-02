@@ -33,17 +33,14 @@ static int DecodeValueFromNode(SCHEMA_HANDLE schemaHandle, AGENT_DATA_TYPE* agen
     const char* argStringValue;
     AGENT_DATA_TYPE_TYPE primitiveType;
 
-    /* Codes_SRS_COMMAND_DECODER_99_029:[ If the argument type is complex then a complex type value shall be built from the child nodes.] */
     if ((primitiveType = CodeFirst_GetPrimitiveType(edmTypeName)) == EDM_NO_TYPE)
     {
         SCHEMA_STRUCT_TYPE_HANDLE structTypeHandle;
         size_t propertyCount;
 
-        /* Codes_SRS_COMMAND_DECODER_99_033:[ In order to determine which are the members of a complex types, Schema APIs for structure types shall be used.] */
         if (((structTypeHandle = Schema_GetStructTypeByName(schemaHandle, edmTypeName)) == NULL) ||
             (Schema_GetStructTypePropertyCount(structTypeHandle, &propertyCount) != SCHEMA_OK))
         {
-            /* Codes_SRS_COMMAND_DECODER_99_010:[ If any Schema API fails then the command shall not be dispatched and it shall return EXECUTE_COMMAND_ERROR.]*/
             result = MU_FAILURE;
             LogError("Getting Struct information failed.");
         }
@@ -51,7 +48,6 @@ static int DecodeValueFromNode(SCHEMA_HANDLE schemaHandle, AGENT_DATA_TYPE* agen
         {
             if (propertyCount == 0)
             {
-                /* Codes_SRS_COMMAND_DECODER_99_034:[ If Schema APIs indicate that a complex type has 0 members then the command shall not be dispatched and it shall return EXECUTE_COMMAND_ERROR.] */
                 result = MU_FAILURE;
                 LogError("Struct type with 0 members is not allowed");
             }
@@ -60,7 +56,6 @@ static int DecodeValueFromNode(SCHEMA_HANDLE schemaHandle, AGENT_DATA_TYPE* agen
                 AGENT_DATA_TYPE* memberValues = (AGENT_DATA_TYPE*)calloc(1, (sizeof(AGENT_DATA_TYPE)* propertyCount));
                 if (memberValues == NULL)
                 {
-                    /* Codes_SRS_COMMAND_DECODER_99_021:[ If the parsing of the command fails for any other reason the command shall not be dispatched.] */
                     result = MU_FAILURE;
                     LogError("Failed allocating member values for command argument");
                 }
@@ -69,7 +64,6 @@ static int DecodeValueFromNode(SCHEMA_HANDLE schemaHandle, AGENT_DATA_TYPE* agen
                     const char** memberNames = (const char**)malloc(sizeof(const char*)* propertyCount);
                     if (memberNames == NULL)
                     {
-                        /* Codes_SRS_COMMAND_DECODER_99_021:[ If the parsing of the command fails for any other reason the command shall not be dispatched.] */
                         result = MU_FAILURE;
                         LogError("Failed allocating member names for command argument.");
                     }
@@ -87,7 +81,6 @@ static int DecodeValueFromNode(SCHEMA_HANDLE schemaHandle, AGENT_DATA_TYPE* agen
 
                             if ((propertyHandle = Schema_GetStructTypePropertyByIndex(structTypeHandle, j)) == NULL)
                             {
-                                /* Codes_SRS_COMMAND_DECODER_99_010:[ If any Schema API fails then the command shall not be dispatched and it shall return EXECUTE_COMMAND_ERROR.]*/
                                 result = MU_FAILURE;
                                 LogError("Getting struct member failed.");
                                 break;
@@ -95,7 +88,6 @@ static int DecodeValueFromNode(SCHEMA_HANDLE schemaHandle, AGENT_DATA_TYPE* agen
                             else if (((propertyName = Schema_GetPropertyName(propertyHandle)) == NULL) ||
                                      ((propertyType = Schema_GetPropertyType(propertyHandle)) == NULL))
                             {
-                                /* Codes_SRS_COMMAND_DECODER_99_010:[ If any Schema API fails then the command shall not be dispatched and it shall return EXECUTE_COMMAND_ERROR.]*/
                                 result = MU_FAILURE;
                                 LogError("Getting the struct member information failed.");
                                 break;
@@ -104,15 +96,12 @@ static int DecodeValueFromNode(SCHEMA_HANDLE schemaHandle, AGENT_DATA_TYPE* agen
                             {
                                 memberNames[j] = propertyName;
 
-                                /* Codes_SRS_COMMAND_DECODER_01_014: [CommandDecoder shall use the MultiTree APIs to extract a specific element from the command JSON.] */
                                 if (MultiTree_GetChildByName(node, memberNames[j], &memberNode) != MULTITREE_OK)
                                 {
-                                    /* Codes_SRS_COMMAND_DECODER_99_028:[ If decoding the argument fails then the command shall not be dispatched and it shall return EXECUTE_COMMAND_ERROR.] */
                                     result = MU_FAILURE;
                                     LogError("Getting child %s failed", propertyName);
                                     break;
                                 }
-                                /* Codes_SRS_COMMAND_DECODER_99_032:[ Nesting shall be supported for complex type.] */
                                 else if ((result = DecodeValueFromNode(schemaHandle, &memberValues[j], memberNode, propertyType)) != 0)
                                 {
                                     break;
@@ -122,10 +111,8 @@ static int DecodeValueFromNode(SCHEMA_HANDLE schemaHandle, AGENT_DATA_TYPE* agen
 
                         if (j == propertyCount)
                         {
-                            /* Codes_SRS_COMMAND_DECODER_99_031:[ The complex type value that aggregates the children shall be built by using the Create_AGENT_DATA_TYPE_from_Members.] */
                             if (Create_AGENT_DATA_TYPE_from_Members(agentDataType, edmTypeName, propertyCount, (const char* const*)memberNames, memberValues) != AGENT_DATA_TYPES_OK)
                             {
-                                /* Codes_SRS_COMMAND_DECODER_99_028:[ If decoding the argument fails then the command shall not be dispatched and it shall return EXECUTE_COMMAND_ERROR.] */
                                 result = MU_FAILURE;
                                 LogError("Creating the agent data type from members failed.");
                             }
@@ -150,17 +137,13 @@ static int DecodeValueFromNode(SCHEMA_HANDLE schemaHandle, AGENT_DATA_TYPE* agen
     }
     else
     {
-        /* Codes_SRS_COMMAND_DECODER_01_014: [CommandDecoder shall use the MultiTree APIs to extract a specific element from the command JSON.] */
         if (MultiTree_GetValue(node, (const void **)&argStringValue) != MULTITREE_OK)
         {
-            /* Codes_SRS_COMMAND_DECODER_99_012:[ If any argument is missing in the command text then the command shall not be dispatched and it shall return EXECUTE_COMMAND_ERROR.] */
             result = MU_FAILURE;
             LogError("Getting the string from the multitree failed.");
         }
-        /* Codes_SRS_COMMAND_DECODER_99_027:[ The value for an argument of primitive type shall be decoded by using the CreateAgentDataType_From_String API.] */
         else if (CreateAgentDataType_From_String(argStringValue, primitiveType, agentDataType) != AGENT_DATA_TYPES_OK)
         {
-            /* Codes_SRS_COMMAND_DECODER_99_028:[ If decoding the argument fails then the command shall not be dispatched and it shall return EXECUTE_COMMAND_ERROR.] */
             result = MU_FAILURE;
             LogError("Failed parsing node %s.", argStringValue);
         }
@@ -177,44 +160,36 @@ static EXECUTE_COMMAND_RESULT DecodeAndExecuteModelAction(COMMAND_DECODER_HANDLE
 
     if (strLength <= 1)
     {
-        /* Codes_SRS_COMMAND_DECODER_99_021:[ If the parsing of the command fails for any other reason the command shall not be dispatched.] */
         LogError("Invalid action name");
         result = EXECUTE_COMMAND_ERROR;
     }
     else if (strLength >= 128)
     {
-        /* Codes_SRS_COMMAND_DECODER_99_021:[ If the parsing of the command fails for any other reason the command shall not be dispatched.] */
         LogError("Invalid action name length");
         result = EXECUTE_COMMAND_ERROR;
     }
     else
     {
-        /* Codes_SRS_COMMAND_DECODER_99_006:[ The action name shall be decoded from the element "Name" of the command JSON.] */
         SCHEMA_ACTION_HANDLE modelActionHandle;
         size_t argCount;
         MULTITREE_HANDLE parametersTreeNode;
 
         if (memcpy(tempStr, actionName, strLength-1) == NULL)
         {
-            /* Codes_SRS_COMMAND_DECODER_99_021:[ If the parsing of the command fails for any other reason the command shall not be dispatched.] */
             LogError("Invalid action name.");
             result = EXECUTE_COMMAND_ERROR;
         }
-        /* Codes_SRS_COMMAND_DECODER_01_014: [CommandDecoder shall use the MultiTree APIs to extract a specific element from the command JSON.] */
         else if (MultiTree_GetChildByName(commandNode, "Parameters", &parametersTreeNode) != MULTITREE_OK)
         {
-            /* Codes_SRS_COMMAND_DECODER_01_015: [If any MultiTree API call fails then the processing shall stop and the command shall not be dispatched and it shall return EXECUTE_COMMAND_ERROR.] */
             LogError("Error getting Parameters node.");
             result = EXECUTE_COMMAND_ERROR;
         }
         else
         {
             tempStr[strLength-1] = 0;
-            /* Codes_SRS_COMMAND_DECODER_99_009:[ CommandDecoder shall call Schema_GetModelActionByName to obtain the information about a specific action.] */
             if (((modelActionHandle = Schema_GetModelActionByName(modelHandle, tempStr)) == NULL) ||
                 (Schema_GetModelActionArgumentCount(modelActionHandle, &argCount) != SCHEMA_OK))
             {
-                /* Codes_SRS_COMMAND_DECODER_99_010:[ If any Schema API fails then the command shall not be dispatched and it shall return EXECUTE_COMMAND_ERROR.]*/
                 LogError("Failed reading action %s from the schema", tempStr);
                 result = EXECUTE_COMMAND_ERROR;
             }
@@ -230,7 +205,6 @@ static EXECUTE_COMMAND_RESULT DecodeAndExecuteModelAction(COMMAND_DECODER_HANDLE
                 if ((argCount > 0) &&
                     (arguments == NULL))
                 {
-                    /* Codes_SRS_COMMAND_DECODER_99_021:[ If the parsing of the command fails for any other reason the command shall not be dispatched.] */
                     LogError("Failed allocating arguments array");
                     result = EXECUTE_COMMAND_ERROR;
                 }
@@ -240,7 +214,6 @@ static EXECUTE_COMMAND_RESULT DecodeAndExecuteModelAction(COMMAND_DECODER_HANDLE
                     size_t j;
                     result = EXECUTE_COMMAND_ERROR;
 
-                    /* Codes_SRS_COMMAND_DECODER_99_011:[ CommandDecoder shall attempt to extract from the command text the value for each action argument.] */
                     for (i = 0; i < argCount; i++)
                     {
                         SCHEMA_ACTION_ARGUMENT_HANDLE actionArgumentHandle;
@@ -256,11 +229,8 @@ static EXECUTE_COMMAND_RESULT DecodeAndExecuteModelAction(COMMAND_DECODER_HANDLE
                             result = EXECUTE_COMMAND_ERROR;
                             break;
                         }
-                        /* Codes_SRS_COMMAND_DECODER_01_014: [CommandDecoder shall use the MultiTree APIs to extract a specific element from the command JSON.] */
-                        /* Codes_SRS_COMMAND_DECODER_01_008: [Each argument shall be looked up as a field, member of the "Parameters" node.]  */
                         else if (MultiTree_GetChildByName(parametersTreeNode, argName, &argumentNode) != MULTITREE_OK)
                         {
-                            /* Codes_SRS_COMMAND_DECODER_99_012:[ If any argument is missing in the command text then the command shall not be dispatched and it shall return EXECUTE_COMMAND_ERROR.] */
                             LogError("Missing argument %s", argName);
                             result = EXECUTE_COMMAND_ERROR;
                             break;
@@ -274,7 +244,6 @@ static EXECUTE_COMMAND_RESULT DecodeAndExecuteModelAction(COMMAND_DECODER_HANDLE
 
                     if (i == argCount)
                     {
-                        /* Codes_SRS_COMMAND_DECODER_99_005:[ If an Invoke Action is decoded successfully then the callback actionCallback shall be called, passing to it the callback action context, decoded name and arguments.] */
                         result = commandDecoderInstance->ActionCallback(commandDecoderInstance->ActionCallbackContext, relativeActionPath, tempStr, argCount, arguments);
                     }
 
@@ -301,7 +270,6 @@ static METHODRETURN_HANDLE DecodeAndExecuteModelMethod(COMMAND_DECODER_HANDLE_DA
 
     if (strLength == 0)
     {
-        /*Codes_SRS_COMMAND_DECODER_02_023: [ If any of the previous operations fail, then CommandDecoder_ExecuteMethod shall return NULL. ]*/
         LogError("Invalid method name");
         result = NULL;
     }
@@ -314,17 +282,14 @@ static METHODRETURN_HANDLE DecodeAndExecuteModelMethod(COMMAND_DECODER_HANDLE_DA
 #pragma warning(suppress: 6324) /* We intentionally use here strncpy */
 #endif
 
-        /*Codes_SRS_COMMAND_DECODER_02_020: [ CommandDecoder_ExecuteMethod shall verify that the model has a method called methodName. ]*/
         if (((modelMethodHandle = Schema_GetModelMethodByName(modelHandle, methodName)) == NULL) ||
             (Schema_GetModelMethodArgumentCount(modelMethodHandle, &argCount) != SCHEMA_OK))
         {
-            /*Codes_SRS_COMMAND_DECODER_02_023: [ If any of the previous operations fail, then CommandDecoder_ExecuteMethod shall return NULL. ]*/
             LogError("Failed reading method %s from the schema", methodName);
             result = NULL;
         }
         else
         {
-            /*Codes_SRS_COMMAND_DECODER_02_021: [ For every argument of methodName, CommandDecoder_ExecuteMethod shall build an AGENT_DATA_TYPE from the node with the same name from the MULTITREE_HANDLE. ]*/
 
             if (argCount == 0)
             {
@@ -357,21 +322,18 @@ static METHODRETURN_HANDLE DecodeAndExecuteModelMethod(COMMAND_DECODER_HANDLE_DA
                             ((argName = Schema_GetMethodArgumentName(methodArgumentHandle)) == NULL) ||
                             ((argType = Schema_GetMethodArgumentType(methodArgumentHandle)) == NULL))
                         {
-                            /*Codes_SRS_COMMAND_DECODER_02_023: [ If any of the previous operations fail, then CommandDecoder_ExecuteMethod shall return NULL. ]*/
                             LogError("Failed getting the argument information from the schema");
                             result = NULL;
                             break;
                         }
                         else if (MultiTree_GetChildByName(methodTree, argName, &argumentNode) != MULTITREE_OK)
                         {
-                            /*Codes_SRS_COMMAND_DECODER_02_023: [ If any of the previous operations fail, then CommandDecoder_ExecuteMethod shall return NULL. ]*/
                             LogError("Missing argument %s", argName);
                             result = NULL;
                             break;
                         }
                         else if (DecodeValueFromNode(schemaHandle, &arguments[i], argumentNode, argType) != 0)
                         {
-                            /*Codes_SRS_COMMAND_DECODER_02_023: [ If any of the previous operations fail, then CommandDecoder_ExecuteMethod shall return NULL. ]*/
                             LogError("failure in DecodeValueFromNode");
                             result = NULL;
                             break;
@@ -380,8 +342,6 @@ static METHODRETURN_HANDLE DecodeAndExecuteModelMethod(COMMAND_DECODER_HANDLE_DA
 
                     if (i == argCount)
                     {
-                        /*Codes_SRS_COMMAND_DECODER_02_022: [ CommandDecoder_ExecuteMethod shall call methodCallback passing the context, the methodName, number of arguments and the AGENT_DATA_TYPE. ]*/
-                        /*Codes_SRS_COMMAND_DECODER_02_024: [ Otherwise, CommandDecoder_ExecuteMethod shall return what methodCallback returns. ]*/
                         result = commandDecoderInstance->methodCallback(commandDecoderInstance->methodCallbackContext, relativeMethodPath, methodName, argCount, arguments);
                     }
 
@@ -408,7 +368,6 @@ static EXECUTE_COMMAND_RESULT ScanActionPathAndExecuteAction(COMMAND_DECODER_HAN
     const char* actionName = actionPath;
     SCHEMA_MODEL_TYPE_HANDLE modelHandle = commandDecoderInstance->ModelHandle;
 
-    /* Codes_SRS_COMMAND_DECODER_99_035:[ CommandDecoder_ExecuteCommand shall support paths to actions that are in child models (i.e. ChildModel/SomeAction.] */
     do
     {
         /* find the slash */
@@ -417,7 +376,6 @@ static EXECUTE_COMMAND_RESULT ScanActionPathAndExecuteAction(COMMAND_DECODER_HAN
         {
             size_t relativeActionPathLength;
 
-            /* Codes_SRS_COMMAND_DECODER_99_037:[ The relative path passed to the actionCallback shall be in the format "childModel1/childModel2/.../childModelN".] */
             if (actionName == actionPath)
             {
                 relativeActionPathLength = 0;
@@ -430,7 +388,6 @@ static EXECUTE_COMMAND_RESULT ScanActionPathAndExecuteAction(COMMAND_DECODER_HAN
             relativeActionPath = (char*)malloc(relativeActionPathLength + 1);
             if (relativeActionPath == NULL)
             {
-                /* Codes_SRS_COMMAND_DECODER_99_021:[ If the parsing of the command fails for any other reason the command shall not be dispatched.] */
                 LogError("Failed allocating relative action path");
                 result = EXECUTE_COMMAND_ERROR;
             }
@@ -454,7 +411,6 @@ static EXECUTE_COMMAND_RESULT ScanActionPathAndExecuteAction(COMMAND_DECODER_HAN
             char* childModelName = (char*)malloc(modelLength + 1);
             if (childModelName == NULL)
             {
-                /* Codes_SRS_COMMAND_DECODER_99_021:[ If the parsing of the command fails for any other reason the command shall not be dispatched.] */
                 LogError("Failed allocating child model name");
                 result = EXECUTE_COMMAND_ERROR;
                 break;
@@ -468,7 +424,6 @@ static EXECUTE_COMMAND_RESULT ScanActionPathAndExecuteAction(COMMAND_DECODER_HAN
                 modelHandle = Schema_GetModelModelByName(modelHandle, childModelName);
                 if (modelHandle == NULL)
                 {
-                    /* Codes_SRS_COMMAND_DECODER_99_036:[ If a child model cannot be found by using Schema APIs then the command shall not be dispatched and it shall return EXECUTE_COMMAND_ERROR.] */
                     LogError("Getting the model %s failed", childModelName);
                     free(childModelName);
                     result = EXECUTE_COMMAND_ERROR;
@@ -493,8 +448,6 @@ static METHODRETURN_HANDLE ScanMethodPathAndExecuteMethod(COMMAND_DECODER_HANDLE
     const char* methodName = fullMethodName;
     SCHEMA_MODEL_TYPE_HANDLE modelHandle = commandDecoderInstance->ModelHandle;
 
-    /*Codes_SRS_COMMAND_DECODER_02_018: [ CommandDecoder_ExecuteMethod shall validate that consecutive segments of the fullMethodName exist in the model. ]*/
-    /*Codes_SRS_COMMAND_DECODER_02_019: [ CommandDecoder_ExecuteMethod shall locate the final model to which the methodName applies. ]*/
     do
     {
         /* find the slash */
@@ -515,7 +468,6 @@ static METHODRETURN_HANDLE ScanMethodPathAndExecuteMethod(COMMAND_DECODER_HANDLE
             relativeMethodPath = (char*)malloc(relativeMethodPathLength + 1);
             if (relativeMethodPath == NULL)
             {
-                /*Codes_SRS_COMMAND_DECODER_02_023: [ If any of the previous operations fail, then CommandDecoder_ExecuteMethod shall return NULL. ]*/
                 LogError("Failed allocating relative method path");
                 result = NULL;
             }
@@ -539,7 +491,6 @@ static METHODRETURN_HANDLE ScanMethodPathAndExecuteMethod(COMMAND_DECODER_HANDLE
             char* childModelName = (char*)malloc(modelLength + 1);
             if (childModelName == NULL)
             {
-                /*Codes_SRS_COMMAND_DECODER_02_023: [ If any of the previous operations fail, then CommandDecoder_ExecuteMethod shall return NULL. ]*/
                 LogError("Failed allocating child model name");
                 result = NULL;
                 break;
@@ -553,7 +504,6 @@ static METHODRETURN_HANDLE ScanMethodPathAndExecuteMethod(COMMAND_DECODER_HANDLE
                 modelHandle = Schema_GetModelModelByName(modelHandle, childModelName);
                 if (modelHandle == NULL)
                 {
-                    /*Codes_SRS_COMMAND_DECODER_02_023: [ If any of the previous operations fail, then CommandDecoder_ExecuteMethod shall return NULL. ]*/
                     LogError("Getting the model %s failed", childModelName);
                     free(childModelName);
                     result = NULL;
@@ -576,10 +526,8 @@ static EXECUTE_COMMAND_RESULT DecodeCommand(COMMAND_DECODER_HANDLE_DATA* command
     EXECUTE_COMMAND_RESULT result;
     SCHEMA_HANDLE schemaHandle;
 
-    /* Codes_SRS_COMMAND_DECODER_99_022:[ CommandDecoder shall use the Schema APIs to obtain the information about the entity set name and namespace] */
     if ((schemaHandle = Schema_GetSchemaForModelType(commandDecoderInstance->ModelHandle)) == NULL)
     {
-        /* Codes_SRS_COMMAND_DECODER_99_010:[ If any Schema API fails then the command shall not be dispatched and it shall return EXECUTE_COMMAND_ERROR.]*/
         LogError("Getting schema information failed");
         result = EXECUTE_COMMAND_ERROR;
     }
@@ -588,18 +536,14 @@ static EXECUTE_COMMAND_RESULT DecodeCommand(COMMAND_DECODER_HANDLE_DATA* command
         const char* actionName;
         MULTITREE_HANDLE nameTreeNode;
 
-        /* Codes_SRS_COMMAND_DECODER_01_014: [CommandDecoder shall use the MultiTree APIs to extract a specific element from the command JSON.] */
-        /* Codes_SRS_COMMAND_DECODER_99_006:[ The action name shall be decoded from the element "name" of the command JSON.] */
         if ((MultiTree_GetChildByName(commandNode, "Name", &nameTreeNode) != MULTITREE_OK) ||
             (MultiTree_GetValue(nameTreeNode, (const void **)&actionName) != MULTITREE_OK))
         {
-            /* Codes_SRS_COMMAND_DECODER_01_015: [If any MultiTree API call fails then the processing shall stop and the command shall not be dispatched and it shall return EXECUTE_COMMAND_ERROR.] */
             LogError("Getting action name failed.");
             result = EXECUTE_COMMAND_ERROR;
         }
         else if (strlen(actionName) < 2)
         {
-            /* Codes_SRS_COMMAND_DECODER_99_021:[ If the parsing of the command fails for any other reason the command shall not be dispatched.] */
             LogError("Invalid action name.");
             result = EXECUTE_COMMAND_ERROR;
         }
@@ -617,7 +561,6 @@ static METHODRETURN_HANDLE DecodeMethod(COMMAND_DECODER_HANDLE_DATA* commandDeco
     METHODRETURN_HANDLE result;
     SCHEMA_HANDLE schemaHandle;
 
-    /*Codes_SRS_COMMAND_DECODER_02_017: [ CommandDecoder_ExecuteMethod shall get the SCHEMA_HANDLE associated with the modelHandle passed at CommandDecoder_Create. ]*/
     if ((schemaHandle = Schema_GetSchemaForModelType(commandDecoderInstance->ModelHandle)) == NULL)
     {
         LogError("Getting schema information failed");
@@ -631,12 +574,10 @@ static METHODRETURN_HANDLE DecodeMethod(COMMAND_DECODER_HANDLE_DATA* commandDeco
     return result;
 }
 
-/*Codes_SRS_COMMAND_DECODER_01_009: [Whenever CommandDecoder_ExecuteCommand is the command shall be decoded and further dispatched to the actionCallback passed in CommandDecoder_Create.]*/
 EXECUTE_COMMAND_RESULT CommandDecoder_ExecuteCommand(COMMAND_DECODER_HANDLE handle, const char* command)
 {
     EXECUTE_COMMAND_RESULT result;
     COMMAND_DECODER_HANDLE_DATA* commandDecoderInstance = (COMMAND_DECODER_HANDLE_DATA*)handle;
-    /*Codes_SRS_COMMAND_DECODER_01_010: [If either the buffer or the receiveCallbackContext argument is NULL, the processing shall stop and the command shall not be dispatched and it shall return EXECUTE_COMMAND_ERROR.]*/
     if (
         (command == NULL) ||
         (commandDecoderInstance == NULL)
@@ -650,13 +591,11 @@ EXECUTE_COMMAND_RESULT CommandDecoder_ExecuteCommand(COMMAND_DECODER_HANDLE hand
         size_t size = strlen(command);
         char* commandJSON;
 
-        /* Codes_SRS_COMMAND_DECODER_01_011: [If the size of the command is 0 then the processing shall stop and the command shall not be dispatched and it shall return EXECUTE_COMMAND_ERROR.]*/
         if (size == 0)
         {
             LogError("Failed because command size is zero");
             result = EXECUTE_COMMAND_ERROR;
         }
-        /*Codes_SRS_COMMAND_DECODER_01_013: [If parsing the JSON to a multi tree fails, the processing shall stop and the command shall not be dispatched and it shall return EXECUTE_COMMAND_ERROR.]*/
         else if ((commandJSON = (char*)malloc(size + 1)) == NULL)
         {
             LogError("Failed to allocate temporary storage for the commands JSON");
@@ -669,10 +608,8 @@ EXECUTE_COMMAND_RESULT CommandDecoder_ExecuteCommand(COMMAND_DECODER_HANDLE hand
             (void)memcpy(commandJSON, command, size);
             commandJSON[size] = '\0';
 
-            /* Codes_SRS_COMMAND_DECODER_01_012: [CommandDecoder shall decode the command JSON contained in buffer to a multi-tree by using JSONDecoder_JSON_To_MultiTree.] */
             if (JSONDecoder_JSON_To_MultiTree(commandJSON, &commandsTree) != JSON_DECODER_OK)
             {
-                /* Codes_SRS_COMMAND_DECODER_01_013: [If parsing the JSON to a multi tree fails, the processing shall stop and the command shall not be dispatched and it shall return EXECUTE_COMMAND_ERROR.] */
                 LogError("Decoding JSON to a multi tree failed");
                 result = EXECUTE_COMMAND_ERROR;
             }
@@ -680,7 +617,6 @@ EXECUTE_COMMAND_RESULT CommandDecoder_ExecuteCommand(COMMAND_DECODER_HANDLE hand
             {
                 result = DecodeCommand(commandDecoderInstance, commandsTree);
 
-                /* Codes_SRS_COMMAND_DECODER_01_016: [CommandDecoder shall ensure that the multi-tree resulting from JSONDecoder_JSON_To_MultiTree is freed after the commands are executed.] */
                 MultiTree_Destroy(commandsTree);
             }
 
@@ -693,8 +629,6 @@ EXECUTE_COMMAND_RESULT CommandDecoder_ExecuteCommand(COMMAND_DECODER_HANDLE hand
 METHODRETURN_HANDLE CommandDecoder_ExecuteMethod(COMMAND_DECODER_HANDLE handle, const char* fullMethodName, const char* methodPayload)
 {
     METHODRETURN_HANDLE result;
-    /*Codes_SRS_COMMAND_DECODER_02_014: [ If handle is NULL then CommandDecoder_ExecuteMethod shall fail and return NULL. ]*/
-    /*Codes_SRS_COMMAND_DECODER_02_015: [ If fulMethodName is NULL then CommandDecoder_ExecuteMethod shall fail and return NULL. ]*/
     if (
         (handle == NULL) ||
         (fullMethodName == NULL) /*methodPayload can be NULL*/
@@ -706,7 +640,6 @@ METHODRETURN_HANDLE CommandDecoder_ExecuteMethod(COMMAND_DECODER_HANDLE handle, 
     else
     {
         COMMAND_DECODER_HANDLE_DATA* commandDecoderInstance = (COMMAND_DECODER_HANDLE_DATA*)handle;
-        /*Codes_SRS_COMMAND_DECODER_02_025: [ If methodCallback is NULL then CommandDecoder_ExecuteMethod shall fail and return NULL. ]*/
         if (commandDecoderInstance->methodCallback == NULL)
         {
             LogError("unable to execute a method when the methodCallback passed in CommandDecoder_Create is NULL");
@@ -714,7 +647,6 @@ METHODRETURN_HANDLE CommandDecoder_ExecuteMethod(COMMAND_DECODER_HANDLE handle, 
         }
         else
         {
-            /*Codes_SRS_COMMAND_DECODER_02_016: [ If methodPayload is not NULL then CommandDecoder_ExecuteMethod shall build a MULTITREE_HANDLE out of methodPayload. ]*/
             if (methodPayload == NULL)
             {
                 result = DecodeMethod(commandDecoderInstance, fullMethodName, NULL);
@@ -753,8 +685,6 @@ METHODRETURN_HANDLE CommandDecoder_ExecuteMethod(COMMAND_DECODER_HANDLE handle, 
 COMMAND_DECODER_HANDLE CommandDecoder_Create(SCHEMA_MODEL_TYPE_HANDLE modelHandle, ACTION_CALLBACK_FUNC actionCallback, void* actionCallbackContext, METHOD_CALLBACK_FUNC methodCallback, void* methodCallbackContext)
 {
     COMMAND_DECODER_HANDLE_DATA* result;
-    /* Codes_SRS_COMMAND_DECODER_99_019:[ For all exposed APIs argument validity checks shall precede other checks.] */
-    /* Codes_SRS_COMMAND_DECODER_01_003: [ If modelHandle is NULL, CommandDecoder_Create shall return NULL. ]*/
     if (modelHandle == NULL)
     {
         LogError("Invalid arguments: SCHEMA_MODEL_TYPE_HANDLE modelHandle=%p, ACTION_CALLBACK_FUNC actionCallback=%p, void* actionCallbackContext=%p, METHOD_CALLBACK_FUNC methodCallback=%p, void* methodCallbackContext=%p",
@@ -763,11 +693,9 @@ COMMAND_DECODER_HANDLE CommandDecoder_Create(SCHEMA_MODEL_TYPE_HANDLE modelHandl
     }
     else
     {
-        /* Codes_SRS_COMMAND_DECODER_01_001: [CommandDecoder_Create shall create a new instance of a CommandDecoder.] */
         result = malloc(sizeof(COMMAND_DECODER_HANDLE_DATA));
         if (result == NULL)
         {
-            /* Codes_SRS_COMMAND_DECODER_01_004: [If any error is encountered during CommandDecoder_Create CommandDecoder_Create shall return NULL.] */
             /*return as is*/
         }
         else
@@ -785,12 +713,10 @@ COMMAND_DECODER_HANDLE CommandDecoder_Create(SCHEMA_MODEL_TYPE_HANDLE modelHandl
 
 void CommandDecoder_Destroy(COMMAND_DECODER_HANDLE commandDecoderHandle)
 {
-    /* Codes_SRS_COMMAND_DECODER_01_007: [If CommandDecoder_Destroy is called with a NULL handle, CommandDecoder_Destroy shall do nothing.] */
     if (commandDecoderHandle != NULL)
     {
         COMMAND_DECODER_HANDLE_DATA* commandDecoderInstance = (COMMAND_DECODER_HANDLE_DATA*)commandDecoderHandle;
 
-        /* Codes_SRS_COMMAND_DECODER_01_005: [CommandDecoder_Destroy shall free all resources associated with the commandDecoderHandle instance.] */
         free(commandDecoderInstance);
     }
 }
@@ -856,7 +782,6 @@ static bool validateModel_vs_Multitree(void* startAddress, SCHEMA_MODEL_TYPE_HAN
                         }
                         case (SCHEMA_DESIRED_PROPERTY):
                         {
-                            /*Codes_SRS_COMMAND_DECODER_02_007: [ If the child name corresponds to a desired property then an AGENT_DATA_TYPE shall be constructed from the MULTITREE node. ]*/
                             SCHEMA_DESIRED_PROPERTY_HANDLE desiredPropertyHandle = elementType.elementHandle.desiredPropertyHandle;
 
                             const char* desiredPropertyType = Schema_GetModelDesiredPropertyType(desiredPropertyHandle);
@@ -868,7 +793,6 @@ static bool validateModel_vs_Multitree(void* startAddress, SCHEMA_MODEL_TYPE_HAN
                             }
                             else
                             {
-                                /*Codes_SRS_COMMAND_DECODER_02_008: [ The desired property shall be constructed in memory by calling pfDesiredPropertyFromAGENT_DATA_TYPE. ]*/
                                 pfDesiredPropertyFromAGENT_DATA_TYPE leFunction = Schema_GetModelDesiredProperty_pfDesiredPropertyFromAGENT_DATA_TYPE(desiredPropertyHandle);
                                 if (leFunction(&output, (char*)startAddress + offset + Schema_GetModelDesiredProperty_offset(desiredPropertyHandle)) != 0)
                                 {
@@ -876,7 +800,6 @@ static bool validateModel_vs_Multitree(void* startAddress, SCHEMA_MODEL_TYPE_HAN
                                 }
                                 else
                                 {
-                                    /*Codes_SRS_COMMAND_DECODER_02_013: [ If the desired property has a non-NULL pfOnDesiredProperty then it shall be called. ]*/
                                     pfOnDesiredProperty onDesiredProperty = Schema_GetModelDesiredProperty_pfOnDesiredProperty(desiredPropertyHandle);
                                     if (onDesiredProperty != NULL)
                                     {
@@ -893,7 +816,6 @@ static bool validateModel_vs_Multitree(void* startAddress, SCHEMA_MODEL_TYPE_HAN
                         {
                             SCHEMA_MODEL_TYPE_HANDLE modelModel = elementType.elementHandle.modelHandle;
 
-                            /*Codes_SRS_COMMAND_DECODER_02_009: [ If the child name corresponds to a model in model then the function shall call itself recursively. ]*/
                             if (!validateModel_vs_Multitree(startAddress, modelModel, child, offset + Schema_GetModelModelByName_Offset(modelHandle, childName_str)))
                             {
                                 LogError("failure in validateModel_vs_Multitree");
@@ -902,7 +824,6 @@ static bool validateModel_vs_Multitree(void* startAddress, SCHEMA_MODEL_TYPE_HAN
                             else
                             {
                                 /*if the model in model so happened to be a WITH_DESIRED_PROPERTY... (only those has non_NULL pfOnDesiredProperty) */
-                                /*Codes_SRS_COMMAND_DECODER_02_012: [ If the child model in model has a non-NULL pfOnDesiredProperty then pfOnDesiredProperty shall be called. ]*/
                                 pfOnDesiredProperty onDesiredProperty = Schema_GetModelModelByName_OnDesiredProperty(modelHandle, childName_str);
                                 if (onDesiredProperty != NULL)
                                 {
@@ -924,12 +845,10 @@ static bool validateModel_vs_Multitree(void* startAddress, SCHEMA_MODEL_TYPE_HAN
 
     if(nProcessedChildren == nChildren)
     {
-        /*Codes_SRS_COMMAND_DECODER_02_010: [ If the complete MULTITREE has been parsed then CommandDecoder_IngestDesiredProperties shall succeed and return EXECUTE_COMMAND_SUCCESS. ]*/
         result = true;
     }
     else
     {
-        /*Codes_SRS_COMMAND_DECODER_02_011: [ Otherwise CommandDecoder_IngestDesiredProperties shall fail and return EXECUTE_COMMAND_FAILED. ]*/
         LogError("not all constituents of the JSON have been ingested");
         result = false;
     }
@@ -938,7 +857,6 @@ static bool validateModel_vs_Multitree(void* startAddress, SCHEMA_MODEL_TYPE_HAN
 
 static EXECUTE_COMMAND_RESULT DecodeDesiredProperties(void* startAddress, COMMAND_DECODER_HANDLE_DATA* handle, MULTITREE_HANDLE desiredPropertiesTree)
 {
-    /*Codes_SRS_COMMAND_DECODER_02_006: [ CommandDecoder_IngestDesiredProperties shall parse the MULTITREEE recursively. ]*/
     return validateModel_vs_Multitree(startAddress, handle->ModelHandle, desiredPropertiesTree, 0 )?EXECUTE_COMMAND_SUCCESS:EXECUTE_COMMAND_FAILED;
 }
 
@@ -950,7 +868,6 @@ static bool RemoveUnneededTwinProperties(MULTITREE_HANDLE initialParsedTree, boo
 
     if (parseDesiredNode)
     {
-        /*Codes_SRS_COMMAND_DECODER_02_014: [ If parseDesiredNode is TRUE, parse only the `desired` part of JSON tree ]*/
         if (MultiTree_GetChildByName(initialParsedTree, "desired", &updateTree) != MULTITREE_OK)
         {
             LogError("Unable to find 'desired' in tree");
@@ -963,7 +880,6 @@ static bool RemoveUnneededTwinProperties(MULTITREE_HANDLE initialParsedTree, boo
         updateTree = initialParsedTree;
     }
 
-    /*Codes_COMMAND_DECODER_02_015: [ Remove '$version' string from node, if it is present.  It not being present is not an error ]*/
     MULTITREE_RESULT deleteChildResult = MultiTree_DeleteChild(updateTree, "$version");
     if ((deleteChildResult == MULTITREE_OK) || (deleteChildResult == MULTITREE_CHILD_NOT_FOUND))
     {
@@ -983,9 +899,6 @@ EXECUTE_COMMAND_RESULT CommandDecoder_IngestDesiredProperties(void* startAddress
 {
     EXECUTE_COMMAND_RESULT result;
 
-    /*Codes_SRS_COMMAND_DECODER_02_001: [ If startAddress is NULL then CommandDecoder_IngestDesiredProperties shall fail and return EXECUTE_COMMAND_ERROR. ]*/
-    /*Codes_SRS_COMMAND_DECODER_02_002: [ If handle is NULL then CommandDecoder_IngestDesiredProperties shall fail and return EXECUTE_COMMAND_ERROR. ]*/
-    /*Codes_SRS_COMMAND_DECODER_02_003: [ If jsonPayload is NULL then CommandDecoder_IngestDesiredProperties shall fail and return EXECUTE_COMMAND_ERROR. ]*/
     if(
         (startAddress == NULL) ||
         (handle == NULL) ||
@@ -997,7 +910,6 @@ EXECUTE_COMMAND_RESULT CommandDecoder_IngestDesiredProperties(void* startAddress
     }
     else
     {
-        /*Codes_SRS_COMMAND_DECODER_02_004: [ CommandDecoder_IngestDesiredProperties shall clone desiredProperties. ]*/
         char* copy;
         if (mallocAndStrcpy_s(&copy, jsonPayload) != 0)
         {
@@ -1006,7 +918,6 @@ EXECUTE_COMMAND_RESULT CommandDecoder_IngestDesiredProperties(void* startAddress
         }
         else
         {
-            /*Codes_SRS_COMMAND_DECODER_02_005: [ CommandDecoder_IngestDesiredProperties shall create a MULTITREE_HANDLE ouf of the clone of desiredProperties. ]*/
             MULTITREE_HANDLE initialParsedTree;
             MULTITREE_HANDLE desiredPropertiesTree;
 
@@ -1026,7 +937,6 @@ EXECUTE_COMMAND_RESULT CommandDecoder_IngestDesiredProperties(void* startAddress
                 {
                     COMMAND_DECODER_HANDLE_DATA* commandDecoderInstance = (COMMAND_DECODER_HANDLE_DATA*)handle;
 
-                    /*Codes_SRS_COMMAND_DECODER_02_006: [ CommandDecoder_IngestDesiredProperties shall parse the MULTITREEE recursively. ]*/
                     result = DecodeDesiredProperties(startAddress, commandDecoderInstance, desiredPropertiesTree);
 
                     // Do NOT free desiredPropertiesTree.  It is only a pointer into initialParsedTree.

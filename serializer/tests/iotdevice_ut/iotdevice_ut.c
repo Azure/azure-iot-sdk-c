@@ -206,7 +206,6 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         TEST_MUTEX_RELEASE(g_testByTest);
     }
 
-    /* Tests_SRS_DEVICE_05_014: [If any of the modelHandle, deviceHandle or deviceActionCallback arguments are NULL, Device_Create shall return DEVICE_INVALID_ARG.]*/
     TEST_FUNCTION(Device_Create_with_NULL_model_handle_fails)
     {
         // arrange
@@ -219,7 +218,6 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         ASSERT_ARE_EQUAL(DEVICE_RESULT, DEVICE_INVALID_ARG, res);
     }
 
-    /* Tests_SRS_DEVICE_05_014: [If any of the iotHubClientHandle, modelHandle, deviceHandle or deviceActionCallback arguments are NULL, Device_Create shall return DEVICE_INVALID_ARG.] */
     TEST_FUNCTION(Device_Create_with_NULL_Action_Callback_fails)
     {
         // arrange
@@ -232,7 +230,6 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         ASSERT_ARE_EQUAL(DEVICE_RESULT, DEVICE_INVALID_ARG, res);
     }
 
-    /* Tests_SRS_DEVICE_05_014: [If any of the modelHandle, deviceHandle or deviceActionCallback arguments are NULL, Device_Create shall return DEVICE_INVALID_ARG.]*/
     TEST_FUNCTION(Device_Create_with_NULL_outparam_fails)
     {
         // arrange
@@ -244,13 +241,6 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         ASSERT_ARE_EQUAL(DEVICE_RESULT, DEVICE_INVALID_ARG, res);
     }
 
-    /* Tests_SRS_DEVICE_03_003: [The DEVICE_HANDLE shall be provided via the deviceHandle out argument.] */
-    /* Tests_SRS_DEVICE_03_004: [Device_Create shall return DEVICE_OK upon success.] */
-    /* Tests_SRS_DEVICE_01_018: [Device_Create shall create a DataPublisher instance by calling DataPublisher_Create.] */
-    /* Tests_SRS_DEVICE_01_020: [Device_Create shall pass to DataPublisher_Create the FrontDoor instance obtained earlier.] */
-    /* Tests_SRS_DEVICE_01_001: [Device_Create shall create a CommandDecoder instance by calling CommandDecoder_Create and passing to it the model handle.] */
-    /* Tests_SRS_DEVICE_01_002: [Device_Create shall also pass to CommandDecoder_Create a callback to be invoked when a command is received and a context that shall be the device handle.]  */
-    /* Tests_SRS_DEVICE_01_004: [DeviceCreate shall pass to DataPublisher_create the includePropertyPath argument.] */
     TEST_FUNCTION(Device_Create_can_return_a_device_handle)
     {
         // arrange
@@ -276,7 +266,6 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
     }
 
 
-    /* Tests_SRS_DEVICE_01_004: [DeviceCreate shall pass to DataPublisher_create the includePropertyPath argument.] */
     TEST_FUNCTION(Device_Create_passes_includePropertyPath_false_to_DataPublisher_Create)
     {
         // arrange
@@ -301,7 +290,6 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         Device_Destroy(h);
     }
 
-    /* Tests_SRS_DEVICE_01_019: [If creating the DataPublisher instance fails, Device_Create shall return DEVICE_DATA_PUBLISHER_FAILED.] */
     TEST_FUNCTION(When_DataPublisher_Create_Fails_Then_Device_Create_Fails)
     {
         // arrange
@@ -319,7 +307,6 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         ASSERT_IS_NULL(h);
     }
 
-    /* Tests_SRS_DEVICE_01_003: [If CommandDecoder_Create fails, Device_Create shall return DEVICE_COMMAND_DECODER_FAILED.] */
     TEST_FUNCTION(When_CommandDecoder_Create_Fails_Device_Create_Fails)
     {
         // arrange
@@ -347,7 +334,6 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
 
     /* Device_Destroy */
 
-    /* Tests_SRS_DEVICE_03_007: [Device_Destroy will not do anything if deviceHandle is NULL.] */
     TEST_FUNCTION(Device_Destroy_with_a_NULL_handle_raises_no_exceptions)
     {
         // arrange
@@ -360,7 +346,6 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
     }
 
 
-    /* Tests_SRS_DEVICE_03_006: [Device_Destroy shall free all resources associated with a device.] */
     TEST_FUNCTION(Device_Destroy_with_a_Valid_handle_frees_all_underlying_modules)
     {
         // arrange
@@ -382,8 +367,6 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
 
     /* Device_StartTransaction */
 
-    /* Tests_SRS_DEVICE_01_034: [Device_StartTransaction shall invoke DataPublisher_StartTransaction for the DataPublisher handle associated with the deviceHandle argument.] */
-    /* Tests_SRS_DEVICE_01_043: [On success, Device_StartTransaction shall return a non NULL handle.] */
     TEST_FUNCTION(Device_StartTransaction_Calls_DataPublisher_And_Succeeds)
     {
         // arrange
@@ -406,7 +389,6 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         Device_Destroy(deviceHandle);
     }
 
-    /* Tests_SRS_DEVICE_01_035: [If any argument is NULL, Device_StartTransaction shall return NULL.] */
     TEST_FUNCTION(Device_StartTransaction_Called_With_NULL_Handle_Fails)
     {
         // arrange
@@ -420,7 +402,6 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
     }
 
 
-    /* Tests_SRS_DEVICE_01_048: [When DataPublisher_StartTransaction fails, Device_StartTransaction shall return NULL.] */
     TEST_FUNCTION(When_DataPublisher_StartTransaction_Fails_Then_Device_StartTransaction_Fails)
     {
         // arrange
@@ -445,8 +426,6 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
 
     /* Device_PublishTransacted */
 
-    /* Tests_SRS_DEVICE_01_036: [Device_PublishTransacted shall invoke DataPublisher_PublishTransacted.] */
-    /* Tests_SRS_DEVICE_01_044: [On success, Device_PublishTransacted shall return DEVICE_OK.] */
     TEST_FUNCTION(Device_PublishTransacted_Calls_DataPublisher_And_Succeeds)
     {
         // arrange
@@ -470,7 +449,6 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         Device_Destroy(deviceHandle);
     }
 
-    /* Tests_SRS_DEVICE_01_037: [If any argument is NULL, Device_PublishTransacted shall return DEVICE_INVALID_ARG.] */
     TEST_FUNCTION(Device_PublishTransacted_Called_With_NULL_Handle_Fails)
     {
         // arrange
@@ -484,7 +462,6 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
     }
 
 
-    /* Tests_SRS_DEVICE_01_037: [If any argument is NULL, Device_PublishTransacted shall return DEVICE_INVALID_ARG.] */
     TEST_FUNCTION(Device_PublishTransacted_Called_With_NULL_Property_Fails)
     {
         // arrange
@@ -506,7 +483,6 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         Device_Destroy(deviceHandle);
     }
 
-    /* Tests_SRS_DEVICE_01_037: [If any argument is NULL, Device_PublishTransacted shall return DEVICE_INVALID_ARG.] */
     TEST_FUNCTION(Device_PublishTransacted_Called_With_NULL_Value_Fails)
     {
         // arrange
@@ -527,7 +503,6 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         Device_Destroy(deviceHandle);
     }
 
-    /* Tests_SRS_DEVICE_01_049: [When DataPublisher_PublishTransacted fails, Device_PublishTransacted shall return DEVICE_DATA_PUBLISHER_FAILED.] */
     TEST_FUNCTION(When_DataPublisher_PublishTransacted_Fails_Then_Device_PublishTransacted_Fails)
     {
         // arrange
@@ -554,8 +529,6 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
 
     /* Device_EndTransaction */
 
-    /* Tests_SRS_DEVICE_01_038: [Device_EndTransaction shall invoke DataPublisher_EndTransaction.] */
-    /* Tests_SRS_DEVICE_01_045: [On success, Device_EndTransaction shall return DEVICE_OK.] */
     TEST_FUNCTION(Device_EndTransaction_Calls_DataPublisher_And_Succeeds)
     {
         // arrange
@@ -579,7 +552,6 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         Device_Destroy(deviceHandle);
     }
 
-    /* Tests_SRS_DEVICE_01_039: [If transactionHandle is NULL, Device_EndTransaction shall return DEVICE_INVALID_ARG.]    */
     TEST_FUNCTION(Device_EndTransaction_Called_With_NULL_Handle_Fails)
     {
         // arrange
@@ -592,7 +564,6 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
 
-    /* Tests_SRS_DEVICE_01_050: [When DataPublisher_EndTransaction fails, Device_EndTransaction shall return DEVICE_DATA_PUBLISHER_FAILED.] */
     TEST_FUNCTION(When_DataPublisher_EndTransaction_Fails_Then_Device_EndTransaction_Fails)
     {
         // arrange
@@ -618,7 +589,6 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         Device_Destroy(deviceHandle);
     }
 
-    /* Tests_SRS_DEVICE_01_038: [Device_EndTransaction shall invoke DataPublisher_EndTransaction.] */
     TEST_FUNCTION(Device_EndTransaction_Calls_DataPublisher_passingCallBackAndNullContext_Succeed)
     {
         // arrange
@@ -642,7 +612,6 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         Device_Destroy(deviceHandle);
     }
 
-    /* Tests_SRS_DEVICE_01_038: [Device_EndTransaction shall invoke DataPublisher_EndTransaction.] */
     TEST_FUNCTION(Device_EndTransaction_Calls_DataPublisher_passingCallBackAndAndContext_Succeed)
     {
         // arrange
@@ -668,8 +637,6 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
 
     /* Device_CancelTransaction */
 
-    /* Tests_SRS_DEVICE_01_040: [Device_CancelTransaction shall invoke DataPublisher_CancelTransaction.] */
-    /* Tests_SRS_DEVICE_01_046: [On success, Device_PublishTransacted shall return DEVICE_OK.] */
     TEST_FUNCTION(Device_CancelTransaction_Calls_DataPublisher_And_Succeeds)
     {
         // arrange
@@ -692,7 +659,6 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
     }
 
 
-    /* Tests_SRS_DEVICE_01_041: [If any argument is NULL, Device_CancelTransaction shall return DEVICE_INVALID_ARG.] */
     TEST_FUNCTION(Device_CancelTransaction_Called_With_NULL_Handle_Fails)
     {
         // arrange
@@ -706,7 +672,6 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
     }
 
 
-    /* Tests_SRS_DEVICE_01_051: [When DataPublisher_CancelTransaction fails, Device_CancelTransaction shall return DEVICE_DATA_PUBLISHER_FAILED.] */
     TEST_FUNCTION(When_DataPublisher_CancelTransaction_Fails_Then_Device_CancelTransaction_Fails)
     {
         // arrange
@@ -732,7 +697,6 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
 
     /* Action callback */
 
-    /*Tests_SRS_DEVICE_02_011: [If the parameter actionCallbackContent passed the callback is NULL then the callback shall return EXECUTION_COMMAND_ERROR.] */
     TEST_FUNCTION(When_Action_Callback_Is_Invoked_with_NULL_handle_returns_ABANDONED)
     {
         /// arrange
@@ -751,9 +715,6 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         Device_Destroy(deviceHandle);
     }
 
-    /* Tests_SRS_DEVICE_01_052: [When the action callback passed to CommandDecoder is called, Device shall call the appropriate user callback associated with the device handle.] */
-    /* Tests_SRS_DEVICE_01_053: [The action name, argument count and action arguments shall be passed to the user callback.] */
-    /* Tests_SRS_DEVICE_01_055: [The value passed in callbackUserContext when creating the device shall be passed to the callback as the value for the callbackUserContext argument.] */
     TEST_FUNCTION(When_Action_Callback_Is_Invoked_The_User_Callback_Is_Invoked)
     {
         // arrange
@@ -774,9 +735,6 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         Device_Destroy(deviceHandle);
     }
 
-    /* Tests_SRS_DEVICE_01_052: [When the action callback passed to CommandDecoder is called, Device shall call the appropriate user callback associated with the device handle.] */
-    /* Tests_SRS_DEVICE_01_053: [The action name, argument count and action arguments shall be passed to the user callback.] */
-    /* Tests_SRS_DEVICE_01_055: [The value passed in callbackUserContext when creating the device shall be passed to the callback as the value for the callbackUserContext argument.] */
     TEST_FUNCTION(When_Action_Callback_Is_Invoked_With_1_Arg_The_User_Callback_Is_Invoked_With_Same_Values)
     {
         // arrange
@@ -798,7 +756,6 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         Device_Destroy(deviceHandle);
     }
 
-    /* Tests_SRS_DEVICE_01_054: [If the user callback returns a non-zero value, a non-zero value shall be returned to CommandReader.] */
     TEST_FUNCTION(When_Action_Callback_Is_Invoked_And_User_Callback_Fails_Action_Callback_Fails_Too)
     {
         // arrange
@@ -821,7 +778,6 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         Device_Destroy(deviceHandle);
     }
 
-    /*Tests_SRS_DEVICE_02_012: [If any parameters are NULL, then Device_ExecuteCommand shall return EXECUTE_COMMAND_ERROR.]*/
     TEST_FUNCTION(Device_ExecuteCommand_with_NULL_handle_returns_EXECUTE_COMMAND_ERROR)
     {
         ///arrange
@@ -836,7 +792,6 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         ///cleanup
     }
 
-    /*Tests_SRS_DEVICE_02_012: [If any parameters are NULL, then Device_ExecuteCommand shall return EXECUTE_COMMAND_ERROR.]*/
     TEST_FUNCTION(Device_ExecuteCommand_with_NULL_command_returns_EXECUTE_COMMAND_ERROR)
     {
         ///arrange
@@ -855,7 +810,6 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         Device_Destroy(h);
     }
 
-    /*Tests_SRS_DEVICE_02_013: [Otherwise, Device_ExecuteCommand shall call CommandDecoder_ExecuteCommand and return what CommandDecoder_ExecuteCommand is returning.]*/
     TEST_FUNCTION(Device_ExecuteCommand_returns_what_CommandDecoder_ExecuteCommand_returns_EXECUTE_COMMAND_SUCCESS)
     {
         ///arrange
@@ -877,7 +831,6 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         Device_Destroy(h);
     }
 
-    /*Tests_SRS_DEVICE_02_013: [Otherwise, Device_ExecuteCommand shall call CommandDecoder_ExecuteCommand and return what CommandDecoder_ExecuteCommand is returning.]*/
     TEST_FUNCTION(Device_ExecuteCommand_returns_what_CommandDecoder_ExecuteCommand_returns_EXECUTE_COMMAND_FAILED)
     {
         ///arrange
@@ -900,7 +853,6 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         Device_Destroy(h);
     }
 
-    /*Tests_SRS_DEVICE_02_013: [Otherwise, Device_ExecuteCommand shall call CommandDecoder_ExecuteCommand and return what CommandDecoder_ExecuteCommand is returning.]*/
     TEST_FUNCTION(Device_ExecuteCommand_returns_what_CommandDecoder_ExecuteCommand_returns_EXECUTE_COMMAND_ERROR)
     {
         ///arrange
@@ -923,7 +875,6 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         Device_Destroy(h);
     }
 
-    /*Tests_SRS_DEVICE_02_014: [ If argument deviceHandle is NULL then Device_CreateTransaction_ReportedProperties shall fail and return NULL. ]*/
     TEST_FUNCTION(Device_CreateTransaction_ReportedProperties_with_NULL_deviceHandle_fails)
     {
         ///arrange
@@ -938,8 +889,6 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         ///clean
     }
 
-    /*Tests_SRS_DEVICE_02_015: [ Otherwise, Device_CreateTransaction_ReportedProperties shall call DataPublisher_CreateTransaction_ReportedProperties. ]*/
-    /*Tests_SRS_DEVICE_02_017: [ Otherwise Device_CreateTransaction_ReportedProperties shall succeed and return a non-NULL value. ]*/
     TEST_FUNCTION(Device_CreateTransaction_ReportedProperties_succeeds)
     {
         ///arrange
@@ -962,7 +911,6 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         Device_Destroy(h);
     }
 
-    /*Tests_SRS_DEVICE_02_016: [ If DataPublisher_CreateTransaction_ReportedProperties fails then Device_CreateTransaction_ReportedProperties shall fail and return NULL. ]*/
     TEST_FUNCTION(Device_CreateTransaction_ReportedProperties_fails)
     {
         ///arrange
@@ -985,7 +933,6 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         Device_Destroy(h);
     }
 
-    /*Tests_SRS_DEVICE_02_018: [ If argument transactionHandle is NULL then Device_PublishTransacted_ReportedProperty shall fail and return DEVICE_INVALID_ARG. ]*/
     TEST_FUNCTION(Device_PublishTransacted_ReportedProperty_with_NULL_transactionHandle_fails)
     {
         ///arrange
@@ -1001,7 +948,6 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         ///clean
     }
 
-    /*Tests_SRS_DEVICE_02_019: [ If argument reportedPropertyPath is NULL then Device_PublishTransacted_ReportedProperty shall fail and return DEVICE_INVALID_ARG. ]*/
     TEST_FUNCTION(Device_PublishTransacted_ReportedProperty_with_NULL_reportedPropertyPath_fails)
     {
         ///arrange
@@ -1023,7 +969,6 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         Device_Destroy(h);
     }
 
-    /*Tests_SRS_DEVICE_02_020: [ If argument data is NULL then Device_PublishTransacted_ReportedProperty shall fail and return DEVICE_INVALID_ARG. ]*/
     TEST_FUNCTION(Device_PublishTransacted_ReportedProperty_with_NULL_data_fails)
     {
         ///arrange
@@ -1044,8 +989,6 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         Device_Destroy(h);
     }
 
-    /*Tests_SRS_DEVICE_02_021: [ Device_PublishTransacted_ReportedProperty shall call DataPublisher_PublishTransacted_ReportedProperty. ]*/
-    /*Tests_SRS_DEVICE_02_023: [ Otherwise, Device_PublishTransacted_ReportedProperty shall succeed and return DEVICE_OK. ]*/
     TEST_FUNCTION(Device_PublishTransacted_ReportedProperty_succeeds)
     {
         ///arrange
@@ -1070,7 +1013,6 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         Device_Destroy(h);
     }
 
-    /*Tests_SRS_DEVICE_02_022: [ If DataPublisher_PublishTransacted_ReportedProperty fails then Device_PublishTransacted_ReportedProperty shall fail and return DEVICE_DATA_PUBLISHER_FAILED. ]*/
     TEST_FUNCTION(Device_PublishTransacted_ReportedProperty_fails)
     {
         ///arrange
@@ -1096,7 +1038,6 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         Device_Destroy(h);
     }
 
-    /*Tests_SRS_DEVICE_02_024: [ If argument transactionHandle is NULL then Device_CommitTransaction_ReportedProperties shall fail and return DEVICE_INVALID_ARG. ]*/
     TEST_FUNCTION(Device_CommitTransaction_ReportedProperties_with_NULL_transactionHandle_fails)
     {
         ///arrange
@@ -1111,7 +1052,6 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
 
-    /*Tests_SRS_DEVICE_02_025: [ If argument destination is NULL then Device_CommitTransaction_ReportedProperties shall fail and return DEVICE_INVALID_ARG. ]*/
     TEST_FUNCTION(Device_CommitTransaction_ReportedProperties_with_NULL_destination_fails)
     {
         ///arrange
@@ -1134,7 +1074,6 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
 
     }
 
-    /*Tests_SRS_DEVICE_02_026: [ If argument destinationSize is NULLthen Device_CommitTransaction_ReportedProperties shall fail and return DEVICE_INVALID_ARG. ]*/
     TEST_FUNCTION(Device_CommitTransaction_ReportedProperties_with_NULL_destinationSize_fails)
     {
         ///arrange
@@ -1156,8 +1095,6 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         Device_Destroy(h);
     }
 
-    /*Tests_SRS_DEVICE_02_027: [ Device_CommitTransaction_ReportedProperties shall call DataPublisher_CommitTransaction_ReportedProperties. ]*/
-    /*Tests_SRS_DEVICE_02_029: [ Otherwise Device_CommitTransaction_ReportedProperties shall succeed and return DEVICE_OK. ]*/
     TEST_FUNCTION(Device_CommitTransaction_ReportedProperties_succeeds)
     {
         ///arrange
@@ -1183,7 +1120,6 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         Device_Destroy(h);
     }
 
-    /*Tests_SRS_DEVICE_02_028: [ If DataPublisher_CommitTransaction_ReportedProperties fails then Device_CommitTransaction_ReportedProperties shall fail and return DEVICE_DATA_PUBLISHER_FAILED. ]*/
     TEST_FUNCTION(Device_CommitTransaction_ReportedProperties_fails)
     {
         ///arrange
@@ -1210,7 +1146,6 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         Device_Destroy(h);
     }
 
-    /*Tests_SRS_DEVICE_02_030: [ If argument transactionHandle is NULL then Device_DestroyTransaction_ReportedProperties shall return. ]*/
     TEST_FUNCTION(Device_DestroyTransaction_ReportedProperties_with_NULL_returns)
     {
         ///arrange
@@ -1224,7 +1159,6 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         ///clean
     }
 
-    /*Tests_SRS_DEVICE_02_031: [ Otherwise Device_DestroyTransaction_ReportedProperties shall free all used resources. ]*/
     TEST_FUNCTION(Device_DestroyTransaction_ReportedProperties_succeeds_1)
     {
         ///arrange
@@ -1246,7 +1180,6 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         Device_Destroy(h);
     }
 
-    /*Tests_SRS_DEVICE_02_031: [ Otherwise Device_DestroyTransaction_ReportedProperties shall free all used resources. ]*/
     TEST_FUNCTION(Device_DestroyTransaction_ReportedProperties_succeeds_2)
     {
         ///arrange
@@ -1270,7 +1203,6 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         Device_Destroy(h);
     }
 
-    /*Tests_SRS_DEVICE_02_031: [ Otherwise Device_DestroyTransaction_ReportedProperties shall free all used resources. ]*/
     TEST_FUNCTION(Device_DestroyTransaction_ReportedProperties_succeeds_3)
     {
         ///arrange
@@ -1297,7 +1229,6 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         Device_Destroy(h);
     }
 
-    /*Tests_SRS_DEVICE_02_032: [ If deviceHandle is NULL then Device_IngestDesiredProperties shall fail and return DEVICE_INVALID_ARG. ]*/
     TEST_FUNCTION(Device_IngestDesiredProperties_with_NULL_deviceHandle_fails)
     {
         ///arrange
@@ -1312,7 +1243,6 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         ///clean
     }
 
-    /*Tests_SRS_DEVICE_02_033: [ If jsonPayload is NULL then Device_IngestDesiredProperties shall fail and return DEVICE_INVALID_ARG. ]*/
     TEST_FUNCTION(Device_IngestDesiredProperties_with_NULL_desiredProperties_fails)
     {
         ///arrange
@@ -1331,7 +1261,6 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         Device_Destroy(h);
     }
 
-    /*Tests_SRS_DEVICE_02_037: [ If startAddress is NULL then Device_IngestDesiredProperties shall fail and return DEVICE_INVALID_ARG. ]*/
     TEST_FUNCTION(Device_IngestDesiredProperties_with_NULL_startAddress_fails)
     {
         ///arrange
@@ -1349,8 +1278,6 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         ///clean
         Device_Destroy(h);
     }
-    /*Tests_SRS_DEVICE_02_034: [ Device_IngestDesiredProperties shall call CommandDecoder_IngestDesiredProperties. ]*/
-    /*Tests_SRS_DEVICE_02_036: [ Otherwise, Device_IngestDesiredProperties shall succeed and return DEVICE_OK. ]*/
     TEST_FUNCTION(Device_IngestDesiredProperties_succeeds)
     {
         ///arrange
@@ -1372,7 +1299,6 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         Device_Destroy(h);
     }
 
-    /*Tests_SRS_DEVICE_02_035: [ If any failure happens then Device_IngestDesiredProperties shall fail and return DEVICE_ERROR. ]*/
     TEST_FUNCTION(Device_IngestDesiredProperties_fails)
     {
         ///arrange
@@ -1395,7 +1321,6 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         Device_Destroy(h);
     }
 
-    /*Tests_SRS_DEVICE_02_038: [ If deviceHandle is NULL then Device_ExecuteMethod shall fail and return NULL. ]*/
     TEST_FUNCTION(Device_ExecuteMethod_with_NULL_deviceHandle_fails)
     {
         ///arrange
@@ -1409,7 +1334,6 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         ///clean
     }
 
-    /*Tests_SRS_DEVICE_02_039: [ If methodName is NULL then Device_ExecuteMethod shall fail and return NULL. ]*/
     TEST_FUNCTION(Device_ExecuteMethod_with_NULL_methodName_fails)
     {
         ///arrange
@@ -1426,7 +1350,6 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         Device_Destroy(h);
     }
 
-    /*Tests_SRS_DEVICE_02_040: [ Device_ExecuteMethod shall call CommandDecoder_ExecuteMethod and shall return what CommandDecoder_ExecuteMethod returns. ]*/
     TEST_FUNCTION(Device_ExecuteMethod_happy_path)
     {
         ///arrange

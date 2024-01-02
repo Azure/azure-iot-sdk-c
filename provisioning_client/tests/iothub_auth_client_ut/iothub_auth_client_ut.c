@@ -372,8 +372,7 @@ BEGIN_TEST_SUITE(iothub_auth_client_ut)
         REGISTER_GLOBAL_MOCK_RETURN(HMACSHA256_ComputeHash, HMACSHA256_OK);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(HMACSHA256_ComputeHash, HMACSHA256_ERROR);
 
-
-#if defined(HSM_TYPE_X509) || defined(HSM_AUTH_TYPE_CUSTOM)
+#if defined(HSM_TYPE_X509) || defined(HSM_TYPE_RIOT) || defined(HSM_AUTH_TYPE_CUSTOM) // Edge Module cmake shouldn't bring in TPM or RIOT.
         REGISTER_GLOBAL_MOCK_RETURN(iothub_security_type, IOTHUB_SECURITY_TYPE_SAS);
 #else
         REGISTER_GLOBAL_MOCK_RETURN(iothub_security_type, IOTHUB_SECURITY_TYPE_HTTP_EDGE);
@@ -494,8 +493,6 @@ BEGIN_TEST_SUITE(iothub_auth_client_ut)
     }
 
 #if defined(HSM_TYPE_SAS_TOKEN)  || defined(HSM_AUTH_TYPE_CUSTOM)
-    /* Tests_IOTHUB_DEV_AUTH_07_003: [ If the function succeeds iothub_device_auth_create shall return a IOTHUB_SECURITY_HANDLE. ] */
-    /* Tests_IOTHUB_DEV_AUTH_07_025: [ iothub_device_auth_create shall call the concrete_iothub_device_auth_create function associated with the XDA_INTERFACE_DESCRIPTION. ] */
     TEST_FUNCTION(iothub_device_auth_create_tpm_succeed)
     {
         //arrange
@@ -515,7 +512,6 @@ BEGIN_TEST_SUITE(iothub_auth_client_ut)
         iothub_device_auth_destroy(xda_handle);
     }
 
-    /* Tests_IOTHUB_DEV_AUTH_07_002: [ iothub_device_auth_create shall allocate the IOTHUB_SECURITY_INFO and shall fail if the allocation fails. ]*/
     TEST_FUNCTION(iothub_device_auth_create_tpm_interface_NULL_fail)
     {
         //arrange
@@ -536,7 +532,6 @@ BEGIN_TEST_SUITE(iothub_auth_client_ut)
     }
 #endif
 
-    /* Tests_IOTHUB_DEV_AUTH_07_002: [ iothub_device_auth_create shall allocate the XDA_INSTANCE and shall fail if the allocation fails. ] */
     TEST_FUNCTION(iothub_device_auth_create_malloc_fail)
     {
         //arrange
@@ -554,9 +549,7 @@ BEGIN_TEST_SUITE(iothub_auth_client_ut)
     }
 
 
-#if defined(HSM_TYPE_X509) || defined(HSM_AUTH_TYPE_CUSTOM)
-    /* Tests_IOTHUB_DEV_AUTH_07_025: [ iothub_device_auth_create shall call the concrete_iothub_device_auth_create function associated with the interface_desc. ] */
-    /* Tests_IOTHUB_DEV_AUTH_07_026: [ if concrete_iothub_device_auth_create fails iothub_device_auth_create shall return NULL. ] */
+#if defined(HSM_TYPE_X509) || defined(HSM_TYPE_RIOT) || defined(HSM_AUTH_TYPE_CUSTOM) // Edge Module cmake shouldn't bring in TPM or RIOT.
     TEST_FUNCTION(iothub_device_auth_create_x509_succeed)
     {
         //arrange
@@ -576,7 +569,6 @@ BEGIN_TEST_SUITE(iothub_auth_client_ut)
         iothub_device_auth_destroy(xda_handle);
     }
 
-    /* Tests_IOTHUB_DEV_AUTH_07_002: [ iothub_device_auth_create shall allocate the IOTHUB_SECURITY_INFO and shall fail if the allocation fails. ]*/
     TEST_FUNCTION(iothub_device_auth_create_x509_Interface_NULL_fail)
     {
         //arrange
@@ -596,7 +588,6 @@ BEGIN_TEST_SUITE(iothub_auth_client_ut)
         iothub_device_auth_destroy(xda_handle);
     }
 
-    /* Tests_IOTHUB_DEV_AUTH_07_026: [ if concrete_iothub_device_auth_create fails iothub_device_auth_create shall return NULL. ] */
     TEST_FUNCTION(iothub_device_auth_create_concrete_iothub_device_auth_create_fail)
     {
         //arrange
@@ -617,8 +608,6 @@ BEGIN_TEST_SUITE(iothub_auth_client_ut)
     }
 #endif
 
-    /* Tests_IOTHUB_DEV_AUTH_07_004: [ iothub_device_auth_destroy shall free all resources associated with the IOTHUB_SECURITY_HANDLE handle ] */
-    /* Tests_IOTHUB_DEV_AUTH_07_005: [ iothub_device_auth_destroy shall call the concrete_iothub_device_auth_destroy function associated with the XDA_INTERFACE_DESCRIPTION. ] */
     TEST_FUNCTION(iothub_device_auth_destroy_succeed)
     {
         //arrange
@@ -640,7 +629,6 @@ BEGIN_TEST_SUITE(iothub_auth_client_ut)
         //cleanup
     }
 
-    /* Tests_IOTHUB_DEV_AUTH_07_006: [ If the argument handle is NULL, iothub_device_auth_destroy shall do nothing ] */
     TEST_FUNCTION(iothub_device_auth_destroy_handle_NULL_succeed)
     {
         //arrange
@@ -654,7 +642,6 @@ BEGIN_TEST_SUITE(iothub_auth_client_ut)
         //cleanup
     }
 
-    /* Tests_IOTHUB_DEV_AUTH_07_007: [ If the argument handle is NULL, iothub_device_auth_get_auth_type shall return AUTH_TYPE_UNKNOWN. ] */
     TEST_FUNCTION(iothub_device_auth_get_auth_type_handle_NULL_fail)
     {
         //arrange
@@ -669,8 +656,6 @@ BEGIN_TEST_SUITE(iothub_auth_client_ut)
         //cleanup
     }
 
-    /* Tests_IOTHUB_DEV_AUTH_07_008: [ iothub_device_auth_get_auth_type shall call concrete_iothub_device_auth_type function associated with the XDA_INTERFACE_DESCRIPTION. ] */
-    /* Tests_IOTHUB_DEV_AUTH_07_009: [ iothub_device_auth_get_auth_type shall return the DEVICE_AUTH_TYPE returned by the concrete_iothub_device_auth_type function. ] */
     TEST_FUNCTION(iothub_device_auth_get_auth_type_succeed)
     {
         //arrange
@@ -688,7 +673,6 @@ BEGIN_TEST_SUITE(iothub_auth_client_ut)
         iothub_device_auth_destroy(xda_handle);
     }
 
-    /* Tests_IOTHUB_DEV_AUTH_07_010: [ If the argument handle, token_scope or sas_token is NULL, iothub_device_auth_generate_credentials shall return a non-zero value. ] */
     TEST_FUNCTION(iothub_device_auth_generate_credentials_handle_NULL_fail)
     {
         //arrange
@@ -703,7 +687,6 @@ BEGIN_TEST_SUITE(iothub_auth_client_ut)
         //cleanup
     }
 
-    /* Tests_IOTHUB_DEV_AUTH_07_010: [ If the argument handle, token_scope or sas_token is NULL, iothub_device_auth_generate_credentials shall return a non-zero value. ] */
     TEST_FUNCTION(iothub_device_auth_generate_credentials_cred_info_NULL_fail)
     {
         //arrange
@@ -743,9 +726,7 @@ BEGIN_TEST_SUITE(iothub_auth_client_ut)
         iothub_device_auth_destroy(xda_handle);
     }
 
-#if defined(HSM_TYPE_X509) || defined(HSM_AUTH_TYPE_CUSTOM)
-    /* Tests_IOTHUB_DEV_AUTH_07_011: [ iothub_device_auth_generate_credentials shall call concrete_iothub_device_auth_generate_sastoken function associated with the XDA_INTERFACE_DESCRIPTION. ]*/
-    /* Tests_IOTHUB_DEV_AUTH_07_035: [ For tpm type iothub_device_auth_generate_credentials shall call the concrete_dev_auth_sign_data function to hash the data. ]*/
+#if defined(HSM_TYPE_X509) || defined(HSM_TYPE_RIOT) || defined(HSM_AUTH_TYPE_CUSTOM) // Edge Module cmake shouldn't bring in TPM or RIOT.
     TEST_FUNCTION(iothub_device_auth_generate_credentials_succeed)
     {
         //arrange
@@ -766,6 +747,7 @@ BEGIN_TEST_SUITE(iothub_auth_client_ut)
         iothub_device_auth_destroy(xda_handle);
     }
 
+#ifndef __APPLE__   // Disabled for Apple builds.
     TEST_FUNCTION(iothub_device_auth_generate_credentials_key_succeed)
     {
         //arrange
@@ -789,6 +771,7 @@ BEGIN_TEST_SUITE(iothub_auth_client_ut)
         my_gballoc_free(result);
         iothub_device_auth_destroy(xda_handle);
     }
+#endif
 
     TEST_FUNCTION(iothub_device_auth_generate_credentials_no_key_succeed)
     {
@@ -1004,7 +987,7 @@ TEST_FUNCTION(IoTHubClient_Auth_Get_TrustedBundle_succeed)
 }
 
 
-#if defined(HSM_TYPE_X509) || defined(HSM_AUTH_TYPE_CUSTOM)
+#if defined(HSM_TYPE_X509) || defined(HSM_TYPE_RIOT) || defined(HSM_AUTH_TYPE_CUSTOM) // Edge Module cmake shouldn't bring in TPM or RIOT.
 // IoTHubClient_Auth_Get_TrustBundle only supports Edge based auth.  Verify that others fail.  Only can get this far if Edge & X509 enabled at same time.
 TEST_FUNCTION(IoTHubClient_Auth_Get_TrustedBundle_unsupported_authtype_fail)
 {
@@ -1027,7 +1010,7 @@ TEST_FUNCTION(IoTHubClient_Auth_Get_TrustedBundle_unsupported_authtype_fail)
     //cleanup
     iothub_device_auth_destroy(xda_handle);
 }
-#endif // defined(HSM_TYPE_X509) || defined(HSM_AUTH_TYPE_CUSTOM)
+#endif // defined(HSM_TYPE_X509) || defined(HSM_TYPE_RIOT) || defined(HSM_AUTH_TYPE_CUSTOM)
 
 #endif // HSM_TYPE_HTTP_EDGE
 

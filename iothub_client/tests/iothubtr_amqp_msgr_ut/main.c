@@ -9,5 +9,5 @@ int main(void)
 {
     size_t failedTestCount = 0;
     RUN_TEST_SUITE(iothubtr_amqp_msgr_ut, failedTestCount);
-    return failedTestCount;
+    return (int)failedTestCount;
 }
