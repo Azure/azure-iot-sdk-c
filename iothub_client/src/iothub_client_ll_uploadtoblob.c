@@ -1061,7 +1061,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_NotifyCompletion(IOTHUB_CLIENT
                                                     uploadCorrelationId,
                                                     isSuccess ? RESPONSE_BODY_SUCCESS_BOOLEAN_STRING : RESPONSE_BODY_ERROR_BOOLEAN_STRING,
                                                     responseCode,
-                                                    responseMessage);
+                                                    responseMessage != NULL ? responseMessage : EMPTY_STRING);
 
         if(response == NULL)
         {
