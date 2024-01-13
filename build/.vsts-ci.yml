@@ -102,7 +102,7 @@ jobs:
     displayName: 'Build'
   - script: |
       call jenkins\windows_c_VsDevCmd.cmd x64
-      cd cmake && ctest -T test --no-compress-output -C "Debug" -V -j 16 --schedule-random
+      cd cmake && ctest -T test --no-compress-output -C "Debug" -VV --debug -j 16 --schedule-random
     displayName: "Run Tests"
     env:
       IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
