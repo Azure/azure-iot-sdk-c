@@ -235,7 +235,8 @@ DEFINE_ENUM(IOTHUB_CLIENT_STATUS, IOTHUB_CLIENT_STATUS_VALUES);
 #define IOTHUBMESSAGE_DISPOSITION_RESULT_VALUES \
     IOTHUBMESSAGE_ACCEPTED, \
     IOTHUBMESSAGE_REJECTED, \
-    IOTHUBMESSAGE_ABANDONED
+    IOTHUBMESSAGE_ABANDONED, \
+    IOTHUBMESSAGE_ASYNC_ACK
  
 DEFINE_ENUM(IOTHUBMESSAGE_DISPOSITION_RESULT, IOTHUBMESSAGE_DISPOSITION_RESULT_VALUES);
  
@@ -451,7 +452,9 @@ typedef IOTHUBMESSAGE_DISPOSITION_RESULT
 (*IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC)(IOTHUB_MESSAGE_HANDLE message, void* userContextCallback);
 ```
 
-If the callback returns the status IOTHUBMESSAGE_ACCEPTED,  the client will accept the message, meaning that it will not be received again by the client. If the callback returns the status IOTHUBMESSAGE_REJECTED , the message will be rejected.  The message will not be resent to the device.  If the callback returns the status IOTHUBMESSAGE_ABANDONED, the message will be abandoned.  The implies that the user could not process the message but it expected that the message will be resent to the device from the service. message is only valid in the scope of the callback.
+If the callback returns the status IOTHUBMESSAGE_ACCEPTED,  the client will accept the message, meaning that it will not be received again by the client. If the callback returns the status IOTHUBMESSAGE_REJECTED, the message will be rejected.  The message will not be resent to the device.  If the callback returns the status IOTHUBMESSAGE_ABANDONED, the message will be abandoned.  This implies that the user could not process the message but it expected that the message will be resent to the device from the service. Message is only valid in the scope of the callback. 
+
+IOTHUBMESSAGE_ASYNC_ACK will allow the application to accept the message at a later time outside of the callback. The application must call IoTHubDeviceClient_LL_SendMessageDisposition() with the message disposition result. Please see iothub_ll_c2d_sample.c for implementation details.
 
 ## IOTHUB_CLIENT_RESULT IoTHubClient_SetOption(IOTHUB_CLIENT_HANDLE iotHubClientHandle, const char\* optionName, const void\* value);
 
