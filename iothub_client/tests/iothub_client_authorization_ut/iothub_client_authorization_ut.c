@@ -54,7 +54,9 @@ static const char* TEST_STRING_VALUE = "Test_string_value";
 static const char* TEST_KEYNAME_VALUE = "Test_keyname_value";
 static const char* TEST_REG_CERT = "Test_certificate";
 static const char* TEST_REG_PK = "Test_private_key";
+static const char* TEST_EXPIRY_TIME_KEYNAME_VALUE = "Test_expiry_time_keyname_value";
 static uint64_t TEST_EXPIRY_TIME = 1;
+static uint64_t TEST_CURRENT_TIME = 1705444027;
 
 #define TEST_TIME_VALUE                     (time_t)123456
 
@@ -110,10 +112,18 @@ static void my_iothub_device_auth_destroy(IOTHUB_SECURITY_HANDLE handle)
 static CREDENTIAL_RESULT* my_iothub_device_auth_generate_credentials(IOTHUB_SECURITY_HANDLE handle, const DEVICE_AUTH_CREDENTIAL_INFO* dev_auth_cred)
 {
     (void)handle;
-    (void)dev_auth_cred;
     CREDENTIAL_RESULT* result = (CREDENTIAL_RESULT*)my_gballoc_malloc(sizeof(CREDENTIAL_RESULT));
     result->auth_cred_result.x509_result.x509_cert = TEST_REG_CERT;
     result->auth_cred_result.x509_result.x509_alias_key = TEST_REG_PK;
+
+    if (dev_auth_cred != NULL && dev_auth_cred->sas_info.key_name == TEST_EXPIRY_TIME_KEYNAME_VALUE)
+    {
+        if (dev_auth_cred->sas_info.expiry_seconds != UINT64_MAX)
+        {
+            ASSERT_FAIL("expiry_seconds int overflow");
+        }
+    }
+
     return result;
 }
 #endif
@@ -789,6 +799,56 @@ TEST_FUNCTION(IoTHubClient_Auth_Get_ConnString_device_auth_succeed)
     free(conn_string);
     IoTHubClient_Auth_Destroy(handle);
 }
+
+TEST_FUNCTION(IoTHubClient_Auth_Get_ConnString_device_auth_large_timeout_succeed)
+{
+    //arrange
+    IOTHUB_AUTHORIZATION_HANDLE handle = IoTHubClient_Auth_CreateFromDeviceAuth(DEVICE_ID, NULL);
+    IoTHubClient_Auth_Set_SasToken_Expiry(handle, UINT64_MAX - TEST_CURRENT_TIME);
+    umock_c_reset_all_calls();
+
+    STRICT_EXPECTED_CALL(get_time(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(get_difftime(IGNORED_NUM_ARG, IGNORED_NUM_ARG)).SetReturn((double)TEST_CURRENT_TIME).CallCannotFail();
+    STRICT_EXPECTED_CALL(iothub_device_auth_generate_credentials(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+
+    //act
+    char* conn_string = IoTHubClient_Auth_Get_SasToken(handle, SCOPE_NAME, UINT64_MAX - TEST_CURRENT_TIME, TEST_EXPIRY_TIME_KEYNAME_VALUE);
+
+    //assert
+    ASSERT_IS_NOT_NULL(conn_string);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    free(conn_string);
+    IoTHubClient_Auth_Destroy(handle);
+}
+
+TEST_FUNCTION(IoTHubClient_Auth_Get_ConnString_device_auth_max_timeout_succeed)
+{
+    //arrange
+    IOTHUB_AUTHORIZATION_HANDLE handle = IoTHubClient_Auth_CreateFromDeviceAuth(DEVICE_ID, NULL);
+    IoTHubClient_Auth_Set_SasToken_Expiry(handle, UINT64_MAX);
+    umock_c_reset_all_calls();
+
+    STRICT_EXPECTED_CALL(get_time(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(get_difftime(IGNORED_NUM_ARG, IGNORED_NUM_ARG)).SetReturn((double)TEST_CURRENT_TIME).CallCannotFail();
+    STRICT_EXPECTED_CALL(iothub_device_auth_generate_credentials(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+
+    //act
+    char* conn_string = IoTHubClient_Auth_Get_SasToken(handle, SCOPE_NAME, UINT64_MAX, TEST_EXPIRY_TIME_KEYNAME_VALUE);
+
+    //assert
+    ASSERT_IS_NOT_NULL(conn_string);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    free(conn_string);
+    IoTHubClient_Auth_Destroy(handle);
+}
 #endif
 
 TEST_FUNCTION(IoTHubClient_Auth_Get_ConnString_succeed)
@@ -798,6 +858,58 @@ TEST_FUNCTION(IoTHubClient_Auth_Get_ConnString_succeed)
     umock_c_reset_all_calls();
 
     setup_IoTHubClient_Auth_Get_ConnString_mocks();
+
+    //act
+    char* conn_string = IoTHubClient_Auth_Get_SasToken(handle, SCOPE_NAME, TEST_EXPIRY_TIME, NULL);
+
+    //assert
+    ASSERT_IS_NOT_NULL(conn_string);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    free(conn_string);
+    IoTHubClient_Auth_Destroy(handle);
+}
+
+TEST_FUNCTION(IoTHubClient_Auth_Get_ConnString_large_timeout_succeed)
+{
+    //arrange
+    IOTHUB_AUTHORIZATION_HANDLE handle = IoTHubClient_Auth_Create(DEVICE_KEY, DEVICE_ID, NULL, NULL);
+    IoTHubClient_Auth_Set_SasToken_Expiry(handle, UINT64_MAX - TEST_CURRENT_TIME);
+    umock_c_reset_all_calls();
+
+    STRICT_EXPECTED_CALL(get_time(NULL));
+    STRICT_EXPECTED_CALL(get_difftime(IGNORED_NUM_ARG, IGNORED_NUM_ARG)).SetReturn((double)TEST_CURRENT_TIME).CallCannotFail();
+    STRICT_EXPECTED_CALL(SASToken_CreateString(IGNORED_PTR_ARG, SCOPE_NAME, IGNORED_PTR_ARG, UINT64_MAX));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+    
+    //act
+    char* conn_string = IoTHubClient_Auth_Get_SasToken(handle, SCOPE_NAME, TEST_EXPIRY_TIME, NULL);
+
+    //assert
+    ASSERT_IS_NOT_NULL(conn_string);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    free(conn_string);
+    IoTHubClient_Auth_Destroy(handle);
+}
+
+TEST_FUNCTION(IoTHubClient_Auth_Get_ConnString_max_timeout_succeed)
+{
+    //arrange
+    IOTHUB_AUTHORIZATION_HANDLE handle = IoTHubClient_Auth_Create(DEVICE_KEY, DEVICE_ID, NULL, NULL);
+    IoTHubClient_Auth_Set_SasToken_Expiry(handle, UINT64_MAX);
+    umock_c_reset_all_calls();
+
+    STRICT_EXPECTED_CALL(get_time(NULL));
+    STRICT_EXPECTED_CALL(get_difftime(IGNORED_NUM_ARG, IGNORED_NUM_ARG)).SetReturn((double)TEST_CURRENT_TIME).CallCannotFail();
+    STRICT_EXPECTED_CALL(SASToken_CreateString(IGNORED_PTR_ARG, SCOPE_NAME, IGNORED_PTR_ARG, UINT64_MAX));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
 
     //act
     char* conn_string = IoTHubClient_Auth_Get_SasToken(handle, SCOPE_NAME, TEST_EXPIRY_TIME, NULL);
