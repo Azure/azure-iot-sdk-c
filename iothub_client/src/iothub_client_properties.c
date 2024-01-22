@@ -72,14 +72,14 @@ static void AdvanceCountersAfterWrite(int currentOutputBytes, char** currentWrit
 }
 
 // To correctly check snprintf for success, we need to check both it's not negative AND 
-// that the (number of bytes written ) != (sizeof buffer).
+// that the (number of bytes written ) !>= (sizeof buffer).
 static int PropertySnprintf(char* buffer, size_t count, const char* format, ...)
 {
     va_list arg_list;
     va_start(arg_list, format);
 
     int currentOutputBytes = vsnprintf(buffer, count, format, arg_list);
-    if ((currentOutputBytes < 0) || (currentOutputBytes == (int)count))
+    if ((currentOutputBytes < 0) || (currentOutputBytes >= (int)count))
     {
         return -1;
     }
