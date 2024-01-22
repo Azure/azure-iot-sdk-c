@@ -364,7 +364,7 @@ static void send_message(IOTHUB_DEVICE_CLIENT_HANDLE handle, char* message, char
 // <main>
 int main(void)
 {
-	srand((unsigned int)time(NULL));
+	srandom((unsigned int)time(NULL));
 	double minTemperature = 50.0;
 	double minPressure = 55.0;
 	double minHumidity = 30.0;

@@ -444,7 +444,7 @@ static void generate_keys(void)
     {
         uint8_t random_digest[RIOT_DIGEST_LENGTH] = { 0 };
 
-        srand((unsigned int)time(NULL));
+        srandom((unsigned int)time(NULL));
         for (size_t index = 0; index < DICE_UDS_LENGTH; index++)
         {
             g_uds_seed[index] = (unsigned char)gb_rand();

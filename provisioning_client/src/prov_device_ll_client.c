@@ -855,7 +855,7 @@ PROV_DEVICE_LL_HANDLE Prov_Device_LL_Create(const char* uri, const char* id_scop
     }
     else
     {
-        srand((unsigned int)get_time(NULL));
+        srandom((unsigned int)get_time(NULL));
 
         result = (PROV_INSTANCE_INFO*)malloc(sizeof(PROV_INSTANCE_INFO));
         if (result == NULL)

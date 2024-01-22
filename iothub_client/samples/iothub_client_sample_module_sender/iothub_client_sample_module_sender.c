@@ -41,7 +41,7 @@ int main(void)
     IOTHUB_MODULE_CLIENT_LL_HANDLE iotHubModuleClientHandle;
     EVENT_INSTANCE messages[MESSAGE_COUNT];
 
-    srand((unsigned int)time(NULL));
+    srandom((unsigned int)time(NULL));
     double avgWindSpeed = 10.0;
     double minTemperature = 20.0;
     double minHumidity = 60.0;

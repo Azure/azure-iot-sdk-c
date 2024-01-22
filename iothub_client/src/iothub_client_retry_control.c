@@ -197,7 +197,7 @@ static unsigned int calculate_next_wait_time(RETRY_CONTROL_INSTANCE* retry_contr
     }
     else if (retry_control->policy == IOTHUB_CLIENT_RETRY_EXPONENTIAL_BACKOFF_WITH_JITTER)
     {
-        double jitter_percent = (retry_control->max_jitter_percent / 100.0) * (rand() / ((double)RAND_MAX));
+        double jitter_percent = (retry_control->max_jitter_percent / 100.0) * (random() / ((double)RAND_MAX));
 
         double base_delay = pow(2, retry_control->retry_count - 1) * retry_control->initial_wait_time_in_secs;
 
@@ -210,7 +210,7 @@ static unsigned int calculate_next_wait_time(RETRY_CONTROL_INSTANCE* retry_contr
     }
     else if (retry_control->policy == IOTHUB_CLIENT_RETRY_RANDOM)
     {
-        double random_percent = ((double)rand() / (double)RAND_MAX);
+        double random_percent = ((double)random() / (double)RAND_MAX);
         result = (unsigned int)(retry_control->initial_wait_time_in_secs * random_percent);
     }
     else

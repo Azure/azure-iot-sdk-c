@@ -894,7 +894,7 @@ static int ScheduleWork_Thread(void* threadArgument)
     IOTHUB_CLIENT_CORE_INSTANCE* iotHubClientInstance = (IOTHUB_CLIENT_CORE_INSTANCE*)threadArgument;
     unsigned int sleeptime_in_ms = DO_WORK_FREQ_DEFAULT;
 
-    srand((unsigned int)get_time(NULL));
+    srandom((unsigned int)get_time(NULL));
 
     while (1)
     {
@@ -2351,7 +2351,7 @@ static int uploadingThread(void *data)
     IOTHUB_CLIENT_FILE_UPLOAD_RESULT upload_result;
     HTTPWORKER_THREAD_INFO* threadInfo = (HTTPWORKER_THREAD_INFO*)data;
 
-    srand((unsigned int)get_time(NULL));
+    srandom((unsigned int)get_time(NULL));
 
     /*it so happens that IoTHubClientCore_LL_UploadToBlob is thread-safe because there's no saved state in the handle and there are no globals, so no need to protect it*/
     /*not having it protected means multiple simultaneous uploads can happen*/
@@ -2426,7 +2426,7 @@ static int uploadMultipleBlock_thread(void* data)
 
     IOTHUB_CLIENT_RESULT result;
 
-    srand((unsigned int)get_time(NULL));
+    srandom((unsigned int)get_time(NULL));
 
     if (threadInfo->uploadBlobMultiblockSavedData.getDataCallback != NULL)
     {
@@ -2653,7 +2653,7 @@ static int uploadMethodInvoke_thread(void* data)
 
     HTTPWORKER_THREAD_INFO* threadInfo = (HTTPWORKER_THREAD_INFO*)data;
 
-    srand((unsigned int)get_time(NULL));
+    srandom((unsigned int)get_time(NULL));
 
     int responseStatus;
     unsigned char* responsePayload = NULL;

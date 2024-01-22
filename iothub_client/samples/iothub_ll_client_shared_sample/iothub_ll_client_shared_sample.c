@@ -152,7 +152,7 @@ static IOTHUB_MESSAGE_HANDLE create_events(const DEVICE_STATE* device_state)
 {
     IOTHUB_MESSAGE_HANDLE message_handle;
 
-    srand((unsigned int)time(NULL));
+    srandom((unsigned int)time(NULL));
     double avgWindSpeed = 10.0;
     double minTemperature = 20.0;
     double minHumidity = 60.0;

@@ -73,7 +73,7 @@ static char* generate_eight_random_characters(char *randomString)
     char* randomStringPos = randomString;
     for (i = 0; i < 4; ++i)
     {
-        int rawRandom = rand();
+        int rawRandom = random();
         int first = rawRandom % BASE_36;
         int second = rawRandom / BASE_36 % BASE_36;
         *randomStringPos++ = get_base36_char((unsigned char)first);

@@ -361,7 +361,7 @@ void send_dps_test_registration_with_retry(const char* global_uri, const char* s
         // DPS fails when having multiple enrollments of the same device ID at the same time:
         //  {"errorCode":409203,"trackingId":"e5490c1e-2528-4eb5-9cf6-e72e80c20268","message":"Precondition failed.","timestampUtc":"2022-02-28T10:11:31.1373215Z"}
         // Since we are running these tests on multiple machines we retry with a randomized back-off timer.
-        srand(time(0));
+        srandom(time(0));
         int random_back_off_sec = rand() % TEST_PROV_RANDOMIZED_BACK_OFF_SEC;
         LogInfo("prov_x509_client_e2e failed: Random back-off = %ds", random_back_off_sec);
         ThreadAPI_Sleep(random_back_off_sec * 1000);

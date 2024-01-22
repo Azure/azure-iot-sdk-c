@@ -64,7 +64,7 @@ BEGIN_TEST_SUITE(prov_x509_client_e2e)
         // DPS fails when having multiple enrollments at the same time. 
         // Since we are running these tests on multiple machines with each test taking about 1 second, 
         // we randomize their start time to avoid collisions.
-        srand(time(0));
+        srandom(time(0));
         int random_back_off_sec = rand() % TEST_PROV_RANDOMIZED_BACK_OFF_SEC;
         LogInfo("prov_x509_client_e2e: Random back-off = %ds", random_back_off_sec);
         ThreadAPI_Sleep(random_back_off_sec * 1000);

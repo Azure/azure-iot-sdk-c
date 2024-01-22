@@ -3075,7 +3075,7 @@ static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLI
                         state->keepAliveValue = DEFAULT_MQTT_KEEPALIVE;
                         state->connect_timeout_in_sec = DEFAULT_CONNACK_TIMEOUT;
                         state->topics_ToSubscribe = UNSUBSCRIBE_FROM_TOPIC;
-                        srand((unsigned int)get_time(NULL));
+                        srandom((unsigned int)get_time(NULL));
                         state->authorization_module = auth_module;
 
                         state->isDestroyCalled = false;
