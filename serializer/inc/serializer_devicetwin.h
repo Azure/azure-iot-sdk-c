@@ -17,8 +17,13 @@
 static void serializer_ingest(DEVICE_TWIN_UPDATE_STATE update_state, const unsigned char* payLoad, size_t size, void* userContextCallback)
 {
     /*by convention, userContextCallback is a pointer to a model instance created with CodeFirst_CreateDevice*/
-
-    char* copyOfPayload = (char*)malloc(size + 1);
+    size_t sizeToAllocate = size + 1;
+    if (sizeToAllocate == 0)
+    {
+        LogError("Payload size exceeds maximum allocation\n");
+        return;
+    }
+    char* copyOfPayload = (char*)malloc(sizeToAllocate);
     if (copyOfPayload == NULL)
     {
         LogError("unable to malloc\n");
