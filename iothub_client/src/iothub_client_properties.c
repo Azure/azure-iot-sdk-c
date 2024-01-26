@@ -401,7 +401,14 @@ static char* CopyPayloadToString(const unsigned char* payload, size_t size)
     char* jsonStr;
     size_t sizeToAllocate = size + 1;
 
-    if ((jsonStr = (char*)calloc(1, sizeToAllocate)) == NULL)
+    // If the result of sizeToAllocate is zero it means it had a type overflow (size_t is an unsigned type).
+    // It is very unlikely but could happen.
+    if (sizeToAllocate == 0)
+    {
+        LogError("Payload size exceeds maximum allocation");
+        jsonStr = NULL;
+    }
+    else if ((jsonStr = (char*)calloc(1, sizeToAllocate)) == NULL)
     {
         LogError("Unable to allocate %lu size buffer", (unsigned long)(sizeToAllocate));
     }

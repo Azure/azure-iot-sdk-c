@@ -982,39 +982,45 @@ static void internal_on_event_send_complete_callback(void* context, MESSAGE_SEND
                 else
                 {
                     bool isResourceLimitExceeded = false;
-                    uint32_t item_count;
-                    int ret = amqpvalue_get_list_item_count(delivery_state, &item_count);
-                    for (uint32_t i = 0; !isResourceLimitExceeded && ret == 0 && i < item_count; i++)
+
+                    // To avoid error message from amqpvalue_get_list_item_count in case
+                    // delivery_state is NULL.
+                    if (delivery_state != NULL)
                     {
-                        AMQP_VALUE delivery_state_item = amqpvalue_get_list_item(delivery_state, i);
-                        if (delivery_state_item != NULL)
+                        uint32_t item_count;
+                        int ret = amqpvalue_get_list_item_count(delivery_state, &item_count);
+                        for (uint32_t i = 0; !isResourceLimitExceeded && ret == 0 && i < item_count; i++)
                         {
-                            AMQP_VALUE item_properties = amqpvalue_get_inplace_described_value(delivery_state_item);
-                            if (item_properties != NULL)
+                            AMQP_VALUE delivery_state_item = amqpvalue_get_list_item(delivery_state, i);
+                            if (delivery_state_item != NULL)
                             {
-                                uint32_t item_properties_count = 0;
-                                ret = amqpvalue_get_list_item_count(item_properties, &item_properties_count);
-                                for (uint32_t t = 0; !isResourceLimitExceeded && ret == 0 && t < item_properties_count; t++)
+                                AMQP_VALUE item_properties = amqpvalue_get_inplace_described_value(delivery_state_item);
+                                if (item_properties != NULL)
                                 {
-                                    AMQP_VALUE item_property = amqpvalue_get_list_item(item_properties, t);
-                                    if (item_property != NULL)
+                                    uint32_t item_properties_count = 0;
+                                    ret = amqpvalue_get_list_item_count(item_properties, &item_properties_count);
+                                    for (uint32_t t = 0; !isResourceLimitExceeded && ret == 0 && t < item_properties_count; t++)
                                     {
-                                        const char* symbol_value;
-                                        int ret_sym = amqpvalue_get_symbol(item_property, &symbol_value);
-                                        if (ret_sym == 0)
+                                        AMQP_VALUE item_property = amqpvalue_get_list_item(item_properties, t);
+                                        if (item_property != NULL)
                                         {
-                                            size_t proplen = strlen(symbol_value);
-                                            proplen = proplen < sizeof(IOTHUB_MESSAGE_PROPERTY_RESOURCE_LIMIT_EXCEEDED) ? proplen : sizeof(IOTHUB_MESSAGE_PROPERTY_RESOURCE_LIMIT_EXCEEDED);
-                                            if (strncmp(symbol_value, IOTHUB_MESSAGE_PROPERTY_RESOURCE_LIMIT_EXCEEDED, proplen) == 0)
+                                            const char* symbol_value;
+                                            int ret_sym = amqpvalue_get_symbol(item_property, &symbol_value);
+                                            if (ret_sym == 0)
                                             {
-                                                isResourceLimitExceeded = true;
+                                                size_t proplen = strlen(symbol_value);
+                                                proplen = proplen < sizeof(IOTHUB_MESSAGE_PROPERTY_RESOURCE_LIMIT_EXCEEDED) ? proplen : sizeof(IOTHUB_MESSAGE_PROPERTY_RESOURCE_LIMIT_EXCEEDED);
+                                                if (strncmp(symbol_value, IOTHUB_MESSAGE_PROPERTY_RESOURCE_LIMIT_EXCEEDED, proplen) == 0)
+                                                {
+                                                    isResourceLimitExceeded = true;
+                                                }
                                             }
+                                            amqpvalue_destroy(item_property);
                                         }
-                                        amqpvalue_destroy(item_property);
                                     }
                                 }
+                                amqpvalue_destroy(delivery_state_item);
                             }
-                            amqpvalue_destroy(delivery_state_item);
                         }
                     }
 
