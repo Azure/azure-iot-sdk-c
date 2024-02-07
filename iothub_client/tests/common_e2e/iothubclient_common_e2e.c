@@ -41,7 +41,7 @@
 #include "azure_c_shared_utility/shared_util_options.h"
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/lock.h"
-#include "azure_c_shared_utility/gb_rand.h"
+#include "azure_c_shared_utility/random.h"
 
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
 #include "certs.h"
@@ -334,7 +334,7 @@ static void GenerateUniqueId(const char* prefix, size_t prefix_len, char* buffer
             buffer[prefix_len - 1] = '.';
             for (int i = 0; i < (MSG_UNIQUE_ID_STAMP_LEN - 1); i++)
             {
-                buffer[prefix_len + i] = (unsigned char)((gb_rand() % 10) + '0');
+                buffer[prefix_len + i] = (unsigned char)((RANDOM_generate() % 10) + '0');
             }
             buffer[prefix_len + MSG_UNIQUE_ID_STAMP_LEN - 1] = '\0';
         }
