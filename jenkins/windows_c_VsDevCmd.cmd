@@ -25,3 +25,8 @@ IF ERRORLEVEL 1 (
 
 where msbuild
 msbuild -version
+echo ***************************
+set
+echo ***************************
+dir /s "%ProgramFiles(x86)%\Microsoft Visual Studio\2017"
+echo ***************************
