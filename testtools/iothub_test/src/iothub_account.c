@@ -26,7 +26,7 @@
 #include "azure_c_shared_utility/httpapiexsas.h"
 #include "azure_c_shared_utility/uniqueid.h"
 #include "azure_c_shared_utility/threadapi.h"
-#include "azure_c_shared_utility/gb_rand.h"
+#include "azure_c_shared_utility/random.h"
 
 #include "iothub_service_client_auth.h"
 #include "iothub_registrymanager.h"
@@ -292,7 +292,7 @@ static IOTHUB_REGISTRYMANAGER_RESULT createTestDeviceWithRetry(IOTHUB_REGISTRYMA
     int creationAttempts = 0;
     bool doesDeviceExist = false;
 
-    ThreadAPI_Sleep(TEST_SLEEP_THROTTLE_MSEC + gb_rand() % 10);  // prevent Too Many Requests (429) error from service
+    ThreadAPI_Sleep(TEST_SLEEP_THROTTLE_MSEC + RANDOM_generate() % 10);  // prevent Too Many Requests (429) error from service
     while (true)
     {
         if (doesDeviceExist == false)
@@ -330,7 +330,7 @@ static IOTHUB_REGISTRYMANAGER_RESULT createTestDeviceWithRetry(IOTHUB_REGISTRYMA
         }
             
         LogError("Creating device %s failed with error %s (%d).  Sleeping %d milliseconds", deviceCreateInfo->deviceId, MU_ENUM_TO_STRING(IOTHUB_REGISTRYMANAGER_RESULT, result), result, TEST_SLEEP_BETWEEN_CREATION_FAILURES_MSEC);
-        ThreadAPI_Sleep(TEST_SLEEP_BETWEEN_CREATION_FAILURES_MSEC + gb_rand() % 15);  // sleep with jitter
+        ThreadAPI_Sleep(TEST_SLEEP_BETWEEN_CREATION_FAILURES_MSEC + RANDOM_generate() % 15);  // sleep with jitter
     }
 
     return result;
@@ -343,7 +343,7 @@ static IOTHUB_REGISTRYMANAGER_RESULT createTestModuleWithRetry(IOTHUB_REGISTRYMA
     int creationAttempts = 0;
     bool doesDeviceExist = false;
 
-    ThreadAPI_Sleep(TEST_SLEEP_THROTTLE_MSEC + gb_rand() % 10);  // prevent Too Many Requests (429) error from service
+    ThreadAPI_Sleep(TEST_SLEEP_THROTTLE_MSEC + RANDOM_generate() % 10);  // prevent Too Many Requests (429) error from service
     while (true)
     {
         if (doesDeviceExist == false)
@@ -376,7 +376,7 @@ static IOTHUB_REGISTRYMANAGER_RESULT createTestModuleWithRetry(IOTHUB_REGISTRYMA
         }
             
         LogError("Creating device/module %s/%s failed with error %d.  Sleeping %d milliseconds", moduleCreateInfo->deviceId, moduleCreateInfo->moduleId, result, TEST_SLEEP_BETWEEN_CREATION_FAILURES_MSEC);
-        ThreadAPI_Sleep(TEST_SLEEP_BETWEEN_CREATION_FAILURES_MSEC + gb_rand() % 15);  // sleep with jitter
+        ThreadAPI_Sleep(TEST_SLEEP_BETWEEN_CREATION_FAILURES_MSEC + RANDOM_generate() % 15);  // sleep with jitter
     }
 
     return result;
@@ -573,7 +573,7 @@ static int updateTestModuleWithRetry(IOTHUB_REGISTRYMANAGER_HANDLE iothub_regist
         }
             
         LogError("Updating device/module %s/%s failed with error %d.  Sleeping %d milliseconds", deviceToProvision->deviceId, deviceToProvision->moduleId, result, TEST_SLEEP_BETWEEN_CREATION_FAILURES_MSEC);
-        ThreadAPI_Sleep(TEST_SLEEP_BETWEEN_CREATION_FAILURES_MSEC + gb_rand() % 15);
+        ThreadAPI_Sleep(TEST_SLEEP_BETWEEN_CREATION_FAILURES_MSEC + RANDOM_generate() % 15);
     }
 
     return result;
@@ -861,7 +861,7 @@ void IoTHubAccount_deinit(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle)
                             break;
                         }
                         LogError("IoTHubRegistryManager_DeleteDevice failed (%d) for SAS Based Device \"%s\"\r\n", i, provisioned_device->deviceId);
-                        ThreadAPI_Sleep(TEST_SLEEP_BETWEEN_DELETE_FAILURES_MSEC + gb_rand() % 15);  // sleep with jitter
+                        ThreadAPI_Sleep(TEST_SLEEP_BETWEEN_DELETE_FAILURES_MSEC + RANDOM_generate() % 15);  // sleep with jitter
                     }
                 }
 
