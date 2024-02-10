@@ -25,3 +25,4 @@ IF ERRORLEVEL 1 (
 
 where msbuild
 msbuild -version
+
