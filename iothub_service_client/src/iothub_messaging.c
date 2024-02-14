@@ -58,7 +58,7 @@ static int ScheduleWork_Thread(void* threadArgument)
         {
             LogError("Lock failed, shall retry");
         }
-        (void)ThreadAPI_Sleep(1);
+        (void)ThreadAPI_Sleep(100);
     }
 
     ThreadAPI_Exit(0);
@@ -303,6 +303,33 @@ IOTHUB_MESSAGING_RESULT IoTHubMessaging_SetTrustedCert(IOTHUB_MESSAGING_CLIENT_H
         else
         {
             result = IoTHubMessaging_LL_SetTrustedCert(iotHubMessagingClientInstance->IoTHubMessagingHandle, trusted_cert);
+            (void)Unlock(iotHubMessagingClientInstance->LockHandle);
+        }
+    }
+    return result;
+}
+
+IOTHUB_MESSAGING_RESULT IoTHubMessaging_SetMaxSendQueueSize(IOTHUB_MESSAGING_CLIENT_HANDLE messagingClientHandle, size_t maxQueueSize)
+{
+    IOTHUB_MESSAGING_RESULT result;
+
+    if (messagingClientHandle == NULL)
+    {
+        LogError("NULL iothubClientHandle");
+        result = IOTHUB_MESSAGING_INVALID_ARG;
+    }
+    else
+    {
+        IOTHUB_MESSAGING_CLIENT_INSTANCE* iotHubMessagingClientInstance = (IOTHUB_MESSAGING_CLIENT_INSTANCE*)messagingClientHandle;
+
+        if (Lock(iotHubMessagingClientInstance->LockHandle) != LOCK_OK)
+        {
+            LogError("Could not acquire lock");
+            result = IOTHUB_MESSAGING_ERROR;
+        }
+        else
+        {
+            result = IoTHubMessaging_LL_SetMaxSendQueueSize(iotHubMessagingClientInstance->IoTHubMessagingHandle, maxQueueSize);
             (void)Unlock(iotHubMessagingClientInstance->LockHandle);
         }
     }

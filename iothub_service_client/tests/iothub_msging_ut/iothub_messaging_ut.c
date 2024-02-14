@@ -849,4 +849,26 @@ TEST_FUNCTION(IoTHubMessaging_SetTrustedCert_Lock_fails)
     IoTHubMessaging_Destroy(messagingClientHandle);
 }
 
+TEST_FUNCTION(IoTHubMessaging_SetMaxSendQueueSize_success)
+{
+    // arrange
+    IOTHUB_MESSAGING_CLIENT_HANDLE messagingClientHandle = IoTHubMessaging_Create(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE);
+    umock_c_reset_all_calls();
+
+    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubMessaging_LL_SetMaxSendQueueSize(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+
+    // act
+    IOTHUB_MESSAGING_RESULT result;
+    result = IoTHubMessaging_SetMaxSendQueueSize(messagingClientHandle, 100);
+
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGING_OK, result);
+
+    // cleanup
+    IoTHubMessaging_Destroy(messagingClientHandle);
+}
+
 END_TEST_SUITE(iothub_messaging_ut)

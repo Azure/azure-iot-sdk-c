@@ -167,6 +167,16 @@ MOCKABLE_FUNCTION(, void, IoTHubMessaging_LL_DoWork, IOTHUB_MESSAGING_HANDLE, me
 */
 MOCKABLE_FUNCTION(, IOTHUB_MESSAGING_RESULT, IoTHubMessaging_LL_SetTrustedCert, IOTHUB_MESSAGING_HANDLE, messagingHandle, const char*, trusted_cert);
 
+/**
+* @brief    Sets the maximum number of in-flight cloud-to-device messages being sent to Azure IoT Hub.
+*
+* @param    messagingHandle The handle created by a call to the create function.
+* @param    maxQueueSize    The maximum number of messages in the send queue.
+*
+* @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
+*/
+MOCKABLE_FUNCTION(, IOTHUB_MESSAGING_RESULT, IoTHubMessaging_LL_SetMaxSendQueueSize, IOTHUB_MESSAGING_HANDLE, messagingHandle, size_t, maxQueueSize);
+
 #ifdef __cplusplus
 }
 #endif

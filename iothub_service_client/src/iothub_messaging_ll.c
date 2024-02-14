@@ -767,6 +767,9 @@ static AMQP_VALUE IoTHubMessaging_LL_FeedbackMessageReceived(const void* context
         IOTHUB_MESSAGING* messagingData = (IOTHUB_MESSAGING*)context;
 
         BINARY_DATA binary_data;
+        binary_data.bytes = NULL;
+        binary_data.length = 0;
+
         JSON_Value* root_value = NULL;
         JSON_Object* feedback_object = NULL;
         JSON_Array* feedback_array = NULL;
@@ -797,7 +800,7 @@ static AMQP_VALUE IoTHubMessaging_LL_FeedbackMessageReceived(const void* context
 
             if ((feedbackBatch = (IOTHUB_SERVICE_FEEDBACK_BATCH*)malloc(sizeof(IOTHUB_SERVICE_FEEDBACK_BATCH))) == NULL)
             {
-                LogError("json_parse_string failed");
+                LogError("Failed allocating IOTHUB_SERVICE_FEEDBACK_BATCH");
                 result = messaging_delivery_rejected("Rejected due to failure reading AMQP message", "Failed to allocate memory for feedback batch");
             }
             else
@@ -1031,7 +1034,8 @@ void IoTHubMessaging_LL_Destroy(IOTHUB_MESSAGING_HANDLE messagingHandle)
         IOTHUB_MESSAGING* messHandle = (IOTHUB_MESSAGING*)messagingHandle;
 
         dequeue_all_send_callback_data(messagingHandle, IOTHUB_MESSAGE_BECAUSE_DESTROY);
-
+        
+        singlylinkedlist_destroy(messagingHandle->send_callback_data);
         free(messHandle->hostname);
         free(messHandle->iothubName);
         free(messHandle->iothubSuffix);
@@ -1528,7 +1532,7 @@ IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_Send(IOTHUB_MESSAGING_HANDLE messagin
                         }
                         else if (messagesender_send_async(messagingHandle->message_sender, amqpMessage, IoTHubMessaging_LL_SendMessageComplete, send_data, 0) == NULL)
                         {
-                            LogError("Could not set outgoing window.");
+                            LogError("messagesender_send_async failed.");
                             dequeue_send_callback_data(send_data);
                             result = IOTHUB_MESSAGING_ERROR;
                         }
