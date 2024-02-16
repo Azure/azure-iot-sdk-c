@@ -1010,9 +1010,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
             {
                 // arrange
                 char error_msg[128];
-                char* call_description = umock_c_negative_tests_get_call_description(i);
-                (void)sprintf(error_msg, "Failure in test %zu/%zu (%s)", i, call_count, call_description);
-                my_gballoc_free(call_description);
+                (void)sprintf(error_msg, "Failure in test %zu/%zu", i, call_count);
 
                 umock_c_negative_tests_reset();
                 umock_c_negative_tests_fail_call(i);
@@ -1176,9 +1174,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
             {
                 // arrange
                 char error_msg[128];
-                char* call_description = umock_c_negative_tests_get_call_description(i);
-                (void)sprintf(error_msg, "Failure in test %zu/%zu (%s)", i, call_count, call_description);
-                my_gballoc_free(call_description);
+                (void)sprintf(error_msg, "Failure in test %zu/%zu", i, call_count);
 
                 umock_c_negative_tests_reset();
                 umock_c_negative_tests_fail_call(i);
@@ -1724,9 +1720,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
             {
                 // arrange
                 char error_msg[128];
-                char* call_description = umock_c_negative_tests_get_call_description(i);
-                (void)sprintf(error_msg, "Failure in test %zu/%zu (%s)", i, call_count, call_description);
-                my_gballoc_free(call_description);
+                (void)sprintf(error_msg, "Failure in test %zu/%zu (%s)", i, call_count);
 
                 umock_c_negative_tests_reset();
                 umock_c_negative_tests_fail_call(i);
