@@ -1137,7 +1137,6 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
     TEST_FUNCTION(IoTHubMessaging_LL_Send_happy_path)
     {
         //arrange
-        size_t number_of_arguments = 1;
         IOTHUB_MESSAGING_HANDLE iothub_messaging_handle = create_messaging_handle();
         ASSERT_ARE_EQUAL(int, 0, open_messaging_handle(iothub_messaging_handle, true));
 
@@ -1559,6 +1558,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         IOTHUB_SERVICE_FEEDBACK_RECORD* feedbackRecord1 = ((IOTHUB_SERVICE_FEEDBACK_RECORD*)(TEST_IOTHUB_SERVICE_FEEDBACK_RECORD_BUFFER + sizeof(IOTHUB_SERVICE_FEEDBACK_RECORD)));
         ASSERT_ARE_EQUAL(int, IOTHUB_FEEDBACK_STATUS_CODE_SUCCESS, feedbackRecord0->statusCode);
         ASSERT_ARE_EQUAL(int, IOTHUB_FEEDBACK_STATUS_CODE_SUCCESS, feedbackRecord1->statusCode);
+        ASSERT_IS_NOT_NULL(amqp_result);
 
         ///cleanup
     }
@@ -1587,6 +1587,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         IOTHUB_SERVICE_FEEDBACK_RECORD* feedbackRecord1 = ((IOTHUB_SERVICE_FEEDBACK_RECORD*)(TEST_IOTHUB_SERVICE_FEEDBACK_RECORD_BUFFER + sizeof(IOTHUB_SERVICE_FEEDBACK_RECORD)));
         ASSERT_ARE_EQUAL(int, IOTHUB_FEEDBACK_STATUS_CODE_EXPIRED, feedbackRecord0->statusCode);
         ASSERT_ARE_EQUAL(int, IOTHUB_FEEDBACK_STATUS_CODE_EXPIRED, feedbackRecord1->statusCode);
+        ASSERT_IS_NOT_NULL(amqp_result);
 
         ///cleanup
     }
@@ -1615,6 +1616,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         IOTHUB_SERVICE_FEEDBACK_RECORD* feedbackRecord1 = ((IOTHUB_SERVICE_FEEDBACK_RECORD*)(TEST_IOTHUB_SERVICE_FEEDBACK_RECORD_BUFFER + sizeof(IOTHUB_SERVICE_FEEDBACK_RECORD)));
         ASSERT_ARE_EQUAL(int, IOTHUB_FEEDBACK_STATUS_CODE_DELIVER_COUNT_EXCEEDED, feedbackRecord0->statusCode);
         ASSERT_ARE_EQUAL(int, IOTHUB_FEEDBACK_STATUS_CODE_DELIVER_COUNT_EXCEEDED, feedbackRecord1->statusCode);
+        ASSERT_IS_NOT_NULL(amqp_result);
 
         ///cleanup
     }
@@ -1643,6 +1645,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         IOTHUB_SERVICE_FEEDBACK_RECORD* feedbackRecord1 = ((IOTHUB_SERVICE_FEEDBACK_RECORD*)(TEST_IOTHUB_SERVICE_FEEDBACK_RECORD_BUFFER + sizeof(IOTHUB_SERVICE_FEEDBACK_RECORD)));
         ASSERT_ARE_EQUAL(int, IOTHUB_FEEDBACK_STATUS_CODE_REJECTED, feedbackRecord0->statusCode);
         ASSERT_ARE_EQUAL(int, IOTHUB_FEEDBACK_STATUS_CODE_REJECTED, feedbackRecord1->statusCode);
+        ASSERT_IS_NOT_NULL(amqp_result);
 
         ///cleanup
     }
@@ -1671,6 +1674,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         IOTHUB_SERVICE_FEEDBACK_RECORD* feedbackRecord1 = ((IOTHUB_SERVICE_FEEDBACK_RECORD*)(TEST_IOTHUB_SERVICE_FEEDBACK_RECORD_BUFFER + sizeof(IOTHUB_SERVICE_FEEDBACK_RECORD)));
         ASSERT_ARE_EQUAL(int, IOTHUB_FEEDBACK_STATUS_CODE_UNKNOWN, feedbackRecord0->statusCode);
         ASSERT_ARE_EQUAL(int, IOTHUB_FEEDBACK_STATUS_CODE_UNKNOWN, feedbackRecord1->statusCode);
+        ASSERT_IS_NOT_NULL(amqp_result);
 
         ///cleanup
     }
@@ -1697,6 +1701,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         ASSERT_ARE_EQUAL(int, 1, saved_feedback_message_received_count);
         IOTHUB_SERVICE_FEEDBACK_RECORD* feedbackRecord0 = ((IOTHUB_SERVICE_FEEDBACK_RECORD*)TEST_IOTHUB_SERVICE_FEEDBACK_RECORD_BUFFER);
         ASSERT_ARE_EQUAL(int, IOTHUB_FEEDBACK_STATUS_CODE_UNKNOWN, feedbackRecord0->statusCode);
+        ASSERT_IS_NOT_NULL(amqp_result);
 
         ///cleanup
     }
