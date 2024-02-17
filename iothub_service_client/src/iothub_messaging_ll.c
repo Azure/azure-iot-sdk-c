@@ -183,7 +183,7 @@ static bool remove_all_send_data_condition_function(const void* item, const void
 
     free(send_data);
 
-    *continue_processing = false;
+    *continue_processing = true;
     return true;
 }
 
@@ -732,7 +732,7 @@ static void IoTHubMessaging_LL_SendMessageComplete(void* context, MESSAGE_SEND_R
 
         if (send_data->callback != NULL)
         {
-            // Convert a send_result to an IOTHUB_MESSAGING_RESULT.
+            // Convert a MESSAGE_SEND_RESULT to an IOTHUB_MESSAGING_RESULT.
             IOTHUB_MESSAGING_RESULT msg_result;
             switch (send_result)
             {

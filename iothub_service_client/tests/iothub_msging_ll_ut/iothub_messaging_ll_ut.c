@@ -97,6 +97,8 @@ static STRING_HANDLE TEST_STRING_HANDLE = (STRING_HANDLE)0x4242;
 #define SIZE_OF_IOTHUB_MESSAGING_STRUCT 224
 static uint8_t TEST_IOTHUB_MESSAGING_INSTANCE[SIZE_OF_IOTHUB_MESSAGING_STRUCT];
 
+#define SOME_RANDOM_NUMBER 50304050
+
 static uint8_t TEST_SEND_TARGET_ADDRESS_BUFFER[64];
 static uint8_t TEST_RECEIVE_TARGET_ADDRESS_BUFFER[64];
 static uint8_t TEST_AUTH_CID_BUFFER[128];
@@ -1469,7 +1471,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         IOTHUB_MESSAGING_HANDLE iothub_messaging_handle = create_messaging_handle();
         ASSERT_ARE_EQUAL(int, 0, open_messaging_handle(iothub_messaging_handle, false));
 
-        int feedbackContext1 = 50000001;
+        int feedbackContext1 = SOME_RANDOM_NUMBER;
         (void)IoTHubMessaging_LL_SetFeedbackMessageCallback(
             iothub_messaging_handle, test_func_iothub_feedback_message_received_callback, &feedbackContext1);
 
@@ -1492,7 +1494,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         IOTHUB_MESSAGING_HANDLE iothub_messaging_handle = create_messaging_handle();
         ASSERT_ARE_EQUAL(int, 0, open_messaging_handle(iothub_messaging_handle, false));
 
-        int feedbackContext1 = 50000001;
+        int feedbackContext1 = SOME_RANDOM_NUMBER;
         (void)IoTHubMessaging_LL_SetFeedbackMessageCallback(
             iothub_messaging_handle, test_func_iothub_feedback_message_received_callback, &feedbackContext1);
 
@@ -1720,7 +1722,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
             {
                 // arrange
                 char error_msg[128];
-                (void)sprintf(error_msg, "Failure in test %zu/%zu (%s)", i, call_count);
+                (void)sprintf(error_msg, "Failure in test %zu/%zu", i, call_count);
 
                 umock_c_negative_tests_reset();
                 umock_c_negative_tests_fail_call(i);

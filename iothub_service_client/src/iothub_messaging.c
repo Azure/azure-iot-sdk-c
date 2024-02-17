@@ -58,7 +58,7 @@ static int ScheduleWork_Thread(void* threadArgument)
         {
             LogError("Lock failed, shall retry");
         }
-        (void)ThreadAPI_Sleep(100);
+        (void)ThreadAPI_Sleep(1);
     }
 
     ThreadAPI_Exit(0);
@@ -315,7 +315,7 @@ IOTHUB_MESSAGING_RESULT IoTHubMessaging_SetMaxSendQueueSize(IOTHUB_MESSAGING_CLI
 
     if (messagingClientHandle == NULL)
     {
-        LogError("NULL iothubClientHandle");
+        LogError("NULL messagingClientHandle");
         result = IOTHUB_MESSAGING_INVALID_ARG;
     }
     else
