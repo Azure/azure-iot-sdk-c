@@ -1032,8 +1032,8 @@ void IoTHubMessaging_LL_Destroy(IOTHUB_MESSAGING_HANDLE messagingHandle)
     if (messagingHandle != NULL)
     {
         IOTHUB_MESSAGING* messHandle = (IOTHUB_MESSAGING*)messagingHandle;
-
-        dequeue_all_send_callback_data(messagingHandle, IOTHUB_MESSAGE_BECAUSE_DESTROY);
+        IOTHUB_MESSAGING_RESULT a;
+        dequeue_all_send_callback_data(messagingHandle, IOTHUB_MESSAGING_BECAUSE_DESTROY);
         
         singlylinkedlist_destroy(messagingHandle->send_callback_data);
         free(messHandle->hostname);

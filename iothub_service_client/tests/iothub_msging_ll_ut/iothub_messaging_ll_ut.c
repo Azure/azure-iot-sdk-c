@@ -1445,10 +1445,10 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         int sendContext1 = 191919191;
         umock_c_reset_all_calls();
         set_IoTHubMessaging_LL_Send_expected_calls();
-        IOTHUB_MESSAGE_RESULT sendApiResult = IoTHubMessaging_LL_Send(
+        IOTHUB_MESSAGING_RESULT sendApiResult = IoTHubMessaging_LL_Send(
             iothub_messaging_handle, TEST_DEVICE_ID, TEST_IOTHUB_MESSAGE_HANDLE, test_iothub_send_complete_callback, &sendContext1);
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-        ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGE_OK, sendApiResult);
+        ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGING_OK, sendApiResult);
 
         umock_c_reset_all_calls();
         STRICT_EXPECTED_CALL(singlylinkedlist_remove_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
