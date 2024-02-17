@@ -1563,6 +1563,7 @@ void IoTHubMessaging_LL_DoWork(IOTHUB_MESSAGING_HANDLE messagingHandle)
 IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_SetTrustedCert(IOTHUB_MESSAGING_HANDLE messagingHandle, const char* trusted_cert)
 {
     IOTHUB_MESSAGING_RESULT result;
+
     if (messagingHandle == NULL || trusted_cert == NULL)
     {
         LogError("Invalid argument messagingHandle: %p trusted_cert: %p", messagingHandle, trusted_cert);
@@ -1570,7 +1571,7 @@ IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_SetTrustedCert(IOTHUB_MESSAGING_HANDL
     }
     else
     {
-        char* temp_cert;
+        char* temp_cert = NULL;
         if (mallocAndStrcpy_s(&temp_cert, trusted_cert) != 0)
         {
             result = IOTHUB_MESSAGING_ERROR;
