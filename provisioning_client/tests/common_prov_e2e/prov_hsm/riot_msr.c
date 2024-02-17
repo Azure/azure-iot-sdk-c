@@ -7,7 +7,7 @@
 #include <time.h>
 
 #include "azure_c_shared_utility/gballoc.h"
-#include "azure_c_shared_utility/gb_rand.h"
+#include "azure_c_shared_utility/random.h"
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/uniqueid.h"
 
@@ -415,7 +415,7 @@ static void generate_subject_name(void)
         unsigned char rand_buff[RANDOM_BUFFER_LENGTH];
         for (size_t index = 0; index < RANDOM_BUFFER_LENGTH; index++)
         {
-            rand_buff[index] = (unsigned char)gb_rand();
+            rand_buff[index] = (unsigned char)RANDOM_generate();
         }
 
         strcpy(g_device_name, DEVICE_PREFIX);
@@ -447,13 +447,13 @@ static void generate_keys(void)
         srand((unsigned int)time(NULL));
         for (size_t index = 0; index < DICE_UDS_LENGTH; index++)
         {
-            g_uds_seed[index] = (unsigned char)gb_rand();
+            g_uds_seed[index] = (unsigned char)RANDOM_generate();
         }
         for (size_t index = 0; index < RIOT_DIGEST_LENGTH; index++)
         {
-            firmware_id[index] = (unsigned char)gb_rand();
-            g_CDI[index] = (unsigned char)gb_rand();
-            random_digest[index] = (unsigned char)gb_rand();
+            firmware_id[index] = (unsigned char)RANDOM_generate();
+            g_CDI[index] = (unsigned char)RANDOM_generate();
+            random_digest[index] = (unsigned char)RANDOM_generate();
         }
         DiceSHA256(g_uds_seed, DICE_UDS_LENGTH, g_digest);
         DiceSHA256_2(g_digest, RIOT_DIGEST_LENGTH, random_digest, RIOT_DIGEST_LENGTH, g_CDI);
