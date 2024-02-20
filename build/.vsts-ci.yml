@@ -893,11 +893,12 @@ jobs:
   displayName: "Xcode Native"
   steps:
   - script: |
-      export DYLD_LIBRARY_PATH=/usr/local/Cellar/curl/7.61.0/lib
+      curl --version
+      export DYLD_LIBRARY_PATH="/usr/local/Cellar/curl/$(ls -b /usr/local/Cellar/curl | grep -e '[0-9\.]')/lib"
       ./jenkins/osx_xcode_native.sh
     displayName: 'Build'
   - script: |
-      export DYLD_LIBRARY_PATH=/usr/local/Cellar/curl/7.61.0/lib
+      export DYLD_LIBRARY_PATH="/usr/local/Cellar/curl/$(ls -b /usr/local/Cellar/curl | grep -e '[0-9\.]')/lib"
       cd cmake && ctest -T test --no-compress-output -C "Debug" -V -j 8 --schedule-random
     displayName: "Run Tests"
     env:
