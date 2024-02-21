@@ -43,7 +43,9 @@ MU_DEFINE_ENUM_WITHOUT_INVALID(IOTHUB_MESSAGE_SEND_STATE, IOTHUB_MESSAGE_SEND_ST
     IOTHUB_MESSAGING_ERROR,                  \
     IOTHUB_MESSAGING_INVALID_JSON,           \
     IOTHUB_MESSAGING_DEVICE_EXIST,           \
-    IOTHUB_MESSAGING_CALLBACK_NOT_SET        \
+    IOTHUB_MESSAGING_CALLBACK_NOT_SET,       \
+    IOTHUB_MESSAGING_QUEUE_FULL,             \
+    IOTHUB_MESSAGING_BECAUSE_DESTROY
 
 MU_DEFINE_ENUM_WITHOUT_INVALID(IOTHUB_MESSAGING_RESULT, IOTHUB_MESSAGING_RESULT_VALUES);
 
@@ -165,6 +167,16 @@ MOCKABLE_FUNCTION(, void, IoTHubMessaging_LL_DoWork, IOTHUB_MESSAGING_HANDLE, me
 * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
 */
 MOCKABLE_FUNCTION(, IOTHUB_MESSAGING_RESULT, IoTHubMessaging_LL_SetTrustedCert, IOTHUB_MESSAGING_HANDLE, messagingHandle, const char*, trusted_cert);
+
+/**
+* @brief    Sets the maximum number of in-flight cloud-to-device messages being sent to Azure IoT Hub.
+*
+* @param    messagingHandle The handle created by a call to the create function.
+* @param    maxQueueSize    The maximum number of messages in the send queue.
+*
+* @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
+*/
+MOCKABLE_FUNCTION(, IOTHUB_MESSAGING_RESULT, IoTHubMessaging_LL_SetMaxSendQueueSize, IOTHUB_MESSAGING_HANDLE, messagingHandle, size_t, maxQueueSize);
 
 #ifdef __cplusplus
 }
