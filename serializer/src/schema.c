@@ -1695,7 +1695,7 @@ SCHEMA_STRUCT_TYPE_HANDLE Schema_CreateStructType(SCHEMA_HANDLE schemaHandle, co
                     if (schema->StructTypeCount > 0)
                     {
                         SCHEMA_STRUCT_TYPE_HANDLE *oldStructTypes;
-                        size_t realloc_size = safe_multiply_size_t(sizeof(SCHEMA_STRUCT_TYPE_HANDLE) * schema->StructTypeCount);
+                        size_t realloc_size = safe_multiply_size_t(sizeof(SCHEMA_STRUCT_TYPE_HANDLE), schema->StructTypeCount);
                         if (realloc_size == SIZE_MAX ||
                             (oldStructTypes = (SCHEMA_STRUCT_TYPE_HANDLE*)realloc(schema->StructTypes, realloc_size)) == NULL)
                         {
@@ -1893,7 +1893,7 @@ SCHEMA_RESULT Schema_AddStructTypeProperty(SCHEMA_STRUCT_TYPE_HANDLE structTypeH
                     if (structType->PropertyCount > 0)
                     {
                         SCHEMA_PROPERTY_HANDLE *oldProperties;
-                        size_t realloc_size = safe_multiply_size_t(sizeof(SCHEMA_PROPERTY_HANDLE) * structType->PropertyCount);
+                        size_t realloc_size = safe_multiply_size_t(sizeof(SCHEMA_PROPERTY_HANDLE), structType->PropertyCount);
                         if (realloc_size == SIZE_MAX ||
                             (oldProperties = (SCHEMA_PROPERTY_HANDLE*)realloc(structType->Properties, realloc_size)) == NULL)
                         {
