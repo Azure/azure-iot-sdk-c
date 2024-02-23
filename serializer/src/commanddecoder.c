@@ -201,15 +201,11 @@ static EXECUTE_COMMAND_RESULT DecodeAndExecuteModelAction(COMMAND_DECODER_HANDLE
             else
             {
                 AGENT_DATA_TYPE* arguments = NULL;
-                size_t calloc_size;
+                size_t calloc_size = safe_multiply_size_t(sizeof(AGENT_DATA_TYPE), argCount);
 
-                if (argCount > 0)
+                if (calloc_size != SIZE_MAX && argCount > 0)
                 {
-                    calloc_size = safe_multiply_size_t(sizeof(AGENT_DATA_TYPE), argCount);
-                    if (calloc_size != SIZE_MAX)
-                    {
-                        arguments = (AGENT_DATA_TYPE*)calloc(1, calloc_size);
-                    }
+                    arguments = (AGENT_DATA_TYPE*)calloc(1, calloc_size);
                 }
 
                 if ((argCount > 0) &&
