@@ -55,7 +55,7 @@ static int deviceMethodCallback(const char* method_name, const unsigned char* pa
     int result;
     char* payloadZeroTerminated;
     size_t malloc_size = safe_add_size_t(size, 1);
-    if (malloc_size == MAX_SIZE ||
+    if (malloc_size == SIZE_MAX ||
         (payloadZeroTerminated = (char*)malloc(malloc_size)) == NULL)
     {
         LogError("failure in malloc, size:%zu", malloc_size);
