@@ -336,7 +336,7 @@ static SCHEMA_RESULT AddModelProperty(SCHEMA_MODEL_TYPE_HANDLE_DATA* modelType, 
                     if (modelType->PropertyCount > 0)
                     {
                         SCHEMA_PROPERTY_HANDLE* oldProperties;
-                        size_t realloc_size = safe_multiply_size_t(sizeof(SCHEMA_PROPERTY_HANDLE), modelType->PropertyCount);
+                        realloc_size = safe_multiply_size_t(sizeof(SCHEMA_PROPERTY_HANDLE), modelType->PropertyCount);
                         if (realloc_size == SIZE_MAX ||
                             (oldProperties = (SCHEMA_PROPERTY_HANDLE*)realloc(modelType->Properties, realloc_size)) == NULL)
                         {
@@ -698,7 +698,7 @@ SCHEMA_MODEL_TYPE_HANDLE Schema_CreateModelType(SCHEMA_HANDLE schemaHandle, cons
                 if ((result == NULL) &&(schema->ModelTypeCount>0))
                 {
                     SCHEMA_MODEL_TYPE_HANDLE* oldModelTypes;
-                    size_t realloc_size = safe_multiply_size_t(sizeof(SCHEMA_MODEL_TYPE_HANDLE), schema->ModelTypeCount);
+                    realloc_size = safe_multiply_size_t(sizeof(SCHEMA_MODEL_TYPE_HANDLE), schema->ModelTypeCount);
                     if (realloc_size == SIZE_MAX ||
                         (oldModelTypes = (SCHEMA_MODEL_TYPE_HANDLE*)realloc(schema->ModelTypes, realloc_size)) == NULL)
                     {
@@ -883,7 +883,7 @@ SCHEMA_ACTION_HANDLE Schema_CreateModelAction(SCHEMA_MODEL_TYPE_HANDLE modelType
                         if (modelType->ActionCount > 0)
                         {
                             SCHEMA_ACTION_HANDLE* oldActions;
-                            size_t realloc_size = safe_multiply_size_t(sizeof(SCHEMA_ACTION_HANDLE), modelType->ActionCount);
+                            realloc_size = safe_multiply_size_t(sizeof(SCHEMA_ACTION_HANDLE), modelType->ActionCount);
                             if (realloc_size == SIZE_MAX ||
                                 (oldActions = (SCHEMA_ACTION_HANDLE*)realloc(modelType->Actions, realloc_size)) == NULL)
                             {
@@ -1062,7 +1062,7 @@ SCHEMA_RESULT Schema_AddModelActionArgument(SCHEMA_ACTION_HANDLE actionHandle, c
                     if (action->ArgumentCount > 0)
                     {
                         SCHEMA_ACTION_ARGUMENT_HANDLE* oldArguments;
-                        size_t realloc_size = safe_multiply_size_t(sizeof(SCHEMA_ACTION_ARGUMENT_HANDLE), action->ArgumentCount);
+                        realloc_size = safe_multiply_size_t(sizeof(SCHEMA_ACTION_ARGUMENT_HANDLE), action->ArgumentCount);
                         if (realloc_size == SIZE_MAX ||
                             (oldArguments = (SCHEMA_ACTION_ARGUMENT_HANDLE*)realloc(action->ArgumentHandles, realloc_size)) == NULL)
                         {
@@ -1695,7 +1695,7 @@ SCHEMA_STRUCT_TYPE_HANDLE Schema_CreateStructType(SCHEMA_HANDLE schemaHandle, co
                     if (schema->StructTypeCount > 0)
                     {
                         SCHEMA_STRUCT_TYPE_HANDLE *oldStructTypes;
-                        size_t realloc_size = safe_multiply_size_t(sizeof(SCHEMA_STRUCT_TYPE_HANDLE), schema->StructTypeCount);
+                        realloc_size = safe_multiply_size_t(sizeof(SCHEMA_STRUCT_TYPE_HANDLE), schema->StructTypeCount);
                         if (realloc_size == SIZE_MAX ||
                             (oldStructTypes = (SCHEMA_STRUCT_TYPE_HANDLE*)realloc(schema->StructTypes, realloc_size)) == NULL)
                         {
@@ -1893,7 +1893,7 @@ SCHEMA_RESULT Schema_AddStructTypeProperty(SCHEMA_STRUCT_TYPE_HANDLE structTypeH
                     if (structType->PropertyCount > 0)
                     {
                         SCHEMA_PROPERTY_HANDLE *oldProperties;
-                        size_t realloc_size = safe_multiply_size_t(sizeof(SCHEMA_PROPERTY_HANDLE), structType->PropertyCount);
+                        realloc_size = safe_multiply_size_t(sizeof(SCHEMA_PROPERTY_HANDLE), structType->PropertyCount);
                         if (realloc_size == SIZE_MAX ||
                             (oldProperties = (SCHEMA_PROPERTY_HANDLE*)realloc(structType->Properties, realloc_size)) == NULL)
                         {
