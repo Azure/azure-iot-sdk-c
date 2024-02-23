@@ -578,6 +578,7 @@ static char* read_ca_certificate_from_file(const char* certificate_file_name)
                 (result = calloc(1, calloc_size)) == NULL)
             {
                 LogError("Cannot allocate %zu bytes", calloc_size);
+                result = NULL;
             }
             else if ((fread(result, 1, file_size, file_stream) == 0) || (ferror(file_stream) != 0))
             {
