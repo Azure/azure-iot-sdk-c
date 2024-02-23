@@ -698,7 +698,7 @@ SCHEMA_MODEL_TYPE_HANDLE Schema_CreateModelType(SCHEMA_HANDLE schemaHandle, cons
                 if ((result == NULL) &&(schema->ModelTypeCount>0))
                 {
                     SCHEMA_MODEL_TYPE_HANDLE* oldModelTypes;
-                    size_t realloc_size = safe_multiply_size_t(sizeof(sizeof(SCHEMA_MODEL_TYPE_HANDLE), schema->ModelTypeCount);
+                    size_t realloc_size = safe_multiply_size_t(sizeof(SCHEMA_MODEL_TYPE_HANDLE), schema->ModelTypeCount);
                     if (realloc_size == SIZE_MAX ||
                         (oldModelTypes = (SCHEMA_MODEL_TYPE_HANDLE*)realloc(schema->ModelTypes, realloc_size)) == NULL)
                     {
