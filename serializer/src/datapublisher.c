@@ -13,6 +13,7 @@
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/vector.h"
+#include "azure_c_shared_utility/safe_math.h"
 
 MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_RESULT_VALUES)
 
@@ -171,14 +172,20 @@ DATA_PUBLISHER_RESULT DataPublisher_PublishTransacted(TRANSACTION_HANDLE transac
 
             if (propertySlot == NULL)
             {
-                DATA_MARSHALLER_VALUE* newValues = (DATA_MARSHALLER_VALUE*)realloc(transaction->Values, sizeof(DATA_MARSHALLER_VALUE)* (transaction->ValueCount + 1));
-                if (newValues != NULL)
+                DATA_MARSHALLER_VALUE* newValues;
+                size_t realloc_size = safe_multiply_size_t(sizeof(DATA_MARSHALLER_VALUE), safe_add_size_t(transaction->ValueCount, 1));
+                if (realloc_size != SIZE_MAX &&
+                    (newValues = (DATA_MARSHALLER_VALUE*)realloc(transaction->Values, realloc_size)) != NULL)
                 {
                     transaction->Values = newValues;
                     propertySlot = &transaction->Values[transaction->ValueCount];
                     propertySlot->Value = NULL;
                     propertySlot->PropertyPath = NULL;
                     transaction->ValueCount++;
+                }
+                else
+                {
+                    LogError("realloc failed, size:%zu", realloc_size);
                 }
             }
 

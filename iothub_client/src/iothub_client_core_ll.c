@@ -17,6 +17,7 @@
 #include "azure_c_shared_utility/singlylinkedlist.h"
 #include "azure_c_shared_utility/shared_util_options.h"
 #include "azure_c_shared_utility/agenttime.h"
+#include "azure_c_shared_utility/safe_math.h"
 
 #include "iothub_client_core_ll.h"
 #include "iothub_client_options.h"
@@ -732,10 +733,12 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_ParseMethodToCommand(const char* method
         }
         else
         {
-            size_t component_name_length = componentSplit - method_name;
-            if ((*component_name = malloc(component_name_length + 1)) == NULL)
+            size_t component_name_length = safe_subtract_size_t(componentSplit, method_name);
+            size_t malloc_size = safe_add_size_t(component_name_length, 1);
+            if (malloc_size == SIZE_MAX ||
+                (*component_name = malloc(malloc_size)) == NULL)
             {
-                LogError("Cannot allocate component name");
+                LogError("Cannot allocate component name, size:%zu", malloc_size);
                 result = IOTHUB_CLIENT_ERROR;
             }
             else
@@ -975,24 +978,27 @@ static IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* initialize_iothub_client(const IOTHUB_
                     else
                     {
                         size_t suffix_len = strlen(whereIsDot);
-                        IoTHubName = (char*)malloc(whereIsDot - hostname + 1);
-                        if (IoTHubName == NULL)
+                        size_t calloc_size_hub_name = safe_add_size_t(safe_subtract_size_t(whereIsDot, hostname), 1);
+                        size_t malloc_size_hub_suffix = safe_add_size_t(suffix_len, 1);
+                        if (malloc_size == SIZE_MAX ||
+                            (IoTHubName = (char*)calloc(1, calloc_size_hub_name)) == NULL)
                         {
-                            LogError("unable to malloc");
+                            LogError("unable to malloc, size:%zu", calloc_size_hub_name);
                             IoTHubClient_Auth_Destroy(result->authorization_module);
                             free(result);
                             result = NULL;
                         }
-                        else if ((IoTHubSuffix = (char*)malloc(suffix_len + 1)) == NULL)
+                        else if (malloc_size_hub_suffix == SIZE_MAX ||
+                            (IoTHubSuffix = (char*)malloc(malloc_size_hub_suffix)) == NULL)
                         {
                             LogError("unable to malloc");
                             IoTHubClient_Auth_Destroy(result->authorization_module);
+                            free(IoTHubName);
                             free(result);
                             result = NULL;
                         }
                         else
                         {
-                            memset(IoTHubName, 0, whereIsDot - hostname + 1);
                             (void)memcpy(IoTHubName, hostname, whereIsDot - hostname);
                             (void)strcpy(IoTHubSuffix, whereIsDot+1);
 
@@ -1270,26 +1276,26 @@ IOTHUB_CLIENT_CORE_LL_HANDLE IoTHubClientCore_LL_CreateFromDeviceAuth(const char
             {
                 if (*iterator == '.')
                 {
-                    size_t length = iterator - initial;
-                    iothub_name = (char*)malloc(length + 1);
-                    if (iothub_name != NULL)
+                    size_t length = safe_subtract_size_t(iterator, initial);
+                    size_t calloc_size = safe_add_size_t(length, 1);
+                    if (calloc_size != SIZE_MAX &&
+                        (iothub_name = (char*)calloc(1, calloc_size)) != NULL)
                     {
-                        memset(iothub_name, 0, length + 1);
                         memcpy(iothub_name, initial, length);
                         config->iotHubName = iothub_name;
 
-                        length = strlen(initial) - length - 1;
-                        iothub_suffix = (char*)malloc(length + 1);
-                        if (iothub_suffix != NULL)
+                        length = safe_subtract_size_t(safe_subtract_size_t(strlen(initial), length), 1);
+                        calloc_size = safe_add_size_t(length, 1);
+                        if (calloc_size != SIZE_MAX &&
+                            (iothub_suffix = (char*)calloc(calloc_size)) != NULL)
                         {
-                            memset(iothub_suffix, 0, length + 1);
                             memcpy(iothub_suffix, iterator + 1, length);
                             config->iotHubSuffix = iothub_suffix;
                             break;
                         }
                         else
                         {
-                            LogError("Failed to allocate iothub suffix");
+                            LogError("Failed to allocate iothub suffix, size:%zu", calloc_size);
                             free(iothub_name);
                             iothub_name = NULL;
                             result = NULL;
@@ -1297,7 +1303,7 @@ IOTHUB_CLIENT_CORE_LL_HANDLE IoTHubClientCore_LL_CreateFromDeviceAuth(const char
                     }
                     else
                     {
-                        LogError("Failed to allocate iothub name");
+                        LogError("Failed to allocate iothub name, size:%zu", calloc_size);
                         result = NULL;
                     }
                 }

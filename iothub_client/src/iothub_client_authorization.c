@@ -13,6 +13,7 @@
 #include "azure_c_shared_utility/shared_util_options.h"
 #include "azure_c_shared_utility/azure_base64.h"
 #include "azure_c_shared_utility/buffer_.h"
+#include "azure_c_shared_utility/safe_math.h"
 
 #ifdef USE_PROV_MODULE
 #include "azure_prov_client/internal/iothub_auth_client.h"
@@ -572,9 +573,11 @@ static char* read_ca_certificate_from_file(const char* certificate_file_name)
         {
             rewind(file_stream);
 
-            if ((result = calloc(1, file_size + 1)) == NULL)
+            size_t calloc_size = safe_add_size_t(file_size, 1);
+            if (calloc_size == SIZE_MAX ||
+                (result = calloc(1, calloc_size)) == NULL)
             {
-                LogError("Cannot allocate %lu bytes", (unsigned long)file_size);
+                LogError("Cannot allocate %zu bytes", calloc_size);
             }
             else if ((fread(result, 1, file_size, file_stream) == 0) || (ferror(file_stream) != 0))
             {

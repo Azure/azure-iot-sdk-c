@@ -15,6 +15,7 @@
 #include "azure_c_shared_utility/shared_util_options.h"
 #include "azure_c_shared_utility/urlencode.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
+#include "azure_c_shared_utility/safe_math.h"
 
 #include "iothub_client_core_ll.h"
 #include "iothub_client_options.h"
@@ -766,22 +767,25 @@ static int parseAzureBlobSasUri(const char* sasUri, char** blobStorageHostname, 
         }
         else
         {
-            size_t hostnameSize = relativePathBegin - hostnameBegin;
-
-            if ((hostname = malloc(hostnameSize + 1)) == NULL)
+            size_t hostnameSize = safe_subtract_size_t(relativePathBegin, hostnameBegin);
+            size_t malloc_size = safe_add_size_t(hostnameSize, 1);
+            if (malloc_size == SIZE_MAX ||
+                (hostname = malloc(malloc_size)) == NULL)
             {
-                LogError("failed to allocate memory for blob storage hostname");
+                LogError("failed to allocate memory for blob storage hostname, size:%zu", malloc_size);
                 result = MU_FAILURE;
             }
             else
             {
                 (void)memcpy(hostname, hostnameBegin, hostnameSize);
                 hostname[hostnameSize] = '\0';
-                size_t relativePathSize = sasUriLength - (relativePathBegin - sasUri);
+                size_t relativePathSize = safe_subtract_size_t(sasUriLength, safe_subtract_size_t(relativePathBegin, sasUri));
+                malloc_size = safe_add_size_t(relativePathSize, 1);
 
-                if ((relativePath = malloc(relativePathSize + 1)) == NULL)
+                if (malloc_size == SIZE_MAX ||
+                    (relativePath = malloc(malloc_size)) == NULL)
                 {
-                    LogError("failed to allocate memory for blob storage relative path");
+                    LogError("failed to allocate memory for blob storage relative path, size:%zu", malloc_size);
                     free(hostname);
                     result = MU_FAILURE;
                 }
@@ -824,10 +828,13 @@ IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE IoTHubClient_LL_UploadToBlob_Create(const I
 
             size_t iotHubNameLength = strlen(config->iotHubName);
             size_t iotHubSuffixLength = strlen(config->iotHubSuffix);
-            upload_data->hostname = malloc(iotHubNameLength + 1 + iotHubSuffixLength + 1); /*first +1 is because "." the second +1 is because \0*/
-            if (upload_data->hostname == NULL)
+
+            /*first +1 is because "." the second +1 is because \0*/
+            size_t malloc_size = safe_add_size_t(safe_add_size_t(safe_add_size_t(iotHubNameLength, 1), iotHubSuffixLength), 1);
+            if (malloc_size == SIZE_MAX ||
+                (upload_data->hostname = malloc(malloc_size)) == NULL)
             {
-                LogError("Failed malloc allocation");
+                LogError("Failed malloc allocation, size:%zu", malloc_size);
                 free(upload_data);
                 upload_data = NULL;
             }

@@ -16,6 +16,7 @@
 #include "azure_c_shared_utility/tickcounter.h"
 #include "azure_c_shared_utility/tlsio.h"
 #include "azure_c_shared_utility/platform.h"
+#include "azure_c_shared_utility/safe_math.h"
 #include "azure_c_shared_utility/string_tokenizer.h"
 #include "azure_c_shared_utility/shared_util_options.h"
 #include "azure_c_shared_utility/urlencode.h"
@@ -1438,10 +1439,12 @@ static const char* addInputNamePropertyToMsg(IOTHUB_MESSAGE_HANDLE iotHubMessage
         }
         else 
         {
-            size_t inputNameLength = inputNameEnd - inputNameStart;
-            if ((inputNameCopy = malloc(inputNameLength + 1)) == NULL)
+            size_t inputNameLength = safe_subtract_size_t(inputNameEnd, inputNameStart);
+            size_t malloc_size = safe_add_size_t(inputNameLength, 1);
+            if (malloc_size == SIZE_MAX ||
+                (inputNameCopy = malloc(malloc_size)) == NULL)
             {
-                LogError("Cannot allocate input name");
+                LogError("Cannot allocate input name, size:%zu", malloc_size);
                 result = NULL;
             }
             else
@@ -1641,9 +1644,11 @@ static int addApplicationPropertyToMessage(MAP_HANDLE propertyMap, const char* p
     // We need to make a copy of propertyName at this point; we don't own the buffer it's part of
     // so we can't just sneak a temporary '\0' in there.  We don't need to make a copy of propertyValue
     // since its part of an otherwise null terminated string.
-    if ((propertyNameCopy = (char*)malloc(propertyNameLength + 1)) == NULL)
+    size_t malloc_size = safe_add_size_t(propertyNameLength, 1);
+    if (malloc_size == SIZE_MAX ||
+        (propertyNameCopy = (char*)malloc(malloc_size)) == NULL)
     {
-        LogError("Failed allocating property information");
+        LogError("Failed allocating property information, size:%zu", malloc_size);
         result = MU_FAILURE;
     }
     else

@@ -8,6 +8,7 @@
 #include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/strings.h"
 #include "azure_c_shared_utility/uniqueid.h"
+#include "azure_c_shared_utility/safe_math.h"
 #include "azure_uamqp_c/sasl_mechanism.h"
 #include "azure_uamqp_c/saslclientio.h"
 #include "azure_uamqp_c/sasl_mssbcbs.h"
@@ -165,15 +166,15 @@ static int create_connection_handle(AMQP_CONNECTION_INSTANCE* instance)
         connection_io_transport = instance->underlying_io_transport;
     }
 
-    if ((unique_container_id = (char*)malloc(sizeof(char) * DEFAULT_UNIQUE_ID_LENGTH + 1)) == NULL)
+    size_t calloc_size = safe_multiply_size_t(sizeof(char), safe_add_size_t(DEFAULT_UNIQUE_ID_LENGTH, 1));
+    if (calloc_size == SIZE_MAX ||
+        (unique_container_id = (char*)calloc(1, calloc_size)) == NULL)
     {
         result = __LINE__;
-        LogError("Failed creating the AMQP connection (failed creating unique ID container)");
+        LogError("Failed creating the AMQP connection (failed creating unique ID container), size:%zu", calloc_size);
     }
     else
     {
-        memset(unique_container_id, 0, sizeof(char) * DEFAULT_UNIQUE_ID_LENGTH + 1);
-
         if (UniqueId_Generate(unique_container_id, DEFAULT_UNIQUE_ID_LENGTH) != UNIQUEID_OK)
         {
             result = MU_FAILURE;
