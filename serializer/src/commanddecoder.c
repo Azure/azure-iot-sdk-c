@@ -615,7 +615,7 @@ EXECUTE_COMMAND_RESULT CommandDecoder_ExecuteCommand(COMMAND_DECODER_HANDLE hand
             result = EXECUTE_COMMAND_ERROR;
         }
         else if ((malloc_size = safe_add_size_t(size, 1)) == SIZE_MAX ||
-            (commandJSON = (char*)malloc(malloc_size) == NULL))
+            (commandJSON = (char*)malloc(malloc_size)) == NULL)
         {
             LogError("Failed to allocate temporary storage for the commands JSON, size:%zu", malloc_size);
             result = EXECUTE_COMMAND_ERROR;
