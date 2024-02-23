@@ -980,7 +980,7 @@ static IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* initialize_iothub_client(const IOTHUB_
                         size_t suffix_len = strlen(whereIsDot);
                         size_t calloc_size_hub_name = safe_add_size_t(safe_subtract_size_t(whereIsDot, hostname), 1);
                         size_t malloc_size_hub_suffix = safe_add_size_t(suffix_len, 1);
-                        if (malloc_size == SIZE_MAX ||
+                        if (calloc_size_hub_name == SIZE_MAX ||
                             (IoTHubName = (char*)calloc(1, calloc_size_hub_name)) == NULL)
                         {
                             LogError("unable to malloc, size:%zu", calloc_size_hub_name);
@@ -1287,7 +1287,7 @@ IOTHUB_CLIENT_CORE_LL_HANDLE IoTHubClientCore_LL_CreateFromDeviceAuth(const char
                         length = safe_subtract_size_t(safe_subtract_size_t(strlen(initial), length), 1);
                         calloc_size = safe_add_size_t(length, 1);
                         if (calloc_size != SIZE_MAX &&
-                            (iothub_suffix = (char*)calloc(calloc_size)) != NULL)
+                            (iothub_suffix = (char*)calloc(1, calloc_size)) != NULL)
                         {
                             memcpy(iothub_suffix, iterator + 1, length);
                             config->iotHubSuffix = iothub_suffix;
