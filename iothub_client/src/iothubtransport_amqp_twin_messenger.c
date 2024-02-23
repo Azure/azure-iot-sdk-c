@@ -347,6 +347,7 @@ static char* generate_unique_id(void)
         (result = (char*)calloc(1, calloc_size)) == NULL)
     {
         LogError("Failed generating an unique tag (malloc failed), size:%zu", calloc_size);
+        result = NULL;
     }
     else
     {
