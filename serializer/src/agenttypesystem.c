@@ -2632,8 +2632,8 @@ AGENT_DATA_TYPES_RESULT Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE(AGENT_DATA_T
                 }
                 else
                 {
-                    size_t malloc_size = safe_multiply_size_t(dest->value.edmComplexType.nMembers, sizeof(COMPLEX_TYPE_FIELD_TYPE));
                     dest->value.edmComplexType.nMembers = src->value.edmComplexType.nMembers;
+                    size_t malloc_size = safe_multiply_size_t(dest->value.edmComplexType.nMembers, sizeof(COMPLEX_TYPE_FIELD_TYPE));
                     if (malloc_size == SIZE_MAX ||
                         (dest->value.edmComplexType.fields = (COMPLEX_TYPE_FIELD_TYPE*)malloc(malloc_size)) == NULL)
                     {
@@ -2804,8 +2804,8 @@ AGENT_DATA_TYPES_RESULT Create_AGENT_DATA_TYPE_from_Members(AGENT_DATA_TYPE* age
     }
     else
     {
-        size_t malloc_size = safe_multiply_size_t(nMembers, sizeof(COMPLEX_TYPE_FIELD_TYPE));
         agentData->value.edmComplexType.nMembers = nMembers;
+        size_t malloc_size = safe_multiply_size_t(nMembers, sizeof(COMPLEX_TYPE_FIELD_TYPE));
         if (malloc_size == SIZE_MAX ||
             (agentData->value.edmComplexType.fields = (COMPLEX_TYPE_FIELD_TYPE*)malloc(malloc_size)) == NULL)
         {
