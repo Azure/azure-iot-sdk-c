@@ -252,6 +252,13 @@ static void* TEST_malloc(size_t size)
     return saved_malloc_returns[saved_malloc_returns_count++];
 }
 
+static void* TEST_calloc(size_t num, size_t size)
+{
+    void* ptr = TEST_malloc(size);
+    memset(ptr, 0, size * num);
+    return ptr;
+}
+
 static void TEST_free(void* ptr)
 {
     int i, j;
@@ -459,7 +466,7 @@ static void on_twin_get_completed_callback(TWIN_UPDATE_TYPE update_type, const c
 
 static void set_generate_unique_id_expected_calls()
 {
-    STRICT_EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(UniqueId_Generate(IGNORED_PTR_ARG, UNIQUE_ID_BUFFER_SIZE));
 }
 
@@ -804,6 +811,7 @@ void umock_free_BINARY_DATA(BINARY_DATA* value)
 static void register_global_mock_hooks()
 {
     REGISTER_GLOBAL_MOCK_HOOK(malloc, TEST_malloc);
+    REGISTER_GLOBAL_MOCK_HOOK(calloc, TEST_calloc);
     REGISTER_GLOBAL_MOCK_HOOK(free, TEST_free);
     REGISTER_GLOBAL_MOCK_HOOK(amqp_messenger_create, TEST_amqp_messenger_create);
     REGISTER_GLOBAL_MOCK_HOOK(CONSTBUFFER_IncRef, real_CONSTBUFFER_IncRef);

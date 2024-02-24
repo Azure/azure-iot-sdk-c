@@ -261,6 +261,13 @@ static void* TEST_malloc(size_t size)
     return saved_malloc_returns[saved_malloc_returns_count++];
 }
 
+static void* TEST_calloc(size_t num, size_t size)
+{
+    void* ptr = TEST_malloc(size);
+    memset(ptr, 0, size * num);
+    return ptr;
+}
+
 static void TEST_free(void* ptr)
 {
     int i, j;
@@ -566,7 +573,7 @@ static void set_create_link_address_expected_calls(role link_role)
 
 static void set_create_link_name_expected_calls(role link_role)
 {
-    EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
+    EXPECTED_CALL(calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(UniqueId_Generate(IGNORED_PTR_ARG, UNIQUE_ID_BUFFER_SIZE));
 
     if (link_role == role_sender)
@@ -1184,6 +1191,7 @@ static void register_global_mock_returns()
 static void register_global_mock_hooks()
 {
     REGISTER_GLOBAL_MOCK_HOOK(malloc, TEST_malloc);
+    REGISTER_GLOBAL_MOCK_HOOK(calloc, TEST_calloc);
     REGISTER_GLOBAL_MOCK_HOOK(free, TEST_free);
     REGISTER_GLOBAL_MOCK_HOOK(messagesender_create, TEST_messagesender_create);
     REGISTER_GLOBAL_MOCK_HOOK(messagesender_send_async, TEST_messagesender_send);
