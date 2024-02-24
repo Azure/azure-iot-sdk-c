@@ -666,7 +666,7 @@ char* hsm_client_riot_get_device_cert(HSM_CLIENT_HANDLE handle)
         }
         else
         {
-            memset(result, 0, x509_client->device_id_length + 1);
+            memset(result, 0, malloc_size);
             memcpy(result, x509_client->device_id_public_pem, x509_client->device_id_length);
         }
     }
