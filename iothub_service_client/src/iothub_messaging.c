@@ -308,3 +308,30 @@ IOTHUB_MESSAGING_RESULT IoTHubMessaging_SetTrustedCert(IOTHUB_MESSAGING_CLIENT_H
     }
     return result;
 }
+
+IOTHUB_MESSAGING_RESULT IoTHubMessaging_SetMaxSendQueueSize(IOTHUB_MESSAGING_CLIENT_HANDLE messagingClientHandle, size_t maxQueueSize)
+{
+    IOTHUB_MESSAGING_RESULT result;
+
+    if (messagingClientHandle == NULL)
+    {
+        LogError("NULL messagingClientHandle");
+        result = IOTHUB_MESSAGING_INVALID_ARG;
+    }
+    else
+    {
+        IOTHUB_MESSAGING_CLIENT_INSTANCE* iotHubMessagingClientInstance = (IOTHUB_MESSAGING_CLIENT_INSTANCE*)messagingClientHandle;
+
+        if (Lock(iotHubMessagingClientInstance->LockHandle) != LOCK_OK)
+        {
+            LogError("Could not acquire lock");
+            result = IOTHUB_MESSAGING_ERROR;
+        }
+        else
+        {
+            result = IoTHubMessaging_LL_SetMaxSendQueueSize(iotHubMessagingClientInstance->IoTHubMessagingHandle, maxQueueSize);
+            (void)Unlock(iotHubMessagingClientInstance->LockHandle);
+        }
+    }
+    return result;
+}

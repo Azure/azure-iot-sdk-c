@@ -25,7 +25,8 @@ extern "C"
     IOTHUB_MESSAGE_OK,                       \
     IOTHUB_MESSAGE_INVALID_ARG,              \
     IOTHUB_MESSAGE_INVALID_TYPE,             \
-    IOTHUB_MESSAGE_ERROR                     \
+    IOTHUB_MESSAGE_ERROR,                    \
+    IOTHUB_MESSAGE_BECAUSE_DESTROY
 
 /** @brief Enumeration specifying the status of calls to various
 *  APIs in this module.
