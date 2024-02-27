@@ -2638,6 +2638,7 @@ AGENT_DATA_TYPES_RESULT Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE(AGENT_DATA_T
                         (dest->value.edmComplexType.fields = (COMPLEX_TYPE_FIELD_TYPE*)malloc(malloc_size)) == NULL)
                     {
                         result = AGENT_DATA_TYPES_ERROR;
+                        dest->value.edmComplexType.fields = NULL;
                         LogError("(result = %s), size:%zu", MU_ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result), malloc_size);
                     }
                     else
@@ -2810,6 +2811,7 @@ AGENT_DATA_TYPES_RESULT Create_AGENT_DATA_TYPE_from_Members(AGENT_DATA_TYPE* age
             (agentData->value.edmComplexType.fields = (COMPLEX_TYPE_FIELD_TYPE*)malloc(malloc_size)) == NULL)
         {
             result = AGENT_DATA_TYPES_ERROR;
+            agentData->value.edmComplexType.fields = NULL;
             LogError("(result = %s), size:%zu", MU_ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result), malloc_size);
         }
         else

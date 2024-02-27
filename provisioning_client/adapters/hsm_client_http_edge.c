@@ -130,6 +130,7 @@ static int read_and_parse_edge_uri(HSM_CLIENT_HTTP_EDGE* hsm_client_http_edge)
                 (hsm_client_http_edge->workload_hostname = malloc(malloc_size)) == NULL)
             {
                 LogError("Failed allocating workload_hostname, size:%zu", malloc_size);
+                hsm_client_http_edge->workload_hostname = NULL;
                 result = MU_FAILURE;
             }
             else

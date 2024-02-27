@@ -605,6 +605,7 @@ char* hsm_client_riot_get_certificate(HSM_CLIENT_HANDLE handle)
             (result = (char*)malloc(malloc_size)) == NULL)
         {
             LogError("Failed to allocate cert buffer, size:%zu", malloc_size);
+            result = NULL;
         }
         else
         {
@@ -636,6 +637,7 @@ char* hsm_client_riot_get_alias_key(HSM_CLIENT_HANDLE handle)
             (result = (char*)malloc(malloc_size)) == NULL)
         {
             LogError("Failure allocating registration id, size:%zu", malloc_size);
+            result = NULL;
         }
         else
         {
@@ -663,6 +665,7 @@ char* hsm_client_riot_get_device_cert(HSM_CLIENT_HANDLE handle)
             (result = (char*)malloc(malloc_size)) == NULL)
         {
             LogError("Failure allocating registration id, size:%zu", malloc_size);
+            result = NULL;
         }
         else
         {
@@ -690,6 +693,7 @@ char* hsm_client_riot_get_signer_cert(HSM_CLIENT_HANDLE handle)
             (result = (char*)malloc(malloc_size)) == NULL)
         {
             LogError("Failure allocating registration id, size:%zu", malloc_size);
+            result = NULL;
         }
         else
         {
@@ -717,6 +721,7 @@ char* hsm_client_riot_get_root_cert(HSM_CLIENT_HANDLE handle)
             (result = (char*)malloc(malloc_size)) == NULL)
         {
             LogError("Failure allocating registration id, size:%zu", malloc_size);
+            result = NULL;
         }
         else
         {
@@ -744,6 +749,7 @@ char* hsm_client_riot_get_root_key(HSM_CLIENT_HANDLE handle)
             (result = (char*)malloc(malloc_size)) == NULL)
         {
             LogError("Failure allocating registration id, size:%zu", malloc_size);
+            result = NULL;
         }
         else
         {

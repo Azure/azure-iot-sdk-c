@@ -740,6 +740,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_ParseMethodToCommand(const char* method
             {
                 LogError("Cannot allocate component name, size:%zu", malloc_size);
                 result = IOTHUB_CLIENT_ERROR;
+                *component_name = NULL;
             }
             else
             {
@@ -983,7 +984,7 @@ static IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* initialize_iothub_client(const IOTHUB_
                         if (calloc_size_hub_name == SIZE_MAX ||
                             (IoTHubName = (char*)calloc(1, calloc_size_hub_name)) == NULL)
                         {
-                            LogError("unable to malloc, size:%zu", calloc_size_hub_name);
+                            LogError("unable to calloc, size:%zu", calloc_size_hub_name);
                             IoTHubClient_Auth_Destroy(result->authorization_module);
                             free(result);
                             result = NULL;
