@@ -58,7 +58,7 @@ static int deviceMethodCallback(const char* method_name, const unsigned char* pa
     if (malloc_size == SIZE_MAX ||
         (payloadZeroTerminated = (char*)malloc(malloc_size)) == NULL)
     {
-        LogError("failure in malloc, size:%zu", malloc_size);
+        LogError("deviceMethodCallback failure allocating payloadZeroTerminated, size:%zu", malloc_size);
         *response = NULL;
         *resp_size = 0;
         result = 500;
