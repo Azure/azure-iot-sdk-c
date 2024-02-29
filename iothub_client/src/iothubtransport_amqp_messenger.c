@@ -342,7 +342,7 @@ static STRING_HANDLE create_link_name(role link_role, const char* device_id)
     if (calloc_size == SIZE_MAX ||
         (unique_id = (char*)calloc(1, calloc_size)) == NULL)
     {
-        LogError("Failed generating an unique tag (malloc failed), size:%zu", calloc_size);
+        LogError("Failed generating an unique tag (calloc failed), size:%zu", calloc_size);
         result = NULL;
     }
     else
