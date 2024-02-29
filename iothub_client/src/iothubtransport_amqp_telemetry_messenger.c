@@ -274,7 +274,7 @@ static STRING_HANDLE create_link_name(const char* prefix, const char* infix)
     if (calloc_size == SIZE_MAX ||
         (unique_id = (char*)calloc(1, calloc_size)) == NULL)
     {
-        LogError("Failed generating an unique tag (malloc failed), size:%zu", calloc_size);
+        LogError("Failed generating an unique tag (calloc failed), size:%zu", calloc_size);
     }
     else
     {
