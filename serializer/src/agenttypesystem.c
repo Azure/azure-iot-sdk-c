@@ -3,6 +3,7 @@
 
 #include <stdlib.h>
 #include "azure_c_shared_utility/gballoc.h"
+#include "azure_c_shared_utility/safe_math.h"
 
 #include "agenttypesystem.h"
 #include <inttypes.h>
@@ -2632,11 +2633,13 @@ AGENT_DATA_TYPES_RESULT Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE(AGENT_DATA_T
                 else
                 {
                     dest->value.edmComplexType.nMembers = src->value.edmComplexType.nMembers;
-                    dest->value.edmComplexType.fields = (COMPLEX_TYPE_FIELD_TYPE*)malloc(dest->value.edmComplexType.nMembers * sizeof(COMPLEX_TYPE_FIELD_TYPE));
-                    if (dest->value.edmComplexType.fields == NULL)
+                    size_t malloc_size = safe_multiply_size_t(dest->value.edmComplexType.nMembers, sizeof(COMPLEX_TYPE_FIELD_TYPE));
+                    if (malloc_size == SIZE_MAX ||
+                        (dest->value.edmComplexType.fields = (COMPLEX_TYPE_FIELD_TYPE*)malloc(malloc_size)) == NULL)
                     {
                         result = AGENT_DATA_TYPES_ERROR;
-                        LogError("(result = %s)", MU_ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result));
+                        dest->value.edmComplexType.fields = NULL;
+                        LogError("(result = %s), size:%zu", MU_ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result), malloc_size);
                     }
                     else
                     {
@@ -2713,11 +2716,13 @@ AGENT_DATA_TYPES_RESULT Create_AGENT_DATA_TYPE_from_MemberPointers(AGENT_DATA_TY
     }
     else
     {
-        AGENT_DATA_TYPE* values = (AGENT_DATA_TYPE*)calloc(1, (nMembers* sizeof(AGENT_DATA_TYPE)));
-        if (values == NULL)
+        AGENT_DATA_TYPE* values;
+        size_t calloc_size = safe_multiply_size_t(nMembers, sizeof(AGENT_DATA_TYPE));
+        if (calloc_size == SIZE_MAX ||
+            (values = (AGENT_DATA_TYPE*)calloc(1, calloc_size)) == NULL)
         {
             result = AGENT_DATA_TYPES_ERROR;
-            LogError("(result = %s)", MU_ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result));
+            LogError("(result = %s), size:%zu", MU_ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result), calloc_size);
         }
         else
         {
@@ -2801,11 +2806,13 @@ AGENT_DATA_TYPES_RESULT Create_AGENT_DATA_TYPE_from_Members(AGENT_DATA_TYPE* age
     else
     {
         agentData->value.edmComplexType.nMembers = nMembers;
-        agentData->value.edmComplexType.fields = (COMPLEX_TYPE_FIELD_TYPE*)malloc(nMembers *sizeof(COMPLEX_TYPE_FIELD_TYPE));
-        if (agentData->value.edmComplexType.fields == NULL)
+        size_t malloc_size = safe_multiply_size_t(nMembers, sizeof(COMPLEX_TYPE_FIELD_TYPE));
+        if (malloc_size == SIZE_MAX ||
+            (agentData->value.edmComplexType.fields = (COMPLEX_TYPE_FIELD_TYPE*)malloc(malloc_size)) == NULL)
         {
             result = AGENT_DATA_TYPES_ERROR;
-            LogError("(result = %s)", MU_ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result));
+            agentData->value.edmComplexType.fields = NULL;
+            LogError("(result = %s), size:%zu", MU_ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result), malloc_size);
         }
         else
         {
@@ -3617,10 +3624,12 @@ result = AGENT_DATA_TYPES_OK;
                 else
                 {
                     char* temp;
-                    if ((temp = (char*)malloc(strLength - 1)) == NULL)
+                    size_t malloc_size = safe_subtract_size_t(strLength, 1);
+                    if (malloc_size == SIZE_MAX ||
+                        (temp = (char*)malloc(malloc_size)) == NULL)
                     {
                         result = AGENT_DATA_TYPES_ERROR;
-                        LogError("(result = %s)", MU_ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result));
+                        LogError("(result = %s), size:%zu", MU_ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result), malloc_size);
                     }
                     else if (memcpy(temp, source + 1, strLength - 2) == NULL)
                     {

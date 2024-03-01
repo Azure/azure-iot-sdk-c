@@ -8,6 +8,7 @@
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/vector.h"
+#include "azure_c_shared_utility/safe_math.h"
 
 
 MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(SCHEMA_RESULT, SCHEMA_RESULT_VALUES);
@@ -287,11 +288,13 @@ static SCHEMA_RESULT AddModelProperty(SCHEMA_MODEL_TYPE_HANDLE_DATA* modelType, 
         }
         else
         {
-            SCHEMA_PROPERTY_HANDLE* newProperties = (SCHEMA_PROPERTY_HANDLE*)realloc(modelType->Properties, sizeof(SCHEMA_PROPERTY_HANDLE) * (modelType->PropertyCount + 1));
-            if (newProperties == NULL)
+            SCHEMA_PROPERTY_HANDLE* newProperties;
+            size_t realloc_size = safe_multiply_size_t(sizeof(SCHEMA_PROPERTY_HANDLE), safe_add_size_t(modelType->PropertyCount, 1));
+            if (realloc_size == SIZE_MAX ||
+                (newProperties = (SCHEMA_PROPERTY_HANDLE*)realloc(modelType->Properties, realloc_size)) == NULL)
             {
                 result = SCHEMA_ERROR;
-                LogError("(result = %s)", MU_ENUM_TO_STRING(SCHEMA_RESULT, result));
+                LogError("(result = %s), size:%zu", MU_ENUM_TO_STRING(SCHEMA_RESULT, result), realloc_size);
             }
             else
             {
@@ -332,11 +335,13 @@ static SCHEMA_RESULT AddModelProperty(SCHEMA_MODEL_TYPE_HANDLE_DATA* modelType, 
                 {
                     if (modelType->PropertyCount > 0)
                     {
-                        SCHEMA_PROPERTY_HANDLE *oldProperties = (SCHEMA_PROPERTY_HANDLE *)realloc(modelType->Properties, sizeof(SCHEMA_PROPERTY_HANDLE) * modelType->PropertyCount);
-                        if (oldProperties == NULL)
+                        SCHEMA_PROPERTY_HANDLE* oldProperties;
+                        realloc_size = safe_multiply_size_t(sizeof(SCHEMA_PROPERTY_HANDLE), modelType->PropertyCount);
+                        if (realloc_size == SIZE_MAX ||
+                            (oldProperties = (SCHEMA_PROPERTY_HANDLE*)realloc(modelType->Properties, realloc_size)) == NULL)
                         {
                             result = SCHEMA_ERROR;
-                            LogError("(result = %s)", MU_ENUM_TO_STRING(SCHEMA_RESULT, result));
+                            LogError("(result = %s), size:%zu", MU_ENUM_TO_STRING(SCHEMA_RESULT, result), realloc_size);
                         }
                         else
                         {
@@ -602,11 +607,13 @@ SCHEMA_MODEL_TYPE_HANDLE Schema_CreateModelType(SCHEMA_HANDLE schemaHandle, cons
 
         else
         {
-            SCHEMA_MODEL_TYPE_HANDLE* newModelTypes = (SCHEMA_MODEL_TYPE_HANDLE*)realloc(schema->ModelTypes, sizeof(SCHEMA_MODEL_TYPE_HANDLE) * (schema->ModelTypeCount + 1));
-            if (newModelTypes == NULL)
+            SCHEMA_MODEL_TYPE_HANDLE* newModelTypes;
+            size_t realloc_size = safe_multiply_size_t(sizeof(SCHEMA_MODEL_TYPE_HANDLE), safe_add_size_t(schema->ModelTypeCount, 1));
+            if (realloc_size == SIZE_MAX ||
+                (newModelTypes = (SCHEMA_MODEL_TYPE_HANDLE*)realloc(schema->ModelTypes, realloc_size)) == NULL)
             {
                 result = NULL;
-                LogError("(Error code:%s)", MU_ENUM_TO_STRING(SCHEMA_RESULT, SCHEMA_ERROR));
+                LogError("(Error code:%s), size:%zu", MU_ENUM_TO_STRING(SCHEMA_RESULT, SCHEMA_ERROR), realloc_size);
             }
             else
             {
@@ -690,10 +697,12 @@ SCHEMA_MODEL_TYPE_HANDLE Schema_CreateModelType(SCHEMA_HANDLE schemaHandle, cons
                 /* If possible, reduce the memory of over allocation */
                 if ((result == NULL) &&(schema->ModelTypeCount>0))
                 {
-                    SCHEMA_MODEL_TYPE_HANDLE* oldModelTypes = (SCHEMA_MODEL_TYPE_HANDLE*)realloc(schema->ModelTypes, sizeof(SCHEMA_MODEL_TYPE_HANDLE) * schema->ModelTypeCount);
-                    if (oldModelTypes == NULL)
+                    SCHEMA_MODEL_TYPE_HANDLE* oldModelTypes;
+                    realloc_size = safe_multiply_size_t(sizeof(SCHEMA_MODEL_TYPE_HANDLE), schema->ModelTypeCount);
+                    if (realloc_size == SIZE_MAX ||
+                        (oldModelTypes = (SCHEMA_MODEL_TYPE_HANDLE*)realloc(schema->ModelTypes, realloc_size)) == NULL)
                     {
-                        LogError("(Error code:%s)", MU_ENUM_TO_STRING(SCHEMA_RESULT, SCHEMA_ERROR));
+                        LogError("(Error code:%s), size:%zu", MU_ENUM_TO_STRING(SCHEMA_RESULT, SCHEMA_ERROR), realloc_size);
                     }
                     else
                     {
@@ -832,11 +841,13 @@ SCHEMA_ACTION_HANDLE Schema_CreateModelAction(SCHEMA_MODEL_TYPE_HANDLE modelType
         }
         else
         {
-            SCHEMA_ACTION_HANDLE* newActions = (SCHEMA_ACTION_HANDLE*)realloc(modelType->Actions, sizeof(SCHEMA_ACTION_HANDLE) * (modelType->ActionCount + 1));
-            if (newActions == NULL)
+            SCHEMA_ACTION_HANDLE* newActions;
+            size_t realloc_size = safe_multiply_size_t(sizeof(SCHEMA_ACTION_HANDLE), safe_add_size_t(modelType->ActionCount, 1));
+            if (realloc_size == SIZE_MAX ||
+                (newActions = (SCHEMA_ACTION_HANDLE*)realloc(modelType->Actions, realloc_size)) == NULL)
             {
                 result = NULL;
-                LogError("(Error code:%s)", MU_ENUM_TO_STRING(SCHEMA_RESULT, SCHEMA_ERROR));
+                LogError("(Error code:%s), size:%zu", MU_ENUM_TO_STRING(SCHEMA_RESULT, SCHEMA_ERROR), realloc_size);
             }
             else
             {
@@ -871,10 +882,12 @@ SCHEMA_ACTION_HANDLE Schema_CreateModelAction(SCHEMA_MODEL_TYPE_HANDLE modelType
                     {
                         if (modelType->ActionCount > 0)
                         {
-                            SCHEMA_ACTION_HANDLE *oldActions = (SCHEMA_ACTION_HANDLE *)realloc(modelType->Actions, sizeof(SCHEMA_ACTION_HANDLE) * modelType->ActionCount);
-                            if (oldActions == NULL)
+                            SCHEMA_ACTION_HANDLE* oldActions;
+                            realloc_size = safe_multiply_size_t(sizeof(SCHEMA_ACTION_HANDLE), modelType->ActionCount);
+                            if (realloc_size == SIZE_MAX ||
+                                (oldActions = (SCHEMA_ACTION_HANDLE*)realloc(modelType->Actions, realloc_size)) == NULL)
                             {
-                                LogError("(Error code:%s)", MU_ENUM_TO_STRING(SCHEMA_RESULT, SCHEMA_ERROR));
+                                LogError("(Error code:%s), size:%zu", MU_ENUM_TO_STRING(SCHEMA_RESULT, SCHEMA_ERROR), realloc_size);
                             }
                             else
                             {
@@ -999,11 +1012,13 @@ SCHEMA_RESULT Schema_AddModelActionArgument(SCHEMA_ACTION_HANDLE actionHandle, c
         }
         else
         {
-            SCHEMA_ACTION_ARGUMENT_HANDLE* newArguments = (SCHEMA_ACTION_ARGUMENT_HANDLE*)realloc(action->ArgumentHandles, sizeof(SCHEMA_ACTION_ARGUMENT_HANDLE) * (action->ArgumentCount + 1));
-            if (newArguments == NULL)
+            SCHEMA_ACTION_ARGUMENT_HANDLE* newArguments;
+            size_t realloc_size = safe_multiply_size_t(sizeof(SCHEMA_ACTION_ARGUMENT_HANDLE), safe_add_size_t(action->ArgumentCount, 1));
+            if (realloc_size == SIZE_MAX ||
+                (newArguments = (SCHEMA_ACTION_ARGUMENT_HANDLE*)realloc(action->ArgumentHandles, realloc_size)) == NULL)
             {
                 result = SCHEMA_ERROR;
-                LogError("(result = %s)", MU_ENUM_TO_STRING(SCHEMA_RESULT, result));
+                LogError("(result = %s), size:%zu", MU_ENUM_TO_STRING(SCHEMA_RESULT, result), realloc_size);
             }
             else
             {
@@ -1046,10 +1061,12 @@ SCHEMA_RESULT Schema_AddModelActionArgument(SCHEMA_ACTION_HANDLE actionHandle, c
                 {
                     if (action->ArgumentCount > 0)
                     {
-                        SCHEMA_ACTION_ARGUMENT_HANDLE *oldArguments = (SCHEMA_ACTION_ARGUMENT_HANDLE *)realloc(action->ArgumentHandles, sizeof(SCHEMA_ACTION_ARGUMENT_HANDLE) * action->ArgumentCount);
-                        if (oldArguments == NULL)
+                        SCHEMA_ACTION_ARGUMENT_HANDLE* oldArguments;
+                        realloc_size = safe_multiply_size_t(sizeof(SCHEMA_ACTION_ARGUMENT_HANDLE), action->ArgumentCount);
+                        if (realloc_size == SIZE_MAX ||
+                            (oldArguments = (SCHEMA_ACTION_ARGUMENT_HANDLE*)realloc(action->ArgumentHandles, realloc_size)) == NULL)
                         {
-                            LogError("(result = %s)", MU_ENUM_TO_STRING(SCHEMA_RESULT, SCHEMA_ERROR));
+                            LogError("(result = %s), size:%zu", MU_ENUM_TO_STRING(SCHEMA_RESULT, SCHEMA_ERROR), realloc_size);
                         }
                         else
                         {
@@ -1640,11 +1657,13 @@ SCHEMA_STRUCT_TYPE_HANDLE Schema_CreateStructType(SCHEMA_HANDLE schemaHandle, co
         }
         else
         {
-            SCHEMA_STRUCT_TYPE_HANDLE* newStructTypes = (SCHEMA_STRUCT_TYPE_HANDLE*)realloc(schema->StructTypes, sizeof(SCHEMA_STRUCT_TYPE_HANDLE) * (schema->StructTypeCount + 1));
-            if (newStructTypes == NULL)
+            SCHEMA_STRUCT_TYPE_HANDLE* newStructTypes;
+            size_t realloc_size = safe_multiply_size_t(sizeof(SCHEMA_STRUCT_TYPE_HANDLE), safe_add_size_t(schema->StructTypeCount, 1));
+            if (realloc_size == SIZE_MAX ||
+                (newStructTypes = (SCHEMA_STRUCT_TYPE_HANDLE*)realloc(schema->StructTypes, realloc_size)) == NULL)
             {
                 result = NULL;
-                LogError("(Error code:%s)", MU_ENUM_TO_STRING(SCHEMA_RESULT, SCHEMA_ERROR));
+                LogError("(Error code:%s), size:%zu", MU_ENUM_TO_STRING(SCHEMA_RESULT, SCHEMA_ERROR), realloc_size);
             }
             else
             {
@@ -1675,11 +1694,13 @@ SCHEMA_STRUCT_TYPE_HANDLE Schema_CreateStructType(SCHEMA_HANDLE schemaHandle, co
                 {
                     if (schema->StructTypeCount > 0)
                     {
-                        SCHEMA_STRUCT_TYPE_HANDLE *oldStructTypes = (SCHEMA_STRUCT_TYPE_HANDLE *)realloc(schema->StructTypes, sizeof(SCHEMA_STRUCT_TYPE_HANDLE) * schema->StructTypeCount);
-                        if (oldStructTypes == NULL)
+                        SCHEMA_STRUCT_TYPE_HANDLE *oldStructTypes;
+                        realloc_size = safe_multiply_size_t(sizeof(SCHEMA_STRUCT_TYPE_HANDLE), schema->StructTypeCount);
+                        if (realloc_size == SIZE_MAX ||
+                            (oldStructTypes = (SCHEMA_STRUCT_TYPE_HANDLE*)realloc(schema->StructTypes, realloc_size)) == NULL)
                         {
                             result = NULL;
-                            LogError("(Error code:%s)", MU_ENUM_TO_STRING(SCHEMA_RESULT, SCHEMA_ERROR));
+                            LogError("(Error code:%s), size:%zu", MU_ENUM_TO_STRING(SCHEMA_RESULT, SCHEMA_ERROR), realloc_size);
                         }
                         else
                         {
@@ -1824,11 +1845,13 @@ SCHEMA_RESULT Schema_AddStructTypeProperty(SCHEMA_STRUCT_TYPE_HANDLE structTypeH
         }
         else
         {
-            SCHEMA_PROPERTY_HANDLE* newProperties = (SCHEMA_PROPERTY_HANDLE*)realloc(structType->Properties, sizeof(SCHEMA_PROPERTY_HANDLE) * (structType->PropertyCount + 1));
-            if (newProperties == NULL)
+            SCHEMA_PROPERTY_HANDLE* newProperties;
+            size_t realloc_size = safe_multiply_size_t(sizeof(SCHEMA_PROPERTY_HANDLE), safe_add_size_t(structType->PropertyCount, 1));
+            if (realloc_size == SIZE_MAX ||
+                (newProperties = (SCHEMA_PROPERTY_HANDLE*)realloc(structType->Properties, realloc_size)) == NULL)
             {
                 result = SCHEMA_ERROR;
-                LogError("(result = %s)", MU_ENUM_TO_STRING(SCHEMA_RESULT, result));
+                LogError("(result = %s), size:%zu", MU_ENUM_TO_STRING(SCHEMA_RESULT, result), realloc_size);
             }
             else
             {
@@ -1869,11 +1892,13 @@ SCHEMA_RESULT Schema_AddStructTypeProperty(SCHEMA_STRUCT_TYPE_HANDLE structTypeH
                 {
                     if (structType->PropertyCount > 0)
                     {
-                        SCHEMA_PROPERTY_HANDLE *oldProperties = (SCHEMA_PROPERTY_HANDLE *)realloc(structType->Properties, sizeof(SCHEMA_PROPERTY_HANDLE) * structType->PropertyCount);
-                        if (oldProperties == NULL)
+                        SCHEMA_PROPERTY_HANDLE *oldProperties;
+                        realloc_size = safe_multiply_size_t(sizeof(SCHEMA_PROPERTY_HANDLE), structType->PropertyCount);
+                        if (realloc_size == SIZE_MAX ||
+                            (oldProperties = (SCHEMA_PROPERTY_HANDLE*)realloc(structType->Properties, realloc_size)) == NULL)
                         {
                             result = SCHEMA_ERROR;
-                            LogError("(result = %s)", MU_ENUM_TO_STRING(SCHEMA_RESULT, result));
+                            LogError("(result = %s), size:%zu", MU_ENUM_TO_STRING(SCHEMA_RESULT, result), realloc_size);
                         }
                         else
                         {

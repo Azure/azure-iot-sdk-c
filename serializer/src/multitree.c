@@ -10,6 +10,7 @@
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_macro_utils/macro_utils.h"
 #include "azure_c_shared_utility/const_defines.h"
+#include "azure_c_shared_utility/safe_math.h"
 
 /*assume a name cannot be longer than 100 characters*/
 #define INNER_NODE_NAME_SIZE 128
@@ -167,8 +168,10 @@ static CREATELEAF_RESULT createLeaf(MULTITREE_HANDLE_DATA* node, const char*name
             if (newNode!=NULL)
             {
                 /*allocate space in the father node*/
-                MULTITREE_HANDLE_DATA** newChildren = (MULTITREE_HANDLE_DATA**)realloc(node->children, (node->nChildren + 1)*sizeof(MULTITREE_HANDLE_DATA*));
-                if (newChildren == NULL)
+                MULTITREE_HANDLE_DATA** newChildren;
+                size_t realloc_size = safe_multiply_size_t(safe_add_size_t(node->nChildren, 1), sizeof(MULTITREE_HANDLE_DATA*));
+                if (realloc_size == SIZE_MAX ||
+                    (newChildren = (MULTITREE_HANDLE_DATA**)realloc(node->children, realloc_size)) == NULL)
                 {
                     /*no space for the new node*/
                     newNode->value = NULL;
@@ -177,7 +180,7 @@ static CREATELEAF_RESULT createLeaf(MULTITREE_HANDLE_DATA* node, const char*name
                     free(newNode);
                     newNode = NULL;
                     result = CREATELEAF_ERROR;
-                    LogError("(result = %s)", CreateLeaf_ResultAsString[result]);
+                    LogError("(result = %s), size:%zu", CreateLeaf_ResultAsString[result], realloc_size);
                 }
                 else
                 {

@@ -15,6 +15,7 @@
 #include "azure_c_shared_utility/optimize_size.h"
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/uuid.h"
+#include "azure_c_shared_utility/safe_math.h"
 #include "azure_uamqp_c/amqp_definitions.h"
 #include "azure_uamqp_c/message.h"
 #include "azure_uamqp_c/amqpvalue.h"
@@ -667,6 +668,7 @@ int message_create_uamqp_encoding_from_iothub_message(MESSAGE_HANDLE message_bat
     size_t application_properties_length = 0;
     size_t message_annotations_length = 0;
     size_t data_length = 0;
+    size_t malloc_size;
 
     body_binary_data->bytes = NULL;
     body_binary_data->length = 0;
@@ -691,9 +693,10 @@ int message_create_uamqp_encoding_from_iothub_message(MESSAGE_HANDLE message_bat
         LogError("create_data_to_encode() failed");
         result = MU_FAILURE;
     }
-    else if ((body_binary_data->bytes = malloc(message_properties_length + application_properties_length + data_length + message_annotations_length)) == NULL)
+    else if ((malloc_size = safe_add_size_t(safe_add_size_t(safe_add_size_t(message_properties_length, application_properties_length), data_length), message_annotations_length)) == SIZE_MAX ||
+        (body_binary_data->bytes = malloc(malloc_size)) == NULL)
     {
-        LogError("malloc of %lu bytes failed", (unsigned long)(message_properties_length + application_properties_length + data_length + message_annotations_length));
+        LogError("malloc of %zu bytes failed", malloc_size);
         result = MU_FAILURE;
     }
     else if (amqpvalue_encode(message_properties, &encode_callback, body_binary_data) != RESULT_OK)

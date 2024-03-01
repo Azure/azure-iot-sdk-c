@@ -16,6 +16,11 @@ static void* my_gballoc_malloc(size_t size)
     return malloc(size);
 }
 
+static void* my_gballoc_calloc(size_t num, size_t size)
+{
+    return calloc(num, size);
+}
+
 static void my_gballoc_free(void* ptr)
 {
     free(ptr);
@@ -902,6 +907,7 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_RETURN(get_time, (time_t)TEST_TIME_VALUE);
 
     REGISTER_GLOBAL_MOCK_HOOK(gballoc_malloc, my_gballoc_malloc);
+    REGISTER_GLOBAL_MOCK_HOOK(gballoc_calloc, my_gballoc_calloc);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(gballoc_malloc, NULL);
     REGISTER_GLOBAL_MOCK_HOOK(gballoc_free, my_gballoc_free);
 
@@ -1692,7 +1698,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_CreateWithTransport_Succeeds)
     STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_GetHostname(IGNORED_PTR_ARG)); /*this is getting the hostname as STRING_HANDLE*/
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)) /*this is getting the hostname as const char* */
         .SetReturn(TEST_HOSTNAME_VALUE);
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
 #ifndef DONT_USE_UPLOADTOBLOB
@@ -1795,8 +1801,8 @@ TEST_FUNCTION(IoTHubClientCore_LL_CreateFromDeviceAuth_Succeeds)
 {
     //arrange
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG));
 
     setup_IoTHubClientCore_LL_create_mocks(true, false);
 
@@ -1865,7 +1871,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_CreateWithTransport_create_tickcounter_fails_s
     STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_GetHostname(IGNORED_PTR_ARG)); /*this is getting the hostname as STRING_HANDLE*/
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)) /*this is getting the hostname as const char* */
         .SetReturn(TEST_HOSTNAME_VALUE);
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
 
@@ -1913,7 +1919,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_CreateWithTransport_register_fails_shared_tran
     STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_GetHostname(IGNORED_PTR_ARG)); /*this is getting the hostname as STRING_HANDLE*/
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)) /*this is getting the hostname as const char* */
         .SetReturn(TEST_HOSTNAME_VALUE);
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
 
@@ -1976,7 +1982,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_CreateWithTransport_set_retry_policy_fails_sha
     STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_GetHostname(IGNORED_PTR_ARG)); /*this is getting the hostname as STRING_HANDLE*/
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)) /*this is getting the hostname as const char* */
         .SetReturn(TEST_HOSTNAME_VALUE);
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
 

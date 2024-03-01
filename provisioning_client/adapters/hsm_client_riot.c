@@ -7,6 +7,7 @@
 #include "azure_c_shared_utility/urlencode.h"
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
+#include "azure_c_shared_utility/safe_math.h"
 
 #include "hsm_client_riot.h"
 #include "hsm_client_data.h"
@@ -599,15 +600,17 @@ char* hsm_client_riot_get_certificate(HSM_CLIENT_HANDLE handle)
 
         size_t total_len = x509_client->alias_cert_length + x509_client->device_signed_length;
 
-        result = (char*)malloc(total_len + 1);
-        if (result == NULL)
+        size_t malloc_size = safe_add_size_t(total_len, 1);
+        if (malloc_size == SIZE_MAX ||
+            (result = (char*)malloc(malloc_size)) == NULL)
         {
-            LogError("Failed to allocate cert buffer.");
+            LogError("Failed to allocate cert buffer, size:%zu", malloc_size);
+            result = NULL;
         }
         else
         {
             size_t offset = 0;
-            memset(result, 0, total_len + 1);
+            memset(result, 0, malloc_size);
             memcpy(result, x509_client->alias_cert_pem, x509_client->alias_cert_length);
             offset += x509_client->alias_cert_length;
 
@@ -629,13 +632,16 @@ char* hsm_client_riot_get_alias_key(HSM_CLIENT_HANDLE handle)
     {
         HSM_CLIENT_X509_INFO* x509_client = (HSM_CLIENT_X509_INFO*)handle;
 
-        if ((result = (char*)malloc(x509_client->alias_key_length+1)) == NULL)
+        size_t malloc_size = safe_add_size_t(x509_client->alias_key_length, 1);
+        if (malloc_size == SIZE_MAX ||
+            (result = (char*)malloc(malloc_size)) == NULL)
         {
-            LogError("Failure allocating registration id.");
+            LogError("Failure allocating registration id, size:%zu", malloc_size);
+            result = NULL;
         }
         else
         {
-            memset(result, 0, x509_client->alias_key_length+1);
+            memset(result, 0, malloc_size);
             memcpy(result, x509_client->alias_priv_key_pem, x509_client->alias_key_length);
         }
     }
@@ -654,13 +660,16 @@ char* hsm_client_riot_get_device_cert(HSM_CLIENT_HANDLE handle)
     {
         HSM_CLIENT_X509_INFO* x509_client = (HSM_CLIENT_X509_INFO*)handle;
 
-        if ((result = (char*)malloc(x509_client->device_id_length+1)) == NULL)
+        size_t malloc_size = safe_add_size_t(x509_client->device_id_length, 1);
+        if (malloc_size == SIZE_MAX ||
+            (result = (char*)malloc(malloc_size)) == NULL)
         {
-            LogError("Failure allocating registration id.");
+            LogError("Failure allocating registration id, size:%zu", malloc_size);
+            result = NULL;
         }
         else
         {
-            memset(result, 0, x509_client->device_id_length+1);
+            memset(result, 0, malloc_size);
             memcpy(result, x509_client->device_id_public_pem, x509_client->device_id_length);
         }
     }
@@ -679,13 +688,16 @@ char* hsm_client_riot_get_signer_cert(HSM_CLIENT_HANDLE handle)
     {
         HSM_CLIENT_X509_INFO* x509_client = (HSM_CLIENT_X509_INFO*)handle;
 
-        if ((result = (char*)malloc(x509_client->device_signed_length + 1)) == NULL)
+        size_t malloc_size = safe_add_size_t(x509_client->device_signed_length, 1);
+        if (malloc_size == SIZE_MAX ||
+            (result = (char*)malloc(malloc_size)) == NULL)
         {
-            LogError("Failure allocating registration id.");
+            LogError("Failure allocating registration id, size:%zu", malloc_size);
+            result = NULL;
         }
         else
         {
-            memset(result, 0, x509_client->device_signed_length + 1);
+            memset(result, 0, malloc_size);
             memcpy(result, x509_client->device_signed_pem, x509_client->device_signed_length);
         }
     }
@@ -704,13 +716,16 @@ char* hsm_client_riot_get_root_cert(HSM_CLIENT_HANDLE handle)
     {
         HSM_CLIENT_X509_INFO* x509_client = (HSM_CLIENT_X509_INFO*)handle;
 
-        if ((result = (char*)malloc(x509_client->root_ca_length + 1)) == NULL)
+        size_t malloc_size = safe_add_size_t(x509_client->root_ca_length, 1);
+        if (malloc_size == SIZE_MAX ||
+            (result = (char*)malloc(malloc_size)) == NULL)
         {
-            LogError("Failure allocating registration id.");
+            LogError("Failure allocating registration id, size:%zu", malloc_size);
+            result = NULL;
         }
         else
         {
-            memset(result, 0, x509_client->root_ca_length + 1);
+            memset(result, 0, malloc_size);
             memcpy(result, x509_client->root_ca_pem, x509_client->root_ca_length);
         }
     }
@@ -729,13 +744,16 @@ char* hsm_client_riot_get_root_key(HSM_CLIENT_HANDLE handle)
     {
         HSM_CLIENT_X509_INFO* x509_client = (HSM_CLIENT_X509_INFO*)handle;
 
-        if ((result = (char*)malloc(x509_client->root_ca_priv_length + 1)) == NULL)
+        size_t malloc_size = safe_add_size_t(x509_client->root_ca_priv_length, 1);
+        if (malloc_size == SIZE_MAX ||
+            (result = (char*)malloc(malloc_size)) == NULL)
         {
-            LogError("Failure allocating registration id.");
+            LogError("Failure allocating registration id, size:%zu", malloc_size);
+            result = NULL;
         }
         else
         {
-            memset(result, 0, x509_client->root_ca_priv_length + 1);
+            memset(result, 0, malloc_size);
             memcpy(result, x509_client->root_ca_priv_pem, x509_client->root_ca_priv_length);
         }
     }

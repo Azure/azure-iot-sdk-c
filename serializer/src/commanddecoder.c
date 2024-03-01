@@ -11,6 +11,7 @@
 #include "multitree.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/xlogging.h"
+#include "azure_c_shared_utility/safe_math.h"
 #include "schema.h"
 #include "codefirst.h"
 #include "jsondecoder.h"
@@ -53,19 +54,23 @@ static int DecodeValueFromNode(SCHEMA_HANDLE schemaHandle, AGENT_DATA_TYPE* agen
             }
             else
             {
-                AGENT_DATA_TYPE* memberValues = (AGENT_DATA_TYPE*)calloc(1, (sizeof(AGENT_DATA_TYPE)* propertyCount));
-                if (memberValues == NULL)
+                AGENT_DATA_TYPE* memberValues;
+                size_t calloc_size = safe_multiply_size_t(sizeof(AGENT_DATA_TYPE), propertyCount);
+                if (calloc_size == SIZE_MAX ||
+                    (memberValues = (AGENT_DATA_TYPE*)calloc(1, calloc_size)) == NULL)
                 {
                     result = MU_FAILURE;
-                    LogError("Failed allocating member values for command argument");
+                    LogError("Failed allocating member values for command argument, size:%zu", calloc_size);
                 }
                 else
                 {
-                    const char** memberNames = (const char**)malloc(sizeof(const char*)* propertyCount);
-                    if (memberNames == NULL)
+                    const char** memberNames;
+                    size_t malloc_size = safe_multiply_size_t(sizeof(const char*), propertyCount);
+                    if (malloc_size == SIZE_MAX || 
+                        (memberNames = (const char**)malloc(malloc_size)) == NULL)
                     {
                         result = MU_FAILURE;
-                        LogError("Failed allocating member names for command argument.");
+                        LogError("Failed allocating member names for command argument, size:%zu", malloc_size);
                     }
                     else
                     {
@@ -196,16 +201,17 @@ static EXECUTE_COMMAND_RESULT DecodeAndExecuteModelAction(COMMAND_DECODER_HANDLE
             else
             {
                 AGENT_DATA_TYPE* arguments = NULL;
+                size_t calloc_size = safe_multiply_size_t(sizeof(AGENT_DATA_TYPE), argCount);
 
-                if (argCount > 0)
+                if (calloc_size != SIZE_MAX && argCount > 0)
                 {
-                    arguments = (AGENT_DATA_TYPE*)calloc(1, (sizeof(AGENT_DATA_TYPE)* argCount));
+                    arguments = (AGENT_DATA_TYPE*)calloc(1, calloc_size);
                 }
 
                 if ((argCount > 0) &&
                     (arguments == NULL))
                 {
-                    LogError("Failed allocating arguments array");
+                    LogError("Failed allocating arguments array, size:%zu", calloc_size);
                     result = EXECUTE_COMMAND_ERROR;
                 }
                 else
@@ -299,10 +305,11 @@ static METHODRETURN_HANDLE DecodeAndExecuteModelMethod(COMMAND_DECODER_HANDLE_DA
             else
             {
                 AGENT_DATA_TYPE* arguments;
-                arguments = (AGENT_DATA_TYPE*)calloc(1, (sizeof(AGENT_DATA_TYPE)* argCount));
-                if (arguments == NULL)
+                size_t calloc_size = safe_multiply_size_t(sizeof(AGENT_DATA_TYPE), argCount);
+                if (calloc_size == SIZE_MAX ||
+                    (arguments = (AGENT_DATA_TYPE*)calloc(1, calloc_size)) == NULL)
                 {
-                    LogError("Failed allocating arguments array");
+                    LogError("Failed allocating arguments array, size:%zu", calloc_size);
                     result = NULL;
                 }
                 else
@@ -385,10 +392,11 @@ static EXECUTE_COMMAND_RESULT ScanActionPathAndExecuteAction(COMMAND_DECODER_HAN
                 relativeActionPathLength = actionName - actionPath - 1;
             }
 
-            relativeActionPath = (char*)malloc(relativeActionPathLength + 1);
-            if (relativeActionPath == NULL)
+            size_t malloc_size = safe_add_size_t(relativeActionPathLength, 1);
+            if (malloc_size == SIZE_MAX ||
+                (relativeActionPath = (char*)malloc(malloc_size)) == NULL)
             {
-                LogError("Failed allocating relative action path");
+                LogError("Failed allocating relative action path, size:%zu", malloc_size);
                 result = EXECUTE_COMMAND_ERROR;
             }
             else
@@ -407,11 +415,13 @@ static EXECUTE_COMMAND_RESULT ScanActionPathAndExecuteAction(COMMAND_DECODER_HAN
         else
         {
             /* found a slash, get the child model name */
-            size_t modelLength = slashPos - actionName;
-            char* childModelName = (char*)malloc(modelLength + 1);
-            if (childModelName == NULL)
+            char* childModelName;
+            size_t modelLength = safe_subtract_size_t(slashPos, actionName);
+            size_t malloc_size = safe_add_size_t(modelLength, 1);
+            if (malloc_size == SIZE_MAX ||
+                (childModelName = (char*)malloc(malloc_size)) == NULL)
             {
-                LogError("Failed allocating child model name");
+                LogError("Failed allocating child model name, size:%zu", malloc_size);
                 result = EXECUTE_COMMAND_ERROR;
                 break;
             }
@@ -465,10 +475,11 @@ static METHODRETURN_HANDLE ScanMethodPathAndExecuteMethod(COMMAND_DECODER_HANDLE
                 relativeMethodPathLength = methodName - fullMethodName - 1;
             }
 
-            relativeMethodPath = (char*)malloc(relativeMethodPathLength + 1);
-            if (relativeMethodPath == NULL)
+            size_t malloc_size = safe_add_size_t(relativeMethodPathLength, 1);
+            if (malloc_size == SIZE_MAX ||
+                (relativeMethodPath = (char*)malloc(malloc_size)) == NULL)
             {
-                LogError("Failed allocating relative method path");
+                LogError("Failed allocating relative method path, size:%zu", malloc_size);
                 result = NULL;
             }
             else
@@ -487,11 +498,13 @@ static METHODRETURN_HANDLE ScanMethodPathAndExecuteMethod(COMMAND_DECODER_HANDLE
         else
         {
             /* found a slash, get the child model name */
-            size_t modelLength = slashPos - methodName;
-            char* childModelName = (char*)malloc(modelLength + 1);
-            if (childModelName == NULL)
+            char* childModelName;
+            size_t modelLength = safe_subtract_size_t(slashPos, methodName);
+            size_t malloc_size = safe_add_size_t(modelLength, 1);
+            if (malloc_size == SIZE_MAX ||
+                (childModelName = (char*)malloc(malloc_size)) == NULL)
             {
-                LogError("Failed allocating child model name");
+                LogError("Failed allocating child model name, size:%zu", malloc_size);
                 result = NULL;
                 break;
             }
@@ -590,15 +603,17 @@ EXECUTE_COMMAND_RESULT CommandDecoder_ExecuteCommand(COMMAND_DECODER_HANDLE hand
     {
         size_t size = strlen(command);
         char* commandJSON;
+        size_t malloc_size;
 
         if (size == 0)
         {
             LogError("Failed because command size is zero");
             result = EXECUTE_COMMAND_ERROR;
         }
-        else if ((commandJSON = (char*)malloc(size + 1)) == NULL)
+        else if ((malloc_size = safe_add_size_t(size, 1)) == SIZE_MAX ||
+            (commandJSON = (char*)malloc(malloc_size)) == NULL)
         {
-            LogError("Failed to allocate temporary storage for the commands JSON");
+            LogError("Failed to allocate temporary storage for the commands JSON, size:%zu", malloc_size);
             result = EXECUTE_COMMAND_ERROR;
         }
         else

@@ -13,6 +13,7 @@
 #include "azure_c_shared_utility/socketio.h"
 #include "azure_c_shared_utility/azure_base64.h"
 #include "azure_c_shared_utility/shared_util_options.h"
+#include "azure_c_shared_utility/safe_math.h"
 #include "azure_uhttp_c/uhttp.h"
 
 #include "azure_c_shared_utility/envvariable.h"
@@ -114,6 +115,7 @@ static int read_and_parse_edge_uri(HSM_CLIENT_HTTP_EDGE* hsm_client_http_edge)
     {
         if (hsm_client_http_edge->workload_protocol_type == WORKLOAD_PROTOCOL_TYPE_HTTP)
         {
+            size_t malloc_size;
             if ((colon_begin = strchr(workload_uri + http_prefix_len + 1, ':')) == NULL)
             {
                 LogError("WorkloadUri is set to %s, missing ':' to indicate port number", workload_uri);
@@ -124,9 +126,11 @@ static int read_and_parse_edge_uri(HSM_CLIENT_HTTP_EDGE* hsm_client_http_edge)
                 LogError("WorkloadUri is set to %s, port number is not legal", workload_uri);
                 result = MU_FAILURE;
             }
-            else if ((hsm_client_http_edge->workload_hostname = malloc(colon_begin - workload_uri)) == NULL)
+            else if ((malloc_size = safe_subtract_size_t(colon_begin, workload_uri)) == SIZE_MAX ||
+                (hsm_client_http_edge->workload_hostname = malloc(malloc_size)) == NULL)
             {
-                LogError("Failed allocating workload_hostname");
+                LogError("Failed allocating workload_hostname, size:%zu", malloc_size);
+                hsm_client_http_edge->workload_hostname = NULL;
                 result = MU_FAILURE;
             }
             else

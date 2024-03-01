@@ -12,6 +12,7 @@
 #include "parson.h"
 #include "azure_c_shared_utility/optimize_size.h"
 #include "azure_c_shared_utility/vector.h"
+#include "azure_c_shared_utility/safe_math.h"
 #include "methodreturn.h"
 
 static void serializer_ingest(DEVICE_TWIN_UPDATE_STATE update_state, const unsigned char* payLoad, size_t size, void* userContextCallback)
@@ -52,10 +53,12 @@ static void serializer_ingest(DEVICE_TWIN_UPDATE_STATE update_state, const unsig
 static int deviceMethodCallback(const char* method_name, const unsigned char* payload, size_t size, unsigned char** response, size_t* resp_size, void* userContextCallback)
 {
     int result;
-    char* payloadZeroTerminated = (char*)malloc(size + 1);
-    if (payloadZeroTerminated == NULL)
+    char* payloadZeroTerminated;
+    size_t malloc_size = safe_add_size_t(size, 1);
+    if (malloc_size == SIZE_MAX ||
+        (payloadZeroTerminated = (char*)malloc(malloc_size)) == NULL)
     {
-        LogError("failure in malloc");
+        LogError("deviceMethodCallback failure allocating payloadZeroTerminated, size:%zu", malloc_size);
         *response = NULL;
         *resp_size = 0;
         result = 500;

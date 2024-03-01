@@ -9,6 +9,7 @@
 #include "azure_c_shared_utility/agenttime.h"
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/uniqueid.h"
+#include "azure_c_shared_utility/safe_math.h"
 #include "azure_uamqp_c/link.h"
 #include "azure_uamqp_c/messaging.h"
 #include "azure_uamqp_c/message_sender.h"
@@ -337,15 +338,15 @@ static STRING_HANDLE create_link_name(role link_role, const char* device_id)
     char* unique_id;
     STRING_HANDLE result;
 
-    if ((unique_id = (char*)malloc(sizeof(char) * UNIQUE_ID_BUFFER_SIZE + 1)) == NULL)
+    size_t calloc_size = safe_multiply_size_t(sizeof(char), safe_add_size_t(UNIQUE_ID_BUFFER_SIZE, 1));
+    if (calloc_size == SIZE_MAX ||
+        (unique_id = (char*)calloc(1, calloc_size)) == NULL)
     {
-        LogError("Failed generating an unique tag (malloc failed)");
+        LogError("Failed generating an unique tag (calloc failed), size:%zu", calloc_size);
         result = NULL;
     }
     else
     {
-        memset(unique_id, 0, sizeof(char) * UNIQUE_ID_BUFFER_SIZE + 1);
-
         if (UniqueId_Generate(unique_id, UNIQUE_ID_BUFFER_SIZE) != UNIQUEID_OK)
         {
             LogError("Failed generating an unique tag (UniqueId_Generate failed)");

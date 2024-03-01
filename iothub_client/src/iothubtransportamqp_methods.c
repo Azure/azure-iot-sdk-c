@@ -8,6 +8,7 @@
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/strings.h"
+#include "azure_c_shared_utility/safe_math.h"
 #include "azure_uamqp_c/link.h"
 #include "azure_uamqp_c/messaging.h"
 #include "azure_uamqp_c/message_receiver.h"
@@ -84,10 +85,16 @@ static void remove_tracked_handle(IOTHUBTRANSPORT_AMQP_METHODS* amqp_methods_han
     }
     else
     {
-        IOTHUBTRANSPORT_AMQP_METHOD_HANDLE* new_handles = (IOTHUBTRANSPORT_AMQP_METHOD_HANDLE*)realloc(amqp_methods_handle->method_request_handles, amqp_methods_handle->method_request_handle_count * sizeof(IOTHUBTRANSPORT_AMQP_METHOD_HANDLE));
-        if (new_handles != NULL)
+        IOTHUBTRANSPORT_AMQP_METHOD_HANDLE* new_handles;
+        size_t realloc_size = safe_multiply_size_t(amqp_methods_handle->method_request_handle_count, sizeof(IOTHUBTRANSPORT_AMQP_METHOD_HANDLE));
+        if (realloc_size != SIZE_MAX && (
+            new_handles = (IOTHUBTRANSPORT_AMQP_METHOD_HANDLE*)realloc(amqp_methods_handle->method_request_handles, realloc_size)) != NULL)
         {
             amqp_methods_handle->method_request_handles = new_handles;
+        }
+        else
+        {
+            LogError("realloc error, size:%zu", realloc_size);
         }
     }
 }
@@ -281,11 +288,12 @@ static AMQP_VALUE on_message_received(const void* context, MESSAGE_HANDLE messag
                 else
                 {
                     IOTHUBTRANSPORT_AMQP_METHOD_HANDLE* new_handles;
-                    new_handles = (IOTHUBTRANSPORT_AMQP_METHOD_HANDLE*)realloc(amqp_methods_handle->method_request_handles, (amqp_methods_handle->method_request_handle_count + 1) * sizeof(IOTHUBTRANSPORT_AMQP_METHOD_HANDLE));
-                    if (new_handles == NULL)
+                    size_t realloc_size = safe_multiply_size_t(safe_add_size_t(amqp_methods_handle->method_request_handle_count, 1), sizeof(IOTHUBTRANSPORT_AMQP_METHOD_HANDLE));
+                    if (realloc_size == SIZE_MAX || 
+                        (new_handles = (IOTHUBTRANSPORT_AMQP_METHOD_HANDLE*)realloc(amqp_methods_handle->method_request_handles, realloc_size)) == NULL)
                     {
                         free(method_handle);
-                        LogError("Cannot grow method handles array");
+                        LogError("Cannot grow method handles array, size:%zu", realloc_size);
                         message_outcome = MESSAGE_OUTCOME_RELEASED;
                     }
                     else

@@ -10,8 +10,8 @@
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/xlogging.h"
 #include <stddef.h>
-#include "azure_c_shared_utility/crt_abstractions.h"
 #include "iotdevice.h"
+#include "azure_c_shared_utility/safe_math.h"
 
 MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(CODEFIRST_RESULT, CODEFIRST_RESULT_VALUES)
 MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_RESULT_VALUES)
@@ -884,6 +884,7 @@ void* CodeFirst_CreateDevice(SCHEMA_MODEL_TYPE_HANDLE model, const REFLECTED_DAT
             else
             {
                 DEVICE_HEADER_DATA** newDevices;
+                size_t realloc_size;
 
                 initializeDesiredProperties(model, deviceHeader->data);
 
@@ -896,14 +897,15 @@ void* CodeFirst_CreateDevice(SCHEMA_MODEL_TYPE_HANDLE model, const REFLECTED_DAT
                     result = NULL;
                     LogError(" %s ", MU_ENUM_TO_STRING(CODEFIRST_RESULT, CODEFIRST_DEVICE_FAILED));
                 }
-                else if ((newDevices = (DEVICE_HEADER_DATA**)realloc(g_Devices, sizeof(DEVICE_HEADER_DATA*) * (g_DeviceCount + 1))) == NULL)
+                else if ((realloc_size = safe_multiply_size_t(safe_add_size_t(g_DeviceCount, 1), sizeof(DEVICE_HEADER_DATA*))) == SIZE_MAX ||
+                    (newDevices = (DEVICE_HEADER_DATA**)realloc(g_Devices, realloc_size)) == NULL)
                 {
                     Device_Destroy(deviceHeader->DeviceHandle);
                     free(deviceHeader->data);
                     free(deviceHeader);
 
                     result = NULL;
-                    LogError(" %s ", MU_ENUM_TO_STRING(CODEFIRST_RESULT, CODEFIRST_ERROR));
+                    LogError(" %s, size:%zu", MU_ENUM_TO_STRING(CODEFIRST_RESULT, CODEFIRST_ERROR), realloc_size);
                 }
                 else
                 {

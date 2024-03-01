@@ -121,6 +121,13 @@ static void* TEST_malloc(size_t size)
     return saved_malloc_returns[saved_malloc_returns_count++];
 }
 
+static void* TEST_calloc(size_t num, size_t size)
+{
+    void* ptr = TEST_malloc(size);
+    memset(ptr, 0, size * num);
+    return ptr;
+}
+
 static void TEST_free(void* ptr)
 {
     int i, j;
@@ -217,7 +224,7 @@ static void set_exp_calls_for_amqp_connection_create(AMQP_CONNECTION_CONFIG* amq
     }
 
     // Connection
-    EXPECTED_CALL(malloc(IGNORED_NUM_ARG)); // UniqueId container.
+    EXPECTED_CALL(calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)); // UniqueId container.
     STRICT_EXPECTED_CALL(UniqueId_Generate(IGNORED_PTR_ARG, 40)).IgnoreArgument(1);
     STRICT_EXPECTED_CALL(STRING_c_str(TEST_STRING_HANDLE)).SetReturn(TEST_IOTHUB_HOST_FQDN);
 
@@ -311,6 +318,7 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
 
     REGISTER_GLOBAL_MOCK_HOOK(gballoc_malloc, TEST_malloc);
     REGISTER_GLOBAL_MOCK_HOOK(malloc, TEST_malloc);
+    REGISTER_GLOBAL_MOCK_HOOK(calloc, TEST_calloc);
     REGISTER_GLOBAL_MOCK_HOOK(gballoc_free, TEST_free);
     REGISTER_GLOBAL_MOCK_HOOK(free, TEST_free);
     REGISTER_GLOBAL_MOCK_RETURN(cbs_create, TEST_CBS_HANDLE);

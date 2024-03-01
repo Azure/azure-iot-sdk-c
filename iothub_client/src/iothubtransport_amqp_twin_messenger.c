@@ -11,6 +11,7 @@
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/uniqueid.h"
 #include "azure_c_shared_utility/singlylinkedlist.h"
+#include "azure_c_shared_utility/safe_math.h"
 #include "azure_uamqp_c/amqp_definitions_fields.h"
 #include "azure_uamqp_c/messaging.h"
 #include "internal/iothub_client_private.h"
@@ -341,14 +342,15 @@ static char* generate_unique_id(void)
 {
     char* result;
 
-    if ((result = (char*)malloc(sizeof(char) * UNIQUE_ID_BUFFER_SIZE + 1)) == NULL)
+    size_t calloc_size = safe_multiply_size_t(sizeof(char), safe_add_size_t(UNIQUE_ID_BUFFER_SIZE, 1));
+    if (calloc_size == SIZE_MAX ||
+        (result = (char*)calloc(1, calloc_size)) == NULL)
     {
-        LogError("Failed generating an unique tag (malloc failed)");
+        LogError("Failed generating an unique tag (calloc failed), size:%zu", calloc_size);
+        result = NULL;
     }
     else
     {
-        memset(result, 0, sizeof(char) * UNIQUE_ID_BUFFER_SIZE + 1);
-
         if (UniqueId_Generate(result, UNIQUE_ID_BUFFER_SIZE) != UNIQUEID_OK)
         {
             LogError("Failed generating an unique tag (UniqueId_Generate failed)");
@@ -372,9 +374,14 @@ static char* generate_twin_correlation_id(void)
     }
     else
     {
-        if ((result = (char*)malloc(strlen(TWIN_CORRELATION_ID_PROPERTY_FORMAT) + strlen(unique_id) + 1)) == NULL)
+        size_t malloc_size = strlen(TWIN_CORRELATION_ID_PROPERTY_FORMAT);
+        malloc_size = safe_add_size_t(malloc_size, strlen(unique_id));
+        malloc_size = safe_add_size_t(malloc_size, 1);
+
+        if (malloc_size == SIZE_MAX ||
+            (result = (char*)malloc(malloc_size)) == NULL)
         {
-            LogError("Failed allocating correlation-id");
+            LogError("Failed allocating correlation-id, size:%zu", malloc_size);
             result = NULL;
         }
         else
