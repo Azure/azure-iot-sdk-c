@@ -122,10 +122,10 @@ Functions</h2></td></tr>
 <tr class="memdesc:a905f59a848d7fbf0ae28f44ceff97e6c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets up the connection status callback to be invoked representing the status of the connection to IOT Hub. This is a blocking call.  <a href="iothub__device__client_8h.html#a905f59a848d7fbf0ae28f44ceff97e6c">More...</a><br /></td></tr>
 <tr class="separator:a905f59a848d7fbf0ae28f44ceff97e6c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a53604d8d75556ded769b7947268beec8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="iothub__client__core__common_8h.html#ae8e8840cc715c54bc60465f3f110d40f">IOTHUB_CLIENT_RESULT</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__device__client_8h.html#a53604d8d75556ded769b7947268beec8">IoTHubDeviceClient_SetRetryPolicy</a> (<a class="el" href="iothub__device__client_8h.html#ac0a6393bbcbec2e1b580e8c4c127f4c1">IOTHUB_DEVICE_CLIENT_HANDLE</a> iotHubClientHandle, <a class="el" href="iothub__client__core__common_8h.html#a361221e523247855ff0a05c2e2870e4a">IOTHUB_CLIENT_RETRY_POLICY</a> retryPolicy, size_t retryTimeoutLimitInSeconds)</td></tr>
-<tr class="memdesc:a53604d8d75556ded769b7947268beec8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets up the connection status callback to be invoked representing the status of the connection to IOT Hub. This is a blocking call.  <a href="iothub__device__client_8h.html#a53604d8d75556ded769b7947268beec8">More...</a><br /></td></tr>
+<tr class="memdesc:a53604d8d75556ded769b7947268beec8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the Retry Policy feature to control how immediatelly and frequently the SDK will attempt to re-connect to the Azure IoT Hub in case a connection issue occurs.  <a href="iothub__device__client_8h.html#a53604d8d75556ded769b7947268beec8">More...</a><br /></td></tr>
 <tr class="separator:a53604d8d75556ded769b7947268beec8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7e001ad2e02069d7b9773f8f245fae77"><td class="memItemLeft" align="right" valign="top"><a class="el" href="iothub__client__core__common_8h.html#ae8e8840cc715c54bc60465f3f110d40f">IOTHUB_CLIENT_RESULT</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__device__client_8h.html#a7e001ad2e02069d7b9773f8f245fae77">IoTHubDeviceClient_GetRetryPolicy</a> (<a class="el" href="iothub__device__client_8h.html#ac0a6393bbcbec2e1b580e8c4c127f4c1">IOTHUB_DEVICE_CLIENT_HANDLE</a> iotHubClientHandle, <a class="el" href="iothub__client__core__common_8h.html#a361221e523247855ff0a05c2e2870e4a">IOTHUB_CLIENT_RETRY_POLICY</a> *retryPolicy, size_t *retryTimeoutLimitInSeconds)</td></tr>
-<tr class="memdesc:a7e001ad2e02069d7b9773f8f245fae77"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets up the connection status callback to be invoked representing the status of the connection to IOT Hub. This is a blocking call.  <a href="iothub__device__client_8h.html#a7e001ad2e02069d7b9773f8f245fae77">More...</a><br /></td></tr>
+<tr class="memdesc:a7e001ad2e02069d7b9773f8f245fae77"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the Retry Policy setting and timeout value for the current retry policy.  <a href="iothub__device__client_8h.html#a7e001ad2e02069d7b9773f8f245fae77">More...</a><br /></td></tr>
 <tr class="separator:a7e001ad2e02069d7b9773f8f245fae77"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abc0085250813091a1e78fe4e07fa23ba"><td class="memItemLeft" align="right" valign="top"><a class="el" href="iothub__client__core__common_8h.html#ae8e8840cc715c54bc60465f3f110d40f">IOTHUB_CLIENT_RESULT</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__device__client_8h.html#abc0085250813091a1e78fe4e07fa23ba">IoTHubDeviceClient_GetLastMessageReceiveTime</a> (<a class="el" href="iothub__device__client_8h.html#ac0a6393bbcbec2e1b580e8c4c127f4c1">IOTHUB_DEVICE_CLIENT_HANDLE</a> iotHubClientHandle, time_t *lastMessageReceiveTime)</td></tr>
 <tr class="memdesc:abc0085250813091a1e78fe4e07fa23ba"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function returns in the out parameter <code>lastMessageReceiveTime</code> what was the value of the <code>time</code> function when the last message was received at the client.  <a href="iothub__device__client_8h.html#abc0085250813091a1e78fe4e07fa23ba">More...</a><br /></td></tr>
@@ -889,16 +889,15 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Sets up the connection status callback to be invoked representing the status of the connection to IOT Hub. This is a blocking call. </p>
+<p>Gets the Retry Policy setting and timeout value for the current retry policy. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">iotHubClientHandle</td><td>The handle created by a call to the create function. </td></tr>
     <tr><td class="paramname">retryPolicy</td><td>Out parameter containing the policy to use to reconnect to IoT Hub. </td></tr>
-    <tr><td class="paramname">retryTimeoutLimitInSeconds</td><td>Out parameter containing maximum amount of time in seconds to attempt reconnection to IOT Hub.</td></tr>
+    <tr><td class="paramname">retryTimeoutLimitInSeconds</td><td>Out parameter containing maximum amount of time, in seconds, to attempt reconnection to IOT Hub for the specified retry policy.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section warning"><dt>Warning</dt><dd>: Do not call <a class="el" href="iothub__device__client_8h.html#a2991e03140462e9cc1606ccf25e8b412" title="Disposes of resources allocated by the IoT Hub client. This is a blocking call.">IoTHubDeviceClient_Destroy()</a> from inside your application's callback.</dd></dl>
 <dl class="section return"><dt>Returns</dt><dd>IOTHUB_CLIENT_OK upon success or an error code upon failure. </dd></dl>
 
 </div>
@@ -1529,7 +1528,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Sets up the connection status callback to be invoked representing the status of the connection to IOT Hub. This is a blocking call. </p>
+<p>Sets the Retry Policy feature to control how immediatelly and frequently the SDK will attempt to re-connect to the Azure IoT Hub in case a connection issue occurs. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">iotHubClientHandle</td><td>The handle created by a call to the create function. </td></tr>
@@ -1538,7 +1537,6 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section warning"><dt>Warning</dt><dd>: Do not call <a class="el" href="iothub__device__client_8h.html#a2991e03140462e9cc1606ccf25e8b412" title="Disposes of resources allocated by the IoT Hub client. This is a blocking call.">IoTHubDeviceClient_Destroy()</a> from inside your application's callback.</dd></dl>
 <dl class="section remark"><dt>Remarks</dt><dd>Uploads initiated by IoTHubDeviceClient_UploadToBlob or IoTHubDeviceClient_UploadMultipleBlocksToBlob do not have automatic retries and do not honor the retryPolicy settings.</dd></dl>
 <dl class="section return"><dt>Returns</dt><dd>IOTHUB_CLIENT_OK upon success or an error code upon failure. </dd></dl>
 
