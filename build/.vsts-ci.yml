@@ -950,7 +950,7 @@ jobs:
     displayName: 'Build'
 - job: crosscompile_mips32
   pool:
-    vmImage: 'sdk-c--ubuntu-22'
+    name: 'sdk-c--ubuntu-22'
   displayName: "Cross Compile (MIPS32)"
   steps:
   - script: |
@@ -972,7 +972,7 @@ jobs:
     displayName: 'Build MIPS32'
 - job: crosscompile_arm
   pool:
-    vmImage: 'sdk-c--ubuntu-22'
+    name: 'sdk-c--ubuntu-22'
   displayName: "Cross Compile (ARM)"
   steps:
   - script: |
