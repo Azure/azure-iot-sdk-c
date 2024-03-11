@@ -97,6 +97,7 @@ RUN echo "include_directories(${TOOLCHAIN_PREFIX}/include)" >> toolchain.cmake
 
 RUN cmake -DCMAKE_TOOLCHAIN_FILE=toolchain.cmake ..
 RUN cmake --build .
+RUN ctest -T test --no-compress-output
 RUN cmake --install . --prefix ${TOOLCHAIN_PREFIX}
 
 WORKDIR ../..
