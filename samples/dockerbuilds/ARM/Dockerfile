@@ -97,7 +97,7 @@ RUN echo "include_directories(${TOOLCHAIN_PREFIX}/include)" >> toolchain.cmake
 
 RUN nproc --all
 RUN cmake -DCMAKE_TOOLCHAIN_FILE=toolchain.cmake -Drun_unittests=ON ..
-RUN cmake --build -j 8 .
+RUN make -j5
 RUN ctest -T test --no-compress-output -V
 RUN cmake --install . --prefix ${TOOLCHAIN_PREFIX}
 
