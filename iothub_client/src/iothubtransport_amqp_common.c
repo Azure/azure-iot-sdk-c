@@ -495,7 +495,7 @@ static int subscribe_methods(AMQP_TRANSPORT_DEVICE_INSTANCE* deviceState)
 
         if ((amqp_connection_get_session_handle(deviceState->transport_instance->amqp_connection, &session_handle)) != RESULT_OK)
         {
-            const char* device_id = STRING_c_str(deviceState->device_id);
+            const char* device_id = STRING_c_str(deviceState->device_id); // advoid MU_P_OR_NULL double call
             LogError("Device '%s' failed subscribing for methods (failed getting session handle)", MU_P_OR_NULL(device_id));
             result = MU_FAILURE;
         }
@@ -816,7 +816,7 @@ static void prepare_device_for_connection_retry(AMQP_TRANSPORT_DEVICE_INSTANCE* 
     {
         if (amqp_device_stop(registered_device->device_handle) != RESULT_OK)
         {
-            const char* device_id = STRING_c_str(registered_device->device_id);
+            const char* device_id = STRING_c_str(registered_device->device_id); // advoid MU_P_OR_NULL double call
             LogError("Failed preparing device '%s' for connection retry (amqp_device_stop failed)", MU_P_OR_NULL(device_id));
         }
     }
@@ -994,7 +994,7 @@ static int send_pending_events(AMQP_TRANSPORT_DEVICE_INSTANCE* device_state)
     {
         if (amqp_device_send_event_async(device_state->device_handle, message, on_event_send_complete, device_state) != RESULT_OK)
         {
-            const char* device_id = STRING_c_str(device_state->device_id);
+            const char* device_id = STRING_c_str(device_state->device_id); // advoid MU_P_OR_NULL double call
             LogError("Device '%s' failed to send message (amqp_device_send_event_async failed)", MU_P_OR_NULL(device_id));
             result = MU_FAILURE;
 
@@ -1025,20 +1025,20 @@ static int IoTHubTransport_AMQP_Common_Device_DoWork(AMQP_TRANSPORT_DEVICE_INSTA
 
             if (amqp_connection_get_session_handle(registered_device->transport_instance->amqp_connection, &session_handle) != RESULT_OK)
             {
-                const char* device_id = STRING_c_str(registered_device->device_id);
+                const char* device_id = STRING_c_str(registered_device->device_id); // advoid MU_P_OR_NULL double call
                 LogError("Failed performing DoWork for device '%s' (failed to get the amqp_connection session_handle)", MU_P_OR_NULL(device_id));
                 result = MU_FAILURE;
             }
             else if (registered_device->transport_instance->preferred_authentication_mode == AMQP_TRANSPORT_AUTHENTICATION_MODE_CBS &&
                 amqp_connection_get_cbs_handle(registered_device->transport_instance->amqp_connection, &cbs_handle) != RESULT_OK)
             {
-                const char* device_id = STRING_c_str(registered_device->device_id);
+                const char* device_id = STRING_c_str(registered_device->device_id); // advoid MU_P_OR_NULL double call
                 LogError("Failed performing DoWork for device '%s' (failed to get the amqp_connection cbs_handle)", MU_P_OR_NULL(device_id));
                 result = MU_FAILURE;
             }
             else if (amqp_device_start_async(registered_device->device_handle, session_handle, cbs_handle) != RESULT_OK)
             {
-                const char* device_id = STRING_c_str(registered_device->device_id);
+                const char* device_id = STRING_c_str(registered_device->device_id); // advoid MU_P_OR_NULL double call
                 LogError("Failed performing DoWork for device '%s' (failed to start device)", MU_P_OR_NULL(device_id));
                 result = MU_FAILURE;
             }
@@ -1053,14 +1053,14 @@ static int IoTHubTransport_AMQP_Common_Device_DoWork(AMQP_TRANSPORT_DEVICE_INSTA
             bool is_timed_out;
             if (is_timeout_reached(registered_device->time_of_last_state_change, registered_device->max_state_change_timeout_secs, &is_timed_out) != RESULT_OK)
             {
-                const char* device_id = STRING_c_str(registered_device->device_id);
+                const char* device_id = STRING_c_str(registered_device->device_id); // advoid MU_P_OR_NULL double call
                 LogError("Failed performing DoWork for device '%s' (failed tracking timeout of device %d state)", MU_P_OR_NULL(device_id), registered_device->device_state);
                 registered_device->device_state = DEVICE_STATE_ERROR_AUTH; // if time could not be calculated, the worst must be assumed.
                 result = MU_FAILURE;
             }
             else if (is_timed_out)
             {
-                const char* device_id = STRING_c_str(registered_device->device_id);
+                const char* device_id = STRING_c_str(registered_device->device_id); // advoid MU_P_OR_NULL double call
                 LogError("Failed performing DoWork for device '%s' (device failed to start or stop within expected timeout)", MU_P_OR_NULL(device_id));
                 registered_device->device_state = DEVICE_STATE_ERROR_AUTH; // this will cause device to be stopped bellow on the next call to this function.
                 result = MU_FAILURE;
@@ -1076,14 +1076,14 @@ static int IoTHubTransport_AMQP_Common_Device_DoWork(AMQP_TRANSPORT_DEVICE_INSTA
 
             if (registered_device->number_of_previous_failures >= MAX_NUMBER_OF_DEVICE_FAILURES)
             {
-                const char* device_id = STRING_c_str(registered_device->device_id);
+                const char* device_id = STRING_c_str(registered_device->device_id); // advoid MU_P_OR_NULL double call
                 LogError("Failed performing DoWork for device '%s' (device reported state %d; number of previous failures: %lu)",
                     MU_P_OR_NULL(device_id), (int)registered_device->device_state, (unsigned long)registered_device->number_of_previous_failures);
                 result = MU_FAILURE;
             }
             else if (amqp_device_delayed_stop(registered_device->device_handle, DEFAULT_DEVICE_STOP_DELAY) != RESULT_OK)
             {
-                const char* device_id = STRING_c_str(registered_device->device_id);
+                const char* device_id = STRING_c_str(registered_device->device_id); // advoid MU_P_OR_NULL double call
                 LogError("Failed to stop reset device '%s' (amqp_device_stop failed)", MU_P_OR_NULL(device_id));
                 result = MU_FAILURE;
             }
@@ -1097,7 +1097,7 @@ static int IoTHubTransport_AMQP_Common_Device_DoWork(AMQP_TRANSPORT_DEVICE_INSTA
         !registered_device->subscribed_for_methods &&
         subscribe_methods(registered_device) != RESULT_OK)
     {
-        const char* device_id = STRING_c_str(registered_device->device_id);
+        const char* device_id = STRING_c_str(registered_device->device_id); // advoid MU_P_OR_NULL double call
         LogError("Failed performing DoWork for device '%s' (failed registering for device methods)", MU_P_OR_NULL(device_id));
         registered_device->number_of_previous_failures++;
         result = MU_FAILURE;
@@ -1106,7 +1106,7 @@ static int IoTHubTransport_AMQP_Common_Device_DoWork(AMQP_TRANSPORT_DEVICE_INSTA
     {
         if (send_pending_events(registered_device) != RESULT_OK)
         {
-            const char* device_id = STRING_c_str(registered_device->device_id);
+            const char* device_id = STRING_c_str(registered_device->device_id); // advoid MU_P_OR_NULL double call
             LogError("Failed performing DoWork for device '%s' (failed sending pending events)", MU_P_OR_NULL(device_id));
             registered_device->number_of_previous_failures++;
             result = MU_FAILURE;
@@ -1139,7 +1139,7 @@ static int replicate_device_options_to(AMQP_TRANSPORT_DEVICE_INSTANCE* dev_insta
         DEVICE_OPTION_EVENT_SEND_TIMEOUT_SECS,
         &dev_instance->transport_instance->option_send_event_timeout_secs) != RESULT_OK)
     {
-        const char* device_id = STRING_c_str(dev_instance->device_id);
+        const char* device_id = STRING_c_str(dev_instance->device_id); // advoid MU_P_OR_NULL double call
         LogError("Failed to apply option DEVICE_OPTION_EVENT_SEND_TIMEOUT_SECS to device '%s' (amqp_device_set_option failed)", MU_P_OR_NULL(device_id));
         result = MU_FAILURE;
     }
@@ -1150,7 +1150,7 @@ static int replicate_device_options_to(AMQP_TRANSPORT_DEVICE_INSTANCE* dev_insta
             DEVICE_OPTION_CBS_REQUEST_TIMEOUT_SECS,
             &dev_instance->transport_instance->option_cbs_request_timeout_secs) != RESULT_OK)
         {
-            const char* device_id = STRING_c_str(dev_instance->device_id);
+            const char* device_id = STRING_c_str(dev_instance->device_id); // advoid MU_P_OR_NULL double call
             LogError("Failed to apply option DEVICE_OPTION_CBS_REQUEST_TIMEOUT_SECS to device '%s' (amqp_device_set_option failed)", MU_P_OR_NULL(device_id));
             result = MU_FAILURE;
         }
@@ -1222,7 +1222,7 @@ static int IoTHubTransport_AMQP_Common_Device_SetOption(TRANSPORT_LL_HANDLE hand
             }
             else if (amqp_device_set_option(registered_device->device_handle, device_option, value) != RESULT_OK)
             {
-                const char* device_id = STRING_c_str(registered_device->device_id);
+                const char* device_id = STRING_c_str(registered_device->device_id); // advoid MU_P_OR_NULL double call
                 LogError("failed setting option '%s' to registered device '%s' (amqp_device_set_option failed)",
                     option, MU_P_OR_NULL(device_id));
                 result = MU_FAILURE;
@@ -1527,13 +1527,13 @@ int IoTHubTransport_AMQP_Common_Subscribe(IOTHUB_DEVICE_HANDLE handle)
 
         if (!is_device_registered(amqp_device_instance))
         {
-            const char* device_id = STRING_c_str(amqp_device_instance->device_id);
+            const char* device_id = STRING_c_str(amqp_device_instance->device_id); // advoid MU_P_OR_NULL double call
             LogError("Device '%s' failed subscribing to cloud-to-device messages (device is not registered)", MU_P_OR_NULL(device_id));
             result = MU_FAILURE;
         }
         else if (amqp_device_subscribe_message(amqp_device_instance->device_handle, on_message_received, amqp_device_instance) != RESULT_OK)
         {
-            const char* device_id = STRING_c_str(amqp_device_instance->device_id);
+            const char* device_id = STRING_c_str(amqp_device_instance->device_id); // advoid MU_P_OR_NULL double call
             LogError("Device '%s' failed subscribing to cloud-to-device messages (amqp_device_subscribe_message failed)", MU_P_OR_NULL(device_id));
             result = MU_FAILURE;
         }
@@ -1558,12 +1558,12 @@ void IoTHubTransport_AMQP_Common_Unsubscribe(IOTHUB_DEVICE_HANDLE handle)
 
         if (!is_device_registered(amqp_device_instance))
         {
-            const char* device_id = STRING_c_str(amqp_device_instance->device_id);
+            const char* device_id = STRING_c_str(amqp_device_instance->device_id); // advoid MU_P_OR_NULL double call
             LogError("Device '%s' failed unsubscribing to cloud-to-device messages (device is not registered)", MU_P_OR_NULL(device_id));
         }
         else if (amqp_device_unsubscribe_message(amqp_device_instance->device_handle) != RESULT_OK)
         {
-            const char* device_id = STRING_c_str(amqp_device_instance->device_id);
+            const char* device_id = STRING_c_str(amqp_device_instance->device_id); // advoid MU_P_OR_NULL double call
             LogError("Device '%s' failed unsubscribing to cloud-to-device messages (amqp_device_unsubscribe_message failed)", MU_P_OR_NULL(device_id));
         }
     }
@@ -2295,7 +2295,7 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_AMQP_Common_SendMessageDisposition(IOTHUB_D
 
             if (amqp_device_send_message_disposition(amqp_device_instance->device_handle, (DEVICE_MESSAGE_DISPOSITION_INFO*)device_message_disposition_info, device_disposition_result) != RESULT_OK)
             {
-                const char* device_id = STRING_c_str(amqp_device_instance->device_id);
+                const char* device_id = STRING_c_str(amqp_device_instance->device_id); // advoid MU_P_OR_NULL double call
                 LogError("Device '%s' failed sending message disposition (amqp_device_send_message_disposition failed)", MU_P_OR_NULL(device_id));
                 result = IOTHUB_CLIENT_ERROR;
             }
