@@ -348,8 +348,15 @@ jobs:
   displayName: 'Ubuntu 22.04 (ARM)'
   steps:
   - script: |
+      echo cpu count"
+      nproc --all
+      sudo apt-get update
+      sudo apt-get install -y git cmake build-essential curl libcurl4-openssl-dev libssl-dev uuid-dev ca-certificates
       sudo apt-get install -y gcc-arm-linux* g++-arm-linux*
-      sudo -E ./jenkins/ubuntu_c.sh
+      mkdir cmake
+      cd cmake
+      cmake -Drun_unittests=ON ..
+      make -j5
     displayName: 'Build'
   - script: |
       export OPENSSL_ia32cap=0x00000000
