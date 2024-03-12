@@ -1018,8 +1018,8 @@ int prov_sc_create_or_update_individual_enrollment(PROVISIONING_SERVICE_CLIENT_H
 
 int prov_sc_delete_individual_enrollment(PROVISIONING_SERVICE_CLIENT_HANDLE prov_client, INDIVIDUAL_ENROLLMENT_HANDLE enrollment)
 {
-    const char* registrationId = individualEnrollment_getRegistrationId(enrollment);
     const char* eTag = individualEnrollment_getEtag(enrollment);
+    const char* registrationId = individualEnrollment_getRegistrationId(enrollment);
     return prov_sc_delete_record_by_param(prov_client, registrationId, eTag, INDV_ENROLL_PROVISION_PATH_FMT);
 }
 
