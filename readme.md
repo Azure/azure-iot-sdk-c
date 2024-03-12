@@ -290,9 +290,9 @@ Below is a hypothetical example of versioning and tagging for the C SDK. `minor`
 
 - The main branch is at version 1.8.2.
 - February 23, 2020: A new feature is released on main. The version bumps to 1.9.0, is tagged `1.9.0`, and the release is tagged `2020-02-23`.
-- July 9, 2020: A new LTS release occurs. A new release branch `lts_07_2020` is created, the version remains 1.9.0, and the LTS release is tagged `LTS_07_2020_Ref01`. The main branch bumps to 1.10.0 and is tagged `1.10.0`.
+- July 9, 2020: A new LTS release occurs. A new release is created, the version remains 1.9.0, and the LTS release is tagged `LTS_07_2020`. The main branch bumps to 1.10.0 and is tagged `1.10.0`.
 - August 2, 2020: A new feature is released on main: The main branch has already been bumped for an upcoming release so the version is unchanged. The release is tagged `2020-08-02`.
-- September 28, 2020: A critical bug fix is released: The version on main bumps to 1.10.1, is tagged `1.10.1`, and the release is tagged `2020-09-28`. The critical bug fix is ported to the lts branch `lts_07_2020` (and any other existing LTS branch). The lts branch version bumps to 1.9.1, is tagged `1.9.1`, and the updated LTS release is tagged `LTS_07_2020_Ref02`. Any submodules that were part of the critical bug fix will be tagged with `LTS_07_2020_Ref02`.
+- September 28, 2020: A critical bug fix is released: The version on main bumps to 1.10.1, is tagged `1.10.1`, and the release is tagged `2020-09-28`. The critical bug fix is ported to the lts release `LTS_03_2024` (and any other existing LTS branch) by creating a branch with name `lts_07_2020_ref02`, its version bumps to 1.9.1 and is tagged `1.9.1` and `LTS_07_2020_Ref02`. Any submodules that were part of the critical bug fix will be tagged with `LTS_07_2020_Ref02`.
 - December 14, 2020: A new feature is released on main. The version bumps to 1.11.0, is tagged `1.11.0`, and the release is tagged `2020-12-14`.
 
 ---
