@@ -1070,8 +1070,8 @@ int prov_sc_create_or_update_enrollment_group(PROVISIONING_SERVICE_CLIENT_HANDLE
 
 int prov_sc_delete_enrollment_group(PROVISIONING_SERVICE_CLIENT_HANDLE prov_client, ENROLLMENT_GROUP_HANDLE enrollment)
 {
-    const char* groupId = enrollmentGroup_getGroupId(enrollment);
     const char* eTag = enrollmentGroup_getEtag(enrollment);
+    const char* groupId = enrollmentGroup_getGroupId(enrollment);
     return prov_sc_delete_record_by_param(prov_client, groupId, eTag, ENROLL_GROUP_PROVISION_PATH_FMT);
 }
 
