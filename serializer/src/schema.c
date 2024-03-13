@@ -2443,7 +2443,7 @@ bool Schema_ModelReportedPropertyByPathExists(SCHEMA_MODEL_TYPE_HANDLE modelType
     if ((modelTypeHandle == NULL) ||
         (reportedPropertyPath == NULL))
     {
-        LogError("invalid argument SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle=%p, const char* reportedPropertyPath=%s", modelTypeHandle, reportedPropertyPath);
+        LogError("invalid argument SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle=%p, const char* reportedPropertyPath=%s", modelTypeHandle, MU_P_OR_NULL(reportedPropertyPath));
         result = false;
     }
     else
