@@ -1018,7 +1018,9 @@ int prov_sc_create_or_update_individual_enrollment(PROVISIONING_SERVICE_CLIENT_H
 
 int prov_sc_delete_individual_enrollment(PROVISIONING_SERVICE_CLIENT_HANDLE prov_client, INDIVIDUAL_ENROLLMENT_HANDLE enrollment)
 {
-    return prov_sc_delete_record_by_param(prov_client, individualEnrollment_getRegistrationId(enrollment), individualEnrollment_getEtag(enrollment), INDV_ENROLL_PROVISION_PATH_FMT);
+    const char* eTag = individualEnrollment_getEtag(enrollment);
+    const char* registrationId = individualEnrollment_getRegistrationId(enrollment);
+    return prov_sc_delete_record_by_param(prov_client, registrationId, eTag, INDV_ENROLL_PROVISION_PATH_FMT);
 }
 
 int prov_sc_delete_individual_enrollment_by_param(PROVISIONING_SERVICE_CLIENT_HANDLE prov_client, const char* reg_id, const char* etag)
@@ -1043,7 +1045,9 @@ int prov_sc_run_individual_enrollment_bulk_operation(PROVISIONING_SERVICE_CLIENT
 
 int prov_sc_delete_device_registration_state(PROVISIONING_SERVICE_CLIENT_HANDLE prov_client, DEVICE_REGISTRATION_STATE_HANDLE reg_state)
 {
-    return prov_sc_delete_record_by_param(prov_client, deviceRegistrationState_getRegistrationId(reg_state), deviceRegistrationState_getEtag(reg_state), REG_STATE_PROVISION_PATH_FMT);
+    const char* eTag = deviceRegistrationState_getEtag(reg_state);
+    const char* registrationId = deviceRegistrationState_getRegistrationId(reg_state);
+    return prov_sc_delete_record_by_param(prov_client, registrationId, eTag, REG_STATE_PROVISION_PATH_FMT);
 }
 
 int prov_sc_delete_device_registration_state_by_param(PROVISIONING_SERVICE_CLIENT_HANDLE prov_client, const char* reg_id, const char* etag)
@@ -1068,7 +1072,9 @@ int prov_sc_create_or_update_enrollment_group(PROVISIONING_SERVICE_CLIENT_HANDLE
 
 int prov_sc_delete_enrollment_group(PROVISIONING_SERVICE_CLIENT_HANDLE prov_client, ENROLLMENT_GROUP_HANDLE enrollment)
 {
-    return prov_sc_delete_record_by_param(prov_client, enrollmentGroup_getGroupId(enrollment), enrollmentGroup_getEtag(enrollment), ENROLL_GROUP_PROVISION_PATH_FMT);
+    const char* eTag = enrollmentGroup_getEtag(enrollment);
+    const char* groupId = enrollmentGroup_getGroupId(enrollment);
+    return prov_sc_delete_record_by_param(prov_client, groupId, eTag, ENROLL_GROUP_PROVISION_PATH_FMT);
 }
 
 int prov_sc_delete_enrollment_group_by_param(PROVISIONING_SERVICE_CLIENT_HANDLE prov_client, const char* group_id, const char* etag)
