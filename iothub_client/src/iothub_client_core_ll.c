@@ -656,7 +656,7 @@ static bool IoTHubClientCore_LL_MessageCallbackFromInput(IOTHUB_MESSAGE_HANDLE m
 
         if (item_handle == NULL)
         {
-            LogError("Could not find callback (explicit or default) for input queue %s", inputName);
+            LogError("Could not find callback (explicit or default) for input queue %s", MU_P_OR_NULL(inputName));
             result = false;
         }
         else
@@ -2714,7 +2714,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_UploadToBlob(IOTHUB_CLIENT_CORE_LL_HAND
         )
     {
         LogError("invalid parameters iotHubClientHandle=%p, const char* destinationFileName=%s, const unsigned char* source=%p, size_t size=%lu",
-            iotHubClientHandle, destinationFileName, source, (unsigned long)size);
+            iotHubClientHandle, MU_P_OR_NULL(destinationFileName), source, (unsigned long)size);
         result = IOTHUB_CLIENT_INVALID_ARG;
     }
     else
@@ -3165,7 +3165,7 @@ static IOTHUB_CLIENT_RESULT remove_event_unsubscribe_if_needed(IOTHUB_CLIENT_COR
     LIST_ITEM_HANDLE item_handle = singlylinkedlist_find(handleData->event_callbacks, is_event_equal_for_match, (const void*)inputName);
     if (item_handle == NULL)
     {
-        LogError("Input name %s was not present", inputName);
+        LogError("Input name %s was not present", MU_P_OR_NULL(inputName));
         result = IOTHUB_CLIENT_ERROR;
     }
     else

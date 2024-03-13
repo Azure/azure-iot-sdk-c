@@ -1290,10 +1290,10 @@ static void CompareProperties(const IOTHUB_CLIENT_PROPERTY_PARSED* expectedPrope
 {
     ASSERT_ARE_EQUAL(int, expectedProperty->structVersion, actualProperty->structVersion);
     ASSERT_ARE_EQUAL(int, expectedProperty->propertyType, actualProperty->propertyType);
-    ASSERT_ARE_EQUAL(char_ptr, expectedProperty->componentName, actualProperty->componentName);
-    ASSERT_ARE_EQUAL(char_ptr, expectedProperty->name, actualProperty->name);
+    ASSERT_ARE_EQUAL(char_ptr, MU_P_OR_NULL(expectedProperty->componentName), MU_P_OR_NULL(actualProperty->componentName));
+    ASSERT_ARE_EQUAL(char_ptr, MU_P_OR_NULL(expectedProperty->name), MU_P_OR_NULL(actualProperty->name));
     ASSERT_ARE_EQUAL(int, expectedProperty->valueType, actualProperty->valueType);
-    ASSERT_ARE_EQUAL(char_ptr, expectedProperty->value.str, actualProperty->value.str);
+    ASSERT_ARE_EQUAL(char_ptr, MU_P_OR_NULL(expectedProperty->value.str), MU_P_OR_NULL(actualProperty->value.str));
     ASSERT_ARE_EQUAL(int, expectedProperty->valueLength, actualProperty->valueLength);
 }
 
