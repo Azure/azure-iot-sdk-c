@@ -1338,6 +1338,7 @@ static void remove_timed_out_events(TELEMETRY_MESSENGER_INSTANCE* instance)
     while (list_item != NULL)
     {
         MESSENGER_SEND_EVENT_TASK* task = (MESSENGER_SEND_EVENT_TASK*)singlylinkedlist_item_get_value(list_item);
+        list_item = singlylinkedlist_get_next_item(list_item);
 
         if (task != NULL && task->is_timed_out == true)
         {
@@ -1346,7 +1347,6 @@ static void remove_timed_out_events(TELEMETRY_MESSENGER_INSTANCE* instance)
             free_task(task);
         }
 
-        list_item = singlylinkedlist_get_next_item(list_item);
     }
 }
 
