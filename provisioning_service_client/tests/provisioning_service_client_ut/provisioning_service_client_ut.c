@@ -2933,6 +2933,9 @@ TEST_FUNCTION(prov_sc_delete_device_registration_state_GOLDEN_NO_ETAG)
     //act
     int res = prov_sc_delete_device_registration_state(sc, TEST_DEVICE_REGISTRATION_STATE_HANDLE);
 
+    LogError("expected: %s", umock_c_get_expected_calls());
+    LogError("actual: %s", umock_c_get_actual_calls());
+
     //assert
     ASSERT_ARE_EQUAL(int, res, 0);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
