@@ -2301,6 +2301,7 @@ static void processErrorCallback(MQTT_CLIENT_HANDLE handle, MQTT_CLIENT_EVENT_ER
             // We have encountered an mqtt protocol error in an non-closing state
             // The best course of action is to execute a shutdown of the mqtt/tls/socket
             // layer and then attempt to reconnect
+            LogError("Disconnecting MQTT connection because of an MQTT protocol error.");
             transport_data->mqttClientStatus = MQTT_CLIENT_STATUS_EXECUTE_DISCONNECT;
         }
         transport_data->currPacketState = PACKET_TYPE_ERROR;
@@ -2504,6 +2505,7 @@ static void ProcessPendingTelemetryMessages(PMQTTTRANSPORT_HANDLE_DATA transport
             // again
             if (transport_data->currPacketState == PUBLISH_TYPE)
             {
+                LogInfo("Publish MQTT packet timeout. current_ms:%" PRIu64 ", msgPublishTime:%" PRIu64 ", msgCreationTime:%" PRIu64 ", packet_id:%d", (uint64_t)current_ms, (uint64_t)msg_detail_entry->msgPublishTime, (uint64_t)msg_detail_entry->msgCreationTime, msg_detail_entry->packet_id);
                 size_t messageLength;
                 const unsigned char* messagePayload = NULL;
                 if (!RetrieveMessagePayload(msg_detail_entry->iotHubMessageEntry->messageHandle, &messagePayload, &messageLength))
@@ -2877,6 +2879,7 @@ static int UpdateMqttConnectionStateIfNeeded(PMQTTTRANSPORT_HANDLE_DATA transpor
                     uint64_t sas_token_expiry = IoTHubClient_Auth_Get_SasToken_Expiry(transport_data->authorization_module);
                     if ((current_time - transport_data->mqtt_connect_time) / 1000 > (sas_token_expiry*SAS_REFRESH_MULTIPLIER))
                     {
+                        LogInfo("Disconnecting MQTT connection because SAS token expired.");
                         DisconnectFromClient(transport_data);
 
                         transport_data->transport_callbacks.connection_status_cb(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_EXPIRED_SAS_TOKEN, transport_data->transport_ctx);
@@ -3181,6 +3184,8 @@ static void ProcessPublishStateDoWork(PMQTTTRANSPORT_HANDLE_DATA transport_data)
                 }
                 else
                 {
+                    LogInfo("Publish MQTT packet. current_ms:%" PRIu64 ", msgPublishTime:%" PRIu64 ", msgCreationTime:%" PRIu64 ", packet_id:%d", (uint64_t)current_ms, (uint64_t)mqttMsgEntry->msgPublishTime, (uint64_t)mqttMsgEntry->msgCreationTime, mqttMsgEntry->packet_id);
+
                     // Remove the message from the waiting queue ...
                     (void)(DList_RemoveEntryList(currentListEntry));
                     // and add it to the ack queue
