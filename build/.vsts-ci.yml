@@ -395,8 +395,8 @@ jobs:
       sudo apt-get install -y git cmake build-essential curl libcurl4-openssl-dev libssl-dev uuid-dev ca-certificates
       mkdir cmake
       cd cmake
-      sudo cmake -Drun_unittests=ON ..
-      sudo make -j3
+      sudo cmake -Drun_unittests:BOOL=ON -Duse_prov_client:BOOL=ON ..
+      sudo make -j8
     displayName: 'Build'
   - script: |
       cd cmake && sudo ctest -T test --no-compress-output -V
