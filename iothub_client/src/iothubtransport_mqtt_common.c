@@ -3189,8 +3189,6 @@ static void ProcessPublishStateDoWork(PMQTTTRANSPORT_HANDLE_DATA transport_data)
                 }
                 else
                 {
-                    LogInfo("Publish MQTT packet. current_ms:%" PRIu64 ", msgPublishTime:%" PRIu64 ", msgCreationTime:%" PRIu64 ", packet_id:%d", (uint64_t)current_ms, (uint64_t)mqttMsgEntry->msgPublishTime, (uint64_t)mqttMsgEntry->msgCreationTime, mqttMsgEntry->packet_id);
-
                     // Remove the message from the waiting queue ...
                     (void)(DList_RemoveEntryList(currentListEntry));
                     // and add it to the ack queue
