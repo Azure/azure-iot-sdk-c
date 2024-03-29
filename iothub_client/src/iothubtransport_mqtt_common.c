@@ -2418,7 +2418,7 @@ static void SubscribeToMqttProtocol(PMQTTTRANSPORT_HANDLE_DATA transport_data)
                 // Wait for at least MESSAGE_REPUBLISH_TIMEOUT_SECS before republish on new connection
                 tickcounter_ms_t current_ms;
                 (void)tickcounter_get_current_ms(transport_data->msgTickCounter, &current_ms);
-                tickcounter_ms_t new_publish_time_ms = current_ms - (MESSAGE_REPUBLISH_TIMEOUT_SECS * 1000); // force the message to resend
+                tickcounter_ms_t new_publish_time_ms = current_ms - ((RESEND_TIMEOUT_VALUE_MIN - MESSAGE_REPUBLISH_TIMEOUT_SECS) * 1000); // force the message to resend
                 if (new_publish_time_ms < current_ms)
                 {
                     msg_detail_entry->msgPublishTime = new_publish_time_ms;
