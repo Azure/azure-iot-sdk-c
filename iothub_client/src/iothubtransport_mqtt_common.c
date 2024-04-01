@@ -62,6 +62,7 @@
 
 #define ON_DEMAND_GET_TWIN_REQUEST_TIMEOUT_SECS    60
 #define TWIN_REPORT_UPDATE_TIMEOUT_SECS           (60*5)
+#define MESSAGE_REPUBLISH_TIMEOUT_SECS             3
 
 static const char TOPIC_DEVICE_TWIN_PREFIX[] = "$iothub/twin";
 static const char TOPIC_DEVICE_METHOD_PREFIX[] = "$iothub/methods";
@@ -2301,7 +2302,7 @@ static void processErrorCallback(MQTT_CLIENT_HANDLE handle, MQTT_CLIENT_EVENT_ER
             // We have encountered an mqtt protocol error in an non-closing state
             // The best course of action is to execute a shutdown of the mqtt/tls/socket
             // layer and then attempt to reconnect
-            LogError("Disconnecting MQTT connection because of an MQTT protocol error.");
+            LogError("Disconnecting MQTT connection because of an MQTT protocol error (%s).", MU_ENUM_TO_STRING(MQTT_CLIENT_EVENT_ERROR, error));
             transport_data->mqttClientStatus = MQTT_CLIENT_STATUS_EXECUTE_DISCONNECT;
         }
         transport_data->currPacketState = PACKET_TYPE_ERROR;
@@ -2414,10 +2415,14 @@ static void SubscribeToMqttProtocol(PMQTTTRANSPORT_HANDLE_DATA transport_data)
             if (!isMqttMessageSfcType(msg_detail_entry->iotHubMessageEntry->messageHandle))
             {
 #endif //RUN_SFC_TESTS
-                // Setting the value to 0 as it is simpler than calculating the amount of time to
-                // expire the PUBLISH. This value of zero is equivalent to setting a time way in the 
-                // past, enough for this control logic.
-                msg_detail_entry->msgPublishTime = 0;        // force the message to resend
+                // Wait for at least MESSAGE_REPUBLISH_TIMEOUT_SECS before republish on new connection
+                tickcounter_ms_t current_ms;
+                (void)tickcounter_get_current_ms(transport_data->msgTickCounter, &current_ms);
+                tickcounter_ms_t new_publish_time_ms = current_ms - ((RESEND_TIMEOUT_VALUE_MIN - MESSAGE_REPUBLISH_TIMEOUT_SECS) * 1000); // force the message to resend
+                if (new_publish_time_ms < current_ms)
+                {
+                    msg_detail_entry->msgPublishTime = new_publish_time_ms;
+                }
 
 #ifdef RUN_SFC_TESTS
             }
@@ -3184,8 +3189,6 @@ static void ProcessPublishStateDoWork(PMQTTTRANSPORT_HANDLE_DATA transport_data)
                 }
                 else
                 {
-                    LogInfo("Publish MQTT packet. current_ms:%" PRIu64 ", msgPublishTime:%" PRIu64 ", msgCreationTime:%" PRIu64 ", packet_id:%d", (uint64_t)current_ms, (uint64_t)mqttMsgEntry->msgPublishTime, (uint64_t)mqttMsgEntry->msgCreationTime, mqttMsgEntry->packet_id);
-
                     // Remove the message from the waiting queue ...
                     (void)(DList_RemoveEntryList(currentListEntry));
                     // and add it to the ack queue
