@@ -56,6 +56,7 @@ jobs:
       node_modules/.bin/check_submodules . main
     displayName: 'Check Submodules Match'
 - job: windowsx86
+  timeoutInMinutes: 190
   pool:
     name: 'sdk-c--win-vs2022'
   displayName: "Windows x86"
@@ -93,6 +94,7 @@ jobs:
       testRunTitle: 'windowsx86'
     condition: succeededOrFailed()
 - job: windowsx64debug
+  timeoutInMinutes: 190
   pool:
     name: 'sdk-c--win-vs2022'
   displayName: 'Windows x64 (Debug)'
@@ -133,7 +135,7 @@ jobs:
       testRunTitle: 'windowsx64'
     condition: succeededOrFailed()
 - job: windowsx64release
-  timeoutInMinutes: 150
+  timeoutInMinutes: 190
   variables:
     CodeQL.Enabled: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
     CodeQL.Language: cpp
@@ -180,6 +182,7 @@ jobs:
       testRunTitle: 'windowsx64release'
     condition: succeededOrFailed()
 - job: windowsdynamic
+  timeoutInMinutes: 190
   pool:
     name: 'sdk-c--win-vs2022'
   displayName: "Windows Dynamic"
@@ -217,6 +220,7 @@ jobs:
     displayName: 'Build'
     condition: always()
 - job: clang
+  timeoutInMinutes: 190
   container: linux-c-ubuntu-clang
   pool: 
     name: 'sdk-c--ubuntu-22'
@@ -259,6 +263,7 @@ jobs:
       testRunTitle: 'clang'
     condition: succeededOrFailed()
 - job: clang_release
+  timeoutInMinutes: 190
   container: linux-c-ubuntu-clang
   pool: 
     name: 'sdk-c--ubuntu-22'
@@ -301,6 +306,7 @@ jobs:
       testRunTitle: 'clang_release'
     condition: succeededOrFailed()
 - job: ubuntu2004debug
+  timeoutInMinutes: 190
   container: linux-c-ubuntu-2004
   pool:
     name: 'sdk-c--ubuntu-22'
@@ -343,6 +349,7 @@ jobs:
       testRunTitle: 'ubuntu2004debug'
     condition: succeededOrFailed()
 - job: ubuntu2004release
+  timeoutInMinutes: 190
   container: linux-c-ubuntu-2004
   pool:
     name: 'sdk-c--ubuntu-22'
@@ -385,6 +392,7 @@ jobs:
       testRunTitle: 'ubuntu2004release'
     condition: succeededOrFailed()
 - job: ubuntu2204build
+  timeoutInMinutes: 190
   container: linux-c-ubuntu-2204
   pool:
     name: 'sdk-c--ubuntu-22'
@@ -431,6 +439,7 @@ jobs:
       testRunTitle: 'ubuntu2004debug'
     condition: succeededOrFailed()
 - job: ubuntuRIOT
+  timeoutInMinutes: 190
   container: linux-c-ubuntu-2004
   pool:
     name: 'sdk-c--ubuntu-22'
@@ -473,6 +482,7 @@ jobs:
       testRunTitle: 'ubuntuRIOT'
     condition: succeededOrFailed()
 - job: ubuntu2004dualipstack
+  timeoutInMinutes: 190
   container: linux-c-ubuntu-2004
   pool:
     name: 'sdk-c--ubuntu-22'
@@ -515,6 +525,7 @@ jobs:
       testRunTitle: 'ubuntu2004dualipstack'
     condition: succeededOrFailed()
 - job: ubuntu2204dualipstack
+  timeoutInMinutes: 190
   container: linux-c-ubuntu-2204
   pool:
     name: 'sdk-c--ubuntu-22'
