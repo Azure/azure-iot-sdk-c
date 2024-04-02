@@ -2885,13 +2885,8 @@ TEST_FUNCTION(prov_sc_get_device_registration_state_FAIL)
 TEST_FUNCTION(prov_sc_delete_device_registration_state_ERROR_INPUT_NULL_PROV_SC)
 {
     //arrange
-//#if defined(__arm__) || (__aarch64__)
-//    STRICT_EXPECTED_CALL(deviceRegistrationState_getRegistrationId(IGNORED_PTR_ARG));
-//    STRICT_EXPECTED_CALL(deviceRegistrationState_getEtag(IGNORED_PTR_ARG));
-//#else
     STRICT_EXPECTED_CALL(deviceRegistrationState_getEtag(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(deviceRegistrationState_getRegistrationId(IGNORED_PTR_ARG));
-//#endif
 
     //act
     int res = prov_sc_delete_device_registration_state(NULL, TEST_DEVICE_REGISTRATION_STATE_HANDLE);
@@ -2909,13 +2904,8 @@ TEST_FUNCTION(prov_sc_delete_device_registration_state_ERROR_INPUT_NULL_ENROLLME
     PROVISIONING_SERVICE_CLIENT_HANDLE sc = prov_sc_create_from_connection_string(TEST_CONNECTION_STRING);
     umock_c_reset_all_calls();
 
-//#if defined(__arm__) || (__aarch64__)
-//    STRICT_EXPECTED_CALL(deviceRegistrationState_getRegistrationId(IGNORED_PTR_ARG));
-//    STRICT_EXPECTED_CALL(deviceRegistrationState_getEtag(IGNORED_PTR_ARG));
-//#else
     STRICT_EXPECTED_CALL(deviceRegistrationState_getEtag(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(deviceRegistrationState_getRegistrationId(IGNORED_PTR_ARG));
-//#endif
 
     //act
     int res = prov_sc_delete_device_registration_state(sc, NULL);
@@ -2935,13 +2925,8 @@ TEST_FUNCTION(prov_sc_delete_device_registration_state_GOLDEN_NO_ETAG)
     umock_c_reset_all_calls();
 
     //arrange
-//#if defined(__arm__) || (__aarch64__)
-//    STRICT_EXPECTED_CALL(deviceRegistrationState_getRegistrationId(IGNORED_PTR_ARG));
-//    STRICT_EXPECTED_CALL(deviceRegistrationState_getEtag(IGNORED_PTR_ARG));
-//#else
     STRICT_EXPECTED_CALL(deviceRegistrationState_getEtag(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(deviceRegistrationState_getRegistrationId(IGNORED_PTR_ARG));
-//#endif
     expected_calls_construct_registration_path(true);
     expected_calls_construct_http_headers(NO_ETAG, HTTP_CLIENT_REQUEST_DELETE, true);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)); //does not fail
@@ -2951,12 +2936,8 @@ TEST_FUNCTION(prov_sc_delete_device_registration_state_GOLDEN_NO_ETAG)
     STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG)); //does not fail
     STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG)); //does not fail
 
-    LogError("expected: %s", umock_c_get_expected_calls());
-
     //act
     int res = prov_sc_delete_device_registration_state(sc, TEST_DEVICE_REGISTRATION_STATE_HANDLE);
-
-    LogError("actual: %s", umock_c_get_actual_calls());
 
     //assert
     ASSERT_ARE_EQUAL(int, res, 0);
@@ -2973,13 +2954,8 @@ TEST_FUNCTION(prov_sc_delete_device_registration_state_GOLDEN_WITH_ETAG)
     umock_c_reset_all_calls();
 
     //arrange
-//#if defined(__arm__) || (__aarch64__)
-//    STRICT_EXPECTED_CALL(deviceRegistrationState_getRegistrationId(IGNORED_PTR_ARG));
-//    STRICT_EXPECTED_CALL(deviceRegistrationState_getEtag(IGNORED_PTR_ARG));
-//#else
     STRICT_EXPECTED_CALL(deviceRegistrationState_getEtag(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(deviceRegistrationState_getRegistrationId(IGNORED_PTR_ARG));
-//#endif
     expected_calls_construct_registration_path(true);
     expected_calls_construct_http_headers(ETAG, HTTP_CLIENT_REQUEST_DELETE, false);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)); //does not fail
@@ -3011,13 +2987,8 @@ TEST_FUNCTION(prov_sc_delete_device_registration_state_FAIL)
 
     umock_c_reset_all_calls();
 
-//#if defined(__arm__) || (__aarch64__)
-//    STRICT_EXPECTED_CALL(deviceRegistrationState_getRegistrationId(IGNORED_PTR_ARG));
-//    STRICT_EXPECTED_CALL(deviceRegistrationState_getEtag(IGNORED_PTR_ARG));
-//#else
     STRICT_EXPECTED_CALL(deviceRegistrationState_getEtag(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(deviceRegistrationState_getRegistrationId(IGNORED_PTR_ARG));
-//#endif
     expected_calls_construct_registration_path(true);
     expected_calls_construct_http_headers(ETAG, HTTP_CLIENT_REQUEST_DELETE, false);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)); //does not fail
