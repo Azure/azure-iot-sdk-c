@@ -1043,7 +1043,9 @@ int prov_sc_run_individual_enrollment_bulk_operation(PROVISIONING_SERVICE_CLIENT
 
 int prov_sc_delete_device_registration_state(PROVISIONING_SERVICE_CLIENT_HANDLE prov_client, DEVICE_REGISTRATION_STATE_HANDLE reg_state)
 {
-    return prov_sc_delete_record_by_param(prov_client, deviceRegistrationState_getRegistrationId(reg_state), deviceRegistrationState_getEtag(reg_state), REG_STATE_PROVISION_PATH_FMT);
+    const char* eTag = deviceRegistrationState_getEtag(reg_state);
+    const char* registrationId = deviceRegistrationState_getRegistrationId(reg_state);
+    return prov_sc_delete_record_by_param(prov_client, registrationId, eTag, REG_STATE_PROVISION_PATH_FMT);
 }
 
 int prov_sc_delete_device_registration_state_by_param(PROVISIONING_SERVICE_CLIENT_HANDLE prov_client, const char* reg_id, const char* etag)
