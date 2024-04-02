@@ -2951,8 +2951,14 @@ TEST_FUNCTION(prov_sc_delete_device_registration_state_GOLDEN_WITH_ETAG)
     umock_c_reset_all_calls();
 
     //arrange
+#ifdef __arm__
+    STRICT_EXPECTED_CALL(deviceRegistrationState_getRegistrationId(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(deviceRegistrationState_getEtag(IGNORED_PTR_ARG));
+#else
     STRICT_EXPECTED_CALL(deviceRegistrationState_getEtag(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(deviceRegistrationState_getRegistrationId(IGNORED_PTR_ARG));
+#endif
+
     expected_calls_construct_registration_path(true);
     expected_calls_construct_http_headers(ETAG, HTTP_CLIENT_REQUEST_DELETE);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)); //does not fail
