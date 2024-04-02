@@ -2951,7 +2951,7 @@ TEST_FUNCTION(prov_sc_delete_device_registration_state_GOLDEN_WITH_ETAG)
     umock_c_reset_all_calls();
 
     //arrange
-#ifdef __arm__
+#if defined(__arm__) || (__aarch64__)
     STRICT_EXPECTED_CALL(deviceRegistrationState_getRegistrationId(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(deviceRegistrationState_getEtag(IGNORED_PTR_ARG));
 #else
