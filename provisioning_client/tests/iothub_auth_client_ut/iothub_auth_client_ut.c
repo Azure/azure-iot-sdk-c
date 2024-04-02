@@ -433,13 +433,8 @@ BEGIN_TEST_SUITE(iothub_auth_client_ut)
             STRICT_EXPECTED_CALL(hsm_client_get_symmetric_key(IGNORED_PTR_ARG));
             STRICT_EXPECTED_CALL(Azure_Base64_Decode(IGNORED_PTR_ARG));
             STRICT_EXPECTED_CALL(BUFFER_new());
-#if defined(__arm__) || (__aarch64__)
-            STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG)).CallCannotFail();
-            STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG)).CallCannotFail();
-#else
             STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG)).CallCannotFail();
             STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG)).CallCannotFail();
-#endif
             STRICT_EXPECTED_CALL(HMACSHA256_ComputeHash(IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG));
             STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG)).CallCannotFail();
             STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));

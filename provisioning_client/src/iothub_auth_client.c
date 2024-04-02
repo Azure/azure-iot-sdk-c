@@ -88,7 +88,9 @@ static int sign_sas_data(IOTHUB_SECURITY_INFO* security_info, const char* payloa
             }
             else
             {
-                if (HMACSHA256_ComputeHash(BUFFER_u_char(decoded_key), BUFFER_length(decoded_key), (const unsigned char*)payload, payload_len, output_hash) != HMACSHA256_OK)
+                size_t buffer_len = BUFFER_length(decoded_key);
+                unsigned char* buffer = BUFFER_u_char(decoded_key);
+                if (HMACSHA256_ComputeHash(buffer, buffer_len, (const unsigned char*)payload, payload_len, output_hash) != HMACSHA256_OK)
                 {
                     LogError("Failed computing HMAC Hash");
                     result = MU_FAILURE;
