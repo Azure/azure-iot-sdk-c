@@ -778,7 +778,7 @@ static void expected_calls_construct_registration_path(bool has_id)
 
 }
 
-static void expected_calls_construct_http_headers(etag_flag etag_flag, HTTP_CLIENT_REQUEST_TYPE request)
+static void expected_calls_construct_http_headers(etag_flag etag_flag, HTTP_CLIENT_REQUEST_TYPE request, bool addHeader)
 {
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
     STRICT_EXPECTED_CALL(get_time(IGNORED_PTR_ARG)); //does not fail
@@ -791,6 +791,10 @@ static void expected_calls_construct_http_headers(etag_flag etag_flag, HTTP_CLIE
     }
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)); //does not fail
     STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    if (addHeader)
+    {
+        STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    }
     if (etag_flag == ETAG)
         STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG)); //does not fail
@@ -1311,7 +1315,7 @@ TEST_FUNCTION(prov_sc_create_or_update_individual_enrollment_GOLDEN)
     STRICT_EXPECTED_CALL(individualEnrollment_getRegistrationId(IGNORED_PTR_ARG));
     expected_calls_construct_registration_path(true);
     STRICT_EXPECTED_CALL(individualEnrollment_getEtag(IGNORED_PTR_ARG)).SetReturn(NULL);
-    expected_calls_construct_http_headers(NO_ETAG, HTTP_CLIENT_REQUEST_PUT);
+    expected_calls_construct_http_headers(NO_ETAG, HTTP_CLIENT_REQUEST_PUT, false);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
     expected_calls_rest_call(HTTP_CLIENT_REQUEST_PUT, RESPONSE);
     STRICT_EXPECTED_CALL(individualEnrollment_deserializeFromJson(IGNORED_PTR_ARG));
@@ -1347,7 +1351,7 @@ TEST_FUNCTION(prov_sc_create_or_update_individual_enrollment_GOLDEN_w_etag)
     STRICT_EXPECTED_CALL(individualEnrollment_getRegistrationId(IGNORED_PTR_ARG));
     expected_calls_construct_registration_path(true);
     STRICT_EXPECTED_CALL(individualEnrollment_getEtag(IGNORED_PTR_ARG));
-    expected_calls_construct_http_headers(ETAG, HTTP_CLIENT_REQUEST_PUT);
+    expected_calls_construct_http_headers(ETAG, HTTP_CLIENT_REQUEST_PUT, false);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
     expected_calls_rest_call(HTTP_CLIENT_REQUEST_PUT, RESPONSE);
     STRICT_EXPECTED_CALL(individualEnrollment_deserializeFromJson(IGNORED_PTR_ARG));
@@ -1398,7 +1402,7 @@ TEST_FUNCTION(prov_sc_create_or_update_individual_enrollment_GOLDEN_ALL_HTTP_OPT
     STRICT_EXPECTED_CALL(individualEnrollment_getRegistrationId(IGNORED_PTR_ARG));
     expected_calls_construct_registration_path(true);
     STRICT_EXPECTED_CALL(individualEnrollment_getEtag(IGNORED_PTR_ARG)).SetReturn(NULL);
-    expected_calls_construct_http_headers(NO_ETAG, HTTP_CLIENT_REQUEST_PUT);
+    expected_calls_construct_http_headers(NO_ETAG, HTTP_CLIENT_REQUEST_PUT, false);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
     expected_calls_rest_call(HTTP_CLIENT_REQUEST_PUT, RESPONSE);
     STRICT_EXPECTED_CALL(individualEnrollment_deserializeFromJson(IGNORED_PTR_ARG));
@@ -1437,7 +1441,7 @@ TEST_FUNCTION(prov_sc_create_or_update_individual_enrollment_FAIL_null_etag)
     STRICT_EXPECTED_CALL(individualEnrollment_getRegistrationId(IGNORED_PTR_ARG));
     expected_calls_construct_registration_path(true);
     STRICT_EXPECTED_CALL(individualEnrollment_getEtag(IGNORED_PTR_ARG)).SetReturn(NULL); //cannot fail
-    expected_calls_construct_http_headers(NO_ETAG, HTTP_CLIENT_REQUEST_PUT);
+    expected_calls_construct_http_headers(NO_ETAG, HTTP_CLIENT_REQUEST_PUT, false);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)); //does not fail
     expected_calls_rest_call(HTTP_CLIENT_REQUEST_PUT, RESPONSE);
     STRICT_EXPECTED_CALL(individualEnrollment_deserializeFromJson(IGNORED_PTR_ARG));
@@ -1498,7 +1502,7 @@ TEST_FUNCTION(prov_sc_create_or_update_individual_enrollment_FAIL_w_etag)
     STRICT_EXPECTED_CALL(individualEnrollment_getRegistrationId(IGNORED_PTR_ARG));
     expected_calls_construct_registration_path(true);
     STRICT_EXPECTED_CALL(individualEnrollment_getEtag(IGNORED_PTR_ARG)); //cannot fail
-    expected_calls_construct_http_headers(ETAG, HTTP_CLIENT_REQUEST_PUT);
+    expected_calls_construct_http_headers(ETAG, HTTP_CLIENT_REQUEST_PUT, false);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)); //does not fail
     expected_calls_rest_call(HTTP_CLIENT_REQUEST_PUT, RESPONSE);
     STRICT_EXPECTED_CALL(individualEnrollment_deserializeFromJson(IGNORED_PTR_ARG));
@@ -1574,7 +1578,7 @@ TEST_FUNCTION(prov_sc_create_or_update_individual_enrollment_FAIL_ALL_HTTP_OPTIO
     STRICT_EXPECTED_CALL(individualEnrollment_getRegistrationId(IGNORED_PTR_ARG));
     expected_calls_construct_registration_path(true);
     STRICT_EXPECTED_CALL(individualEnrollment_getEtag(IGNORED_PTR_ARG)).SetReturn(NULL); //cannot fail
-    expected_calls_construct_http_headers(NO_ETAG, HTTP_CLIENT_REQUEST_PUT);
+    expected_calls_construct_http_headers(NO_ETAG, HTTP_CLIENT_REQUEST_PUT, false);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)); //does not fail
     expected_calls_rest_call(HTTP_CLIENT_REQUEST_PUT, RESPONSE);
     STRICT_EXPECTED_CALL(individualEnrollment_deserializeFromJson(IGNORED_PTR_ARG));
@@ -1668,7 +1672,7 @@ TEST_FUNCTION(prov_sc_delete_individual_enrollment_GOLDEN_NO_ETAG)
     STRICT_EXPECTED_CALL(individualEnrollment_getEtag(IGNORED_PTR_ARG)).SetReturn(NULL); //no etag
     STRICT_EXPECTED_CALL(individualEnrollment_getRegistrationId(IGNORED_PTR_ARG));
     expected_calls_construct_registration_path(true);
-    expected_calls_construct_http_headers(NO_ETAG, HTTP_CLIENT_REQUEST_DELETE);
+    expected_calls_construct_http_headers(NO_ETAG, HTTP_CLIENT_REQUEST_DELETE, false);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)); //does not fail
     expected_calls_rest_call(HTTP_CLIENT_REQUEST_DELETE, NO_RESPONSE);
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)); //does not fail
@@ -1699,7 +1703,7 @@ TEST_FUNCTION(prov_sc_delete_individual_enrollment_GOLDEN_WITH_ETAG)
     STRICT_EXPECTED_CALL(individualEnrollment_getEtag(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(individualEnrollment_getRegistrationId(IGNORED_PTR_ARG));
     expected_calls_construct_registration_path(true);
-    expected_calls_construct_http_headers(ETAG, HTTP_CLIENT_REQUEST_DELETE);
+    expected_calls_construct_http_headers(ETAG, HTTP_CLIENT_REQUEST_DELETE, false);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)); //does not fail
     expected_calls_rest_call(HTTP_CLIENT_REQUEST_DELETE, NO_RESPONSE);
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)); //does not fail
@@ -1734,7 +1738,7 @@ TEST_FUNCTION(prov_sc_delete_individual_enrollment_FAIL)
     STRICT_EXPECTED_CALL(individualEnrollment_getEtag(IGNORED_PTR_ARG)); //can fail, but for sake of this example, cannot
     STRICT_EXPECTED_CALL(individualEnrollment_getRegistrationId(IGNORED_PTR_ARG));
     expected_calls_construct_registration_path(true);
-    expected_calls_construct_http_headers(ETAG, HTTP_CLIENT_REQUEST_DELETE);
+    expected_calls_construct_http_headers(ETAG, HTTP_CLIENT_REQUEST_DELETE, false);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)); //does not fail
     expected_calls_rest_call(HTTP_CLIENT_REQUEST_DELETE, NO_RESPONSE);
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)); //does not fail
@@ -1818,7 +1822,7 @@ TEST_FUNCTION(prov_sc_delete_individual_enrollment_by_param_GOLDEN_NO_ETAG)
 
     //arrange
     expected_calls_construct_registration_path(true);
-    expected_calls_construct_http_headers(NO_ETAG, HTTP_CLIENT_REQUEST_DELETE); // <- this NO_ETAG flag is what proves Requirement 047 - if etag wasn't ignored, actual calls will not line up with expected
+    expected_calls_construct_http_headers(NO_ETAG, HTTP_CLIENT_REQUEST_DELETE, false); // <- this NO_ETAG flag is what proves Requirement 047 - if etag wasn't ignored, actual calls will not line up with expected
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)); //does not fail
     expected_calls_rest_call(HTTP_CLIENT_REQUEST_DELETE, NO_RESPONSE);
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)); //does not fail
@@ -1845,7 +1849,7 @@ TEST_FUNCTION(prov_sc_delete_individual_enrollment_by_param_GOLDEN_WITH_ETAG)
 
     //arrange
     expected_calls_construct_registration_path(true);
-    expected_calls_construct_http_headers(ETAG, HTTP_CLIENT_REQUEST_DELETE);
+    expected_calls_construct_http_headers(ETAG, HTTP_CLIENT_REQUEST_DELETE, false);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)); //does not fail
     expected_calls_rest_call(HTTP_CLIENT_REQUEST_DELETE, NO_RESPONSE);
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)); //does not fail
@@ -1876,7 +1880,7 @@ TEST_FUNCTION(prov_sc_delete_individual_enrollment_by_param_FAIL)
     umock_c_reset_all_calls();
 
     expected_calls_construct_registration_path(true);
-    expected_calls_construct_http_headers(ETAG, HTTP_CLIENT_REQUEST_DELETE);
+    expected_calls_construct_http_headers(ETAG, HTTP_CLIENT_REQUEST_DELETE, false);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)); //does not fail
     expected_calls_rest_call(HTTP_CLIENT_REQUEST_DELETE, NO_RESPONSE);
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)); //does not fail
@@ -1978,7 +1982,7 @@ TEST_FUNCTION(prov_sc_get_individual_enrollment_GOLDEN)
     umock_c_reset_all_calls();
 
     expected_calls_construct_registration_path(true);
-    expected_calls_construct_http_headers(NO_ETAG, HTTP_CLIENT_REQUEST_GET);
+    expected_calls_construct_http_headers(NO_ETAG, HTTP_CLIENT_REQUEST_GET, false);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)); //does not fail
     expected_calls_rest_call(HTTP_CLIENT_REQUEST_GET, RESPONSE);
     STRICT_EXPECTED_CALL(individualEnrollment_deserializeFromJson(IGNORED_PTR_ARG));
@@ -2011,7 +2015,7 @@ TEST_FUNCTION(prov_sc_get_individual_enrollment_FAIL)
     umock_c_reset_all_calls();
 
     expected_calls_construct_registration_path(true);
-    expected_calls_construct_http_headers(NO_ETAG, HTTP_CLIENT_REQUEST_GET);
+    expected_calls_construct_http_headers(NO_ETAG, HTTP_CLIENT_REQUEST_GET, false);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)); //does not fail
     expected_calls_rest_call(HTTP_CLIENT_REQUEST_GET, RESPONSE);
     STRICT_EXPECTED_CALL(individualEnrollment_deserializeFromJson(IGNORED_PTR_ARG));
@@ -2120,7 +2124,7 @@ TEST_FUNCTION(prov_sc_create_or_update_enrollment_group_GOLDEN_no_etag)
     STRICT_EXPECTED_CALL(enrollmentGroup_getGroupId(IGNORED_PTR_ARG));
     expected_calls_construct_registration_path(true);
     STRICT_EXPECTED_CALL(enrollmentGroup_getEtag(IGNORED_PTR_ARG)).SetReturn(NULL); //cannot fail
-    expected_calls_construct_http_headers(NO_ETAG, HTTP_CLIENT_REQUEST_PUT);
+    expected_calls_construct_http_headers(NO_ETAG, HTTP_CLIENT_REQUEST_PUT, false);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
     expected_calls_rest_call(HTTP_CLIENT_REQUEST_PUT, RESPONSE);
     STRICT_EXPECTED_CALL(enrollmentGroup_deserializeFromJson(IGNORED_PTR_ARG));
@@ -2156,7 +2160,7 @@ TEST_FUNCTION(prov_sc_create_or_update_enrollment_group_GOLDEN_w_etag)
     STRICT_EXPECTED_CALL(enrollmentGroup_getGroupId(IGNORED_PTR_ARG));
     expected_calls_construct_registration_path(true);
     STRICT_EXPECTED_CALL(enrollmentGroup_getEtag(IGNORED_PTR_ARG)); //cannot fail
-    expected_calls_construct_http_headers(ETAG, HTTP_CLIENT_REQUEST_PUT);
+    expected_calls_construct_http_headers(ETAG, HTTP_CLIENT_REQUEST_PUT, false);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
     expected_calls_rest_call(HTTP_CLIENT_REQUEST_PUT, RESPONSE);
     STRICT_EXPECTED_CALL(enrollmentGroup_deserializeFromJson(IGNORED_PTR_ARG));
@@ -2195,7 +2199,7 @@ TEST_FUNCTION(prov_sc_create_or_update_enrollment_group_FAIL_no_etag)
     STRICT_EXPECTED_CALL(enrollmentGroup_getGroupId(IGNORED_PTR_ARG));
     expected_calls_construct_registration_path(true);
     STRICT_EXPECTED_CALL(enrollmentGroup_getEtag(IGNORED_PTR_ARG)).SetReturn(NULL); //cannot fail
-    expected_calls_construct_http_headers(NO_ETAG, HTTP_CLIENT_REQUEST_PUT);
+    expected_calls_construct_http_headers(NO_ETAG, HTTP_CLIENT_REQUEST_PUT, false);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)); //does not fail
     expected_calls_rest_call(HTTP_CLIENT_REQUEST_PUT, RESPONSE);
     STRICT_EXPECTED_CALL(enrollmentGroup_deserializeFromJson(IGNORED_PTR_ARG));
@@ -2257,7 +2261,7 @@ TEST_FUNCTION(prov_sc_create_or_update_enrollment_group_FAIL_w_etag)
     STRICT_EXPECTED_CALL(enrollmentGroup_getGroupId(IGNORED_PTR_ARG));
     expected_calls_construct_registration_path(true);
     STRICT_EXPECTED_CALL(enrollmentGroup_getEtag(IGNORED_PTR_ARG)); //cannot fail
-    expected_calls_construct_http_headers(ETAG, HTTP_CLIENT_REQUEST_PUT);
+    expected_calls_construct_http_headers(ETAG, HTTP_CLIENT_REQUEST_PUT, false);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)); //does not fail
     expected_calls_rest_call(HTTP_CLIENT_REQUEST_PUT, RESPONSE);
     STRICT_EXPECTED_CALL(enrollmentGroup_deserializeFromJson(IGNORED_PTR_ARG));
@@ -2352,7 +2356,7 @@ TEST_FUNCTION(prov_sc_delete_enrollment_group_GOLDEN_NO_ETAG)
     STRICT_EXPECTED_CALL(enrollmentGroup_getEtag(IGNORED_PTR_ARG)).SetReturn(NULL); //no etag
     STRICT_EXPECTED_CALL(enrollmentGroup_getGroupId(IGNORED_PTR_ARG));
     expected_calls_construct_registration_path(true);
-    expected_calls_construct_http_headers(NO_ETAG, HTTP_CLIENT_REQUEST_DELETE);
+    expected_calls_construct_http_headers(NO_ETAG, HTTP_CLIENT_REQUEST_DELETE, false);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)); //does not fail
     expected_calls_rest_call(HTTP_CLIENT_REQUEST_DELETE, NO_RESPONSE);
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)); //does not fail
@@ -2383,7 +2387,7 @@ TEST_FUNCTION(prov_sc_delete_enrollment_group_GOLDEN_WITH_ETAG)
     STRICT_EXPECTED_CALL(enrollmentGroup_getEtag(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(enrollmentGroup_getGroupId(IGNORED_PTR_ARG));
     expected_calls_construct_registration_path(true);
-    expected_calls_construct_http_headers(ETAG, HTTP_CLIENT_REQUEST_DELETE);
+    expected_calls_construct_http_headers(ETAG, HTTP_CLIENT_REQUEST_DELETE, false);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)); //does not fail
     expected_calls_rest_call(HTTP_CLIENT_REQUEST_DELETE, NO_RESPONSE);
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)); //does not fail
@@ -2418,7 +2422,7 @@ TEST_FUNCTION(prov_sc_delete_enrollment_group_FAIL)
     STRICT_EXPECTED_CALL(enrollmentGroup_getEtag(IGNORED_PTR_ARG)); //can fail, but for sake of this example, cannot
     STRICT_EXPECTED_CALL(enrollmentGroup_getGroupId(IGNORED_PTR_ARG));
     expected_calls_construct_registration_path(true);
-    expected_calls_construct_http_headers(ETAG, HTTP_CLIENT_REQUEST_DELETE);
+    expected_calls_construct_http_headers(ETAG, HTTP_CLIENT_REQUEST_DELETE, false);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)); //does not fail
     expected_calls_rest_call(HTTP_CLIENT_REQUEST_DELETE, NO_RESPONSE);
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)); //does not fail
@@ -2502,7 +2506,7 @@ TEST_FUNCTION(prov_sc_delete_enrollment_group_by_param_GOLDEN_NO_ETAG)
 
     //arrange
     expected_calls_construct_registration_path(true);
-    expected_calls_construct_http_headers(NO_ETAG, HTTP_CLIENT_REQUEST_DELETE); // <- this NO_ETAG flag is what proves Requirement 054 - if etag wasn't ignored, actual calls will not line up with expected
+    expected_calls_construct_http_headers(NO_ETAG, HTTP_CLIENT_REQUEST_DELETE, false); // <- this NO_ETAG flag is what proves Requirement 054 - if etag wasn't ignored, actual calls will not line up with expected
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)); //does not fail
     expected_calls_rest_call(HTTP_CLIENT_REQUEST_DELETE, NO_RESPONSE);
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)); //does not fail
@@ -2529,7 +2533,7 @@ TEST_FUNCTION(prov_sc_delete_enrollment_group_by_param_GOLDEN_WITH_ETAG)
 
     //arrange
     expected_calls_construct_registration_path(true);
-    expected_calls_construct_http_headers(ETAG, HTTP_CLIENT_REQUEST_DELETE);
+    expected_calls_construct_http_headers(ETAG, HTTP_CLIENT_REQUEST_DELETE, false);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)); //does not fail
     expected_calls_rest_call(HTTP_CLIENT_REQUEST_DELETE, NO_RESPONSE);
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)); //does not fail
@@ -2560,7 +2564,7 @@ TEST_FUNCTION(prov_sc_delete_enrollment_group_by_param_FAIL)
     umock_c_reset_all_calls();
 
     expected_calls_construct_registration_path(true);
-    expected_calls_construct_http_headers(ETAG, HTTP_CLIENT_REQUEST_DELETE);
+    expected_calls_construct_http_headers(ETAG, HTTP_CLIENT_REQUEST_DELETE, false);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)); //does not fail
     expected_calls_rest_call(HTTP_CLIENT_REQUEST_DELETE, NO_RESPONSE);
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)); //does not fail
@@ -2661,7 +2665,7 @@ TEST_FUNCTION(prov_sc_get_enrollment_group_GOLDEN)
     umock_c_reset_all_calls();
 
     expected_calls_construct_registration_path(true);
-    expected_calls_construct_http_headers(NO_ETAG, HTTP_CLIENT_REQUEST_GET);
+    expected_calls_construct_http_headers(NO_ETAG, HTTP_CLIENT_REQUEST_GET, false);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)); //does not fail
     expected_calls_rest_call(HTTP_CLIENT_REQUEST_GET, RESPONSE);
     STRICT_EXPECTED_CALL(enrollmentGroup_deserializeFromJson(IGNORED_PTR_ARG));
@@ -2694,7 +2698,7 @@ TEST_FUNCTION(prov_sc_get_enrollment_group_FAIL)
     umock_c_reset_all_calls();
 
     expected_calls_construct_registration_path(true);
-    expected_calls_construct_http_headers(NO_ETAG, HTTP_CLIENT_REQUEST_GET);
+    expected_calls_construct_http_headers(NO_ETAG, HTTP_CLIENT_REQUEST_GET, false);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)); //does not fail
     expected_calls_rest_call(HTTP_CLIENT_REQUEST_GET, RESPONSE);
     STRICT_EXPECTED_CALL(enrollmentGroup_deserializeFromJson(IGNORED_PTR_ARG));
@@ -2797,7 +2801,7 @@ TEST_FUNCTION(prov_sc_get_device_registration_state_GOLDEN)
     umock_c_reset_all_calls();
 
     expected_calls_construct_registration_path(true);
-    expected_calls_construct_http_headers(NO_ETAG, HTTP_CLIENT_REQUEST_GET);
+    expected_calls_construct_http_headers(NO_ETAG, HTTP_CLIENT_REQUEST_GET, false);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)); //does not fail
     expected_calls_rest_call(HTTP_CLIENT_REQUEST_GET, RESPONSE);
     STRICT_EXPECTED_CALL(deviceRegistrationState_deserializeFromJson(IGNORED_PTR_ARG));
@@ -2831,7 +2835,7 @@ TEST_FUNCTION(prov_sc_get_device_registration_state_FAIL)
     umock_c_reset_all_calls();
 
     expected_calls_construct_registration_path(true);
-    expected_calls_construct_http_headers(NO_ETAG, HTTP_CLIENT_REQUEST_GET);
+    expected_calls_construct_http_headers(NO_ETAG, HTTP_CLIENT_REQUEST_GET, false);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)); //does not fail
     expected_calls_rest_call(HTTP_CLIENT_REQUEST_GET, RESPONSE);
     STRICT_EXPECTED_CALL(deviceRegistrationState_deserializeFromJson(IGNORED_PTR_ARG));
@@ -2919,10 +2923,10 @@ TEST_FUNCTION(prov_sc_delete_device_registration_state_GOLDEN_NO_ETAG)
     umock_c_reset_all_calls();
 
     //arrange
-    STRICT_EXPECTED_CALL(deviceRegistrationState_getEtag(IGNORED_PTR_ARG)).SetReturn(NULL); //no etag
+    STRICT_EXPECTED_CALL(deviceRegistrationState_getEtag(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(deviceRegistrationState_getRegistrationId(IGNORED_PTR_ARG));
     expected_calls_construct_registration_path(true);
-    expected_calls_construct_http_headers(NO_ETAG, HTTP_CLIENT_REQUEST_DELETE);
+    expected_calls_construct_http_headers(NO_ETAG, HTTP_CLIENT_REQUEST_DELETE, true);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)); //does not fail
     expected_calls_rest_call(HTTP_CLIENT_REQUEST_DELETE, NO_RESPONSE);
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)); //does not fail
@@ -2951,7 +2955,7 @@ TEST_FUNCTION(prov_sc_delete_device_registration_state_GOLDEN_WITH_ETAG)
     STRICT_EXPECTED_CALL(deviceRegistrationState_getEtag(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(deviceRegistrationState_getRegistrationId(IGNORED_PTR_ARG));
     expected_calls_construct_registration_path(true);
-    expected_calls_construct_http_headers(ETAG, HTTP_CLIENT_REQUEST_DELETE);
+    expected_calls_construct_http_headers(ETAG, HTTP_CLIENT_REQUEST_DELETE, false);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)); //does not fail
     expected_calls_rest_call(HTTP_CLIENT_REQUEST_DELETE, NO_RESPONSE);
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)); //does not fail
@@ -2981,10 +2985,10 @@ TEST_FUNCTION(prov_sc_delete_device_registration_state_FAIL)
 
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(deviceRegistrationState_getEtag(IGNORED_PTR_ARG)); //can fail, but for sake of this example, cannot
+    STRICT_EXPECTED_CALL(deviceRegistrationState_getEtag(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(deviceRegistrationState_getRegistrationId(IGNORED_PTR_ARG));
     expected_calls_construct_registration_path(true);
-    expected_calls_construct_http_headers(ETAG, HTTP_CLIENT_REQUEST_DELETE);
+    expected_calls_construct_http_headers(ETAG, HTTP_CLIENT_REQUEST_DELETE, false);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)); //does not fail
     expected_calls_rest_call(HTTP_CLIENT_REQUEST_DELETE, NO_RESPONSE);
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)); //does not fail
@@ -3067,7 +3071,7 @@ TEST_FUNCTION(prov_sc_delete_device_registration_state_by_param_GOLDEN_NO_ETAG)
 
     //arrange
     expected_calls_construct_registration_path(true);
-    expected_calls_construct_http_headers(NO_ETAG, HTTP_CLIENT_REQUEST_DELETE); // <- this NO_ETAG flag is what proves Requirement 054 - if etag wasn't ignored, actual calls will not line up with expected
+    expected_calls_construct_http_headers(NO_ETAG, HTTP_CLIENT_REQUEST_DELETE, false); // <- this NO_ETAG flag is what proves Requirement 054 - if etag wasn't ignored, actual calls will not line up with expected
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)); //does not fail
     expected_calls_rest_call(HTTP_CLIENT_REQUEST_DELETE, NO_RESPONSE);
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)); //does not fail
@@ -3094,7 +3098,7 @@ TEST_FUNCTION(prov_sc_delete_device_registration_state_by_param_GOLDEN_WITH_ETAG
 
     //arrange
     expected_calls_construct_registration_path(true);
-    expected_calls_construct_http_headers(ETAG, HTTP_CLIENT_REQUEST_DELETE);
+    expected_calls_construct_http_headers(ETAG, HTTP_CLIENT_REQUEST_DELETE, false);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)); //does not fail
     expected_calls_rest_call(HTTP_CLIENT_REQUEST_DELETE, NO_RESPONSE);
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)); //does not fail
@@ -3125,7 +3129,7 @@ TEST_FUNCTION(prov_sc_delete_device_registration_state_by_param_FAIL)
     umock_c_reset_all_calls();
 
     expected_calls_construct_registration_path(true);
-    expected_calls_construct_http_headers(ETAG, HTTP_CLIENT_REQUEST_DELETE);
+    expected_calls_construct_http_headers(ETAG, HTTP_CLIENT_REQUEST_DELETE, false);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)); //does not fail
     expected_calls_rest_call(HTTP_CLIENT_REQUEST_DELETE, NO_RESPONSE);
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)); //does not fail
@@ -3269,7 +3273,7 @@ TEST_FUNCTION(prov_sc_run_individual_enrollment_bulk_operation_SUCCESS)
 
     STRICT_EXPECTED_CALL(bulkOperation_serializeToJson(IGNORED_PTR_ARG));
     expected_calls_construct_registration_path(false);
-    expected_calls_construct_http_headers(NO_ETAG, HTTP_CLIENT_REQUEST_POST);
+    expected_calls_construct_http_headers(NO_ETAG, HTTP_CLIENT_REQUEST_POST, false);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)); //does not fail
     expected_calls_rest_call(HTTP_CLIENT_REQUEST_POST, RESPONSE);
     STRICT_EXPECTED_CALL(bulkOperationResult_deserializeFromJson(IGNORED_PTR_ARG));
@@ -3310,7 +3314,7 @@ TEST_FUNCTION(prov_sc_run_individual_enrollment_bulk_operation_ERROR)
 
     STRICT_EXPECTED_CALL(bulkOperation_serializeToJson(IGNORED_PTR_ARG));
     expected_calls_construct_registration_path(false);
-    expected_calls_construct_http_headers(NO_ETAG, HTTP_CLIENT_REQUEST_POST);
+    expected_calls_construct_http_headers(NO_ETAG, HTTP_CLIENT_REQUEST_POST, false);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)); //does not fail
     expected_calls_rest_call(HTTP_CLIENT_REQUEST_POST, RESPONSE); //----------------->20?
     STRICT_EXPECTED_CALL(bulkOperationResult_deserializeFromJson(IGNORED_PTR_ARG));
@@ -3490,7 +3494,7 @@ TEST_FUNCTION(prov_sc_query_individual_enrollment_success_full_results)
 
     STRICT_EXPECTED_CALL(querySpecification_serializeToJson(&qs));
     expected_calls_construct_registration_path(false);
-    expected_calls_construct_http_headers(NO_ETAG, HTTP_CLIENT_REQUEST_POST);
+    expected_calls_construct_http_headers(NO_ETAG, HTTP_CLIENT_REQUEST_POST, false);
     expected_calls_add_query_headers(false, false);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)); //cannot fail
     expected_calls_rest_call(HTTP_CLIENT_REQUEST_POST, RESPONSE);
@@ -3537,7 +3541,7 @@ TEST_FUNCTION(prov_sc_query_individual_enrollment_success_paging_no_given_token_
 
     STRICT_EXPECTED_CALL(querySpecification_serializeToJson(&qs));
     expected_calls_construct_registration_path(false);
-    expected_calls_construct_http_headers(NO_ETAG, HTTP_CLIENT_REQUEST_POST);
+    expected_calls_construct_http_headers(NO_ETAG, HTTP_CLIENT_REQUEST_POST, false);
     expected_calls_add_query_headers(true, false);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)); //cannot fail
     expected_calls_rest_call(HTTP_CLIENT_REQUEST_POST, RESPONSE);
@@ -3587,7 +3591,7 @@ TEST_FUNCTION(prov_sc_query_individual_enrollment_success_paging_given_token_no_
 
     STRICT_EXPECTED_CALL(querySpecification_serializeToJson(&qs));
     expected_calls_construct_registration_path(false);
-    expected_calls_construct_http_headers(NO_ETAG, HTTP_CLIENT_REQUEST_POST);
+    expected_calls_construct_http_headers(NO_ETAG, HTTP_CLIENT_REQUEST_POST, false);
     expected_calls_add_query_headers(true, true);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)); //cannot fail
     expected_calls_rest_call(HTTP_CLIENT_REQUEST_POST, RESPONSE);
@@ -3635,7 +3639,7 @@ TEST_FUNCTION(prov_sc_query_individual_enrollment_success_paging_given_token_w_t
 
     STRICT_EXPECTED_CALL(querySpecification_serializeToJson(&qs));
     expected_calls_construct_registration_path(false);
-    expected_calls_construct_http_headers(NO_ETAG, HTTP_CLIENT_REQUEST_POST);
+    expected_calls_construct_http_headers(NO_ETAG, HTTP_CLIENT_REQUEST_POST, false);
     expected_calls_add_query_headers(true, true);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)); //cannot fail
     expected_calls_rest_call(HTTP_CLIENT_REQUEST_POST, RESPONSE);
@@ -3688,7 +3692,7 @@ TEST_FUNCTION(prov_sc_query_individual_enrollment_success_paging_given_token_w_t
 
     STRICT_EXPECTED_CALL(querySpecification_serializeToJson(&qs));
     expected_calls_construct_registration_path(false);
-    expected_calls_construct_http_headers(NO_ETAG, HTTP_CLIENT_REQUEST_POST); //10
+    expected_calls_construct_http_headers(NO_ETAG, HTTP_CLIENT_REQUEST_POST, false); //10
     expected_calls_add_query_headers(true, true); //12
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)); //cannot fail
     expected_calls_rest_call(HTTP_CLIENT_REQUEST_POST, RESPONSE);
@@ -3875,7 +3879,7 @@ TEST_FUNCTION(prov_sc_query_enrollment_group_success_full_results)
 
     STRICT_EXPECTED_CALL(querySpecification_serializeToJson(&qs));
     expected_calls_construct_registration_path(false);
-    expected_calls_construct_http_headers(NO_ETAG, HTTP_CLIENT_REQUEST_POST);
+    expected_calls_construct_http_headers(NO_ETAG, HTTP_CLIENT_REQUEST_POST, false);
     expected_calls_add_query_headers(false, false);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)); //cannot fail
     expected_calls_rest_call(HTTP_CLIENT_REQUEST_POST, RESPONSE);
@@ -3922,7 +3926,7 @@ TEST_FUNCTION(prov_sc_query_enrollment_group_success_paging_no_given_token_w_tok
 
     STRICT_EXPECTED_CALL(querySpecification_serializeToJson(&qs));
     expected_calls_construct_registration_path(false);
-    expected_calls_construct_http_headers(NO_ETAG, HTTP_CLIENT_REQUEST_POST);
+    expected_calls_construct_http_headers(NO_ETAG, HTTP_CLIENT_REQUEST_POST, false);
     expected_calls_add_query_headers(true, false);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)); //cannot fail
     expected_calls_rest_call(HTTP_CLIENT_REQUEST_POST, RESPONSE);
@@ -3972,7 +3976,7 @@ TEST_FUNCTION(prov_sc_query_enrollment_group_success_paging_given_token_no_token
 
     STRICT_EXPECTED_CALL(querySpecification_serializeToJson(&qs));
     expected_calls_construct_registration_path(false);
-    expected_calls_construct_http_headers(NO_ETAG, HTTP_CLIENT_REQUEST_POST);
+    expected_calls_construct_http_headers(NO_ETAG, HTTP_CLIENT_REQUEST_POST, false);
     expected_calls_add_query_headers(true, true);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)); //cannot fail
     expected_calls_rest_call(HTTP_CLIENT_REQUEST_POST, RESPONSE);
@@ -4020,7 +4024,7 @@ TEST_FUNCTION(prov_sc_query_enrollment_group_success_paging_given_token_w_token_
 
     STRICT_EXPECTED_CALL(querySpecification_serializeToJson(&qs));
     expected_calls_construct_registration_path(false);
-    expected_calls_construct_http_headers(NO_ETAG, HTTP_CLIENT_REQUEST_POST);
+    expected_calls_construct_http_headers(NO_ETAG, HTTP_CLIENT_REQUEST_POST, false);
     expected_calls_add_query_headers(true, true);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)); //cannot fail
     expected_calls_rest_call(HTTP_CLIENT_REQUEST_POST, RESPONSE);
@@ -4073,7 +4077,7 @@ TEST_FUNCTION(prov_sc_query_enrollment_group_success_paging_given_token_w_token_
 
     STRICT_EXPECTED_CALL(querySpecification_serializeToJson(&qs));
     expected_calls_construct_registration_path(false);
-    expected_calls_construct_http_headers(NO_ETAG, HTTP_CLIENT_REQUEST_POST); //10
+    expected_calls_construct_http_headers(NO_ETAG, HTTP_CLIENT_REQUEST_POST, false); //10
     expected_calls_add_query_headers(true, true); //12
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)); //cannot fail
     expected_calls_rest_call(HTTP_CLIENT_REQUEST_POST, RESPONSE);
@@ -4259,7 +4263,7 @@ TEST_FUNCTION(prov_sc_query_device_registration_state_success_full_results)
     umock_c_reset_all_calls();
 
     expected_calls_construct_registration_path(true);
-    expected_calls_construct_http_headers(NO_ETAG, HTTP_CLIENT_REQUEST_POST);
+    expected_calls_construct_http_headers(NO_ETAG, HTTP_CLIENT_REQUEST_POST, false);
     expected_calls_add_query_headers(false, false);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)); //cannot fail
     expected_calls_rest_call(HTTP_CLIENT_REQUEST_POST, RESPONSE);
@@ -4305,7 +4309,7 @@ TEST_FUNCTION(prov_sc_query_device_registration_state_success_paging_no_given_to
     umock_c_reset_all_calls();
 
     expected_calls_construct_registration_path(true);
-    expected_calls_construct_http_headers(NO_ETAG, HTTP_CLIENT_REQUEST_POST);
+    expected_calls_construct_http_headers(NO_ETAG, HTTP_CLIENT_REQUEST_POST, false);
     expected_calls_add_query_headers(true, false);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)); //cannot fail
     expected_calls_rest_call(HTTP_CLIENT_REQUEST_POST, RESPONSE);
@@ -4354,7 +4358,7 @@ TEST_FUNCTION(prov_sc_query_device_registration_state_success_paging_given_token
     umock_c_reset_all_calls();
 
     expected_calls_construct_registration_path(true);
-    expected_calls_construct_http_headers(NO_ETAG, HTTP_CLIENT_REQUEST_POST);
+    expected_calls_construct_http_headers(NO_ETAG, HTTP_CLIENT_REQUEST_POST, false);
     expected_calls_add_query_headers(true, true);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)); //cannot fail
     expected_calls_rest_call(HTTP_CLIENT_REQUEST_POST, RESPONSE);
@@ -4401,7 +4405,7 @@ TEST_FUNCTION(prov_sc_query_device_registration_state_success_paging_given_token
     umock_c_reset_all_calls();
 
     expected_calls_construct_registration_path(true);
-    expected_calls_construct_http_headers(NO_ETAG, HTTP_CLIENT_REQUEST_POST);
+    expected_calls_construct_http_headers(NO_ETAG, HTTP_CLIENT_REQUEST_POST, false);
     expected_calls_add_query_headers(true, true);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)); //cannot fail
     expected_calls_rest_call(HTTP_CLIENT_REQUEST_POST, RESPONSE);
@@ -4453,7 +4457,7 @@ TEST_FUNCTION(prov_sc_query_device_registration_state_success_paging_given_token
     umock_c_reset_all_calls();
 
     expected_calls_construct_registration_path(true);
-    expected_calls_construct_http_headers(NO_ETAG, HTTP_CLIENT_REQUEST_POST); //12
+    expected_calls_construct_http_headers(NO_ETAG, HTTP_CLIENT_REQUEST_POST, false); //12
     expected_calls_add_query_headers(true, true); //14
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)); //cannot fail
     expected_calls_rest_call(HTTP_CLIENT_REQUEST_POST, RESPONSE);
