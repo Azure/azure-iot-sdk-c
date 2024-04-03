@@ -302,7 +302,7 @@ DEVICE_RESULT Device_PublishTransacted_ReportedProperty(REPORTED_PROPERTIES_TRAN
         (data == NULL)
         )
     {
-        LogError("invalid argument REPORTED_PROPERTIES_TRANSACTION_HANDLE transactionHandle=%p, const char* reportedPropertyPath=%s, const AGENT_DATA_TYPE* data=%p", transactionHandle, reportedPropertyPath, data);
+        LogError("invalid argument REPORTED_PROPERTIES_TRANSACTION_HANDLE transactionHandle=%p, const char* reportedPropertyPath=%s, const AGENT_DATA_TYPE* data=%p", transactionHandle, MU_P_OR_NULL(reportedPropertyPath), data);
         result = DEVICE_INVALID_ARG;
     }
     else
