@@ -778,7 +778,7 @@ static void expected_calls_construct_registration_path(bool has_id)
 
 }
 
-static void expected_calls_construct_http_headers(etag_flag etag_flag, HTTP_CLIENT_REQUEST_TYPE request, bool armAddHeader)
+static void expected_calls_construct_http_headers(etag_flag etag_flag, HTTP_CLIENT_REQUEST_TYPE request, bool addHeader)
 {
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
     STRICT_EXPECTED_CALL(get_time(IGNORED_PTR_ARG)); //does not fail
@@ -791,11 +791,9 @@ static void expected_calls_construct_http_headers(etag_flag etag_flag, HTTP_CLIE
     }
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)); //does not fail
     STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    if (armAddHeader)
+    if (addHeader)
     {
-#if defined(__arm__) || (__aarch64__)
         STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-#endif
     }
     if (etag_flag == ETAG)
         STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
