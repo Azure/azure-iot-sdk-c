@@ -303,7 +303,7 @@ int main(void)
                 ThreadAPI_Sleep((unsigned int)sleep_ms);
                 counter += sleep_ms;
 
-                g_continueRunning = !(messages_sent > MESSAGE_COUNT);
+                g_continueRunning &= !(messages_sent > MESSAGE_COUNT);
             } while (g_continueRunning);
 
             (void)printf("client_amqp_shared_sample has received a quit message, call DoWork %d more time to complete final sending...\r\n", DOWORK_LOOP_NUM);
