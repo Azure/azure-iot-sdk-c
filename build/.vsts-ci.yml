@@ -4,34 +4,34 @@ variables:
 resources:
   containers:
   - container: linux-c-ubuntu-2204
-    endpoint: csdk-containers
+    endpoint: CSDK Container Service Identity
     image: csdkcontainerregistry.azurecr.io/linux-c-ubuntu-2204:latest
   - container: linux-c-ubuntu-2004
-    endpoint: csdk-containers
+    endpoint: CSDK Container Service Identity
     image: csdkcontainerregistry.azurecr.io/linux-c-ubuntu-2004:latest
   - container: linux-c-ubuntu-wolfssl
-    endpoint: csdk-containers
+    endpoint: CSDK Container Service Identity
     image: csdkcontainerregistry.azurecr.io/linux-c-ubuntu-wolfssl:latest
   - container: linux-c-ubuntu-bearssl
-    endpoint: csdk-containers
+    endpoint: CSDK Container Service Identity
     image: csdkcontainerregistry.azurecr.io/linux-c-ubuntu-bearssl:latest
   - container: linux-c-ubuntu-mbed
-    endpoint: csdk-containers
+    endpoint: CSDK Container Service Identity
     image: csdkcontainerregistry.azurecr.io/linux-c-ubuntu-mbed:latest
   - container: linux-c-ubuntu-c-ares
-    endpoint: csdk-containers
+    endpoint: CSDK Container Service Identity
     image: csdkcontainerregistry.azurecr.io/linux-c-ubuntu-c-ares:latest
   - container: linux-c-debian-buster
-    endpoint: csdk-containers
+    endpoint: CSDK Container Service Identity
     image: csdkcontainerregistry.azurecr.io/linux-c-debian-buster:latest
   - container: linux-c-ubuntu-clang
-    endpoint: csdk-containers
+    endpoint: CSDK Container Service Identity
     image: csdkcontainerregistry.azurecr.io/linux-c-ubuntu-clang:latest
   - container: linux-c-openssl-pkcs11
-    endpoint: csdk-containers
+    endpoint: CSDK Container Service Identity
     image: csdkcontainerregistry.azurecr.io/linux-c-openssl-pkcs11:latest
   - container: raspberrypi-c-buster
-    endpoint: csdk-containers
+    endpoint: CSDK Container Service Identity
     image: csdkcontainerregistry.azurecr.io/raspberrypi-c-buster:brown
 jobs:
 - job: checksubmodule
