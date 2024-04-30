@@ -361,7 +361,11 @@ jobs:
   - script: |
       export OPENSSL_ia32cap=0x00000000
       sudo chmod -R 755 .
+      sudo apt-get install -y tshark
+      tcpdump -i eth0 -w ~/network.pcap -s 0 &
       cd cmake && sudo -E ../build_all/linux/run_tests.sh
+      sudo pkill tcpdump
+      tshark -r ~/network.pcap  | grep -E "Hello|Application Data"
     displayName: "Run Tests"
     env:
       IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
@@ -586,7 +590,11 @@ jobs:
   - script: |
       export OPENSSL_ia32cap=0x00000000
       sudo chmod -R 755 .
+      sudo apt-get install -y tshark
+      tcpdump -i eth0 -w ~/network.pcap -s 0 &
       cd cmake && sudo -E ../build_all/linux/run_tests.sh
+      sudo pkill tcpdump
+      tshark -r ~/network.pcap  | grep -E "Hello|Application Data"
     displayName: "Run Tests"
     env:
       IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
