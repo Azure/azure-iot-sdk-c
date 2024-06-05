@@ -4832,8 +4832,10 @@ static void IoTHubClientCore_GenericMethodInvoke_Impl(METHOD_INVOKE_TEST_TARGET 
     EXPECTED_CALL(singlylinkedlist_get_head_item(TEST_SLL_HANDLE))
         .SetReturn(TEST_LIST_HANDLE);
 
+#ifndef DONT_USE_UPLOADTOBLOB
     setup_gargageCollection(my_malloc_items[3], true);
     setup_IothubClient_Destroy_after_garbage_collection();
+#endif // DONT_USE_UPLOADTOBLOB
 
     IoTHubClientCore_Destroy(iothub_handle);
 
