@@ -121,7 +121,7 @@ goto args-continue
 set use_edge_modules=ON
 goto args-continue
 
-:arg-edge-modules
+:arg-uploadtoblob
 set no_uploadtoblob=ON
 goto args-continue
 
