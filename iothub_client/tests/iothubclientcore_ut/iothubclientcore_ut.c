@@ -809,7 +809,6 @@ static void setup_iothubclient_sendeventasync(bool use_threads)
     STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG)).CallCannotFail();
 }
 
-#ifndef DONT_USE_UPLOADTOBLOB
 static void setup_gargageCollection(void* saved_data, bool can_item_be_collected)
 {
     STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
@@ -855,6 +854,7 @@ static void setup_IothubClient_Destroy_after_garbage_collection()
     EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
 }
 
+#ifndef DONT_USE_UPLOADTOBLOB
 static void setup_iothubclient_uploadtoblobasync()
 {
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)); /*this is creating a HTTPWORKER_THREAD_INFO*/

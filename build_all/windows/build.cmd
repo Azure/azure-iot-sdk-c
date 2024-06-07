@@ -41,6 +41,7 @@ set make=yes
 set build_traceabilitytool=0
 set prov_auth=OFF
 set use_edge_modules=OFF
+set no_uploadtoblob=OFF
 
 :args-loop
 if "%1" equ "" goto args-done
@@ -57,6 +58,7 @@ if "%1" equ "--no-make" goto arg-no-make
 if "%1" equ "--build-traceabilitytool" goto arg-build-traceabilitytool
 if "%1" equ "--provisioning" goto arg-provisioning
 if "%1" equ "--use-edge-modules" goto arg-edge-modules
+if "%1" equ "--no-uploadtoblob" goto arg-uploadtoblob
 call :usage && exit /b 1
 
 :arg-build-clean
@@ -119,6 +121,10 @@ goto args-continue
 set use_edge_modules=ON
 goto args-continue
 
+:arg-uploadtoblob
+set no_uploadtoblob=ON
+goto args-continue
+
 :args-continue
 shift
 goto args-loop
@@ -154,15 +160,15 @@ cmake --version
 
 if %build-platform% == x64 (
     echo ***Running CMAKE for Win64***
-    cmake -LAH -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_sfc_tests:BOOL=%CMAKE_run_sfc_tests% -Duse_cppunittest:BOOL=OFF -Drun_unittests:BOOL=%CMAKE_run_unittests% %build-root% -Duse_prov_client:BOOL=%prov_auth% -G %VSVERSION% -A x64 -Duse_edge_modules=%use_edge_modules% -DCMAKE_BUILD_TYPE=%build-config%
+    cmake -LAH -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Ddont_use_uploadtoblob:BOOL=%no_uploadtoblob% -Drun_sfc_tests:BOOL=%CMAKE_run_sfc_tests% -Duse_cppunittest:BOOL=OFF -Drun_unittests:BOOL=%CMAKE_run_unittests% %build-root% -Duse_prov_client:BOOL=%prov_auth% -G %VSVERSION% -A x64 -Duse_edge_modules=%use_edge_modules% -DCMAKE_BUILD_TYPE=%build-config%
     if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 ) else if %build-platform% == arm (
     echo ***Running CMAKE for ARM***
-    cmake -LAH -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_sfc_tests:BOOL=%CMAKE_run_sfc_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% %build-root% -Duse_prov_client:BOOL=%prov_auth% -G %VSVERSION% -A ARM -Duse_edge_modules=%use_edge_modules% -DCMAKE_BUILD_TYPE=%build-config%
+    cmake -LAH -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Ddont_use_uploadtoblob:BOOL=%no_uploadtoblob% -Drun_sfc_tests:BOOL=%CMAKE_run_sfc_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% %build-root% -Duse_prov_client:BOOL=%prov_auth% -G %VSVERSION% -A ARM -Duse_edge_modules=%use_edge_modules% -DCMAKE_BUILD_TYPE=%build-config%
     if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 ) else (
     echo ***Running CMAKE for Win32***
-    cmake -LAH -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_sfc_tests:BOOL=%CMAKE_run_sfc_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% %build-root% -Duse_prov_client:BOOL=%prov_auth% -G %VSVERSION% -A Win32 -Duse_edge_modules=%use_edge_modules% -DCMAKE_BUILD_TYPE=%build-config%
+    cmake -LAH -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Ddont_use_uploadtoblob:BOOL=%no_uploadtoblob% -Drun_sfc_tests:BOOL=%CMAKE_run_sfc_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% %build-root% -Duse_prov_client:BOOL=%prov_auth% -G %VSVERSION% -A Win32 -Duse_edge_modules=%use_edge_modules% -DCMAKE_BUILD_TYPE=%build-config%
     if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 )
 
