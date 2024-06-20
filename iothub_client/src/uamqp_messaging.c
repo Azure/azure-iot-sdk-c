@@ -1101,29 +1101,25 @@ static int readApplicationPropertiesFromuAMQPMessage(IOTHUB_MESSAGE_HANDLE iothu
                         result = MU_FAILURE;
                     }
 
-                    else if ((result = amqpvalue_get_string(map_key_name, &key_name)) != 0)
+                    else
                     {
-                        LogError("Failed parsing the uAMQP property name (return code %d).", result);
-                        result = MU_FAILURE;
-                    }
-                    else if ((result = amqpvalue_get_string(map_key_value, &key_value)) != 0)
-                    {
-                        LogError("Failed parsing the uAMQP property value (return code %d).", result);
-                        result = MU_FAILURE;
-                    }
-                    else if (Map_AddOrUpdate(iothub_message_properties_map, key_name, key_value) != MAP_OK)
-                    {
-                        LogError("Failed to add/update IoTHub message property map.");
-                        result = MU_FAILURE;
-                    }
+                        if ((result = amqpvalue_get_string(map_key_name, &key_name)) != 0)
+                        {
+                            LogError("Failed parsing the uAMQP property name (return code %d).", result);
+                            result = MU_FAILURE;
+                        }
+                        else if ((result = amqpvalue_get_string(map_key_value, &key_value)) != 0)
+                        {
+                            LogError("Failed parsing the uAMQP property value (return code %d).", result);
+                            result = MU_FAILURE;
+                        }
+                        else if (Map_AddOrUpdate(iothub_message_properties_map, key_name, key_value) != MAP_OK)
+                        {
+                            LogError("Failed to add/update IoTHub message property map.");
+                            result = MU_FAILURE;
+                        }
 
-                    if (map_key_name != NULL)
-                    {
                         amqpvalue_destroy(map_key_name);
-                    }
-
-                    if (map_key_value != NULL)
-                    {
                         amqpvalue_destroy(map_key_value);
                     }
                 }
