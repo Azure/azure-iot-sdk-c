@@ -79,7 +79,6 @@ typedef struct MESSAGE_SEND_CONTEXT_TAG
 {
     uint32_t mq_message_id;
     MESSAGE_HANDLE message;
-    bool is_destroyed;
 
     AMQP_MESSENGER_INSTANCE* messenger;
 
@@ -882,8 +881,10 @@ static void on_process_message_callback(MESSAGE_QUEUE_HANDLE message_queue, MQ_M
             on_process_message_completed_callback(message_queue, message_id, MESSAGE_QUEUE_ERROR, NULL);
         }
 
-        message_destroy((MESSAGE_HANDLE)message);
-        message_context->is_destroyed = true;
+        // An optimization was done here before to destroy `message` right away,
+        // freeing up memory as early as possible, but it led to a double-free
+        // situation when on_message_processing_completed_callback is called.
+        // Removing the optimization is the easiest fix.
     }
 }
 
@@ -930,16 +931,12 @@ static void on_message_processing_completed_callback(MQ_MESSAGE_HANDLE message, 
             msg_ctx->messenger->send_error_count++;
         }
 
-        if (!msg_ctx->is_destroyed)
+        if (msg_ctx->on_send_complete_callback != NULL)
         {
-            if (msg_ctx->on_send_complete_callback != NULL)
-            {
-                msg_ctx->on_send_complete_callback(messenger_send_result, messenger_send_reason, msg_ctx->user_context);
-            }
-
-            message_destroy((MESSAGE_HANDLE)message);
+            msg_ctx->on_send_complete_callback(messenger_send_result, messenger_send_reason, msg_ctx->user_context);
         }
 
+        message_destroy((MESSAGE_HANDLE)message);
         destroy_message_send_context(msg_ctx);
     }
 }
