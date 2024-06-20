@@ -89,12 +89,14 @@ static void real_free(void* ptr)
 #define please_mock_messaging_delivery_accepted MOCK_ENABLED
 #define please_mock_messaging_delivery_rejected MOCK_ENABLED
 #define please_mock_messaging_delivery_released MOCK_ENABLED
+#define please_mock_async_operation_cancel MOCK_ENABLED
 
 #include "azure_uamqp_c/session.h"
 #include "azure_uamqp_c/link.h"
 #include "azure_uamqp_c/messaging.h"
 #include "azure_uamqp_c/message_sender.h"
 #include "azure_uamqp_c/message_receiver.h"
+#include "azure_uamqp_c/async_operation.h"
 #include "internal/message_queue.h"
 
 #undef ENABLE_MOCK_FILTERING_SWITCH

@@ -22,6 +22,6 @@ rm -r -f $build_folder
 mkdir -p $build_folder
 pushd $build_folder
 
-cmake .. -Duse_prov_client=OFF -Dhsm_type_x509=OFF -Dhsm_type_sastoken=OFF -Dhsm_type_symm_key=OFF -Drun_e2e_tests=ON -G Xcode -DCMAKE_BUILD_TYPE=Debug
+cmake .. -Duse_prov_client=OFF -Dhsm_type_x509=OFF -Dhsm_type_sastoken=OFF -Dhsm_type_symm_key=OFF -Drun_e2e_tests=ON -Ddont_use_uploadtoblob:BOOL=ON -G Xcode -DCMAKE_BUILD_TYPE=Debug
 cmake --build . -- --jobs=$CORES
 popd

@@ -118,20 +118,30 @@ static int my_DeviceMethodCallback_Impl(const char* method_name, const unsigned 
     return 200;
 }
 
+typedef struct TEST_GETDATA_CALLBACK_ARGS_TAG
+{
+    IOTHUB_CLIENT_FILE_UPLOAD_RESULT last_result;
+    unsigned char const ** last_data;
+    size_t* last_size;
+    int invokation_counter;
+} TEST_GETDATA_CALLBACK_ARGS;
+
 static void my_FileUpload_GetData_Callback(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, unsigned char const ** data, size_t* size, void* context)
 {
-    (void)data;
-    (void)size;
-    (void)context;
-    (void)result;
+    TEST_GETDATA_CALLBACK_ARGS* saved_args = (TEST_GETDATA_CALLBACK_ARGS*)context;
+    saved_args->last_result = result;
+    saved_args->last_data = data;
+    saved_args->last_size = size;
+    saved_args->invokation_counter++;
 }
 
 static IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT my_FileUpload_GetData_CallbackEx(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, unsigned char const ** data, size_t* size, void* context)
 {
-    (void)data;
-    (void)size;
-    (void)context;
-    (void)result;
+    TEST_GETDATA_CALLBACK_ARGS* saved_args = (TEST_GETDATA_CALLBACK_ARGS*)context;
+    saved_args->last_result = result;
+    saved_args->last_data = data;
+    saved_args->last_size = size;
+    saved_args->invokation_counter++;
     return IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_OK;
 }
 
@@ -166,6 +176,9 @@ IMPLEMENT_UMOCK_C_ENUM_TYPE(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
 
 TEST_DEFINE_ENUM_TYPE(IOTHUB_CLIENT_RETRY_POLICY, IOTHUB_CLIENT_RETRY_POLICY_VALUES);
 IMPLEMENT_UMOCK_C_ENUM_TYPE(IOTHUB_CLIENT_RETRY_POLICY, IOTHUB_CLIENT_RETRY_POLICY_VALUES);
+
+TEST_DEFINE_ENUM_TYPE(IOTHUB_CLIENT_FILE_UPLOAD_RESULT, IOTHUB_CLIENT_FILE_UPLOAD_RESULT_VALUES);
+IMPLEMENT_UMOCK_C_ENUM_TYPE(IOTHUB_CLIENT_FILE_UPLOAD_RESULT, IOTHUB_CLIENT_FILE_UPLOAD_RESULT_VALUES);
 
 // Overloading operators for Micromock
 static TEST_MUTEX_HANDLE test_serialize_mutex;
@@ -796,7 +809,6 @@ static void setup_iothubclient_sendeventasync(bool use_threads)
     STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG)).CallCannotFail();
 }
 
-#ifndef DONT_USE_UPLOADTOBLOB
 static void setup_gargageCollection(void* saved_data, bool can_item_be_collected)
 {
     STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
@@ -842,6 +854,7 @@ static void setup_IothubClient_Destroy_after_garbage_collection()
     EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
 }
 
+#ifndef DONT_USE_UPLOADTOBLOB
 static void setup_iothubclient_uploadtoblobasync()
 {
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)); /*this is creating a HTTPWORKER_THREAD_INFO*/
@@ -3216,7 +3229,7 @@ TEST_FUNCTION(IoTHubClientCore_UploadMultipleBlocksToBlobAsync_fails_when_handle
 {
     ///arrange
     IOTHUB_CLIENT_CORE_HANDLE iothub_handle = NULL;
-    int context = 1;
+    TEST_GETDATA_CALLBACK_ARGS context = { 0 };
     umock_c_reset_all_calls();
 
     ///act
@@ -3234,7 +3247,7 @@ TEST_FUNCTION(IoTHubClientCore_UploadMultipleBlocksToBlobAsync_fails_when_destin
 {
     ///arrange
     IOTHUB_CLIENT_CORE_HANDLE iothub_handle = IoTHubClientCore_Create(TEST_CLIENT_CONFIG);
-    int context = 1;
+    TEST_GETDATA_CALLBACK_ARGS context = { 0 };
     umock_c_reset_all_calls();
 
     ///act
@@ -3270,7 +3283,7 @@ static void IoTHubClientCore_UploadMultipleBlocksToBlobAsync_succeeds_Impl(bool 
 {
     ///arrange
     IOTHUB_CLIENT_CORE_HANDLE iothub_handle = IoTHubClientCore_Create(TEST_CLIENT_CONFIG);
-    int context = 1;
+    TEST_GETDATA_CALLBACK_ARGS context =  { 0 };
     umock_c_reset_all_calls();
 
     set_expected_calls_for_allocateUploadToBlob();
@@ -3345,7 +3358,7 @@ static void IoTHubClientCore_UploadMultipleBlocksToBlobAsync_fails_when_ThreadAP
 {
     ///arrange
     IOTHUB_CLIENT_CORE_HANDLE iothub_handle = IoTHubClientCore_Create(TEST_CLIENT_CONFIG);
-    int context = 1;
+    TEST_GETDATA_CALLBACK_ARGS context = { 0 };
     umock_c_reset_all_calls();
 
     set_expected_calls_for_allocateUploadToBlob();
@@ -3395,7 +3408,7 @@ static void IoTHubClientCore_UploadMultipleBlocksToBlobAsync_fails_when_strcpy_f
 {
     ///arrange
     IOTHUB_CLIENT_CORE_HANDLE iothub_handle = IoTHubClientCore_Create(TEST_CLIENT_CONFIG);
-    int context = 1;
+    TEST_GETDATA_CALLBACK_ARGS context = { 0 };
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
@@ -3438,7 +3451,7 @@ static void IoTHubClientCore_UploadMultipleBlocksToBlobAsync_fails_when_malloc_f
 {
     ///arrange
     IOTHUB_CLIENT_CORE_HANDLE iothub_handle = IoTHubClientCore_Create(TEST_CLIENT_CONFIG);
-    int context = 1;
+    TEST_GETDATA_CALLBACK_ARGS context = { 0 };
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
@@ -3473,6 +3486,106 @@ TEST_FUNCTION(IoTHubClientCore_UploadMultipleBlocksToBlobAsync_fails_when_malloc
 TEST_FUNCTION(IoTHubClientCore_UploadMultipleBlocksToBlobAsyncEx_fails_when_malloc_fails)
 {
     IoTHubClientCore_UploadMultipleBlocksToBlobAsync_fails_when_malloc_fails_Impl(true);
+}
+
+TEST_FUNCTION(IoTHubClientCore_UploadMultipleBlocksToBlobAsync_callback_invoked_on_error_return_if_not_already)
+{
+    ///arrange
+    IOTHUB_CLIENT_CORE_HANDLE iothub_handle = IoTHubClientCore_Create(TEST_CLIENT_CONFIG);
+    TEST_GETDATA_CALLBACK_ARGS context = { 0 };
+    umock_c_reset_all_calls();
+
+    set_expected_calls_for_allocateUploadToBlob();
+    STRICT_EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
+
+    STRICT_EXPECTED_CALL(singlylinkedlist_add(IGNORED_PTR_ARG, IGNORED_PTR_ARG)); /*this is adding HTTPWORKER_THREAD_INFO to the list of HTTPWORKER_THREAD_INFO's to be cleaned*/
+    STRICT_EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+
+    STRICT_EXPECTED_CALL(get_time(IGNORED_NUM_ARG)).CallCannotFail();
+    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_UploadMultipleBlocksToBlob(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .SetReturn(IOTHUB_CLIENT_ERROR);
+
+    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(ThreadAPI_Exit(0));
+
+    ///act
+    IOTHUB_CLIENT_RESULT result = IoTHubClientCore_UploadMultipleBlocksToBlobAsync(iothub_handle, "someFileName.txt", my_FileUpload_GetData_Callback, NULL, &context);
+    g_thread_func(g_thread_func_arg); /*this is the thread uploading function*/
+
+    ///assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(int, 1, context.invokation_counter);
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_FILE_UPLOAD_RESULT, FILE_UPLOAD_ERROR, context.last_result);
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+
+    ///cleanup
+    umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+
+    EXPECTED_CALL(ThreadAPI_Join(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+
+    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
+    EXPECTED_CALL(singlylinkedlist_get_head_item(TEST_SLL_HANDLE))
+        .SetReturn(TEST_LIST_HANDLE);
+
+    setup_gargageCollection(my_malloc_items[2], true);
+    setup_IothubClient_Destroy_after_garbage_collection();
+
+    IoTHubClientCore_Destroy(iothub_handle);
+}
+
+TEST_FUNCTION(IoTHubClientCore_UploadMultipleBlocksToBlobAsync_callbackEx_invoked_on_error_return_if_not_already)
+{
+    ///arrange
+    IOTHUB_CLIENT_CORE_HANDLE iothub_handle = IoTHubClientCore_Create(TEST_CLIENT_CONFIG);
+    TEST_GETDATA_CALLBACK_ARGS context = { 0 };
+    umock_c_reset_all_calls();
+
+    set_expected_calls_for_allocateUploadToBlob();
+    STRICT_EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
+
+    STRICT_EXPECTED_CALL(singlylinkedlist_add(IGNORED_PTR_ARG, IGNORED_PTR_ARG)); /*this is adding HTTPWORKER_THREAD_INFO to the list of HTTPWORKER_THREAD_INFO's to be cleaned*/
+    STRICT_EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+
+    STRICT_EXPECTED_CALL(get_time(IGNORED_NUM_ARG)).CallCannotFail();
+    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_UploadMultipleBlocksToBlobEx(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .SetReturn(IOTHUB_CLIENT_ERROR);
+
+    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(ThreadAPI_Exit(0));
+
+    ///act
+    IOTHUB_CLIENT_RESULT result = IoTHubClientCore_UploadMultipleBlocksToBlobAsync(iothub_handle, "someFileName.txt", NULL, my_FileUpload_GetData_CallbackEx, &context);
+    g_thread_func(g_thread_func_arg); /*this is the thread uploading function*/
+
+    ///assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(int, 1, context.invokation_counter);
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_FILE_UPLOAD_RESULT, FILE_UPLOAD_ERROR, context.last_result);
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+
+    ///cleanup
+    umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+
+    EXPECTED_CALL(ThreadAPI_Join(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+
+    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
+    EXPECTED_CALL(singlylinkedlist_get_head_item(TEST_SLL_HANDLE))
+        .SetReturn(TEST_LIST_HANDLE);
+
+    setup_gargageCollection(my_malloc_items[2], true);
+    setup_IothubClient_Destroy_after_garbage_collection();
+
+    IoTHubClientCore_Destroy(iothub_handle);
 }
 #endif
 

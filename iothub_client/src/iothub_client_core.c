@@ -73,6 +73,7 @@ typedef struct UPLOADTOBLOB_MULTIBLOCK_SAVED_DATA_TAG
 {
     IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK getDataCallback;
     IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK_EX getDataCallbackEx;
+    IOTHUB_CLIENT_FILE_UPLOAD_RESULT blobStorageUploadResult;
 }UPLOADTOBLOB_MULTIBLOCK_SAVED_DATA;
 
 typedef struct INVOKE_METHOD_SAVED_DATA_TAG
@@ -2298,6 +2299,7 @@ static HTTPWORKER_THREAD_INFO* allocateUploadToBlob(const char* destinationFileN
         threadInfo->workerThreadType = HTTPWORKER_THREAD_UPLOAD_TO_BLOB;
         threadInfo->iotHubClientHandle = iotHubClientHandle;
         threadInfo->context = context;
+        threadInfo->uploadBlobMultiblockSavedData.blobStorageUploadResult = FILE_UPLOAD_ERROR;
 
         if (mallocAndStrcpy_s(&threadInfo->destinationFileName, destinationFileName) != 0)
         {
@@ -2419,22 +2421,78 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_UploadToBlobAsync(IOTHUB_CLIENT_CORE_HANDL
     return result;
 }
 
+// This callback wrapper allows iothub_client_core to trap the final result from the upload to blob callback.
+// That is because IoTHubClientCore_LL_UploadMultipleBlocksToBlob
+// will fire the user callback with succes or error only in specific situations (i.e., uploading to Azure Storage).
+// All other stages within IoTHubClientCore_LL_UploadMultipleBlocksToBlob do not cause the callback to be invoked,
+// only signaling the final upload result through the return code. However, the return code is not exposed to the user application
+// by iothub_client_core. So iothub_client_core must invoke the user callback so the user can get a feedback that
+// an upload has succeeded or failed.
+static void uploadToBlobMultiblockCallbackWrapper(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, unsigned char const ** data, size_t* size, void* context)
+{
+    HTTPWORKER_THREAD_INFO* threadInfo = (HTTPWORKER_THREAD_INFO*)context;
+
+    if (data == NULL || size == NULL)
+    {
+        // Capture the last callback invocation and save result.
+        threadInfo->uploadBlobMultiblockSavedData.blobStorageUploadResult = result;
+    }
+    else
+    {
+        threadInfo->uploadBlobMultiblockSavedData.getDataCallback(result, data, size, threadInfo->context);
+    }
+}
+
+// This callback wrapper allows iothub_client_core to trap the final result from the upload to blob callback.
+// That is because IoTHubClientCore_LL_UploadMultipleBlocksToBlobEx
+// will fire the user callback with succes or error only in specific situations (i.e., uploading to Azure Storage).
+// All other stages within IoTHubClientCore_LL_UploadMultipleBlocksToBlobEx do not cause the callback to be invoked,
+// only signaling the final upload result through the return code. However, the return code is not exposed to the user application
+// by iothub_client_core. So iothub_client_core must invoke the user callback so the user can get a feedback that
+// an upload has succeeded or failed.
+static IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT uploadToBlobMultiblockCallbackWrapperEx(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, unsigned char const ** data, size_t* size, void* context)
+{
+    HTTPWORKER_THREAD_INFO* threadInfo = (HTTPWORKER_THREAD_INFO*)context;
+
+    if (data == NULL || size == NULL)
+    {
+        // Capture the last callback invocation and save result.
+        threadInfo->uploadBlobMultiblockSavedData.blobStorageUploadResult = result;
+        return IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_OK;
+    }
+    else
+    {
+        return threadInfo->uploadBlobMultiblockSavedData.getDataCallbackEx(result, data, size, threadInfo->context);
+    }
+}
+
 static int uploadMultipleBlock_thread(void* data)
 {
     HTTPWORKER_THREAD_INFO* threadInfo = (HTTPWORKER_THREAD_INFO*)data;
     IOTHUB_CLIENT_CORE_LL_HANDLE llHandle = threadInfo->iotHubClientHandle->IoTHubClientLLHandle;
 
     IOTHUB_CLIENT_RESULT result;
+    IOTHUB_CLIENT_FILE_UPLOAD_RESULT finalUploadToBlobResult;
 
     srand((unsigned int)get_time(NULL));
 
     if (threadInfo->uploadBlobMultiblockSavedData.getDataCallback != NULL)
     {
-        result = IoTHubClientCore_LL_UploadMultipleBlocksToBlob(llHandle, threadInfo->destinationFileName, threadInfo->uploadBlobMultiblockSavedData.getDataCallback, threadInfo->context);
+        result = IoTHubClientCore_LL_UploadMultipleBlocksToBlob(llHandle, threadInfo->destinationFileName, uploadToBlobMultiblockCallbackWrapper, threadInfo);
+
+        // See comments in uploadToBlobMultiblockCallbackWrapper for further details.
+        finalUploadToBlobResult = (result != IOTHUB_CLIENT_OK ? FILE_UPLOAD_ERROR : threadInfo->uploadBlobMultiblockSavedData.blobStorageUploadResult);
+        
+        threadInfo->uploadBlobMultiblockSavedData.getDataCallback(finalUploadToBlobResult, NULL, NULL, threadInfo->context);
     }
     else
     {
-        result = IoTHubClientCore_LL_UploadMultipleBlocksToBlobEx(llHandle, threadInfo->destinationFileName, threadInfo->uploadBlobMultiblockSavedData.getDataCallbackEx, threadInfo->context);
+        result = IoTHubClientCore_LL_UploadMultipleBlocksToBlobEx(llHandle, threadInfo->destinationFileName, uploadToBlobMultiblockCallbackWrapperEx, threadInfo);
+
+        // See comments in uploadToBlobMultiblockCallbackWrapperEx for further details.
+        finalUploadToBlobResult = (result != IOTHUB_CLIENT_OK ? FILE_UPLOAD_ERROR : threadInfo->uploadBlobMultiblockSavedData.blobStorageUploadResult);
+
+        (void)threadInfo->uploadBlobMultiblockSavedData.getDataCallbackEx(finalUploadToBlobResult, NULL, NULL, threadInfo->context);
     }
     (void)markThreadReadyToBeGarbageCollected(threadInfo);
 

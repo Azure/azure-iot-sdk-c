@@ -14,7 +14,7 @@ curl --version
 
 # Set the default cores
 CORES=$(grep -c ^processor /proc/cpuinfo 2>/dev/null || sysctl -n hw.ncpu)
-cmake . -Bcmake -Duse_http=ON -Duse_mqtt=ON -Duse_amqp=ON -Duse_openssl:BOOL=ON -Dhsm_type_x509:BOOL=ON -Duse_prov_client:BOOL=ON -Drun_e2e_tests:BOOL=ON -Drun_e2e_openssl_engine_tests:BOOL=ON -Drun_valgrind:BOOL=ON
+cmake . -Bcmake -Duse_http=ON -Duse_mqtt=ON -Duse_amqp=ON -Duse_openssl:BOOL=ON -Dhsm_type_x509:BOOL=ON -Duse_prov_client:BOOL=ON -Drun_e2e_tests:BOOL=ON -Ddont_use_uploadtoblob:BOOL=ON -Drun_e2e_openssl_engine_tests:BOOL=ON -Drun_valgrind:BOOL=ON
 cd cmake
 
 make --jobs=$CORES

@@ -258,10 +258,7 @@ static void process_pending_messages(MESSAGE_QUEUE_HANDLE message_queue)
         {
             LogError("failed moving message out of pending list (%p)", mq_item->message);
 
-            if (mq_item->on_message_processing_completed_callback != NULL)
-            {
-                mq_item->on_message_processing_completed_callback(mq_item->message, MESSAGE_QUEUE_ERROR, NULL, mq_item->user_context);
-            }
+            fire_message_callback(mq_item, MESSAGE_QUEUE_ERROR, NULL);
 
             // Not freeing since this would cause a memory A/V on the next call.
 
@@ -271,22 +268,14 @@ static void process_pending_messages(MESSAGE_QUEUE_HANDLE message_queue)
         {
             LogError("failed setting message processing_start_time (%p)", mq_item->message);
 
-            if (mq_item->on_message_processing_completed_callback != NULL)
-            {
-                mq_item->on_message_processing_completed_callback(mq_item->message, MESSAGE_QUEUE_ERROR, NULL, mq_item->user_context);
-            }
-
+            fire_message_callback(mq_item, MESSAGE_QUEUE_ERROR, NULL);
             free(mq_item);
         }
         else if (singlylinkedlist_add(message_queue->in_progress, (const void*)mq_item) == NULL)
         {
             LogError("failed moving message to in-progress list (%p)", mq_item->message);
 
-            if (mq_item->on_message_processing_completed_callback != NULL)
-            {
-                mq_item->on_message_processing_completed_callback(mq_item->message, MESSAGE_QUEUE_ERROR, NULL, mq_item->user_context);
-            }
-
+            fire_message_callback(mq_item, MESSAGE_QUEUE_ERROR, NULL);
             free(mq_item);
         }
         else

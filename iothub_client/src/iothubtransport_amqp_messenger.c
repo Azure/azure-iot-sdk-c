@@ -14,6 +14,7 @@
 #include "azure_uamqp_c/messaging.h"
 #include "azure_uamqp_c/message_sender.h"
 #include "azure_uamqp_c/message_receiver.h"
+#include "azure_uamqp_c/async_operation.h"
 #include "internal/message_queue.h"
 #include "internal/iothub_client_retry_control.h"
 #include "internal/iothubtransport_amqp_messenger.h"
@@ -79,7 +80,6 @@ typedef struct MESSAGE_SEND_CONTEXT_TAG
 {
     uint32_t mq_message_id;
     MESSAGE_HANDLE message;
-    bool is_destroyed;
 
     AMQP_MESSENGER_INSTANCE* messenger;
 
@@ -87,9 +87,24 @@ typedef struct MESSAGE_SEND_CONTEXT_TAG
     void* user_context;
 
     PROCESS_MESSAGE_COMPLETED_CALLBACK on_process_message_completed_callback;
+
+    // Handle to the async operation instance returned
+    // by messagesender_send_async().
+    ASYNC_OPERATION_HANDLE async_operation;
 } MESSAGE_SEND_CONTEXT;
 
+static void destroy_message_send_context(MESSAGE_SEND_CONTEXT* context)
+{
+    if (context->async_operation != NULL)
+    {
+        (void)async_operation_cancel(context->async_operation);
+    }
 
+    free(context);
+}
+
+#define mark_message_send_context_completed(context) \
+    context->async_operation = NULL
 
 static MESSAGE_SEND_CONTEXT* create_message_send_context(void)
 {
@@ -271,11 +286,6 @@ static AMQP_MESSENGER_CONFIG* clone_configuration(const AMQP_MESSENGER_CONFIG* c
     }
 
     return result;
-}
-
-static void destroy_message_send_context(MESSAGE_SEND_CONTEXT* context)
-{
-    free(context);
 }
 
 static STRING_HANDLE create_link_address(const char* host_fqdn, const char* device_id, const char* module_id, const char* address_suffix)
@@ -851,6 +861,8 @@ static void on_send_complete_callback(void* context, MESSAGE_SEND_RESULT send_re
         MESSAGE_QUEUE_RESULT mq_result;
         MESSAGE_SEND_CONTEXT* msg_ctx = (MESSAGE_SEND_CONTEXT*)context;
 
+        mark_message_send_context_completed(msg_ctx);
+
         if (send_result == MESSAGE_SEND_OK)
         {
             mq_result = MESSAGE_QUEUE_SUCCESS;
@@ -875,15 +887,18 @@ static void on_process_message_callback(MESSAGE_QUEUE_HANDLE message_queue, MQ_M
         MESSAGE_SEND_CONTEXT* message_context = (MESSAGE_SEND_CONTEXT*)context;
         message_context->mq_message_id = message_id;
         message_context->on_process_message_completed_callback = on_process_message_completed_callback;
+        message_context->async_operation = messagesender_send_async(message_context->messenger->message_sender, (MESSAGE_HANDLE)message, on_send_complete_callback, context, 0);
 
-        if (messagesender_send_async(message_context->messenger->message_sender, (MESSAGE_HANDLE)message, on_send_complete_callback, context, 0) == NULL)
+        if (message_context->async_operation == NULL)
         {
             LogError("Failed sending AMQP message");
             on_process_message_completed_callback(message_queue, message_id, MESSAGE_QUEUE_ERROR, NULL);
         }
 
-        message_destroy((MESSAGE_HANDLE)message);
-        message_context->is_destroyed = true;
+        // An optimization was done here before to destroy `message` right away,
+        // freeing up memory as early as possible, but it led to a double-free
+        // situation when on_message_processing_completed_callback is called.
+        // Removing the optimization is the easiest fix.
     }
 }
 
@@ -930,16 +945,12 @@ static void on_message_processing_completed_callback(MQ_MESSAGE_HANDLE message, 
             msg_ctx->messenger->send_error_count++;
         }
 
-        if (!msg_ctx->is_destroyed)
+        if (msg_ctx->on_send_complete_callback != NULL)
         {
-            if (msg_ctx->on_send_complete_callback != NULL)
-            {
-                msg_ctx->on_send_complete_callback(messenger_send_result, messenger_send_reason, msg_ctx->user_context);
-            }
-
-            message_destroy((MESSAGE_HANDLE)message);
+            msg_ctx->on_send_complete_callback(messenger_send_result, messenger_send_reason, msg_ctx->user_context);
         }
 
+        message_destroy((MESSAGE_HANDLE)message);
         destroy_message_send_context(msg_ctx);
     }
 }
