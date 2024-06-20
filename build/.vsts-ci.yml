@@ -525,7 +525,7 @@ jobs:
       gcc --version
       openssl version
       curl --version
-      sudo -E env PATH="$PATH" ./build_all/linux/build.sh --run-unittests --run-e2e-tests --provisioning --use-hsmsymmkey --use-hsmsas --use-hsmx509 --use-edge-modules --use-ipv6-dualstack --config Debug
+      sudo -E env PATH="$PATH" ./build_all/linux/build.sh --run-unittests --run-e2e-tests --no_uploadtoblob --provisioning --use-hsmsymmkey --use-hsmsas --use-hsmx509 --use-edge-modules --use-ipv6-dualstack --config Debug
     displayName: 'Build'
   - script: |
       export OPENSSL_ia32cap=0x00000000

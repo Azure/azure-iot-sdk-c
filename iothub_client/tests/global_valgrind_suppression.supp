@@ -718,3 +718,932 @@
    fun:exit
    fun:(below main)
 }
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:CRYPTO_zalloc
+   fun:ENGINE_new
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:__pthread_once_slow
+   fun:CRYPTO_THREAD_run_once
+   fun:OPENSSL_init_crypto
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:__pthread_once_slow
+   fun:CRYPTO_THREAD_run_once
+   fun:OPENSSL_init_crypto
+   fun:OPENSSL_init_ssl
+   fun:tlsio_openssl_init
+   fun:platform_init
+   fun:IoTHub_Init
+   fun:TestSuiteInitialize
+   fun:RunTests
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:CRYPTO_zalloc
+   fun:EC_KEY_METHOD_new
+   obj:*
+   obj:*
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:ENGINE_ctrl_cmd_string
+   fun:ENGINE_by_id
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:CONF_modules_load
+   fun:CONF_modules_load_file
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:__pthread_once_slow
+   fun:CRYPTO_THREAD_run_once
+   fun:OPENSSL_init_crypto
+   fun:OPENSSL_init_ssl
+   fun:tlsio_openssl_init
+   fun:platform_init
+   fun:IoTHub_Init
+   fun:device_method_e2e_init
+   fun:TestSuiteInitialize
+   fun:RunTests
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:RSA_meth_dup
+   obj:*
+   obj:*
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:ENGINE_ctrl_cmd_string
+   fun:ENGINE_by_id
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:CONF_modules_load
+   fun:CONF_modules_load_file
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:__pthread_once_slow
+   fun:CRYPTO_THREAD_run_once
+   fun:OPENSSL_init_crypto
+   fun:OPENSSL_init_ssl
+   fun:tlsio_openssl_init
+   fun:platform_init
+   fun:IoTHub_Init
+   fun:device_method_e2e_init
+   fun:TestSuiteInitialize
+   fun:RunTests
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:CRYPTO_zalloc
+   fun:ENGINE_new
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:__pthread_once_slow
+   fun:CRYPTO_THREAD_run_once
+   fun:OPENSSL_init_crypto
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:__pthread_once_slow
+   fun:CRYPTO_THREAD_run_once
+   fun:OPENSSL_init_crypto
+   fun:OPENSSL_init_ssl
+   fun:tlsio_openssl_init
+   fun:platform_init
+   fun:TestSuiteInitialize
+   fun:RunTests
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:CRYPTO_zalloc
+   fun:EC_KEY_METHOD_new
+   obj:*
+   obj:*
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:ENGINE_ctrl_cmd_string
+   fun:ENGINE_by_id
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:CONF_modules_load
+   fun:CONF_modules_load_file
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:__pthread_once_slow
+   fun:CRYPTO_THREAD_run_once
+   fun:OPENSSL_init_crypto
+   fun:OPENSSL_init_ssl
+   fun:tlsio_openssl_init
+   fun:platform_init
+   fun:IoTHub_Init
+   fun:e2e_init
+   fun:TestSuiteInitialize
+   fun:RunTests
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:RSA_meth_dup
+   obj:*
+   obj:*
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:ENGINE_ctrl_cmd_string
+   fun:ENGINE_by_id
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:CONF_modules_load
+   fun:CONF_modules_load_file
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:__pthread_once_slow
+   fun:CRYPTO_THREAD_run_once
+   fun:OPENSSL_init_crypto
+   fun:OPENSSL_init_ssl
+   fun:tlsio_openssl_init
+   fun:platform_init
+   fun:IoTHub_Init
+   fun:e2e_init
+   fun:TestSuiteInitialize
+   fun:RunTests
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:CRYPTO_zalloc
+   fun:EC_KEY_METHOD_new
+   obj:*
+   obj:*
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:ENGINE_ctrl_cmd_string
+   fun:ENGINE_by_id
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:CONF_modules_load
+   fun:CONF_modules_load_file
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:__pthread_once_slow
+   fun:CRYPTO_THREAD_run_once
+   fun:OPENSSL_init_crypto
+   fun:OPENSSL_init_ssl
+   fun:tlsio_openssl_init
+   fun:platform_init
+   fun:IoTHub_Init
+   fun:dt_e2e_init
+   fun:TestSuiteInitialize
+   fun:RunTests
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:RSA_meth_dup
+   obj:*
+   obj:*
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:ENGINE_ctrl_cmd_string
+   fun:ENGINE_by_id
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:CONF_modules_load
+   fun:CONF_modules_load_file
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:__pthread_once_slow
+   fun:CRYPTO_THREAD_run_once
+   fun:OPENSSL_init_crypto
+   fun:OPENSSL_init_ssl
+   fun:tlsio_openssl_init
+   fun:platform_init
+   fun:IoTHub_Init
+   fun:dt_e2e_init
+   fun:TestSuiteInitialize
+   fun:RunTests
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:CRYPTO_zalloc
+   fun:EC_KEY_METHOD_new
+   obj:*
+   obj:*
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:ENGINE_ctrl_cmd_string
+   fun:ENGINE_by_id
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:CONF_modules_load
+   fun:CONF_modules_load_file
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:__pthread_once_slow
+   fun:CRYPTO_THREAD_run_once
+   fun:OPENSSL_init_crypto
+   fun:OPENSSL_init_ssl
+   fun:tlsio_openssl_init
+   fun:platform_init
+   fun:IoTHub_Init
+   fun:dt_e2e_init
+   fun:TestSuiteInitialize
+   fun:RunTests
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:RSA_meth_dup
+   obj:*
+   obj:*
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:ENGINE_ctrl_cmd_string
+   fun:ENGINE_by_id
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:CONF_modules_load
+   fun:CONF_modules_load_file
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:__pthread_once_slow
+   fun:CRYPTO_THREAD_run_once
+   fun:OPENSSL_init_crypto
+   fun:OPENSSL_init_ssl
+   fun:tlsio_openssl_init
+   fun:platform_init
+   fun:IoTHub_Init
+   fun:dt_e2e_init
+   fun:TestSuiteInitialize
+   fun:RunTests
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:CRYPTO_zalloc
+   fun:EC_KEY_METHOD_new
+   obj:*
+   obj:*
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:ENGINE_ctrl_cmd_string
+   fun:ENGINE_by_id
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:CONF_modules_load
+   fun:CONF_modules_load_file
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:__pthread_once_slow
+   fun:CRYPTO_THREAD_run_once
+   fun:OPENSSL_init_crypto
+   fun:OPENSSL_init_ssl
+   fun:tlsio_openssl_init
+   fun:platform_init
+   fun:IoTHub_Init
+   fun:device_method_e2e_init
+   fun:TestSuiteInitialize
+   fun:RunTests
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:RSA_meth_dup
+   obj:*
+   obj:*
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:ENGINE_ctrl_cmd_string
+   fun:ENGINE_by_id
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:CONF_modules_load
+   fun:CONF_modules_load_file
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:__pthread_once_slow
+   fun:CRYPTO_THREAD_run_once
+   fun:OPENSSL_init_crypto
+   fun:OPENSSL_init_ssl
+   fun:tlsio_openssl_init
+   fun:platform_init
+   fun:IoTHub_Init
+   fun:device_method_e2e_init
+   fun:TestSuiteInitialize
+   fun:RunTests
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:CRYPTO_zalloc
+   fun:EC_KEY_METHOD_new
+   obj:*
+   obj:*
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:ENGINE_ctrl_cmd_string
+   fun:ENGINE_by_id
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:CONF_modules_load
+   fun:CONF_modules_load_file
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:__pthread_once_slow
+   fun:CRYPTO_THREAD_run_once
+   fun:OPENSSL_init_crypto
+   fun:OPENSSL_init_ssl
+   fun:tlsio_openssl_init
+   fun:platform_init
+   fun:TestSuiteInitialize
+   fun:RunTests
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:CRYPTO_zalloc
+   fun:EC_KEY_METHOD_new
+   obj:*
+   obj:*
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:ENGINE_ctrl_cmd_string
+   fun:ENGINE_by_id
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:CONF_modules_load
+   fun:CONF_modules_load_file
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:__pthread_once_slow
+   fun:CRYPTO_THREAD_run_once
+   fun:OPENSSL_init_crypto
+   fun:OPENSSL_init_ssl
+   fun:tlsio_openssl_init
+   fun:platform_init
+   fun:IoTHub_Init
+   fun:e2e_init
+   fun:TestSuiteInitialize
+   fun:RunTests
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:RSA_meth_dup
+   obj:*
+   obj:*
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:ENGINE_ctrl_cmd_string
+   fun:ENGINE_by_id
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:CONF_modules_load
+   fun:CONF_modules_load_file
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:__pthread_once_slow
+   fun:CRYPTO_THREAD_run_once
+   fun:OPENSSL_init_crypto
+   fun:OPENSSL_init_ssl
+   fun:tlsio_openssl_init
+   fun:platform_init
+   fun:IoTHub_Init
+   fun:e2e_init
+   fun:TestSuiteInitialize
+   fun:RunTests
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:CRYPTO_zalloc
+   fun:EC_KEY_METHOD_new
+   obj:*
+   obj:*
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:ENGINE_ctrl_cmd_string
+   fun:ENGINE_by_id
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:CONF_modules_load
+   fun:CONF_modules_load_file
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:__pthread_once_slow
+   fun:CRYPTO_THREAD_run_once
+   fun:OPENSSL_init_crypto
+   fun:OPENSSL_init_ssl
+   fun:tlsio_openssl_init
+   fun:platform_init
+   fun:IoTHub_Init
+   fun:e2e_init
+   fun:TestSuiteInitialize
+   fun:RunTests
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:RSA_meth_dup
+   obj:*
+   obj:*
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:ENGINE_ctrl_cmd_string
+   fun:ENGINE_by_id
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:CONF_modules_load
+   fun:CONF_modules_load_file
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:__pthread_once_slow
+   fun:CRYPTO_THREAD_run_once
+   fun:OPENSSL_init_crypto
+   fun:OPENSSL_init_ssl
+   fun:tlsio_openssl_init
+   fun:platform_init
+   fun:IoTHub_Init
+   fun:e2e_init
+   fun:TestSuiteInitialize
+   fun:RunTests
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:CRYPTO_zalloc
+   fun:EC_KEY_METHOD_new
+   obj:*
+   obj:*
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:ENGINE_ctrl_cmd_string
+   fun:ENGINE_by_id
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:CONF_modules_load
+   fun:CONF_modules_load_file
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:__pthread_once_slow
+   fun:CRYPTO_THREAD_run_once
+   fun:OPENSSL_init_crypto
+   fun:OPENSSL_init_ssl
+   fun:tlsio_openssl_init
+   fun:platform_init
+   fun:IoTHub_Init
+   fun:TestSuiteInitialize
+   fun:RunTests
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:RSA_meth_dup
+   obj:*
+   obj:*
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:ENGINE_ctrl_cmd_string
+   fun:ENGINE_by_id
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:CONF_modules_load
+   fun:CONF_modules_load_file
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:__pthread_once_slow
+   fun:CRYPTO_THREAD_run_once
+   fun:OPENSSL_init_crypto
+   fun:OPENSSL_init_ssl
+   fun:tlsio_openssl_init
+   fun:platform_init
+   fun:IoTHub_Init
+   fun:TestSuiteInitialize
+   fun:RunTests
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:CRYPTO_zalloc
+   fun:EC_KEY_METHOD_new
+   obj:*
+   obj:*
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:ENGINE_ctrl_cmd_string
+   fun:ENGINE_by_id
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:CONF_modules_load
+   fun:CONF_modules_load_file
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:__pthread_once_slow
+   fun:CRYPTO_THREAD_run_once
+   fun:OPENSSL_init_crypto
+   fun:OPENSSL_init_ssl
+   fun:tlsio_openssl_init
+   fun:platform_init
+   fun:IoTHub_Init
+   fun:dt_e2e_init
+   fun:TestSuiteInitialize
+   fun:RunTests
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:RSA_meth_dup
+   obj:*
+   obj:*
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:ENGINE_ctrl_cmd_string
+   fun:ENGINE_by_id
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:CONF_modules_load
+   fun:CONF_modules_load_file
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:__pthread_once_slow
+   fun:CRYPTO_THREAD_run_once
+   fun:OPENSSL_init_crypto
+   fun:OPENSSL_init_ssl
+   fun:tlsio_openssl_init
+   fun:platform_init
+   fun:IoTHub_Init
+   fun:dt_e2e_init
+   fun:TestSuiteInitialize
+   fun:RunTests
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:CRYPTO_zalloc
+   fun:EC_KEY_METHOD_new
+   obj:*
+   obj:*
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:ENGINE_ctrl_cmd_string
+   fun:ENGINE_by_id
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:CONF_modules_load
+   fun:CONF_modules_load_file
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:__pthread_once_slow
+   fun:CRYPTO_THREAD_run_once
+   fun:OPENSSL_init_crypto
+   fun:OPENSSL_init_ssl
+   fun:tlsio_openssl_init
+   fun:platform_init
+   fun:IoTHub_Init
+   fun:e2e_init
+   fun:TestSuiteInitialize
+   fun:RunTests
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:RSA_meth_dup
+   obj:*
+   obj:*
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:ENGINE_ctrl_cmd_string
+   fun:ENGINE_by_id
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:CONF_modules_load
+   fun:CONF_modules_load_file
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:__pthread_once_slow
+   fun:CRYPTO_THREAD_run_once
+   fun:OPENSSL_init_crypto
+   fun:OPENSSL_init_ssl
+   fun:tlsio_openssl_init
+   fun:platform_init
+   fun:IoTHub_Init
+   fun:e2e_init
+   fun:TestSuiteInitialize
+   fun:RunTests
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:CRYPTO_zalloc
+   fun:EC_KEY_METHOD_new
+   obj:*
+   obj:*
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:ENGINE_ctrl_cmd_string
+   fun:ENGINE_by_id
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:CONF_modules_load
+   fun:CONF_modules_load_file
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:__pthread_once_slow
+   fun:CRYPTO_THREAD_run_once
+   fun:OPENSSL_init_crypto
+   fun:OPENSSL_init_ssl
+   fun:tlsio_openssl_init
+   fun:platform_init
+   fun:IoTHub_Init
+   fun:e2e_init
+   fun:TestSuiteInitialize
+   fun:RunTests
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:RSA_meth_dup
+   obj:*
+   obj:*
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:ENGINE_ctrl_cmd_string
+   fun:ENGINE_by_id
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:CONF_modules_load
+   fun:CONF_modules_load_file
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:__pthread_once_slow
+   fun:CRYPTO_THREAD_run_once
+   fun:OPENSSL_init_crypto
+   fun:OPENSSL_init_ssl
+   fun:tlsio_openssl_init
+   fun:platform_init
+   fun:IoTHub_Init
+   fun:e2e_init
+   fun:TestSuiteInitialize
+   fun:RunTests
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:CRYPTO_zalloc
+   fun:EC_KEY_METHOD_new
+   obj:*
+   obj:*
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:ENGINE_ctrl_cmd_string
+   fun:ENGINE_by_id
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:CONF_modules_load
+   fun:CONF_modules_load_file
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:__pthread_once_slow
+   fun:CRYPTO_THREAD_run_once
+   fun:OPENSSL_init_crypto
+   fun:OPENSSL_init_ssl
+   fun:tlsio_openssl_init
+   fun:platform_init
+   fun:IoTHub_Init
+   fun:device_method_e2e_init
+   fun:TestSuiteInitialize
+   fun:RunTests
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:RSA_meth_dup
+   obj:*
+   obj:*
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:ENGINE_ctrl_cmd_string
+   fun:ENGINE_by_id
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:CONF_modules_load
+   fun:CONF_modules_load_file
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:__pthread_once_slow
+   fun:CRYPTO_THREAD_run_once
+   fun:OPENSSL_init_crypto
+   fun:OPENSSL_init_ssl
+   fun:tlsio_openssl_init
+   fun:platform_init
+   fun:IoTHub_Init
+   fun:device_method_e2e_init
+   fun:TestSuiteInitialize
+   fun:RunTests
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:CRYPTO_zalloc
+   fun:EC_KEY_METHOD_new
+   obj:*
+   obj:*
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:ENGINE_ctrl_cmd_string
+   fun:ENGINE_by_id
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:CONF_modules_load
+   fun:CONF_modules_load_file
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:__pthread_once_slow
+   fun:CRYPTO_THREAD_run_once
+   fun:OPENSSL_init_crypto
+   fun:OPENSSL_init_ssl
+   fun:tlsio_openssl_init
+   fun:platform_init
+   fun:IoTHub_Init
+   fun:e2e_init
+   fun:TestSuiteInitialize
+   fun:RunTests
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:RSA_meth_dup
+   obj:*
+   obj:*
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:ENGINE_ctrl_cmd_string
+   fun:ENGINE_by_id
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:CONF_modules_load
+   fun:CONF_modules_load_file
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:__pthread_once_slow
+   fun:CRYPTO_THREAD_run_once
+   fun:OPENSSL_init_crypto
+   fun:OPENSSL_init_ssl
+   fun:tlsio_openssl_init
+   fun:platform_init
+   fun:IoTHub_Init
+   fun:e2e_init
+   fun:TestSuiteInitialize
+   fun:RunTests
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:CRYPTO_zalloc
+   fun:EC_KEY_METHOD_new
+   obj:*
+   obj:*
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:ENGINE_ctrl_cmd_string
+   fun:ENGINE_by_id
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:CONF_modules_load
+   fun:CONF_modules_load_file
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:__pthread_once_slow
+   fun:CRYPTO_THREAD_run_once
+   fun:OPENSSL_init_crypto
+   fun:OPENSSL_init_ssl
+   fun:tlsio_openssl_init
+   fun:platform_init
+   fun:IoTHub_Init
+   fun:device_method_e2e_init
+   fun:TestSuiteInitialize
+   fun:RunTests
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:RSA_meth_dup
+   obj:*
+   obj:*
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:ENGINE_ctrl_cmd_string
+   fun:ENGINE_by_id
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:CONF_modules_load
+   fun:CONF_modules_load_file
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:__pthread_once_slow
+   fun:CRYPTO_THREAD_run_once
+   fun:OPENSSL_init_crypto
+   fun:OPENSSL_init_ssl
+   fun:tlsio_openssl_init
+   fun:platform_init
+   fun:IoTHub_Init
+   fun:device_method_e2e_init
+   fun:TestSuiteInitialize
+   fun:RunTests
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:CRYPTO_zalloc
+   fun:EC_KEY_METHOD_new
+   obj:*
+   obj:*
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:ENGINE_ctrl_cmd_string
+   fun:ENGINE_by_id
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:CONF_modules_load
+   fun:CONF_modules_load_file
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:__pthread_once_slow
+   fun:CRYPTO_THREAD_run_once
+   fun:OPENSSL_init_crypto
+   fun:OPENSSL_init_ssl
+   fun:tlsio_openssl_init
+   fun:platform_init
+   fun:IoTHub_Init
+   fun:dt_e2e_init
+   fun:TestSuiteInitialize
+   fun:RunTests
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:RSA_meth_dup
+   obj:*
+   obj:*
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:ENGINE_ctrl_cmd_string
+   fun:ENGINE_by_id
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:CONF_modules_load
+   fun:CONF_modules_load_file
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:__pthread_once_slow
+   fun:CRYPTO_THREAD_run_once
+   fun:OPENSSL_init_crypto
+   fun:OPENSSL_init_ssl
+   fun:tlsio_openssl_init
+   fun:platform_init
+   fun:IoTHub_Init
+   fun:dt_e2e_init
+   fun:TestSuiteInitialize
+   fun:RunTests
+   fun:main
+}
