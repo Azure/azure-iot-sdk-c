@@ -50,11 +50,24 @@ jobs:
       pkg-config
       sudo curl -sL https://deb.nodesource.com/setup_16.x | bash -
       sudo apt-get install -y nodejs
+      ifconfig
     displayName: 'Setup'
   - script: |
       npm install check_submodules 
       node_modules/.bin/check_submodules . main
     displayName: 'Check Submodules Match'
+# - job: Setup
+#   pool:
+#     vmImage: 'ubuntu-20.04'
+#   displayName: "Setup"
+#   steps:
+#   - script: |
+#       az login -u  -p
+#       az storage account update --subscription $SUBSCRIPTION_ID -n $STORAGE_ACCOUNT_NAME --allow-shared-key-access $true
+#     displayName: Enable storage account SAS authentication
+#     env:
+#       SUBSCRIPTION_ID: $(SUBSCRIPTION-ID)
+#       STORAGE_ACCOUNT_NAME: $(STORAGE-ACCOUNT-NAME)
 - job: windowsx86
   timeoutInMinutes: 190
   pool:
@@ -63,6 +76,7 @@ jobs:
   steps:
   - script: |
       call jenkins\windows_c.cmd
+      ipconfig
     displayName: 'Build'
   - script: |
       call jenkins\windows_c_VsDevCmd.cmd x86
@@ -100,6 +114,7 @@ jobs:
   displayName: 'Windows x64 (Debug)'
   steps:
   - script: |
+      ipconfig
       call jenkins\windows_c.cmd --platform x64
     displayName: 'Build'
   - script: |
@@ -146,6 +161,7 @@ jobs:
   - task: CodeQL3000Init@0
   - script: |
       call jenkins\windows_c_release.cmd --platform x64
+      ipconfig
     displayName: 'Build'
   - task: CodeQL3000Finalize@0
     condition: always()
@@ -188,6 +204,7 @@ jobs:
   displayName: "Windows Dynamic"
   steps:
   - script: |
+      ipconfig
       call jenkins\windows_c_VsDevCmd.cmd
       call jenkins\windows_c_build_as_dynamic.cmd
     displayName: 'Build'
@@ -227,6 +244,7 @@ jobs:
   displayName: 'Clang (Debug)'
   steps:
   - script: |
+      ifconfig
       export OPENSSL_ia32cap=0x00000000
       sudo chmod -R 755 .
       sudo -E ./jenkins/ubuntu_clang.sh
@@ -270,6 +288,7 @@ jobs:
   displayName: 'Clang (Release)'
   steps:
   - script: |
+      ifconfig
       export OPENSSL_ia32cap=0x00000000
       sudo chmod -R 755 .
       sudo -E ./jenkins/ubuntu_clang_release.sh
@@ -313,6 +332,7 @@ jobs:
   displayName: 'Ubuntu 20.04 (Debug)'
   steps:
   - script: |
+      ifconfig
       sudo -E ./jenkins/ubuntu_c.sh
     displayName: 'Build'
   - script: |
@@ -356,6 +376,7 @@ jobs:
   displayName: 'Ubuntu 20.04 (Release)'
   steps:
   - script: |
+      ifconfig
       sudo -E ./jenkins/ubuntu_c_release.sh
     displayName: 'Build'
   - script: |
@@ -444,6 +465,7 @@ jobs:
   displayName: 'Ubuntu 22.04 Unit Tests (Debug)'
   steps:
   - script: |
+      ifconfig
       cat /etc/*release | grep VERSION*
       gcc --version
       openssl version
@@ -534,6 +556,7 @@ jobs:
   displayName: 'Ubuntu 20.04 with Dual IP Stack'
   steps:
   - script: |
+      ifconfig
       export OPENSSL_ia32cap=0x00000000
       sudo chmod -R 755 .
       sudo -E ./jenkins/ubuntu_c_ipv6_dual_stack.sh
@@ -577,6 +600,7 @@ jobs:
   displayName: 'Ubuntu 22.04 with Dual IP Stack'
   steps:
   - script: |
+      ifconfig
       cat /etc/*release | grep VERSION*
       gcc --version
       openssl version
@@ -623,6 +647,7 @@ jobs:
   displayName: 'Debian (Buster)'
   steps:
   - script: |
+      ifconfig
       sudo ./jenkins/debian_c.sh
     displayName: 'Build'
   - script: |
@@ -820,6 +845,7 @@ jobs:
   displayName: 'Linux with C-Ares'
   steps:
   - script: |
+      ifconfig
       sudo -E bash jenkins/linux_cares.sh
     displayName: 'Build'
   - script: |
@@ -860,6 +886,7 @@ jobs:
   displayName: 'OpenSSL with pkcs11 engine and SoftHSM'
   steps:
   - script: |
+      ifconfig
       sudo -E bash jenkins/linux_openssl_engine.sh
     displayName: 'Build'
     env:
@@ -903,6 +930,7 @@ jobs:
     vmImage: 'macOS-13'
   steps:
   - script: |
+      ifconfig
       ./jenkins/osx_gcc_openssl.sh
     displayName: 'Build'
   - script: |
@@ -949,6 +977,7 @@ jobs:
   displayName: "Xcode Native"
   steps:
   - script: |
+      ifconfig
       curl --version
       export DYLD_LIBRARY_PATH="/usr/local/Cellar/curl/$(ls -b /usr/local/Cellar/curl | grep -e '[0-9\.]')/lib"
       ./jenkins/osx_xcode_native.sh
