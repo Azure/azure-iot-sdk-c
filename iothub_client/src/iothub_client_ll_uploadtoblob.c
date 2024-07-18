@@ -1315,7 +1315,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_SetOption(IOTHUB_CLIENT_LL_UPL
         }
         else if (strcmp(OPTION_OPENSSL_PRIVATE_KEY_TYPE, optionName) == 0)
         {
-            if (upload_data->cred_type != IOTHUB_CREDENTIAL_TYPE_X509)
+            if (upload_data->cred_type != IOTHUB_CREDENTIAL_TYPE_X509 && upload_data->cred_type != IOTHUB_CREDENTIAL_TYPE_X509_ECC)
             {
                 LogError("trying to set a x509 private key type while the authentication scheme is not x509");
                 result = IOTHUB_CLIENT_INVALID_ARG;
@@ -1347,7 +1347,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_SetOption(IOTHUB_CLIENT_LL_UPL
         }
         else if (strcmp(OPTION_OPENSSL_ENGINE, optionName) == 0)
         {
-            if (upload_data->cred_type != IOTHUB_CREDENTIAL_TYPE_X509)
+            if (upload_data->cred_type != IOTHUB_CREDENTIAL_TYPE_X509 && upload_data->cred_type != IOTHUB_CREDENTIAL_TYPE_X509_ECC)
             {
                 LogError("trying to set an openssl engine while the authentication scheme is not x509");
                 result = IOTHUB_CLIENT_INVALID_ARG;
