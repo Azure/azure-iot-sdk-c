@@ -3,7 +3,6 @@
 
 #include <stdlib.h>
 #include "azure_c_shared_utility/gballoc.h"
-#include "azure_c_shared_utility/safe_math.h"
 
 #include "agenttypesystem.h"
 #include <inttypes.h>
@@ -30,6 +29,7 @@
 #include "multitree.h"
 
 #include "azure_c_shared_utility/xlogging.h"
+#include "azure_c_shared_utility/safe_math.h"
 
 #define NaN_STRING "NaN"
 #define MINUSINF_STRING "-INF"
