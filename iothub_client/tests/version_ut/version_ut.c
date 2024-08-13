@@ -8,7 +8,7 @@ BEGIN_TEST_SUITE(version_ut)
 
     TEST_FUNCTION(the_version_constant_has_the_expected_value)
     {
-        ASSERT_ARE_EQUAL(char_ptr, "1.13.0", IOTHUB_SDK_VERSION);
+        ASSERT_ARE_EQUAL(char_ptr, "1.14.0", IOTHUB_SDK_VERSION);
     }
 
     TEST_FUNCTION(IoTHubClient_GetVersionString_returns_the_version)
