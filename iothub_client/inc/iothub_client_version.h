@@ -9,7 +9,7 @@
 #define IOTHUB_CLIENT_VERSION_H
 
 /** @brief Macro representing current IoT Hub Client SDK version. */
-#define IOTHUB_SDK_VERSION "1.13.0"
+#define IOTHUB_SDK_VERSION "1.14.0"
 
 #include "umock_c/umock_c_prod.h"
 
