@@ -315,11 +315,9 @@ LTS Schedule</h3>
 <tr class="markdownTableHead">
 <th class="markdownTableHeadCenter">Package   </th><th class="markdownTableHeadCenter">GitHub Branch   </th><th class="markdownTableHeadCenter">LTS Tag   </th><th class="markdownTableHeadCenter">LTS Start Date   </th><th class="markdownTableHeadCenter">Maintenance End Date    </th></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyCenter">vcpkg: 2024-03-04   </td><td class="markdownTableBodyCenter">lts_03_2024   </td><td class="markdownTableBodyCenter">LTS_03_2024   </td><td class="markdownTableBodyCenter">2024-03-04   </td><td class="markdownTableBodyCenter">2025-03-04    </td></tr>
+<td class="markdownTableBodyCenter">vcpkg: 2024-08-12   </td><td class="markdownTableBodyCenter">lts_08_2024   </td><td class="markdownTableBodyCenter">LTS_08_2024   </td><td class="markdownTableBodyCenter">2024-08-12   </td><td class="markdownTableBodyCenter">2025-08-12    </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyCenter">vcpkg: 2023-08-07   </td><td class="markdownTableBodyCenter">lts_08_2023   </td><td class="markdownTableBodyCenter">LTS_08_2023   </td><td class="markdownTableBodyCenter">2023-08-07   </td><td class="markdownTableBodyCenter">2024-08-07    </td></tr>
-<tr class="markdownTableRowOdd">
-<td class="markdownTableBodyCenter">vcpkg: 2023-04-20   </td><td class="markdownTableBodyCenter">lts_01_2023   </td><td class="markdownTableBodyCenter">LTS_01_2023_Ref02   </td><td class="markdownTableBodyCenter">2023-04-20   </td><td class="markdownTableBodyCenter">2024-04-20   </td></tr>
+<td class="markdownTableBodyCenter">vcpkg: 2024-03-04   </td><td class="markdownTableBodyCenter">lts_03_2024   </td><td class="markdownTableBodyCenter">LTS_03_2024   </td><td class="markdownTableBodyCenter">2024-03-04   </td><td class="markdownTableBodyCenter">2025-03-04   </td></tr>
 </table>
 <p>'Maintenance End Date' refers to the end of life support of the related version.</p>
 <h2><a class="anchor" id="autotoc_md26"></a>
@@ -329,10 +327,10 @@ Release Example</h2>
 <ul>
 <li>The main branch is at version 1.8.2.</li>
 <li>February 23, 2020: A new feature is released on main. The version bumps to 1.9.0, is tagged <code>1.9.0</code>, and the release is tagged <code>2020-02-23</code>.</li>
-<li>July 9, 2020: A new LTS release occurs. A new release branch <code>lts_07_2020</code> is created, the version remains 1.9.0, and the LTS release is tagged <code>LTS_07_2020_Ref01</code>. The main branch bumps to 1.10.0 and is tagged <code>1.10.0</code>.</li>
+<li>July 9, 2020: A new LTS release occurs. A new release is created, the version remains 1.9.0, and the LTS release is tagged <code>LTS_07_2020</code>. The main branch bumps to 1.10.0 and is tagged <code>1.10.0</code>.</li>
 <li>August 2, 2020: A new feature is released on main: The main branch has already been bumped for an upcoming release so the version is unchanged. The release is tagged <code>2020-08-02</code>.</li>
-<li>September 28, 2020: A critical bug fix is released: The version on main bumps to 1.10.1, is tagged <code>1.10.1</code>, and the release is tagged <code>2020-09-28</code>. The critical bug fix is ported to the lts branch <code>lts_07_2020</code> (and any other existing LTS branch). The lts branch version bumps to 1.9.1, is tagged <code>1.9.1</code>, and the updated LTS release is tagged <code>LTS_07_2020_Ref02</code>. Any submodules that were part of the critical bug fix will be tagged with <code>LTS_07_2020_Ref02</code>.</li>
-<li>December 14, 2020: A new feature is released on main. The version bumps to 1.11.0, is tagged <code>1.11.0</code>, and the release is tagged <code>2020-12-14</code>.</li>
+<li>September 28, 2020: A critical bug fix is released: The version on main bumps to 1.10.1, is tagged <code>1.10.1</code>, and the release is tagged <code>2020-09-28</code>. The critical bug fix is ported to the lts release <code>LTS_07_2020</code> (and any other existing LTS branch) by creating a branch with name <code>lts_07_2020_ref02</code>, its version bumps to 1.9.1 and is tagged <code>1.9.1</code> and <code>LTS_07_2020_Ref02</code>. Any submodules that were part of the critical bug fix will be tagged with <code>LTS_07_2020_Ref02</code>.</li>
+<li>December 14, 2020: A new feature is released on main. The version bumps to 1.11.0, is tagged <code>1.11.0</code>, and the release is tagged as <code>2020-12-14</code>.</li>
 </ul>
 <hr  />
 <p>This project has adopted the <a href="https://opensource.microsoft.com/codeofconduct/">Microsoft Open Source Code of Conduct</a>. For more information see the <a href="https://opensource.microsoft.com/codeofconduct/faq/">Code of Conduct FAQ</a> or contact <a href="#" onclick="location.href='mai'+'lto:'+'ope'+'nc'+'ode'+'@m'+'icr'+'os'+'oft'+'.c'+'om'; return false;">opencode@microsoft.com</a> with any additional questions or comments.</p>
