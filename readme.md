@@ -278,7 +278,6 @@ Below is a table showing the mapping of the LTS branches to the packages release
   | :-----: | :-----------: | :-----: | :------------: | :------------------: |
   | vcpkg: 2024-08-12 | lts_08_2024 | LTS_08_2024 | 2024-08-12 | 2025-08-12 |
   | vcpkg: 2024-03-04 | lts_03_2024 | LTS_03_2024 | 2024-03-04 | 2025-03-04 |
-  | vcpkg: 2023-08-07 | lts_08_2023 | LTS_08_2023 | 2023-08-07 | 2024-08-07 |
 
 'Maintenance End Date' refers to the end of life support of the related version.
 
