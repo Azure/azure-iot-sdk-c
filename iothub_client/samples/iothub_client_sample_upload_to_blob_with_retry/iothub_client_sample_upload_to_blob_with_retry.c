@@ -21,6 +21,7 @@ and removing calls to _DoWork will yield the same results. */
 
 #include "iothub.h"
 #include "iothub_device_client.h"
+#include "iothub_client_options.h"
 
 #include "azure_c_shared_utility/shared_util_options.h"
 #include "azure_c_shared_utility/threadapi.h"
@@ -34,7 +35,8 @@ and removing calls to _DoWork will yield the same results. */
 /*String containing Hostname, Device Id & Device Key in the format:                         */
 /*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>"                */
 /*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessSignature=<device_sas_token>"    */
-static const char* connectionString = "[device connection string]";
+// static const char* connectionString = "[device connection string]";
+static const char* connectionString = "HostName=user-iothub1.azure-devices.net;DeviceId=user-device-x509-1;x509=true";
 
 /*Optional string with http proxy host and integer for http proxy port (Linux only)         */
 static const char* proxyHost = NULL;
@@ -43,6 +45,26 @@ static int proxyPort = 0;
 static const char* azureStorageBlobPath = "subdir/hello_world_mb_with_retry.txt";
 static const char* data_to_upload_format = "Hello World from iothub_client_sample_upload_to_blob_with_retry: %d\n";
 static char data_to_upload[128];
+
+static const char* x509certificate =
+"-----BEGIN CERTIFICATE-----""\n"
+"MIICpDCCAYwCCQCgAJQdOd6dNzANBgkqhkiG9w0BAQsFADAUMRIwEAYDVQQDDAls""\n"
+"b2NhbGhvc3QwHhcNMTcwMTIwMTkyNTMzWhcNMjcwMTE4MTkyNTMzWjAUMRIwEAYD""\n"
+... THIS IS INCOMPLETE, PLEASE ENTER YOUR OWN X509 CERTIFICATE...
+"aFsI7tsqp+dToLKaZqBLTvYwCgCJCxdg3QvMhVD8OxcEIFJtDEwm3h9WFFO3ocab""\n"
+"CmcMDyXUL354yaZ7RphCBLd06XXdaUU/eV6fOjY6T5ka4ZRJcYDJtjxSG04XPtxs""\n"
+"wQfrPGGoFhk=""\n"
+"-----END CERTIFICATE-----";
+
+static const char* x509privatekey =
+"-----BEGIN RSA PRIVATE KEY-----""\n"
+"MIIEpAIBAAKCAQEA5Sd30TVptOQUQIYFGO3Kc2sR2SDkaJmWjqdlLmucr/qbHZKb""\n"
+"9+RMS4Shq1CCtQCS2cpZ7ntKIWXyjxU56MTBznnJ2ml2fUQNuTO1xkL8POXj5Rjm""\n"
+... THIS IS INCOMPLETE, PLEASE ENTER YOUR OWN X509 KEY ...
+"Sin9818Nw7OfBhWOkq9UqrQ6KXA7jJg0oP2n2Fbxhw429hXOIWRYqd+dAAA3Jox+""\n"
+"PxkL7bBgoT1w9S+f99TEXOiXUdrl34m/QJ446Rb6aNbqVLcDwLcXL4h2zFXVRGo3""\n"
+"5lmm6kCRa9Ohnhe1DwQK6C1SMngUitaTHhjTtjKNXJrdWPMVUUYEGw==""\n"
+"-----END RSA PRIVATE KEY-----";
 
 #define SAMPLE_MAX_RETRY_COUNT          3
 #define SAMPLE_RETRY_DELAY_MILLISECS    2000
@@ -62,6 +84,9 @@ int main(void)
     }
     else
     {
+        (void)IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_X509_CERT, x509certificate);
+        (void)IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_X509_PRIVATE_KEY, x509privatekey);
+
 #ifndef WIN32
         size_t log = 1;
         (void)IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_CURL_VERBOSE, &log);
