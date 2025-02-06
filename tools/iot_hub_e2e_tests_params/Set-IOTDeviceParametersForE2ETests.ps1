@@ -12,21 +12,21 @@ cat $IOTParametersFilePath | %{
 			{
 				$Value = $Tokens[1].Replace("$", "`$");
 				
-				if ($Value.StartsWith("`""))
+				if ($Value.StartsWith("`"") -OR $Value.StartsWith("`'"))
 				{
 					$Value = $Value.Remove(0, 1);
 				}
 
-				if ($Value.EndsWith("`""))
+				if ($Value.EndsWith("`"") -OR $Value.EndsWith("`'"))
 				{
 					$Value = $Value.Remove($Value.Length - 1, 1);
 				}
 			}
 		
-			Write-Host "Writing $Name...";
+			Write-Host "Setting $Name=$Value";
 			[Environment]::SetEnvironmentVariable($Name, $Value, $EnvironmentVariableScope);
 		}
 	}
 }
 
-Write-Host "Writing Environment Variable Complete";
+Write-Host "Completed setting Environment Variables";
