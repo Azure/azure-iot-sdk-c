@@ -50,7 +50,7 @@ This document describes how to run the end to end tests.
         .../azure-iot-sdk-c/tools/iot_hub_e2e_tests_params$ ./fill_x509_in_iot_device_params.sh
         ```
         
-        OR follow the manual steps below.
+        OR following the manual steps below:
         
         Generate the test-only self-signed using the following openssl command:
 
