@@ -42,7 +42,17 @@ This document describes how to run the end to end tests.
         - IOTHUB_E2E_X509_PRIVATE_KEY_BASE64
         - IOTHUB_E2E_X509_THUMBPRINT
 
-        For testing-only, you can generate a x509 self-signed certificate using the following openssl command:
+        For testing-only, you can generate a x509 self-signed certificate by either:
+        
+       Using our script to fill these three parameters automatically with a **test-only** certificate:
+
+        ```shell
+        .../azure-iot-sdk-c/tools/iot_hub_e2e_tests_params$ ./fill_x509_in_iot_device_params.sh
+        ```
+        
+        OR following the manual steps below:
+        
+        Generate the test-only self-signed using the following openssl command:
 
         ```Shell
         openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -nodes -days 365 -subj "/C=US/ST=Washington/L=Redmond/O=Company/OU=Org/CN=www.company.com"
@@ -77,11 +87,11 @@ This document describes how to run the end to end tests.
 ## Run end to end tests on a Windows development environment
 
 - Start the Windows PowerShell in Administrator mode. Update execution policy by entering "set-executionpolicy unrestricted"
+- Navigate to the folder tools\iot_hub_e2e_tests_params in your local copy of the repository.
+- Run the script "Set-IOTDeviceParametersForE2ETests.ps1" located under the tools\iot_hub_e2e_tests_params folders in your local copy of the repository.
 - Navigate to azure-iot-sdk-c\cmake  
 - From cmake directory, run cmake with option to enable e2e testing: Cmake -Drun_e2e_tests=ON ..
 - The test directory will be located here: azure-iot-sdk-c\cmake\iothub_client\tests
-- Navigate to the folder tools\iot_hub_e2e_tests_params in your local copy of the repository.
-- Run the script "Set-IOTDeviceParametersForE2ETests.ps1" located under the tools\iot_hub_e2e_tests_params folders in your local copy of the repository.
 - Start the Visual Studio solution "azure_iot_sdks.sln" located under the folder cmake in your home directory. 
 - Build the solution
 - Run the tests by Test -> Run -> All Tests menu item inside of Visual Studio.
@@ -90,9 +100,6 @@ This document describes how to run the end to end tests.
 ## Run end to end tests for "iothub_client" on a Linux development environment
 
 - Navigate to the folder tools/iot_hub_e2e_tests_params
-- Navigate to azure-iot-sdk-c\cmake
-- From cmake directory run cmake with option to enable e2e testing: Cmake -Drun_e2e_tests=ON ..
-- The test directory will be located here: azure-iot-sdk-c\cmake\iothub_client\tests
 - Set the parameters in "iot_device_params.txt" as environment variables in the current session:
   
   Notes:
@@ -103,6 +110,7 @@ This document describes how to run the end to end tests.
   set -a
   source ./iot_device_params.txt
   ```
-- Navigate to the folder c/build_all/linux in your local copy of the repository.
-- Run the build.sh script.
-- In your home folder, in the cmake folder, run the ctest command with parameters -C "Debug"
+- Navigate to azure-iot-sdk-c\cmake
+- From cmake directory run cmake with option to enable e2e testing: `cmake -Drun_e2e_tests=ON ..`
+- The test directory will be located here: azure-iot-sdk-c\cmake\iothub_client\tests
+- In the azure-iot-sdk-c\cmake folder, run the following to run all tests: `ctest -C "Debug"`
