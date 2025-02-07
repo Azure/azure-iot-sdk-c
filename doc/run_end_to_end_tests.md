@@ -44,7 +44,7 @@ This document describes how to run the end to end tests.
 
         For testing-only, you can generate a x509 self-signed certificate by either:
         
-        You can either use our script to fill these three parameters automatically with a **test-only** certificate:
+       Using our script to fill these three parameters automatically with a **test-only** certificate:
 
         ```shell
         .../azure-iot-sdk-c/tools/iot_hub_e2e_tests_params$ ./fill_x509_in_iot_device_params.sh
