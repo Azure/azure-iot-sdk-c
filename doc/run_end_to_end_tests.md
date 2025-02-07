@@ -42,7 +42,7 @@ This document describes how to run the end to end tests.
         - IOTHUB_E2E_X509_PRIVATE_KEY_BASE64
         - IOTHUB_E2E_X509_THUMBPRINT
 
-        For testing-only, you can generate a x509 self-signed certificate.
+        For testing-only, you can generate a x509 self-signed certificate by either:
         
         You can either use our script to fill these three parameters automatically with a **test-only** certificate:
 
