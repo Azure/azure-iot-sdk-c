@@ -360,6 +360,20 @@ if(${use_prov_client} OR (${use_prov_client_core} AND ${run_e2e_tests}))
         target_link_libraries(prov_mqtt_transport umqtt)
         set(provisioning_libs ${provisioning_libs} prov_mqtt_transport)
         set(provisioning_headers ${provisioning_headers} ${PROV_MQTT_CLIENT_H_FILES})
+        if(${build_as_dynamic})
+            add_library(prov_mqtt_transport_dll SHARED
+                ${PROV_MQTT_CLIENT_C_FILES}
+                ${PROV_MQTT_CLIENT_H_FILES}
+            )
+            linkSharedUtil(prov_mqtt_transport_dll)
+            target_link_libraries(prov_mqtt_transport_dll umqtt)
+            set_target_properties(prov_mqtt_transport_dll PROPERTIES
+                OUTPUT_NAME "prov_mqtt_transport"
+                VERSION ${PROV_SDK_VERSION}
+                SOVERSION ${PROV_SDK_VERSION_MAJOR}
+            )
+            set(provisioning_libs ${provisioning_libs} prov_mqtt_transport_dll)
+        endif()
     endif()
 endif()
 
