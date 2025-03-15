@@ -171,6 +171,125 @@ static void register_device_callback(PROV_DEVICE_RESULT register_result, const c
     }
 }
 
+#define SAMPLE_MAX_RETRY_COUNT          3
+#define SAMPLE_RETRY_DELAY_MILLISECS    2000
+static void run_upload_to_blob(IOTHUB_DEVICE_CLIENT_LL_HANDLE device_ll_handle)
+{
+    static const char* azureStorageBlobPath = "subdir/hello_world_mb_with_retry_dps.txt";
+    static const char* data_to_upload_format = "Hello World from iothub_client_sample_upload_to_blob_with_retry: %d\n";
+    static char data_to_upload[128];
+
+    char* uploadCorrelationId;
+    char* azureBlobSasUri;
+
+    if (IoTHubDeviceClient_LL_AzureStorageInitializeBlobUpload(
+            device_ll_handle, azureStorageBlobPath, &uploadCorrelationId, &azureBlobSasUri) != IOTHUB_CLIENT_OK)
+    {
+        printf("failed initializing upload in IoT Hub\n");
+    }
+    else
+    {
+        // The SAS URI obtained above (azureBlobSasUri) can be used with other tools
+        // like az_copy or Azure Storage SDK instead of the API functions
+        // built-in this SDK shown below.
+
+        IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE azureStorageClientHandle = IoTHubDeviceClient_LL_AzureStorageCreateClient(device_ll_handle, azureBlobSasUri);
+
+        if (azureStorageClientHandle == NULL)
+        {
+            (void)printf("failed to create upload context\n");
+        }
+        else
+        {
+            bool uploadSuccessful = true;
+            int uploadResultCode = 200;
+            int attemptCount;
+
+            for (uint32_t block_number = 0; block_number < 10 && uploadSuccessful; block_number++)
+            {
+                int data_size = snprintf(data_to_upload, sizeof(data_to_upload), data_to_upload_format, block_number);
+
+                attemptCount = 1;
+
+                while (true)
+                {
+                    if (IoTHubDeviceClient_LL_AzureStoragePutBlock(
+                            azureStorageClientHandle, block_number, (const uint8_t*)data_to_upload, data_size) == IOTHUB_CLIENT_OK)
+                    {
+                        // Block upload succeeded. Continuing with next block.
+                        break;
+                    }
+                    else
+                    {
+                        if (attemptCount >= SAMPLE_MAX_RETRY_COUNT)
+                        {
+                            (void)printf("Failed uploading block number %u to blob (exhausted all retries).\n", block_number);
+                            uploadSuccessful = false;
+                            uploadResultCode = 300;
+                            break;
+                        }
+                        else
+                        {
+                            (void)printf("Failed uploading block number %u. Retrying in %u seconds...\n", block_number, SAMPLE_RETRY_DELAY_MILLISECS / 1000);
+                            ThreadAPI_Sleep(SAMPLE_RETRY_DELAY_MILLISECS);
+                        }
+                    }
+
+                    attemptCount++;
+                }
+            }
+
+            if (uploadSuccessful)
+            {
+                // This function can also be retried if any errors occur.
+                if (IoTHubDeviceClient_LL_AzureStoragePutBlockList(azureStorageClientHandle) != IOTHUB_CLIENT_OK)
+                {
+                    (void)printf("Failed performing Azure Storage Put Blob List.\n");
+                    uploadSuccessful = false;
+                    uploadResultCode = 400;
+                }
+            }
+
+            IoTHubDeviceClient_LL_AzureStorageDestroyClient(azureStorageClientHandle);
+
+            attemptCount = 1;
+
+            while (true)
+            {
+                if (IoTHubDeviceClient_LL_AzureStorageNotifyBlobUploadCompletion(
+                        device_ll_handle, uploadCorrelationId, uploadSuccessful, uploadResultCode, uploadSuccessful ? "OK" : "Aborted")
+                    == IOTHUB_CLIENT_OK)
+                {
+                    // Notification succeeded.
+                    if (uploadSuccessful)
+                    {
+                        (void)printf("hello world blob has been created\n");
+                    }
+                    break;
+                }
+                else
+                {
+                    if (attemptCount >= SAMPLE_MAX_RETRY_COUNT)
+                    {
+                        (void)printf("Failed notifying Azure IoT Hub of upload completion (exhausted all retries).\n");
+                        break;
+                    }
+                    else
+                    {
+                        (void)printf("Failed notifying Azure IoT Hub of upload completion. Retrying in %u seconds...\n", SAMPLE_RETRY_DELAY_MILLISECS / 1000);
+                        ThreadAPI_Sleep(SAMPLE_RETRY_DELAY_MILLISECS);
+                    }
+                }
+
+                attemptCount++;
+            }
+        }
+
+        free(uploadCorrelationId);
+        free(azureBlobSasUri);
+    }
+}
+
 int main(void)
 {
     bool traceOn = true;
@@ -279,10 +398,6 @@ int main(void)
         else
         {
             IOTHUB_CLIENT_SAMPLE_INFO iothub_info;
-            TICK_COUNTER_HANDLE tick_counter_handle = tickcounter_create();
-            tickcounter_ms_t current_tick;
-            tickcounter_ms_t last_send_time = 0;
-            size_t msg_count = 0;
             iothub_info.stop_running = false;
             iothub_info.connected = false;
 
@@ -312,53 +427,8 @@ int main(void)
             (void)IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_AUTO_URL_ENCODE_DECODE, &urlEncodeOn);
 #endif
             
-            (void)IoTHubDeviceClient_LL_SetMessageCallback(device_ll_handle, receive_msg_callback, &iothub_info);
+            run_upload_to_blob(device_ll_handle);
 
-            (void)printf("Sending one message to IoTHub every %d seconds for %d messages (Send any C2D message to the device to stop)\r\n", TIME_BETWEEN_MESSAGES_SECONDS, MESSAGES_TO_SEND);
-            do
-            {
-                if (iothub_info.connected)
-                {
-                    // Send a message every TIME_BETWEEN_MESSAGES_SECONDS seconds
-                    (void)tickcounter_get_current_ms(tick_counter_handle, &current_tick);
-                    if ((current_tick - last_send_time) / 1000 > TIME_BETWEEN_MESSAGES_SECONDS)
-                    {
-                        static char msgText[1024];
-                        sprintf_s(msgText, sizeof(msgText), "{ \"message_index\" : \"%zu\" }", msg_count++);
-
-                        IOTHUB_MESSAGE_HANDLE msg_handle = IoTHubMessage_CreateFromByteArray((const unsigned char*)msgText, strlen(msgText));
-                        if (msg_handle == NULL)
-                        {
-                            (void)printf("ERROR: iotHubMessageHandle is NULL!\r\n");
-                        }
-                        else
-                        {
-                            if (IoTHubDeviceClient_LL_SendEventAsync(device_ll_handle, msg_handle, NULL, NULL) != IOTHUB_CLIENT_OK)
-                            {
-                                (void)printf("ERROR: IoTHubClient_LL_SendEventAsync..........FAILED!\r\n");
-                            }
-                            else
-                            {
-                                (void)tickcounter_get_current_ms(tick_counter_handle, &last_send_time);
-                                (void)printf("IoTHubClient_LL_SendEventAsync accepted message [%zu] for transmission to IoT Hub.\r\n", msg_count);
-
-                            }
-                            IoTHubMessage_Destroy(msg_handle);
-                        }
-                    }
-                }
-                IoTHubDeviceClient_LL_DoWork(device_ll_handle);
-                ThreadAPI_Sleep(1);
-            } while (!iothub_info.stop_running && msg_count < MESSAGES_TO_SEND);
-
-            int cleanup_counter = 0;
-            for (cleanup_counter = 0; cleanup_counter < 10; cleanup_counter++)
-            {
-                IoTHubDeviceClient_LL_DoWork(device_ll_handle);
-                ThreadAPI_Sleep(1);
-            }
-            tickcounter_destroy(tick_counter_handle);
-            // Clean up the iothub sdk handle
             IoTHubDeviceClient_LL_Destroy(device_ll_handle);
         }
     }
