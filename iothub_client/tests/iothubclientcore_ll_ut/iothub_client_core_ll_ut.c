@@ -805,6 +805,8 @@ TEST_SUITE_INITIALIZE(suite_init)
 
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK, void*);
 
+    REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CREDENTIAL_TYPE, int);
+
 #ifndef DONT_USE_UPLOADTOBLOB
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE, void*);
@@ -1041,6 +1043,26 @@ static void setup_IoTHubClientCore_LL_create_mocks(bool use_device_config, bool 
 #else
         (void)is_edge_module;
 #endif /*USE_EDGE_MODULES*/
+
+#ifndef DONT_USE_UPLOADTOBLOB
+    if (use_device_config)
+    {
+        STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG))
+            .SetReturn(IOTHUB_CREDENTIAL_TYPE_X509_ECC)
+            .CallCannotFail();
+        STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_x509_info(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadToBlob_SetOption(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadToBlob_SetOption(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    }
+    else
+    {
+        STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG))
+            .SetReturn(IOTHUB_CREDENTIAL_TYPE_DEVICE_KEY)
+            .CallCannotFail();
+    }
+#endif /*DONT_USE_UPLOADTOBLOB*/
 
     STRICT_EXPECTED_CALL(tickcounter_create());
 
@@ -1703,6 +1725,8 @@ TEST_FUNCTION(IoTHubClientCore_LL_CreateWithTransport_Succeeds)
     STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
 #ifndef DONT_USE_UPLOADTOBLOB
     STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadToBlob_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG))
+        .SetReturn(IOTHUB_CREDENTIAL_TYPE_DEVICE_KEY);
 #endif /*DONT_USE_UPLOADTOBLOB*/
     STRICT_EXPECTED_CALL(tickcounter_create());
     PLATFORM_INFO_OPTION supportedPlatformInfo = PLATFORM_INFO_OPTION_RETRIEVE_SQM;
@@ -1877,6 +1901,8 @@ TEST_FUNCTION(IoTHubClientCore_LL_CreateWithTransport_create_tickcounter_fails_s
 
 #ifndef DONT_USE_UPLOADTOBLOB
     STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadToBlob_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG))
+        .SetReturn(IOTHUB_CREDENTIAL_TYPE_DEVICE_KEY);
 #endif /*DONT_USE_UPLOADTOBLOB*/
 
     STRICT_EXPECTED_CALL(tickcounter_create())
@@ -1925,6 +1951,8 @@ TEST_FUNCTION(IoTHubClientCore_LL_CreateWithTransport_register_fails_shared_tran
 
 #ifndef DONT_USE_UPLOADTOBLOB
     STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadToBlob_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG))
+        .SetReturn(IOTHUB_CREDENTIAL_TYPE_DEVICE_KEY);
 #endif /*DONT_USE_UPLOADTOBLOB*/
 
     STRICT_EXPECTED_CALL(tickcounter_create());
@@ -1988,6 +2016,8 @@ TEST_FUNCTION(IoTHubClientCore_LL_CreateWithTransport_set_retry_policy_fails_sha
 
 #ifndef DONT_USE_UPLOADTOBLOB
     STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadToBlob_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG))
+        .SetReturn(IOTHUB_CREDENTIAL_TYPE_DEVICE_KEY);
 #endif /*DONT_USE_UPLOADTOBLOB*/
 
     STRICT_EXPECTED_CALL(tickcounter_create());
