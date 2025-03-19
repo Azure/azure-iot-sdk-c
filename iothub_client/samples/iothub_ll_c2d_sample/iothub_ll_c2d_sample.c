@@ -157,8 +157,8 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT receive_msg_callback(IOTHUB_MESSAGE_HAND
     const char* property_value = IoTHubMessage_GetProperty(message, property_name);
     if (property_value != NULL)
     {
-        printf("\r\nMessage \"%s\" property:\r\n", property_name);
-        printf("\tKey: %s Value: %s\r\n", property_name, property_value);
+        (void)printf("\r\nMessage \"%s\" property:\r\n", property_name);
+        (void)printf("\tKey: %s Value: %s\r\n", property_name, property_value);
     }
 
     MAP_HANDLE non_system_properties = IoTHubMessage_Properties(message);
@@ -171,15 +171,15 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT receive_msg_callback(IOTHUB_MESSAGE_HAND
 
         if (Map_GetInternals(non_system_properties, &keys, &values, &count) != MAP_OK)
         {
-            printf("\r\nFailed retrieving message non-system properties.\r\n");
+            (void)printf("\r\nFailed retrieving message non-system properties.\r\n");
         }
         else
         {
-            printf("\r\nMessage properties:\r\n");
+            (void)printf("\r\nMessage properties:\r\n");
 
             for (size_t i = 0; i < count; i++)
             {
-                printf("\tKey: %s Value: %s\r\n", (char*)keys[i], (char*)values[i]);
+                (void)printf("\tKey: %s Value: %s\r\n", (char*)keys[i], (char*)values[i]);
             }
         }
     }
