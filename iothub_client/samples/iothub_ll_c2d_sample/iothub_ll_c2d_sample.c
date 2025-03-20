@@ -153,13 +153,37 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT receive_msg_callback(IOTHUB_MESSAGE_HAND
             (void)printf("Received String Message\r\nMessage ID: %s\r\n Correlation ID: %s\r\n Data: <<<%s>>>\r\n", messageId, correlationId, string_msg);
         }
     }
-    const char* property_value = "property_value";
-    const char* property_key = IoTHubMessage_GetProperty(message, property_value);
-    if (property_key != NULL)
+    const char* property_name = "property_name";
+    const char* property_value = IoTHubMessage_GetProperty(message, property_name);
+    if (property_value != NULL)
     {
-        printf("\r\nMessage Properties:\r\n");
-        printf("\tKey: %s Value: %s\r\n", property_value, property_key);
+        (void)printf("\r\nMessage \"%s\" property:\r\n", property_name);
+        (void)printf("\tKey: %s Value: %s\r\n", property_name, property_value);
     }
+
+    MAP_HANDLE non_system_properties = IoTHubMessage_Properties(message);
+
+    if (non_system_properties != NULL)
+    {
+        const char*const* keys;
+        const char*const* values;
+        size_t count;
+
+        if (Map_GetInternals(non_system_properties, &keys, &values, &count) != MAP_OK)
+        {
+            (void)printf("\r\nFailed retrieving message non-system properties.\r\n");
+        }
+        else
+        {
+            (void)printf("\r\nMessage properties:\r\n");
+
+            for (size_t i = 0; i < count; i++)
+            {
+                (void)printf("\tKey: %s Value: %s\r\n", (char*)keys[i], (char*)values[i]);
+            }
+        }
+    }
+
     g_message_recv_count++;
 
 #ifdef USE_C2D_ASYNC_ACK

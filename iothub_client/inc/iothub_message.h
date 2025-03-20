@@ -177,7 +177,6 @@ MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetContentEncodingSyste
 MOCKABLE_FUNCTION(, const char*, IoTHubMessage_GetContentEncodingSystemProperty, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle);
 
 /**
-** DEPRECATED: Use IoTHubMessage_SetProperty and IoTHubMessage_GetProperty instead. **
 * @brief   Gets a handle to the message's properties map.
 *          Note that when sending messages via the HTTP transport, the key names in the map must not contain spaces.
 *
