@@ -389,6 +389,7 @@ static int create_blob_upload_module(IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handle_d
     int result;
     (void)handle_data;
     (void)config;
+    (void)use_dev_auth;
 #ifndef DONT_USE_UPLOADTOBLOB
     handle_data->uploadToBlobHandle = IoTHubClient_LL_UploadToBlob_Create(config, handle_data->authorization_module);
     if (handle_data->uploadToBlobHandle == NULL)
@@ -403,8 +404,8 @@ static int create_blob_upload_module(IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handle_d
         if (use_dev_auth &&
             (credential_type == IOTHUB_CREDENTIAL_TYPE_X509 || credential_type == IOTHUB_CREDENTIAL_TYPE_X509_ECC))
         {
-            char* x509_certificate;
-            char* x509_private_key;
+            char* x509_certificate = NULL;
+            char* x509_private_key = NULL;
 
             if (IoTHubClient_Auth_Get_x509_info(handle_data->authorization_module, &x509_certificate, &x509_private_key) != 0)
             {
