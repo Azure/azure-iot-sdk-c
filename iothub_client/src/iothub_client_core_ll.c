@@ -42,7 +42,6 @@
 #define INDEFINITE_TIME ((time_t)(-1))
 #define ERROR_CODE_BECAUSE_DESTROY 0
 
-
 MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(IOTHUB_CLIENT_FILE_UPLOAD_RESULT, IOTHUB_CLIENT_FILE_UPLOAD_RESULT_VALUES);
 MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
 MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(IOTHUB_CLIENT_RETRY_POLICY, IOTHUB_CLIENT_RETRY_POLICY_VALUES);
@@ -385,11 +384,12 @@ static int create_edge_handle(IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handle_data, co
     return result;
 }
 
-static int create_blob_upload_module(IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handle_data, const IOTHUB_CLIENT_CONFIG* config)
+static int create_blob_upload_module(IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handle_data, const IOTHUB_CLIENT_CONFIG* config, bool use_dev_auth)
 {
     int result;
     (void)handle_data;
     (void)config;
+    (void)use_dev_auth;
 #ifndef DONT_USE_UPLOADTOBLOB
     handle_data->uploadToBlobHandle = IoTHubClient_LL_UploadToBlob_Create(config, handle_data->authorization_module);
     if (handle_data->uploadToBlobHandle == NULL)
@@ -399,7 +399,44 @@ static int create_blob_upload_module(IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handle_d
     }
     else
     {
-        result = 0;
+        IOTHUB_CREDENTIAL_TYPE credential_type = IoTHubClient_Auth_Get_Credential_Type(handle_data->authorization_module);
+
+        if (use_dev_auth &&
+            (credential_type == IOTHUB_CREDENTIAL_TYPE_X509 || credential_type == IOTHUB_CREDENTIAL_TYPE_X509_ECC))
+        {
+            char* x509_certificate = NULL;
+            char* x509_private_key = NULL;
+
+            if (IoTHubClient_Auth_Get_x509_info(handle_data->authorization_module, &x509_certificate, &x509_private_key) != 0)
+            {
+                LogError("Failed retrieving x509 client certificate and/or private key for upload to blob.");
+                result = MU_FAILURE;
+            }
+            else
+            {
+                if (IoTHubClient_LL_UploadToBlob_SetOption(handle_data->uploadToBlobHandle, OPTION_X509_CERT, x509_certificate) != IOTHUB_CLIENT_OK)
+                {
+                    LogError("Failed setting x509 client certificate for upload to blob.");
+                    result = MU_FAILURE;
+                }
+                else if (IoTHubClient_LL_UploadToBlob_SetOption(handle_data->uploadToBlobHandle, OPTION_X509_PRIVATE_KEY, x509_private_key) != IOTHUB_CLIENT_OK)
+                {
+                    LogError("Failed setting x509 client private key for upload to blob.");
+                    result = MU_FAILURE;
+                }
+                else
+                {
+                    result = 0;
+                }
+                
+                free(x509_certificate);
+                free(x509_private_key);
+            }
+        }
+        else
+        {
+            result = 0;
+        }
     }
 #else
     result = 0;
@@ -1022,7 +1059,7 @@ static IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* initialize_iothub_client(const IOTHUB_
         }
         if (result != NULL)
         {
-            if (create_blob_upload_module(result, config) != 0)
+            if (create_blob_upload_module(result, config, use_dev_auth) != 0)
             {
                 LogError("unable to create blob upload");
                 if (!result->isSharedTransport)
