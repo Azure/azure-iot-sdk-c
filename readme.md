@@ -276,8 +276,8 @@ Below is a table showing the mapping of the LTS branches to the packages release
 
   | Package | GitHub Branch | LTS Tag | LTS Start Date | Maintenance End Date |
   | :-----: | :-----------: | :-----: | :------------: | :------------------: |
+  | vcpkg: 2025-03-31 | lts_03_2025 | LTS_03_2025 | 2025-03-31 | 2026-03-31 |
   | vcpkg: 2024-08-12 | lts_08_2024 | LTS_08_2024 | 2024-08-12 | 2025-08-12 |
-  | vcpkg: 2024-03-04 | lts_03_2024 | LTS_03_2024 | 2024-03-04 | 2025-03-04 |
 
 'Maintenance End Date' refers to the end of life support of the related version.
 
