@@ -102,7 +102,11 @@ Setup the test parameters</h1>
 <li>IOTHUB_E2E_X509_PRIVATE_KEY_BASE64</li>
 <li>IOTHUB_E2E_X509_THUMBPRINT</li>
 </ul>
-<p class="startli">For testing-only, you can generate a x509 self-signed certificate using the following openssl command:</p>
+<p class="startli">For testing-only, you can generate a x509 self-signed certificate by either:</p>
+<p class="startli">Using our script to fill these three parameters automatically with a <b>test-only</b> certificate:</p>
+<p class="startli">```shell .../azure-iot-sdk-c/tools/iot_hub_e2e_tests_params$ ./fill_x509_in_iot_device_params.sh ```</p>
+<p class="startli">OR following the manual steps below:</p>
+<p class="startli">Generate the test-only self-signed using the following openssl command:</p>
 <p class="startli">```Shell openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -nodes -days 365 -subj "/C=US/ST=Washington/L=Redmond/O=Company/OU=Org/CN=www.company.com" ```</p>
 <p class="startli">Note: this command generates a pass-phrase-free certificate. Protect the file!</p>
 <p class="startli">This will generate two files, one with the certificate information (<code>cert.pem</code>) and the other with the certificate key (<code>key.pem</code>).</p>
@@ -130,12 +134,12 @@ Setup the test parameters</h1>
 Run end to end tests on a Windows development environment</h1>
 <ul>
 <li>Start the Windows PowerShell in Administrator mode. Update execution policy by entering "set-executionpolicy unrestricted"</li>
+<li>Navigate to the folder tools\iot_hub_e2e_tests_params in your local copy of the repository.</li>
+<li>Run the script "Set-IOTDeviceParametersForE2ETests.ps1" located under the tools\iot_hub_e2e_tests_params folders in your local copy of the repository.</li>
 <li>Navigate to azure-iot-sdk-c\cmake <br  />
 </li>
 <li>From cmake directory, run cmake with option to enable e2e testing: Cmake -Drun_e2e_tests=ON ..</li>
 <li>The test directory will be located here: azure-iot-sdk-c\cmake\iothub_client\tests</li>
-<li>Navigate to the folder tools\iot_hub_e2e_tests_params in your local copy of the repository.</li>
-<li>Run the script "Set-IOTDeviceParametersForE2ETests.ps1" located under the tools\iot_hub_e2e_tests_params folders in your local copy of the repository.</li>
 <li>Start the Visual Studio solution "azure_iot_sdks.sln" located under the folder cmake in your home directory.</li>
 <li>Build the solution</li>
 <li>Run the tests by Test -&gt; Run -&gt; All Tests menu item inside of Visual Studio.</li>
@@ -145,9 +149,6 @@ Run end to end tests on a Windows development environment</h1>
 Run end to end tests for "iothub_client" on a Linux development environment</h1>
 <ul>
 <li>Navigate to the folder tools/iot_hub_e2e_tests_params</li>
-<li>Navigate to azure-iot-sdk-c\cmake</li>
-<li>From cmake directory run cmake with option to enable e2e testing: Cmake -Drun_e2e_tests=ON ..</li>
-<li>The test directory will be located here: azure-iot-sdk-c\cmake\iothub_client\tests</li>
 <li><p class="startli">Set the parameters in "iot_device_params.txt" as environment variables in the current session:</p>
 <p class="startli">Notes:</p><ul>
 <li>Make sure the contents of "iot_device_params.txt" are properly escaped for Linux (use "\$" for the '$' character).</li>
@@ -158,9 +159,10 @@ Run end to end tests for "iothub_client" on a Linux development environment</h1>
 <div class="fragment"><div class="line">set -a</div>
 <div class="line">source ./iot_device_params.txt</div>
 </div><!-- fragment --><ul>
-<li>Navigate to the folder c/build_all/linux in your local copy of the repository.</li>
-<li>Run the build.sh script.</li>
-<li>In your home folder, in the cmake folder, run the ctest command with parameters -C "Debug" </li>
+<li>Navigate to azure-iot-sdk-c\cmake</li>
+<li>From cmake directory run cmake with option to enable e2e testing: <code>cmake -Drun_e2e_tests=ON ..</code></li>
+<li>The test directory will be located here: azure-iot-sdk-c\cmake\iothub_client\tests</li>
+<li>In the azure-iot-sdk-c\cmake folder, run the following to run all tests: <code>ctest -C "Debug"</code> </li>
 </ul>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->
