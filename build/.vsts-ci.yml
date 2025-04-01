@@ -58,7 +58,7 @@ stages:
     variables:
       CodeQL.Enabled: false
     pool:
-      vmImage: 'ubuntu-20.04'
+      vmImage: 'ubuntu-24.04'
     displayName: "Check Submodules"
     steps:
     - script: |
@@ -1106,7 +1106,7 @@ stages:
       displayName: 'Build'
   - job: crosscompile_mips32
     pool:
-      vmImage: 'ubuntu-20.04'
+      vmImage: 'ubuntu-24.04'
     displayName: "Cross Compile (MIPS32)"
     steps:
     - script: |
@@ -1128,7 +1128,7 @@ stages:
       displayName: 'Build MIPS32'
   - job: crosscompile_arm
     pool:
-      vmImage: 'ubuntu-20.04'
+      vmImage: 'ubuntu-24.04'
     displayName: "Cross Compile (ARM)"
     steps:
     - script: |
