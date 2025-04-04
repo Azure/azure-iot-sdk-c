@@ -15,6 +15,13 @@ The Azure IoT C SDK uses [vcpkg](https://github.com/microsoft/vcpkg) primarily f
     -Dwarnings_as_errors=OFF
 ```
 
+Additionally, it is possible to enable the Provisioning Device client during installation by using the `vcpkg install azure-iot-sdk-c[use-prov-client]` command instead or by adding the `use-prov-client` feature in the [vcpkg manifest](https://learn.microsoft.com/en-us/vcpkg/concepts/manifest-mode) file. In any case, this build will also set the following CMake flags:
+
+```
+    -Duse_prov_client=ON
+    -Dhsm_type_symm_key=ON
+```
+
 There are no other configuration options via vcpkg available.
 
 > NOTE: If your application requires specific CMake flags not shown above, please build and install directly from the source code.  See [devbox_setup.md](https://github.com/Azure/azure-iot-sdk-c/blob/main/doc/devbox_setup.md) for further information.
