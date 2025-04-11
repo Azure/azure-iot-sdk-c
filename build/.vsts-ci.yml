@@ -78,7 +78,7 @@ stages:
   - job: windowsx86
     timeoutInMinutes: 190
     pool:
-      name: 'sdk-c--win-vs2022b'
+      name: 'sdk-c--win-vs2022b-pool'
     displayName: "Windows x86"
     steps:
     - script: |
@@ -116,7 +116,7 @@ stages:
   - job: windowsx64debug
     timeoutInMinutes: 190
     pool:
-      name: 'sdk-c--win-vs2022b'
+      name: 'sdk-c--win-vs2022b-pool'
     displayName: 'Windows x64 (Debug)'
     steps:
     - script: |
@@ -160,7 +160,7 @@ stages:
       CodeQL.Enabled: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
       CodeQL.Language: cpp
     pool:
-      name: 'sdk-c--win-vs2022b'
+      name: 'sdk-c--win-vs2022b-pool'
     displayName: 'Windows x64 (Release)'
     steps:
     - task: CodeQL3000Init@0
@@ -204,7 +204,7 @@ stages:
   - job: windowsdynamic
     timeoutInMinutes: 190
     pool:
-      name: 'sdk-c--win-vs2022b'
+      name: 'sdk-c--win-vs2022b-pool'
     displayName: "Windows Dynamic"
     steps:
     - script: |
