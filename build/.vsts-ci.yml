@@ -37,21 +37,21 @@ resources:
     endpoint: csdk-containers
     image: csdkcontainerregistry.azurecr.io/raspberrypi-c-buster:brown
 stages:
-- stage: Setup
-  jobs:
-  - job: setup
-    container: linux-c-ubuntu-2204
-    pool:
-      name: 'sdk-c--ubuntu-22'
-    displayName: 'Setup'
-    steps:
-    - script: |
-        az login --identity
-        az storage account update -g $STORAGE_ACCOUNT_RESOURCE_GROUP -n $STORAGE_ACCOUNT_NAME --allow-shared-key-access true --default-action Allow
-      displayName: 'Setup Azure Storage Account'
-      env:
-        STORAGE_ACCOUNT_NAME: $(STORAGE-ACCOUNT-NAME)
-        STORAGE_ACCOUNT_RESOURCE_GROUP: $(STORAGE-ACCOUNT-RESOURCE-GROUP)
+# - stage: Setup
+#   jobs:
+#   - job: setup
+#     container: linux-c-ubuntu-2204
+#     pool:
+#       name: 'sdk-c--ubuntu-22'
+#     displayName: 'Setup'
+#     steps:
+#     - script: |
+#         az login --identity
+#         az storage account update -g $STORAGE_ACCOUNT_RESOURCE_GROUP -n $STORAGE_ACCOUNT_NAME --allow-shared-key-access true --default-action Allow
+#       displayName: 'Setup Azure Storage Account'
+#       env:
+#         STORAGE_ACCOUNT_NAME: $(STORAGE-ACCOUNT-NAME)
+#         STORAGE_ACCOUNT_RESOURCE_GROUP: $(STORAGE-ACCOUNT-RESOURCE-GROUP)
 - stage: Tests  
   jobs:
   # - job: checksubmodule
@@ -119,7 +119,7 @@ stages:
       name: 'sdk-c--win-vs2022'
     displayName: 'Windows x64 (Debug)'
     steps:
-    - script: |
+    - pwsh: |
         (Get-Item "C:\\Program Files\\Microsoft Office\\root\\Office16\\GRAPH.EXE").VersionInfo.ProductVersion
         dir 'C:\Program Files (x86)\dotnet\shared\Microsoft.AspNetCore.App\'
         (Get-Item "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\IDE\devenv.exe").VersionInfo.ProductVersion
@@ -1174,20 +1174,20 @@ stages:
 #         projects: 'tools\traceabilitytool\traceabilitytool.sln'
 #     - task: CodeQL3000Finalize@0
 #       condition: always()
-# - stage: Cleanup 
-#   jobs:
-#   - job: cleanup
-#     container: linux-c-ubuntu-2204
-#     pool:
-#       name: 'sdk-c--ubuntu-22'
-#     displayName: 'Cleanup'
-#     steps:
-#     - script: |
-#         az login --identity
-#         az storage account update -g $STORAGE_ACCOUNT_RESOURCE_GROUP -n $STORAGE_ACCOUNT_NAME --allow-shared-key-access false --default-action Deny
-#       displayName: 'Setup Azure Storage Account'
-#       env:
-#         STORAGE_ACCOUNT_NAME: $(STORAGE-ACCOUNT-NAME)
-#         STORAGE_ACCOUNT_RESOURCE_GROUP: $(STORAGE-ACCOUNT-RESOURCE-GROUP)
-#       condition: always() # Run even if the pipeline run is cancelled.
+- stage: Cleanup 
+  jobs:
+  - job: cleanup
+    container: linux-c-ubuntu-2204
+    pool:
+      name: 'sdk-c--ubuntu-22'
+    displayName: 'Cleanup'
+    steps:
+    - script: |
+        az login --identity
+        az storage account update -g $STORAGE_ACCOUNT_RESOURCE_GROUP -n $STORAGE_ACCOUNT_NAME --allow-shared-key-access false --default-action Deny
+      displayName: 'Setup Azure Storage Account'
+      env:
+        STORAGE_ACCOUNT_NAME: $(STORAGE-ACCOUNT-NAME)
+        STORAGE_ACCOUNT_RESOURCE_GROUP: $(STORAGE-ACCOUNT-RESOURCE-GROUP)
+      condition: always() # Run even if the pipeline run is cancelled.
   
