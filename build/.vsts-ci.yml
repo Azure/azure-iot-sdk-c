@@ -1170,8 +1170,10 @@ stages:
     - task: CodeQL3000Finalize@0
       condition: always()
 - stage: Cleanup 
+  condition: always() # Run stage even if the pipeline run is cancelled.
   jobs:
   - job: cleanup
+    condition: always() # Run job even if the pipeline run is cancelled.
     container: linux-c-ubuntu-2204
     pool:
       name: 'sdk-c--ubuntu-22'
@@ -1184,5 +1186,5 @@ stages:
       env:
         STORAGE_ACCOUNT_NAME: $(STORAGE-ACCOUNT-NAME)
         STORAGE_ACCOUNT_RESOURCE_GROUP: $(STORAGE-ACCOUNT-RESOURCE-GROUP)
-      condition: always() # Run even if the pipeline run is cancelled.
+      condition: always() # Run step even if the pipeline run is cancelled.
   
