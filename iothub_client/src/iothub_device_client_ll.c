@@ -106,6 +106,11 @@ IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_GetTwinAsync(IOTHUB_DEVICE_CLIENT_LL_
     return IoTHubClientCore_LL_GetTwinAsync((IOTHUB_CLIENT_CORE_LL_HANDLE)iotHubClientHandle, deviceTwinCallback, userContextCallback);
 }
 
+IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_SendCertificateSigningRequestAsync(IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, const char* certificateSigningRequest, const char* replace, IOTHUB_CLIENT_CERTIFICATE_SIGNING_RESPONSE_CALLBACK certificateSigningResponseCallback, void* userContextCallback)
+{
+    return IoTHubClientCore_LL_SendCertificateSigningRequestAsync((IOTHUB_CLIENT_CORE_LL_HANDLE)iotHubClientHandle, certificateSigningRequest, replace, certificateSigningResponseCallback, userContextCallback);
+}
+
 IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_SendReportedState(IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, const unsigned char* reportedState, size_t size, IOTHUB_CLIENT_REPORTED_STATE_CALLBACK reportedStateCallback, void* userContextCallback)
 {
     return IoTHubClientCore_LL_SendReportedState((IOTHUB_CLIENT_CORE_LL_HANDLE)iotHubClientHandle, reportedState, size, reportedStateCallback, userContextCallback);
