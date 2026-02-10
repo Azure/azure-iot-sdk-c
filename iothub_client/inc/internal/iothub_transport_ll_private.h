@@ -77,6 +77,7 @@ extern "C"
     typedef int (*pfIoTHubTransport_Subscribe_DeviceTwin)(IOTHUB_DEVICE_HANDLE handle);
     typedef void (*pfIoTHubTransport_Unsubscribe_DeviceTwin)(IOTHUB_DEVICE_HANDLE handle);
     typedef IOTHUB_CLIENT_RESULT(*pfIoTHubTransport_GetTwinAsync)(IOTHUB_DEVICE_HANDLE handle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK completionCallback, void* callbackContext);
+    typedef IOTHUB_CLIENT_RESULT(*pfIoTHubTransport_SendCertificateSigningRequest)(IOTHUB_DEVICE_HANDLE handle, const char* certificateSigningRequest, const char* replace, IOTHUB_CLIENT_CERTIFICATE_SIGNING_RESPONSE_CALLBACK completionCallback, void* callbackContext);
     typedef IOTHUB_CLIENT_RESULT(*pfIotHubTransport_SendMessageDisposition)(IOTHUB_DEVICE_HANDLE handle, IOTHUB_MESSAGE_HANDLE message, IOTHUBMESSAGE_DISPOSITION_RESULT disposition);
     typedef IOTHUB_PROCESS_ITEM_RESULT(*pfIoTHubTransport_ProcessItem)(TRANSPORT_LL_HANDLE handle, IOTHUB_IDENTITY_TYPE item_type, IOTHUB_IDENTITY_INFO* iothub_item);
     typedef int(*pfIoTHubTransport_Subscribe_DeviceMethod)(IOTHUB_DEVICE_HANDLE handle);
@@ -110,6 +111,7 @@ pfIoTHubTransport_Subscribe_InputQueue IoTHubTransport_Subscribe_InputQueue;    
 pfIoTHubTransport_Unsubscribe_InputQueue IoTHubTransport_Unsubscribe_InputQueue;    \
 pfIoTHubTransport_SetCallbackContext IoTHubTransport_SetCallbackContext;            \
 pfIoTHubTransport_GetTwinAsync IoTHubTransport_GetTwinAsync;                        \
+pfIoTHubTransport_SendCertificateSigningRequest IoTHubTransport_SendCertificateSigningRequest; \
 pfIoTHubTransport_GetSupportedPlatformInfo IoTHubTransport_GetSupportedPlatformInfo     /*there's an intentional missing ; on this line*/
 
     struct TRANSPORT_PROVIDER_TAG
