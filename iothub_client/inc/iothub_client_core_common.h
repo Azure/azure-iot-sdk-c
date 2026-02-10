@@ -105,7 +105,8 @@ typedef struct IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_STRUCT* IOTHUB_CLIENT_LL_UP
     IOTHUB_TYPE_TELEMETRY,          \
     IOTHUB_TYPE_DEVICE_TWIN,        \
     IOTHUB_TYPE_DEVICE_METHODS,     \
-    IOTHUB_TYPE_EVENT_QUEUE
+    IOTHUB_TYPE_EVENT_QUEUE,        \
+    IOTHUB_TYPE_CREDENTIALS
 
     MU_DEFINE_ENUM_WITHOUT_INVALID(IOTHUB_IDENTITY_TYPE, IOTHUB_IDENTITY_TYPE_VALUE);
 
@@ -488,10 +489,20 @@ typedef struct IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_STRUCT* IOTHUB_CLIENT_LL_UP
     *                                     @p IoTHubDeviceClient_LL_GetPropertiesAsync() or @p IoTHubDeviceClient_LL_GetPropertiesAndSubscribeToUpdatesAsync()).
     */
     typedef void(*IOTHUB_CLIENT_PROPERTIES_RECEIVED_CALLBACK)(
-                     IOTHUB_CLIENT_PROPERTY_PAYLOAD_TYPE payloadType, 
+                     IOTHUB_CLIENT_PROPERTY_PAYLOAD_TYPE payloadType,
                      const unsigned char* payload,
                      size_t payloadLength,
                      void* userContextCallback);
+
+    /**
+    * @brief    Function callback application implements to receive the result of a certificate signing request (CSR) operation.
+    *
+    * @param[in]   status                 HTTP-style status code from IoT Hub (e.g. 200 on success, 4xx/5xx on error).
+    * @param[in]   certificates           Raw JSON response payload. On success (200) this contains the issued certificates
+    *                                     and correlation ID. On error this contains error details. Can be NULL if no payload was received.
+    * @param[in]   userContextCallback    User context pointer set in the call to send the CSR.
+    */
+    typedef void(*IOTHUB_CLIENT_CERTIFICATE_SIGNING_RESPONSE_CALLBACK)(int status, const char* certificates, void* userContextCallback);
 
 #ifdef __cplusplus
 }
