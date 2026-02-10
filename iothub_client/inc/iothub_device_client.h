@@ -322,6 +322,22 @@ extern "C"
     */
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_DeviceMethodResponse, IOTHUB_DEVICE_CLIENT_HANDLE, iotHubClientHandle, METHOD_HANDLE, methodId, const unsigned char*, response, size_t, response_size, int, statusCode);
 
+    /**
+    * @brief    Sends a Certificate Signing Request (CSR) to IoT Hub asynchronously.
+    *
+    * @param    iotHubClientHandle                      The handle created by a call to the create function.
+    * @param    certificateSigningRequest               The PEM-encoded CSR string.
+    * @param    replace                                 Optional certificate fingerprint to replace. Can be @c NULL.
+    * @param    certificateSigningResponseCallback      The callback invoked when the CSR response is received.
+    * @param    userContextCallback                     User specified context that will be provided to the
+    *                                                   callback. This can be @c NULL.
+    *
+    * @warning: Do not call IoTHubDeviceClient_Destroy() from inside your application's callback.
+    *
+    * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
+    */
+    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_SendCertificateSigningRequestAsync, IOTHUB_DEVICE_CLIENT_HANDLE, iotHubClientHandle, const char*, certificateSigningRequest, const char*, replace, IOTHUB_CLIENT_CERTIFICATE_SIGNING_RESPONSE_CALLBACK, certificateSigningResponseCallback, void*, userContextCallback);
+
 #ifndef DONT_USE_UPLOADTOBLOB
     /**
     * @brief    IoTHubDeviceClient_UploadToBlobAsync uploads data from memory to a file in Azure Blob Storage.
