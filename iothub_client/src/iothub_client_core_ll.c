@@ -104,6 +104,12 @@ typedef struct GET_TWIN_CONTEXT_TAG
     void* context;
 } GET_TWIN_CONTEXT;
 
+typedef struct CSR_CONTEXT_TAG
+{
+    IOTHUB_CLIENT_CERTIFICATE_SIGNING_RESPONSE_CALLBACK callback;
+    void* context;
+} CSR_CONTEXT;
+
 typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG
 {
     DLIST_ENTRY waitingToSend;
@@ -1253,6 +1259,20 @@ static void on_get_device_twin_completed(DEVICE_TWIN_UPDATE_STATE update_state, 
         GET_TWIN_CONTEXT* getTwinCtx = (GET_TWIN_CONTEXT*)userContextCallback;
         getTwinCtx->callback(update_state, payLoad, size, getTwinCtx->context);
         free(getTwinCtx);
+    }
+}
+
+static void on_csr_completed(int status, const char* certificates, void* userContextCallback)
+{
+    if (userContextCallback == NULL)
+    {
+        LogError("Invalid argument (userContextCallback=NULL)");
+    }
+    else
+    {
+        CSR_CONTEXT* csrCtx = (CSR_CONTEXT*)userContextCallback;
+        csrCtx->callback(status, certificates, csrCtx->context);
+        free(csrCtx);
     }
 }
 
@@ -2527,6 +2547,55 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_GetTwinAsync(IOTHUB_CLIENT_CORE_LL_HAND
                     handleData->complete_twin_update_encountered = true;
                     result = IOTHUB_CLIENT_OK;
                 }
+            }
+        }
+    }
+
+    return result;
+}
+
+IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SendCertificateSigningRequestAsync(
+    IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle,
+    const char* certificateSigningRequest,
+    const char* replace,
+    IOTHUB_CLIENT_CERTIFICATE_SIGNING_RESPONSE_CALLBACK certificateSigningResponseCallback,
+    void* userContextCallback)
+{
+    IOTHUB_CLIENT_RESULT result;
+
+    if (iotHubClientHandle == NULL || certificateSigningRequest == NULL || certificateSigningResponseCallback == NULL)
+    {
+        LogError("Invalid argument (iotHubClientHandle=%p, csr=%p, callback=%p)",
+            iotHubClientHandle, certificateSigningRequest, certificateSigningResponseCallback);
+        result = IOTHUB_CLIENT_INVALID_ARG;
+    }
+    else
+    {
+        CSR_CONTEXT* csrCtx;
+
+        if ((csrCtx = (CSR_CONTEXT*)malloc(sizeof(CSR_CONTEXT))) == NULL)
+        {
+            LogError("Failed creating CSR context");
+            result = IOTHUB_CLIENT_ERROR;
+        }
+        else
+        {
+            IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handleData = (IOTHUB_CLIENT_CORE_LL_HANDLE_DATA*)iotHubClientHandle;
+
+            csrCtx->callback = certificateSigningResponseCallback;
+            csrCtx->context = userContextCallback;
+
+            if (handleData->IoTHubTransport_SendCertificateSigningRequest(
+                    handleData->deviceHandle, certificateSigningRequest, replace,
+                    on_csr_completed, csrCtx) != IOTHUB_CLIENT_OK)
+            {
+                LogError("Failed sending certificate signing request");
+                free(csrCtx);
+                result = IOTHUB_CLIENT_ERROR;
+            }
+            else
+            {
+                result = IOTHUB_CLIENT_OK;
             }
         }
     }
