@@ -58,7 +58,7 @@ multithreaded API is that the calls to DoWork are abstracted away from your code
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
 
 /* Paste in your device connection string  */
-static const char* connectionString = "[device connection string]";
+static const char* connectionString = "[connectionString]";
 
 static bool g_continueRunning = true;
 int g_interval = 10000;  // 10 sec send interval initially

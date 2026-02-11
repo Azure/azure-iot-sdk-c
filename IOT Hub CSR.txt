@@ -1,0 +1,308 @@
+Issue Certificate Device API 
+
+This section should cover the design of the public device API for MQTT only and implementation details. 
+
+Assumptions 
+
+Only a single issueCertificate operation can be active at a time per device. 
+
+Certificate operations are throttled [by hub] at admission time only. 
+
+Goals 
+
+The API is completely specified.  
+
+Non-functional requirements are documented. 
+
+What are the latency and client retry expectations? 
+
+Full enumeration of all possible error conditions required. 
+
+In the nominal case, no polling is required, even in the case of device disconnection. 
+
+At least once semantics must be preserved. 
+
+Acknowledgements at defined stages of the operation SHALL provide durable commitment. 
+
+Clear semantics for API usage assuming failure or loss of connectivity at any step MUST be documented. 
+
+Public API 
+
+For MQTT 3.1.1, the API shall follow the request/response conventions set forth by direct methods, twins, and streams in existing API versions. 
+
+Device must connect with API version 2025-08-01-preview in username. 
+
+Device must subscribe to topic “$iothub/credentials/res/#” 
+
+Device publishes to topic: “$iothub/credentials/POST/issueCertificate/?$rid={request_id}” 
+
+Payload as described in Request Payload. 
+
+request_id is an opaque ClientRequestId 
+
+[IF QoS1 PUB] Gateway will ack receipt of the request immediately. 
+
+Gateway will publish to topic with QoS 0: “$iothub/credentials/res/{status}/?$rid={request_id}” 
+
+request_id matches the request_id provided by the device. 
+
+Status will be 202 on success or the HTTP code portion of the error code. 
+
+Any status other than 202 signals the end of the exchange. 
+
+Gateway has 60 seconds to respond [from the time the request was acked]. SDK should not assume the operation failed before this, with some grace (i.e. wait 90 seconds). 
+
+Payload as described in Accepted Payload. 
+
+Gateway will publish to topic “$iothub/credentials/res/{status}/?$rid={request_id}” 
+
+Payload as described in Response Payload. 
+
+Status will be 200 on success or HTTP code portion of the error code. 
+
+[IF QoS1 SUB] GW will ack to DC once client acks to GW. 
+[IF QoS0 SUB] GW will ack to DC immediately upon publish to client. 
+
+ClientRequestId 
+
+Ascii alphanumerics and dash allowed string 4 to 36 characters inclusive. Must not begin or end with a dash. 
+
+Behavior 
+
+The device first sends a POST request to create the operation. If the request was sent with QoS1, GW will ack it immediately. GW will begin trying to commit the request to the backend. Nominally, it will take less than 1 second to respond. If the hub is being throttled on credential operations or the backend is temporarily unavailable, GW will try for up to 60 seconds. If the request was unable to acquire throttle tokens, GW will return 429002/429003. If there was no response from the backend or backend reports a timeout to GW, GW will return 503001. 
+
+If the device disconnects before receiving a 202 Accepted response, the request will be canceled if possible. If the request cannot be canceled (i.e. DC already has a write inflight to CosmosDB or DCs response to GW is already inflight), when the device reconnects and submits a request, it will receive 409005. 
+
+Once the device receives a 202 Accepted response, the hub has committed the request. There is no need to poll or resubmit the request unless the operationExpires time has passed. This contract guarantees that if the device is connected and subscribed to the response topic, hub will provide a response by the operationExpires time. Even if the device disconnects and reconnects with clean session, as long as the device resubscribes to the response topic, it will receive the response before the operationExpires time. 
+
+Clients should make no assumptions about the value operationExpires, but we will start with 12 hour. 
+
+If the device is not available to receive the response by the operationExpires time, the request is discarded. No notification will be sent to the device. The device can submit a new request without error. If the device resubmits a request before receiving a response to the accepted request, it will receive error 409005.  
+
+Request Processing 
+
+GW will enforce: 
+
+Feature Support for “CredentialManagement” using ensure_operation_is_allowed. 
+
+Concurrency check: Allow 1 inflight pending credential operation per connection. 
+
+Throttle for “CredentialManagement” throttle type using throttle_one_unit. 
+
+Request Payload 
+
+{ 
+
+    "id": "device1", 
+
+    "csr": "MIICYTCCAUkCAQAwHDEaMBgGA1wRZGAw...yM1X8USCtPz/1nRYDOtA==", 
+
+    "replace": "*", 
+
+} 
+
+id 
+
+Required. The device ID the certificate will be issued for. Currently can only be the active authenticated device ID. 
+
+csr 
+
+Required. The base64 encoded PKCS#10 CSR, without PEM header/footers or new lines.  
+
+replace 
+
+Optional. Default null. This request should replace the specified request ID. “*” is also accepted to replace any active request. If replace is not supplied and there is an active certificate operation for the specified device, the request will fail with 409005. 
+
+This should only be used in one of the following situations: 
+
+The CSR is known to be different than the previous request that has not completed. 
+
+Client received error 409005 and the client does not know if the CSR has changed. This could be the case if the device lost its state due to storage failure for example. 
+
+Accepted Payload 
+
+Correlation ID is an opaque utf-8 string. Clients should make no assumptions about the contents, other than that it will be identical for all responses related to the same operation. Client is not required to store this. For diagnostic and support purposes only. 
+
+{ 
+
+    "correlationId": "8819e8d8-1324-4a9c-acde-ce0318e93f31", 
+
+    "operationExpires": "2025-06-09T17:31:31.426Z", 
+
+} 
+
+Response Payload 
+
+The response payload will be as follows 
+
+BLOCKED 
+Need spec for CMS response payload. Requested in teams. 
+
+Errors 
+
+Example CMS failure: 
+
+{ 
+
+    "errorCode": 400040, 
+
+    "message": "Credential management operation failed", 
+
+    "trackingId": "59b2922c-f1c9-451b-b02d-5b64bc31685a", 
+
+    "timestampUtc": "2025-06-09T17:31:31.426574675Z", 
+
+    "info": { 
+
+        "correlationId": "8819e8d8-1324-4a9c-acde-ce0318e93f31", 
+
+        "credentialError": "FailedToDecodeCsr", 
+
+        "credentialMessage": "Failed to decode CSR: invalid base64 encoding" 
+
+    } 
+
+} 
+
+ 
+
+Example conflicting request failure: 
+
+{ 
+
+    "errorCode": 409005, 
+
+    "message": "A credential management operation is already active", 
+
+    "trackingId": "59b2922c-f1c9-451b-b02d-5b64bc31685a", 
+
+    "timestampUtc": "2025-06-09T17:31:31.426574675Z", 
+
+    "info": { 
+
+        "requestId": "aabbcc", 
+
+        "correlationId": "8819e8d8-1324-4a9c-acde-ce0318e93f31", 
+
+        "operationExpires": "2025-06-09T17:31:31.426Z" 
+
+    } 
+
+} 
+
+ 
+
+Service errors from CMS will be clubbed into IoT Hubs ServerError and ServiceUnavailable as appropriate. Service error details will not be communicated to customers. They should generate LSIs that are investigated internally. Client errors from CMS will be passed through to the customer as shown above. 
+
+Errors will be fully specified. API consumers should expect no other codes for the API version 2025-08-01-preview. 
+
+400001 InvalidProtocolVersion 
+A request was made with API version < 2025-08-01-preview 
+
+403010 OperationNotAvailableInCurrentTier 
+Hub is not a P SKU. 
+
+412001 PreconditionFailed 
+
+The specified request id in the replace property is not an active request for the device. 
+
+412005 CredentialManagementPreconditionFailed (New) 
+
+The hub or device is not configured correctly. E.g. the device is missing the required attributes or the namespace is no longer linked. 
+
+429002/429003 ThrottleBacklogLimitExceeded/ThrottlingBacklogTimeout 
+The client is throttled by IoT Hub’s rate limit on credential operations. See Retry with initial time 1 second. 
+
+409004 CredentialOperationPending (New) 
+
+The client has already requested a credential operation on the connection. It has neither been accepted nor failed yet. This cannot be canceled if the connection is open. Closing the connection may cancel the request. 
+
+409005 CredentialOperationActive (New) 
+The client already has a credential operation that has been accepted. 
+
+400040 CredentialOperationFailed (New) 
+After DC has exhausted any retries (for throttling) if the final error is a client error GW will return this error. 
+“info” will contain 2 properties: “credentialError” and “credentialMessage”. Each being a string value. credentialError is a string name of an error. The possible values will be provided by CMS team. 
+
+404001/503102 DeviceNotFound/DeviceUnavailable 
+Device was deleted or currently is being deleted. 
+
+500001 ServerError 
+Service is failing. Retries are unlikely to succeed without intervention. See Retry with initial time of 5 minutes. 
+
+503001 ServiceUnavailable 
+Temporary service issue. See Retry with initial time of 5 seconds. 
+
+Retry 
+
+As indicated above the error may contain a “retryAfter” property (unsigned int, seconds). Clients should retry after at least the initial duration indicated above with exponential backoff up to at most 30 minutes and include jitter. For each retry attempt of a given operation, the client should take the larger of the calculated exponential backoff and the retryAfter value (if it was provided). 
+
+Azure Monitor 
+
+Azure Monitor will help customers with self-diagnosing issues. 
+
+Logs 
+
+A new category “CredentialManagement” will be added with operation names: “issueCertificateRequest” and “issueCertificateResponse”.  
+
+These contain the additional property: “correlationId” which matches the one provided to the device.  
+
+In the case of hub error 400040:  “credentialError” and “credentialMessage” will also be available. 
+
+The “issueCertificateRequest” will have the properties: “armResourceId” and “policyId”. 
+
+Metrics 
+
+A new metric will be provided “Credential operations”. It will support splitting on 2 values:  
+
+Type Values: “IssueCertificateRequest” “IssueCertificateResponse” 
+These map the acceptance (committing to backend) and the response delivery.  
+
+Result: Values “Success”, “ClientError”, “ClientThrottled”, “Failure” 
+For the request a client error is caused by a bad request (4XXXXX + 503102 except 429002/429003). Failure counts service caused issues (500001/503001). ClientThrottled counts 429002/429003. 
+
+SDK Design 
+
+To minimize communication and cost, clients should store the last sent request ID, durably if hardware permits. If the client requests a certificate but loses connectivity before receiving a reply, the request is in an indeterminate state.  
+
+Upon reconnect, the client SHOULD resubmit the request. If the previous request succeeded, the client will receive a 409005 error which includes the request ID that was accepted. If the client recognizes the request ID as the last one it sent and the client determines that request is still valid (i.e. the CSR hasn’t changed), no further action is needed. The client is assured that the request was durably committed and that a response will be provided on or before the operationExpires time.  
+
+There is no need to poll for a response. Even if the client disconnects and reconnects or unsubscribes and resubscribes to the response topic. The response will be delivered if the device is connected and subscribed anytime before the operationExpires time. 
+
+Device Configuration 
+
+The DeviceInfo from DC must contain ADR attributes deviceResourceId and policyResourceId. It may be configured with credential ID validation (x509Cavalidation), but this is not required for issuance. It is required for authentication. 
+
+{ 
+
+  "deviceResourceId": "<ARM ADR Device Resource ID>", 
+
+  "authentication": { 
+
+    "policyResourceId": "<ARM ADR Policy Resource ID>"                    
+
+  } 
+
+}	 
+
+ 
+
+Gen2 SKU 
+
+Gen2 SKU [currently] is identical to S3 SKU except that it supports the CertificateManagement feature. 
+
+Downstream API 
+
+Downstream contract specification is tracked in this pull request: Pull request 13336592: [IDL] Cert Management Device API - Repos . 
+
+Observability 
+
+Internal E2E observability is achieved using the GWv2 related activity ID for the initial POST request that starts the operation.  
+
+Downstream: the related activity ID is sent to DC via the standard mux context. DC must store and use this for any logs related to this operation. DC must return it back to GW with the result notification. DC should provide  the ID to CMS so CMS can use the same correlation ID in their logs. 
+
+Upstream: the related activity ID is communicated to customer as the “correlationId” in all successful responses. The “correlationId” may be provided in the “info” property of some errors. 
+
+ 
+
+ 

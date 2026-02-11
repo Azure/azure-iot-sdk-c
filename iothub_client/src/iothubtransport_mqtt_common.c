@@ -207,6 +207,20 @@ typedef enum MQTT_CLIENT_STATUS_TAG
     MQTT_CLIENT_STATUS_EXECUTE_DISCONNECT
 } MQTT_CLIENT_STATUS;
 
+typedef struct MQTT_CSR_ITEM_TAG
+{
+    tickcounter_ms_t msgCreationTime;
+    tickcounter_ms_t msgPublishTime;
+    uint16_t packet_id;
+    char* certificateSigningRequest;
+    char* replace;
+    bool accepted;
+    IOTHUB_CLIENT_CERTIFICATE_SIGNING_RESPONSE_CALLBACK userCallback;
+    void* userContext;
+} MQTT_CSR_ITEM;
+
+static void freeCsrItem(MQTT_CSR_ITEM* csr_item);
+
 typedef struct MQTTTRANSPORT_HANDLE_DATA_TAG
 {
     // Topic control
@@ -316,18 +330,6 @@ typedef struct MQTT_DEVICE_TWIN_ITEM_TAG
     IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK userCallback;
     void* userContext;
 } MQTT_DEVICE_TWIN_ITEM;
-
-typedef struct MQTT_CSR_ITEM_TAG
-{
-    tickcounter_ms_t msgCreationTime;
-    tickcounter_ms_t msgPublishTime;
-    uint16_t packet_id;
-    char* certificateSigningRequest;
-    char* replace;
-    bool accepted;
-    IOTHUB_CLIENT_CERTIFICATE_SIGNING_RESPONSE_CALLBACK userCallback;
-    void* userContext;
-} MQTT_CSR_ITEM;
 
 typedef struct MQTT_MESSAGE_DETAILS_LIST_TAG
 {
@@ -2183,19 +2185,81 @@ static void processCredentialsNotification(PMQTTTRANSPORT_HANDLE_DATA transportD
 }
 
 //
-// buildCsrRequestPayload builds the JSON payload for a CSR request.
-// Format: {"id":"<deviceId>","csr":"<csr>"} with optional ,"replace":"<replace>"
+// stripPemToBase64 converts a PEM-encoded string to raw base64 by removing
+// the header/footer lines (e.g. -----BEGIN CERTIFICATE REQUEST-----) and all
+// whitespace characters (newlines, carriage returns).
+// Returns a malloc'd string or NULL on failure.
 //
-static STRING_HANDLE buildCsrRequestPayload(const char* deviceId, const char* csr, const char* replace)
+static char* stripPemToBase64(const char* pem)
 {
-    STRING_HANDLE result;
-    if (replace != NULL)
+    char* result = NULL;
+    size_t pemLen = strlen(pem);
+    char* buf = (char*)malloc(pemLen + 1);
+
+    if (buf == NULL)
     {
-        result = STRING_construct_sprintf("{\"id\":\"%s\",\"csr\":\"%s\",\"replace\":\"%s\"}", deviceId, csr, replace);
+        LogError("Failed to allocate buffer for PEM stripping");
     }
     else
     {
-        result = STRING_construct_sprintf("{\"id\":\"%s\",\"csr\":\"%s\"}", deviceId, csr);
+        size_t outIdx = 0;
+        const char* p = pem;
+        bool skipLine = false;
+
+        while (*p != '\0')
+        {
+            if (*p == '-' && strncmp(p, "-----", 5) == 0)
+            {
+                // Skip the entire header/footer line
+                skipLine = true;
+            }
+
+            if (skipLine)
+            {
+                if (*p == '\n')
+                {
+                    skipLine = false;
+                }
+            }
+            else if (*p != '\n' && *p != '\r' && *p != ' ' && *p != '\t')
+            {
+                buf[outIdx++] = *p;
+            }
+
+            p++;
+        }
+
+        buf[outIdx] = '\0';
+        result = buf;
+    }
+    return result;
+}
+
+//
+// buildCsrRequestPayload builds the JSON payload for a CSR request.
+// Format: {"id":"<deviceId>","csr":"<csrBase64>"} with optional ,"replace":"<replace>"
+// The CSR is expected in PEM format and is converted to raw base64 for the payload.
+//
+static STRING_HANDLE buildCsrRequestPayload(const char* deviceId, const char* csr, const char* replace)
+{
+    STRING_HANDLE result = NULL;
+    char* csrBase64 = stripPemToBase64(csr);
+
+    if (csrBase64 == NULL)
+    {
+        LogError("Failed to strip PEM headers from CSR");
+    }
+    else
+    {
+        if (replace != NULL)
+        {
+            result = STRING_construct_sprintf("{\"id\":\"%s\",\"csr\":\"%s\",\"replace\":\"%s\"}", deviceId, csrBase64, replace);
+        }
+        else
+        {
+            result = STRING_construct_sprintf("{\"id\":\"%s\",\"csr\":\"%s\"}", deviceId, csrBase64);
+        }
+        free(csrBase64);
     }
     return result;
 }
