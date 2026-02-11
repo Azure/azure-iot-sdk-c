@@ -103,6 +103,7 @@ extern "C"
 #endif
 
 #define TEST_BUFFER_VALUE (BUFFER_HANDLE)0x11111111
+#define TEST_HSM_CLIENT_X509_HANDLE (HSM_CLIENT_HANDLE)0x11112222
 #define TEST_JSON_ROOT_VALUE (JSON_Value*)0x11111112
 #define TEST_JSON_OBJECT_VALUE (JSON_Object*)0x11111113
 #define TEST_JSON_STATUS_VALUE (JSON_Value*)0x11111114
@@ -422,6 +423,14 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
         REGISTER_GLOBAL_MOCK_RETURN(hsm_client_tpm_interface, &test_tpm_interface);
         REGISTER_GLOBAL_MOCK_RETURN(hsm_client_x509_interface, &test_x509_interface);
         REGISTER_GLOBAL_MOCK_RETURN(hsm_client_key_interface, &test_key_interface);
+
+#ifdef HSM_TYPE_X509
+        REGISTER_GLOBAL_MOCK_RETURN(hsm_client_x509_create, TEST_HSM_CLIENT_X509_HANDLE);
+        REGISTER_GLOBAL_MOCK_RETURN(hsm_client_x509_set_certificate, 0);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(hsm_client_x509_set_certificate, MU_FAILURE);
+        REGISTER_GLOBAL_MOCK_RETURN(hsm_client_x509_set_key, 0);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(hsm_client_x509_set_key, MU_FAILURE);
+#endif
     }
 
     TEST_SUITE_CLEANUP(suite_cleanup)
@@ -1386,5 +1395,163 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
         //cleanup
         prov_auth_destroy(sec_handle);
     }
+
+#ifdef HSM_TYPE_X509
+    // -----------------------------------------------------------------------
+    // prov_auth_set_certificate tests
+    // -----------------------------------------------------------------------
+
+    TEST_FUNCTION(prov_auth_set_certificate_symm_key_succeed)
+    {
+        // Create a symmetric key auth handle (not X.509).
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(prov_dev_security_get_type()).SetReturn(SECURE_DEVICE_TYPE_SYMMETRIC_KEY);
+        STRICT_EXPECTED_CALL(hsm_client_key_interface());
+        PROV_AUTH_HANDLE sec_handle = prov_auth_create();
+        ASSERT_IS_NOT_NULL(sec_handle);
+        umock_c_reset_all_calls();
+
+        //arrange
+        STRICT_EXPECTED_CALL(hsm_client_x509_create());
+        STRICT_EXPECTED_CALL(hsm_client_x509_set_certificate(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+
+        //act
+        int result = prov_auth_set_certificate(sec_handle, TEST_STRING_VALUE);
+
+        //assert
+        ASSERT_ARE_EQUAL(int, 0, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        //cleanup
+        prov_auth_destroy(sec_handle);
+    }
+
+    TEST_FUNCTION(prov_auth_set_certificate_x509_succeed)
+    {
+        // Create an X.509 auth handle.
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(prov_dev_security_get_type()).SetReturn(SECURE_DEVICE_TYPE_X509);
+        STRICT_EXPECTED_CALL(hsm_client_x509_interface()).SetReturn(&test_x509_interface);
+        PROV_AUTH_HANDLE sec_handle = prov_auth_create();
+        ASSERT_IS_NOT_NULL(sec_handle);
+        umock_c_reset_all_calls();
+
+        //arrange
+        STRICT_EXPECTED_CALL(hsm_client_x509_create());
+        STRICT_EXPECTED_CALL(hsm_client_x509_set_certificate(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+
+        //act
+        int result = prov_auth_set_certificate(sec_handle, TEST_STRING_VALUE);
+
+        //assert
+        ASSERT_ARE_EQUAL(int, 0, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        //cleanup
+        prov_auth_destroy(sec_handle);
+    }
+
+    TEST_FUNCTION(prov_auth_set_certificate_fail)
+    {
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(prov_dev_security_get_type()).SetReturn(SECURE_DEVICE_TYPE_SYMMETRIC_KEY);
+        STRICT_EXPECTED_CALL(hsm_client_key_interface());
+        PROV_AUTH_HANDLE sec_handle = prov_auth_create();
+        ASSERT_IS_NOT_NULL(sec_handle);
+        umock_c_reset_all_calls();
+
+        //arrange
+        STRICT_EXPECTED_CALL(hsm_client_x509_create());
+        STRICT_EXPECTED_CALL(hsm_client_x509_set_certificate(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(MU_FAILURE);
+
+        //act
+        int result = prov_auth_set_certificate(sec_handle, TEST_STRING_VALUE);
+
+        //assert
+        ASSERT_ARE_NOT_EQUAL(int, 0, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        //cleanup
+        prov_auth_destroy(sec_handle);
+    }
+
+    // -----------------------------------------------------------------------
+    // prov_auth_set_key tests
+    // -----------------------------------------------------------------------
+
+    TEST_FUNCTION(prov_auth_set_key_symm_key_succeed)
+    {
+        // Create a symmetric key auth handle (not X.509).
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(prov_dev_security_get_type()).SetReturn(SECURE_DEVICE_TYPE_SYMMETRIC_KEY);
+        STRICT_EXPECTED_CALL(hsm_client_key_interface());
+        PROV_AUTH_HANDLE sec_handle = prov_auth_create();
+        ASSERT_IS_NOT_NULL(sec_handle);
+        umock_c_reset_all_calls();
+
+        //arrange
+        STRICT_EXPECTED_CALL(hsm_client_x509_create());
+        STRICT_EXPECTED_CALL(hsm_client_x509_set_key(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+
+        //act
+        int result = prov_auth_set_key(sec_handle, TEST_STRING_VALUE);
+
+        //assert
+        ASSERT_ARE_EQUAL(int, 0, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        //cleanup
+        prov_auth_destroy(sec_handle);
+    }
+
+    TEST_FUNCTION(prov_auth_set_key_x509_succeed)
+    {
+        // Create an X.509 auth handle.
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(prov_dev_security_get_type()).SetReturn(SECURE_DEVICE_TYPE_X509);
+        STRICT_EXPECTED_CALL(hsm_client_x509_interface()).SetReturn(&test_x509_interface);
+        PROV_AUTH_HANDLE sec_handle = prov_auth_create();
+        ASSERT_IS_NOT_NULL(sec_handle);
+        umock_c_reset_all_calls();
+
+        //arrange
+        STRICT_EXPECTED_CALL(hsm_client_x509_create());
+        STRICT_EXPECTED_CALL(hsm_client_x509_set_key(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+
+        //act
+        int result = prov_auth_set_key(sec_handle, TEST_STRING_VALUE);
+
+        //assert
+        ASSERT_ARE_EQUAL(int, 0, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        //cleanup
+        prov_auth_destroy(sec_handle);
+    }
+
+    TEST_FUNCTION(prov_auth_set_key_fail)
+    {
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(prov_dev_security_get_type()).SetReturn(SECURE_DEVICE_TYPE_SYMMETRIC_KEY);
+        STRICT_EXPECTED_CALL(hsm_client_key_interface());
+        PROV_AUTH_HANDLE sec_handle = prov_auth_create();
+        ASSERT_IS_NOT_NULL(sec_handle);
+        umock_c_reset_all_calls();
+
+        //arrange
+        STRICT_EXPECTED_CALL(hsm_client_x509_create());
+        STRICT_EXPECTED_CALL(hsm_client_x509_set_key(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(MU_FAILURE);
+
+        //act
+        int result = prov_auth_set_key(sec_handle, TEST_STRING_VALUE);
+
+        //assert
+        ASSERT_ARE_NOT_EQUAL(int, 0, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        //cleanup
+        prov_auth_destroy(sec_handle);
+    }
+#endif // HSM_TYPE_X509
 
     END_TEST_SUITE(prov_auth_client_ut)
