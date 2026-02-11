@@ -23,12 +23,21 @@ endif()
 
 include_directories(.)
 include_directories(${PROJECT_SOURCE_DIR}/deps/parson)
+include_directories(${IOTHUB_CLIENT_INC_FOLDER})
+include_directories(${DEV_AUTH_MODULES_CLIENT_INC_FOLDER})
+include_directories(${SHARED_UTIL_INC_FOLDER})
+include_directories(${PROJECT_SOURCE_DIR}/provisioning_client/adapters)
 
 add_executable(iothub_client_sample_csr ${iothub_c_files})
 
 target_link_libraries(iothub_client_sample_csr
     iothub_client
     iothub_client_mqtt_transport
+    prov_device_ll_client
+    prov_mqtt_transport
+    prov_mqtt_ws_transport
+    prov_auth_client
+    hsm_security_client
     aziotsharedutil
     parson
     ${OPENSSL_LIBRARIES}

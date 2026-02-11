@@ -56,6 +56,8 @@ endif()
 if(${use_mqtt})
    # PnP only supports MQTT so only build the sample if MQTT is enabled.
    add_subdirectory(pnp)
-   # CSR sample requires MQTT transport.
-   add_sample_directory(iothub_client_sample_csr)
+   # CSR sample requires MQTT transport and provisioning client.
+   if(${use_prov_client})
+       add_sample_directory(iothub_client_sample_csr)
+   endif()
 endif()

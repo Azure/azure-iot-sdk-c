@@ -5,6 +5,18 @@
 CAUTION: Checking of return codes and error values shall be omitted for brevity in this sample.
 This sample is to demonstrate the certificate signing request (CSR) feature and is not a guide
 for design principles or style. Please practice sound engineering practices when writing production code.
+
+This sample demonstrates two CSR flows:
+
+Phase 1 - DPS Provisioning with CSR (SAS-based):
+    Generates an ECC P-256 key pair, creates a PKCS#10 CSR, and registers with the
+    Azure Device Provisioning Service using symmetric key (SAS) authentication.
+    DPS issues a signed certificate for the device.
+
+Phase 2 - IoT Hub Certificate Renewal (X.509-based):
+    Connects to IoT Hub using the DPS-issued certificate, generates a new key pair
+    and CSR, sends it via the IoT Hub credentials MQTT topic, and verifies the
+    renewed certificate by reconnecting.
 */
 
 #include <stdio.h>
@@ -16,6 +28,7 @@ for design principles or style. Please practice sound engineering practices when
 #include <openssl/x509.h>
 #include <openssl/evp.h>
 #include <openssl/bio.h>
+#include <openssl/hmac.h>
 
 #include "parson.h"
 
@@ -24,6 +37,11 @@ for design principles or style. Please practice sound engineering practices when
 #include "iothub_client_options.h"
 #include "iothub_message.h"
 #include "iothubtransportmqtt.h"
+
+#include "azure_prov_client/prov_device_ll_client.h"
+#include "azure_prov_client/prov_security_factory.h"
+#include "azure_prov_client/prov_transport_mqtt_client.h"
+#include "hsm_client_x509.h"
 
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
@@ -37,15 +55,35 @@ for design principles or style. Please practice sound engineering practices when
 #include "certs.h"
 #endif
 
-/* Paste in your device connection string (SAS-based) */
-static const char* connectionString = "[connectionString]";
+MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_VALUE);
+MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(PROV_DEVICE_REG_STATUS, PROV_DEVICE_REG_STATUS_VALUES);
+
+// DPS provisioning parameters (SAS-based symmetric key enrollment).
+static const char* global_prov_uri = "global.azure-devices-provisioning.net";
+static const char* id_scope = NULL;
+static const char* registration_id = NULL;
+static const char* symmetric_key = NULL;
 
 #define MAX_PATH_LEN 512
 #define CONNECT_TIMEOUT_MS 30000
 #define TELEMETRY_SEND_TIMEOUT_MS 30000
 #define CSR_RESPONSE_TIMEOUT_MS 60000
 
-// Context passed to the CSR response callback.
+// ---------------------------------------------------------------------------
+// DPS provisioning context
+// ---------------------------------------------------------------------------
+
+typedef struct DPS_CONTEXT_TAG
+{
+    bool registration_complete;
+    char* iothub_uri;
+    char* device_id;
+} DPS_CONTEXT;
+
+// ---------------------------------------------------------------------------
+// IoT Hub CSR response context
+// ---------------------------------------------------------------------------
+
 typedef struct CSR_CALLBACK_CONTEXT_TAG
 {
     bool responseReceived;
@@ -55,46 +93,6 @@ typedef struct CSR_CALLBACK_CONTEXT_TAG
 
 static volatile bool g_connected = false;
 static volatile size_t g_messages_confirmed = 0;
-
-// ---------------------------------------------------------------------------
-// Connection string parsing helper
-// ---------------------------------------------------------------------------
-
-// Extracts a value for a given key from an IoT Hub connection string.
-// Connection string format: "key1=value1;key2=value2;..."
-// Returns a malloc'd string or NULL if the key is not found.
-static char* connection_string_get_value(const char* connStr, const char* key)
-{
-    char* result = NULL;
-    size_t keyLen = strlen(key);
-    const char* p = connStr;
-
-    while (p != NULL && *p != '\0')
-    {
-        if (strncmp(p, key, keyLen) == 0 && p[keyLen] == '=')
-        {
-            const char* valueStart = p + keyLen + 1;
-            const char* valueEnd = strchr(valueStart, ';');
-            size_t valueLen = (valueEnd != NULL) ? (size_t)(valueEnd - valueStart) : strlen(valueStart);
-
-            result = (char*)malloc(valueLen + 1);
-            if (result != NULL)
-            {
-                memcpy(result, valueStart, valueLen);
-                result[valueLen] = '\0';
-            }
-            break;
-        }
-
-        p = strchr(p, ';');
-        if (p != NULL)
-        {
-            p++;
-        }
-    }
-
-    return result;
-}
 
 // ---------------------------------------------------------------------------
 // File I/O helper
@@ -123,6 +121,101 @@ static int write_string_to_file(const char* filePath, const char* content)
             result = 0;
         }
         fclose(fp);
+    }
+    return result;
+}
+
+// Saves a key/cert pair to disk. Files are named {dir}/{deviceId}{suffix}.key.pem
+// and {dir}/{deviceId}{suffix}.cert.pem. Returns 0 on success, 1 on failure.
+static int save_credentials(const char* dir, const char* deviceId, const char* suffix,
+                            const char* keyPem, const char* certPem)
+{
+    char keyPath[MAX_PATH_LEN];
+    char certPath[MAX_PATH_LEN];
+
+    snprintf(keyPath, sizeof(keyPath), "%s/%s%s.key.pem", dir, deviceId, suffix);
+    snprintf(certPath, sizeof(certPath), "%s/%s%s.cert.pem", dir, deviceId, suffix);
+
+    if (write_string_to_file(keyPath, keyPem) != 0 ||
+        write_string_to_file(certPath, certPem) != 0)
+    {
+        LogError("Failed to save credentials to disk");
+        return 1;
+    }
+
+    (void)printf("Private key saved to:  %s\r\n", keyPath);
+    (void)printf("Certificate saved to:  %s\r\n", certPath);
+    return 0;
+}
+
+// ---------------------------------------------------------------------------
+// Symmetric key derivation for DPS group enrollment
+// ---------------------------------------------------------------------------
+
+// Derives a device-specific symmetric key from a group enrollment key.
+// derived_key = base64(HMAC-SHA256(base64_decode(group_key), registration_id))
+// Returns a malloc'd base64 string or NULL on failure.
+static char* derive_device_key(const char* groupKey, const char* regId)
+{
+    char* result = NULL;
+    BUFFER_HANDLE decodedKey = Azure_Base64_Decode(groupKey);
+
+    if (decodedKey == NULL)
+    {
+        LogError("Failed to base64-decode group enrollment key");
+    }
+    else
+    {
+        unsigned char hmacResult[EVP_MAX_MD_SIZE];
+        unsigned int hmacLen = 0;
+
+        if (HMAC(EVP_sha256(),
+                 BUFFER_u_char(decodedKey), (int)BUFFER_length(decodedKey),
+                 (const unsigned char*)regId, strlen(regId),
+                 hmacResult, &hmacLen) == NULL)
+        {
+            LogError("HMAC-SHA256 failed");
+        }
+        else
+        {
+            STRING_HANDLE encoded = Azure_Base64_Encode_Bytes(hmacResult, hmacLen);
+            if (encoded == NULL)
+            {
+                LogError("Failed to base64-encode derived key");
+            }
+            else
+            {
+                if (mallocAndStrcpy_s(&result, STRING_c_str(encoded)) != 0)
+                {
+                    result = NULL;
+                }
+                STRING_delete(encoded);
+            }
+        }
+        BUFFER_delete(decodedKey);
+    }
+    return result;
+}
+
+// ---------------------------------------------------------------------------
+// OpenSSL helpers
+// ---------------------------------------------------------------------------
+
+// Reads the contents of a memory BIO into a malloc'd null-terminated string.
+// Returns a malloc'd string or NULL on failure.
+static char* bio_to_string(BIO* bio)
+{
+    char* result = NULL;
+    char* bioData = NULL;
+    long bioLen = BIO_get_mem_data(bio, &bioData);
+
+    if (bioLen > 0 && bioData != NULL)
+    {
+        result = (char*)calloc(1, (size_t)bioLen + 1);
+        if (result != NULL)
+        {
+            memcpy(result, bioData, (size_t)bioLen);
+        }
     }
     return result;
 }
@@ -163,7 +256,7 @@ static EVP_PKEY* generate_ecc_key_pair(void)
     return pkey;
 }
 
-// Converts an EVP_PKEY to a PEM-encoded private key string.
+// Converts an EVP_PKEY to a PEM-encoded private key string (PKCS#8 format).
 // Returns a malloc'd string or NULL on failure.
 static char* pkey_to_pem_string(EVP_PKEY* pkey)
 {
@@ -178,17 +271,7 @@ static char* pkey_to_pem_string(EVP_PKEY* pkey)
     {
         if (PEM_write_bio_PrivateKey(bio, pkey, NULL, NULL, 0, NULL, NULL) == 1)
         {
-            char* bioData = NULL;
-            long bioLen = BIO_get_mem_data(bio, &bioData);
-
-            if (bioLen > 0 && bioData != NULL)
-            {
-                result = (char*)calloc(1, (size_t)bioLen + 1);
-                if (result != NULL)
-                {
-                    memcpy(result, bioData, (size_t)bioLen);
-                }
-            }
+            result = bio_to_string(bio);
         }
         BIO_free(bio);
     }
@@ -197,7 +280,7 @@ static char* pkey_to_pem_string(EVP_PKEY* pkey)
 }
 
 // Generates a PEM-encoded PKCS#10 CSR. Returns a malloc'd string or NULL on failure.
-static char* generate_csr(EVP_PKEY* pkey, const char* commonName)
+static char* generate_csr_pem(EVP_PKEY* pkey, const char* commonName)
 {
     char* result = NULL;
     X509_REQ* req = X509_REQ_new();
@@ -248,17 +331,7 @@ static char* generate_csr(EVP_PKEY* pkey, const char* commonName)
             {
                 if (PEM_write_bio_X509_REQ(csrBio, req) == 1)
                 {
-                    char* bioData = NULL;
-                    long bioLen = BIO_get_mem_data(csrBio, &bioData);
-
-                    if (bioLen > 0 && bioData != NULL)
-                    {
-                        result = (char*)calloc(1, (size_t)bioLen + 1);
-                        if (result != NULL)
-                        {
-                            memcpy(result, bioData, (size_t)bioLen);
-                        }
-                    }
+                    result = bio_to_string(csrBio);
                 }
                 BIO_free(csrBio);
             }
@@ -270,8 +343,55 @@ static char* generate_csr(EVP_PKEY* pkey, const char* commonName)
     return result;
 }
 
+// Strips PEM headers/footers and whitespace to produce raw base64
+// (used for DPS CSR option which expects base64-encoded DER).
+// Returns a malloc'd string or NULL on failure.
+static char* pem_to_base64(const char* pem)
+{
+    char* result = NULL;
+    size_t pemLen = strlen(pem);
+    char* buf = (char*)malloc(pemLen + 1);
+
+    if (buf == NULL)
+    {
+        LogError("Failed to allocate buffer");
+    }
+    else
+    {
+        size_t outIdx = 0;
+        const char* p = pem;
+        bool skipLine = false;
+
+        while (*p != '\0')
+        {
+            if (*p == '-' && strncmp(p, "-----", 5) == 0)
+            {
+                skipLine = true;
+            }
+
+            if (skipLine)
+            {
+                if (*p == '\n')
+                {
+                    skipLine = false;
+                }
+            }
+            else if (*p != '\n' && *p != '\r' && *p != ' ' && *p != '\t')
+            {
+                buf[outIdx++] = *p;
+            }
+
+            p++;
+        }
+
+        buf[outIdx] = '\0';
+        result = buf;
+    }
+    return result;
+}
+
 // ---------------------------------------------------------------------------
-// Certificate response parsing
+// Certificate response parsing (for IoT Hub CSR renewal)
 // ---------------------------------------------------------------------------
 
 // Converts a base64-encoded DER certificate to a PEM string.
@@ -304,17 +424,7 @@ static char* base64_der_cert_to_pem(const char* base64Der)
             {
                 if (PEM_write_bio_X509(pemBio, cert) == 1)
                 {
-                    char* bioData = NULL;
-                    long bioLen = BIO_get_mem_data(pemBio, &bioData);
-
-                    if (bioLen > 0 && bioData != NULL)
-                    {
-                        result = (char*)calloc(1, (size_t)bioLen + 1);
-                        if (result != NULL)
-                        {
-                            memcpy(result, bioData, (size_t)bioLen);
-                        }
-                    }
+                    result = bio_to_string(pemBio);
                 }
                 BIO_free(pemBio);
             }
@@ -325,7 +435,7 @@ static char* base64_der_cert_to_pem(const char* base64Der)
     return result;
 }
 
-// Parses the CSR response JSON, extracts the certificates array,
+// Parses the IoT Hub CSR response JSON, extracts the certificates array,
 // decodes each base64 DER cert to PEM, and returns the concatenated chain.
 // Returns a malloc'd string or NULL on failure.
 static char* parse_certificate_response(const char* responseJson)
@@ -394,6 +504,33 @@ static char* parse_certificate_response(const char* responseJson)
         json_value_free(rootValue);
     }
     return result;
+}
+
+// ---------------------------------------------------------------------------
+// DPS callbacks
+// ---------------------------------------------------------------------------
+
+static void dps_registration_status_callback(PROV_DEVICE_REG_STATUS reg_status, void* userContext)
+{
+    (void)userContext;
+    (void)printf("DPS provisioning status: %s\r\n", MU_ENUM_TO_STRING(PROV_DEVICE_REG_STATUS, reg_status));
+}
+
+static void dps_register_device_callback(PROV_DEVICE_RESULT register_result, const char* iothub_uri, const char* device_id, void* userContext)
+{
+    DPS_CONTEXT* ctx = (DPS_CONTEXT*)userContext;
+    ctx->registration_complete = true;
+
+    if (register_result == PROV_DEVICE_RESULT_OK)
+    {
+        (void)printf("DPS registration succeeded. Hub: %s, Device: %s\r\n", iothub_uri, device_id);
+        (void)mallocAndStrcpy_s(&ctx->iothub_uri, iothub_uri);
+        (void)mallocAndStrcpy_s(&ctx->device_id, device_id);
+    }
+    else
+    {
+        (void)printf("DPS registration failed: %s\r\n", MU_ENUM_TO_STRING(PROV_DEVICE_RESULT, register_result));
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -506,8 +643,11 @@ static int send_test_telemetry(IOTHUB_DEVICE_CLIENT_HANDLE deviceHandle, const c
     return result;
 }
 
-static IOTHUB_DEVICE_CLIENT_HANDLE create_client(const char* connStr)
+static IOTHUB_DEVICE_CLIENT_HANDLE create_x509_client(const char* hubUri, const char* deviceId, const char* certPem, const char* keyPem)
 {
+    char connStr[MAX_PATH_LEN];
+    snprintf(connStr, sizeof(connStr), "HostName=%s;DeviceId=%s;x509=true", hubUri, deviceId);
+
     IOTHUB_DEVICE_CLIENT_HANDLE handle = IoTHubDeviceClient_CreateFromConnectionString(connStr, MQTT_Protocol);
 
     if (handle != NULL)
@@ -520,6 +660,9 @@ static IOTHUB_DEVICE_CLIENT_HANDLE create_client(const char* connStr)
 
         bool urlEncodeOn = true;
         (void)IoTHubDeviceClient_SetOption(handle, OPTION_AUTO_URL_ENCODE_DECODE, &urlEncodeOn);
+
+        (void)IoTHubDeviceClient_SetOption(handle, OPTION_X509_CERT, certPem);
+        (void)IoTHubDeviceClient_SetOption(handle, OPTION_X509_PRIVATE_KEY, keyPem);
 
         (void)IoTHubDeviceClient_SetConnectionStatusCallback(handle, connection_status_callback, NULL);
     }
@@ -534,99 +677,250 @@ int main(int argc, char* argv[])
 {
     int exitCode = 0;
     const char* outputDir = ".";
-    char* hostName = NULL;
-    char* deviceId = NULL;
+    EVP_PKEY* pkey = NULL;
+    EVP_PKEY* renewPkey = NULL;
     char* privateKeyPem = NULL;
     char* csrPem = NULL;
-    char* certChainPem = NULL;
-    EVP_PKEY* pkey = NULL;
+    char* csrBase64 = NULL;
+    char* dpsCertPem = NULL;
+    char* renewKeyPem = NULL;
+    char* renewCsrPem = NULL;
+    char* renewedCertPem = NULL;
+    char* derivedKey = NULL;
     IOTHUB_DEVICE_CLIENT_HANDLE deviceHandle = NULL;
+    DPS_CONTEXT dpsCtx;
 
-    // Allow overriding output directory from command line.
-    if (argc > 1)
+    memset(&dpsCtx, 0, sizeof(dpsCtx));
+
+    // Parse command line arguments.
+    if (argc < 4)
     {
-        outputDir = argv[1];
+        (void)printf("Usage: %s <id_scope> <device_id> <enrollment_group_key> [output_dir] [dps_uri]\r\n", argv[0]);
+        return 1;
     }
 
-    (void)printf("IoT Hub CSR Sample\r\n");
-    (void)printf("==================\r\n\r\n");
+    id_scope = argv[1];
+    registration_id = argv[2];
 
-    // Step 1: Extract HostName and DeviceId from connection string.
-    hostName = connection_string_get_value(connectionString, "HostName");
-    deviceId = connection_string_get_value(connectionString, "DeviceId");
-
-    if (hostName == NULL || deviceId == NULL)
+    if (argc > 4)
     {
-        LogError("Failed to parse HostName or DeviceId from connection string");
-        exitCode = 1;
-        goto cleanup;
+        outputDir = argv[4];
     }
 
-    (void)printf("Host:     %s\r\n", hostName);
-    (void)printf("Device:   %s\r\n", deviceId);
-    (void)printf("Output:   %s\r\n\r\n", outputDir);
-
-    // Initialize SDK.
-    if (IoTHub_Init() != 0)
+    if (argc > 5)
     {
-        LogError("IoTHub_Init failed");
-        exitCode = 1;
-        goto cleanup;
+        global_prov_uri = argv[5];
     }
 
-    // Step 2: Connect to IoT Hub with SAS authentication.
-    (void)printf("Connecting with SAS authentication...\r\n");
-    deviceHandle = create_client(connectionString);
-    if (deviceHandle == NULL)
+    // Derive device-specific symmetric key from enrollment group key.
+    derivedKey = derive_device_key(argv[3], registration_id);
+    if (derivedKey == NULL)
     {
-        LogError("Failed to create IoT Hub client. Check your connection string.");
-        exitCode = 1;
-        goto cleanup_sdk;
+        LogError("Failed to derive device key");
+        return 1;
     }
+    symmetric_key = derivedKey;
 
-    if (!wait_for_connection(CONNECT_TIMEOUT_MS))
-    {
-        LogError("Timed out waiting for connection");
-        exitCode = 1;
-        goto cleanup_client;
-    }
+    (void)printf("IoT Hub CSR Sample (DPS + Renewal)\r\n");
+    (void)printf("==================================\r\n\r\n");
+    (void)printf("DPS URI:          %s\r\n", global_prov_uri);
+    (void)printf("ID Scope:         %s\r\n", id_scope);
+    (void)printf("Device ID:        %s\r\n", registration_id);
+    (void)printf("Output Dir:       %s\r\n\r\n", outputDir);
 
-    // Step 3: Send telemetry to verify SAS connectivity.
-    if (send_test_telemetry(deviceHandle, "pre-csr") != 0)
-    {
-        exitCode = 1;
-        goto cleanup_client;
-    }
+    // ======================================================================
+    // Phase 1: DPS Provisioning with SAS + CSR
+    // ======================================================================
 
-    // Step 4: Generate ECC key pair and CSR.
-    (void)printf("\r\nGenerating ECC key pair and CSR...\r\n");
+    // Step 1: Generate ECC P-256 key pair and CSR.
+    (void)printf("Generating ECC key pair and CSR for DPS provisioning...\r\n");
 
     pkey = generate_ecc_key_pair();
     if (pkey == NULL)
     {
         LogError("Failed to generate key pair");
         exitCode = 1;
-        goto cleanup_client;
+        goto cleanup;
     }
 
-    csrPem = generate_csr(pkey, deviceId);
-    if (csrPem == NULL)
+    privateKeyPem = pkey_to_pem_string(pkey);
+    csrPem = generate_csr_pem(pkey, registration_id);
+    csrBase64 = (csrPem != NULL) ? pem_to_base64(csrPem) : NULL;
+
+    if (privateKeyPem == NULL || csrPem == NULL || csrBase64 == NULL)
     {
-        LogError("Failed to generate CSR");
+        LogError("Failed to generate CSR or private key");
+        exitCode = 1;
+        goto cleanup;
+    }
+
+    (void)printf("CSR generated successfully.\r\n\r\n");
+
+    // Step 2: Initialize DPS security with symmetric key.
+    if (prov_dev_set_symmetric_key_info(registration_id, symmetric_key) != 0)
+    {
+        LogError("prov_dev_set_symmetric_key_info failed");
+        exitCode = 1;
+        goto cleanup;
+    }
+
+    if (prov_dev_security_init(SECURE_DEVICE_TYPE_SYMMETRIC_KEY) != 0)
+    {
+        LogError("prov_dev_security_init failed");
+        exitCode = 1;
+        goto cleanup;
+    }
+
+    if (IoTHub_Init() != 0)
+    {
+        LogError("IoTHub_Init failed");
+        exitCode = 1;
+        goto cleanup_security;
+    }
+
+    // Step 3: Create DPS client and set CSR options.
+    {
+        PROV_DEVICE_LL_HANDLE provHandle = Prov_Device_LL_Create(global_prov_uri, id_scope, Prov_Device_MQTT_Protocol);
+
+        if (provHandle == NULL)
+        {
+            LogError("Prov_Device_LL_Create failed");
+            exitCode = 1;
+            goto cleanup_sdk;
+        }
+
+        bool traceOn = true;
+        (void)Prov_Device_LL_SetOption(provHandle, PROV_OPTION_LOG_TRACE, &traceOn);
+
+#ifdef SET_TRUSTED_CERT_IN_SAMPLES
+        (void)Prov_Device_LL_SetOption(provHandle, OPTION_TRUSTED_CERT, certificates);
+#endif
+
+        // Set the CSR (base64-encoded DER) and its corresponding private key (PEM).
+        if (Prov_Device_LL_SetOption(provHandle, PROV_CERTIFICATE_SIGNING_REQUEST, csrBase64) != PROV_DEVICE_RESULT_OK)
+        {
+            LogError("Failed to set PROV_CERTIFICATE_SIGNING_REQUEST");
+            Prov_Device_LL_Destroy(provHandle);
+            exitCode = 1;
+            goto cleanup_sdk;
+        }
+
+        if (Prov_Device_LL_SetOption(provHandle, PROV_CERTIFICATE_SIGNING_REQUEST_PRIVATE_KEY, privateKeyPem) != PROV_DEVICE_RESULT_OK)
+        {
+            LogError("Failed to set PROV_CERTIFICATE_SIGNING_REQUEST_PRIVATE_KEY");
+            Prov_Device_LL_Destroy(provHandle);
+            exitCode = 1;
+            goto cleanup_sdk;
+        }
+
+        // Step 4: Register device with DPS.
+        (void)printf("Registering device with DPS (SAS + CSR)...\r\n");
+
+        if (Prov_Device_LL_Register_Device(provHandle, dps_register_device_callback, &dpsCtx, dps_registration_status_callback, &dpsCtx) != PROV_DEVICE_RESULT_OK)
+        {
+            LogError("Prov_Device_LL_Register_Device failed");
+            Prov_Device_LL_Destroy(provHandle);
+            exitCode = 1;
+            goto cleanup_sdk;
+        }
+
+        while (!dpsCtx.registration_complete)
+        {
+            Prov_Device_LL_DoWork(provHandle);
+            ThreadAPI_Sleep(10);
+        }
+
+        Prov_Device_LL_Destroy(provHandle);
+    }
+
+    if (dpsCtx.iothub_uri == NULL || dpsCtx.device_id == NULL)
+    {
+        LogError("DPS registration failed");
+        exitCode = 1;
+        goto cleanup_sdk;
+    }
+
+    // Step 5: Retrieve the DPS-issued certificate from the HSM singleton.
+    {
+        HSM_CLIENT_HANDLE hsmHandle = hsm_client_x509_create();
+        dpsCertPem = hsm_client_x509_get_certificate(hsmHandle);
+    }
+
+    if (dpsCertPem == NULL)
+    {
+        LogError("Failed to retrieve DPS-issued certificate from HSM");
+        exitCode = 1;
+        goto cleanup_sdk;
+    }
+
+    (void)printf("\r\nDPS-issued certificate retrieved.\r\n");
+
+    // Save initial credentials to disk.
+    if (save_credentials(outputDir, dpsCtx.device_id, "", privateKeyPem, dpsCertPem) != 0)
+    {
+        exitCode = 1;
+        goto cleanup_sdk;
+    }
+
+    // ======================================================================
+    // Phase 2: IoT Hub connection with X.509 + Certificate Renewal via CSR
+    // ======================================================================
+
+    // Step 6: Connect to IoT Hub with the DPS-issued X.509 certificate.
+    (void)printf("\r\nConnecting to IoT Hub with DPS-issued certificate...\r\n");
+
+    deviceHandle = create_x509_client(dpsCtx.iothub_uri, dpsCtx.device_id, dpsCertPem, privateKeyPem);
+    if (deviceHandle == NULL)
+    {
+        LogError("Failed to create IoT Hub client");
+        exitCode = 1;
+        goto cleanup_sdk;
+    }
+
+    if (!wait_for_connection(CONNECT_TIMEOUT_MS))
+    {
+        LogError("Timed out waiting for IoT Hub connection");
         exitCode = 1;
         goto cleanup_client;
     }
-    (void)printf("CSR generated successfully.\r\n");
 
-    // Step 5: Send CSR to IoT Hub.
+    // Step 7: Send telemetry to verify X.509 connectivity.
+    if (send_test_telemetry(deviceHandle, "pre-renewal") != 0)
+    {
+        exitCode = 1;
+        goto cleanup_client;
+    }
+
+    // Step 8: Generate new key pair and CSR for certificate renewal.
+    (void)printf("\r\nGenerating new key pair and CSR for renewal...\r\n");
+
+    renewPkey = generate_ecc_key_pair();
+    if (renewPkey == NULL)
+    {
+        LogError("Failed to generate renewal key pair");
+        exitCode = 1;
+        goto cleanup_client;
+    }
+
+    renewKeyPem = pkey_to_pem_string(renewPkey);
+    renewCsrPem = generate_csr_pem(renewPkey, dpsCtx.device_id);
+
+    if (renewKeyPem == NULL || renewCsrPem == NULL)
+    {
+        LogError("Failed to generate renewal CSR");
+        exitCode = 1;
+        goto cleanup_client;
+    }
+
+    (void)printf("Renewal CSR generated. Sending to IoT Hub...\r\n");
+
+    // Step 9: Send CSR to IoT Hub.
     {
         CSR_CALLBACK_CONTEXT csrCtx;
         memset(&csrCtx, 0, sizeof(csrCtx));
 
-        (void)printf("Sending CSR to IoT Hub...\r\n");
-
         if (IoTHubDeviceClient_SendCertificateSigningRequestAsync(
-                deviceHandle, csrPem, NULL, on_csr_response, &csrCtx) != IOTHUB_CLIENT_OK)
+                deviceHandle, renewCsrPem, NULL, on_csr_response, &csrCtx) != IOTHUB_CLIENT_OK)
         {
             LogError("IoTHubDeviceClient_SendCertificateSigningRequestAsync failed");
             exitCode = 1;
@@ -649,11 +943,11 @@ int main(int argc, char* argv[])
             goto cleanup_client;
         }
 
-        // Step 6: Parse the certificate response.
-        certChainPem = parse_certificate_response(csrCtx.responsePayload);
+        // Step 10: Parse the certificate response.
+        renewedCertPem = parse_certificate_response(csrCtx.responsePayload);
         free(csrCtx.responsePayload);
 
-        if (certChainPem == NULL)
+        if (renewedCertPem == NULL)
         {
             LogError("Failed to parse certificate response");
             exitCode = 1;
@@ -661,76 +955,42 @@ int main(int argc, char* argv[])
         }
     }
 
-    // Save generated private key and certificate to files.
-    privateKeyPem = pkey_to_pem_string(pkey);
-    if (privateKeyPem == NULL)
+    // Save renewed credentials to disk.
+    if (save_credentials(outputDir, dpsCtx.device_id, "_renewed", renewKeyPem, renewedCertPem) != 0)
     {
-        LogError("Failed to convert private key to PEM");
         exitCode = 1;
         goto cleanup_client;
     }
 
-    {
-        char keyPath[MAX_PATH_LEN];
-        char certPath[MAX_PATH_LEN];
-
-        snprintf(keyPath, sizeof(keyPath), "%s/%s.key.pem", outputDir, deviceId);
-        snprintf(certPath, sizeof(certPath), "%s/%s.cert.pem", outputDir, deviceId);
-
-        if (write_string_to_file(keyPath, privateKeyPem) != 0 ||
-            write_string_to_file(certPath, certChainPem) != 0)
-        {
-            LogError("Failed to save credentials to disk");
-            exitCode = 1;
-            goto cleanup_client;
-        }
-
-        (void)printf("Private key saved to:  %s\r\n", keyPath);
-        (void)printf("Certificate saved to:  %s\r\n", certPath);
-    }
-
-    // Step 7: Reconnect with X.509 certificate to verify it works.
-    (void)printf("\r\nReconnecting with X.509 certificate...\r\n");
+    // Step 11: Reconnect with renewed certificate to verify it works.
+    (void)printf("\r\nReconnecting with renewed certificate...\r\n");
     IoTHubDeviceClient_Destroy(deviceHandle);
     deviceHandle = NULL;
     g_connected = false;
 
+    deviceHandle = create_x509_client(dpsCtx.iothub_uri, dpsCtx.device_id, renewedCertPem, renewKeyPem);
+    if (deviceHandle == NULL)
     {
-        char x509ConnStr[MAX_PATH_LEN];
-        snprintf(x509ConnStr, sizeof(x509ConnStr), "HostName=%s;DeviceId=%s;x509=true", hostName, deviceId);
-
-        deviceHandle = create_client(x509ConnStr);
-        if (deviceHandle == NULL)
-        {
-            LogError("Failed to create X.509 client");
-            exitCode = 1;
-            goto cleanup_sdk;
-        }
-
-        if (IoTHubDeviceClient_SetOption(deviceHandle, OPTION_X509_CERT, certChainPem) != IOTHUB_CLIENT_OK ||
-            IoTHubDeviceClient_SetOption(deviceHandle, OPTION_X509_PRIVATE_KEY, privateKeyPem) != IOTHUB_CLIENT_OK)
-        {
-            LogError("Failed to set X.509 options");
-            exitCode = 1;
-            goto cleanup_client;
-        }
-
-        if (!wait_for_connection(CONNECT_TIMEOUT_MS))
-        {
-            LogError("Timed out waiting for X.509 connection");
-            exitCode = 1;
-            goto cleanup_client;
-        }
-
-        // Step 8: Send telemetry to verify X.509 connectivity.
-        if (send_test_telemetry(deviceHandle, "post-csr") != 0)
-        {
-            exitCode = 1;
-            goto cleanup_client;
-        }
+        LogError("Failed to create IoT Hub client with renewed cert");
+        exitCode = 1;
+        goto cleanup_sdk;
     }
 
-    (void)printf("\r\n==================\r\n");
+    if (!wait_for_connection(CONNECT_TIMEOUT_MS))
+    {
+        LogError("Timed out waiting for connection with renewed cert");
+        exitCode = 1;
+        goto cleanup_client;
+    }
+
+    // Step 12: Send telemetry to verify renewed certificate works.
+    if (send_test_telemetry(deviceHandle, "post-renewal") != 0)
+    {
+        exitCode = 1;
+        goto cleanup_client;
+    }
+
+    (void)printf("\r\n==================================\r\n");
     (void)printf("CSR sample completed successfully!\r\n");
 
 cleanup_client:
@@ -742,13 +1002,22 @@ cleanup_client:
 cleanup_sdk:
     IoTHub_Deinit();
 
+cleanup_security:
+    prov_dev_security_deinit();
+
 cleanup:
     if (pkey != NULL) EVP_PKEY_free(pkey);
-    free(hostName);
-    free(deviceId);
+    if (renewPkey != NULL) EVP_PKEY_free(renewPkey);
     free(privateKeyPem);
     free(csrPem);
-    free(certChainPem);
+    free(csrBase64);
+    free(dpsCertPem);
+    free(renewKeyPem);
+    free(renewCsrPem);
+    free(renewedCertPem);
+    free(derivedKey);
+    free(dpsCtx.iothub_uri);
+    free(dpsCtx.device_id);
 
     return exitCode;
 }
