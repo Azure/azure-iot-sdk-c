@@ -127,11 +127,6 @@ static IOTHUB_CLIENT_RESULT IoTHubTransportMqtt_WS_GetTwinAsync(IOTHUB_DEVICE_HA
     return IoTHubTransport_MQTT_Common_GetTwinAsync(handle, completionCallback, callbackContext);
 }
 
-static IOTHUB_CLIENT_RESULT IoTHubTransportMqtt_WS_SendCertificateSigningRequest(IOTHUB_DEVICE_HANDLE handle, const char* csr, const char* replace, IOTHUB_CLIENT_CERTIFICATE_SIGNING_RESPONSE_CALLBACK cb, void* ctx)
-{
-    return IoTHubTransport_MQTT_Common_SendCertificateSigningRequestAsync(handle, csr, replace, cb, ctx);
-}
-
 static IOTHUB_PROCESS_ITEM_RESULT IoTHubTransportMqtt_WS_ProcessItem(TRANSPORT_LL_HANDLE handle, IOTHUB_IDENTITY_TYPE item_type, IOTHUB_IDENTITY_INFO* iothub_item)
 {
     return IoTHubTransport_MQTT_Common_ProcessItem(handle, item_type, iothub_item);
@@ -223,7 +218,6 @@ static TRANSPORT_PROVIDER thisTransportProvider_WebSocketsOverTls = {
     IoTHubTransportMqtt_WS_Unsubscribe_InputQueue,
     IotHubTransportMqtt_WS_SetCallbackContext,
     IoTHubTransportMqtt_WS_GetTwinAsync,
-    IoTHubTransportMqtt_WS_SendCertificateSigningRequest,
     IotHubTransportMqtt_WS_GetSupportedPlatformInfo
 };
 

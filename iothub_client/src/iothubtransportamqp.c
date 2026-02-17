@@ -81,13 +81,6 @@ static IOTHUB_CLIENT_RESULT IoTHubTransportAMQP_GetTwinAsync(IOTHUB_DEVICE_HANDL
     return IoTHubTransport_AMQP_Common_GetTwinAsync(handle, completionCallback, callbackContext);
 }
 
-static IOTHUB_CLIENT_RESULT IoTHubTransportAMQP_SendCertificateSigningRequest(IOTHUB_DEVICE_HANDLE handle, const char* csr, const char* replace, IOTHUB_CLIENT_CERTIFICATE_SIGNING_RESPONSE_CALLBACK cb, void* ctx)
-{
-    (void)handle; (void)csr; (void)replace; (void)cb; (void)ctx;
-    LogError("SendCertificateSigningRequest is not supported by this transport. Use MQTT.");
-    return IOTHUB_CLIENT_ERROR;
-}
-
 static int IoTHubTransportAMQP_Subscribe_DeviceMethod(IOTHUB_DEVICE_HANDLE handle)
 {
     return IoTHubTransport_AMQP_Common_Subscribe_DeviceMethod(handle);
@@ -190,7 +183,6 @@ static TRANSPORT_PROVIDER thisTransportProvider =
     IotHubTransportAMQP_Unsubscribe_InputQueue,     /*pfIoTHubTransport_Unsubscribe_InputQueue IoTHubTransport_Unsubscribe_InputQueue; */
     IoTHubTransportAMQP_SetCallbackContext,         /*pfIoTHubTransport_SetTransportCallbacks IoTHubTransport_SetTransportCallbacks; */
     IoTHubTransportAMQP_GetTwinAsync,               /*pfIoTHubTransport_GetTwinAsync IoTHubTransport_GetTwinAsync;*/
-    IoTHubTransportAMQP_SendCertificateSigningRequest, /*pfIoTHubTransport_SendCertificateSigningRequest IoTHubTransport_SendCertificateSigningRequest;*/
     IoTHubTransportAMQP_GetSupportedPlatformInfo      /*pfIoTHubTransport_GetSupportedPlatformInfo IoTHubTransport_GetSupportedPlatformInfo;*/
 };
 

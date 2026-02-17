@@ -1122,13 +1122,6 @@ static IOTHUB_CLIENT_RESULT IoTHubTransportHttp_GetTwinAsync(IOTHUB_DEVICE_HANDL
     return IOTHUB_CLIENT_ERROR;
 }
 
-static IOTHUB_CLIENT_RESULT IoTHubTransportHttp_SendCertificateSigningRequest(IOTHUB_DEVICE_HANDLE handle, const char* csr, const char* replace, IOTHUB_CLIENT_CERTIFICATE_SIGNING_RESPONSE_CALLBACK cb, void* ctx)
-{
-    (void)handle; (void)csr; (void)replace; (void)cb; (void)ctx;
-    LogError("SendCertificateSigningRequest is not supported by this transport. Use MQTT.");
-    return IOTHUB_CLIENT_ERROR;
-}
-
 static int IoTHubTransportHttp_Subscribe_DeviceMethod(IOTHUB_DEVICE_HANDLE handle)
 {
     (void)handle;
@@ -2090,9 +2083,17 @@ static void DoMessages(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERD
 static IOTHUB_PROCESS_ITEM_RESULT IoTHubTransportHttp_ProcessItem(TRANSPORT_LL_HANDLE handle, IOTHUB_IDENTITY_TYPE item_type, IOTHUB_IDENTITY_INFO* iothub_item)
 {
     (void)handle;
-    (void)item_type;
     (void)iothub_item;
-    LogError("Currently Not Supported.");
+
+    if (item_type == IOTHUB_TYPE_CREDENTIALS)
+    {
+        LogError("SendCertificateSigningRequest is not supported by this transport. Use MQTT.");
+    }
+    else
+    {
+        LogError("IoTHubTransportHttp_ProcessItem: item type not supported (%d)", item_type);
+    }
+
     return IOTHUB_PROCESS_ERROR;
 }
 
@@ -2303,7 +2304,6 @@ static TRANSPORT_PROVIDER thisTransportProvider =
     IotHubTransportHttp_Unsubscribe_InputQueue,     /*pfIoTHubTransport_Unsubscribe_InputQueue IoTHubTransport_Unsubscribe_InputQueue; */
     IoTHubTransportHttp_SetCallbackContext,         /*pfIoTHubTransport_SetTransportCallbacks IoTHubTransport_SetTransportCallbacks; */
     IoTHubTransportHttp_GetTwinAsync,               /*pfIoTHubTransport_GetTwinAsync IoTHubTransport_GetTwinAsync;*/
-    IoTHubTransportHttp_SendCertificateSigningRequest, /*pfIoTHubTransport_SendCertificateSigningRequest IoTHubTransport_SendCertificateSigningRequest;*/
     IoTHubTransportHttp_GetSupportedPlatformInfo      /*pfIoTHubTransport_GetSupportedPlatformInfo IoTHubTransport_GetSupportedPlatformInfo;*/
 };
 
