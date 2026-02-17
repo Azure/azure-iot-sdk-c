@@ -892,6 +892,12 @@ int main(int argc, char* argv[])
     }
 
     // Step 8: Generate new key pair and CSR for certificate renewal.
+    // Configure the CSR timeout to match our application-level wait.
+    {
+        int csr_timeout_secs = CSR_RESPONSE_TIMEOUT_MS / 1000;
+        (void)IoTHubDeviceClient_SetOption(deviceHandle, OPTION_CSR_TIMEOUT_SECS, &csr_timeout_secs);
+    }
+
     (void)printf("\r\nGenerating new key pair and CSR for renewal...\r\n");
 
     renewPkey = generate_ecc_key_pair();
