@@ -62,6 +62,7 @@
 
 #define ON_DEMAND_GET_TWIN_REQUEST_TIMEOUT_SECS    60
 #define TWIN_REPORT_UPDATE_TIMEOUT_SECS           (60*5)
+#define DEFAULT_CSR_TIMEOUT_SECS                  (60*3)
 #define MESSAGE_REPUBLISH_TIMEOUT_SECS             3
 
 static const char TOPIC_DEVICE_TWIN_PREFIX[] = "$iothub/twin";
@@ -315,6 +316,7 @@ typedef struct MQTTTRANSPORT_HANDLE_DATA_TAG
     MQTT_CSR_ITEM* pending_csr_request;
     bool credentials_sub_recv;
     uint16_t credentials_resp_packet_id;
+    uint16_t csr_timeout_secs;
 } MQTTTRANSPORT_HANDLE_DATA, *PMQTTTRANSPORT_HANDLE_DATA;
 
 typedef struct MQTT_DEVICE_TWIN_ITEM_TAG
@@ -2579,6 +2581,11 @@ static void processErrorCallback(MQTT_CLIENT_HANDLE handle, MQTT_CLIENT_EVENT_ER
         {
             transport_data->topics_ToSubscribe |= SUBSCRIBE_INPUT_QUEUE_TOPIC;
         }
+        if (transport_data->topic_CredentialsResponse != NULL)
+        {
+            transport_data->topics_ToSubscribe |= SUBSCRIBE_CREDENTIALS_TOPIC;
+            transport_data->credentials_sub_recv = false;
+        }
     }
     else
     {
@@ -3169,6 +3176,11 @@ static int UpdateMqttConnectionStateIfNeeded(PMQTTTRANSPORT_HANDLE_DATA transpor
                         {
                             transport_data->topics_ToSubscribe |= SUBSCRIBE_INPUT_QUEUE_TOPIC;
                         }
+                        if (transport_data->topic_CredentialsResponse != NULL)
+                        {
+                            transport_data->topics_ToSubscribe |= SUBSCRIBE_CREDENTIALS_TOPIC;
+                            transport_data->credentials_sub_recv = false;
+                        }
                     }
                 }
             }
@@ -3347,6 +3359,7 @@ static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLI
                         state->currPacketState = CONNECT_TYPE;
                         state->keepAliveValue = DEFAULT_MQTT_KEEPALIVE;
                         state->connect_timeout_in_sec = DEFAULT_CONNACK_TIMEOUT;
+                        state->csr_timeout_secs = DEFAULT_CSR_TIMEOUT_SECS;
                         state->topics_ToSubscribe = UNSUBSCRIBE_FROM_TOPIC;
                         srand((unsigned int)get_time(NULL));
                         state->authorization_module = auth_module;
@@ -4191,6 +4204,15 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_MQTT_Common_SetOption(TRANSPORT_LL_HANDLE h
             if (*connection_time != transport_data->connect_timeout_in_sec)
             {
                 transport_data->connect_timeout_in_sec = (uint16_t)(*connection_time);
+            }
+            result = IOTHUB_CLIENT_OK;
+        }
+        else if (strcmp(OPTION_CSR_TIMEOUT_SECS, option) == 0)
+        {
+            int* csr_timeout = (int*)value;
+            if (*csr_timeout > 0)
+            {
+                transport_data->csr_timeout_secs = (uint16_t)(*csr_timeout);
             }
             result = IOTHUB_CLIENT_OK;
         }
