@@ -213,11 +213,10 @@ typedef struct MQTT_CSR_ITEM_TAG
     tickcounter_ms_t msgCreationTime;
     tickcounter_ms_t msgPublishTime;
     uint16_t packet_id;
-    char* certificateSigningRequest;
-    char* replace;
+    uint32_t iothub_msg_id;
+    IOTHUB_CSR_REQUEST* csr_data;
     bool accepted;
-    IOTHUB_CLIENT_CERTIFICATE_SIGNING_RESPONSE_CALLBACK userCallback;
-    void* userContext;
+    DLIST_ENTRY entry;
 } MQTT_CSR_ITEM;
 
 static void freeCsrItem(MQTT_CSR_ITEM* csr_item);
@@ -313,7 +312,7 @@ typedef struct MQTTTRANSPORT_HANDLE_DATA_TAG
 
     // Credentials (CSR) support
     STRING_HANDLE topic_CredentialsResponse;
-    MQTT_CSR_ITEM* pending_csr_request;
+    DLIST_ENTRY pending_csr_queue;
     bool credentials_sub_recv;
     uint16_t credentials_resp_packet_id;
     uint16_t csr_timeout_secs;
@@ -471,7 +470,12 @@ static void freeTransportHandleData(MQTTTRANSPORT_HANDLE_DATA* transport_data)
     STRING_delete(transport_data->topic_InputQueue);
     STRING_delete(transport_data->topic_CredentialsResponse);
 
-    freeCsrItem(transport_data->pending_csr_request);
+    while (!DList_IsListEmpty(&transport_data->pending_csr_queue))
+    {
+        PDLIST_ENTRY currentEntry = DList_RemoveHeadList(&transport_data->pending_csr_queue);
+        MQTT_CSR_ITEM* csr_item = containingRecord(currentEntry, MQTT_CSR_ITEM, entry);
+        freeCsrItem(csr_item);
+    }
 
     DestroyXioTransport(transport_data);
 
@@ -724,14 +728,12 @@ static int parseCredentialsTopicInfo(const char* resp_topic, size_t* request_id,
 }
 
 //
-// freeCsrItem frees resources associated with a MQTT_CSR_ITEM.
+// freeCsrItem frees resources associated with a MQTT_CSR_ITEM wrapper.
 //
 static void freeCsrItem(MQTT_CSR_ITEM* csr_item)
 {
     if (csr_item != NULL)
     {
-        free(csr_item->certificateSigningRequest);
-        free(csr_item->replace);
         free(csr_item);
     }
 }
@@ -1385,6 +1387,38 @@ static void removeExpiredTwinRequests(PMQTTTRANSPORT_HANDLE_DATA transport_data)
     {
         removeExpiredTwinRequestsFromList(transport_data, current_ms, &transport_data->pending_get_twin_queue);
         removeExpiredTwinRequestsFromList(transport_data, current_ms, &transport_data->ack_waiting_queue);
+    }
+}
+
+//
+// removeExpiredCsrRequests removes any CSR requests that have timed out.
+//
+static void removeExpiredCsrRequests(PMQTTTRANSPORT_HANDLE_DATA transport_data)
+{
+    tickcounter_ms_t current_ms;
+
+    if (tickcounter_get_current_ms(transport_data->msgTickCounter, &current_ms) == 0)
+    {
+        PDLIST_ENTRY list_item = transport_data->pending_csr_queue.Flink;
+
+        while (list_item != &transport_data->pending_csr_queue)
+        {
+            DLIST_ENTRY next_item;
+            next_item.Flink = list_item->Flink;
+            MQTT_CSR_ITEM* csr_entry = containingRecord(list_item, MQTT_CSR_ITEM, entry);
+
+            if (((current_ms - csr_entry->msgCreationTime) / 1000) >= transport_data->csr_timeout_secs)
+            {
+                LogError("CSR request timed out (item_id=%u)", (unsigned)csr_entry->iothub_msg_id);
+                transport_data->transport_callbacks.csr_complete_cb(
+                    csr_entry->iothub_msg_id, STATUS_CODE_TIMEOUT_VALUE, NULL,
+                    transport_data->transport_ctx);
+                (void)DList_RemoveEntryList(list_item);
+                freeCsrItem(csr_entry);
+            }
+
+            list_item = next_item.Flink;
+        }
     }
 }
 
@@ -2144,45 +2178,59 @@ static void processCredentialsNotification(PMQTTTRANSPORT_HANDLE_DATA transportD
     {
         LogError("Failure: parsing credentials topic info");
     }
-    else if (transportData->pending_csr_request == NULL)
-    {
-        LogError("Received credentials response but no pending CSR request");
-    }
-    else if (request_id != transportData->pending_csr_request->packet_id)
-    {
-        LogError("Received credentials response with mismatched request id (expected %u, got %lu)",
-            transportData->pending_csr_request->packet_id, (unsigned long)request_id);
-    }
-    else if (status_code == 202)
-    {
-        // Intermediate "accepted" response - do NOT invoke user callback
-        transportData->pending_csr_request->accepted = true;
-    }
     else
     {
-        // Final response (200 success, or 4xx/5xx error)
-        const APP_PAYLOAD* payload = mqttmessage_getApplicationMsg(msgHandle);
-        const char* payload_str = NULL;
-        char* payload_copy = NULL;
+        // Search pending_csr_queue by packet_id
+        PDLIST_ENTRY list_item = transportData->pending_csr_queue.Flink;
+        MQTT_CSR_ITEM* matched_entry = NULL;
 
-        if (payload != NULL && payload->message != NULL && payload->length > 0)
+        while (list_item != &transportData->pending_csr_queue)
         {
-            // Null-terminate the payload for passing as a C string
-            payload_copy = (char*)malloc(payload->length + 1);
-            if (payload_copy != NULL)
+            MQTT_CSR_ITEM* msg_entry = containingRecord(list_item, MQTT_CSR_ITEM, entry);
+            if (request_id == msg_entry->packet_id)
             {
-                memcpy(payload_copy, payload->message, payload->length);
-                payload_copy[payload->length] = '\0';
-                payload_str = payload_copy;
+                matched_entry = msg_entry;
+                break;
             }
+            list_item = list_item->Flink;
         }
 
-        transportData->pending_csr_request->userCallback(
-            status_code, payload_str, transportData->pending_csr_request->userContext);
+        if (matched_entry == NULL)
+        {
+            LogError("Received credentials response with unknown request id %lu", (unsigned long)request_id);
+        }
+        else if (status_code == 202)
+        {
+            // Intermediate "accepted" response - do NOT invoke completion callback
+            matched_entry->accepted = true;
+        }
+        else
+        {
+            // Final response (200 success, or 4xx/5xx error)
+            const APP_PAYLOAD* payload = mqttmessage_getApplicationMsg(msgHandle);
+            const char* payload_str = NULL;
+            char* payload_copy = NULL;
 
-        free(payload_copy);
-        freeCsrItem(transportData->pending_csr_request);
-        transportData->pending_csr_request = NULL;
+            if (payload != NULL && payload->message != NULL && payload->length > 0)
+            {
+                // Null-terminate the payload for passing as a C string
+                payload_copy = (char*)malloc(payload->length + 1);
+                if (payload_copy != NULL)
+                {
+                    memcpy(payload_copy, payload->message, payload->length);
+                    payload_copy[payload->length] = '\0';
+                    payload_str = payload_copy;
+                }
+            }
+
+            transportData->transport_callbacks.csr_complete_cb(
+                matched_entry->iothub_msg_id, status_code, payload_str,
+                transportData->transport_ctx);
+
+            free(payload_copy);
+            DList_RemoveEntryList(&matched_entry->entry);
+            freeCsrItem(matched_entry);
+        }
     }
 }
 
@@ -3352,6 +3400,7 @@ static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLI
                         DList_InitializeListHead(&(state->telemetry_waitingForAck));
                         DList_InitializeListHead(&(state->ack_waiting_queue));
                         DList_InitializeListHead(&(state->pending_get_twin_queue));
+                        DList_InitializeListHead(&(state->pending_csr_queue));
                         state->mqttClientStatus = MQTT_CLIENT_STATUS_NOT_CONNECTED;
                         state->isRecoverableError = true;
                         state->packetId = 1;
@@ -3413,57 +3462,6 @@ static void ProcessSubackDoWork(PMQTTTRANSPORT_HANDLE_DATA transport_data)
         {
             LogError("Failure: sending device twin get command.");
             destroyDeviceTwinGetMsg(mqtt_info);
-        }
-    }
-
-    // Publish pending CSR request after credentials subscription is acknowledged
-    if (transport_data->credentials_sub_recv && transport_data->pending_csr_request != NULL &&
-        transport_data->pending_csr_request->msgPublishTime == 0)
-    {
-        STRING_HANDLE msgTopic = STRING_construct_sprintf(CREDENTIALS_POST_TOPIC, transport_data->pending_csr_request->packet_id);
-        if (msgTopic == NULL)
-        {
-            LogError("Failure: could not construct credentials post topic");
-        }
-        else
-        {
-            STRING_HANDLE payload = buildCsrRequestPayload(
-                STRING_c_str(transport_data->device_id),
-                transport_data->pending_csr_request->certificateSigningRequest,
-                transport_data->pending_csr_request->replace);
-            if (payload == NULL)
-            {
-                LogError("Failure: could not build CSR request payload");
-            }
-            else
-            {
-                const char* payload_str = STRING_c_str(payload);
-                MQTT_MESSAGE_HANDLE mqtt_msg = mqttmessage_create_in_place(
-                    transport_data->pending_csr_request->packet_id,
-                    STRING_c_str(msgTopic),
-                    DELIVER_AT_MOST_ONCE,
-                    (const uint8_t*)payload_str,
-                    strlen(payload_str));
-                if (mqtt_msg == NULL)
-                {
-                    LogError("Failure: could not create mqtt message for CSR");
-                }
-                else
-                {
-                    if (mqtt_client_publish(transport_data->mqttClient, mqtt_msg) != 0)
-                    {
-                        LogError("Failure: mqtt_client_publish for CSR returned error");
-                    }
-                    else
-                    {
-                        (void)tickcounter_get_current_ms(transport_data->msgTickCounter,
-                            &transport_data->pending_csr_request->msgPublishTime);
-                    }
-                    mqttmessage_destroy(mqtt_msg);
-                }
-                STRING_delete(payload);
-            }
-            STRING_delete(msgTopic);
         }
     }
 
@@ -3645,13 +3643,15 @@ void IoTHubTransport_MQTT_Common_Destroy(TRANSPORT_LL_HANDLE handle)
             destroyDeviceTwinGetMsg(mqtt_device_twin);
         }
 
-        // Clean up pending CSR request
-        if (transport_data->pending_csr_request != NULL)
+        // Clean up pending CSR requests
+        while (!DList_IsListEmpty(&transport_data->pending_csr_queue))
         {
-            transport_data->pending_csr_request->userCallback(
-                STATUS_CODE_TIMEOUT_VALUE, NULL, transport_data->pending_csr_request->userContext);
-            freeCsrItem(transport_data->pending_csr_request);
-            transport_data->pending_csr_request = NULL;
+            PDLIST_ENTRY currentEntry = DList_RemoveHeadList(&transport_data->pending_csr_queue);
+            MQTT_CSR_ITEM* csr_item = containingRecord(currentEntry, MQTT_CSR_ITEM, entry);
+            transport_data->transport_callbacks.csr_complete_cb(
+                csr_item->iothub_msg_id, STATUS_CODE_TIMEOUT_VALUE, NULL,
+                transport_data->transport_ctx);
+            freeCsrItem(csr_item);
         }
 
         freeTransportHandleData(transport_data);
@@ -3752,91 +3752,6 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_MQTT_Common_GetTwinAsync(IOTHUB_DEVICE_HAND
             DList_InsertTailList(&transport_data->pending_get_twin_queue, &mqtt_info->entry);
 
             result = IOTHUB_CLIENT_OK;
-        }
-    }
-
-    return result;
-}
-
-IOTHUB_CLIENT_RESULT IoTHubTransport_MQTT_Common_SendCertificateSigningRequestAsync(
-    IOTHUB_DEVICE_HANDLE handle,
-    const char* certificateSigningRequest,
-    const char* replace,
-    IOTHUB_CLIENT_CERTIFICATE_SIGNING_RESPONSE_CALLBACK completionCallback,
-    void* callbackContext)
-{
-    IOTHUB_CLIENT_RESULT result;
-
-    if (handle == NULL || certificateSigningRequest == NULL || completionCallback == NULL)
-    {
-        LogError("Invalid argument (handle=%p, csr=%p, completionCallback=%p)", handle, certificateSigningRequest, completionCallback);
-        result = IOTHUB_CLIENT_INVALID_ARG;
-    }
-    else
-    {
-        PMQTTTRANSPORT_HANDLE_DATA transport_data = (PMQTTTRANSPORT_HANDLE_DATA)handle;
-
-        if (transport_data->pending_csr_request != NULL)
-        {
-            LogError("A CSR request is already pending");
-            result = IOTHUB_CLIENT_ERROR;
-        }
-        // Set up subscription to credentials response topic if not already done
-        else if (transport_data->topic_CredentialsResponse == NULL &&
-                 (transport_data->topic_CredentialsResponse = STRING_construct(TOPIC_CREDENTIALS_RESPONSE)) == NULL)
-        {
-            LogError("Failure: unable to construct credentials response topic");
-            result = IOTHUB_CLIENT_ERROR;
-        }
-        else
-        {
-            MQTT_CSR_ITEM* csr_item = (MQTT_CSR_ITEM*)malloc(sizeof(MQTT_CSR_ITEM));
-            if (csr_item == NULL)
-            {
-                LogError("Failed allocating MQTT_CSR_ITEM");
-                result = IOTHUB_CLIENT_ERROR;
-            }
-            else
-            {
-                memset(csr_item, 0, sizeof(MQTT_CSR_ITEM));
-
-                if (mallocAndStrcpy_s(&csr_item->certificateSigningRequest, certificateSigningRequest) != 0)
-                {
-                    LogError("Failed copying CSR string");
-                    free(csr_item);
-                    result = IOTHUB_CLIENT_ERROR;
-                }
-                else if (replace != NULL && mallocAndStrcpy_s(&csr_item->replace, replace) != 0)
-                {
-                    LogError("Failed copying replace string");
-                    free(csr_item->certificateSigningRequest);
-                    free(csr_item);
-                    result = IOTHUB_CLIENT_ERROR;
-                }
-                else if (tickcounter_get_current_ms(transport_data->msgTickCounter, &csr_item->msgCreationTime) != 0)
-                {
-                    LogError("Failed setting the CSR request enqueue time");
-                    free(csr_item->replace);
-                    free(csr_item->certificateSigningRequest);
-                    free(csr_item);
-                    result = IOTHUB_CLIENT_ERROR;
-                }
-                else
-                {
-                    csr_item->packet_id = getNextPacketId(transport_data);
-                    csr_item->userCallback = completionCallback;
-                    csr_item->userContext = callbackContext;
-                    csr_item->accepted = false;
-                    csr_item->msgPublishTime = 0;
-
-                    transport_data->topics_ToSubscribe |= SUBSCRIBE_CREDENTIALS_TOPIC;
-                    transport_data->pending_csr_request = csr_item;
-
-                    changeStateToSubscribeIfAllowed(transport_data);
-
-                    result = IOTHUB_CLIENT_OK;
-                }
-            }
         }
     }
 
@@ -4037,6 +3952,114 @@ IOTHUB_PROCESS_ITEM_RESULT IoTHubTransport_MQTT_Common_ProcessItem(TRANSPORT_LL_
                     }
                 }
             }
+            else if (item_type == IOTHUB_TYPE_CREDENTIALS)
+            {
+                // Auto-subscribe to credentials topic if needed
+                if (transport_data->topic_CredentialsResponse == NULL)
+                {
+                    transport_data->topic_CredentialsResponse = STRING_construct(TOPIC_CREDENTIALS_RESPONSE);
+                    if (transport_data->topic_CredentialsResponse != NULL)
+                    {
+                        transport_data->topics_ToSubscribe |= SUBSCRIBE_CREDENTIALS_TOPIC;
+                        changeStateToSubscribeIfAllowed(transport_data);
+                    }
+                }
+
+                if (!transport_data->credentials_sub_recv)
+                {
+                    result = IOTHUB_PROCESS_CONTINUE;
+                }
+                else
+                {
+                    IOTHUB_CSR_REQUEST* csr_request = iothub_item->csr_request;
+
+                    MQTT_CSR_ITEM* csr_item = (MQTT_CSR_ITEM*)malloc(sizeof(MQTT_CSR_ITEM));
+                    if (csr_item == NULL)
+                    {
+                        LogError("Failed allocating MQTT_CSR_ITEM");
+                        result = IOTHUB_PROCESS_ERROR;
+                    }
+                    else
+                    {
+                        memset(csr_item, 0, sizeof(MQTT_CSR_ITEM));
+                        csr_item->packet_id = getNextPacketId(transport_data);
+                        csr_item->iothub_msg_id = csr_request->item_id;
+                        csr_item->csr_data = csr_request;
+                        csr_item->accepted = false;
+                        csr_item->msgPublishTime = 0;
+
+                        if (tickcounter_get_current_ms(transport_data->msgTickCounter, &csr_item->msgCreationTime) != 0)
+                        {
+                            LogError("Failed setting the CSR request creation time");
+                            free(csr_item);
+                            result = IOTHUB_PROCESS_ERROR;
+                        }
+                        else
+                        {
+                            STRING_HANDLE msgTopic = STRING_construct_sprintf(CREDENTIALS_POST_TOPIC, csr_item->packet_id);
+                            if (msgTopic == NULL)
+                            {
+                                LogError("Failure: could not construct credentials post topic");
+                                free(csr_item);
+                                result = IOTHUB_PROCESS_ERROR;
+                            }
+                            else
+                            {
+                                STRING_HANDLE payload = buildCsrRequestPayload(
+                                    STRING_c_str(transport_data->device_id),
+                                    csr_request->certificateSigningRequest,
+                                    csr_request->replace);
+                                if (payload == NULL)
+                                {
+                                    LogError("Failure: could not build CSR request payload");
+                                    STRING_delete(msgTopic);
+                                    free(csr_item);
+                                    result = IOTHUB_PROCESS_ERROR;
+                                }
+                                else
+                                {
+                                    const char* payload_str = STRING_c_str(payload);
+                                    MQTT_MESSAGE_HANDLE mqtt_msg = mqttmessage_create_in_place(
+                                        csr_item->packet_id,
+                                        STRING_c_str(msgTopic),
+                                        DELIVER_AT_MOST_ONCE,
+                                        (const uint8_t*)payload_str,
+                                        strlen(payload_str));
+                                    if (mqtt_msg == NULL)
+                                    {
+                                        LogError("Failure: could not create mqtt message for CSR");
+                                        result = IOTHUB_PROCESS_ERROR;
+                                    }
+                                    else
+                                    {
+                                        if (mqtt_client_publish(transport_data->mqttClient, mqtt_msg) != 0)
+                                        {
+                                            LogError("Failure: mqtt_client_publish for CSR returned error");
+                                            result = IOTHUB_PROCESS_ERROR;
+                                        }
+                                        else
+                                        {
+                                            (void)tickcounter_get_current_ms(transport_data->msgTickCounter,
+                                                &csr_item->msgPublishTime);
+                                            DList_InsertTailList(&transport_data->pending_csr_queue, &csr_item->entry);
+                                            result = IOTHUB_PROCESS_OK;
+                                        }
+                                        mqttmessage_destroy(mqtt_msg);
+                                    }
+
+                                    if (result != IOTHUB_PROCESS_OK)
+                                    {
+                                        free(csr_item);
+                                    }
+
+                                    STRING_delete(payload);
+                                }
+                                STRING_delete(msgTopic);
+                            }
+                        }
+                    }
+                }
+            }
             else
             {
                 result = IOTHUB_PROCESS_CONTINUE;
@@ -4084,23 +4107,7 @@ void IoTHubTransport_MQTT_Common_DoWork(TRANSPORT_LL_HANDLE handle)
         // Check the ack messages timeouts
         ProcessPendingTelemetryMessages(transport_data);
         removeExpiredTwinRequests(transport_data);
-
-        // Check for expired CSR request (90 second timeout)
-        if (transport_data->pending_csr_request != NULL)
-        {
-            tickcounter_ms_t current_ms;
-            if (tickcounter_get_current_ms(transport_data->msgTickCounter, &current_ms) == 0)
-            {
-                if (((current_ms - transport_data->pending_csr_request->msgCreationTime) / 1000) >= 90)
-                {
-                    LogError("CSR request timed out");
-                    transport_data->pending_csr_request->userCallback(
-                        STATUS_CODE_TIMEOUT_VALUE, NULL, transport_data->pending_csr_request->userContext);
-                    freeCsrItem(transport_data->pending_csr_request);
-                    transport_data->pending_csr_request = NULL;
-                }
-            }
-        }
+        removeExpiredCsrRequests(transport_data);
     }
 }
 

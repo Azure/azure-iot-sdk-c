@@ -80,11 +80,6 @@ static IOTHUB_CLIENT_RESULT IoTHubTransportMqtt_GetTwinAsync(IOTHUB_DEVICE_HANDL
     return IoTHubTransport_MQTT_Common_GetTwinAsync(handle, completionCallback, callbackContext);
 }
 
-static IOTHUB_CLIENT_RESULT IoTHubTransportMqtt_SendCertificateSigningRequest(IOTHUB_DEVICE_HANDLE handle, const char* csr, const char* replace, IOTHUB_CLIENT_CERTIFICATE_SIGNING_RESPONSE_CALLBACK cb, void* ctx)
-{
-    return IoTHubTransport_MQTT_Common_SendCertificateSigningRequestAsync(handle, csr, replace, cb, ctx);
-}
-
 static int IoTHubTransportMqtt_DeviceMethod_Response(IOTHUB_DEVICE_HANDLE handle, METHOD_HANDLE methodId, const unsigned char* response, size_t response_size, int status_response)
 {
     return IoTHubTransport_MQTT_Common_DeviceMethod_Response(handle, methodId, response, response_size, status_response);
@@ -179,7 +174,6 @@ static TRANSPORT_PROVIDER myfunc =
     IotHubTransportMqtt_Unsubscribe_InputQueue,     /*pfIoTHubTransport_Unsubscribe_InputQueue IoTHubTransport_Unsubscribe_InputQueue; */
     IotHubTransportMqtt_SetCallbackContext,         /*pfIoTHubTransport_SetCallbackContext IoTHubTransport_SetCallbackContext; */
     IoTHubTransportMqtt_GetTwinAsync,               /*pfIoTHubTransport_GetTwinAsync IoTHubTransport_GetTwinAsync;*/
-    IoTHubTransportMqtt_SendCertificateSigningRequest, /*pfIoTHubTransport_SendCertificateSigningRequest IoTHubTransport_SendCertificateSigningRequest;*/
     IotHubTransportMqtt_GetSupportedPlatformInfo      /*pfIoTHubTransport_GetSupportedPlatformInfo IoTHubTransport_GetSupportedPlatformInfo;*/
 };
 
