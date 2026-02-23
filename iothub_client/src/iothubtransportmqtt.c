@@ -75,7 +75,7 @@ static void IoTHubTransportMqtt_Unsubscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE hand
     IoTHubTransport_MQTT_Common_Unsubscribe_DeviceTwin(handle);
 }
 
-static int IoTHubTransportMqtt_Subscribe_Credentials(IOTHUB_DEVICE_HANDLE handle)
+static int IoTHubTransportMqtt_Subscribe_CertificateSigningResponse(IOTHUB_DEVICE_HANDLE handle)
 {
     return IoTHubTransport_MQTT_Common_Subscribe_Credentials(handle);
 }
@@ -163,7 +163,7 @@ static TRANSPORT_PROVIDER myfunc =
     IoTHubTransportMqtt_DeviceMethod_Response,      /*pfIoTHubTransport_DeviceMethod_Response IoTHubTransport_DeviceMethod_Response;*/
     IoTHubTransportMqtt_Subscribe_DeviceTwin,       /*pfIoTHubTransport_Subscribe_DeviceTwin IoTHubTransport_Subscribe_DeviceTwin;*/
     IoTHubTransportMqtt_Unsubscribe_DeviceTwin,     /*pfIoTHubTransport_Unsubscribe_DeviceTwin IoTHubTransport_Unsubscribe_DeviceTwin;*/
-    IoTHubTransportMqtt_Subscribe_Credentials,      /*pfIoTHubTransport_Subscribe_CertificateSigningResponse IoTHubTransport_Subscribe_Credentials;*/
+    IoTHubTransportMqtt_Subscribe_CertificateSigningResponse,      /*pfIoTHubTransport_Subscribe_CertificateSigningResponse IoTHubTransport_Subscribe_CertificateSigningResponse;*/
     IoTHubTransportMqtt_ProcessItem,                /*pfIoTHubTransport_ProcessItem IoTHubTransport_ProcessItem;*/
     IoTHubTransportMqtt_GetHostname,                /*pfIoTHubTransport_GetHostname IoTHubTransport_GetHostname;*/
     IoTHubTransportMqtt_SetOption,                  /*pfIoTHubTransport_SetOption IoTHubTransport_SetOption;*/

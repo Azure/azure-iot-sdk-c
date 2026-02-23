@@ -167,7 +167,7 @@ static TRANSPORT_PROVIDER thisTransportProvider =
     IoTHubTransportAMQP_DeviceMethod_Response,
     IoTHubTransportAMQP_Subscribe_DeviceTwin,       /*pfIoTHubTransport_Subscribe_DeviceTwin IoTHubTransport_Subscribe_DeviceTwin;*/
     IoTHubTransportAMQP_Unsubscribe_DeviceTwin,     /*pfIoTHubTransport_Unsubscribe_DeviceTwin IoTHubTransport_Unsubscribe_DeviceTwin;*/
-    NULL,                                           /*pfIoTHubTransport_Subscribe_CertificateSigningResponse IoTHubTransport_Subscribe_Credentials;*/
+    NULL,                                           /*pfIoTHubTransport_Subscribe_CertificateSigningResponse IoTHubTransport_Subscribe_CertificateSigningResponse;*/
     IoTHubTransportAMQP_ProcessItem,                /*pfIoTHubTransport_ProcessItem IoTHubTransport_ProcessItem;*/
     IoTHubTransportAMQP_GetHostname,                /*pfIoTHubTransport_GetHostname IoTHubTransport_GetHostname;*/
     IoTHubTransportAMQP_SetOption,                  /*pfIoTHubTransport_SetOption IoTHubTransport_SetOption;*/

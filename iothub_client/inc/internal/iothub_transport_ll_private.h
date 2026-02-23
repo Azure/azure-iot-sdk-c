@@ -97,7 +97,7 @@ pfIoTHubTransport_Unsubscribe_DeviceMethod IoTHubTransport_Unsubscribe_DeviceMet
 pfIoTHubTransport_DeviceMethod_Response IoTHubTransport_DeviceMethod_Response;      \
 pfIoTHubTransport_Subscribe_DeviceTwin IoTHubTransport_Subscribe_DeviceTwin;        \
 pfIoTHubTransport_Unsubscribe_DeviceTwin IoTHubTransport_Unsubscribe_DeviceTwin;    \
-pfIoTHubTransport_Subscribe_CertificateSigningResponse IoTHubTransport_Subscribe_Credentials;      \
+pfIoTHubTransport_Subscribe_CertificateSigningResponse IoTHubTransport_Subscribe_CertificateSigningResponse;      \
 pfIoTHubTransport_ProcessItem IoTHubTransport_ProcessItem;                          \
 pfIoTHubTransport_GetHostname IoTHubTransport_GetHostname;                          \
 pfIoTHubTransport_SetOption IoTHubTransport_SetOption;                              \
