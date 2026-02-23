@@ -2280,6 +2280,13 @@ static int IoTHubTransportHttp_GetSupportedPlatformInfo(TRANSPORT_LL_HANDLE hand
     return result;
 }
 
+static int IoTHubTransportHttp_Subscribe_CertificateSigningResponse(IOTHUB_DEVICE_HANDLE handle)
+{
+    (void)handle;
+    LogError("HTTP does not support certificate signing request.");
+    return MU_FAILURE;
+}
+
 static TRANSPORT_PROVIDER thisTransportProvider =
 {
     IoTHubTransportHttp_SendMessageDisposition,     /*pfIotHubTransport_SendMessageDisposition IoTHubTransport_SendMessageDisposition;*/
@@ -2288,7 +2295,7 @@ static TRANSPORT_PROVIDER thisTransportProvider =
     IoTHubTransportHttp_DeviceMethod_Response,      /*pfIoTHubTransport_DeviceMethod_Response IoTHubTransport_DeviceMethod_Response;*/
     IoTHubTransportHttp_Subscribe_DeviceTwin,       /*pfIoTHubTransport_Subscribe_DeviceTwin IoTHubTransport_Subscribe_DeviceTwin;*/
     IoTHubTransportHttp_Unsubscribe_DeviceTwin,     /*pfIoTHubTransport_Unsubscribe_DeviceTwin IoTHubTransport_Unsubscribe_DeviceTwin;*/
-    NULL,                                           /*pfIoTHubTransport_Subscribe_CertificateSigningResponse IoTHubTransport_Subscribe_CertificateSigningResponse;*/
+    IoTHubTransportHttp_Subscribe_CertificateSigningResponse, /*pfIoTHubTransport_Subscribe_CertificateSigningResponse IoTHubTransport_Subscribe_CertificateSigningResponse;*/
     IoTHubTransportHttp_ProcessItem,                /*pfIoTHubTransport_ProcessItem IoTHubTransport_ProcessItem;*/
     IoTHubTransportHttp_GetHostname,                /*pfIoTHubTransport_GetHostname IoTHubTransport_GetHostname;*/
     IoTHubTransportHttp_SetOption,                  /*pfIoTHubTransport_SetOption IoTHubTransport_SetOption;*/

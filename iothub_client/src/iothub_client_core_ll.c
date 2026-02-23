@@ -2690,8 +2690,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SendCertificateSigningRequestAsync(
             LogError("Failure constructing CSR request data");
             result = IOTHUB_CLIENT_ERROR;
         }
-        else if (handleData->IoTHubTransport_Subscribe_CertificateSigningResponse != NULL &&
-                 handleData->IoTHubTransport_Subscribe_CertificateSigningResponse(handleData->transportHandle) != 0)
+        else if (handleData->IoTHubTransport_Subscribe_CertificateSigningResponse(handleData->transportHandle) != 0)
         {
             LogError("Failure subscribing to credentials topic");
             csr_request_data_destroy(csr_data);
