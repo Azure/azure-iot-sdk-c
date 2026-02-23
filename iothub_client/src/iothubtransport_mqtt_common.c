@@ -86,9 +86,9 @@ static const char* REPORTED_PROPERTIES_TOPIC = "$iothub/twin/PATCH/properties/re
 static const char* GET_PROPERTIES_TOPIC = "$iothub/twin/GET/?$rid=%"PRIu16;
 static const char* DEVICE_METHOD_RESPONSE_TOPIC = "$iothub/methods/res/%d/?$rid=%s";
 
-static const char TOPIC_CREDENTIALS_PREFIX[] = "$iothub/credentials";
-static const char* TOPIC_CREDENTIALS_RESPONSE = "$iothub/credentials/res/#";
-static const char* CREDENTIALS_POST_TOPIC = "$iothub/credentials/POST/issueCertificate/?$rid=%05"PRIu16;
+static const char CERTIFICATE_SIGNING_RESPONSE_TOPIC_PREFIX[] = "$iothub/credentials";
+static const char* CERTIFICATE_SIGNING_RESPONSE_TOPIC = "$iothub/credentials/res/#";
+static const char* CERTIFICATE_SIGNING_REQUEST_TOPIC = "$iothub/credentials/POST/issueCertificate/?$rid=%05"PRIu16;
 #ifdef RUN_SFC_TESTS
     static const char* FAULT_OPERATION_TYPE = "AzIoTHub_FaultOperationType";
 #endif //RUN_SFC_TESTS
@@ -759,7 +759,7 @@ static int retrieveTopicType(PMQTTTRANSPORT_HANDLE_DATA transportData, const cha
         *type = IOTHUB_TYPE_DEVICE_METHODS;
         result = 0;
     }
-    else if (InternStrnicmp(topicName, TOPIC_CREDENTIALS_PREFIX, sizeof(TOPIC_CREDENTIALS_PREFIX) - 1) == 0)
+    else if (InternStrnicmp(topicName, CERTIFICATE_SIGNING_RESPONSE_TOPIC_PREFIX, sizeof(CERTIFICATE_SIGNING_RESPONSE_TOPIC_PREFIX) - 1) == 0)
     {
         *type = IOTHUB_TYPE_CERTIFICATE_SIGNING_REQUEST;
         result = 0;
@@ -1517,7 +1517,7 @@ static int publishCsrMsg(MQTTTRANSPORT_HANDLE_DATA* transport_data, IOTHUB_CSR_R
 {
     int result;
 
-    STRING_HANDLE msgTopic = STRING_construct_sprintf(CREDENTIALS_POST_TOPIC, csr_item->packet_id);
+    STRING_HANDLE msgTopic = STRING_construct_sprintf(CERTIFICATE_SIGNING_REQUEST_TOPIC, csr_item->packet_id);
     if (msgTopic == NULL)
     {
         LogError("Failure constructing credentials post topic");
@@ -2257,10 +2257,10 @@ static void processIncomingMessageNotification(PMQTTTRANSPORT_HANDLE_DATA transp
 }
 
 //
-// processCredentialsNotification processes a credentials (CSR) response from IoT Hub.
+// processCertificateSigningRequestNotification processes a credentials (CSR) response from IoT Hub.
 // Protocol: 202 is intermediate "accepted"; 200 or error codes are final.
 //
-static void processCredentialsNotification(PMQTTTRANSPORT_HANDLE_DATA transportData, MQTT_MESSAGE_HANDLE msgHandle, const char* topicName)
+static void processCertificateSigningRequestNotification(PMQTTTRANSPORT_HANDLE_DATA transportData, MQTT_MESSAGE_HANDLE msgHandle, const char* topicName)
 {
     size_t request_id;
     int status_code;
@@ -2438,7 +2438,7 @@ static MQTT_CLIENT_ACK_OPTION mqttNotificationCallback(MQTT_MESSAGE_HANDLE msgHa
             }
             else if (type == IOTHUB_TYPE_CERTIFICATE_SIGNING_REQUEST)
             {
-                processCredentialsNotification(transportData, msgHandle, topicName);
+                processCertificateSigningRequestNotification(transportData, msgHandle, topicName);
             }
             else
             {
@@ -3799,7 +3799,7 @@ int IoTHubTransport_MQTT_Common_Subscribe_Credentials(TRANSPORT_LL_HANDLE handle
     {
         if (transport_data->topic_CredentialsResponse == NULL)
         {
-            transport_data->topic_CredentialsResponse = STRING_construct(TOPIC_CREDENTIALS_RESPONSE);
+            transport_data->topic_CredentialsResponse = STRING_construct(CERTIFICATE_SIGNING_RESPONSE_TOPIC);
             if (transport_data->topic_CredentialsResponse == NULL)
             {
                 LogError("Failure: unable constructing credentials response topic");

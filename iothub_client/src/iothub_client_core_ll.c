@@ -1273,14 +1273,13 @@ static IOTHUB_CSR_REQUEST* csr_request_data_create(IOTHUB_CLIENT_CORE_LL_HANDLE_
         if (mallocAndStrcpy_s(&result->certificate_signing_request, certificateSigningRequest) != 0)
         {
             LogError("Failed copying CSR string");
-            free(result);
+            csr_request_data_destroy(result);
             result = NULL;
         }
         else if (replace != NULL && mallocAndStrcpy_s(&result->replace, replace) != 0)
         {
             LogError("Failed copying replace string");
-            free(result->certificate_signing_request);
-            free(result);
+            csr_request_data_destroy(result);
             result = NULL;
         }
         else
