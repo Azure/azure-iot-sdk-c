@@ -1270,7 +1270,7 @@ static IOTHUB_CSR_REQUEST* csr_request_data_create(IOTHUB_CLIENT_CORE_LL_HANDLE_
     {
         memset(result, 0, sizeof(IOTHUB_CSR_REQUEST));
 
-        if (mallocAndStrcpy_s(&result->certificateSigningRequest, certificateSigningRequest) != 0)
+        if (mallocAndStrcpy_s(&result->certificate_signing_request, certificateSigningRequest) != 0)
         {
             LogError("Failed copying CSR string");
             free(result);
@@ -1279,7 +1279,7 @@ static IOTHUB_CSR_REQUEST* csr_request_data_create(IOTHUB_CLIENT_CORE_LL_HANDLE_
         else if (replace != NULL && mallocAndStrcpy_s(&result->replace, replace) != 0)
         {
             LogError("Failed copying replace string");
-            free(result->certificateSigningRequest);
+            free(result->certificate_signing_request);
             free(result);
             result = NULL;
         }
@@ -1299,7 +1299,7 @@ static void csr_request_data_destroy(IOTHUB_CSR_REQUEST* csr_data)
 {
     if (csr_data != NULL)
     {
-        free(csr_data->certificateSigningRequest);
+        free(csr_data->certificate_signing_request);
         free(csr_data->replace);
         free(csr_data);
     }

@@ -1527,7 +1527,7 @@ static int publishCsrMsg(MQTTTRANSPORT_HANDLE_DATA* transport_data, IOTHUB_CSR_R
     {
         STRING_HANDLE payload = buildCsrRequestPayload(
             STRING_c_str(transport_data->device_id),
-            csr_request->certificateSigningRequest,
+            csr_request->certificate_signing_request,
             csr_request->replace);
         if (payload == NULL)
         {

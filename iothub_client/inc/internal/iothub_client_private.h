@@ -67,7 +67,7 @@ typedef struct IOTHUB_DEVICE_TWIN_TAG
 typedef struct IOTHUB_CSR_REQUEST_TAG
 {
     uint32_t item_id;
-    char* certificateSigningRequest;
+    char* certificate_signing_request;
     char* replace;
     IOTHUB_CLIENT_CERTIFICATE_SIGNING_RESPONSE_CALLBACK callback;
     void* context;
