@@ -2085,9 +2085,9 @@ static IOTHUB_PROCESS_ITEM_RESULT IoTHubTransportHttp_ProcessItem(TRANSPORT_LL_H
     (void)handle;
     (void)iothub_item;
 
-    if (item_type == IOTHUB_TYPE_CREDENTIALS)
+    if (item_type == IOTHUB_TYPE_CERTIFICATE_SIGNING_REQUEST)
     {
-        LogError("SendCertificateSigningRequest is not supported by this transport. Use MQTT.");
+        LogError("Certificate Signing Request is not supported by HTTP transport.");
     }
     else
     {

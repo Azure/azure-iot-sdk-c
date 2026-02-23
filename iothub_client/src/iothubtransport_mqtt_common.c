@@ -761,7 +761,7 @@ static int retrieveTopicType(PMQTTTRANSPORT_HANDLE_DATA transportData, const cha
     }
     else if (InternStrnicmp(topicName, TOPIC_CREDENTIALS_PREFIX, sizeof(TOPIC_CREDENTIALS_PREFIX) - 1) == 0)
     {
-        *type = IOTHUB_TYPE_CREDENTIALS;
+        *type = IOTHUB_TYPE_CERTIFICATE_SIGNING_REQUEST;
         result = 0;
     }
     // mqtt_message_queue_topic contains additional "#" from subscribe, which we strip off on comparing incoming.
@@ -2436,7 +2436,7 @@ static MQTT_CLIENT_ACK_OPTION mqttNotificationCallback(MQTT_MESSAGE_HANDLE msgHa
             {
                 processDeviceMethodNotification(transportData, msgHandle, topicName);
             }
-            else if (type == IOTHUB_TYPE_CREDENTIALS)
+            else if (type == IOTHUB_TYPE_CERTIFICATE_SIGNING_REQUEST)
             {
                 processCredentialsNotification(transportData, msgHandle, topicName);
             }
@@ -4080,7 +4080,7 @@ IOTHUB_PROCESS_ITEM_RESULT IoTHubTransport_MQTT_Common_ProcessItem(TRANSPORT_LL_
                     }
                 }
             }
-            else if (item_type == IOTHUB_TYPE_CREDENTIALS && transport_data->credentials_sub_recv)
+            else if (item_type == IOTHUB_TYPE_CERTIFICATE_SIGNING_REQUEST && transport_data->credentials_sub_recv)
             {
                 IOTHUB_CSR_REQUEST* csr_request = iothub_item->csr_request;
                 MQTT_CSR_ITEM* csr_item = createCsrMsg(transport_data, csr_request->item_id, csr_request);

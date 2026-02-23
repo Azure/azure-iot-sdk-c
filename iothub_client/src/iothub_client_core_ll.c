@@ -2264,7 +2264,7 @@ void IoTHubClientCore_LL_DoWork(IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle)
             IOTHUB_CSR_REQUEST* csr_data = containingRecord(client_item, IOTHUB_CSR_REQUEST, entry);
             IOTHUB_IDENTITY_INFO identity_info;
             identity_info.csr_request = csr_data;
-            IOTHUB_PROCESS_ITEM_RESULT process_results = handleData->IoTHubTransport_ProcessItem(handleData->transportHandle, IOTHUB_TYPE_CREDENTIALS, &identity_info);
+            IOTHUB_PROCESS_ITEM_RESULT process_results = handleData->IoTHubTransport_ProcessItem(handleData->transportHandle, IOTHUB_TYPE_CERTIFICATE_SIGNING_REQUEST, &identity_info);
             if (process_results == IOTHUB_PROCESS_CONTINUE || process_results == IOTHUB_PROCESS_NOT_CONNECTED)
             {
                 break;
