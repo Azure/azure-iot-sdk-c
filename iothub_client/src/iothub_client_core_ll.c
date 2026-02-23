@@ -1263,6 +1263,16 @@ static void on_get_device_twin_completed(DEVICE_TWIN_UPDATE_STATE update_state, 
     }
 }
 
+static void csr_request_data_destroy(IOTHUB_CSR_REQUEST* csr_data)
+{
+    if (csr_data != NULL)
+    {
+        free(csr_data->certificate_signing_request);
+        free(csr_data->replace);
+        free(csr_data);
+    }
+}
+
 static IOTHUB_CSR_REQUEST* csr_request_data_create(IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handleData, uint32_t id, const char* certificateSigningRequest, const char* replace, IOTHUB_CLIENT_CERTIFICATE_SIGNING_RESPONSE_CALLBACK callback, void* context)
 {
     IOTHUB_CSR_REQUEST* result = (IOTHUB_CSR_REQUEST*)malloc(sizeof(IOTHUB_CSR_REQUEST));
@@ -1292,16 +1302,6 @@ static IOTHUB_CSR_REQUEST* csr_request_data_create(IOTHUB_CLIENT_CORE_LL_HANDLE_
         }
     }
     return result;
-}
-
-static void csr_request_data_destroy(IOTHUB_CSR_REQUEST* csr_data)
-{
-    if (csr_data != NULL)
-    {
-        free(csr_data->certificate_signing_request);
-        free(csr_data->replace);
-        free(csr_data);
-    }
 }
 
 static void IoTHubClientCore_LL_CsrComplete(uint32_t item_id, int status_code, const char* certificates, void* ctx)

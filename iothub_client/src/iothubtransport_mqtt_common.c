@@ -312,10 +312,10 @@ typedef struct MQTTTRANSPORT_HANDLE_DATA_TAG
     int disconnect_recv_flag;
 
     // Credentials (CSR) support
-    STRING_HANDLE topic_CredentialsResponse;
+    STRING_HANDLE topic_csr_response;
     DLIST_ENTRY pending_csr_queue;
-    bool credentials_sub_recv;
-    uint16_t credentials_resp_packet_id;
+    bool csr_response_sub_recv;
+    uint16_t csr_resp_packet_id;
     uint16_t csr_timeout_secs;
 } MQTTTRANSPORT_HANDLE_DATA, *PMQTTTRANSPORT_HANDLE_DATA;
 
@@ -469,7 +469,7 @@ static void freeTransportHandleData(MQTTTRANSPORT_HANDLE_DATA* transport_data)
     STRING_delete(transport_data->topic_NotifyState);
     STRING_delete(transport_data->topic_DeviceMethods);
     STRING_delete(transport_data->topic_InputQueue);
-    STRING_delete(transport_data->topic_CredentialsResponse);
+    STRING_delete(transport_data->topic_csr_response);
 
     while (!DList_IsListEmpty(&transport_data->pending_csr_queue))
     {
@@ -2559,9 +2559,9 @@ static void mqttOperationCompleteCallback(MQTT_CLIENT_HANDLE handle, MQTT_CLIENT
                         transport_data->twin_resp_sub_recv = true;
                     }
                     // Is this a credentials message
-                    if (suback->packetId == transport_data->credentials_resp_packet_id)
+                    if (suback->packetId == transport_data->csr_resp_packet_id)
                     {
-                        transport_data->credentials_sub_recv = true;
+                        transport_data->csr_response_sub_recv = true;
                     }
                 }
                 else
@@ -2720,10 +2720,10 @@ static void processErrorCallback(MQTT_CLIENT_HANDLE handle, MQTT_CLIENT_EVENT_ER
         {
             transport_data->topics_ToSubscribe |= SUBSCRIBE_INPUT_QUEUE_TOPIC;
         }
-        if (transport_data->topic_CredentialsResponse != NULL)
+        if (transport_data->topic_csr_response != NULL)
         {
             transport_data->topics_ToSubscribe |= SUBSCRIBE_CREDENTIALS_TOPIC;
-            transport_data->credentials_sub_recv = false;
+            transport_data->csr_response_sub_recv = false;
         }
     }
     else
@@ -2780,13 +2780,13 @@ static void SubscribeToMqttProtocol(PMQTTTRANSPORT_HANDLE_DATA transport_data)
             topic_subscription |= SUBSCRIBE_INPUT_QUEUE_TOPIC;
             subscribe_count++;
         }
-        if ((transport_data->topic_CredentialsResponse != NULL) && (SUBSCRIBE_CREDENTIALS_TOPIC & transport_data->topics_ToSubscribe))
+        if ((transport_data->topic_csr_response != NULL) && (SUBSCRIBE_CREDENTIALS_TOPIC & transport_data->topics_ToSubscribe))
         {
-            subscribe[subscribe_count].subscribeTopic = STRING_c_str(transport_data->topic_CredentialsResponse);
+            subscribe[subscribe_count].subscribeTopic = STRING_c_str(transport_data->topic_csr_response);
             subscribe[subscribe_count].qosReturn = DELIVER_AT_MOST_ONCE;
             topic_subscription |= SUBSCRIBE_CREDENTIALS_TOPIC;
             subscribe_count++;
-            transport_data->credentials_resp_packet_id = packet_id;
+            transport_data->csr_resp_packet_id = packet_id;
         }
 
         if (subscribe_count != 0)
@@ -3315,10 +3315,10 @@ static int UpdateMqttConnectionStateIfNeeded(PMQTTTRANSPORT_HANDLE_DATA transpor
                         {
                             transport_data->topics_ToSubscribe |= SUBSCRIBE_INPUT_QUEUE_TOPIC;
                         }
-                        if (transport_data->topic_CredentialsResponse != NULL)
+                        if (transport_data->topic_csr_response != NULL)
                         {
                             transport_data->topics_ToSubscribe |= SUBSCRIBE_CREDENTIALS_TOPIC;
-                            transport_data->credentials_sub_recv = false;
+                            transport_data->csr_response_sub_recv = false;
                         }
                     }
                 }
@@ -3797,10 +3797,10 @@ int IoTHubTransport_MQTT_Common_Subscribe_Credentials(TRANSPORT_LL_HANDLE handle
     }
     else
     {
-        if (transport_data->topic_CredentialsResponse == NULL)
+        if (transport_data->topic_csr_response == NULL)
         {
-            transport_data->topic_CredentialsResponse = STRING_construct(CERTIFICATE_SIGNING_RESPONSE_TOPIC);
-            if (transport_data->topic_CredentialsResponse == NULL)
+            transport_data->topic_csr_response = STRING_construct(CERTIFICATE_SIGNING_RESPONSE_TOPIC);
+            if (transport_data->topic_csr_response == NULL)
             {
                 LogError("Failure: unable constructing credentials response topic");
                 result = MU_FAILURE;
@@ -4080,7 +4080,7 @@ IOTHUB_PROCESS_ITEM_RESULT IoTHubTransport_MQTT_Common_ProcessItem(TRANSPORT_LL_
                     }
                 }
             }
-            else if (item_type == IOTHUB_TYPE_CERTIFICATE_SIGNING_REQUEST && transport_data->credentials_sub_recv)
+            else if (item_type == IOTHUB_TYPE_CERTIFICATE_SIGNING_REQUEST && transport_data->csr_response_sub_recv)
             {
                 IOTHUB_CSR_REQUEST* csr_request = iothub_item->csr_request;
                 MQTT_CSR_ITEM* csr_item = createCsrMsg(transport_data, csr_request->item_id, csr_request);
