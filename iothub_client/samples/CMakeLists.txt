@@ -58,6 +58,6 @@ if(${use_mqtt})
    add_subdirectory(pnp)
    # CSR sample requires MQTT transport and provisioning client.
    if(${use_prov_client})
-       add_sample_directory(iothub_client_sample_csr)
+       add_sample_directory(iothub_client_sample_certificate_signing_request)
    endif()
 endif()

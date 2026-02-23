@@ -1,12 +1,12 @@
 #Copyright (c) Microsoft. All rights reserved.
 #Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#this is CMakeLists.txt for iothub_client_sample_csr
+#this is CMakeLists.txt for iothub_client_sample_certificate_signing_request
 
 compileAsC99()
 
 set(iothub_c_files
-    iothub_client_sample_csr.c
+    iothub_client_sample_certificate_signing_request.c
 )
 
 IF(WIN32)
@@ -28,9 +28,9 @@ include_directories(${DEV_AUTH_MODULES_CLIENT_INC_FOLDER})
 include_directories(${SHARED_UTIL_INC_FOLDER})
 include_directories(${PROJECT_SOURCE_DIR}/provisioning_client/adapters)
 
-add_executable(iothub_client_sample_csr ${iothub_c_files})
+add_executable(iothub_client_sample_certificate_signing_request ${iothub_c_files})
 
-target_link_libraries(iothub_client_sample_csr
+target_link_libraries(iothub_client_sample_certificate_signing_request
     iothub_client
     iothub_client_mqtt_transport
     prov_device_ll_client
@@ -43,4 +43,4 @@ target_link_libraries(iothub_client_sample_csr
     ${OPENSSL_LIBRARIES}
 )
 
-linkMqttLibrary(iothub_client_sample_csr)
+linkMqttLibrary(iothub_client_sample_certificate_signing_request)
