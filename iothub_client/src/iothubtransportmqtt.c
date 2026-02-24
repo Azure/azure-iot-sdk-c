@@ -77,7 +77,7 @@ static void IoTHubTransportMqtt_Unsubscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE hand
 
 static int IoTHubTransportMqtt_Subscribe_CertificateSigningResponse(IOTHUB_DEVICE_HANDLE handle)
 {
-    return IoTHubTransport_MQTT_Common_Subscribe_Credentials(handle);
+    return IoTHubTransport_MQTT_Common_Subscribe_CertificateSigningResponse(handle);
 }
 
 static IOTHUB_CLIENT_RESULT IoTHubTransportMqtt_GetTwinAsync(IOTHUB_DEVICE_HANDLE handle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK completionCallback, void* callbackContext)

@@ -10,7 +10,7 @@ For initial device provisioning with CSR via DPS, see the [prov_dev_client_ll_x5
 
 1. Modify `.\iothub_client_sample_certificate_signing_request.c`: update the `connectionString`,
    `x509certificate` and `x509privatekey` variables with your device's IoT Hub connection info and
-   current X.509 credentials.
+   current X.509 certificate and private key.
 
 1. Set the variables `certificateSigningRequest` and `csrPrivateKey` as:
    - `certificateSigningRequest`: PEM-encoded certificate signing request.

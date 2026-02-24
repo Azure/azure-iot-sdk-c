@@ -124,7 +124,7 @@ static const char DEFAULT_IOTHUB_PRODUCT_IDENTIFIER[] = CLIENT_DEVICE_TYPE_PREFI
 #define SUBSCRIBE_TELEMETRY_TOPIC               0x0004
 #define SUBSCRIBE_DEVICE_METHOD_TOPIC           0x0008
 #define SUBSCRIBE_INPUT_QUEUE_TOPIC             0x0010
-#define SUBSCRIBE_CREDENTIALS_TOPIC             0x0020
+#define SUBSCRIBE_CERTIFICATE_SIGNING_RESPONSE_TOPIC             0x0020
 #define SUBSCRIBE_TOPIC_COUNT                   6
 
 MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(MQTT_CLIENT_EVENT_ERROR, MQTT_CLIENT_EVENT_ERROR_VALUES);
@@ -311,7 +311,7 @@ typedef struct MQTTTRANSPORT_HANDLE_DATA_TAG
     bool isConnectUsernameSet;
     int disconnect_recv_flag;
 
-    // Credentials (CSR) support
+    // Certificate Signing Request (CSR) support
     STRING_HANDLE topic_csr_response;
     DLIST_ENTRY pending_csr_queue;
     bool csr_response_sub_recv;
@@ -668,16 +668,16 @@ static int parseDeviceTwinTopicInfo(const char* resp_topic, bool* patch_msg, siz
 }
 
 //
-// parseCredentialsTopicInfo parses information about a credentials response topic.
+// parseCertificateSigningResponseTopicInfo parses information about a certificate signing response topic.
 // Expected format: $iothub/credentials/res/{status}/?$rid={request_id}
 //
-static int parseCredentialsTopicInfo(const char* resp_topic, size_t* request_id, int* status_code)
+static int parseCertificateSigningResponseTopicInfo(const char* resp_topic, size_t* request_id, int* status_code)
 {
     int result;
     STRING_TOKENIZER_HANDLE token_handle = STRING_TOKENIZER_create_from_char(resp_topic);
     if (token_handle == NULL)
     {
-        LogError("Failed creating token from credentials topic.");
+        LogError("Failed creating token from certificate signing response topic.");
         result = MU_FAILURE;
         *status_code = 0;
         *request_id = 0;
@@ -1520,7 +1520,7 @@ static int publishCsrMsg(MQTTTRANSPORT_HANDLE_DATA* transport_data, IOTHUB_CSR_R
     STRING_HANDLE msgTopic = STRING_construct_sprintf(CERTIFICATE_SIGNING_REQUEST_TOPIC, csr_item->packet_id);
     if (msgTopic == NULL)
     {
-        LogError("Failure constructing credentials post topic");
+        LogError("Failure constructing certificate signing request topic");
         result = MU_FAILURE;
     }
     else
@@ -2257,7 +2257,7 @@ static void processIncomingMessageNotification(PMQTTTRANSPORT_HANDLE_DATA transp
 }
 
 //
-// processCertificateSigningRequestNotification processes a credentials (CSR) response from IoT Hub.
+// processCertificateSigningRequestNotification processes a certificate signing response from IoT Hub.
 // Protocol: 202 is intermediate "accepted"; 200 or error codes are final.
 //
 static void processCertificateSigningRequestNotification(PMQTTTRANSPORT_HANDLE_DATA transportData, MQTT_MESSAGE_HANDLE msgHandle, const char* topicName)
@@ -2265,9 +2265,9 @@ static void processCertificateSigningRequestNotification(PMQTTTRANSPORT_HANDLE_D
     size_t request_id;
     int status_code;
 
-    if (parseCredentialsTopicInfo(topicName, &request_id, &status_code) != 0)
+    if (parseCertificateSigningResponseTopicInfo(topicName, &request_id, &status_code) != 0)
     {
-        LogError("Failure: parsing credentials topic info");
+        LogError("Failure: parsing certificate signing response topic info");
     }
     else
     {
@@ -2288,7 +2288,7 @@ static void processCertificateSigningRequestNotification(PMQTTTRANSPORT_HANDLE_D
 
         if (matched_entry == NULL)
         {
-            LogError("Received credentials response with unknown request id %lu", (unsigned long)request_id);
+            LogError("Received certificate signing response with unknown request id %lu", (unsigned long)request_id);
         }
         else if (status_code == 202)
         {
@@ -2558,7 +2558,7 @@ static void mqttOperationCompleteCallback(MQTT_CLIENT_HANDLE handle, MQTT_CLIENT
                     {
                         transport_data->twin_resp_sub_recv = true;
                     }
-                    // Is this a credentials message
+                    // Is this a certificate signing response message
                     if (suback->packetId == transport_data->csr_resp_packet_id)
                     {
                         transport_data->csr_response_sub_recv = true;
@@ -2722,7 +2722,7 @@ static void processErrorCallback(MQTT_CLIENT_HANDLE handle, MQTT_CLIENT_EVENT_ER
         }
         if (transport_data->topic_csr_response != NULL)
         {
-            transport_data->topics_ToSubscribe |= SUBSCRIBE_CREDENTIALS_TOPIC;
+            transport_data->topics_ToSubscribe |= SUBSCRIBE_CERTIFICATE_SIGNING_RESPONSE_TOPIC;
             transport_data->csr_response_sub_recv = false;
         }
     }
@@ -2780,11 +2780,11 @@ static void SubscribeToMqttProtocol(PMQTTTRANSPORT_HANDLE_DATA transport_data)
             topic_subscription |= SUBSCRIBE_INPUT_QUEUE_TOPIC;
             subscribe_count++;
         }
-        if ((transport_data->topic_csr_response != NULL) && (SUBSCRIBE_CREDENTIALS_TOPIC & transport_data->topics_ToSubscribe))
+        if ((transport_data->topic_csr_response != NULL) && (SUBSCRIBE_CERTIFICATE_SIGNING_RESPONSE_TOPIC & transport_data->topics_ToSubscribe))
         {
             subscribe[subscribe_count].subscribeTopic = STRING_c_str(transport_data->topic_csr_response);
             subscribe[subscribe_count].qosReturn = DELIVER_AT_MOST_ONCE;
-            topic_subscription |= SUBSCRIBE_CREDENTIALS_TOPIC;
+            topic_subscription |= SUBSCRIBE_CERTIFICATE_SIGNING_RESPONSE_TOPIC;
             subscribe_count++;
             transport_data->csr_resp_packet_id = packet_id;
         }
@@ -3317,7 +3317,7 @@ static int UpdateMqttConnectionStateIfNeeded(PMQTTTRANSPORT_HANDLE_DATA transpor
                         }
                         if (transport_data->topic_csr_response != NULL)
                         {
-                            transport_data->topics_ToSubscribe |= SUBSCRIBE_CREDENTIALS_TOPIC;
+                            transport_data->topics_ToSubscribe |= SUBSCRIBE_CERTIFICATE_SIGNING_RESPONSE_TOPIC;
                             transport_data->csr_response_sub_recv = false;
                         }
                     }
@@ -3786,7 +3786,7 @@ int IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin(TRANSPORT_LL_HANDLE handle)
     return result;
 }
 
-int IoTHubTransport_MQTT_Common_Subscribe_Credentials(TRANSPORT_LL_HANDLE handle)
+int IoTHubTransport_MQTT_Common_Subscribe_CertificateSigningResponse(TRANSPORT_LL_HANDLE handle)
 {
     int result;
     PMQTTTRANSPORT_HANDLE_DATA transport_data = (PMQTTTRANSPORT_HANDLE_DATA)handle;
@@ -3802,12 +3802,12 @@ int IoTHubTransport_MQTT_Common_Subscribe_Credentials(TRANSPORT_LL_HANDLE handle
             transport_data->topic_csr_response = STRING_construct(CERTIFICATE_SIGNING_RESPONSE_TOPIC);
             if (transport_data->topic_csr_response == NULL)
             {
-                LogError("Failure: unable constructing credentials response topic");
+                LogError("Failure: unable constructing certificate signing response topic");
                 result = MU_FAILURE;
             }
             else
             {
-                transport_data->topics_ToSubscribe |= SUBSCRIBE_CREDENTIALS_TOPIC;
+                transport_data->topics_ToSubscribe |= SUBSCRIBE_CERTIFICATE_SIGNING_RESPONSE_TOPIC;
                 result = 0;
             }
         }

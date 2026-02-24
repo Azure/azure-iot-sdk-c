@@ -2692,7 +2692,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SendCertificateSigningRequestAsync(
         }
         else if (handleData->IoTHubTransport_Subscribe_CertificateSigningResponse(handleData->transportHandle) != 0)
         {
-            LogError("Failure subscribing to credentials topic");
+            LogError("Failure subscribing to certificate signing response topic");
             csr_request_data_destroy(csr_data);
             result = IOTHUB_CLIENT_ERROR;
         }
