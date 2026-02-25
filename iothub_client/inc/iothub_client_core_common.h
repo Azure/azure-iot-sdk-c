@@ -497,12 +497,17 @@ typedef struct IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_STRUCT* IOTHUB_CLIENT_LL_UP
     /**
     * @brief    Function callback application implements to receive the result of a certificate signing request (CSR) operation.
     *
-    * @param[in]   status                 HTTP-style status code from IoT Hub (e.g. 200 on success, 4xx/5xx on error).
+    * @param[in]   result                 Confirmation result indicating whether the request completed, timed out, or was cancelled.
+    *                                     @c IOTHUB_CLIENT_CONFIRMATION_OK when a response was received from IoT Hub,
+    *                                     @c IOTHUB_CLIENT_CONFIRMATION_MESSAGE_TIMEOUT when the request timed out,
+    *                                     @c IOTHUB_CLIENT_CONFIRMATION_BECAUSE_DESTROY when the client is being destroyed.
+    * @param[in]   response_status_code   HTTP-style status code from IoT Hub (e.g. 200 on success, 4xx/5xx on error).
+    *                                     Only meaningful when @p result is @c IOTHUB_CLIENT_CONFIRMATION_OK.
     * @param[in]   certificates           Raw JSON response payload. On success (200) this contains the issued certificates
     *                                     and correlation ID. On error this contains error details. Can be NULL if no payload was received.
     * @param[in]   userContextCallback    User context pointer set in the call to send the CSR.
     */
-    typedef void(*IOTHUB_CLIENT_CERTIFICATE_SIGNING_RESPONSE_CALLBACK)(int status, const char* certificates, void* userContextCallback);
+    typedef void(*IOTHUB_CLIENT_CERTIFICATE_SIGNING_RESPONSE_CALLBACK)(IOTHUB_CLIENT_CONFIRMATION_RESULT result, int response_status_code, const char* certificates, void* userContextCallback);
 
 #ifdef __cplusplus
 }

@@ -1323,7 +1323,14 @@ static void IoTHubClientCore_LL_CsrComplete(uint32_t item_id, int status_code, c
             {
                 if (csr_data->callback != NULL)
                 {
-                    csr_data->callback(status_code, certificates, csr_data->context);
+                    if (status_code == 408)
+                    {
+                        csr_data->callback(IOTHUB_CLIENT_CONFIRMATION_MESSAGE_TIMEOUT, 0, NULL, csr_data->context);
+                    }
+                    else
+                    {
+                        csr_data->callback(IOTHUB_CLIENT_CONFIRMATION_OK, status_code, certificates, csr_data->context);
+                    }
                 }
                 DList_RemoveEntryList(client_item);
                 csr_request_data_destroy(csr_data);
@@ -1921,7 +1928,7 @@ void IoTHubClientCore_LL_Destroy(IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle
             IOTHUB_CSR_REQUEST* temp = containingRecord(unsend, IOTHUB_CSR_REQUEST, entry);
             if (temp->callback != NULL)
             {
-                temp->callback(ERROR_CODE_BECAUSE_DESTROY, NULL, temp->context);
+                temp->callback(IOTHUB_CLIENT_CONFIRMATION_BECAUSE_DESTROY, 0, NULL, temp->context);
             }
             csr_request_data_destroy(temp);
         }
@@ -1930,7 +1937,7 @@ void IoTHubClientCore_LL_Destroy(IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle
             IOTHUB_CSR_REQUEST* temp = containingRecord(unsend, IOTHUB_CSR_REQUEST, entry);
             if (temp->callback != NULL)
             {
-                temp->callback(ERROR_CODE_BECAUSE_DESTROY, NULL, temp->context);
+                temp->callback(IOTHUB_CLIENT_CONFIRMATION_BECAUSE_DESTROY, 0, NULL, temp->context);
             }
             csr_request_data_destroy(temp);
         }
@@ -2280,7 +2287,7 @@ void IoTHubClientCore_LL_DoWork(IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle)
                     LogError("Failure processing CSR item");
                     if (csr_data->callback != NULL)
                     {
-                        csr_data->callback(ERROR_CODE_BECAUSE_DESTROY, NULL, csr_data->context);
+                        csr_data->callback(IOTHUB_CLIENT_CONFIRMATION_ERROR, 0, NULL, csr_data->context);
                     }
                     csr_request_data_destroy(csr_data);
                 }

@@ -91,7 +91,8 @@ static volatile size_t g_message_count_send_confirmations = 0;
 typedef struct CSR_CALLBACK_CONTEXT_TAG
 {
     bool response_received;
-    int status;
+    IOTHUB_CLIENT_CONFIRMATION_RESULT result;
+    int response_status_code;
     char* payload;
 } CSR_CALLBACK_CONTEXT;
 
@@ -119,15 +120,17 @@ static void send_confirm_callback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void
         g_message_count_send_confirmations, MU_ENUM_TO_STRING(IOTHUB_CLIENT_CONFIRMATION_RESULT, result));
 }
 
-static void csr_response_callback(int status, const char* responsePayload, void* userContextCallback)
+static void csr_response_callback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, int response_status_code, const char* responsePayload, void* userContextCallback)
 {
     CSR_CALLBACK_CONTEXT* ctx = (CSR_CALLBACK_CONTEXT*)userContextCallback;
-    ctx->status = status;
+    ctx->result = result;
+    ctx->response_status_code = response_status_code;
     ctx->response_received = true;
 
-    (void)printf("CSR response received (status: %d)\r\n", status);
+    (void)printf("CSR response received (result: %s, status: %d)\r\n",
+        MU_ENUM_TO_STRING(IOTHUB_CLIENT_CONFIRMATION_RESULT, result), response_status_code);
 
-    if (status == 200 && responsePayload != NULL)
+    if (result == IOTHUB_CLIENT_CONFIRMATION_OK && response_status_code == 200 && responsePayload != NULL)
     {
         (void)mallocAndStrcpy_s(&ctx->payload, responsePayload);
     }
@@ -317,7 +320,7 @@ int main(void)
                     ThreadAPI_Sleep(1);
                 }
 
-                if (csr_ctx.status == 200 && csr_ctx.payload != NULL)
+                if (csr_ctx.result == IOTHUB_CLIENT_CONFIRMATION_OK && csr_ctx.response_status_code == 200 && csr_ctx.payload != NULL)
                 {
                     char* renewed_cert = parse_certificate_response(csr_ctx.payload);
 
@@ -369,7 +372,8 @@ int main(void)
                 }
                 else
                 {
-                    (void)printf("CSR request failed (status=%d)\r\n", csr_ctx.status);
+                    (void)printf("CSR request failed (result=%s, status=%d)\r\n",
+                        MU_ENUM_TO_STRING(IOTHUB_CLIENT_CONFIRMATION_RESULT, csr_ctx.result), csr_ctx.response_status_code);
                 }
 
                 free(csr_ctx.payload);

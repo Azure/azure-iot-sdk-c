@@ -157,7 +157,8 @@ typedef struct INPUTMESSAGE_CALLBACK_INFO_TAG
 
 typedef struct CSR_CALLBACK_INFO_TAG
 {
-    int status;
+    IOTHUB_CLIENT_CONFIRMATION_RESULT result;
+    int response_status_code;
     char* certificates;
     IOTHUB_CLIENT_CERTIFICATE_SIGNING_RESPONSE_CALLBACK userCallback;
     void* userContext;
@@ -625,7 +626,7 @@ static void iothub_ll_get_device_twin_async_callback(DEVICE_TWIN_UPDATE_STATE up
     }
 }
 
-static void iothub_ll_csr_callback(int status, const char* certificates, void* userContextCallback)
+static void iothub_ll_csr_callback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, int response_status_code, const char* certificates, void* userContextCallback)
 {
     IOTHUB_QUEUE_CONSOLIDATED_CONTEXT* queue_context = (IOTHUB_QUEUE_CONSOLIDATED_CONTEXT*)userContextCallback;
 
@@ -634,7 +635,8 @@ static void iothub_ll_csr_callback(int status, const char* certificates, void* u
         USER_CALLBACK_INFO queue_cb_info;
         queue_cb_info.type = CALLBACK_TYPE_CSR;
         queue_cb_info.userContextCallback = queue_context->userContext;
-        queue_cb_info.iothub_callback.csr_cb_info.status = status;
+        queue_cb_info.iothub_callback.csr_cb_info.result = result;
+        queue_cb_info.iothub_callback.csr_cb_info.response_status_code = response_status_code;
         queue_cb_info.iothub_callback.csr_cb_info.userCallback = queue_context->userCallback.csrCallback;
         queue_cb_info.iothub_callback.csr_cb_info.userContext = queue_context->userContext;
 
@@ -915,7 +917,8 @@ static void dispatch_user_callbacks(IOTHUB_CLIENT_CORE_INSTANCE* iotHubClientIns
                 if (queued_cb->iothub_callback.csr_cb_info.userCallback)
                 {
                     queued_cb->iothub_callback.csr_cb_info.userCallback(
-                        queued_cb->iothub_callback.csr_cb_info.status,
+                        queued_cb->iothub_callback.csr_cb_info.result,
+                        queued_cb->iothub_callback.csr_cb_info.response_status_code,
                         queued_cb->iothub_callback.csr_cb_info.certificates,
                         queued_cb->iothub_callback.csr_cb_info.userContext);
                 }
@@ -1426,7 +1429,8 @@ void IoTHubClientCore_Destroy(IOTHUB_CLIENT_CORE_HANDLE iotHubClientHandle)
                     if (queue_cb_info->iothub_callback.csr_cb_info.userCallback)
                     {
                         queue_cb_info->iothub_callback.csr_cb_info.userCallback(
-                            queue_cb_info->iothub_callback.csr_cb_info.status,
+                            queue_cb_info->iothub_callback.csr_cb_info.result,
+                            queue_cb_info->iothub_callback.csr_cb_info.response_status_code,
                             queue_cb_info->iothub_callback.csr_cb_info.certificates,
                             queue_cb_info->iothub_callback.csr_cb_info.userContext);
                     }
