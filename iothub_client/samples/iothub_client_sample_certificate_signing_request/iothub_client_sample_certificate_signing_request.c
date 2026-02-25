@@ -123,12 +123,23 @@ static void send_confirm_callback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void
 static void csr_response_callback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, int response_status_code, const char* responsePayload, void* userContextCallback)
 {
     CSR_CALLBACK_CONTEXT* ctx = (CSR_CALLBACK_CONTEXT*)userContextCallback;
-    ctx->result = result;
-    ctx->response_status_code = response_status_code;
-    ctx->response_received = true;
 
     (void)printf("CSR response received (result: %s, status: %d)\r\n",
         MU_ENUM_TO_STRING(IOTHUB_CLIENT_CONFIRMATION_RESULT, result), response_status_code);
+
+    if (result == IOTHUB_CLIENT_CONFIRMATION_ACCEPTED)
+    {
+        (void)printf("CSR request accepted (202), waiting for final response...\r\n");
+        if (responsePayload != NULL)
+        {
+            (void)printf("Intermediate payload: %s\r\n", responsePayload);
+        }
+        return;
+    }
+
+    ctx->result = result;
+    ctx->response_status_code = response_status_code;
+    ctx->response_received = true;
 
     if (result == IOTHUB_CLIENT_CONFIRMATION_OK && response_status_code == 200 && responsePayload != NULL)
     {

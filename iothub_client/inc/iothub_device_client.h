@@ -328,9 +328,11 @@ extern "C"
     * @param    iotHubClientHandle                      The handle created by a call to the create function.
     * @param    certificateSigningRequest               The PEM-encoded CSR string.
     * @param    replace                                 Optional certificate fingerprint to replace. Can be @c NULL.
-    * @param    certificateSigningResponseCallback      The callback invoked with the result. Receives an
-    *                                                   @c IOTHUB_CLIENT_CONFIRMATION_RESULT indicating whether the
-    *                                                   response was received, timed out, or the client was destroyed.
+    * @param    certificateSigningResponseCallback      The callback invoked with the result. May be called more
+    *                                                   than once: first with @c IOTHUB_CLIENT_CONFIRMATION_ACCEPTED
+    *                                                   (intermediate 202 response), then with a final result such as
+    *                                                   @c IOTHUB_CLIENT_CONFIRMATION_OK, @c IOTHUB_CLIENT_CONFIRMATION_MESSAGE_TIMEOUT,
+    *                                                   @c IOTHUB_CLIENT_CONFIRMATION_BECAUSE_DESTROY, or @c IOTHUB_CLIENT_CONFIRMATION_ERROR.
     * @param    userContextCallback                     User specified context that will be provided to the
     *                                                   callback. This can be @c NULL.
     *

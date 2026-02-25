@@ -143,7 +143,8 @@ typedef struct IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_STRUCT* IOTHUB_CLIENT_LL_UP
     IOTHUB_CLIENT_CONFIRMATION_OK,                   \
     IOTHUB_CLIENT_CONFIRMATION_BECAUSE_DESTROY,      \
     IOTHUB_CLIENT_CONFIRMATION_MESSAGE_TIMEOUT,      \
-    IOTHUB_CLIENT_CONFIRMATION_ERROR                 \
+    IOTHUB_CLIENT_CONFIRMATION_ERROR,                \
+    IOTHUB_CLIENT_CONFIRMATION_ACCEPTED              \
 
     /** @brief Enumeration passed to the application's callback to process the success or failure of telemetry
     *          initiated by APIs in the SendEventAsync family (e.g. IoTHubDeviceClient_LL_SendEventAsync()).
@@ -497,14 +498,23 @@ typedef struct IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_STRUCT* IOTHUB_CLIENT_LL_UP
     /**
     * @brief    Function callback application implements to receive the result of a certificate signing request (CSR) operation.
     *
-    * @param[in]   result                 Confirmation result indicating whether the request completed, timed out, or was cancelled.
-    *                                     @c IOTHUB_CLIENT_CONFIRMATION_OK when a response was received from IoT Hub,
+    * @remarks  This callback may be invoked more than once for a single CSR request. An intermediate call with
+    *           @c IOTHUB_CLIENT_CONFIRMATION_ACCEPTED (HTTP 202) indicates the request was accepted and is being
+    *           processed. A subsequent final call delivers the actual result.
+    *
+    * @param[in]   result                 Confirmation result indicating the current state of the request.
+    *                                     @c IOTHUB_CLIENT_CONFIRMATION_ACCEPTED when an intermediate 202 response
+    *                                     was received (request accepted, final response pending),
+    *                                     @c IOTHUB_CLIENT_CONFIRMATION_OK when a final response was received from IoT Hub,
     *                                     @c IOTHUB_CLIENT_CONFIRMATION_MESSAGE_TIMEOUT when the request timed out,
-    *                                     @c IOTHUB_CLIENT_CONFIRMATION_BECAUSE_DESTROY when the client is being destroyed.
-    * @param[in]   response_status_code   HTTP-style status code from IoT Hub (e.g. 200 on success, 4xx/5xx on error).
-    *                                     Only meaningful when @p result is @c IOTHUB_CLIENT_CONFIRMATION_OK.
+    *                                     @c IOTHUB_CLIENT_CONFIRMATION_BECAUSE_DESTROY when the client is being destroyed,
+    *                                     @c IOTHUB_CLIENT_CONFIRMATION_ERROR when a processing error occurred.
+    * @param[in]   response_status_code   HTTP-style status code from IoT Hub (e.g. 200 on success, 202 on accepted, 4xx/5xx on error).
+    *                                     Only meaningful when @p result is @c IOTHUB_CLIENT_CONFIRMATION_OK or
+    *                                     @c IOTHUB_CLIENT_CONFIRMATION_ACCEPTED.
     * @param[in]   certificates           Raw JSON response payload. On success (200) this contains the issued certificates
-    *                                     and correlation ID. On error this contains error details. Can be NULL if no payload was received.
+    *                                     and correlation ID. On 202 this may contain intermediate status information.
+    *                                     On error this contains error details. Can be NULL if no payload was received.
     * @param[in]   userContextCallback    User context pointer set in the call to send the CSR.
     */
     typedef void(*IOTHUB_CLIENT_CERTIFICATE_SIGNING_RESPONSE_CALLBACK)(IOTHUB_CLIENT_CONFIRMATION_RESULT result, int response_status_code, const char* certificates, void* userContextCallback);

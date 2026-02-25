@@ -2292,8 +2292,29 @@ static void processCertificateSigningRequestNotification(PMQTTTRANSPORT_HANDLE_D
         }
         else if (status_code == 202)
         {
-            // Intermediate "accepted" response - do NOT invoke completion callback
+            // Intermediate "accepted" response - invoke completion callback but keep item in queue
             matched_entry->accepted = true;
+
+            const APP_PAYLOAD* payload = mqttmessage_getApplicationMsg(msgHandle);
+            const char* payload_str = NULL;
+            char* payload_copy = NULL;
+
+            if (payload != NULL && payload->message != NULL && payload->length > 0)
+            {
+                payload_copy = (char*)malloc(payload->length + 1);
+                if (payload_copy != NULL)
+                {
+                    memcpy(payload_copy, payload->message, payload->length);
+                    payload_copy[payload->length] = '\0';
+                    payload_str = payload_copy;
+                }
+            }
+
+            transportData->transport_callbacks.csr_complete_cb(
+                matched_entry->iothub_msg_id, status_code, payload_str,
+                transportData->transport_ctx);
+
+            free(payload_copy);
         }
         else
         {

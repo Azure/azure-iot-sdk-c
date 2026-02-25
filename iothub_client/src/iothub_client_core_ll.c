@@ -1323,17 +1323,29 @@ static void IoTHubClientCore_LL_CsrComplete(uint32_t item_id, int status_code, c
             {
                 if (csr_data->callback != NULL)
                 {
-                    if (status_code == 408)
+                    if (status_code == 202)
+                    {
+                        csr_data->callback(IOTHUB_CLIENT_CONFIRMATION_ACCEPTED, 202, certificates, csr_data->context);
+                        // Keep in csr_ack_queue — awaiting final response
+                    }
+                    else if (status_code == 408)
                     {
                         csr_data->callback(IOTHUB_CLIENT_CONFIRMATION_MESSAGE_TIMEOUT, 0, NULL, csr_data->context);
+                        DList_RemoveEntryList(client_item);
+                        csr_request_data_destroy(csr_data);
                     }
                     else
                     {
                         csr_data->callback(IOTHUB_CLIENT_CONFIRMATION_OK, status_code, certificates, csr_data->context);
+                        DList_RemoveEntryList(client_item);
+                        csr_request_data_destroy(csr_data);
                     }
                 }
-                DList_RemoveEntryList(client_item);
-                csr_request_data_destroy(csr_data);
+                else if (status_code != 202)
+                {
+                    DList_RemoveEntryList(client_item);
+                    csr_request_data_destroy(csr_data);
+                }
                 break;
             }
             client_item = next_item;

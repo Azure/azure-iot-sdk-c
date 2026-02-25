@@ -663,7 +663,11 @@ static void iothub_ll_csr_callback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, int
             }
         }
 
-        free(queue_context);
+        // Only free queue_context on final callbacks (not intermediate 202 accepted)
+        if (result != IOTHUB_CLIENT_CONFIRMATION_ACCEPTED)
+        {
+            free(queue_context);
+        }
     }
     else
     {
