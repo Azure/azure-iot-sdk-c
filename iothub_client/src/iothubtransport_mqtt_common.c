@@ -2347,81 +2347,20 @@ static void processCertificateSigningRequestNotification(PMQTTTRANSPORT_HANDLE_D
 }
 
 //
-// stripPemToBase64 converts a PEM-encoded string to raw base64 by removing
-// the header/footer lines (e.g. -----BEGIN CERTIFICATE REQUEST-----) and all
-// whitespace characters (newlines, carriage returns).
-// Returns a malloc'd string or NULL on failure.
-//
-static char* stripPemToBase64(const char* pem)
-{
-    char* result = NULL;
-    size_t pemLen = strlen(pem);
-    char* buf = (char*)malloc(pemLen + 1);
-
-    if (buf == NULL)
-    {
-        LogError("Failed to allocate buffer for PEM stripping");
-    }
-    else
-    {
-        size_t outIdx = 0;
-        const char* p = pem;
-        bool skipLine = false;
-
-        while (*p != '\0')
-        {
-            if (*p == '-' && strncmp(p, "-----", 5) == 0)
-            {
-                // Skip the entire header/footer line
-                skipLine = true;
-            }
-
-            if (skipLine)
-            {
-                if (*p == '\n')
-                {
-                    skipLine = false;
-                }
-            }
-            else if (*p != '\n' && *p != '\r' && *p != ' ' && *p != '\t')
-            {
-                buf[outIdx++] = *p;
-            }
-
-            p++;
-        }
-
-        buf[outIdx] = '\0';
-        result = buf;
-    }
-    return result;
-}
-
-//
 // buildCsrRequestPayload builds the JSON payload for a CSR request.
-// Format: {"id":"<deviceId>","csr":"<csrBase64>"} with optional ,"replace":"<replace>"
-// The CSR is expected in PEM format and is converted to raw base64 for the payload.
+// Format: {"id":"<deviceId>","csr":"<csr>"} with optional ,"replace":"<replace>"
 //
 static STRING_HANDLE buildCsrRequestPayload(const char* deviceId, const char* csr, const char* replace)
 {
     STRING_HANDLE result = NULL;
-    char* csrBase64 = stripPemToBase64(csr);
 
-    if (csrBase64 == NULL)
+    if (replace != NULL)
     {
-        LogError("Failed to strip PEM headers from CSR");
+        result = STRING_construct_sprintf("{\"id\":\"%s\",\"csr\":\"%s\",\"replace\":\"%s\"}", deviceId, csr, replace);
     }
     else
     {
-        if (replace != NULL)
-        {
-            result = STRING_construct_sprintf("{\"id\":\"%s\",\"csr\":\"%s\",\"replace\":\"%s\"}", deviceId, csrBase64, replace);
-        }
-        else
-        {
-            result = STRING_construct_sprintf("{\"id\":\"%s\",\"csr\":\"%s\"}", deviceId, csrBase64);
-        }
-        free(csrBase64);
+        result = STRING_construct_sprintf("{\"id\":\"%s\",\"csr\":\"%s\"}", deviceId, csr);
     }
     return result;
 }

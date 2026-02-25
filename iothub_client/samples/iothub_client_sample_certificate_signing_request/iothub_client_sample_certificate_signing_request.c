@@ -69,12 +69,11 @@ static const char* x509privatekey =
 "...""\n"
 "-----END PRIVATE KEY-----";
 
-// Certificate Signing Request for renewal (PEM format). See readme.md for generation instructions.
+// Certificate Signing Request for renewal (raw base64, without PEM headers/footers).
+// See readme.md for generation instructions.
 static const char* certificateSigningRequest =
-"-----BEGIN CERTIFICATE REQUEST-----""\n"
-"MIHoMIGPAgEAMBMxETAPBgNVBAMMCGRldmljZUlkMFkwEwYHKoZIzj0CAQYIKoZI""\n"
-"...""\n"
-"-----END CERTIFICATE REQUEST-----";
+"MIHoMIGPAgEAMBMxETAPBgNVBAMMCGRldmljZUlkMFkwEwYHKoZIzj0CAQYIKoZI"
+"...";
 
 // Private key corresponding to the CSR above (PKCS#8 PEM format).
 static const char* csrPrivateKey =
