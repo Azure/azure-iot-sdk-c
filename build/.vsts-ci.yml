@@ -34,7 +34,10 @@ stages:
       vmImage: 'ubuntu-24.04'
     displayName: 'Linux with Options'
     steps:
+    - checkout: self
+      submodules: true
     - script: |
+        set -e
         sudo apt-get update && sudo apt-get upgrade
         sudo ./build_all/linux/setup.sh
       displayName: 'Host setup'
