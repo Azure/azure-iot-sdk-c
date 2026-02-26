@@ -42,8 +42,8 @@ stages:
       condition: always()
 - stage: Cleanup
   dependsOn:
-  - setup
-  - build_and_tests
+  - Setup
+  - Tests
   condition: always() # Run stage even if the pipeline run is cancelled.
   jobs:
   - job: destroy_azure_resource_group
