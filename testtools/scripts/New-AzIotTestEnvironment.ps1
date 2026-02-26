@@ -10,8 +10,22 @@ param(
     $DpsX509EnrollmentId = "test-enrollment-group-x509",
     $StorageAccountName = "teststoacc$([guid]::NewGuid().Guid.Replace('-', ''))".Substring(0, 24), # Max size of Storage Account name
     [switch]$EnableFileUpload,
+    [switch]$NoDps,
     [switch]$EnableCertificateManagement
 )
+
+$TestEnvInfo = [pscustomobject]@{
+    IotHubConnectionString = $null
+    IotHubEventHubConnectionString = $null
+    DpsDeviceFqdn = $null
+    DpsServiceFqdn = $null
+    DpsConnectionString = $null
+    DpsIdScope = $null
+    DpsRootCACertificatePath = $null
+    DpsRootCAPrivateKeyPath = $null
+    DpsIntermediateCACertificatePath = $null
+    DpsIntermediateCAPrivateKeyPath = $null
+}
 
 $IotHubFqdn = "$($IotHubName).$($IotHubDomainName)"
 
@@ -217,6 +231,7 @@ if ($AzureSubscriptionId -eq $null) {
 # Create resource group (if does not exist). 
 $AzureResourceGroup = az group show --name "$ResourceGroup" 2>$null | ConvertFrom-Json
 if ($AzureResourceGroup -eq $null) {
+    Write-Host "Creating Azure resource group ($ResourceGroup)"
     $AzureResourceGroup = az group create --name "$ResourceGroup" --location $AzureLocation --only-show-errors 2>$null | ConvertFrom-json 
     Stop-OnError -Step "Create Azure resource group"
 }
@@ -259,47 +274,59 @@ if ($EnableCertificateManagement -eq $true) {
     az role assignment create --assignee "$($AzureAdrNamespace.identity.principalId)" --role "IoT Hub Registry Contributor" --scope "$($AzureIoTHub.id)" --only-show-errors | Out-Null
     Stop-OnError -Step "Assign IoT Hub Registry Contributor role on Azure IoT for ADR principal"
     
-    Write-Host "Creating Device Provisioning Service with ADR integration ($DpsName)"
-    $AzureDps = az iot dps create --name "$DpsName" --resource-group "$ResourceGroup" --location "$AzureLocation" `
-        --mi-user-assigned "$($AzureCertMgmtIdentity.id)" --ns-resource-id "$($AzureAdrNamespace.id)" --ns-identity-id "$($AzureCertMgmtIdentity.id)" --only-show-errors | ConvertFrom-Json
-    Stop-OnError -Step "Create Device Provisioning Service with ADR integration"
+    if ($NoDps -eq $false) {
+        Write-Host "Creating Device Provisioning Service with ADR integration ($DpsName)"
+        $AzureDps = az iot dps create --name "$DpsName" --resource-group "$ResourceGroup" --location "$AzureLocation" `
+            --mi-user-assigned "$($AzureCertMgmtIdentity.id)" --ns-resource-id "$($AzureAdrNamespace.id)" --ns-identity-id "$($AzureCertMgmtIdentity.id)" --only-show-errors | ConvertFrom-Json
+        Stop-OnError -Step "Create Device Provisioning Service with ADR integration"
+    }
 } else {
     Write-Host "Creating Azure IoT Hub ($IotHubName)."
     $AzureIoTHub = az iot hub create --name "$IotHubName" --resource-group "$ResourceGroup" --location "$AzureLocation" | ConvertFrom-Json
     Stop-OnError -Step "Create Azure IoT Hub"
 
-    Write-Host "Creating Azure Device Provisioning Service ($DpsName)."
-    $AzureDps = az iot dps create --name "$DpsName" --resource-group "$ResourceGroup" --location "$AzureLocation" | ConvertFrom-Json
-    Stop-OnError -Step "Create Device Provisioning Service"
+    if ($NoDps -eq $false) {
+        Write-Host "Creating Azure Device Provisioning Service ($DpsName)."
+        $AzureDps = az iot dps create --name "$DpsName" --resource-group "$ResourceGroup" --location "$AzureLocation" | ConvertFrom-Json
+        Stop-OnError -Step "Create Device Provisioning Service"
+    }
 }
 
-Write-Host "Linking Azure IoT Hub ($IotHubName) to Azure Device Provisioning service ($DpsName)"
-az iot dps linked-hub create --dps-name "$DpsName" --resource-group "$ResourceGroup" --hub-name "$IotHubName" | Out-Null
-Stop-OnError -Step "Link Azure IoT Hub to Azure Device Provisioning service"
+if ($NoDps -eq $false) {    
+    Write-Host "Linking Azure IoT Hub ($IotHubName) to Azure Device Provisioning service ($DpsName)"
+    az iot dps linked-hub create --dps-name "$DpsName" --resource-group "$ResourceGroup" --hub-name "$IotHubName" | Out-Null
+    Stop-OnError -Step "Link Azure IoT Hub to Azure Device Provisioning service"
 
-Write-Host "Creating DPS certificates"
-$DpsCertificates = New-DpsCACertificateChain -ResourceGroup $ResourceGroup -DpsName $DpsName
+    # Step was put here to optimize if blocks, since it's common down.
+    Write-Host "Creating DPS certificates"
+    $DpsCertificates = New-DpsCACertificateChain -ResourceGroup $ResourceGroup -DpsName $DpsName
+}
 
 if ($EnableCertificateManagement -eq $true) {
     Write-Host "Syncing ADR credentials ($AzureAdrNamespaceName)."
     az iot adr ns credential sync --ns "$AzureAdrNamespaceName" --resource-group "$ResourceGroup" --only-show-errors | Out-Null
     Stop-OnError -Step "Sync ADR credentials"
 
-    az iot dps enrollment-group create --dps-name $DpsName --resource-group $ResourceGroup --enrollment-id $DpsSymmKeyEnrollmentId --credential-policy $AzureAdrPolicyName | Out-Null
-    Stop-OnError "Create an Azure Device Provisioning symmetric-key enrollment group (certificate management)"
+    if ($NoDps -eq $false) {    
+        az iot dps enrollment-group create --dps-name $DpsName --resource-group $ResourceGroup --enrollment-id $DpsSymmKeyEnrollmentId --credential-policy $AzureAdrPolicyName | Out-Null
+        Stop-OnError "Create an Azure Device Provisioning symmetric-key enrollment group (certificate management)"
 
-    # Create enrollment group
-    az iot dps enrollment-group create --dps-name $DpsName --resource-group $ResourceGroup --enrollment-id $DpsX509EnrollmentId --ap static --cp $DpsCertificates.IntermediateCACertificatePath --provisioning-status enabled --iot-hubs $IotHubFqdn --credential-policy $AzureAdrPolicyName | Out-Null
-    Stop-OnError "Create an Azure Device Provisioning x509 enrollment group (certificate management)"
+        # Create enrollment group
+        az iot dps enrollment-group create --dps-name $DpsName --resource-group $ResourceGroup --enrollment-id $DpsX509EnrollmentId --ap static --cp $DpsCertificates.IntermediateCACertificatePath --provisioning-status enabled --iot-hubs $IotHubFqdn --credential-policy $AzureAdrPolicyName | Out-Null
+        Stop-OnError "Create an Azure Device Provisioning x509 enrollment group (certificate management)"
+    }
 } else {
-    az iot dps enrollment-group create --dps-name $DpsName --resource-group $ResourceGroup --enrollment-id $DpsSymmKeyEnrollmentId | Out-Null
-    Stop-OnError "Create an Azure Device Provisioning symmetric-key enrollment group"
+    if ($NoDps -eq $false) {
+        az iot dps enrollment-group create --dps-name $DpsName --resource-group $ResourceGroup --enrollment-id $DpsSymmKeyEnrollmentId | Out-Null
+        Stop-OnError "Create an Azure Device Provisioning symmetric-key enrollment group"
 
-    # Create enrollment group
-    az iot dps enrollment-group create --dps-name $DpsName --resource-group $ResourceGroup --enrollment-id $DpsX509EnrollmentId --ap static --cp $DpsCertificates.IntermediateCACertificatePath --provisioning-status enabled --iot-hubs $IotHubFqdn | Out-Null
-    Stop-OnError "Create an Azure Device Provisioning x509 enrollment group"
+        # Create enrollment group
+        az iot dps enrollment-group create --dps-name $DpsName --resource-group $ResourceGroup --enrollment-id $DpsX509EnrollmentId --ap static --cp $DpsCertificates.IntermediateCACertificatePath --provisioning-status enabled --iot-hubs $IotHubFqdn | Out-Null
+        Stop-OnError "Create an Azure Device Provisioning x509 enrollment group"
+    }
 }
 
+# File Upload
 if ($EnableFileUpload -eq $true) {
     Write-Host "Creating Azure Storage account ($StorageAccountName)"
     $AzureStorageAccount = az storage account create --name "$StorageAccountName" --resource-group "$ResourceGroup" --location "$AzureLocation" --sku Standard_LRS --kind StorageV2 | ConvertFrom-Json
@@ -325,3 +352,30 @@ if ($EnableFileUpload -eq $true) {
         Stop-OnError "Updating Azure IoT Hub file upload settings"
     }
 }
+
+
+# Gathering Test Environment settings.
+Write-Host "Getting IoT Hub Connection String"
+$TestEnvInfo.IotHubConnectionString = $(az iot hub connection-string show -g $ResourceGroup -n $IotHubName --kt primary --pn iothubowner --query connectionString -o tsv)
+Stop-OnError -Step "Get IoT Hub Connection String"
+
+Write-Host "Getting IoT Hub's Event Hub Connection String"
+$TestEnvInfo.IotHubEventHubConnectionString = $(az iot hub connection-string show -g $ResourceGroup -n $IotHubName --kt primary --pn iothubowner --eh --query connectionString -o tsv)
+Stop-OnError -Step "Get IoT Hub's Event Hub Connection String"
+
+if ($NoDps -eq $false) {
+    $TestEnvInfo.DpsDeviceFqdn = $AzureDps.properties.deviceProvisioningHostName
+    $TestEnvInfo.DpsServiceFqdn = $AzureDps.properties.serviceOperationsHostName
+    $TestEnvInfo.DpsIdScope = $AzureDps.properties.idScope
+
+    Write-Host "Getting DPS Connection String"
+    $TestEnvInfo.DpsConnectionString = $(az iot dps connection-string show -g $ResourceGroup -n $DpsName --kt primary --pn provisioningserviceowner --query connectionString -o tsv)
+    Stop-OnError -Step "Get DPS Connection String"
+
+    $TestEnvInfo.DpsRootCACertificatePath = $DpsCertificates.RootCACertificatePath
+    $TestEnvInfo.DpsRootCAPrivateKeyPath = $DpsCertificates.RootCAPrivateKeyPath
+    $TestEnvInfo.DpsIntermediateCACertificatePath = $DpsCertificates.IntermediateCACertificatePath
+    $TestEnvInfo.DpsIntermediateCAPrivateKeyPath = $DpsCertificates.IntermediateCAPrivateKeyPath
+}
+
+return $TestEnvInfo
