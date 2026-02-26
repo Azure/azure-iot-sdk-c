@@ -1547,7 +1547,7 @@ int telemetry_messenger_send_async(TELEMETRY_MESSENGER_HANDLE messenger_handle, 
     }
     else
     {
-        MESSENGER_SEND_EVENT_CALLER_INFORMATION *caller_info;
+        MESSENGER_SEND_EVENT_CALLER_INFORMATION *caller_info = NULL;
         TELEMETRY_MESSENGER_INSTANCE *instance = (TELEMETRY_MESSENGER_INSTANCE*)messenger_handle;
 
         if ((caller_info = (MESSENGER_SEND_EVENT_CALLER_INFORMATION*)malloc(sizeof(MESSENGER_SEND_EVENT_CALLER_INFORMATION))) == NULL)

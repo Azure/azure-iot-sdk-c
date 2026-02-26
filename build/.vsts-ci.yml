@@ -2,6 +2,7 @@ name: $(BuildID)_$(BuildDefinitionName)_$(SourceBranchName)_$(Date:yyyyMMdd)$(Re
 resources:
   - repo: self
     clean: true
+
 stages:
 - stage: Setup
   jobs:
@@ -9,6 +10,7 @@ stages:
     pool:
       vmImage: 'ubuntu-24.04'
     steps:
+    - checkout: none
     - script: |
         echo ">>>>>>>>>> Just a test"
       name: setResourceNames
