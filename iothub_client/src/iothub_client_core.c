@@ -159,7 +159,7 @@ typedef struct CSR_CALLBACK_INFO_TAG
 {
     IOTHUB_CLIENT_CONFIRMATION_RESULT result;
     int response_status_code;
-    char* certificates;
+    char* response_payload;
     IOTHUB_CLIENT_CERTIFICATE_SIGNING_RESPONSE_CALLBACK userCallback;
     void* userContext;
 } CSR_CALLBACK_INFO;
@@ -626,7 +626,7 @@ static void iothub_ll_get_device_twin_async_callback(DEVICE_TWIN_UPDATE_STATE up
     }
 }
 
-static void iothub_ll_csr_callback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, int response_status_code, const char* certificates, void* userContextCallback)
+static void iothub_ll_csr_callback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, int response_status_code, const char* response_payload, void* userContextCallback)
 {
     IOTHUB_QUEUE_CONSOLIDATED_CONTEXT* queue_context = (IOTHUB_QUEUE_CONSOLIDATED_CONTEXT*)userContextCallback;
 
@@ -640,16 +640,16 @@ static void iothub_ll_csr_callback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, int
         queue_cb_info.iothub_callback.csr_cb_info.userCallback = queue_context->userCallback.csrCallback;
         queue_cb_info.iothub_callback.csr_cb_info.userContext = queue_context->userContext;
 
-        if (certificates == NULL)
+        if (response_payload == NULL)
         {
-            queue_cb_info.iothub_callback.csr_cb_info.certificates = NULL;
+            queue_cb_info.iothub_callback.csr_cb_info.response_payload = NULL;
         }
         else
         {
-            if (mallocAndStrcpy_s(&queue_cb_info.iothub_callback.csr_cb_info.certificates, certificates) != 0)
+            if (mallocAndStrcpy_s(&queue_cb_info.iothub_callback.csr_cb_info.response_payload, response_payload) != 0)
             {
-                LogError("Failure allocating certificates string in CSR callback.");
-                queue_cb_info.iothub_callback.csr_cb_info.certificates = NULL;
+                LogError("Failure allocating response_payload string in CSR callback.");
+                queue_cb_info.iothub_callback.csr_cb_info.response_payload = NULL;
             }
         }
 
@@ -657,9 +657,9 @@ static void iothub_ll_csr_callback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, int
         {
             LogError("CSR callback vector push failed.");
 
-            if (queue_cb_info.iothub_callback.csr_cb_info.certificates != NULL)
+            if (queue_cb_info.iothub_callback.csr_cb_info.response_payload != NULL)
             {
-                free(queue_cb_info.iothub_callback.csr_cb_info.certificates);
+                free(queue_cb_info.iothub_callback.csr_cb_info.response_payload);
             }
         }
 
@@ -923,13 +923,13 @@ static void dispatch_user_callbacks(IOTHUB_CLIENT_CORE_INSTANCE* iotHubClientIns
                     queued_cb->iothub_callback.csr_cb_info.userCallback(
                         queued_cb->iothub_callback.csr_cb_info.result,
                         queued_cb->iothub_callback.csr_cb_info.response_status_code,
-                        queued_cb->iothub_callback.csr_cb_info.certificates,
+                        queued_cb->iothub_callback.csr_cb_info.response_payload,
                         queued_cb->iothub_callback.csr_cb_info.userContext);
                 }
 
-                if (queued_cb->iothub_callback.csr_cb_info.certificates != NULL)
+                if (queued_cb->iothub_callback.csr_cb_info.response_payload != NULL)
                 {
-                    free(queued_cb->iothub_callback.csr_cb_info.certificates);
+                    free(queued_cb->iothub_callback.csr_cb_info.response_payload);
                 }
                 break;
 
@@ -1435,13 +1435,13 @@ void IoTHubClientCore_Destroy(IOTHUB_CLIENT_CORE_HANDLE iotHubClientHandle)
                         queue_cb_info->iothub_callback.csr_cb_info.userCallback(
                             queue_cb_info->iothub_callback.csr_cb_info.result,
                             queue_cb_info->iothub_callback.csr_cb_info.response_status_code,
-                            queue_cb_info->iothub_callback.csr_cb_info.certificates,
+                            queue_cb_info->iothub_callback.csr_cb_info.response_payload,
                             queue_cb_info->iothub_callback.csr_cb_info.userContext);
                     }
 
-                    if (queue_cb_info->iothub_callback.csr_cb_info.certificates != NULL)
+                    if (queue_cb_info->iothub_callback.csr_cb_info.response_payload != NULL)
                     {
-                        free(queue_cb_info->iothub_callback.csr_cb_info.certificates);
+                        free(queue_cb_info->iothub_callback.csr_cb_info.response_payload);
                     }
                 }
             }

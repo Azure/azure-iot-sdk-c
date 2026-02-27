@@ -126,9 +126,10 @@ static void csr_response_callback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, int 
     (void)printf("CSR response received (result: %s, status: %d)\r\n",
         MU_ENUM_TO_STRING(IOTHUB_CLIENT_CONFIRMATION_RESULT, result), response_status_code);
 
-    if (result == IOTHUB_CLIENT_CONFIRMATION_ACCEPTED)
+    if (result == IOTHUB_CLIENT_CONFIRMATION_OK && response_status_code != 200)
     {
-        (void)printf("CSR request accepted (202), waiting for final response...\r\n");
+        // Non-final response, request remains pending in the SDK
+        (void)printf("CSR intermediate response (%d), waiting for final response...\r\n", response_status_code);
         if (responsePayload != NULL)
         {
             (void)printf("Intermediate payload: %s\r\n", responsePayload);

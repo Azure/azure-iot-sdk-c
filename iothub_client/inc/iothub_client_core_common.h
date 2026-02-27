@@ -512,12 +512,12 @@ typedef struct IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_STRUCT* IOTHUB_CLIENT_LL_UP
     * @param[in]   response_status_code   HTTP-style status code from IoT Hub (e.g. 200 on success, 202 on accepted, 4xx/5xx on error).
     *                                     Only meaningful when @p result is @c IOTHUB_CLIENT_CONFIRMATION_OK or
     *                                     @c IOTHUB_CLIENT_CONFIRMATION_ACCEPTED.
-    * @param[in]   certificates           Raw JSON response payload. On success (200) this contains the issued certificates
+    * @param[in]   response_payload       Raw JSON response payload. On success (200) this contains the issued certificates
     *                                     and correlation ID. On 202 this may contain intermediate status information.
     *                                     On error this contains error details. Can be NULL if no payload was received.
     * @param[in]   userContextCallback    User context pointer set in the call to send the CSR.
     */
-    typedef void(*IOTHUB_CLIENT_CERTIFICATE_SIGNING_RESPONSE_CALLBACK)(IOTHUB_CLIENT_CONFIRMATION_RESULT result, int response_status_code, const char* certificates, void* userContextCallback);
+    typedef void(*IOTHUB_CLIENT_CERTIFICATE_SIGNING_RESPONSE_CALLBACK)(IOTHUB_CLIENT_CONFIRMATION_RESULT result, int response_status_code, const char* response_payload, void* userContextCallback);
 
 #ifdef __cplusplus
 }

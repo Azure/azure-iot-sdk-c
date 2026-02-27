@@ -890,7 +890,7 @@ static int IoTHubClientCore_LL_DeviceMethodComplete(const char* method_name, con
     return result;
 }
 
-static void IoTHubClientCore_LL_CsrComplete(uint32_t item_id, int status_code, const char* certificates, void* ctx);
+static void IoTHubClientCore_LL_CsrComplete(uint32_t item_id, int status_code, const char* response_payload, void* ctx);
 
 static IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* initialize_iothub_client(const IOTHUB_CLIENT_CONFIG* client_config, const IOTHUB_CLIENT_DEVICE_CONFIG* device_config, bool use_dev_auth, const char* module_id)
 {
@@ -1304,7 +1304,7 @@ static IOTHUB_CSR_REQUEST* csr_request_data_create(IOTHUB_CLIENT_CORE_LL_HANDLE_
     return result;
 }
 
-static void IoTHubClientCore_LL_CsrComplete(uint32_t item_id, int status_code, const char* certificates, void* ctx)
+static void IoTHubClientCore_LL_CsrComplete(uint32_t item_id, int status_code, const char* response_payload, void* ctx)
 {
     if (ctx == NULL)
     {
@@ -1323,28 +1323,24 @@ static void IoTHubClientCore_LL_CsrComplete(uint32_t item_id, int status_code, c
             {
                 if (csr_data->callback != NULL)
                 {
-                    if (status_code == 202)
+                    if (status_code == 200)
                     {
-                        csr_data->callback(IOTHUB_CLIENT_CONFIRMATION_ACCEPTED, 202, certificates, csr_data->context);
-                        // Keep in csr_ack_queue — awaiting final response
+                        csr_data->callback(IOTHUB_CLIENT_CONFIRMATION_OK, status_code, response_payload, csr_data->context);
+                        DList_RemoveEntryList(client_item);
+                        csr_request_data_destroy(csr_data);
                     }
-                    else if (status_code == 408)
+                    else if (status_code >= 400)
                     {
-                        csr_data->callback(IOTHUB_CLIENT_CONFIRMATION_MESSAGE_TIMEOUT, 0, NULL, csr_data->context);
+                        csr_data->callback(IOTHUB_CLIENT_CONFIRMATION_ERROR, status_code, response_payload, csr_data->context);
                         DList_RemoveEntryList(client_item);
                         csr_request_data_destroy(csr_data);
                     }
                     else
                     {
-                        csr_data->callback(IOTHUB_CLIENT_CONFIRMATION_OK, status_code, certificates, csr_data->context);
-                        DList_RemoveEntryList(client_item);
-                        csr_request_data_destroy(csr_data);
+                        // For any other status code, we don't remove the request from the list as we are not sure if the request was processed or not,
+                        // so we let it time out eventually and report failure at that time if it does time out.
+                        csr_data->callback(IOTHUB_CLIENT_CONFIRMATION_OK, status_code, response_payload, csr_data->context);
                     }
-                }
-                else if (status_code != 202)
-                {
-                    DList_RemoveEntryList(client_item);
-                    csr_request_data_destroy(csr_data);
                 }
                 break;
             }
