@@ -64,10 +64,23 @@ typedef struct IOTHUB_DEVICE_TWIN_TAG
     IOTHUB_DEVICE_HANDLE device_handle;
 } IOTHUB_DEVICE_TWIN;
 
+typedef struct IOTHUB_CSR_REQUEST_TAG
+{
+    uint32_t item_id;
+    char* certificate_signing_request;
+    char* replace;
+    IOTHUB_CLIENT_CERTIFICATE_SIGNING_RESPONSE_CALLBACK callback;
+    void* context;
+    DLIST_ENTRY entry;
+    IOTHUB_CLIENT_CORE_LL_HANDLE client_handle;
+    IOTHUB_DEVICE_HANDLE device_handle;
+} IOTHUB_CSR_REQUEST;
+
 union IOTHUB_IDENTITY_INFO_TAG
 {
     IOTHUB_DEVICE_TWIN* device_twin;
     IOTHUB_MESSAGE_LIST* iothub_message;
+    IOTHUB_CSR_REQUEST* csr_request;
 };
 
 #ifdef __cplusplus

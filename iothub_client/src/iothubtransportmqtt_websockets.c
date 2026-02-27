@@ -122,6 +122,11 @@ static void IoTHubTransportMqtt_WS_Unsubscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE h
     IoTHubTransport_MQTT_Common_Unsubscribe_DeviceTwin(handle);
 }
 
+static int IoTHubTransportMqtt_WS_Subscribe_CertificateSigningResponse(IOTHUB_DEVICE_HANDLE handle)
+{
+    return IoTHubTransport_MQTT_Common_Subscribe_CertificateSigningResponse(handle);
+}
+
 static IOTHUB_CLIENT_RESULT IoTHubTransportMqtt_WS_GetTwinAsync(IOTHUB_DEVICE_HANDLE handle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK completionCallback, void* callbackContext)
 {
     return IoTHubTransport_MQTT_Common_GetTwinAsync(handle, completionCallback, callbackContext);
@@ -202,6 +207,7 @@ static TRANSPORT_PROVIDER thisTransportProvider_WebSocketsOverTls = {
     IoTHubTransportMqtt_WS_DeviceMethod_Response,
     IoTHubTransportMqtt_WS_Subscribe_DeviceTwin,
     IoTHubTransportMqtt_WS_Unsubscribe_DeviceTwin,
+    IoTHubTransportMqtt_WS_Subscribe_CertificateSigningResponse,
     IoTHubTransportMqtt_WS_ProcessItem,
     IoTHubTransportMqtt_WS_GetHostname,
     IoTHubTransportMqtt_WS_SetOption,

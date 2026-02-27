@@ -31,6 +31,7 @@ extern "C"
     typedef void (*pfTransport_Twin_RetrievePropertyComplete_Callback)(DEVICE_TWIN_UPDATE_STATE update_state, const unsigned char* payLoad, size_t size, void* ctx);
     typedef int (*pfTransport_DeviceMethod_Complete_Callback)(const char* method_name, const unsigned char* payLoad, size_t size, METHOD_HANDLE response_id, void* ctx);
     typedef const char* (*pfTransport_GetOption_Model_Id_Callback)(void* ctx);
+    typedef void (*pfTransport_Csr_Complete_Callback)(uint32_t item_id, int status_code, const char* response_payload, void* ctx);
 
     /** @brief    This struct captures device configuration. */
     typedef struct IOTHUB_DEVICE_CONFIG_TAG
@@ -61,6 +62,7 @@ extern "C"
         pfTransport_Twin_RetrievePropertyComplete_Callback twin_retrieve_prop_complete_cb;
         pfTransport_DeviceMethod_Complete_Callback method_complete_cb;
         pfTransport_GetOption_Model_Id_Callback get_model_id_cb;
+        pfTransport_Csr_Complete_Callback csr_complete_cb;
     } TRANSPORT_CALLBACKS_INFO;
 
     typedef STRING_HANDLE (*pfIoTHubTransport_GetHostname)(TRANSPORT_LL_HANDLE handle);
@@ -82,6 +84,7 @@ extern "C"
     typedef int(*pfIoTHubTransport_Subscribe_DeviceMethod)(IOTHUB_DEVICE_HANDLE handle);
     typedef void(*pfIoTHubTransport_Unsubscribe_DeviceMethod)(IOTHUB_DEVICE_HANDLE handle);
     typedef int(*pfIoTHubTransport_DeviceMethod_Response)(IOTHUB_DEVICE_HANDLE handle, METHOD_HANDLE methodId, const unsigned char* response, size_t response_size, int status_response);
+    typedef int (*pfIoTHubTransport_Subscribe_CertificateSigningResponse)(IOTHUB_DEVICE_HANDLE handle);
     typedef int(*pfIoTHubTransport_Subscribe_InputQueue)(IOTHUB_DEVICE_HANDLE handle);
     typedef void(*pfIoTHubTransport_Unsubscribe_InputQueue)(IOTHUB_DEVICE_HANDLE handle);
     typedef int(*pfIoTHubTransport_SetCallbackContext)(TRANSPORT_LL_HANDLE handle, void* ctx);
@@ -94,6 +97,7 @@ pfIoTHubTransport_Unsubscribe_DeviceMethod IoTHubTransport_Unsubscribe_DeviceMet
 pfIoTHubTransport_DeviceMethod_Response IoTHubTransport_DeviceMethod_Response;      \
 pfIoTHubTransport_Subscribe_DeviceTwin IoTHubTransport_Subscribe_DeviceTwin;        \
 pfIoTHubTransport_Unsubscribe_DeviceTwin IoTHubTransport_Unsubscribe_DeviceTwin;    \
+pfIoTHubTransport_Subscribe_CertificateSigningResponse IoTHubTransport_Subscribe_CertificateSigningResponse;      \
 pfIoTHubTransport_ProcessItem IoTHubTransport_ProcessItem;                          \
 pfIoTHubTransport_GetHostname IoTHubTransport_GetHostname;                          \
 pfIoTHubTransport_SetOption IoTHubTransport_SetOption;                              \

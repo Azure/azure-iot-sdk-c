@@ -1406,6 +1406,11 @@ IOTHUB_PROCESS_ITEM_RESULT IoTHubTransport_AMQP_Common_ProcessItem(TRANSPORT_LL_
                 }
             }
         }
+        else if (item_type == IOTHUB_TYPE_CERTIFICATE_SIGNING_REQUEST)
+        {
+            LogError("SendCertificateSigningRequest is not supported by this transport. Use MQTT.");
+            result = IOTHUB_PROCESS_ERROR;
+        }
         else
         {
             LogError("Item type not supported (%d)", item_type);

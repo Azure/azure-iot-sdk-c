@@ -645,7 +645,8 @@ char* prov_auth_get_alias_key(PROV_AUTH_HANDLE handle)
 int prov_auth_set_certificate(PROV_AUTH_HANDLE handle, const char* cert)
 {
 #ifdef HSM_TYPE_X509
-    return hsm_client_x509_set_certificate(handle->hsm_client_handle, cert);
+    (void)handle;
+    return hsm_client_x509_set_certificate(hsm_client_x509_create(), cert);
 #else
     (void)handle;
     (void)cert;
@@ -657,7 +658,8 @@ int prov_auth_set_certificate(PROV_AUTH_HANDLE handle, const char* cert)
 int prov_auth_set_key(PROV_AUTH_HANDLE handle, const char* key)
 {
 #ifdef HSM_TYPE_X509
-    return hsm_client_x509_set_key(handle->hsm_client_handle, key);
+    (void)handle;
+    return hsm_client_x509_set_key(hsm_client_x509_create(), key);
 #else
     (void)handle;
     (void)key;

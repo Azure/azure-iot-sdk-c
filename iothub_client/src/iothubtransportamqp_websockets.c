@@ -192,6 +192,13 @@ static int IoTHubTransportAMQP_WS_SetCallbackContext(TRANSPORT_LL_HANDLE handle,
     return IoTHubTransport_AMQP_SetCallbackContext(handle, ctx);
 }
 
+static int IoTHubTransportAMQP_WS_Subscribe_CertificateSigningResponse(IOTHUB_DEVICE_HANDLE handle)
+{
+    (void)handle;
+    LogError("AMQP WS does not support certificate signing request.");
+    return MU_FAILURE;
+}
+
 static int IoTHubTransportAMQP_WS_GetSupportedPlatformInfo(TRANSPORT_LL_HANDLE handle, PLATFORM_INFO_OPTION* info)
 {
     return IoTHubTransport_AMQP_Common_GetSupportedPlatformInfo(handle, info);
@@ -205,6 +212,7 @@ static TRANSPORT_PROVIDER thisTransportProvider_WebSocketsOverTls =
     IoTHubTransportAMQP_WS_DeviceMethod_Response,
     IoTHubTransportAMQP_WS_Subscribe_DeviceTwin,                       /*pfIoTHubTransport_Subscribe_DeviceTwin IoTHubTransport_Subscribe_DeviceTwin;*/
     IoTHubTransportAMQP_WS_Unsubscribe_DeviceTwin,                     /*pfIoTHubTransport_Unsubscribe_DeviceTwin IoTHubTransport_Unsubscribe_DeviceTwin;*/
+    IoTHubTransportAMQP_WS_Subscribe_CertificateSigningResponse,        /*pfIoTHubTransport_Subscribe_CertificateSigningResponse IoTHubTransport_Subscribe_CertificateSigningResponse;*/
     IoTHubTransportAMQP_WS_ProcessItem,                                /*pfIoTHubTransport_ProcessItem IoTHubTransport_ProcessItem;*/
     IoTHubTransportAMQP_WS_GetHostname,                                /*pfIoTHubTransport_GetHostname IoTHubTransport_GetHostname;*/
     IoTHubTransportAMQP_WS_SetOption,                                  /*pfIoTHubTransport_SetOption IoTHubTransport_SetOption;*/

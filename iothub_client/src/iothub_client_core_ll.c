@@ -109,6 +109,8 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG
     DLIST_ENTRY waitingToSend;
     DLIST_ENTRY iot_msg_queue;
     DLIST_ENTRY iot_ack_queue;
+    DLIST_ENTRY csr_msg_queue;
+    DLIST_ENTRY csr_ack_queue;
     TRANSPORT_LL_HANDLE transportHandle;
     bool isSharedTransport;
     IOTHUB_DEVICE_HANDLE deviceHandle;
@@ -299,6 +301,7 @@ static void setTransportProtocol(IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handleData, 
     handleData->IoTHubTransport_Subscribe_DeviceMethod = protocol->IoTHubTransport_Subscribe_DeviceMethod;
     handleData->IoTHubTransport_Unsubscribe_DeviceMethod = protocol->IoTHubTransport_Unsubscribe_DeviceMethod;
     handleData->IoTHubTransport_DeviceMethod_Response = protocol->IoTHubTransport_DeviceMethod_Response;
+    handleData->IoTHubTransport_Subscribe_CertificateSigningResponse = protocol->IoTHubTransport_Subscribe_CertificateSigningResponse;
     handleData->IoTHubTransport_Subscribe_InputQueue = protocol->IoTHubTransport_Subscribe_InputQueue;
     handleData->IoTHubTransport_Unsubscribe_InputQueue = protocol->IoTHubTransport_Unsubscribe_InputQueue;
     handleData->IoTHubTransport_SetCallbackContext = protocol->IoTHubTransport_SetCallbackContext;
@@ -887,6 +890,8 @@ static int IoTHubClientCore_LL_DeviceMethodComplete(const char* method_name, con
     return result;
 }
 
+static void IoTHubClientCore_LL_CsrComplete(uint32_t item_id, int status_code, const char* response_payload, void* ctx);
+
 static IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* initialize_iothub_client(const IOTHUB_CLIENT_CONFIG* client_config, const IOTHUB_CLIENT_DEVICE_CONFIG* device_config, bool use_dev_auth, const char* module_id)
 {
     IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* result;
@@ -953,6 +958,7 @@ static IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* initialize_iothub_client(const IOTHUB_
             transport_cb.msg_cb = IoTHubClientCore_LL_MessageCallback;
             transport_cb.method_complete_cb = IoTHubClientCore_LL_DeviceMethodComplete;
             transport_cb.get_model_id_cb = IoTHubClientCore_LL_GetModelId;
+            transport_cb.csr_complete_cb = IoTHubClientCore_LL_CsrComplete;
 
             if (client_config != NULL)
             {
@@ -1133,6 +1139,8 @@ static IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* initialize_iothub_client(const IOTHUB_
                     DList_InitializeListHead(&(result->waitingToSend));
                     DList_InitializeListHead(&(result->iot_msg_queue));
                     DList_InitializeListHead(&(result->iot_ack_queue));
+                    DList_InitializeListHead(&(result->csr_msg_queue));
+                    DList_InitializeListHead(&(result->csr_ack_queue));
                     result->messageCallback.type = CALLBACK_TYPE_NONE;
                     result->methodCallback.type = CALLBACK_TYPE_NONE;
                     result->lastMessageReceiveTime = INDEFINITE_TIME;
@@ -1252,6 +1260,92 @@ static void on_get_device_twin_completed(DEVICE_TWIN_UPDATE_STATE update_state, 
         GET_TWIN_CONTEXT* getTwinCtx = (GET_TWIN_CONTEXT*)userContextCallback;
         getTwinCtx->callback(update_state, payLoad, size, getTwinCtx->context);
         free(getTwinCtx);
+    }
+}
+
+static void csr_request_data_destroy(IOTHUB_CSR_REQUEST* csr_data)
+{
+    if (csr_data != NULL)
+    {
+        free(csr_data->certificate_signing_request);
+        free(csr_data->replace);
+        free(csr_data);
+    }
+}
+
+static IOTHUB_CSR_REQUEST* csr_request_data_create(IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handleData, uint32_t id, const char* certificateSigningRequest, const char* replace, IOTHUB_CLIENT_CERTIFICATE_SIGNING_RESPONSE_CALLBACK callback, void* context)
+{
+    IOTHUB_CSR_REQUEST* result = (IOTHUB_CSR_REQUEST*)malloc(sizeof(IOTHUB_CSR_REQUEST));
+    if (result != NULL)
+    {
+        memset(result, 0, sizeof(IOTHUB_CSR_REQUEST));
+
+        if (mallocAndStrcpy_s(&result->certificate_signing_request, certificateSigningRequest) != 0)
+        {
+            LogError("Failed copying CSR string");
+            csr_request_data_destroy(result);
+            result = NULL;
+        }
+        else if (replace != NULL && mallocAndStrcpy_s(&result->replace, replace) != 0)
+        {
+            LogError("Failed copying replace string");
+            csr_request_data_destroy(result);
+            result = NULL;
+        }
+        else
+        {
+            result->item_id = id;
+            result->callback = callback;
+            result->context = context;
+            result->client_handle = handleData;
+            result->device_handle = handleData->deviceHandle;
+        }
+    }
+    return result;
+}
+
+static void IoTHubClientCore_LL_CsrComplete(uint32_t item_id, int status_code, const char* response_payload, void* ctx)
+{
+    if (ctx == NULL)
+    {
+        LogError("Invalid argument handle=%p", ctx);
+    }
+    else
+    {
+        IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handleData = (IOTHUB_CLIENT_CORE_LL_HANDLE_DATA*)ctx;
+
+        DLIST_ENTRY* client_item = handleData->csr_ack_queue.Flink;
+        while (client_item != &(handleData->csr_ack_queue))
+        {
+            PDLIST_ENTRY next_item = client_item->Flink;
+            IOTHUB_CSR_REQUEST* csr_data = containingRecord(client_item, IOTHUB_CSR_REQUEST, entry);
+            if (csr_data->item_id == item_id)
+            {
+                if (csr_data->callback != NULL)
+                {
+                    if (status_code == 200)
+                    {
+                        csr_data->callback(IOTHUB_CLIENT_CONFIRMATION_OK, status_code, response_payload, csr_data->context);
+                        DList_RemoveEntryList(client_item);
+                        csr_request_data_destroy(csr_data);
+                    }
+                    else if (status_code >= 400)
+                    {
+                        csr_data->callback(IOTHUB_CLIENT_CONFIRMATION_ERROR, status_code, response_payload, csr_data->context);
+                        DList_RemoveEntryList(client_item);
+                        csr_request_data_destroy(csr_data);
+                    }
+                    else
+                    {
+                        // For any other status code, we don't remove the request from the list as we are not sure if the request was processed or not,
+                        // so we let it time out eventually and report failure at that time if it does time out.
+                        csr_data->callback(IOTHUB_CLIENT_CONFIRMATION_OK, status_code, response_payload, csr_data->context);
+                    }
+                }
+                break;
+            }
+            client_item = next_item;
+        }
     }
 }
 
@@ -1837,6 +1931,25 @@ void IoTHubClientCore_LL_Destroy(IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle
             device_twin_data_destroy(temp);
         }
 
+        while ((unsend = DList_RemoveHeadList(&(handleData->csr_msg_queue))) != &(handleData->csr_msg_queue))
+        {
+            IOTHUB_CSR_REQUEST* temp = containingRecord(unsend, IOTHUB_CSR_REQUEST, entry);
+            if (temp->callback != NULL)
+            {
+                temp->callback(IOTHUB_CLIENT_CONFIRMATION_BECAUSE_DESTROY, 0, NULL, temp->context);
+            }
+            csr_request_data_destroy(temp);
+        }
+        while ((unsend = DList_RemoveHeadList(&(handleData->csr_ack_queue))) != &(handleData->csr_ack_queue))
+        {
+            IOTHUB_CSR_REQUEST* temp = containingRecord(unsend, IOTHUB_CSR_REQUEST, entry);
+            if (temp->callback != NULL)
+            {
+                temp->callback(IOTHUB_CLIENT_CONFIRMATION_BECAUSE_DESTROY, 0, NULL, temp->context);
+            }
+            csr_request_data_destroy(temp);
+        }
+
         delete_event_callback_list(handleData);
 
         IoTHubClient_Auth_Destroy(handleData->authorization_module);
@@ -2153,6 +2266,40 @@ void IoTHubClientCore_LL_DoWork(IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle)
                 }
             }
             // Move along to the next item
+            client_item = next_item;
+        }
+
+        // CSR dispatch: csr_msg_queue -> ProcessItem -> csr_ack_queue
+        client_item = handleData->csr_msg_queue.Flink;
+        while (client_item != &(handleData->csr_msg_queue))
+        {
+            PDLIST_ENTRY next_item = client_item->Flink;
+
+            IOTHUB_CSR_REQUEST* csr_data = containingRecord(client_item, IOTHUB_CSR_REQUEST, entry);
+            IOTHUB_IDENTITY_INFO identity_info;
+            identity_info.csr_request = csr_data;
+            IOTHUB_PROCESS_ITEM_RESULT process_results = handleData->IoTHubTransport_ProcessItem(handleData->transportHandle, IOTHUB_TYPE_CERTIFICATE_SIGNING_REQUEST, &identity_info);
+            if (process_results == IOTHUB_PROCESS_CONTINUE || process_results == IOTHUB_PROCESS_NOT_CONNECTED)
+            {
+                break;
+            }
+            else
+            {
+                DList_RemoveEntryList(client_item);
+                if (process_results == IOTHUB_PROCESS_OK)
+                {
+                    DList_InsertTailList(&(handleData->csr_ack_queue), &(csr_data->entry));
+                }
+                else
+                {
+                    LogError("Failure processing CSR item");
+                    if (csr_data->callback != NULL)
+                    {
+                        csr_data->callback(IOTHUB_CLIENT_CONFIRMATION_ERROR, 0, NULL, csr_data->context);
+                    }
+                    csr_request_data_destroy(csr_data);
+                }
+            }
             client_item = next_item;
         }
 
@@ -2527,6 +2674,47 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_GetTwinAsync(IOTHUB_CLIENT_CORE_LL_HAND
                     result = IOTHUB_CLIENT_OK;
                 }
             }
+        }
+    }
+
+    return result;
+}
+
+IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SendCertificateSigningRequestAsync(
+    IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle,
+    const char* certificateSigningRequest,
+    const char* replace,
+    IOTHUB_CLIENT_CERTIFICATE_SIGNING_RESPONSE_CALLBACK certificateSigningResponseCallback,
+    void* userContextCallback)
+{
+    IOTHUB_CLIENT_RESULT result;
+
+    if (iotHubClientHandle == NULL || certificateSigningRequest == NULL || certificateSigningResponseCallback == NULL)
+    {
+        LogError("Invalid argument (iotHubClientHandle=%p, csr=%p, callback=%p)",
+            iotHubClientHandle, certificateSigningRequest, certificateSigningResponseCallback);
+        result = IOTHUB_CLIENT_INVALID_ARG;
+    }
+    else
+    {
+        IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handleData = (IOTHUB_CLIENT_CORE_LL_HANDLE_DATA*)iotHubClientHandle;
+        IOTHUB_CSR_REQUEST* csr_data = csr_request_data_create(handleData, get_next_item_id(handleData),
+            certificateSigningRequest, replace, certificateSigningResponseCallback, userContextCallback);
+        if (csr_data == NULL)
+        {
+            LogError("Failure constructing CSR request data");
+            result = IOTHUB_CLIENT_ERROR;
+        }
+        else if (handleData->IoTHubTransport_Subscribe_CertificateSigningResponse(handleData->transportHandle) != 0)
+        {
+            LogError("Failure subscribing to certificate signing response topic");
+            csr_request_data_destroy(csr_data);
+            result = IOTHUB_CLIENT_ERROR;
+        }
+        else
+        {
+            DList_InsertTailList(&(handleData->csr_msg_queue), &(csr_data->entry));
+            result = IOTHUB_CLIENT_OK;
         }
     }
 
@@ -3304,6 +3492,7 @@ int IoTHubClientCore_LL_GetTransportCallbacks(TRANSPORT_CALLBACKS_INFO* transpor
         transport_cb->msg_cb = IoTHubClientCore_LL_MessageCallback;
         transport_cb->method_complete_cb = IoTHubClientCore_LL_DeviceMethodComplete;
         transport_cb->get_model_id_cb = IoTHubClientCore_LL_GetModelId;
+        transport_cb->csr_complete_cb = IoTHubClientCore_LL_CsrComplete;
         result = 0;
     }
     return result;

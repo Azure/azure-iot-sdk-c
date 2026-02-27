@@ -329,6 +329,26 @@ typedef IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE IOTHUB_CLIENT_LL_AZURE_STOR
      MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_LL_GetTwinAsync, IOTHUB_DEVICE_CLIENT_LL_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK, deviceTwinCallback, void*, userContextCallback);
 
      /**
+     * @brief    This API sends a certificate signing request (CSR) to IoT Hub.
+     *
+     * @param    iotHubClientHandle                          The handle created by a call to the create function.
+     * @param    certificateSigningRequest                   The PEM-encoded certificate signing request.
+     * @param    replace                                     Optional certificate fingerprint to replace. Can be @c NULL.
+     * @param    certificateSigningResponseCallback          The callback invoked with the result. May be called more
+     *                                                      than once: first with @c IOTHUB_CLIENT_CONFIRMATION_ACCEPTED
+     *                                                      (intermediate 202 response), then with a final result such as
+     *                                                      @c IOTHUB_CLIENT_CONFIRMATION_OK, @c IOTHUB_CLIENT_CONFIRMATION_MESSAGE_TIMEOUT,
+     *                                                      @c IOTHUB_CLIENT_CONFIRMATION_BECAUSE_DESTROY, or @c IOTHUB_CLIENT_CONFIRMATION_ERROR.
+     * @param    userContextCallback                         User specified context that will be provided to the
+     *                                                      callback. This can be @c NULL.
+     *
+     * @warning: Do not call IoTHubDeviceClient_LL_Destroy() or IoTHubDeviceClient_LL_DoWork() from inside your application's callback.
+     *
+     * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
+     */
+     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_LL_SendCertificateSigningRequestAsync, IOTHUB_DEVICE_CLIENT_LL_HANDLE, iotHubClientHandle, const char*, certificateSigningRequest, const char*, replace, IOTHUB_CLIENT_CERTIFICATE_SIGNING_RESPONSE_CALLBACK, certificateSigningResponseCallback, void*, userContextCallback);
+
+     /**
      * @brief    This API sets the callback for async cloud to device method calls.
      *
      * @param    iotHubClientHandle                 The handle created by a call to the create function.

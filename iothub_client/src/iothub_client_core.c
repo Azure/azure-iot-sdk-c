@@ -109,7 +109,8 @@ typedef struct HTTPWORKER_THREAD_INFO_TAG
     CALLBACK_TYPE_INBOUND_DEVICE_METHOD, \
     CALLBACK_TYPE_COMMAND,              \
     CALLBACK_TYPE_MESSAGE,              \
-    CALLBACK_TYPE_INPUTMESSAGE
+    CALLBACK_TYPE_INPUTMESSAGE,         \
+    CALLBACK_TYPE_CSR
 
 MU_DEFINE_ENUM_WITHOUT_INVALID(USER_CALLBACK_TYPE, USER_CALLBACK_TYPE_VALUES)
 MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(USER_CALLBACK_TYPE, USER_CALLBACK_TYPE_VALUES)
@@ -154,6 +155,15 @@ typedef struct INPUTMESSAGE_CALLBACK_INFO_TAG
     IOTHUB_MESSAGE_HANDLE message_handle;
 } INPUTMESSAGE_CALLBACK_INFO;
 
+typedef struct CSR_CALLBACK_INFO_TAG
+{
+    IOTHUB_CLIENT_CONFIRMATION_RESULT result;
+    int response_status_code;
+    char* response_payload;
+    IOTHUB_CLIENT_CERTIFICATE_SIGNING_RESPONSE_CALLBACK userCallback;
+    void* userContext;
+} CSR_CALLBACK_INFO;
+
 typedef struct USER_CALLBACK_INFO_TAG
 {
     USER_CALLBACK_TYPE type;
@@ -167,6 +177,7 @@ typedef struct USER_CALLBACK_INFO_TAG
         METHOD_CALLBACK_INFO method_cb_info;
         IOTHUB_MESSAGE_HANDLE message_handle;
         INPUTMESSAGE_CALLBACK_INFO inputmessage_cb_info;
+        CSR_CALLBACK_INFO csr_cb_info;
     } iothub_callback;
 } USER_CALLBACK_INFO;
 
@@ -188,6 +199,7 @@ typedef struct IOTHUB_QUEUE_CONSOLIDATED_CONTEXT_TAG
     union USER_CALLBACK_TAG
     {
         IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK getTwin;
+        IOTHUB_CLIENT_CERTIFICATE_SIGNING_RESPONSE_CALLBACK csrCallback;
     } userCallback;
 
     void* userContext;
@@ -614,6 +626,55 @@ static void iothub_ll_get_device_twin_async_callback(DEVICE_TWIN_UPDATE_STATE up
     }
 }
 
+static void iothub_ll_csr_callback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, int response_status_code, const char* response_payload, void* userContextCallback)
+{
+    IOTHUB_QUEUE_CONSOLIDATED_CONTEXT* queue_context = (IOTHUB_QUEUE_CONSOLIDATED_CONTEXT*)userContextCallback;
+
+    if (queue_context != NULL)
+    {
+        USER_CALLBACK_INFO queue_cb_info;
+        queue_cb_info.type = CALLBACK_TYPE_CSR;
+        queue_cb_info.userContextCallback = queue_context->userContext;
+        queue_cb_info.iothub_callback.csr_cb_info.result = result;
+        queue_cb_info.iothub_callback.csr_cb_info.response_status_code = response_status_code;
+        queue_cb_info.iothub_callback.csr_cb_info.userCallback = queue_context->userCallback.csrCallback;
+        queue_cb_info.iothub_callback.csr_cb_info.userContext = queue_context->userContext;
+
+        if (response_payload == NULL)
+        {
+            queue_cb_info.iothub_callback.csr_cb_info.response_payload = NULL;
+        }
+        else
+        {
+            if (mallocAndStrcpy_s(&queue_cb_info.iothub_callback.csr_cb_info.response_payload, response_payload) != 0)
+            {
+                LogError("Failure allocating response_payload string in CSR callback.");
+                queue_cb_info.iothub_callback.csr_cb_info.response_payload = NULL;
+            }
+        }
+
+        if (VECTOR_push_back(queue_context->iotHubClientHandle->saved_user_callback_list, &queue_cb_info, 1) != 0)
+        {
+            LogError("CSR callback vector push failed.");
+
+            if (queue_cb_info.iothub_callback.csr_cb_info.response_payload != NULL)
+            {
+                free(queue_cb_info.iothub_callback.csr_cb_info.response_payload);
+            }
+        }
+
+        // Only free queue_context on final callbacks (not intermediate 202 accepted)
+        if (result != IOTHUB_CLIENT_CONFIRMATION_ACCEPTED)
+        {
+            free(queue_context);
+        }
+    }
+    else
+    {
+        LogError("CSR callback userContextCallback NULL");
+    }
+}
+
 static void invoke_application_command_callback(IOTHUB_CLIENT_CORE_HANDLE method_user_context_handle, IOTHUB_CLIENT_COMMAND_CALLBACK_ASYNC command_callback, USER_CALLBACK_INFO* queued_cb)
 {
     const char* method_name = STRING_c_str(queued_cb->iothub_callback.method_cb_info.method_name);
@@ -853,6 +914,22 @@ static void dispatch_user_callbacks(IOTHUB_CLIENT_CORE_INSTANCE* iotHubClientIns
                             LogError("Lock failed");
                         }
                     }
+                }
+                break;
+
+            case CALLBACK_TYPE_CSR:
+                if (queued_cb->iothub_callback.csr_cb_info.userCallback)
+                {
+                    queued_cb->iothub_callback.csr_cb_info.userCallback(
+                        queued_cb->iothub_callback.csr_cb_info.result,
+                        queued_cb->iothub_callback.csr_cb_info.response_status_code,
+                        queued_cb->iothub_callback.csr_cb_info.response_payload,
+                        queued_cb->iothub_callback.csr_cb_info.userContext);
+                }
+
+                if (queued_cb->iothub_callback.csr_cb_info.response_payload != NULL)
+                {
+                    free(queued_cb->iothub_callback.csr_cb_info.response_payload);
                 }
                 break;
 
@@ -1349,6 +1426,22 @@ void IoTHubClientCore_Destroy(IOTHUB_CLIENT_CORE_HANDLE iotHubClientHandle)
                     if (queue_cb_info->iothub_callback.reported_state_cb_info.reportedStateCallback)
                     {
                         queue_cb_info->iothub_callback.reported_state_cb_info.reportedStateCallback(queue_cb_info->iothub_callback.reported_state_cb_info.status_code, queue_cb_info->userContextCallback);
+                    }
+                }
+                else if (queue_cb_info->type == CALLBACK_TYPE_CSR)
+                {
+                    if (queue_cb_info->iothub_callback.csr_cb_info.userCallback)
+                    {
+                        queue_cb_info->iothub_callback.csr_cb_info.userCallback(
+                            queue_cb_info->iothub_callback.csr_cb_info.result,
+                            queue_cb_info->iothub_callback.csr_cb_info.response_status_code,
+                            queue_cb_info->iothub_callback.csr_cb_info.response_payload,
+                            queue_cb_info->iothub_callback.csr_cb_info.userContext);
+                    }
+
+                    if (queue_cb_info->iothub_callback.csr_cb_info.response_payload != NULL)
+                    {
+                        free(queue_cb_info->iothub_callback.csr_cb_info.response_payload);
                     }
                 }
             }
@@ -1967,6 +2060,63 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_GetTwinAsync(IOTHUB_CLIENT_CORE_HANDLE iot
                     if (result != IOTHUB_CLIENT_OK)
                     {
                         LogError("IoTHubClientCore_LL_GetTwinAsync failed");
+                        free(queueContext);
+                    }
+
+                    (void)Unlock(iotHubClientInstance->LockHandle);
+                }
+            }
+        }
+    }
+    return result;
+}
+
+IOTHUB_CLIENT_RESULT IoTHubClientCore_SendCertificateSigningRequestAsync(IOTHUB_CLIENT_CORE_HANDLE iotHubClientHandle, const char* certificateSigningRequest, const char* replace, IOTHUB_CLIENT_CERTIFICATE_SIGNING_RESPONSE_CALLBACK certificateSigningResponseCallback, void* userContextCallback)
+{
+    IOTHUB_CLIENT_RESULT result;
+
+    if (iotHubClientHandle == NULL || certificateSigningRequest == NULL || certificateSigningResponseCallback == NULL)
+    {
+        result = IOTHUB_CLIENT_INVALID_ARG;
+        LogError("Invalid argument (iotHubClientHandle=%p, csr=%p, callback=%p)", iotHubClientHandle, certificateSigningRequest, certificateSigningResponseCallback);
+    }
+    else
+    {
+        IOTHUB_CLIENT_CORE_INSTANCE* iotHubClientInstance = (IOTHUB_CLIENT_CORE_INSTANCE*)iotHubClientHandle;
+
+        if ((result = StartWorkerThreadIfNeeded(iotHubClientInstance)) != IOTHUB_CLIENT_OK)
+        {
+            result = IOTHUB_CLIENT_ERROR;
+            LogError("Could not start worker thread");
+        }
+        else
+        {
+            IOTHUB_QUEUE_CONSOLIDATED_CONTEXT* queueContext;
+
+            if ((queueContext = (IOTHUB_QUEUE_CONSOLIDATED_CONTEXT*)malloc(sizeof(IOTHUB_QUEUE_CONSOLIDATED_CONTEXT))) == NULL)
+            {
+                LogError("Failed creating queue context");
+                result = IOTHUB_CLIENT_ERROR;
+            }
+            else
+            {
+                queueContext->iotHubClientHandle = iotHubClientHandle;
+                queueContext->userCallback.csrCallback = certificateSigningResponseCallback;
+                queueContext->userContext = userContextCallback;
+
+                if (Lock(iotHubClientInstance->LockHandle) != LOCK_OK)
+                {
+                    result = IOTHUB_CLIENT_ERROR;
+                    LogError("Could not acquire lock");
+                    free(queueContext);
+                }
+                else
+                {
+                    result = IoTHubClientCore_LL_SendCertificateSigningRequestAsync(iotHubClientInstance->IoTHubClientLLHandle, certificateSigningRequest, replace, iothub_ll_csr_callback, queueContext);
+
+                    if (result != IOTHUB_CLIENT_OK)
+                    {
+                        LogError("IoTHubClientCore_LL_SendCertificateSigningRequestAsync failed");
                         free(queueContext);
                     }
 
