@@ -21,10 +21,12 @@ stages:
         scriptType: 'ps'
         scriptLocation: 'inlineScript'
         inlineScript: |
+          $PSVersionTable
           Import-Module ./testtools/scripts/Azure.Iot.Sdk.Test.psm1
           $TestEnvInfo = New-AzIotTestEnvironment -AzureLocation $AZURE_LOCATION -EnableFileUpload -IotHubX509ThumbprintDevices 1 -DpsX509IndividualEnrollments 1
           New-AzIotCSDKE2ETestConfig -TestEnvInfo $TestEnvInfo -Target bash -OutFile test_config/set_e2e_test_env_vars.sh
           New-AzIotCSDKE2ETestConfig -TestEnvInfo $TestEnvInfo -Target powershell -OutFile test_config/Set-E2ETestEnvVars.ps1
+      displayName: Create Azure Resources and Test Config
     - task: PublishPipelineArtifact@1
       inputs:
         targetPath: test_config

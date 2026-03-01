@@ -651,7 +651,12 @@ function New-AzIotCSDKE2ETestConfig {
     )
 
     if ($OutFile -eq $null) {
-        $OutFile = "./azure-iot-sdk-c-e2e-test-config" + $($Target -eq "powershell" ? ".ps1" : ".sh")
+        $OutFile = "./azure-iot-sdk-c-e2e-test-config"
+        if ($Target -eq "powershell") {
+            $OutFile += ".ps1"
+        } else {
+            $OutFile += ".sh"
+        }
     }
 
     $OutFileDir = Split-Path -Path $OutFile -Parent
