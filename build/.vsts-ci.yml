@@ -8,25 +8,28 @@ stages:
   jobs:
   - job: create_azure_resources
     pool:
-      vmImage: 'ubuntu-24.04'
+      vmImage: 'windows-latest'
     steps:
-    - checkout: none
-    - script: |
-        echo ">>>>>>>>>> Just a test"
-      name: setResourceNames
-      displayName: Set Resource Names
-    # - task: AzureCLI@2
-    #   inputs:
-    #     azureSubscription: 'iot hub sdk service connection'
-    #     scriptType: 'bash'
-    #     scriptLocation: 'inlineScript'
-    #     inlineScript: |
-    #       set -e
-
-    #       export AZURE_RESOURCE_GROUP=$(setResourceNames.AZURE_RESOURCE_GROUP)
-
-    #       ./node_e2e_resources/deploy.sh -l "$AZURE_REGION" -n "$AZURE_RESOURCE_GROUP" -u
-    #       find . -iname activate*
+    - checkout: self
+      submodules: false
+      fetchDepth: 1
+      sparseCheckoutDirectories: testtools/scripts
+      displayName: "Checkout (scripts only)"
+    - task: AzureCLI@2
+      inputs:
+        azureSubscription: 'iot hub sdk service connection'
+        scriptType: 'ps'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          Import-Module ./testtools/scripts/Azure.Iot.Sdk.Test.psm1
+          $TestEnvInfo = New-AzIotTestEnvironment -AzureLocation $AZURE_LOCATION -EnableFileUpload -IotHubX509ThumbprintDevices 1 -DpsX509IndividualEnrollments 1
+          New-AzIotCSDKE2ETestConfig -TestEnvInfo $TestEnvInfo -Target bash -OutFile test_config/set_e2e_test_env_vars.sh
+          New-AzIotCSDKE2ETestConfig -TestEnvInfo $TestEnvInfo -Target powershell -OutFile test_config/Set-E2ETestEnvVars.ps1
+    - task: PublishPipelineArtifact@1
+      inputs:
+        targetPath: test_config
+        artifact: test_config_scripts
+      displayName: Publish artifact (test config scripts)
 - stage: Tests
   jobs:
   - job: checksubmodule
@@ -74,10 +77,10 @@ stages:
       vmImage: 'ubuntu-24.04'
     displayName: "Raspberry Pi"
     steps:
+    - checkout: self
+      submodules: true
     - script: |
-        set -e
-        sudo apt-get update && sudo apt-get upgrade
-        sudo ./build_all/linux/setup.sh
+        source ./testtools/scripts/linux-setup-raspberry.sh
       displayName: 'Host setup'
       condition: always()
     - script: |
@@ -132,7 +135,54 @@ stages:
         cd ..
         docker build -t armiotapp:latest . --network=host --file ./ARM/Dockerfile_adjunct
       displayName: 'Build ARM'
-
+  - job: ubuntu2204debug
+    timeoutInMinutes: 190
+    pool:
+      vmImage: 'ubuntu-22.04'
+    displayName: 'Ubuntu 22.04 (Debug)'
+    steps:
+    - task: DownloadPipelineArtifact@2
+      inputs:
+        artifact: test_config_scripts
+        path: $(Pipeline.Workspace)/test_config
+      displayName: Download artifact (test config scripts)
+    - script: |
+        sudo -E ./jenkins/ubuntu_c.sh
+      displayName: 'Build'
+    - script: |
+        export OPENSSL_ia32cap=0x00000000
+        sudo chmod -R 755 .
+        source ./test_config/set_e2e_test_env_vars.sh
+        cd cmake && sudo -E ../build_all/linux/run_tests.sh
+      displayName: "Run Tests (+E2E)"
+      # env:
+      #   IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
+      #   IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
+      #   IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
+      #   IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
+      #   IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
+      #   IOTHUB_POLICY_KEY: $(IOTHUB-POLICY-KEY)
+      #   STORAGE_ACCOUNT_CONNECTION_STRING: $(STORAGE-ACCOUNT-CONNECTION-STRING)
+      #   IOT_DPS_CONNECTION_STRING: $(IOT-DPS-CONNECTION-STRING)
+      #   IOT_DPS_ID_SCOPE: $(IOT-DPS-ID-SCOPE)
+      #   IOTHUB_CA_ROOT_CERT: $(IOTHUB-CA-ROOT-CERT)
+      #   IOTHUB_CA_ROOT_CERT_KEY: $(IOTHUB-CA-ROOT-CERT-KEY)
+      #   IOT_DPS_GLOBAL_ENDPOINT: $(IOT-DPS-GLOBAL-ENDPOINT)
+      #   IOTHUB_DEVICE_CONN_STRING_INVALIDCERT: $(IOTHUB-DEVICE-CONN-STRING-INVALIDCERT)
+      #   IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
+      #   DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
+      #   PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
+      #   IOT_DPS_INDIVIDUAL_X509_CERTIFICATE: $(IOTHUB-E2E-X509-ECC-CERT-BASE64)
+      #   IOT_DPS_INDIVIDUAL_X509_KEY: $(IOTHUB-E2E-X509-ECC-PRIVATE-KEY-BASE64)
+      #   IOT_DPS_INDIVIDUAL_REGISTRATION_ID: $(IOT-DPS-INDIVIDUAL-REGISTRATION-ID)
+    - task: PublishTestResults@2
+      displayName: 'Publish Ubuntu 22 (Debug) Results'
+      inputs:
+        testRunner: CTest
+        testResultsFiles: '**/Test.xml'
+        mergeTestResults: true
+        testRunTitle: 'ubuntu2204debug'
+      condition: succeededOrFailed()
 - stage: Cleanup
   dependsOn:
   - Setup
@@ -143,18 +193,21 @@ stages:
     condition: always() # Run job even if the pipeline run is cancelled.
     pool:
       vmImage: 'ubuntu-24.04'
-    # variables:
-    #     AZURE_RESOURCE_GROUP: $[stageDependencies.setup.create_azure_resources.outputs['setResourceNames.AZURE_RESOURCE_GROUP']]
     steps:
+    - task: DownloadPipelineArtifact@2
+      inputs:
+        artifact: test_config_scripts
+        path: $(Pipeline.Workspace)/test_config
+      displayName: Download artifact (test config scripts)
     - task: AzureCLI@2
       inputs:
         azureSubscription: 'iot hub sdk service connection'
         scriptType: 'bash'
         scriptLocation: 'inlineScript'
         inlineScript: |
-          # set -e
-
-          # time az group delete --name $(AZURE_RESOURCE_GROUP) --yes
+          set -e
+          source ./test_config/set_e2e_test_env_vars.sh
+          az group delete --name $AZURE_RESOURCE_GROUP --yes --no-wait
       displayName: Destroy Azure Resource Group
       condition: always() # Run step even if the pipeline run is cancelled.
 
