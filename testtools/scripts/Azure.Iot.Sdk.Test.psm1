@@ -373,9 +373,11 @@ function New-AzIotTestEnvironment {
         Stop-OnError -Step "Set Azure subscription"
     }
 
-    # Create resource group (if does not exist). 
-    $AzureResourceGroup = az group show --name "$ResourceGroup" 2>$null | ConvertFrom-Json
-    if ($AzureResourceGroup -eq $null) {
+    # Create resource group (if does not exist).
+    $ResouceGroupExists = az group exists --name $ResourceGroup -o tsv
+    if ($ResouceGroupExists -eq 'true') {
+       $AzureResourceGroup = az group show --name "$ResourceGroup" | ConvertFrom-Json
+    } else {
         Write-Host "Creating Azure resource group ($ResourceGroup)"
         $AzureResourceGroup = az group create --name "$ResourceGroup" --location $AzureLocation --only-show-errors 2>$null | ConvertFrom-json 
         Stop-OnError -Step "Create Azure resource group"
