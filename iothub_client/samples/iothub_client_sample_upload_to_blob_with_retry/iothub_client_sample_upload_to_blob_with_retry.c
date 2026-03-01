@@ -109,6 +109,7 @@ int main(void)
                     int uploadResultCode = 200;
                     int attemptCount;
 
+                    // "block_number" is used to simulate reading chunks from a larger data content, like a large file.
                     for (uint32_t block_number = 0; block_number < 10 && uploadSuccessful; block_number++)
                     {
                         int data_size = snprintf(data_to_upload, sizeof(data_to_upload), data_to_upload_format, block_number);
