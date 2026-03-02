@@ -58,7 +58,7 @@ function New-PrivateKey {
 }
 
 function New-RandomNumber {
-    param($Length)
+    param($Length = 16)
 
     if ($PSVersionTable.PSVersion.Major -lt 7) {
         $RandomNumber = New-Object byte[] $Length
@@ -336,11 +336,16 @@ function New-DpsX509EnrollmentGroup {
     Stop-OnError "Create an Azure Device Provisioning x509 enrollment group ($EnrollmentId; $AdrPolicyName)"
 }
 
+function New-AzureResourceGroupName {
+    param($Prefix = "rg-")
+    return $Prefix + $([guid]::NewGuid().Guid.Replace('-', ''))
+}
+
 function New-AzIotTestEnvironment {
     param(
         $AzureLocation = "centraluseuap", # Other locations (e.g.): eastus2euap, westus2, ...
         $AzureSubscriptionId = $null,
-        $ResourceGroup = "rg-$([guid]::NewGuid().Guid.Replace('-', ''))",
+        $ResourceGroup = $(New-AzureResourceGroupName),
         $DpsName       = "dps-$([guid]::NewGuid().Guid.Replace('-', ''))",
         $IotHubName    = "iothub-$([guid]::NewGuid().Guid.Replace('-', ''))",
         $IotHubDomainName = "azure-devices.net",
@@ -754,3 +759,4 @@ export AZURE_RESOURCE_GROUP=`"$($TestEnvInfo.AzureResourceGroup)`"
 
 Export-ModuleMember -Function New-AzIotTestEnvironment
 Export-ModuleMember -Function New-AzIotCSDKE2ETestConfig
+Export-ModuleMember -Function New-AzureResourceGroupName
