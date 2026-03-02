@@ -32,13 +32,24 @@ function New-DpsDerivedSymmetricKey {
     return "$derivedkey"
 }
 
+function Export-Pkcs8PrivateKeyPem {
+    param($Key)
+
+    if ($PSVersionTable.PSVersion.Major -lt 7) {
+        $KeyPemHex = [Convert]::ToBase64String($Key.Key.Export([System.Security.Cryptography.CngKeyBlobFormat]::Pkcs8PrivateBlob), 'InsertLineBreaks')
+        return "-----BEGIN PRIVATE KEY-----`n$KeyPemHex`n-----END PRIVATE KEY-----"
+    } else {
+        return $Key.ExportPkcs8PrivateKey()
+    }
+}
+
 function New-PrivateKey {
     param([string]$Path = $null)
 
     $rsa = [System.Security.Cryptography.RSA]::Create(4096)
 
     if ($Path -ne $null -and $Path -ne "") {
-        $pem = $rsa.ExportPkcs8PrivateKeyPem()
+        $pem = Export-Pkcs8PrivateKeyPem -Key $rsa
         Write-Host "Saving private key to $Path"
         Set-Content -Path $Path -Value $pem
     }
