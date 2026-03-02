@@ -57,6 +57,18 @@ function New-PrivateKey {
     return $rsa
 }
 
+function New-RandomNumber {
+    param($Length)
+
+    if ($PSVersionTable.PSVersion.Major -lt 7) {
+        $RandomNumber = New-Object byte[] $Length
+        [System.Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($RandomNumber)
+        return $RandomNumber
+    } else {
+        return [System.Security.Cryptography.RandomNumberGenerator]::GetBytes($Length)
+    }
+}
+
 function New-Certificate {
     param(
         [string]$Subject,
@@ -126,7 +138,7 @@ function New-Certificate {
         }
 
         # Serial number must be random bytes (8–20 bytes is typical)
-        $SerialNumber = [System.Security.Cryptography.RandomNumberGenerator]::GetBytes(16)
+        $SerialNumber = New-RandomNumber -Length 16
 
         # Use the issuer *private key* for signing
         $SignatureGenerator = [System.Security.Cryptography.X509Certificates.X509SignatureGenerator]::CreateForRSA(
