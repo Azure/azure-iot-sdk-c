@@ -337,8 +337,17 @@ function New-DpsX509EnrollmentGroup {
 }
 
 function New-AzureResourceGroupName {
-    param($Prefix = "rg-")
-    return $Prefix + $([guid]::NewGuid().Guid.Replace('-', ''))
+    param($Prefix = "rg-", $OutFile = $null)
+    $ResourceGroupName = $Prefix + $([guid]::NewGuid().Guid.Replace('-', ''))
+
+    if ($OutFile -ne $null) {
+        $OutFileDir = Split-Path -Path $OutFile -Parent
+        if ($OutFileDir -ne "" -and $(Test-Path $OutFileDir) -eq $false) {
+            New-Item -ItemType Directory -Force -Path $OutFileDir | Out-Null
+        }
+    }
+
+    return $ResourceGroupName
 }
 
 function New-AzIotTestEnvironment {
