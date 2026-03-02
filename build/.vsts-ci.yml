@@ -22,7 +22,6 @@ stages:
         scriptLocation: 'inlineScript'
         inlineScript: |
           $PSVersionTable
-          get-childitem env:
           Import-Module ./testtools/scripts/Azure.Iot.Sdk.Test.psm1
           $TestEnvInfo = New-AzIotTestEnvironment -AzureLocation $env:AZURE_LOCATION -EnableFileUpload -IotHubX509ThumbprintDevices 1 -DpsX509IndividualEnrollments 1
           New-AzIotCSDKE2ETestConfig -TestEnvInfo $TestEnvInfo -Target bash -OutFile test_config/set_e2e_test_env_vars.sh
