@@ -23,7 +23,12 @@ stages:
         inlineScript: |
           $PSVersionTable
           Import-Module ./testtools/scripts/Azure.Iot.Sdk.Test.psm1
-          $TestEnvInfo = New-AzIotTestEnvironment -AzureLocation $env:AZURE_LOCATION -EnableFileUpload -IotHubX509ThumbprintDevices 1 -DpsX509IndividualEnrollments 1
+
+          $ResourceGroupName = New-AzureResourceGroupName
+          Set-Content -Value $ResourceGroupName -Path "test_config/azure-resource-group-name.txt"
+
+          $TestEnvInfo = New-AzIotTestEnvironment -AzureLocation $env:AZURE_LOCATION -ResourceGroup $ResourceGroupName -EnableFileUpload -IotHubX509ThumbprintDevices 1 -DpsX509IndividualEnrollments 1
+
           New-AzIotCSDKE2ETestConfig -TestEnvInfo $TestEnvInfo -Target bash -OutFile test_config/set_e2e_test_env_vars.sh
           New-AzIotCSDKE2ETestConfig -TestEnvInfo $TestEnvInfo -Target powershell -OutFile test_config/Set-E2ETestEnvVars.ps1
       displayName: Create Azure Resources and Test Config
@@ -32,6 +37,7 @@ stages:
         targetPath: test_config
         artifact: test_config_scripts
       displayName: Publish artifact (test config scripts)
+      condition: always()
 - stage: Tests
   jobs:
   - job: checksubmodule
@@ -208,7 +214,7 @@ stages:
         scriptLocation: 'inlineScript'
         inlineScript: |
           set -e
-          source ./test_config/set_e2e_test_env_vars.sh
+          export AZURE_RESOURCE_GROUP=$(cat test_config/azure-resource-group-name.txt)
           az group delete --name $AZURE_RESOURCE_GROUP --yes --no-wait
       displayName: Destroy Azure Resource Group
       condition: always() # Run step even if the pipeline run is cancelled.
