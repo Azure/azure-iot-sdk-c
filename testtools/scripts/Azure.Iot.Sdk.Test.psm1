@@ -145,9 +145,20 @@ function New-Certificate {
     }
 }
 
+function Export-X509CertificateToPem {
+    param([System.Security.Cryptography.X509Certificates.X509Certificate2]$Certificate)
+
+    if ($PSVersionTable.PSVersion.Major -lt 7) {
+        $CertificatePemHex = [Convert]::ToBase64String($Certificate.Export([System.Security.Cryptography.X509Certificates.X509ContentType]::Cert), 'InsertLineBreaks')
+        return "-----BEGIN CERTIFICATE-----`n$Certificate`n-----END CERTIFICATE-----"
+    } else {
+        return $Certificate.ExportCertificatePem()
+    }
+}
+
 function Export-X509CertificateToPemFile {
     param([System.Security.Cryptography.X509Certificates.X509Certificate2]$Cert, [string]$Path)
-    $pem = $Cert.ExportCertificatePem()
+    $pem = Export-X509CertificateToPem -Certificate $Cert
     Write-Host "Exporting certificate to $Path"
     Set-Content -Path $Path -Value $pem
 }
