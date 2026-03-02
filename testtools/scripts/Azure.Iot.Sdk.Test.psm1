@@ -162,7 +162,7 @@ function Export-X509CertificateToPem {
 
     if ($PSVersionTable.PSVersion.Major -lt 7) {
         $CertificatePemHex = [Convert]::ToBase64String($Certificate.Export([System.Security.Cryptography.X509Certificates.X509ContentType]::Cert), 'InsertLineBreaks')
-        return "-----BEGIN CERTIFICATE-----`n$Certificate`n-----END CERTIFICATE-----"
+        return "-----BEGIN CERTIFICATE-----`n$CertificatePemHex`n-----END CERTIFICATE-----"
     } else {
         return $Certificate.ExportCertificatePem()
     }
