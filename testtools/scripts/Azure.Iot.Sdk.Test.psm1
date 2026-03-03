@@ -380,6 +380,7 @@ function New-AzIotTestEnvironment {
         AzureResourceGroup = $null
         IotHubConnectionString = $null
         IotHubEventHubConnectionString = $null
+        IotHubEventHubCompatibleName = $null
         IotHubEventHubPartitionCount = 0
         DpsDeviceFqdn = $null
         DpsServiceFqdn = $null
@@ -674,6 +675,7 @@ function New-AzIotTestEnvironment {
     $TestEnvInfo.IotHubEventHubConnectionString = $(az iot hub connection-string show -g $ResourceGroup -n $IotHubName --kt primary --pn iothubowner --eh --query connectionString -o tsv)
     Stop-OnError -Step "Get IoT Hub's Event Hub Connection String"
 
+    $TestEnvInfo.IotHubEventHubCompatibleName = $AzureIoTHub.properties.eventHubEndpoints.events.path
     $TestEnvInfo.IotHubEventHubPartitionCount = $AzureIoTHub.properties.eventHubEndpoints.events.partitionCount
 
     if ($NoDps -eq $false) {
@@ -720,6 +722,7 @@ function New-AzIotCSDKE2ETestConfig {
         Set-Content "$OutFile" @"
 `$env:IOTHUB_CONNECTION_STRING = `"$($TestEnvInfo.IotHubConnectionString)`"
 `$env:IOTHUB_EVENTHUB_CONNECTION_STRING = `"$($TestEnvInfo.IotHubEventHubConnectionString)`"
+`$env:IOTHUB_EVENTHUB_LISTEN_NAME = `"$($TestEnvInfo.IotHubEventHubCompatibleName)`"
 `$env:IOTHUB_PARTITION_COUNT = $($TestEnvInfo.IotHubEventHubPartitionCount)
 `$env:IOT_DPS_GLOBAL_ENDPOINT = `"$($TestEnvInfo.DpsDeviceFqdn)`"
 `$env:IOT_DPS_CONNECTION_STRING = `"$($TestEnvInfo.DpsConnectionString)`"
@@ -740,6 +743,7 @@ function New-AzIotCSDKE2ETestConfig {
     Set-Content "$OutFile" @"
 export IOTHUB_CONNECTION_STRING=`"$($TestEnvInfo.IotHubConnectionString)`"
 export IOTHUB_EVENTHUB_CONNECTION_STRING=`"$($TestEnvInfo.IotHubEventHubConnectionString)`"
+export IOTHUB_EVENTHUB_LISTEN_NAME=`"$($TestEnvInfo.IotHubEventHubCompatibleName)`"
 export IOTHUB_PARTITION_COUNT=$($TestEnvInfo.IotHubEventHubPartitionCount)
 export IOT_DPS_GLOBAL_ENDPOINT=`"$($TestEnvInfo.DpsDeviceFqdn)`"
 export IOT_DPS_CONNECTION_STRING=`"$($TestEnvInfo.DpsConnectionString)`"
@@ -753,7 +757,7 @@ export IOTHUB_E2E_X509_PRIVATE_KEY_BASE64=`"$($TestEnvInfo.IotHubX509ThumbprintD
 export IOTHUB_E2E_X509_THUMBPRINT=`"$($TestEnvInfo.IotHubX509ThumbprintDevices[0].PrimaryCertificateThumbprint)`"
 export IOT_DPS_INDIVIDUAL_X509_CERTIFICATE=`"$($TestEnvInfo.DpsIndividualX509Enrollments[0].CertificateBase64)`"
 export IOT_DPS_INDIVIDUAL_X509_KEY=`"$($TestEnvInfo.DpsIndividualX509Enrollments[0].PrivateKeyBase64)`"
-export IOT_DPS_INDIVIDUAL_REGISTRATION_ID = `"$($TestEnvInfo.DpsIndividualX509Enrollments[0].Id)`"
+export IOT_DPS_INDIVIDUAL_REGISTRATION_ID=`"$($TestEnvInfo.DpsIndividualX509Enrollments[0].Id)`"
 export AZURE_RESOURCE_GROUP=`"$($TestEnvInfo.AzureResourceGroup)`"
 "@  
     }

@@ -156,11 +156,6 @@ stages:
     - download: current
       artifact: test_config_scripts    
       displayName: Download artifact (test config scripts)
-    # - task: DownloadPipelineArtifact@2
-    #   inputs:
-    #     artifact: test_config_scripts
-    #     path: $(Pipeline.Workspace)/test_config
-    #   displayName: Download artifact (test config scripts)
     - script: |
         set -e
         sudo apt-get update && sudo apt-get upgrade
@@ -173,8 +168,9 @@ stages:
     - script: |
         export OPENSSL_ia32cap=0x00000000
         sudo chmod -R 755 .
+        cat "$(Pipeline.Workspace)/test_config_scripts/set_e2e_test_env_vars.sh" # TODO: (ewertons) remove this
         source "$(Pipeline.Workspace)/test_config_scripts/set_e2e_test_env_vars.sh"
-        printenv | sort
+        printenv | sort | grep IOT # TODO: (ewertons) remove this
         cd cmake && sudo -E ../build_all/linux/run_tests.sh
       displayName: "Run Tests (+E2E)"
     - task: PublishTestResults@2
@@ -196,11 +192,6 @@ stages:
     pool:
       vmImage: 'ubuntu-24.04'
     steps:
-    # - task: DownloadPipelineArtifact@2
-    #   inputs:
-    #     artifact: test_config_scripts
-    #     path: $(Pipeline.Workspace)/test_config
-    #   displayName: Download artifact (test config scripts)
     - download: current
       artifact: test_config_scripts
       displayName: Download artifact (test config scripts)
@@ -213,6 +204,8 @@ stages:
           set -e
           ls -l "$(Pipeline.Workspace)/test_config_scripts"
           export AZURE_RESOURCE_GROUP=$(cat "$(Pipeline.Workspace)/test_config_scripts/azure-resource-group-name.txt")
+          # TODO: (ewertons) remove this
+          echo "RUNNING: az group delete --name $AZURE_RESOURCE_GROUP --yes --no-wait"
           az group delete --name $AZURE_RESOURCE_GROUP --yes --no-wait
       displayName: Destroy Azure Resource Group
       condition: always() # Run step even if the pipeline run is cancelled.

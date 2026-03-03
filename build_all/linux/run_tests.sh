@@ -6,6 +6,9 @@
 set -o errexit # Exit if command failed.
 set -o pipefail # Exit if pipe failed.
 
+# TODO: (ewertons) remove this
+printenv | sort | grep IOT
+
 # Only for testing E2E behaviour !!! 
 TEST_CORES=16
 
