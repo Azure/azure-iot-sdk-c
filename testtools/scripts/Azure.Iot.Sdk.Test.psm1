@@ -346,7 +346,7 @@ function New-AzureResourceGroupName {
             New-Item -ItemType Directory -Force -Path $OutFileDir | Out-Null
         }
 
-        Set-Content -Force -Value $ResourceGroupName -Path $OutFile
+        Set-Content -Force -Value $ResourceGroupName -Path $OutFile -NoNewline
     }
 
     return $ResourceGroupName
