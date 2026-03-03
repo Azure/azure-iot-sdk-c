@@ -5,7 +5,7 @@ set -e
 sudo apt-get update && sudo apt-get upgrade
 sudo apt install --fix-missing -y wget git build-essential cmake xz-utils ca-certificates pkg-config uuid-dev sudo
 
-export WORK_ROOT=/toolchain
+export WORK_ROOT="$pwd/toolchain"
 mkdir $WORK_ROOT && pushd $WORK_ROOT
 
 # LINARO INSTALL
@@ -36,18 +36,6 @@ export STAGING_DIR=${TOOLCHAIN_SYSROOT}
 export OPENSSL_SOURCE=openssl-1.1.1f
 wget https://www.openssl.org/source/${OPENSSL_SOURCE}.tar.gz
 tar -xvf ${OPENSSL_SOURCE}.tar.gz
-
-# TODO: (ewertons) remove this
-echo "<<<<<"
-pwd
-ls -l
-printenv | sort
-echo "WORK_ROOT=${WORK_ROOT}"
-echo "WORK_ROOT=$WORK_ROOT"
-echo "WORK_ROOT=${OPENSSL_SOURCE}"
-echo "WORK_ROOT=$OPENSSL_SOURCE"
-find / -iname ${OPENSSL_SOURCE}
-echo ">>>>>"
 
 # Build OpenSSL
 cd ${WORK_ROOT}/${OPENSSL_SOURCE}
