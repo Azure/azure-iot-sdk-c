@@ -204,8 +204,6 @@ stages:
         inlineScript: |
           set -e
           export AZURE_RESOURCE_GROUP=$(cat "$(Pipeline.Workspace)/test_config_scripts/azure-resource-group-name.txt")
-          # TODO: (ewertons) remove this
-          echo "RUNNING: az group delete --name $AZURE_RESOURCE_GROUP --yes --no-wait"
           az group delete --name $AZURE_RESOURCE_GROUP --yes --no-wait
       displayName: Destroy Azure Resource Group
       condition: always() # Run step even if the pipeline run is cancelled.
