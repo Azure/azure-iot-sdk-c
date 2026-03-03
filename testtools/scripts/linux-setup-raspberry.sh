@@ -5,8 +5,12 @@ set -e
 sudo apt-get update && sudo apt-get upgrade
 sudo apt install --fix-missing -y wget git build-essential cmake xz-utils ca-certificates pkg-config uuid-dev sudo
 
-export WORK_ROOT="$pwd/toolchain"
+export WORK_ROOT="$(pwd)/toolchain"
 mkdir $WORK_ROOT && pushd $WORK_ROOT
+
+# TODO: (ewertons) remove this
+echo ">>>> PWD=$(pwd)"
+echo ">>>> WORK_ROOT=$WORK_ROOT"
 
 # LINARO INSTALL
 export LINARO_SOURCE=gcc-linaro-7.4.1-2019.02-x86_64_arm-linux-gnueabihf
