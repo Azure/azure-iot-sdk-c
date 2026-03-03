@@ -192,6 +192,7 @@ stages:
     pool:
       vmImage: 'ubuntu-24.04'
     steps:
+    - checkout: none
     - download: current
       artifact: test_config_scripts
       displayName: Download artifact (test config scripts)
