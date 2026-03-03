@@ -212,7 +212,9 @@ stages:
         scriptLocation: 'inlineScript'
         inlineScript: |
           set -e
-          export AZURE_RESOURCE_GROUP=$(cat test_config/azure-resource-group-name.txt)
+          ls -l
+          ls -l ./test_config
+          export AZURE_RESOURCE_GROUP=$(cat ./test_config/azure-resource-group-name.txt)
           az group delete --name $AZURE_RESOURCE_GROUP --yes --no-wait
       displayName: Destroy Azure Resource Group
       condition: always() # Run step even if the pipeline run is cancelled.
