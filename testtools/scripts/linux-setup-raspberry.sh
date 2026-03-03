@@ -78,3 +78,9 @@ ls -al ${TOOLCHAIN_PREFIX}/lib
 ls -al ${TOOLCHAIN_PREFIX}/include
 
 ls -la ./
+
+cat > ./raspberry_env_vars.sh << EOF
+export TOOLCHAIN_ROOT="$TOOLCHAIN_ROOT"
+export TOOLCHAIN_SYSROOT="$TOOLCHAIN_SYSROOT"
+export TOOLCHAIN_EXES="$TOOLCHAIN_EXES"
+EOF

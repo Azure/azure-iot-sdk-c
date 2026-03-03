@@ -98,6 +98,8 @@ stages:
        whoami
        ls -lr
        pwd
+       source ./toolchain/raspberry_env_vars.sh
+       printenv | sort # TODO: remove this
        chmod +x jenkins/raspberrypi_c_buster.sh
         ./jenkins/raspberrypi_c_buster.sh
       displayName: 'Build'
@@ -106,6 +108,8 @@ stages:
       vmImage: 'ubuntu-24.04'
     displayName: "Cross Compile (MIPS32)"
     steps:
+    - checkout: self
+      submodules: false
     - script: |
         sudo apt-get update && sudo apt-get install -y \
         curl \
@@ -128,6 +132,8 @@ stages:
       vmImage: 'ubuntu-24.04'
     displayName: "Cross Compile (ARM)"
     steps:
+    - checkout: self
+      submodules: false
     - script: |
         sudo apt-get update && sudo apt-get install -y \
         curl \
