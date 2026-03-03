@@ -147,11 +147,19 @@ stages:
       vmImage: 'ubuntu-22.04'
     displayName: 'Ubuntu 22.04 (Debug)'
     steps:
+    - checkout: self
+      submodules: true
     - task: DownloadPipelineArtifact@2
       inputs:
         artifact: test_config_scripts
         path: $(Pipeline.Workspace)/test_config
       displayName: Download artifact (test config scripts)
+    - script: |
+        set -e
+        sudo apt-get update && sudo apt-get upgrade
+        sudo ./build_all/linux/setup.sh
+      displayName: 'Host setup'
+      condition: always()
     - script: |
         sudo -E ./jenkins/ubuntu_c.sh
       displayName: 'Build'

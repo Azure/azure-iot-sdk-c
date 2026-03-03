@@ -38,11 +38,11 @@ wget https://www.openssl.org/source/${OPENSSL_SOURCE}.tar.gz
 tar -xvf ${OPENSSL_SOURCE}.tar.gz
 
 # Build OpenSSL
-cd /${WORK_ROOT}/${OPENSSL_SOURCE}
+cd ${WORK_ROOT}/${OPENSSL_SOURCE}
 ./Configure linux-generic32 shared --prefix=${TOOLCHAIN_PREFIX} --openssldir=${TOOLCHAIN_PREFIX}
 make
 make install
-cd /${WORK_ROOT}
+cd ${WORK_ROOT}
 
 
 # CURL INSTALL
@@ -58,7 +58,7 @@ pushd /${WORK_ROOT}/${CURL_SOURCE}
 
 make
 make install
-cd /${WORK_ROOT}
+cd ${WORK_ROOT}
 
 ########## UTIL LINUX INSTALL ##########
 # Download the Linux utilities for libuuid and expand it
@@ -67,11 +67,11 @@ wget https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.33/${UTIL_LIN
 tar -xvf ${UTIL_LINUX_SOURCE}.tar.gz
 
 # Build uuid
-cd /${WORK_ROOT}/${UTIL_LINUX_SOURCE}
+cd ${WORK_ROOT}/${UTIL_LINUX_SOURCE}
 ./configure --prefix=${TOOLCHAIN_PREFIX} --with-sysroot=${TOOLCHAIN_SYSROOT} --target=${TOOLCHAIN_NAME} --host=${TOOLCHAIN_NAME} --disable-all-programs  --disable-bash-completion --enable-libuuid
 make
 make install
-cd /${WORK_ROOT}
+cd ${WORK_ROOT}
 
 # Finally a sanity check to make sure the files are there
 ls -al ${TOOLCHAIN_PREFIX}/lib
