@@ -30,12 +30,16 @@ stages:
           New-AzIotCSDKE2ETestConfig -TestEnvInfo $TestEnvInfo -Target bash -OutFile test_config/set_e2e_test_env_vars.sh
           New-AzIotCSDKE2ETestConfig -TestEnvInfo $TestEnvInfo -Target powershell -OutFile test_config/Set-E2ETestEnvVars.ps1
       displayName: Create Azure Resources and Test Config
-    - task: PublishPipelineArtifact@1
-      inputs:
-        targetPath: test_config
-        artifact: test_config_scripts
+    - publish: test_config
+      artifact: test_config_scripts
       displayName: Publish artifact (test config scripts)
-      condition: always()
+      condition: always()      
+    # - task: PublishPipelineArtifact@1
+    #   inputs:
+    #     targetPath: test_config
+    #     artifact: test_config_scripts
+    #   displayName: Publish artifact (test config scripts)
+    #   condition: always()
 - stage: Tests
   jobs:
   - job: checksubmodule
@@ -149,11 +153,14 @@ stages:
     steps:
     - checkout: self
       submodules: true
-    - task: DownloadPipelineArtifact@2
-      inputs:
-        artifact: test_config_scripts
-        path: $(Pipeline.Workspace)/test_config
+    - download: current
+      artifact: test_config_scripts    
       displayName: Download artifact (test config scripts)
+    # - task: DownloadPipelineArtifact@2
+    #   inputs:
+    #     artifact: test_config_scripts
+    #     path: $(Pipeline.Workspace)/test_config
+    #   displayName: Download artifact (test config scripts)
     - script: |
         set -e
         sudo apt-get update && sudo apt-get upgrade
@@ -166,29 +173,10 @@ stages:
     - script: |
         export OPENSSL_ia32cap=0x00000000
         sudo chmod -R 755 .
-        source ./test_config/set_e2e_test_env_vars.sh
+        source "$(Pipeline.Workspace)/test_config_scripts/set_e2e_test_env_vars.sh"
+        printenv | sort
         cd cmake && sudo -E ../build_all/linux/run_tests.sh
       displayName: "Run Tests (+E2E)"
-      # env:
-      #   IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
-      #   IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
-      #   IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
-      #   IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
-      #   IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
-      #   IOTHUB_POLICY_KEY: $(IOTHUB-POLICY-KEY)
-      #   STORAGE_ACCOUNT_CONNECTION_STRING: $(STORAGE-ACCOUNT-CONNECTION-STRING)
-      #   IOT_DPS_CONNECTION_STRING: $(IOT-DPS-CONNECTION-STRING)
-      #   IOT_DPS_ID_SCOPE: $(IOT-DPS-ID-SCOPE)
-      #   IOTHUB_CA_ROOT_CERT: $(IOTHUB-CA-ROOT-CERT)
-      #   IOTHUB_CA_ROOT_CERT_KEY: $(IOTHUB-CA-ROOT-CERT-KEY)
-      #   IOT_DPS_GLOBAL_ENDPOINT: $(IOT-DPS-GLOBAL-ENDPOINT)
-      #   IOTHUB_DEVICE_CONN_STRING_INVALIDCERT: $(IOTHUB-DEVICE-CONN-STRING-INVALIDCERT)
-      #   IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
-      #   DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
-      #   PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
-      #   IOT_DPS_INDIVIDUAL_X509_CERTIFICATE: $(IOTHUB-E2E-X509-ECC-CERT-BASE64)
-      #   IOT_DPS_INDIVIDUAL_X509_KEY: $(IOTHUB-E2E-X509-ECC-PRIVATE-KEY-BASE64)
-      #   IOT_DPS_INDIVIDUAL_REGISTRATION_ID: $(IOT-DPS-INDIVIDUAL-REGISTRATION-ID)
     - task: PublishTestResults@2
       displayName: 'Publish Ubuntu 22 (Debug) Results'
       inputs:
@@ -208,10 +196,13 @@ stages:
     pool:
       vmImage: 'ubuntu-24.04'
     steps:
-    - task: DownloadPipelineArtifact@2
-      inputs:
-        artifact: test_config_scripts
-        path: $(Pipeline.Workspace)/test_config
+    # - task: DownloadPipelineArtifact@2
+    #   inputs:
+    #     artifact: test_config_scripts
+    #     path: $(Pipeline.Workspace)/test_config
+    #   displayName: Download artifact (test config scripts)
+    - download: current
+      artifact: test_config_scripts
       displayName: Download artifact (test config scripts)
     - task: AzureCLI@2
       inputs:
@@ -220,9 +211,8 @@ stages:
         scriptLocation: 'inlineScript'
         inlineScript: |
           set -e
-          ls -l
-          ls -l ./test_config
-          export AZURE_RESOURCE_GROUP=$(cat ./test_config/azure-resource-group-name.txt)
+          ls -l "$(Pipeline.Workspace)/test_config_scripts"
+          export AZURE_RESOURCE_GROUP=$(cat "$(Pipeline.Workspace)/test_config_scripts/azure-resource-group-name.txt")
           az group delete --name $AZURE_RESOURCE_GROUP --yes --no-wait
       displayName: Destroy Azure Resource Group
       condition: always() # Run step even if the pipeline run is cancelled.
