@@ -8,10 +8,6 @@ sudo apt install --fix-missing -y wget git build-essential cmake xz-utils ca-cer
 export WORK_ROOT="$(pwd)/toolchain"
 mkdir $WORK_ROOT && pushd $WORK_ROOT
 
-# TODO: (ewertons) remove this
-echo ">>>> PWD=$(pwd)"
-echo ">>>> WORK_ROOT=$WORK_ROOT"
-
 # LINARO INSTALL
 export LINARO_SOURCE=gcc-linaro-7.4.1-2019.02-x86_64_arm-linux-gnueabihf
 wget https://releases.linaro.org/components/toolchain/binaries/7.4-2019.02/arm-linux-gnueabihf/${LINARO_SOURCE}.tar.xz
