@@ -39,7 +39,7 @@ function Export-Pkcs8PrivateKeyPem {
         $KeyPemHex = [Convert]::ToBase64String($Key.Key.Export([System.Security.Cryptography.CngKeyBlobFormat]::Pkcs8PrivateBlob), 'InsertLineBreaks')
         return "-----BEGIN PRIVATE KEY-----`n$KeyPemHex`n-----END PRIVATE KEY-----"
     } else {
-        return $Key.ExportPkcs8PrivateKey()
+        return $Key.ExportPkcs8PrivateKeyPem()
     }
 }
 
@@ -546,12 +546,12 @@ function New-AzIotTestEnvironment {
 
         $DeviceMinimalInfo = [pscustomobject]@{
             Id = $IotHubDeviceId
-            PrimaryCertificateBase64 = $(ConvertTo-Base64 -Content $IotHubDevicePrimaryCertificate.ExportCertificatePem())
+            PrimaryCertificateBase64 = $(ConvertTo-Base64 -Content $(Export-X509CertificateToPem -Certificate $IotHubDevicePrimaryCertificate))
             PrimaryCertificateThumbprint = $IotHubDevicePrimaryCertificate.Thumbprint
-            PrimaryPrivateKeyBase64 = $(ConvertTo-Base64 -Content $IotHubDevicePrivateKey.ExportPkcs8PrivateKeyPem())
-            SecondaryCertificateBase64 = $(ConvertTo-Base64 -Content $IotHubDeviceSecondaryCertificate.ExportCertificatePem())
+            PrimaryPrivateKeyBase64 = $(ConvertTo-Base64 -Content $(Export-Pkcs8PrivateKeyPem -Key $IotHubDevicePrivateKey))
+            SecondaryCertificateBase64 = $(ConvertTo-Base64 -Content $(Export-X509CertificateToPem -Certificate $IotHubDeviceSecondaryCertificate))
             SecondaryCertificateThumbprint = $IotHubDeviceSecondaryCertificate.Thumbprint
-            SecondaryPrivateKeyBase64 = $(ConvertTo-Base64 -Content $IotHubDevicePrivateKey.ExportPkcs8PrivateKeyPem())
+            SecondaryPrivateKeyBase64 = $(ConvertTo-Base64 -Content $(Export-Pkcs8PrivateKeyPem -Key $IotHubDevicePrivateKey))
             ConnectionString = $ConnectionString.connectionString
         }
 
