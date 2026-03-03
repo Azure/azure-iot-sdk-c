@@ -345,6 +345,8 @@ function New-AzureResourceGroupName {
         if ($OutFileDir -ne "" -and $(Test-Path $OutFileDir) -eq $false) {
             New-Item -ItemType Directory -Force -Path $OutFileDir | Out-Null
         }
+
+        Set-Content -Force -Value $ResourceGroupName -Path $OutFile
     }
 
     return $ResourceGroupName
