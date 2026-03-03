@@ -676,8 +676,7 @@ static char* convert_base64_to_string(const char* base64_cert)
     int base64_cert_length = (int)strlen(base64_cert);
     LogInfo(">>> convert_base64_to_string.base64_cert=(%d) \"%s\"", base64_cert_length, base64_cert);
 
-    LogInfo(">>> %02x %02x %02x %02x",
-        base64_cert[base64_cert_length - 3], base64_cert[base64_cert_length - 2], base64_cert[base64_cert_length - 1], base64_cert[base64_cert_length - 0]);
+    LogInfo(">>> %02x %02x %02x %02x", base64_cert[base64_cert_length - 3], base64_cert[base64_cert_length - 2], base64_cert[base64_cert_length - 1], base64_cert[base64_cert_length - 0]);
     BUFFER_HANDLE raw_cert = Azure_Base64_Decode(base64_cert);
     if (raw_cert == NULL)
     {
@@ -747,8 +746,7 @@ IOTHUB_ACCOUNT_INFO_HANDLE IoTHubAccount_Init_With_Config(IOTHUB_ACCOUNT_CONFIG*
             // TODO: (ewertons) remove this
             int base64_cert_length = (int)strlen(base64_cert);
             LogInfo(">>> base64_cert (%d) = \"%s\"", base64_cert_length, base64_cert)
-            LogInfo(">>> %02x %02x %02x %02x",
-                base64_cert[base64_cert_length - 3], base64_cert[base64_cert_length - 2], base64_cert[base64_cert_length - 1], base64_cert[base64_cert_length - 0]);
+            LogInfo(">>> %02x %02x %02x %02x", base64_cert[base64_cert_length - 3], base64_cert[base64_cert_length - 2], base64_cert[base64_cert_length - 1], base64_cert[base64_cert_length - 0]);
 
             if (iothub_account_info->connString == NULL)
             {
