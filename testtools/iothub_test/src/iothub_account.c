@@ -672,6 +672,7 @@ static int provisionModule(IOTHUB_ACCOUNT_INFO* accountInfo, IOTHUB_PROVISIONED_
 static char* convert_base64_to_string(const char* base64_cert)
 {
     char* result;
+    LogInfo(">>> convert_base64_to_string.base64_cert=(%d) \"%s\"", strlen(base64_cert), base64_cert);
     BUFFER_HANDLE raw_cert = Azure_Base64_Decode(base64_cert);
     if (raw_cert == NULL)
     {
