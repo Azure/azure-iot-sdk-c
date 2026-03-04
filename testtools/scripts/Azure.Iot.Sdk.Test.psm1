@@ -5,6 +5,26 @@ function ConvertTo-Base64 {
     return $Base64Content
 }
 
+
+function WriteTo-File {
+    param(
+        $Path = $null,
+        $Content = $null
+    )
+
+    $OutFileDir = Split-Path -Path $Path -Parent
+    if ($OutFileDir -ne "" -and $(Test-Path $OutFileDir) -eq $false) {
+        New-Item -ItemType Directory -Force -Path $OutFileDir | Out-Null        
+    }
+
+    if ($PSVersionTable.PSVersion.Major -lt 7) {
+        $Utf8NoBom = New-Object System.Text.UTF8Encoding($false)  # $false = no BOM
+        [System.IO.File]::WriteAllText("$Path", "$Content", $Utf8NoBom)
+    } else {
+        Set-Content -Path "$Path" -Value $Content -Encoding utf8 -NoNewline
+    }
+}
+
 function Stop-OnError {
     param([string]$Step = 'Command', [int]$ExpectedReturn = 0, [switch]$Throw)
     if ($LASTEXITCODE -ne $ExpectedReturn) {
@@ -51,7 +71,7 @@ function New-PrivateKey {
     if ($Path -ne $null -and $Path -ne "") {
         $pem = Export-Pkcs8PrivateKeyPem -Key $rsa
         Write-Host "Saving private key to $Path"
-        Set-Content -Path $Path -Value $pem
+        WriteTo-File -Path $Path -Content $pem
     }
 
     return $rsa
@@ -172,7 +192,7 @@ function Export-X509CertificateToPemFile {
     param([System.Security.Cryptography.X509Certificates.X509Certificate2]$Cert, [string]$Path)
     $pem = Export-X509CertificateToPem -Certificate $Cert
     Write-Host "Exporting certificate to $Path"
-    Set-Content -Path $Path -Value $pem
+    WriteTo-File -Path $Path -Content $pem
 }
 
 function New-DpsCACertificateChain {
@@ -346,7 +366,8 @@ function New-AzureResourceGroupName {
             New-Item -ItemType Directory -Force -Path $OutFileDir | Out-Null
         }
 
-        Set-Content -Force -Value $ResourceGroupName -Path $OutFile -NoNewline
+        WriteTo-File -Path $OutFile -Content $ResourceGroupName
+
     }
 
     return $ResourceGroupName
@@ -713,11 +734,6 @@ function New-AzIotCSDKE2ETestConfig {
         }
     }
 
-    $OutFileDir = Split-Path -Path $OutFile -Parent
-    if ($OutFileDir -ne "" -and $(Test-Path $OutFileDir) -eq $false) {
-        New-Item -ItemType Directory -Force -Path $OutFileDir | Out-Null        
-    }
-
     if ($Target -eq "powershell") {
         $Lines = @(
             "`$env:IOTHUB_CONNECTION_STRING = `"$($TestEnvInfo.IotHubConnectionString)`""
@@ -763,7 +779,9 @@ function New-AzIotCSDKE2ETestConfig {
         )
     }
 
-    Set-Content -Path "$OutFile" -Value $($Lines -join "`n") -Encoding utf8 -NoNewline
+    $Content = $($Lines -join "`n") + "`n"
+
+    WriteTo-File -Path "$OutFile" -Content "$Content"
 
     Write-Host "End-to-End test configuration written to $OutFile"
 

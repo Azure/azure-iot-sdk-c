@@ -33,13 +33,7 @@ stages:
     - publish: test_config
       artifact: test_config_scripts
       displayName: Publish artifact (test config scripts)
-      condition: always()      
-    # - task: PublishPipelineArtifact@1
-    #   inputs:
-    #     targetPath: test_config
-    #     artifact: test_config_scripts
-    #   displayName: Publish artifact (test config scripts)
-    #   condition: always()
+      condition: always()
 - stage: Tests
   jobs:
   - job: checksubmodule
