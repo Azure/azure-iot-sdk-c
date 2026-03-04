@@ -719,48 +719,50 @@ function New-AzIotCSDKE2ETestConfig {
     }
 
     if ($Target -eq "powershell") {
-        Set-Content "$OutFile" @"
-`$env:IOTHUB_CONNECTION_STRING = `"$($TestEnvInfo.IotHubConnectionString)`"
-`$env:IOTHUB_EVENTHUB_CONNECTION_STRING = `"$($TestEnvInfo.IotHubEventHubConnectionString)`"
-`$env:IOTHUB_EVENTHUB_LISTEN_NAME = `"$($TestEnvInfo.IotHubEventHubCompatibleName)`"
-`$env:IOTHUB_PARTITION_COUNT = $($TestEnvInfo.IotHubEventHubPartitionCount)
-`$env:IOT_DPS_GLOBAL_ENDPOINT = `"$($TestEnvInfo.DpsDeviceFqdn)`"
-`$env:IOT_DPS_CONNECTION_STRING = `"$($TestEnvInfo.DpsConnectionString)`"
-`$env:IOT_DPS_ID_SCOPE = `"$($TestEnvInfo.DpsIdScope)`"
-`$env:IOTHUB_DEVICE_CONN_STRING_INVALIDCERT = `"HostName=invalidcertiothub1.westus.cloudapp.azure.com;DeviceId=DoNotDelete1;SharedAccessKey=zWmeTGWmjcgDG1dpuSCVjc5ZY4TqVnKso5+g1wt/K3E=`"
-`$env:IOTHUB_CONN_STRING_INVALIDCERT = `"HostName=invalidcertiothub1.westus.cloudapp.azure.com;SharedAccessKeyName=iothubowner;SharedAccessKey=Fk1H0asPeeAwlRkUMTybJasksTYTd13cgI7SsteB05U=`"
-`$env:DPS_GLOBALDEVICEENDPOINT_INVALIDCERT = `"invalidcertgde1.westus.cloudapp.azure.com`"
-`$env:PROVISIONING_CONNECTION_STRING_INVALIDCERT = `"HostName=invalidcertdps1.westus.cloudapp.azure.com;SharedAccessKeyName=provisioningserviceowner;SharedAccessKey=lGO7OlXNhXlFyYV1rh9F/lUCQC1Owuh5f/1P0I1AFSY=`"
-`$env:IOTHUB_E2E_X509_CERT_BASE64 = `"$($TestEnvInfo.IotHubX509ThumbprintDevices[0].PrimaryCertificateBase64)`"
-`$env:IOTHUB_E2E_X509_PRIVATE_KEY_BASE64 = `"$($TestEnvInfo.IotHubX509ThumbprintDevices[0].PrimaryPrivateKeyBase64)`"
-`$env:IOTHUB_E2E_X509_THUMBPRINT = `"$($TestEnvInfo.IotHubX509ThumbprintDevices[0].PrimaryCertificateThumbprint)`"
-`$env:IOT_DPS_INDIVIDUAL_X509_CERTIFICATE = `"$($TestEnvInfo.DpsIndividualX509Enrollments[0].CertificateBase64)`"
-`$env:IOT_DPS_INDIVIDUAL_X509_KEY = `"$($TestEnvInfo.DpsIndividualX509Enrollments[0].PrivateKeyBase64)`"
-`$env:IOT_DPS_INDIVIDUAL_REGISTRATION_ID = `"$($TestEnvInfo.DpsIndividualX509Enrollments[0].Id)`"
-`$env:AZURE_RESOURCE_GROUP = `"$($TestEnvInfo.AzureResourceGroup)`"
-"@ 
+        $Lines = @(
+            "`$env:IOTHUB_CONNECTION_STRING = `"$($TestEnvInfo.IotHubConnectionString)`""
+            "`$env:IOTHUB_EVENTHUB_CONNECTION_STRING = `"$($TestEnvInfo.IotHubEventHubConnectionString)`""
+            "`$env:IOTHUB_EVENTHUB_LISTEN_NAME = `"$($TestEnvInfo.IotHubEventHubCompatibleName)`""
+            "`$env:IOTHUB_PARTITION_COUNT = $($TestEnvInfo.IotHubEventHubPartitionCount)"
+            "`$env:IOT_DPS_GLOBAL_ENDPOINT = `"$($TestEnvInfo.DpsDeviceFqdn)`""
+            "`$env:IOT_DPS_CONNECTION_STRING = `"$($TestEnvInfo.DpsConnectionString)`""
+            "`$env:IOT_DPS_ID_SCOPE = `"$($TestEnvInfo.DpsIdScope)`""
+            "`$env:IOTHUB_DEVICE_CONN_STRING_INVALIDCERT = `"HostName=invalidcertiothub1.westus.cloudapp.azure.com;DeviceId=DoNotDelete1;SharedAccessKey=zWmeTGWmjcgDG1dpuSCVjc5ZY4TqVnKso5+g1wt/K3E=`""
+            "`$env:IOTHUB_CONN_STRING_INVALIDCERT = `"HostName=invalidcertiothub1.westus.cloudapp.azure.com;SharedAccessKeyName=iothubowner;SharedAccessKey=Fk1H0asPeeAwlRkUMTybJasksTYTd13cgI7SsteB05U=`""
+            "`$env:DPS_GLOBALDEVICEENDPOINT_INVALIDCERT = `"invalidcertgde1.westus.cloudapp.azure.com`""
+            "`$env:PROVISIONING_CONNECTION_STRING_INVALIDCERT = `"HostName=invalidcertdps1.westus.cloudapp.azure.com;SharedAccessKeyName=provisioningserviceowner;SharedAccessKey=lGO7OlXNhXlFyYV1rh9F/lUCQC1Owuh5f/1P0I1AFSY=`""
+            "`$env:IOTHUB_E2E_X509_CERT_BASE64 = `"$($TestEnvInfo.IotHubX509ThumbprintDevices[0].PrimaryCertificateBase64)`""
+            "`$env:IOTHUB_E2E_X509_PRIVATE_KEY_BASE64 = `"$($TestEnvInfo.IotHubX509ThumbprintDevices[0].PrimaryPrivateKeyBase64)`""
+            "`$env:IOTHUB_E2E_X509_THUMBPRINT = `"$($TestEnvInfo.IotHubX509ThumbprintDevices[0].PrimaryCertificateThumbprint)`""
+            "`$env:IOT_DPS_INDIVIDUAL_X509_CERTIFICATE = `"$($TestEnvInfo.DpsIndividualX509Enrollments[0].CertificateBase64)`""
+            "`$env:IOT_DPS_INDIVIDUAL_X509_KEY = `"$($TestEnvInfo.DpsIndividualX509Enrollments[0].PrivateKeyBase64)`""
+            "`$env:IOT_DPS_INDIVIDUAL_REGISTRATION_ID = `"$($TestEnvInfo.DpsIndividualX509Enrollments[0].Id)`""
+            "`$env:AZURE_RESOURCE_GROUP = `"$($TestEnvInfo.AzureResourceGroup)`""
+        )
     } else { # bash
-    Set-Content "$OutFile" @"
-export IOTHUB_CONNECTION_STRING=`"$($TestEnvInfo.IotHubConnectionString)`"
-export IOTHUB_EVENTHUB_CONNECTION_STRING=`"$($TestEnvInfo.IotHubEventHubConnectionString)`"
-export IOTHUB_EVENTHUB_LISTEN_NAME=`"$($TestEnvInfo.IotHubEventHubCompatibleName)`"
-export IOTHUB_PARTITION_COUNT=$($TestEnvInfo.IotHubEventHubPartitionCount)
-export IOT_DPS_GLOBAL_ENDPOINT=`"$($TestEnvInfo.DpsDeviceFqdn)`"
-export IOT_DPS_CONNECTION_STRING=`"$($TestEnvInfo.DpsConnectionString)`"
-export IOT_DPS_ID_SCOPE=`"$($TestEnvInfo.DpsIdScope)`"
-export IOTHUB_DEVICE_CONN_STRING_INVALIDCERT=`"HostName=invalidcertiothub1.westus.cloudapp.azure.com;DeviceId=DoNotDelete1;SharedAccessKey=zWmeTGWmjcgDG1dpuSCVjc5ZY4TqVnKso5+g1wt/K3E=`"
-export IOTHUB_CONN_STRING_INVALIDCERT=`"HostName=invalidcertiothub1.westus.cloudapp.azure.com;SharedAccessKeyName=iothubowner;SharedAccessKey=Fk1H0asPeeAwlRkUMTybJasksTYTd13cgI7SsteB05U=`"
-export DPS_GLOBALDEVICEENDPOINT_INVALIDCERT=`"invalidcertgde1.westus.cloudapp.azure.com`"
-export PROVISIONING_CONNECTION_STRING_INVALIDCERT=`"HostName=invalidcertdps1.westus.cloudapp.azure.com;SharedAccessKeyName=provisioningserviceowner;SharedAccessKey=lGO7OlXNhXlFyYV1rh9F/lUCQC1Owuh5f/1P0I1AFSY=`"
-export IOTHUB_E2E_X509_CERT_BASE64=`"$($TestEnvInfo.IotHubX509ThumbprintDevices[0].PrimaryCertificateBase64)`"
-export IOTHUB_E2E_X509_PRIVATE_KEY_BASE64=`"$($TestEnvInfo.IotHubX509ThumbprintDevices[0].PrimaryPrivateKeyBase64)`"
-export IOTHUB_E2E_X509_THUMBPRINT=`"$($TestEnvInfo.IotHubX509ThumbprintDevices[0].PrimaryCertificateThumbprint)`"
-export IOT_DPS_INDIVIDUAL_X509_CERTIFICATE=`"$($TestEnvInfo.DpsIndividualX509Enrollments[0].CertificateBase64)`"
-export IOT_DPS_INDIVIDUAL_X509_KEY=`"$($TestEnvInfo.DpsIndividualX509Enrollments[0].PrivateKeyBase64)`"
-export IOT_DPS_INDIVIDUAL_REGISTRATION_ID=`"$($TestEnvInfo.DpsIndividualX509Enrollments[0].Id)`"
-export AZURE_RESOURCE_GROUP=`"$($TestEnvInfo.AzureResourceGroup)`"
-"@  
+        $Lines = @(
+            "export IOTHUB_CONNECTION_STRING=`"$($TestEnvInfo.IotHubConnectionString)`""
+            "export IOTHUB_EVENTHUB_CONNECTION_STRING=`"$($TestEnvInfo.IotHubEventHubConnectionString)`""
+            "export IOTHUB_EVENTHUB_LISTEN_NAME=`"$($TestEnvInfo.IotHubEventHubCompatibleName)`""
+            "export IOTHUB_PARTITION_COUNT=$($TestEnvInfo.IotHubEventHubPartitionCount)"
+            "export IOT_DPS_GLOBAL_ENDPOINT=`"$($TestEnvInfo.DpsDeviceFqdn)`""
+            "export IOT_DPS_CONNECTION_STRING=`"$($TestEnvInfo.DpsConnectionString)`""
+            "export IOT_DPS_ID_SCOPE=`"$($TestEnvInfo.DpsIdScope)`""
+            "export IOTHUB_DEVICE_CONN_STRING_INVALIDCERT=`"HostName=invalidcertiothub1.westus.cloudapp.azure.com;DeviceId=DoNotDelete1;SharedAccessKey=zWmeTGWmjcgDG1dpuSCVjc5ZY4TqVnKso5+g1wt/K3E=`""
+            "export IOTHUB_CONN_STRING_INVALIDCERT=`"HostName=invalidcertiothub1.westus.cloudapp.azure.com;SharedAccessKeyName=iothubowner;SharedAccessKey=Fk1H0asPeeAwlRkUMTybJasksTYTd13cgI7SsteB05U=`""
+            "export DPS_GLOBALDEVICEENDPOINT_INVALIDCERT=`"invalidcertgde1.westus.cloudapp.azure.com`""
+            "export PROVISIONING_CONNECTION_STRING_INVALIDCERT=`"HostName=invalidcertdps1.westus.cloudapp.azure.com;SharedAccessKeyName=provisioningserviceowner;SharedAccessKey=lGO7OlXNhXlFyYV1rh9F/lUCQC1Owuh5f/1P0I1AFSY=`""
+            "export IOTHUB_E2E_X509_CERT_BASE64=`"$($TestEnvInfo.IotHubX509ThumbprintDevices[0].PrimaryCertificateBase64)`""
+            "export IOTHUB_E2E_X509_PRIVATE_KEY_BASE64=`"$($TestEnvInfo.IotHubX509ThumbprintDevices[0].PrimaryPrivateKeyBase64)`""
+            "export IOTHUB_E2E_X509_THUMBPRINT=`"$($TestEnvInfo.IotHubX509ThumbprintDevices[0].PrimaryCertificateThumbprint)`""
+            "export IOT_DPS_INDIVIDUAL_X509_CERTIFICATE=`"$($TestEnvInfo.DpsIndividualX509Enrollments[0].CertificateBase64)`""
+            "export IOT_DPS_INDIVIDUAL_X509_KEY=`"$($TestEnvInfo.DpsIndividualX509Enrollments[0].PrivateKeyBase64)`""
+            "export IOT_DPS_INDIVIDUAL_REGISTRATION_ID=`"$($TestEnvInfo.DpsIndividualX509Enrollments[0].Id)`""
+            "export AZURE_RESOURCE_GROUP=`"$($TestEnvInfo.AzureResourceGroup)`""
+        )
     }
+
+    Set-Content -Path "$OutFile" -Value $($Lines -join "`n") -Encoding utf8 -NoNewline
 
     Write-Host "End-to-End test configuration written to $OutFile"
 
