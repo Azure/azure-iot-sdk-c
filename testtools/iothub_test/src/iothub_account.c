@@ -745,7 +745,7 @@ IOTHUB_ACCOUNT_INFO_HANDLE IoTHubAccount_Init_With_Config(IOTHUB_ACCOUNT_CONFIG*
 
             // TODO: (ewertons) remove this
             int base64_cert_length = (int)strlen(base64_cert);
-            LogInfo(">>> base64_cert (%d) = \"%s\"", base64_cert_length, base64_cert)
+            LogInfo(">>> base64_cert (%d) = \"%s\"", base64_cert_length, base64_cert);
             LogInfo(">>> %02x %02x %02x %02x", base64_cert[base64_cert_length - 3], base64_cert[base64_cert_length - 2], base64_cert[base64_cert_length - 1], base64_cert[base64_cert_length - 0]);
 
             if (iothub_account_info->connString == NULL)
