@@ -177,6 +177,11 @@ stages:
         cat "$(Pipeline.Workspace)/test_config_scripts/set_e2e_test_env_vars.sh" # TODO: (ewertons) remove this
         source "$(Pipeline.Workspace)/test_config_scripts/set_e2e_test_env_vars.sh"
         printenv | sort | grep IOT # TODO: (ewertons) remove this
+        echo "-------------------"
+        xxd "$(Pipeline.Workspace)/test_config_scripts/set_e2e_test_env_vars.sh"
+        echo "-------------------"
+        echo $IOTHUB_E2E_X509_CERT_BASE64 | xxd
+        echo "-------------------"
         cd cmake && sudo -E ../build_all/linux/run_tests.sh
       displayName: "Run Tests (+E2E)"
     - task: PublishTestResults@2

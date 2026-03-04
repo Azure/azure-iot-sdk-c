@@ -764,6 +764,8 @@ export AZURE_RESOURCE_GROUP=`"$($TestEnvInfo.AzureResourceGroup)`"
 
     Write-Host "End-to-End test configuration written to $OutFile"
 
+    format-hex "$OutFile" | Out-Host
+
     return $OutFile
 
     # Cut list?
