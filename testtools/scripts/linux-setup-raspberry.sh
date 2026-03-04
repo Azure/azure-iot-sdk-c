@@ -3,7 +3,7 @@
 set -e
 
 sudo apt-get update && sudo apt-get upgrade
-sudo apt install --fix-missing -y wget git build-essential cmake xz-utils ca-certificates pkg-config uuid-dev sudo
+sudo apt install --fix-missing -y wget git build-essential cmake xz-utils ca-certificates pkg-config sudo
 
 export WORK_ROOT="$(pwd)/toolchain"
 mkdir $WORK_ROOT && pushd $WORK_ROOT
