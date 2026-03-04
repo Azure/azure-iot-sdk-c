@@ -43,18 +43,17 @@ int hsm_client_x509_set_certificate(HSM_CLIENT_HANDLE handle, const char* certif
     else
     {
         HSM_CLIENT_X509_INFO* x509_client = (HSM_CLIENT_X509_INFO*)handle;
-        if (x509_client->x509certificate != NULL)
-        {
-            LogError("Certificate has been previously set and cannot be changed");
-            result = MU_FAILURE;
-        }
-        else if (mallocAndStrcpy_s((char **)&(x509_client->x509certificate), certificate) != 0)
+        char* certificate_copy = NULL;
+
+        if (mallocAndStrcpy_s(&certificate_copy, certificate) != 0)
         {
             LogError("Failed allocating certificate key");
             result = MU_FAILURE;
         }
         else
         {
+            free((char*)x509_client->x509certificate);
+            x509_client->x509certificate = certificate_copy;
             result = 0;
         }
     }
@@ -72,18 +71,16 @@ int hsm_client_x509_set_key(HSM_CLIENT_HANDLE handle, const char* key)
     else
     {
         HSM_CLIENT_X509_INFO* x509_client = (HSM_CLIENT_X509_INFO*)handle;
-        if (x509_client->x509key != NULL)
-        {
-            LogError("Certificate key has been previously set and cannot be changed");
-            result = MU_FAILURE;
-        }
-        else if (mallocAndStrcpy_s((char **)&x509_client->x509key, key) != 0)
+        char* key_copy = NULL;
+        if (mallocAndStrcpy_s(&key_copy, key) != 0)
         {
             LogError("Failed allocating cert key");
             result = MU_FAILURE;
         }
         else
         {
+            free((char*)x509_client->x509key);
+            x509_client->x509key = key_copy;
             result = 0;
         }
     }

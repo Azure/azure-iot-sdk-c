@@ -168,7 +168,6 @@ stages:
     - script: |
         export OPENSSL_ia32cap=0x00000000
         sudo chmod -R 755 .
-        cat "$(Pipeline.Workspace)/test_config_scripts/set_e2e_test_env_vars.sh" # TODO: (ewertons) remove this
         source "$(Pipeline.Workspace)/test_config_scripts/set_e2e_test_env_vars.sh"
         cd cmake && sudo -E ../build_all/linux/run_tests.sh
       displayName: "Run Tests (+E2E)"
