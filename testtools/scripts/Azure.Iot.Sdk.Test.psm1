@@ -741,6 +741,7 @@ function New-AzIotCSDKE2ETestConfig {
         )
     } else { # bash
         $Lines = @(
+            "#!/bin/bash"
             "export IOTHUB_CONNECTION_STRING=`"$($TestEnvInfo.IotHubConnectionString)`""
             "export IOTHUB_EVENTHUB_CONNECTION_STRING=`"$($TestEnvInfo.IotHubEventHubConnectionString)`""
             "export IOTHUB_EVENTHUB_LISTEN_NAME=`"$($TestEnvInfo.IotHubEventHubCompatibleName)`""
@@ -765,8 +766,6 @@ function New-AzIotCSDKE2ETestConfig {
     Set-Content -Path "$OutFile" -Value $($Lines -join "`n") -Encoding utf8 -NoNewline
 
     Write-Host "End-to-End test configuration written to $OutFile"
-
-    format-hex "$OutFile" | Out-Host
 
     return $OutFile
 

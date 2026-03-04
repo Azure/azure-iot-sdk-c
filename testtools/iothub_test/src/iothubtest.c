@@ -1571,9 +1571,6 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEvent(IOTHUB_TEST_HANDLE devhubHan
                     }
                     else
                     {
-                        // TODO: (ewertons) remove this
-                        connection_set_trace(connection, 1);
-
                         char tempBuffer[256];
                         const char filter_name[] = "apache.org:selector-filter:string";
                         int filter_string_length = sprintf(tempBuffer, "amqp.annotation.x-opt-enqueuedtimeutc > %llu", ((unsigned long long)receiveTimeRangeStart - 330) * 1000);
