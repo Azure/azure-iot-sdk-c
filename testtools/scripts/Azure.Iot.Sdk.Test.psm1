@@ -6,7 +6,7 @@ function ConvertTo-Base64 {
 }
 
 
-function WriteTo-File {
+function Set-FileContent {
     param(
         $Path = $null,
         $Content = $null
@@ -40,16 +40,18 @@ function Stop-OnError {
 
 function New-DpsDerivedSymmetricKey {
     param(
-        $SymmetricKey = $null, # Enrollment group symmetric key (primary or secondary)
+        $SymmetricKey = $null,
         $DeviceId = $null
     )
 
     $hmacsha256 = New-Object System.Security.Cryptography.HMACSHA256
-    $hmacsha256.key = [Convert]::FromBase64String($SymmetricKey)
-    $sig = $hmacsha256.ComputeHash([Text.Encoding]::ASCII.GetBytes($DeviceId))
-    $derivedkey = [Convert]::ToBase64String($sig)
-    # return "`n$derivedkey`n"
-    return "$derivedkey"
+    try {
+        $hmacsha256.key = [Convert]::FromBase64String($SymmetricKey)
+        $sig = $hmacsha256.ComputeHash([Text.Encoding]::ASCII.GetBytes($DeviceId))
+        return [Convert]::ToBase64String($sig)
+    } finally {
+        $hmacsha256.Dispose()
+    }
 }
 
 function Export-Pkcs8PrivateKeyPem {
@@ -71,7 +73,7 @@ function New-PrivateKey {
     if ($Path -ne $null -and $Path -ne "") {
         $pem = Export-Pkcs8PrivateKeyPem -Key $rsa
         Write-Host "Saving private key to $Path"
-        WriteTo-File -Path $Path -Content $pem
+        Set-FileContent -Path $Path -Content $pem
     }
 
     return $rsa
@@ -192,7 +194,7 @@ function Export-X509CertificateToPemFile {
     param([System.Security.Cryptography.X509Certificates.X509Certificate2]$Cert, [string]$Path)
     $pem = Export-X509CertificateToPem -Certificate $Cert
     Write-Host "Exporting certificate to $Path"
-    WriteTo-File -Path $Path -Content $pem
+    Set-FileContent -Path $Path -Content $pem
 }
 
 function New-DpsCACertificateChain {
@@ -276,7 +278,7 @@ function New-DpsSymmetricKeyIndividualEnrollment {
         $EnrollmentInfo = az iot dps enrollment create --dps-name $DpsName --resource-group $ResourceGroup --at symmetricKey --enrollment-id $EnrollmentId --credential-policy $AdrPolicyName | ConvertFrom-Json
     }
 
-    Stop-OnError "Create an Azure DPS symmetric-key individual enrollment ($EnrollmentId; $AdrPolicyName)"
+    Stop-OnError -Step "Create an Azure DPS symmetric-key individual enrollment ($EnrollmentId; $AdrPolicyName)"
 
     return $EnrollmentInfo
 }
@@ -305,7 +307,7 @@ function New-DpsX509IndividualEnrollment {
         $EnrollmentInfo = az iot dps enrollment create --dps-name $DpsName --resource-group $ResourceGroup --at x509 --enrollment-id $EnrollmentId --cp $DpsDeviceCertificatePath --credential-policy $AdrPolicyName | ConvertFrom-Json
     }
 
-    Stop-OnError "Create an Azure DPS x509 individual enrollment ($EnrollmentId; $AdrPolicyName)"
+    Stop-OnError -Step "Create an Azure DPS x509 individual enrollment ($EnrollmentId; $AdrPolicyName)"
 
     return [pscustomobject]@{
         Enrollment = $EnrollmentInfo
@@ -330,7 +332,7 @@ function New-DpsSymmetricKeyEnrollmentGroup {
         $EnrollmentInfo = az iot dps enrollment-group create --dps-name $DpsName --resource-group $ResourceGroup --enrollment-id $EnrollmentId --credential-policy $AdrPolicyName | ConvertFrom-Json
     }
 
-    Stop-OnError "Create an Azure Device Provisioning symmetric-key enrollment group ($EnrollmentId; $AdrPolicyName)"
+    Stop-OnError -Step "Create an Azure Device Provisioning symmetric-key enrollment group ($EnrollmentId; $AdrPolicyName)"
 
     return $EnrollmentInfo
 }
@@ -353,7 +355,7 @@ function New-DpsX509EnrollmentGroup {
         az iot dps enrollment-group create --dps-name $DpsName --resource-group $ResourceGroup --enrollment-id $EnrollmentId --ap static --cp $IntermediateCACertificatePath --provisioning-status enabled --iot-hubs $IotHubFqdn --credential-policy $AdrPolicyName | Out-Null
     }
 
-    Stop-OnError "Create an Azure Device Provisioning x509 enrollment group ($EnrollmentId; $AdrPolicyName)"
+    Stop-OnError -Step "Create an Azure Device Provisioning x509 enrollment group ($EnrollmentId; $AdrPolicyName)"
 }
 
 function New-AzureResourceGroupName {
@@ -366,7 +368,7 @@ function New-AzureResourceGroupName {
             New-Item -ItemType Directory -Force -Path $OutFileDir | Out-Null
         }
 
-        WriteTo-File -Path $OutFile -Content $ResourceGroupName
+        Set-FileContent -Path $OutFile -Content $ResourceGroupName
 
     }
 
@@ -544,7 +546,7 @@ function New-AzIotTestEnvironment {
         $DeviceMinimalInfo = [pscustomobject]@{
             Id = $IotHubDeviceId
             PrimaryKey = $IotHubDeviceInfo.authentication.symmetricKey.primaryKey
-            SecondaryKey = $EnrollmentInfo.authentication.symmetricKey.secondaryKey
+            SecondaryKey = $IotHubDeviceInfo.authentication.symmetricKey.secondaryKey
             PrimaryConnectionString = $PrimaryConnectionString.connectionString
             SecondaryConnectionString = $SecondaryConnectionString.connectionString
         }
@@ -606,7 +608,7 @@ function New-AzIotTestEnvironment {
 
         for ($i = 0; $i -lt $DpsX509IndividualEnrollments; $i++) {
             $EnrollmentId = "$DpsX509EnrollmentIdPrefix-$i"
-            $EnrollmentInfo = New-DpsX509IndividualEnrollment -ResourceGroup $ResourceGroup -DpsName $DpsName -EnrollmentId $EnrollmentId -AdrPolicyName $AzureAdrPolicyName -CertDir $TestCertDir -PrivateDir $TestPrivateDir
+            $EnrollmentInfo = New-DpsX509IndividualEnrollment -ResourceGroup $ResourceGroup -DpsName $DpsName -EnrollmentId $EnrollmentId -AdrPolicyName $AzureAdrPolicyName -CertDir $CertDir -PrivateDir $PrivateDir
 
             $EnrollmentMininalInfo = [pscustomobject]@{
                 Id = $EnrollmentId
@@ -640,8 +642,8 @@ function New-AzIotTestEnvironment {
 
             for ($i = 0; $i -lt $DpsX509GroupEnrollmentDevices; $i++) {
                 $DeviceId = "group-prov-x509-$i"
-                $DpsDevicePrivateKeyPath = "$PrivateDir/$EnrollmentId.key.pem"
-                $DpsDeviceCertificatePath = "$CertDir/$EnrollmentId.cert.pem"
+                $DpsDevicePrivateKeyPath = "$PrivateDir/$DeviceId.key.pem"
+                $DpsDeviceCertificatePath = "$CertDir/$DeviceId.cert.pem"
                 $DpsDevicePrivateKey = New-PrivateKey -Path $DpsDevicePrivateKeyPath
                 $DpsDeviceCertificate = New-Certificate -Subject "CN=$DeviceId" -Key $DpsDevicePrivateKey -IssuerCert $DpsCertificates.IntermediateCACertificate -IssuerKey $DpsCertificates.IntermediateCAPrivateKey -IsCA $false -Days 30
                 Export-X509CertificateToPemFile -Cert $DpsDeviceCertificate -Path $DpsDeviceCertificatePath
@@ -661,26 +663,26 @@ function New-AzIotTestEnvironment {
     if ($EnableFileUpload -eq $true) {
         Write-Host "Creating Azure Storage account ($StorageAccountName)"
         $AzureStorageAccount = az storage account create --name "$StorageAccountName" --resource-group "$ResourceGroup" --location "$AzureLocation" --sku Standard_LRS --kind StorageV2 | ConvertFrom-Json
-        Stop-OnError "Creating Azure Storage account"
+        Stop-OnError -Step "Creating Azure Storage account"
 
         $AzureStorageContainerName = "iothubuploads"
 
         Write-Host "Creating Azure Storage container ($AzureStorageContainerName on $StorageAccountName)"
         az storage container create --name $AzureStorageContainerName --account-name "$StorageAccountName" --only-show-errors | Out-Null
-        Stop-OnError "Creating Azure Storage container"
+        Stop-OnError -Step "Creating Azure Storage container"
 
         Write-Host "Getting Azure Storage account connection string"
         $AzureStorageConnectionString=$(az storage account show-connection-string --name "$StorageAccountName" --resource-group "$ResourceGroup" --query connectionString -o tsv)
-        Stop-OnError "Getting Azure Storage account connection string"
+        Stop-OnError -Step "Getting Azure Storage account connection string"
 
         if ($EnableCertificateManagement -eq $true) {
             Write-Host "Updating Azure IoT Hub file upload settings (certificate management)"
             az iot hub update --name "$IotHubName" --resource-group "$ResourceGroup" --fcs "$AzureStorageConnectionString" --fc $AzureStorageContainerName --fileupload-sas-ttl 1 --ns-identity-id "$($AzureAdrNamespace.identity.principalId)" | Out-Null
-            Stop-OnError "Updating Azure IoT Hub file upload settings (certificate management)"
+            Stop-OnError -Step "Updating Azure IoT Hub file upload settings (certificate management)"
         } else {    
             Write-Host "Updating Azure IoT Hub file upload settings"
             az iot hub update --name "$IotHubName" --resource-group "$ResourceGroup" --fcs "$AzureStorageConnectionString" --fc $AzureStorageContainerName --fileupload-sas-ttl 1 | Out-Null
-            Stop-OnError "Updating Azure IoT Hub file upload settings"
+            Stop-OnError -Step "Updating Azure IoT Hub file upload settings"
         }
     }
 
@@ -781,7 +783,7 @@ function New-AzIotCSDKE2ETestConfig {
 
     $Content = $($Lines -join "`n") + "`n"
 
-    WriteTo-File -Path "$OutFile" -Content "$Content"
+    Set-FileContent -Path "$OutFile" -Content "$Content"
 
     Write-Host "End-to-End test configuration written to $OutFile"
 
