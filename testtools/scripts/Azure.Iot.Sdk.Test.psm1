@@ -376,14 +376,80 @@ function New-AzureResourceGroupName {
 }
 
 function New-AzIotTestEnvironment {
+    <#
+    .SYNOPSIS
+    Creates a new set of Azure Resources for testing Azure IoT scenarios, including an IoT Hub and optionally a Device Provisioning Service, with different types of enrollments and devices.
+
+    .DESCRIPTION
+    Creates a new set of Azure Resources for testing Azure IoT scenarios, including an IoT Hub and optionally a Device Provisioning Service, with different types of enrollments and devices.
+
+    .PARAMETER AzureLocation
+    Specifies the Azure location for the resources. Default is "centraluseuap".
+    .PARAMETER AzureSubscriptionId
+    Specifies the Azure subscription ID. If not provided, the current Azure CLI session default subscription will be used.
+    .PARAMETER ResourceGroup
+    Specifies the name of the resource group. If not provided, a new resource group will be created.
+    .PARAMETER DpsName
+    Specifies the name of the Device Provisioning Service. If not provided, a new DPS will be created.
+    .PARAMETER IotHubName
+    Specifies the name of the IoT Hub. If not provided, a new IoT Hub will be created.
+    .PARAMETER IotHubDomainName
+    Specifies the domain name of the IoT Hub. Default is "azure-devices.net".
+    .PARAMETER StorageAccountName
+    Specifies the name of the Storage Account. If not provided, a new Storage Account will be created.
+    .PARAMETER DpsSymmKeyIndividualEnrollments
+    Specifies the number of symmetric key individual enrollments to create in DPS. Default is 0.
+    .PARAMETER DpsX509IndividualEnrollments
+    Specifies the number of x509 individual enrollments to create in DPS. Default is 0.
+    .PARAMETER DpsSymmKeyGroupEnrollmentDevices
+    Specifies the number of devices to create under a symmetric key enrollment group in DPS. Default is 0.
+    .PARAMETER DpsX509GroupEnrollmentDevices
+    Specifies the number of devices to create under an x509 enrollment group in DPS. Default is 1.
+    .PARAMETER IotHubSymmKeyDevices
+    Specifies the number of symmetric key devices to create in IoT Hub. Default is 1.
+    .PARAMETER IotHubX509ThumbprintDevices
+    Specifies the number of x509 thumbprint devices to create in IoT Hub. Default is 1.
+    .PARAMETER IotHubX509CADevices
+    Specifies the number of x509 CA devices to create in IoT Hub. Default is 0.
+    .PARAMETER EnableFileUpload
+    Specifies whether to enable file upload in IoT Hub. Default is false.
+    .PARAMETER NoDps
+    Specifies whether to skip creating a Device Provisioning Service. Default is false.
+    .PARAMETER EnableCertificateManagement
+    Specifies whether to enable certificate management in IoT Hub and DPS using Azure Device Registration (ADR). Default is false.
+    .PARAMETER CertDir
+    Specifies the directory to store generated certificates. Default is "$(pwd)/certs". The path is created if it does not exist.
+    .PARAMETER PrivateDir
+    Specifies the directory to store generated private keys. Default is "$(pwd)/private". The path is created if it does not exist.
+    .PARAMETER CsrDir
+    Specifies the directory to store generated certificate signing requests (CSRs). Default is "$(pwd)/csr". The path is created if it does not exist.
+
+    .OUTPUTS
+    A custom object containing information about the created Azure resources and devices, including connection strings, certificate paths, and enrollment details.
+
+    .EXAMPLE
+    PS> $TestEnvInfo = New-AzIotTestEnvironment
+
+    This command creates a new Azure IoT test environment in the default location with 1 x509 group enrollment device in DPS and 1 symmetric key device and 1 x509 thumbprint device in IoT Hub, without enabling certificate management nor file upload on Azure IoT Hub.
+
+    .EXAMPLE
+    PS> $TestEnvInfo = New-AzIotTestEnvironment -AzureLocation "eastus2" -DpsSymmKeyIndividualEnrollments 2 -DpsX509IndividualEnrollments 1 -DpsSymmKeyGroupEnrollmentDevices 2 -DpsX509GroupEnrollmentDevices 2 -IotHubSymmKeyDevices 2 -IotHubX509ThumbprintDevices 1 -IotHubX509CADevices 1
+    
+    This command creates a new Azure IoT test environment in the "eastus2" location with 2 symmetric key individual enrollments, 1 x509 individual enrollment, 2 devices under a symmetric key enrollment group, 2 devices under an x509 enrollment group in DPS, and 2 symmetric key devices, 1 x509 thumbprint device, and 1 x509 CA device in IoT Hub.
+
+    .EXAMPLE
+    PS> $TestEnvInfo = New-AzIotTestEnvironment -EnableCertificateManagement
+    
+    This command creates a new Azure IoT test environment with an IoT Hub and Device Provisioning Service that has certificate management enabled using Azure Device Registration (ADR).
+    #>
     param(
-        $AzureLocation = "centraluseuap", # Other locations (e.g.): eastus2euap, westus2, ...
-        $AzureSubscriptionId = $null,
-        $ResourceGroup = $(New-AzureResourceGroupName),
-        $DpsName       = "dps-$([guid]::NewGuid().Guid.Replace('-', ''))",
-        $IotHubName    = "iothub-$([guid]::NewGuid().Guid.Replace('-', ''))",
-        $IotHubDomainName = "azure-devices.net",
-        $StorageAccountName = "teststoacc$([guid]::NewGuid().Guid.Replace('-', ''))".Substring(0, 24), # Max size of Storage Account name
+        [string]$AzureLocation = "centraluseuap", # Other locations (e.g.): eastus2euap, westus2, ...
+        [string]$AzureSubscriptionId = $null,
+        [string]$ResourceGroup = $(New-AzureResourceGroupName),
+        [string]$DpsName       = "dps-$([guid]::NewGuid().Guid.Replace('-', ''))",
+        [string]$IotHubName    = "iothub-$([guid]::NewGuid().Guid.Replace('-', ''))",
+        [string]$IotHubDomainName = "azure-devices.net",
+        [string]$StorageAccountName = "teststoacc$([guid]::NewGuid().Guid.Replace('-', ''))".Substring(0, 24), # Max size of Storage Account name
         [int]$DpsSymmKeyIndividualEnrollments = 0,
         [int]$DpsX509IndividualEnrollments = 0,
         [int]$DpsSymmKeyGroupEnrollmentDevices = 0,
@@ -394,9 +460,9 @@ function New-AzIotTestEnvironment {
         [switch]$EnableFileUpload,
         [switch]$NoDps,
         [switch]$EnableCertificateManagement,
-        $CertDir = "$(pwd)/certs",
-        $PrivateDir = "$(pwd)/private",
-        $CsrDir = "$(pwd)/csr"
+        [string]$CertDir = "$(pwd)/certs",
+        [string]$PrivateDir = "$(pwd)/private",
+        [string]$CsrDir = "$(pwd)/csr"
     )
 
     $TestEnvInfo = [pscustomobject]@{
@@ -438,13 +504,30 @@ function New-AzIotTestEnvironment {
     }
 
     # Subscription id...
-    if ($AzureSubscriptionId -eq $null) {
+    if ($AzureSubscriptionId -eq $null -or $AzureSubscriptionId -imatch "[ `t]*") {
         $AzureAccount = az account show 2>$null | ConvertFrom-Json
         Stop-OnError -Step "Get Azure account information"
         $AzureSubscriptionId = $AzureAccount.id
     } else {
         $discard = az account set --subscription "$AzureSubscriptionId" --only-show-errors 2>$null
         Stop-OnError -Step "Set Azure subscription"
+    }
+
+    # Add Azure IoT extension if not already added (required for some az iot commands, e.g. az iot adr ns create)
+    # TODO: install non-preview version after GA.
+    $AzCliAzureIotExtension = $(az extension list | Convertfrom-json | ?{$_.name -eq "azure-iot"})
+
+    if ($AzCliAzureIotExtension -ne $null -and $AzCliAzureIotExtension.preview -eq $false) {
+        Write-Host "Non-preview Azure IoT extension found (version $($AzCliAzureIotExtension.version)). Removing..."
+        az extension remove --name azure-iot --only-show-errors | Out-Null
+        Stop-OnError -Step "Remove non-preview Azure IoT extension"
+        $AzCliAzureIotExtension = $null
+    }
+
+    if ($AzCliAzureIotExtension -eq $null) {
+        Write-Host "Installing Azure IoT extension."
+        az extension add --name azure-iot --allow-preview --only-show-errors | Out-Null
+        Stop-OnError -Step "Install Azure IoT extension"
     }
 
     # Create resource group (if does not exist).
