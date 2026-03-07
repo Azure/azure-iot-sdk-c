@@ -471,6 +471,7 @@ function New-AzIotTestEnvironment {
         IotHubEventHubConnectionString = $null
         IotHubEventHubCompatibleName = $null
         IotHubEventHubPartitionCount = 0
+        IotHubEventHubConsumerGroups = @()
         DpsDeviceFqdn = $null
         DpsServiceFqdn = $null
         DpsConnectionString = $null
@@ -486,6 +487,7 @@ function New-AzIotTestEnvironment {
         DpsIndividualX509Enrollments = @()
         DpsGroupSymKeyEnrollments = @()
         DpsGroupX509Enrollments = @()
+        AzureAdrPolicyName = $null
     }
 
     $IotHubFqdn = "$($IotHubName).$($IotHubDomainName)"
@@ -771,7 +773,8 @@ function New-AzIotTestEnvironment {
 
 
     # Gathering Test Environment settings.
-    $TestEnvInfo.AzureResourceGroup = $ResourceGroup 
+    $TestEnvInfo.AzureResourceGroup = $ResourceGroup
+    $TestEnvInfo.AzureAdrPolicyName = $AzureAdrPolicyName
 
     Write-Host "Getting IoT Hub Connection String"
     $TestEnvInfo.IotHubConnectionString = $(az iot hub connection-string show -g $ResourceGroup -n $IotHubName --kt primary --pn iothubowner --query connectionString -o tsv)
@@ -783,6 +786,10 @@ function New-AzIotTestEnvironment {
 
     $TestEnvInfo.IotHubEventHubCompatibleName = $AzureIoTHub.properties.eventHubEndpoints.events.path
     $TestEnvInfo.IotHubEventHubPartitionCount = $AzureIoTHub.properties.eventHubEndpoints.events.partitionCount
+
+    Write-Host "Getting IoT Hub's Event Hub Consumer Groups"
+    az iot hub consumer-group list --hub-name $IotHubName --resource-group $ResourceGroup | ConvertFrom-Json | %{ $TestEnvInfo.IotHubEventHubConsumerGroups += $_.name }
+    Stop-OnError -Step "Get IoT Hub's Event Hub Consumer Groups"
 
     if ($NoDps -eq $false) {
         $TestEnvInfo.DpsDeviceFqdn = $AzureDps.properties.deviceProvisioningHostName
@@ -878,6 +885,108 @@ function New-AzIotCSDKE2ETestConfig {
         #   IOTHUB_CA_ROOT_CERT_KEY: $(IOTHUB-CA-ROOT-CERT-KEY)
 }
 
+function New-AzIotPythonSDKE2ETestConfig {
+    param(
+        $TestEnvInfo = $null,
+        [ValidateSet('powershell', 'bash')]
+        [string]$Target = "bash",
+        [switch]$EnableCertificateManagement,
+        $OutFile
+    )
+
+    if ($OutFile -eq $null) {
+        $OutFile = "./azure-iot-sdk-python-e2e-test-config"
+        if ($Target -eq "powershell") {
+            $OutFile += ".ps1"
+        } else {
+            $OutFile += ".sh"
+        }
+    }
+
+# registration_id = os.getenv("PROVISIONING_REGISTRATION_ID")
+
+# dps_x509_cert_file = os.getenv("PROVISIONING_X509_CERT_FILE")
+# dps_x509_key_file = os.getenv("PROVISIONING_X509_KEY_FILE")
+
+# dps_sas_key = os.getenv("PROVISIONING_SYMMETRIC_KEY")
+
+# dps_csr_data = os.getenv("PROVISIONING_CSR")
+# dps_csr_key_file = os.getenv("PROVISIONING_CSR_KEY_FILE")
+# dps_issued_cert_file = os.getenv("PROVISIONING_ISSUED_CERT_FILE")
+
+# iothub_csr_data = os.getenv("IOTHUB_CSR")
+# iothub_csr_key_file = dps_csr_key_file  # Must be the same.
+# iothub_issued_cert_file = os.getenv("IOTHUB_ISSUED_CERT_FILE")
+
+    $DpsRootCACertificateBase64 = ConvertTo-Base64 -Content $(gc $TestEnvInfo.DpsRootCACertificatePath)
+    $DpsRootCAPrivateKeyBase64 = ConvertTo-Base64 -Content $(gc $TestEnvInfo.DpsRootCAPrivateKeyPath)
+
+    if ($Target -eq "powershell") {
+        $Lines = @(
+            "`$env:IOTHUB_CONNECTION_STRING = `"$($TestEnvInfo.IotHubConnectionString)`""
+            "`$env:IOTHUB_E2E_IOTHUB_CONNECTION_STRING = `"$($TestEnvInfo.IotHubConnectionString)`""
+            "`$env:IOTHUB_EVENTHUB_CONNECTION_STRING = `"$($TestEnvInfo.IotHubEventHubConnectionString)`""
+            "`$env:IOTHUB_E2E_EVENTHUB_CONNECTION_STRING = `"$($TestEnvInfo.IotHubEventHubConnectionString)`""
+            "`$env:EVENTHUB_CONNECTION_STRING = `"$($TestEnvInfo.IotHubEventHubConnectionString)`""
+            "`$env:IOTHUB_E2E_EVENTHUB_CONSUMER_GROUP = `"``$($TestEnvInfo.IotHubEventHubConsumerGroups[0])`""
+            "`$env:EVENTHUB_CONSUMER_GROUP = `"``$($TestEnvInfo.IotHubEventHubConsumerGroups[0])`""
+
+            "`$env:PROVISIONING_DEVICE_IDSCOPE = `"$($TestEnvInfo.DpsIdScope)`""
+            "`$env:PROVISIONING_IDSCOPE = `"$($TestEnvInfo.DpsIdScope)`""
+            "`$env:PROVISIONING_DEVICE_ENDPOINT = `"$($TestEnvInfo.DpsDeviceFqdn)`""
+            "`$env:PROVISIONING_HOST = `"$($TestEnvInfo.DpsIdScope)`""
+            "`$env:PROVISIONING_SERVICE_CONNECTION_STRING = `"$($TestEnvInfo.DpsConnectionString)`""
+
+            "`$env:PROVISIONING_ROOT_CERT = `"$DpsRootCACertificateBase64`""
+            "`$env:PROVISIONING_ROOT_CERT_KEY = `"$DpsRootCAPrivateKeyBase64`""
+            "`$env:PROVISIONING_ROOT_PASSWORD = `"`""
+
+            "`$env:ADR_CERT_MGMT_POLICY_NAME = `"$($TestEnvInfo.AzureAdrPolicyName)`""
+
+            "`$env:PYTHONUNBUFFERED = `"True`""
+
+            "`$env:AZURE_RESOURCE_GROUP = `"$($TestEnvInfo.AzureResourceGroup)`""
+        )
+    } else { # bash
+        $Lines = @(
+            "#!/bin/bash"
+            "export IOTHUB_CONNECTION_STRING=`"$($TestEnvInfo.IotHubConnectionString)`""
+            "export IOTHUB_E2E_IOTHUB_CONNECTION_STRING=`"$($TestEnvInfo.IotHubConnectionString)`""
+            "export IOTHUB_EVENTHUB_CONNECTION_STRING=`"$($TestEnvInfo.IotHubEventHubConnectionString)`""
+            "export IOTHUB_E2E_EVENTHUB_CONNECTION_STRING=`"$($TestEnvInfo.IotHubEventHubConnectionString)`""
+            "export EVENTHUB_CONNECTION_STRING=`"$($TestEnvInfo.IotHubEventHubConnectionString)`""
+            "export IOTHUB_E2E_EVENTHUB_CONSUMER_GROUP=`"`\$($TestEnvInfo.IotHubEventHubConsumerGroups[0])`""
+            "export EVENTHUB_CONSUMER_GROUP=`"`\$($TestEnvInfo.IotHubEventHubConsumerGroups[0])`""
+
+
+            "export PROVISIONING_DEVICE_IDSCOPE=`"$($TestEnvInfo.DpsIdScope)`""
+            "export PROVISIONING_IDSCOPE=`"$($TestEnvInfo.DpsIdScope)`""
+            "export PROVISIONING_DEVICE_ENDPOINT=`"$($TestEnvInfo.DpsDeviceFqdn)`""
+            "export PROVISIONING_HOST=`"$($TestEnvInfo.DpsIdScope)`""
+            "export PROVISIONING_SERVICE_CONNECTION_STRING=`"$($TestEnvInfo.DpsConnectionString)`""
+
+            "export PROVISIONING_ROOT_CERT=`"$DpsRootCACertificateBase64`""
+            "export PROVISIONING_ROOT_CERT_KEY=`"$DpsRootCAPrivateKeyBase64`""
+            "export PROVISIONING_ROOT_PASSWORD=`"`""
+
+            "export ADR_CERT_MGMT_POLICY_NAME=`"$($TestEnvInfo.AzureAdrPolicyName)`""
+
+            "export PYTHONUNBUFFERED=`"True`""
+
+            "export AZURE_RESOURCE_GROUP=`"$($TestEnvInfo.AzureResourceGroup)`""
+        )
+    }
+
+    $Content = $($Lines -join "`n") + "`n"
+
+    Set-FileContent -Path "$OutFile" -Content "$Content"
+
+    Write-Host "End-to-End test configuration written to $OutFile"
+
+    return $OutFile
+}
+
+Export-ModuleMember -Function New-AzureResourceGroupName
 Export-ModuleMember -Function New-AzIotTestEnvironment
 Export-ModuleMember -Function New-AzIotCSDKE2ETestConfig
-Export-ModuleMember -Function New-AzureResourceGroupName
+Export-ModuleMember -Function New-AzIotPythonSDKE2ETestConfig
