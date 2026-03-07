@@ -154,7 +154,7 @@ stages:
     - checkout: self
       submodules: true
     - download: current
-      artifact: test_config_scripts    
+      artifact: test_config_scripts
       displayName: Download artifact (test config scripts)
     - script: |
         set -e
