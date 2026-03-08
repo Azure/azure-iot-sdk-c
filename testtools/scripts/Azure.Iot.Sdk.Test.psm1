@@ -505,9 +505,11 @@ function New-AzIotTestEnvironment {
         Write-Host "Already logged in to Azure."
     }
 
+    $AzureAccount = az account show | ConvertFrom-Json
+    $IsAzureAccountServicePrincipal = $AzureAccount.user.type -eq "servicePrincipal"
+
     # Subscription id...
     if ($AzureSubscriptionId -eq $null -or $AzureSubscriptionId -imatch "[ `t]*") {
-        $AzureAccount = az account show 2>$null | ConvertFrom-Json
         Stop-OnError -Step "Get Azure account information"
         $AzureSubscriptionId = $AzureAccount.id
     } else {
@@ -543,9 +545,16 @@ function New-AzIotTestEnvironment {
     }
 
     if ($EnableCertificateManagement -eq $true) {
+        $AzureIotHubAppId = "89d10474-74af-4874-99a7-c23c2f643083" # Azure IoT Hub application ID (same for all tenants)
+        $AzureIotHubObjectId = "0aab4033-4ad9-4b0b-9934-542334eceffb" # Manually obtained...
+
         $ResouceGroupScope = "/subscriptions/$AzureSubscriptionId/resourceGroups/$ResourceGroup"
         Write-Host "Creating Azure role assignment for certificate management (scope=$ResouceGroupScope)"
-        az role assignment create --assignee 89d10474-74af-4874-99a7-c23c2f643083 --role Contributor --scope "$ResouceGroupScope" --only-show-errors | Out-Null
+        if ($IsAzureAccountServicePrincipal) {
+            az role assignment create --assignee-object-id $AzureIotHubObjectId --assignee-principal-type ServicePrincipal --role Contributor --scope "$ResouceGroupScope" --only-show-errors | Out-Null
+        } else {
+            az role assignment create --assignee $AzureIotHubAppId --role Contributor --scope "$ResouceGroupScope" --only-show-errors | Out-Null
+        }
         Stop-OnError -Step "Create Azure role assignment for certificate management"
 
         $CertMgmtUserIdentity = "$($ResourceGroup)cmuid"
