@@ -499,12 +499,20 @@ class DpsEnrollmentsSet {
 }
 
 class DpsInfo {
+    [string]$ResourceGroup = $null
     [string]$DeviceFqdn = $null
     [string]$ServiceFqdn = $null
     [string]$ConnectionString = $null
     [string]$IdScope = $null
-    [X509CertificateInfo]$RootCaCertificate = $null
+    [X509CertificateInfo[]]$RootCaCertificates = @()
     [DpsEnrollmentsSet]$Enrollments = [DpsEnrollmentsSet]::new()
+
+    [X509CertificateInfo]AddRootCaCertificate() {
+        $DpsName = $this.ServiceFqdn.split(".")[0]
+        $DpsRootCertificate = Add-DpsCertificate -ResourceGroup $this.ResourceGroup -DpsName $DpsName
+        $this.RootCaCertificates += $DpsRootCertificate
+        return $DpsRootCertificate
+    }
 }
 
 class EventHubInfo {
@@ -817,16 +825,14 @@ function New-AzIotTestEnvironment {
         [int]$DpsSymmKeyIndividualEnrollments = 0,
         [int]$DpsX509IndividualEnrollments = 0,
         [int]$DpsSymmKeyGroupEnrollmentDevices = 0,
-        [int]$DpsX509GroupEnrollmentDevices = 1,
-        [int]$IotHubSymmKeyDevices = 1,
-        [int]$IotHubX509ThumbprintDevices = 1,
+        [int]$DpsX509GroupEnrollmentDevices = 0,
+        [int]$IotHubSymmKeyDevices = 0,
+        [int]$IotHubX509ThumbprintDevices = 0,
         [int]$IotHubX509CADevices = 0,
         [switch]$EnableFileUpload,
         [switch]$NoDps,
         [switch]$EnableCertificateManagement
     )
-
-    $TestEnvInfo = [TestEnvironmentInfo]::new()
 
     $IotHubFqdn = "$($IotHubName).$($IotHubDomainName)"
 
@@ -889,6 +895,8 @@ function New-AzIotTestEnvironment {
 
         Stop-OnError -Step "Create Azure resource group"
     }
+
+    $TestEnvInfo = [TestEnvironmentInfo]::new()
 
     if ($EnableCertificateManagement -eq $true) {
         $AzureIotHubAppId = "89d10474-74af-4874-99a7-c23c2f643083" # Azure IoT Hub application ID (same for all tenants)
@@ -960,7 +968,7 @@ function New-AzIotTestEnvironment {
 
         # Step was put here to optimize if blocks, since it's common down.
         Write-Host "Creating DPS Root Certificate"
-        $DpsRootCertificate = Add-DpsCertificate -ResourceGroup $ResourceGroup -DpsName $DpsName 
+        $DpsRootCertificate = Add-DpsCertificate -ResourceGroup $ResourceGroup -DpsName $DpsName
     }
 
     if ($EnableCertificateManagement -eq $true) {
@@ -1095,6 +1103,7 @@ function New-AzIotTestEnvironment {
 
     # Gathering Test Environment settings.
     $TestEnvInfo.AzureResourceGroup = $ResourceGroup
+    $TestEnvInfo.Dps.ResourceGroup = $ResourceGroup
     $TestEnvInfo.AzureAdrPolicyName = $AzureAdrPolicyName
 
     Write-Host "Getting IoT Hub Connection String"
@@ -1121,10 +1130,148 @@ function New-AzIotTestEnvironment {
         $TestEnvInfo.Dps.ConnectionString = $(az iot dps connection-string show -g $ResourceGroup -n $DpsName --kt primary --pn provisioningserviceowner --query connectionString -o tsv)
         Stop-OnError -Step "Get DPS Connection String"
 
-        $TestEnvInfo.Dps.RootCaCertificate = $DpsRootCertificate
+        $TestEnvInfo.Dps.RootCaCertificates += $DpsRootCertificate
     }
 
     return $TestEnvInfo
+}
+
+function Get-AzIotTestEnvironment {
+    <#
+    .SYNOPSIS
+    Creates a new set of Azure Resources for testing Azure IoT scenarios, including an IoT Hub and optionally a Device Provisioning Service, with different types of enrollments and devices.
+
+    .DESCRIPTION
+    Creates a new set of Azure Resources for testing Azure IoT scenarios, including an IoT Hub and optionally a Device Provisioning Service, with different types of enrollments and devices.
+
+    .PARAMETER AzureSubscriptionId
+    Specifies the Azure subscription ID. If not provided, the current Azure CLI session default subscription will be used.
+    .PARAMETER ResourceGroup
+    Specifies the name of the resource group. If not provided, a new resource group will be created.
+    .PARAMETER DpsName
+    Specifies the name of the Device Provisioning Service. If not provided, get the one instance in the resource group.
+    .PARAMETER IotHubName
+    Specifies the name of the IoT Hub. If not provided, get the IoT Hub linked to the DPS or with the specified name.
+
+    .OUTPUTS
+    A custom object containing information about the created Azure resources and devices, including connection strings, certificate paths, and enrollment details.
+
+    .EXAMPLE
+    PS> $TestEnvInfo = Get-AzIotTestEnvironment -ResourceGroup "myResourceGroupName"
+    #>
+    param(
+        [string]$AzureSubscriptionId = $null,
+        [string]$ResourceGroup = $null,
+        [string]$DpsName       = $null,
+        [string]$IotHubName    = $null
+    )
+
+    $TestEnvInfo = [TestEnvironmentInfo]::new()
+
+    # Login to Azure if not already
+    $null = & az account show 2>$null
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "Not logged in to Azure. Running 'az login'..."
+        & az login --use-device-code
+        if ($LASTEXITCODE -ne 0) {
+            throw "Azure login failed."
+        }
+    }
+    else {
+        Write-Host "Already logged in to Azure."
+    }
+
+    $AzureAccount = az account show | ConvertFrom-Json
+
+    # Subscription id...
+    if ([string]::IsNullOrWhiteSpace($AzureSubscriptionId)) {
+        Stop-OnError -Step "Get Azure account information"
+        $AzureSubscriptionId = $AzureAccount.id
+    } else {
+        $discard = az account set --subscription "$AzureSubscriptionId" --only-show-errors 2>$null
+        Stop-OnError -Step "Set Azure subscription"
+    }
+
+    # Add Azure IoT extension if not already added (required for some az iot commands, e.g. az iot adr ns create)
+    # TODO: install non-preview version after GA.
+    $AzCliAzureIotExtension = $(az extension list | Convertfrom-json | ?{$_.name -eq "azure-iot"})
+
+    if ($AzCliAzureIotExtension -ne $null -and $AzCliAzureIotExtension.preview -eq $false) {
+        Write-Host "Non-preview Azure IoT extension found (version $($AzCliAzureIotExtension.version)). Removing..."
+        az extension remove --name azure-iot --only-show-errors | Out-Null
+        Stop-OnError -Step "Remove non-preview Azure IoT extension"
+        $AzCliAzureIotExtension = $null
+    }
+
+    if ($AzCliAzureIotExtension -eq $null) {
+        Write-Host "Installing Azure IoT extension."
+        az extension add --name azure-iot --allow-preview --only-show-errors | Out-Null
+        Stop-OnError -Step "Install Azure IoT extension"
+    }
+
+    $AzureResourceGroup = az group show --name "$ResourceGroup" | ConvertFrom-Json
+
+    if ([string]::IsNullOrWhiteSpace($DpsName)) {
+        $AzureDpsInstances = az iot dps list --resource-group "$ResourceGroup" | ConvertFrom-Json
+
+        if ($AzureDpsInstances.Count -ne 1) {
+            throw "Multiple Azure Device Provisioning services found under resource group $ResourceGroup. Provide DpsName argument to select."
+        }
+
+        $AzureDps = $AzureDpsInstances[0]
+    } else {
+        $AzureDps = az iot dps show --resource-group "$ResourceGroup" --name "$DpsName" | ConvertFrom-Json
+    }
+
+    if ([string]::IsNullOrWhiteSpace($IotHubName)) {
+        if ($AzureDps.properties.iotHubs.Count -eq 0) {
+            throw "Device Provisioning Service ($DpsName) does not have linked IoT hubs"
+        }
+
+        $IotHubName = $($AzureDps.properties.iotHubs[0].name.Split('.')[0])
+    } else {
+        $DpsLinkedIotHub = $AzureDps.properties.iotHubs | ?{$_.name -imatch "$IotHubName" }
+
+        if ($DpsLinkedIotHub -eq $null) {
+            throw "Iot Hub $IotHubName is not linked to $DpsName"
+        }
+    }
+
+    $AzureIoTHub = az iot hub show --resource-group "$ResourceGroup" --name "$IotHubName" | ConvertFrom-Json
+
+    # Gathering Test Environment settings.
+    $TestEnvInfo.AzureResourceGroup = $AzureResourceGroup.name
+    $TestEnvInfo.Dps.ResourceGroup = $AzureResourceGroup.name
+
+    $AzureAdrNamespaceName = $AzureIotHub.properties.deviceRegistry.namespaceResourceId.split("/")[8]
+    $AzureAdrPolicy = az iot adr ns policy list --resource-group "$ResourceGroup" --ns "$AzureAdrNamespaceName" | ConvertFrom-Json
+
+    $TestEnvInfo.AzureAdrPolicyName = $AzureAdrPolicy.name
+
+    Write-Host "Getting IoT Hub Connection String"
+    $TestEnvInfo.IotHub.ConnectionString = $(az iot hub connection-string show -g $ResourceGroup -n $IotHubName --kt primary --pn iothubowner --query connectionString -o tsv)
+    Stop-OnError -Step "Get IoT Hub Connection String"
+
+    Write-Host "Getting IoT Hub's Event Hub Connection String"
+    $TestEnvInfo.IotHub.EventHub.ConnectionString = $(az iot hub connection-string show -g $ResourceGroup -n $IotHubName --kt primary --pn iothubowner --eh --query connectionString -o tsv)
+    Stop-OnError -Step "Get IoT Hub's Event Hub Connection String"
+
+    $TestEnvInfo.IotHub.EventHub.CompatibleName = $AzureIoTHub.properties.eventHubEndpoints.events.path
+    $TestEnvInfo.IotHub.EventHub.PartitionCount = $AzureIoTHub.properties.eventHubEndpoints.events.partitionCount
+
+    Write-Host "Getting IoT Hub's Event Hub Consumer Groups"
+    az iot hub consumer-group list --hub-name $IotHubName --resource-group $ResourceGroup | ConvertFrom-Json | %{ $TestEnvInfo.IotHub.EventHub.ConsumerGroups += $_.name }
+    Stop-OnError -Step "Get IoT Hub's Event Hub Consumer Groups"
+
+    $TestEnvInfo.Dps.DeviceFqdn = $AzureDps.properties.deviceProvisioningHostName
+    $TestEnvInfo.Dps.ServiceFqdn = $AzureDps.properties.serviceOperationsHostName
+    $TestEnvInfo.Dps.IdScope = $AzureDps.properties.idScope
+
+    Write-Host "Getting DPS Connection String"
+    $TestEnvInfo.Dps.ConnectionString = $(az iot dps connection-string show -g $ResourceGroup -n $AzureDps.name --kt primary --pn provisioningserviceowner --query connectionString -o tsv)
+    Stop-OnError -Step "Get DPS Connection String"
+
+    return $TestEnvInfo    
 }
 
 function New-AzIotCSDKE2ETestConfig {
@@ -1228,8 +1375,12 @@ function New-AzIotPythonSDKE2ETestConfig {
         }
     }
 
-    $DpsRootCACertificateBase64 = ConvertTo-Base64 -Content $($TestEnvInfo.Dps.RootCaCertificate.ToPem())
-    $DpsRootCAPrivateKeyBase64 = ConvertTo-Base64 -Content $($TestEnvInfo.Dps.RootCaCertificate.PrivateKey.ToPem())
+    if ($TestEnvInfo.Dps.RootCaCertificates.Count -eq 0) {
+        $TestEnvInfo.Dps.AddRootCaCertificate() | Out-Null
+    }
+
+    $DpsRootCACertificateBase64 = ConvertTo-Base64 -Content $($TestEnvInfo.Dps.RootCaCertificates[0].ToPem())
+    $DpsRootCAPrivateKeyBase64 = ConvertTo-Base64 -Content $($TestEnvInfo.Dps.RootCaCertificates[0].PrivateKey.ToPem())
 
     if ($Target -eq "powershell") {
         $Lines = @(
@@ -1323,7 +1474,7 @@ function New-AzIotPythonSdkSampleConfig {
 
     $DeviceDpsX509CertificateChainPem = $X509EnrollmentGroupIdentity.Certificate.ToPem()
     $DeviceDpsX509CertificateChainPem += "`n" +  $TestEnvInfo.Dps.Enrollments.GroupX509[0].Certificate.ToPem()
-    $DeviceDpsX509CertificateChainPem += "`n" +  $TestEnvInfo.Dps.RootCaCertificate.ToPem()
+    $DeviceDpsX509CertificateChainPem += "`n" +  $TestEnvInfo.Dps.RootCaCertificates[0].ToPem()
 
     $DeviceDpsX509CertificateChainFile = "$CertificatesDir/$DeviceId-full-chain.cert.pem"
     Set-FileContent -Path $DeviceDpsX509CertificateChainFile -Content $DeviceDpsX509CertificateChainPem
@@ -1382,5 +1533,6 @@ function New-AzIotPythonSdkSampleConfig {
 
 Export-ModuleMember -Function New-AzureResourceGroupName
 Export-ModuleMember -Function New-AzIotTestEnvironment
+Export-ModuleMember -Function Get-AzIotTestEnvironment
 Export-ModuleMember -Function New-AzIotCSDKE2ETestConfig
 Export-ModuleMember -Function New-AzIotPythonSDKE2ETestConfig
