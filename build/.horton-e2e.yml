@@ -11,7 +11,7 @@ resources:
   - repository: e2e_fx
     type: github
     name: Azure/iot-sdks-e2e-fx
-    ref: refs/heads/master
+    ref: refs/heads/ewertons/horton-fixes
     endpoint: 'azure-iot-sdk-python-github'
 
 jobs:
