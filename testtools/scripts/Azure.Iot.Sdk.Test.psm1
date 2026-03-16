@@ -91,253 +91,11 @@ function Join-Hashtable {
     }
 }
 
-# Types
-class RsaPrivateKeyInfo {
-    [System.Security.Cryptography.RSA]$PrivateKey = $null
-
-    RsaPrivateKeyInfo(
-        [System.Security.Cryptography.RSA]$PrivateKey
-    ) {
-        $this.PrivateKey = $PrivateKey
-    }
-
-    [System.Security.Cryptography.RSA]ToNativeRsaKey() {
-        return $this.PrivateKey
-    }
-
-    [string]ToPem() {
-        return Export-Pkcs8PrivateKeyPem -Key $this.PrivateKey
-    }
-}
-
-class X509CertificateInfo {
-    [RsaPrivateKeyInfo]$PrivateKey = $null
-    [System.Security.Cryptography.X509Certificates.X509Certificate2]$Certificate = $null
-
-    X509CertificateInfo(
-        [System.Security.Cryptography.RSA]$PrivateKey,
-        [System.Security.Cryptography.X509Certificates.X509Certificate2]$Certificate
-    ) {
-        $this.PrivateKey = [RsaPrivateKeyInfo]::new($PrivateKey)
-        $this.Certificate = $Certificate
-    }
-
-    [string]GetThumbprint() {
-        return $this.Certificate.Thumbprint
-    }
-
-    [System.Security.Cryptography.X509Certificates.X509Certificate2]ToNativeX509Certificate2() {
-        return $this.Certificate
-    }
-
-    [string]ToPem() {
-        return Export-X509CertificateToPem -Certificate $this.Certificate
-    }
-
-    [void]ExportToPemFile([string]$Path) {
-        Export-X509CertificateToPemFile -Cert $this.Certificate -Path $Path
-    }
-}
-
-class IotHubSymmetricKeyIdentityInfo {
-    [string]$Id = $null
-    [string]$PrimaryKey = $null
-    [string]$SecondaryKey = $null
-    [string]$PrimaryConnectionString = $null
-    [string]$SecondaryConnectionString = $null
-
-    IotHubSymmetricKeyIdentityInfo(
-        [string]$Id,
-        [string]$PrimaryKey,
-        [string]$SecondaryKey,
-        [string]$PrimaryConnectionString,
-        [string]$SecondaryConnectionString
-    ) {
-        $this.Id = $Id
-        $this.PrimaryKey = $PrimaryKey
-        $this.SecondaryKey = $SecondaryKey
-        $this.PrimaryConnectionString = $PrimaryConnectionString
-        $this.SecondaryConnectionString = $SecondaryConnectionString
-    }
-}
-
-class IotHubX509IdentityInfo {
-    [string]$Id = $null
-    [string]$ConnectionString = $null
-    [X509CertificateInfo]$PrimaryCertificate = $null
-    [X509CertificateInfo]$SecondaryCertificate = $null
-
-    IotHubX509IdentityInfo(
-        [string]$Id,
-        [string]$ConnectionString,
-        [X509CertificateInfo]$PrimaryCertificate,
-        [X509CertificateInfo]$SecondaryCertificate
-    ) {
-        $this.Id = $Id
-        $this.ConnectionString = $ConnectionString
-        $this.PrimaryCertificate = $PrimaryCertificate
-        $this.SecondaryCertificate = $SecondaryCertificate
-    }
-}
-
-class DpsSymmetricKeyIdentityInfo {
-    [string]$Id
-    [string]$PrimaryKey
-    [string]$SecondaryKey
-
-    DpsSymmetricKeyIdentityInfo(
-        [string]$Id,
-        [string]$PrimaryKey,
-        [string]$SecondaryKey
-    ) {
-        $this.Id = $Id
-        $this.PrimaryKey = $PrimaryKey
-        $this.SecondaryKey = $SecondaryKey
-    }
-
-    [DpsSymmetricKeyIdentityInfo]DeriveKeysForDevice([string]$DeviceId) {
-        return [DpsSymmetricKeyIdentityInfo]::new(
-            $DeviceId,
-            $(New-DpsDerivedSymmetricKey -SymmetricKey $this.PrimaryKey -DeviceId $DeviceId),
-            $(New-DpsDerivedSymmetricKey -SymmetricKey $this.SecondaryKey -DeviceId $DeviceId)
-        )
-    }
-}
-
-class DpsX509IdentityInfo {
-    [string]$Id
-    [X509CertificateInfo]$Certificate
-
-    DpsX509IdentityInfo(
-        [string]$Id,
-        [X509CertificateInfo]$Certificate
-     ) {
-        $this.Id = $Id
-        $this.Certificate = $Certificate
-     }
-}
-
-class DpsSymmetricKeyIndividualEnrollmentInfo : DpsSymmetricKeyIdentityInfo {
-    DpsSymmetricKeyIndividualEnrollmentInfo(
-        [string]$Id,
-        [string]$PrimaryKey,
-        [string]$SecondaryKey
-    ) : base($Id, $PrimaryKey, $SecondaryKey) { }
-}
-
-class DpsX509IndividualEnrollmentInfo : DpsX509IdentityInfo {
-    DpsX509IndividualEnrollmentInfo(
-        [string]$Id,
-        [X509CertificateInfo]$Certificate
-     ) : base($Id, $Certificate) { }
-}
-
-class DpsSymmetricKeyEnrollmentGroupInfo : DpsSymmetricKeyIdentityInfo {
-    [DpsSymmetricKeyIdentityInfo[]]$Identities = @()
-
-    DpsSymmetricKeyEnrollmentGroupInfo(
-        [string]$Id,
-        [string]$PrimaryKey,
-        [string]$SecondaryKey
-    ) : base($Id, $PrimaryKey, $SecondaryKey) { }
-
-     [void]AddIdentity([string]$DeviceId) {
-        $DeviceIdentityInfo = $this.DeriveKeysForDevice($DeviceId)
-
-        $this.Identities += $DeviceIdentityInfo
-     }
-}
-
-class DpsX509EnrollmentGroupInfo : DpsX509IdentityInfo {
-    [DpsX509IdentityInfo[]]$Identities = @()
-
-    DpsX509EnrollmentGroupInfo(
-        [string]$Id,
-        [X509CertificateInfo]$Certificate
-     ) : base($Id, $Certificate) { }
-
-     [void]AddIdentity([string]$DeviceId, [timespan]$CertificateExpiration) {
-        $EnrollmentGroupPrivateKey = $this.Certificate.PrivateKey.ToNativeRsaKey()
-        $EnrollmentGroupCertificate = $this.Certificate.ToNativeX509Certificate2()
-
-        $DpsDevicePrivateKey = New-RsaPrivateKey
-        $DpsDeviceCertificate = New-Certificate -Subject "CN=$DeviceId" -Key $DpsDevicePrivateKey -IssuerCert $EnrollmentGroupCertificate -IssuerKey $EnrollmentGroupPrivateKey -IsCA $false -Days $CertificateExpiration.TotalDays
-
-        $DeviceIdentityInfo = [DpsX509IdentityInfo]::new(
-            $DeviceId,
-            [X509CertificateInfo]::new($DpsDevicePrivateKey, $DpsDeviceCertificate)
-        )
-
-        $this.Identities += $DeviceIdentityInfo
-     }
-}
-
-class DpsEnrollmentsSet {
-    [DpsSymmetricKeyIndividualEnrollmentInfo[]]$IndividualSymmetricKey = [DpsSymmetricKeyIndividualEnrollmentInfo[]]@()
-    [DpsX509IndividualEnrollmentInfo[]]$IndividualX509 = [DpsX509IndividualEnrollmentInfo[]]@()
-    [DpsSymmetricKeyEnrollmentGroupInfo[]]$GroupSymmetricKey = [DpsSymmetricKeyEnrollmentGroupInfo[]]@()
-    [DpsX509EnrollmentGroupInfo[]]$GroupX509 = [DpsX509EnrollmentGroupInfo[]]@()
-}
-
-class DpsInfo {
-    [string]$DeviceFqdn = $null
-    [string]$ServiceFqdn = $null
-    [string]$ConnectionString = $null
-    [string]$IdScope = $null
-    [X509CertificateInfo]$RootCaCertificate = $null
-    [DpsEnrollmentsSet]$Enrollments = [DpsEnrollmentsSet]::new()
-}
-
-class EventHubInfo {
-    [string]$ConnectionString = $null
-    [string]$CompatibleName = $null
-    [int]$PartitionCount = 0
-    [array]$ConsumerGroups = @()
-}
-
-class IotHubDeviceSet {
-    [IotHubSymmetricKeyIdentityInfo[]]$SymmetricKey = @()
-    [array]$X509Thumbprint = @()
-    # $X509CA = @()
-}
-
-class IotHubInfo {
-    [string]$ConnectionString = $null
-    [EventHubInfo]$EventHub = [EventHubInfo]::new()
-    [IotHubDeviceSet]$Devices = [IotHubDeviceSet]::new()
-}
-
-class TestEnvironmentInfo {
-    [string]$AzureResourceGroup = $null
-
-    [IotHubInfo]$IotHub = [IotHubInfo]::new()
-
-    [DpsInfo]$Dps = [DpsInfo]::new()
-
-    [string]$AzureAdrPolicyName = $null
-}
-
-
-
-
-function New-DpsDerivedSymmetricKey {
-    param(
-        $SymmetricKey = $null,
-        $DeviceId = $null
-    )
-
-    $hmacsha256 = New-Object System.Security.Cryptography.HMACSHA256
-    try {
-        $hmacsha256.key = [Convert]::FromBase64String($SymmetricKey)
-        $sig = $hmacsha256.ComputeHash([Text.Encoding]::ASCII.GetBytes($DeviceId))
-        return [Convert]::ToBase64String($sig)
-    } finally {
-        $hmacsha256.Dispose()
-    }
-}
+# Certificates
 
 function Export-Pkcs8PrivateKeyPem {
-    param($Key)
+    param($Key) 
+    # Key of type [System.Security.Cryptography.RSA] or [System.Security.Cryptography.ECDsa]
 
     if ($PSVersionTable.PSVersion.Major -lt 7) {
         $KeyPemHex = [Convert]::ToBase64String($Key.Key.Export([System.Security.Cryptography.CngKeyBlobFormat]::Pkcs8PrivateBlob), 'InsertLineBreaks')
@@ -348,17 +106,71 @@ function Export-Pkcs8PrivateKeyPem {
 }
 
 function New-RsaPrivateKey {
-    param([string]$Path = $null)
+    param(
+        [string]$Path = $null,
+        [switch]$Verbose
+    )
 
     $rsa = [System.Security.Cryptography.RSA]::Create(4096)
 
-    if ($Path -ne $null -and $Path -ne "") {
+    if ($null -ne $Path -and $Path -ne "") {
         $pem = Export-Pkcs8PrivateKeyPem -Key $rsa
-        Write-Host "Saving private key to $Path"
+
+        if ($Verbose) {
+            Write-Host "Saving private key to $Path"
+        }
+
         Set-FileContent -Path $Path -Content $pem
     }
 
     return $rsa
+}
+
+function New-EcdsaPrivateKey {
+    param(
+        [string]$Curve = "nistP256",
+        [string]$Path = $null,
+        [switch]$Verbose
+    )
+
+    $ecdsa = [System.Security.Cryptography.ECDsa]::Create([System.Security.Cryptography.ECCurve]::CreateFromFriendlyName($Curve))
+
+    if ($null -ne $Path -and $Path -ne "") {
+        $pem = Export-Pkcs8PrivateKeyPem -Key $ecdsa
+
+        if ($Verbose) {
+            Write-Host "Saving ECDSA private key ($Curve) to $Path"
+        }
+
+        Set-FileContent -Path $Path -Content $pem
+    }
+
+    return $ecdsa
+}
+
+function New-X509CertificateSigningRequest {
+    param(
+        [string]$Subject,
+        $Key = $null,
+        [System.Security.Cryptography.HashAlgorithmName]$HashAlgorithm = [System.Security.Cryptography.HashAlgorithmName]::SHA256,
+        [Switch]$AsBytes,
+        [Switch]$NoHeaders
+    )
+
+    $DistinguishedName = [System.Security.Cryptography.X509Certificates.X500DistinguishedName]::new("CN=$Subject")
+    $csr = [System.Security.Cryptography.X509Certificates.CertificateRequest]::new($DistinguishedName, $Key, $HashAlgorithm)
+    
+    if ($AsBytes) {
+        return $csr.CreateSigningRequest()
+    } else {
+
+        if ($NoHeaders) {
+            return [Convert]::ToBase64String($csr.CreateSigningRequest())
+        } else {
+            $Base64Csr = [Convert]::ToBase64String($csr.CreateSigningRequest(), 'InsertLineBreaks')
+            return "-----BEGIN CERTIFICATE REQUEST-----`n$Base64Csr`n-----END CERTIFICATE REQUEST-----"
+        }
+    }
 }
 
 function New-RandomNumber {
@@ -489,6 +301,260 @@ function Export-X509CertificateToPemFile {
     Write-Host "Exporting certificate to $Path"
     Set-FileContent -Path $Path -Content $pem
 }
+
+
+
+# Generic Types
+class RsaPrivateKeyInfo {
+    [System.Security.Cryptography.RSA]$PrivateKey = $null
+
+    RsaPrivateKeyInfo(
+        [System.Security.Cryptography.RSA]$PrivateKey
+    ) {
+        $this.PrivateKey = $PrivateKey
+    }
+
+    [System.Security.Cryptography.RSA]ToNativeRsaKey() {
+        return $this.PrivateKey
+    }
+
+    [string]ToPem() {
+        return Export-Pkcs8PrivateKeyPem -Key $this.PrivateKey
+    }
+}
+
+class X509CertificateInfo {
+    [RsaPrivateKeyInfo]$PrivateKey = $null
+    [System.Security.Cryptography.X509Certificates.X509Certificate2]$Certificate = $null
+
+    X509CertificateInfo(
+        [System.Security.Cryptography.RSA]$PrivateKey,
+        [System.Security.Cryptography.X509Certificates.X509Certificate2]$Certificate
+    ) {
+        $this.PrivateKey = [RsaPrivateKeyInfo]::new($PrivateKey)
+        $this.Certificate = $Certificate
+    }
+
+    [string]GetThumbprint() {
+        return $this.Certificate.Thumbprint
+    }
+
+    [System.Security.Cryptography.X509Certificates.X509Certificate2]ToNativeX509Certificate2() {
+        return $this.Certificate
+    }
+
+    [string]ToPem() {
+        return Export-X509CertificateToPem -Certificate $this.Certificate
+    }
+
+    [void]ExportToPemFile([string]$Path) {
+        Export-X509CertificateToPemFile -Cert $this.Certificate -Path $Path
+    }
+}
+
+
+# Azure IoT Types
+class IotHubSymmetricKeyIdentityInfo {
+    [string]$Id = $null
+    [string]$PrimaryKey = $null
+    [string]$SecondaryKey = $null
+    [string]$PrimaryConnectionString = $null
+    [string]$SecondaryConnectionString = $null
+
+    IotHubSymmetricKeyIdentityInfo(
+        [string]$Id,
+        [string]$PrimaryKey,
+        [string]$SecondaryKey,
+        [string]$PrimaryConnectionString,
+        [string]$SecondaryConnectionString
+    ) {
+        $this.Id = $Id
+        $this.PrimaryKey = $PrimaryKey
+        $this.SecondaryKey = $SecondaryKey
+        $this.PrimaryConnectionString = $PrimaryConnectionString
+        $this.SecondaryConnectionString = $SecondaryConnectionString
+    }
+}
+
+class IotHubX509IdentityInfo {
+    [string]$Id = $null
+    [string]$ConnectionString = $null
+    [X509CertificateInfo]$PrimaryCertificate = $null
+    [X509CertificateInfo]$SecondaryCertificate = $null
+
+    IotHubX509IdentityInfo(
+        [string]$Id,
+        [string]$ConnectionString,
+        [X509CertificateInfo]$PrimaryCertificate,
+        [X509CertificateInfo]$SecondaryCertificate
+    ) {
+        $this.Id = $Id
+        $this.ConnectionString = $ConnectionString
+        $this.PrimaryCertificate = $PrimaryCertificate
+        $this.SecondaryCertificate = $SecondaryCertificate
+    }
+}
+
+class DpsSymmetricKeyIdentityInfo {
+    [string]$Id
+    [string]$PrimaryKey
+    [string]$SecondaryKey
+
+    DpsSymmetricKeyIdentityInfo(
+        [string]$Id,
+        [string]$PrimaryKey,
+        [string]$SecondaryKey
+    ) {
+        $this.Id = $Id
+        $this.PrimaryKey = $PrimaryKey
+        $this.SecondaryKey = $SecondaryKey
+    }
+
+    [DpsSymmetricKeyIdentityInfo]DeriveKeysForDevice([string]$DeviceId) {
+        return [DpsSymmetricKeyIdentityInfo]::new(
+            $DeviceId,
+            $(New-DpsDerivedSymmetricKey -SymmetricKey $this.PrimaryKey -DeviceId $DeviceId),
+            $(New-DpsDerivedSymmetricKey -SymmetricKey $this.SecondaryKey -DeviceId $DeviceId)
+        )
+    }
+}
+
+class DpsX509IdentityInfo {
+    [string]$Id
+    [X509CertificateInfo]$Certificate
+
+    DpsX509IdentityInfo(
+        [string]$Id,
+        [X509CertificateInfo]$Certificate
+     ) {
+        $this.Id = $Id
+        $this.Certificate = $Certificate
+     }
+}
+
+class DpsSymmetricKeyIndividualEnrollmentInfo : DpsSymmetricKeyIdentityInfo {
+    DpsSymmetricKeyIndividualEnrollmentInfo(
+        [string]$Id,
+        [string]$PrimaryKey,
+        [string]$SecondaryKey
+    ) : base($Id, $PrimaryKey, $SecondaryKey) { }
+}
+
+class DpsX509IndividualEnrollmentInfo : DpsX509IdentityInfo {
+    DpsX509IndividualEnrollmentInfo(
+        [string]$Id,
+        [X509CertificateInfo]$Certificate
+     ) : base($Id, $Certificate) { }
+}
+
+class DpsSymmetricKeyEnrollmentGroupInfo : DpsSymmetricKeyIdentityInfo {
+    [DpsSymmetricKeyIdentityInfo[]]$Identities = @()
+
+    DpsSymmetricKeyEnrollmentGroupInfo(
+        [string]$Id,
+        [string]$PrimaryKey,
+        [string]$SecondaryKey
+    ) : base($Id, $PrimaryKey, $SecondaryKey) { }
+
+     [DpsSymmetricKeyIdentityInfo]AddIdentity([string]$DeviceId) {
+        $DeviceIdentityInfo = $this.DeriveKeysForDevice($DeviceId)
+
+        $this.Identities += $DeviceIdentityInfo
+
+        return $DeviceIdentityInfo
+     }
+}
+
+class DpsX509EnrollmentGroupInfo : DpsX509IdentityInfo {
+    [DpsX509IdentityInfo[]]$Identities = @()
+
+    DpsX509EnrollmentGroupInfo(
+        [string]$Id,
+        [X509CertificateInfo]$Certificate
+     ) : base($Id, $Certificate) { }
+
+     [DpsX509IdentityInfo]AddIdentity([string]$DeviceId, [timespan]$CertificateExpiration) {
+        $EnrollmentGroupPrivateKey = $this.Certificate.PrivateKey.ToNativeRsaKey()
+        $EnrollmentGroupCertificate = $this.Certificate.ToNativeX509Certificate2()
+
+        $DpsDevicePrivateKey = New-RsaPrivateKey
+        $DpsDeviceCertificate = New-Certificate -Subject "CN=$DeviceId" -Key $DpsDevicePrivateKey -IssuerCert $EnrollmentGroupCertificate -IssuerKey $EnrollmentGroupPrivateKey -IsCA $false -Days $CertificateExpiration.TotalDays
+
+        $DeviceIdentityInfo = [DpsX509IdentityInfo]::new(
+            $DeviceId,
+            [X509CertificateInfo]::new($DpsDevicePrivateKey, $DpsDeviceCertificate)
+        )
+
+        $this.Identities += $DeviceIdentityInfo
+
+        return $DeviceIdentityInfo
+     }
+}
+
+class DpsEnrollmentsSet {
+    [DpsSymmetricKeyIndividualEnrollmentInfo[]]$IndividualSymmetricKey = [DpsSymmetricKeyIndividualEnrollmentInfo[]]@()
+    [DpsX509IndividualEnrollmentInfo[]]$IndividualX509 = [DpsX509IndividualEnrollmentInfo[]]@()
+    [DpsSymmetricKeyEnrollmentGroupInfo[]]$GroupSymmetricKey = [DpsSymmetricKeyEnrollmentGroupInfo[]]@()
+    [DpsX509EnrollmentGroupInfo[]]$GroupX509 = [DpsX509EnrollmentGroupInfo[]]@()
+}
+
+class DpsInfo {
+    [string]$DeviceFqdn = $null
+    [string]$ServiceFqdn = $null
+    [string]$ConnectionString = $null
+    [string]$IdScope = $null
+    [X509CertificateInfo]$RootCaCertificate = $null
+    [DpsEnrollmentsSet]$Enrollments = [DpsEnrollmentsSet]::new()
+}
+
+class EventHubInfo {
+    [string]$ConnectionString = $null
+    [string]$CompatibleName = $null
+    [int]$PartitionCount = 0
+    [array]$ConsumerGroups = @()
+}
+
+class IotHubDeviceSet {
+    [IotHubSymmetricKeyIdentityInfo[]]$SymmetricKey = @()
+    [array]$X509Thumbprint = @()
+    # $X509CA = @()
+}
+
+class IotHubInfo {
+    [string]$ConnectionString = $null
+    [EventHubInfo]$EventHub = [EventHubInfo]::new()
+    [IotHubDeviceSet]$Devices = [IotHubDeviceSet]::new()
+}
+
+class TestEnvironmentInfo {
+    [string]$AzureResourceGroup = $null
+
+    [IotHubInfo]$IotHub = [IotHubInfo]::new()
+
+    [DpsInfo]$Dps = [DpsInfo]::new()
+
+    [string]$AzureAdrPolicyName = $null
+}
+
+
+
+
+function New-DpsDerivedSymmetricKey {
+    param(
+        $SymmetricKey = $null,
+        $DeviceId = $null
+    )
+
+    $hmacsha256 = New-Object System.Security.Cryptography.HMACSHA256
+    try {
+        $hmacsha256.key = [Convert]::FromBase64String($SymmetricKey)
+        $sig = $hmacsha256.ComputeHash([Text.Encoding]::ASCII.GetBytes($DeviceId))
+        return [Convert]::ToBase64String($sig)
+    } finally {
+        $hmacsha256.Dispose()
+    }
+}
+
 
 function Add-DpsCertificate {
     param(
@@ -984,7 +1050,7 @@ function New-AzIotTestEnvironment {
             $TestEnvInfo.Dps.Enrollments.GroupSymmetricKey += $SKEnrollmentGroupInfo
 
             for ($i = 0; $i -lt $DpsSymmKeyGroupEnrollmentDevices; $i++) {
-                $SKEnrollmentGroupInfo.AddIdentity("group-prov-sk-$i")
+                $SKEnrollmentGroupInfo.AddIdentity("group-prov-sk-$i") | Out-Null
             }
         }
 
@@ -995,7 +1061,7 @@ function New-AzIotTestEnvironment {
             $TestEnvInfo.Dps.Enrollments.GroupX509 += $X509EnrollmentGroupInfo
 
             for ($i = 0; $i -lt $DpsX509GroupEnrollmentDevices; $i++) {
-                $X509EnrollmentGroupInfo.AddIdentity("group-prov-x509-$i", $DefaultCertificateExpiration)
+                $X509EnrollmentGroupInfo.AddIdentity("group-prov-x509-$i", $DefaultCertificateExpiration) | Out-Null
             }
         }
     }
@@ -1230,106 +1296,89 @@ function New-AzIotPythonSDKE2ETestConfig {
     return $OutFile
 }
 
-# function New-AzIotPythonSdkSampleConfig {
-#     param(
-#         $TestEnvInfo = $null,
-#         [ValidateSet('powershell', 'bash')]
-#         [string]$TargetEnvironment = "bash",
-#         $DeviceId = "device-" + $(Get-Random -Minimum 100000 -Maximum 999999),
-#         $OutFile = $null,
-#         $CertificatesDir = "$(pwd)/certs",
-#         $CsrDir = "$(pwd)/csr",
-#         $PrivateKeyDir = "$(pwd)/private"
-#     )
+function New-AzIotPythonSdkSampleConfig {
+    param(
+        [TestEnvironmentInfo]$TestEnvInfo = $null,
+        [ValidateSet('powershell', 'bash')]
+        [string]$TargetEnvironment = "bash",
+        [string]$DeviceId = "device-" + $(Get-Random -Minimum 100000 -Maximum 999999),
+        [string]$OutFile = $null,
+        [string]$CertificatesDir = "$(pwd)/certs",
+        [string]$PrivateKeyDir = "$(pwd)/private"
+    )
 
-#     if ($OutFile -eq $null) {
-#         $OutFile = "./azure-iot-sdk-python-sample-config"
-#         if ($TargetEnvironment -eq "powershell") {
-#             $OutFile += ".ps1"
-#         } else {
-#             $OutFile += ".sh"
-#         }
-#     }
+    if ($null -eq $OutFile -or $OutFile -eq "") {
+        $OutFile = "./azure-iot-sdk-python-sample-config"
+        if ($TargetEnvironment -eq "powershell") {
+            $OutFile += ".ps1"
+        } else {
+            $OutFile += ".sh"
+        }
+    }
 
-#     # TODO: generate these in this function
-#     $DeviceDpsX509PrivateKeyFile = "$PrivateKeyDir/$DeviceId.key.pem"
-#     $DeviceDpsX509CertificateFile = "$CertificatesDir/$DeviceId.cert.pem"
-#     $DeviceDpsX509CertificateChainFile = "$CertificatesDir/$DeviceId-full-chain.cert.pem"
+    $X509EnrollmentGroupIdentity = $TestEnvInfo.Dps.Enrollments.GroupX509[0].AddIdentity($DeviceId, [timespan]::FromDays(365))
 
-#     $DeviceDpsX509PrivateKey = New-KeyPair -Path $DeviceDpsX509PrivateKeyFile
-#     $DeviceDpsX509Certificate = New-Certificate -Subject "CN=$DeviceId" -Key $DeviceDpsX509PrivateKey -IssuerCert $TestEnvInfo.DpsIntermediateCACertificate -IssuerKey $TestEnvInfo.DpsIntermediateCAPrivateKey -IsCA $false -Days $DefaultCertificateExpiration.TotalDays
+    $DeviceDpsX509PrivateKeyFile = "$PrivateKeyDir/$DeviceId.key.pem"    
+    $X509EnrollmentGroupIdentity.Certificate.PrivateKey.ExportToPemFile($DeviceDpsX509PrivateKeyFile)
 
-#     # $TestEnvInfo.DpsIntermediateCACertificate
-#     # $TestEnvInfo.Dps.Enrollments.CertificateGroups[0].IntermediateCACertificate
-#     # $TestEnvInfo.Dps.Enrollments.CertificateGroups[0].IntermediateCAPrivateKey
+    $DeviceDpsX509CertificateChainPem = $X509EnrollmentGroupIdentity.Certificate.ToPem()
+    $DeviceDpsX509CertificateChainPem += "`n" +  $TestEnvInfo.Dps.Enrollments.GroupX509[0].Certificate.ToPem()
+    $DeviceDpsX509CertificateChainPem += "`n" +  $TestEnvInfo.Dps.RootCaCertificate.ToPem()
 
-#     # From https://github.com/Azure/azure-iot-sdk-python/blob/ewertons/iot-csr-preview/samples/cert-mgmt/certificate_management.md#generating-a-certificate-key-and-certificate-signing-request-for-testing ...
-#     $CsrKeyFile="$PrivateKeyDir/$DeviceId-dps-csr-private-key.pem"
-#     $ProvisioningIssuedCertFile="$CertificatesDir/$DeviceId-dps-csr-issued-cert.pem"
-#     $IothubIssuedCertFile="$CertificatesDir/$DeviceId-iot-csr-issued-cert.pem"
+    $DeviceDpsX509CertificateChainFile = "$CertificatesDir/$DeviceId-full-chain.cert.pem"
+    Set-FileContent -Path $DeviceDpsX509CertificateChainFile -Content $DeviceDpsX509CertificateChainPem
 
-#     $privateKey = [System.Security.Cryptography.ECDsa]::Create([System.Security.Cryptography.ECCurve]::CreateFromFriendlyName("nistP256"))
+    $CsrPrivateKeyFile = "$PrivateKeyDir/$DeviceId-dps-csr-private-key.pem"
+    $ProvisioningIssuedCertFile = "$CertificatesDir/$DeviceId-dps-csr-issued-cert.pem"
+    $IothubIssuedCertFile = "$CertificatesDir/$DeviceId-iot-csr-issued-cert.pem"
+    
+    $CsrPrivateKey = New-EcdsaPrivateKey -Path $CsrPrivateKeyFile
+    $ProvisioningCsr = $(New-X509CertificateSigningRequest -Subject $DeviceId -Key $CsrPrivateKey -NoHeaders)
+    $IothubCsr = $(New-X509CertificateSigningRequest -Subject $DeviceId -Key $CsrPrivateKey -NoHeaders)
+    
+    if ($TargetEnvironment -eq "powershell") {
+        $Lines = @(
+            "`$env:PROVISIONING_HOST=`"$($TestEnvInfo.Dps.IdScope)`""
+            "`$env:PROVISIONING_IDSCOPE=`"$($TestEnvInfo.Dps.IdScope)`""
+            "`$env:PROVISIONING_REGISTRATION_ID=`"$DeviceId`""
 
-#     if ($PSVersionTable.PSVersion.Major -lt 7) {
-#         $base64pkcs8PrivateKey = [Convert]::ToBase64String($privateKey.Key.Export([System.Security.Cryptography.CngKeyBlobFormat]::Pkcs8PrivateBlob), 'InsertLineBreaks')
-#     } else {
-#         $base64pkcs8PrivateKey = [Convert]::ToBase64String($privateKey.ExportPkcs8PrivateKey(), 'InsertLineBreaks')
-#     }
+            "`$env:PROVISIONING_X509_CERT_FILE=`"$DeviceDpsX509CertificateChainFile`""
+            "`$env:PROVISIONING_X509_KEY_FILE=`"$DeviceDpsX509PrivateKeyFile`""
 
-#     $dn = New-Object System.Security.Cryptography.X509Certificates.X500DistinguishedName("CN=$DeviceId")
-#     $dps_csr = New-Object System.Security.Cryptography.X509Certificates.CertificateRequest($dn, $privateKey, [System.Security.Cryptography.HashAlgorithmName]::SHA256)
-#     $ProvisioningCsr = [Convert]::ToBase64String($dps_csr.CreateSigningRequest())
+            "`$env:PROVISIONING_CSR_KEY_FILE=`"$CsrPrivateKeyFile`""
+            "`$env:PROVISIONING_CSR=`"$ProvisioningCsr`""
+            "`$env:PROVISIONING_ISSUED_CERT_FILE=`"$ProvisioningIssuedCertFile`""
 
-#     echo "-----BEGIN PRIVATE KEY-----`n$base64pkcs8PrivateKey`n-----END PRIVATE KEY-----" > $CsrKeyFile
-#     Stop-OnError -Step "Write DPS CSR Private Key file"
+            "`$env:IOTHUB_CSR=`"$IothubCsr`""
+            "`$env:IOTHUB_ISSUED_CERT_FILE=`"$IothubIssuedCertFile`""
+        )
+    } else { # bash
+        $Lines = @(
+            "#!/bin/bash"
+            "export PROVISIONING_HOST=`"$($TestEnvInfo.Dps.IdScope)`""
+            "export PROVISIONING_IDSCOPE=`"$($TestEnvInfo.Dps.IdScope)`""
+            "export PROVISIONING_REGISTRATION_ID=`"$DeviceId`""
 
-#     # Private Key and DN must be the same...
-#     $CertificateRequest = New-Object System.Security.Cryptography.X509Certificates.CertificateRequest($dn, $privateKey, [System.Security.Cryptography.HashAlgorithmName]::SHA256)
-#     $IothubCsr = [Convert]::ToBase64String($CertificateRequest.CreateSigningRequest())
+            "export PROVISIONING_X509_CERT_FILE=`"$DeviceDpsX509CertificateChainFile`""
+            "export PROVISIONING_X509_KEY_FILE=`"$DeviceDpsX509PrivateKeyFile`""
 
-#     if ($TargetEnvironment -eq "powershell") {
-#         $Lines = @(
-#             "`$env:PROVISIONING_HOST=`"$($TestEnvInfo.DpsIdScope)`""
-#             "`$env:PROVISIONING_IDSCOPE=`"$($TestEnvInfo.DpsIdScope)`""
-#             "`$env:PROVISIONING_REGISTRATION_ID=`"$DeviceId`""
+            "export PROVISIONING_CSR_KEY_FILE=`"$CsrPrivateKeyFile`""
+            "export PROVISIONING_CSR=`"$ProvisioningCsr`""
+            "export PROVISIONING_ISSUED_CERT_FILE=`"$ProvisioningIssuedCertFile`""
 
-#             "`$env:PROVISIONING_X509_CERT_FILE=`"$DeviceDpsX509CertificateChainFile`""
-#             "`$env:PROVISIONING_X509_KEY_FILE=`"$DeviceDpsX509PrivateKeyFile`""
+            "export IOTHUB_CSR=`"$IothubCsr`""
+            "export IOTHUB_ISSUED_CERT_FILE=`"$IothubIssuedCertFile`""
+        )
+    }
 
-#             "`$env:PROVISIONING_CSR_KEY_FILE=`"$CsrKeyFile`""
-#             "`$env:PROVISIONING_CSR=`"$ProvisioningCsr`""
-#             "`$env:PROVISIONING_ISSUED_CERT_FILE=`"$ProvisioningIssuedCertFile`""
+    $Content = $($Lines -join "`n") + "`n"
 
-#             "`$env:IOTHUB_CSR=`"$IothubCsr`""
-#             "`$env:IOTHUB_ISSUED_CERT_FILE=`"$IothubIssuedCertFile`""
-#         )
-#     } else { # bash
-#         $Lines = @(
-#             "#!/bin/bash"
-#             "export PROVISIONING_HOST=`"$($TestEnvInfo.DpsIdScope)`""
-#             "export PROVISIONING_IDSCOPE=`"$($TestEnvInfo.DpsIdScope)`""
-#             "export PROVISIONING_REGISTRATION_ID=`"$DeviceId`""
+    Set-FileContent -Path "$OutFile" -Content "$Content"
 
-#             "export PROVISIONING_X509_CERT_FILE=`"$DeviceDpsX509CertificateChainFile`""
-#             "export PROVISIONING_X509_KEY_FILE=`"$DeviceDpsX509PrivateKeyFile`""
+    Write-Host "End-to-End test configuration written to $OutFile"
 
-#             "export PROVISIONING_CSR_KEY_FILE=`"$CsrKeyFile`""
-#             "export PROVISIONING_CSR=`"$ProvisioningCsr`""
-#             "export PROVISIONING_ISSUED_CERT_FILE=`"$ProvisioningIssuedCertFile`""
-
-#             "export IOTHUB_CSR=`"$IothubCsr`""
-#             "export IOTHUB_ISSUED_CERT_FILE=`"$IothubIssuedCertFile`""
-#         )
-#     }
-
-#     $Content = $($Lines -join "`n") + "`n"
-
-#     Set-FileContent -Path "$OutFile" -Content "$Content"
-
-#     Write-Host "End-to-End test configuration written to $OutFile"
-
-#     return $OutFile
-# }
+    return $OutFile
+}
 
 Export-ModuleMember -Function New-AzureResourceGroupName
 Export-ModuleMember -Function New-AzIotTestEnvironment
