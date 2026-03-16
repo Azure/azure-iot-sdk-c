@@ -2071,14 +2071,14 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_GetTwinAsync(IOTHUB_CLIENT_CORE_HANDLE iot
     return result;
 }
 
-IOTHUB_CLIENT_RESULT IoTHubClientCore_SendCertificateSigningRequestAsync(IOTHUB_CLIENT_CORE_HANDLE iotHubClientHandle, const char* certificateSigningRequest, const char* replace, IOTHUB_CLIENT_CERTIFICATE_SIGNING_RESPONSE_CALLBACK certificateSigningResponseCallback, void* userContextCallback)
+IOTHUB_CLIENT_RESULT IoTHubClientCore_SendCertificateSigningRequestAsync(IOTHUB_CLIENT_CORE_HANDLE iotHubClientHandle, const char* certificateSigningRequest, const char* requestId, const char* replace, IOTHUB_CLIENT_CERTIFICATE_SIGNING_RESPONSE_CALLBACK certificateSigningResponseCallback, void* userContextCallback)
 {
     IOTHUB_CLIENT_RESULT result;
 
-    if (iotHubClientHandle == NULL || certificateSigningRequest == NULL || certificateSigningResponseCallback == NULL)
+    if (iotHubClientHandle == NULL || certificateSigningRequest == NULL || requestId == NULL || certificateSigningResponseCallback == NULL)
     {
         result = IOTHUB_CLIENT_INVALID_ARG;
-        LogError("Invalid argument (iotHubClientHandle=%p, csr=%p, callback=%p)", iotHubClientHandle, certificateSigningRequest, certificateSigningResponseCallback);
+        LogError("Invalid argument (iotHubClientHandle=%p, csr=%p, requestId=%p, callback=%p)", iotHubClientHandle, certificateSigningRequest, requestId, certificateSigningResponseCallback);
     }
     else
     {
@@ -2112,7 +2112,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_SendCertificateSigningRequestAsync(IOTHUB_
                 }
                 else
                 {
-                    result = IoTHubClientCore_LL_SendCertificateSigningRequestAsync(iotHubClientInstance->IoTHubClientLLHandle, certificateSigningRequest, replace, iothub_ll_csr_callback, queueContext);
+                    result = IoTHubClientCore_LL_SendCertificateSigningRequestAsync(iotHubClientInstance->IoTHubClientLLHandle, certificateSigningRequest, requestId, replace, iothub_ll_csr_callback, queueContext);
 
                     if (result != IOTHUB_CLIENT_OK)
                     {

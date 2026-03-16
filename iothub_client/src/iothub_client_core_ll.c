@@ -1269,11 +1269,12 @@ static void csr_request_data_destroy(IOTHUB_CSR_REQUEST* csr_data)
     {
         free(csr_data->certificate_signing_request);
         free(csr_data->replace);
+        free(csr_data->request_id);
         free(csr_data);
     }
 }
 
-static IOTHUB_CSR_REQUEST* csr_request_data_create(IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handleData, uint32_t id, const char* certificateSigningRequest, const char* replace, IOTHUB_CLIENT_CERTIFICATE_SIGNING_RESPONSE_CALLBACK callback, void* context)
+static IOTHUB_CSR_REQUEST* csr_request_data_create(IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handleData, uint32_t id, const char* certificateSigningRequest, const char* requestId, const char* replace, IOTHUB_CLIENT_CERTIFICATE_SIGNING_RESPONSE_CALLBACK callback, void* context)
 {
     IOTHUB_CSR_REQUEST* result = (IOTHUB_CSR_REQUEST*)malloc(sizeof(IOTHUB_CSR_REQUEST));
     if (result != NULL)
@@ -1283,6 +1284,12 @@ static IOTHUB_CSR_REQUEST* csr_request_data_create(IOTHUB_CLIENT_CORE_LL_HANDLE_
         if (mallocAndStrcpy_s(&result->certificate_signing_request, certificateSigningRequest) != 0)
         {
             LogError("Failed copying CSR string");
+            csr_request_data_destroy(result);
+            result = NULL;
+        }
+        else if (mallocAndStrcpy_s(&result->request_id, requestId) != 0)
+        {
+            LogError("Failed copying requestId string");
             csr_request_data_destroy(result);
             result = NULL;
         }
@@ -2683,23 +2690,24 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_GetTwinAsync(IOTHUB_CLIENT_CORE_LL_HAND
 IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SendCertificateSigningRequestAsync(
     IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle,
     const char* certificateSigningRequest,
+    const char* requestId,
     const char* replace,
     IOTHUB_CLIENT_CERTIFICATE_SIGNING_RESPONSE_CALLBACK certificateSigningResponseCallback,
     void* userContextCallback)
 {
     IOTHUB_CLIENT_RESULT result;
 
-    if (iotHubClientHandle == NULL || certificateSigningRequest == NULL || certificateSigningResponseCallback == NULL)
+    if (iotHubClientHandle == NULL || certificateSigningRequest == NULL || requestId == NULL || certificateSigningResponseCallback == NULL)
     {
-        LogError("Invalid argument (iotHubClientHandle=%p, csr=%p, callback=%p)",
-            iotHubClientHandle, certificateSigningRequest, certificateSigningResponseCallback);
+        LogError("Invalid argument (iotHubClientHandle=%p, csr=%p, requestId=%p, callback=%p)",
+            iotHubClientHandle, certificateSigningRequest, requestId, certificateSigningResponseCallback);
         result = IOTHUB_CLIENT_INVALID_ARG;
     }
     else
     {
         IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handleData = (IOTHUB_CLIENT_CORE_LL_HANDLE_DATA*)iotHubClientHandle;
         IOTHUB_CSR_REQUEST* csr_data = csr_request_data_create(handleData, get_next_item_id(handleData),
-            certificateSigningRequest, replace, certificateSigningResponseCallback, userContextCallback);
+            certificateSigningRequest, requestId, replace, certificateSigningResponseCallback, userContextCallback);
         if (csr_data == NULL)
         {
             LogError("Failure constructing CSR request data");
