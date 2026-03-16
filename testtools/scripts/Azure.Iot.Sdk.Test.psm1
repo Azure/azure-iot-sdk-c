@@ -78,6 +78,19 @@ function Stop-OnError {
     }
 }
 
+function Join-Hashtable {
+    param(
+        [Hashtable]$Hashtable,
+        [string]$Separator = " "
+    )
+
+    if ($null -eq $Hashtable -or $Hashtable.Count -eq 0) {
+        return ""
+    } else {
+        return ($Hashtable.GetEnumerator() | %{ "$($_.Key)=$($_.Value)" }) -join $Separator
+    }
+}
+
 # Types
 class RsaPrivateKeyInfo {
     [System.Security.Cryptography.RSA]$PrivateKey = $null
@@ -676,6 +689,9 @@ function New-AzIotTestEnvironment {
     Specifies the Azure subscription ID. If not provided, the current Azure CLI session default subscription will be used.
     .PARAMETER ResourceGroup
     Specifies the name of the resource group. If not provided, a new resource group will be created.
+    .PARAMETER ResourceGroupTags
+    Specify a hashtable with the key/value pairs to use as tags for Azure Resource Group creation.
+    See `az group create --tags` for more details.
     .PARAMETER DpsName
     Specifies the name of the Device Provisioning Service. If not provided, a new DPS will be created.
     .PARAMETER IotHubName
@@ -727,6 +743,7 @@ function New-AzIotTestEnvironment {
         [string]$AzureLocation = "centraluseuap", # Other locations (e.g.): eastus2euap, westus2, ...
         [string]$AzureSubscriptionId = $null,
         [string]$ResourceGroup = $(New-AzureResourceGroupName),
+        [Hashtable]$ResourceGroupTags = $null,
         [string]$DpsName       = "dps-$(New-Guid -NoDashes)",
         [string]$IotHubName    = "iothub-$(New-Guid -NoDashes)",
         [string]$IotHubDomainName = "azure-devices.net",
@@ -794,8 +811,16 @@ function New-AzIotTestEnvironment {
     if ($ResouceGroupExists -eq 'true') {
        $AzureResourceGroup = az group show --name "$ResourceGroup" | ConvertFrom-Json
     } else {
-        Write-Host "Creating Azure resource group ($ResourceGroup)"
-        $AzureResourceGroup = az group create --name "$ResourceGroup" --location "$AzureLocation" 2>$null | ConvertFrom-json 
+        $ResouceGroupTagsString = $(Join-Hashtable -Hashtable $ResourceGroupTags)
+
+        Write-Host "Creating Azure resource group ($ResourceGroup; $ResouceGroupTagsString)"
+
+        if ($null -ne $ResourceGroupTags -and $ResourceGroupTags.Count -gt 0) {
+            $AzureResourceGroup = az group create --name "$ResourceGroup" --location "$AzureLocation" --tags "$ResouceGroupTagsString" 2>$null | ConvertFrom-json 
+        } else {
+            $AzureResourceGroup = az group create --name "$ResourceGroup" --location "$AzureLocation" 2>$null | ConvertFrom-json 
+        }
+
         Stop-OnError -Step "Create Azure resource group"
     }
 
