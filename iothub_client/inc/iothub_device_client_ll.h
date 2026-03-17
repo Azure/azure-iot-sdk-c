@@ -334,7 +334,9 @@ typedef IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE IOTHUB_CLIENT_LL_AZURE_STOR
      * @param    iotHubClientHandle                          The handle created by a call to the create function.
      * @param    certificateSigningRequest                   The PEM-encoded certificate signing request.
      * @param    requestId                                   The request identifier, used as @c $rid on the wire.
-     *                                                      Must not be @c NULL.
+     *                                                      Must not be @c NULL. ASCII alphanumerics and dash
+     *                                                      allowed, 4 to 36 characters inclusive. Must not
+     *                                                      begin or end with a dash.
      * @param    replace                                     Optional certificate fingerprint to replace. Can be @c NULL.
      * @param    certificateSigningResponseCallback          The callback invoked with the result. May be called more
      *                                                      than once: first with @c IOTHUB_CLIENT_CONFIRMATION_ACCEPTED

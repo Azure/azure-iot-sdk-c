@@ -57,5 +57,5 @@ if(${use_mqtt})
    # PnP only supports MQTT so only build the sample if MQTT is enabled.
    add_subdirectory(pnp)
    # CSR sample requires MQTT transport.
-   add_sample_directory(iothub_client_sample_certificate_signing_request)
+   add_sample_directory(iothub_ll_client_sample_certificate_signing_request)
 endif()
