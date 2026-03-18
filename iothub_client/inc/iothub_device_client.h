@@ -327,7 +327,7 @@ extern "C"
     *
     * @param    iotHubClientHandle                      The handle created by a call to the create function.
     * @param    certificateSigningRequest               The PEM-encoded CSR string.
-    * @param    requestId                               The request identifier, used as @c $rid on the wire.
+    * @param    requestId                               The request identifier.
     *                                                   Must not be @c NULL. ASCII alphanumerics and dash
     *                                                   allowed, 4 to 36 characters inclusive. Must not
     *                                                   begin or end with a dash.

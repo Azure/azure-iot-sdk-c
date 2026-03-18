@@ -714,6 +714,7 @@ static int parseCertificateSigningResponseTopicInfo(const char* resp_topic, char
                     }
                     else
                     {
+                        // Add REQUEST_ID_PROPERTY_LEN to skip copying the property name and equal sign.
                         if (mallocAndStrcpy_s(request_id, request_id_string + REQUEST_ID_PROPERTY_LEN) != 0)
                         {
                             LogError("Failed copying request_id string from topic");

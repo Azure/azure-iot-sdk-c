@@ -18,6 +18,7 @@
 #include "iothub.h"
 #include "iothub_device_client_ll.h"
 #include "iothub_client_options.h"
+#include "iothub_message.h"
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/shared_util_options.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
@@ -81,9 +82,11 @@ static const char* csrPrivateKey =
 "...""\n"
 "-----END PRIVATE KEY-----";
 
+
 #define CSR_TIMEOUT_SECS            60
 
 static volatile bool g_connected = false;
+static volatile size_t g_message_count_send_confirmations = 0;
 
 typedef struct CSR_CALLBACK_CONTEXT_TAG
 {
@@ -107,6 +110,14 @@ static void connection_status_callback(IOTHUB_CLIENT_CONNECTION_STATUS result, I
         g_connected = false;
         (void)printf("The device client has been disconnected\r\n");
     }
+}
+
+static void send_confirm_callback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* userContextCallback)
+{
+    (void)userContextCallback;
+    g_message_count_send_confirmations++;
+    (void)printf("Confirmation callback received for message %zu with result %s\r\n",
+        g_message_count_send_confirmations, MU_ENUM_TO_STRING(IOTHUB_CLIENT_CONFIRMATION_RESULT, result));
 }
 
 static void csr_response_callback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, int response_status_code, const char* responsePayload, void* userContextCallback)
@@ -330,8 +341,47 @@ int main(void)
 
                     if (renewed_cert != NULL)
                     {
-                        (void)printf("\r\n=== Renewed certificate (PEM) ===\r\n%s\r\n", renewed_cert);
-                        (void)printf("Certificate renewal via CSR completed successfully.\r\n");
+                        (void)printf("Renewed certificate received. Reconnecting...\r\n");
+
+                        // Disconnect and reconnect with the renewed certificate
+                        IoTHubDeviceClient_LL_Destroy(device_ll_handle);
+                        device_ll_handle = NULL;
+                        g_connected = false;
+
+                        device_ll_handle = IoTHubDeviceClient_LL_CreateFromConnectionString(connectionString, protocol);
+                        if (device_ll_handle != NULL)
+                        {
+#ifdef SET_TRUSTED_CERT_IN_SAMPLES
+                            IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_TRUSTED_CERT, certificates);
+#endif
+#if defined SAMPLE_MQTT || defined SAMPLE_MQTT_OVER_WEBSOCKETS
+                            (void)IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_AUTO_URL_ENCODE_DECODE, &urlEncodeOn);
+#endif
+                            (void)IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_X509_CERT, renewed_cert);
+                            (void)IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_X509_PRIVATE_KEY, csrPrivateKey);
+                            (void)IoTHubDeviceClient_LL_SetConnectionStatusCallback(device_ll_handle, connection_status_callback, NULL);
+
+                            while (!g_connected)
+                            {
+                                IoTHubDeviceClient_LL_DoWork(device_ll_handle);
+                                ThreadAPI_Sleep(1);
+                            }
+
+                            // Send a test message to verify the renewed certificate
+                            IOTHUB_MESSAGE_HANDLE message_handle = IoTHubMessage_CreateFromString("CSR renewal verified");
+                            (void)printf("Sending test message with renewed certificate...\r\n");
+                            IoTHubDeviceClient_LL_SendEventAsync(device_ll_handle, message_handle, send_confirm_callback, NULL);
+                            IoTHubMessage_Destroy(message_handle);
+
+                            while (g_message_count_send_confirmations < 1)
+                            {
+                                IoTHubDeviceClient_LL_DoWork(device_ll_handle);
+                                ThreadAPI_Sleep(1);
+                            }
+
+                            (void)printf("Certificate renewal verified successfully.\r\n");
+                        }
+
                         free(renewed_cert);
                     }
                 }
