@@ -21,7 +21,25 @@ function Debug-PSScript {
     } | Format-List
 }
 
-function New-Guid {
+function Invoke-Script {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [scriptblock] $ScriptBlock
+    )
+
+    try {
+        & $ScriptBlock
+    }
+    catch {
+        Write-Host "Exception: $($_.ToString())"
+        Write-Host "Errors:"
+        $_.InvocationInfo
+        $null
+    }
+}
+
+function New-GuidString {
     param([switch]$NoDashes)
 
     $Guid = [guid]::NewGuid().ToString()
@@ -113,7 +131,7 @@ function New-RsaPrivateKey {
 
     $rsa = [System.Security.Cryptography.RSA]::Create(4096)
 
-    if ($null -ne $Path -and $Path -ne "") {
+    if (-not [string]::IsNullOrWhiteSpace($Path)) {
         $pem = Export-Pkcs8PrivateKeyPem -Key $rsa
 
         if ($Verbose) {
@@ -135,7 +153,7 @@ function New-EcdsaPrivateKey {
 
     $ecdsa = [System.Security.Cryptography.ECDsa]::Create([System.Security.Cryptography.ECCurve]::CreateFromFriendlyName($Curve))
 
-    if ($null -ne $Path -and $Path -ne "") {
+    if (-not [string]::IsNullOrWhiteSpace($Path)) {
         $pem = Export-Pkcs8PrivateKeyPem -Key $ecdsa
 
         if ($Verbose) {
@@ -241,7 +259,7 @@ function New-Certificate {
         # Self-signed (Root CA)
         $NewCertificate = $req.CreateSelfSigned($NotBefore, $NotAfter)
 
-        if ($OutFile -ne $null -and $OutFile -ne "") {
+        if (-not [string]::IsNullOrWhiteSpace($OutFile)) {
             Export-X509CertificateToPemFile -Cert $NewCertificate -Path $OutFile
         }
 
@@ -276,7 +294,7 @@ function New-Certificate {
             $SerialNumber
         )
 
-        if ($null -ne $OutFile -and $OutFile -ne "") {
+        if (-not [string]::IsNullOrWhiteSpace($OutFile)) {
             Export-X509CertificateToPemFile -Cert $NewCertificate -Path $OutFile
         }
 
@@ -574,8 +592,8 @@ function Add-DpsCertificate {
         [timespan]$Expiration = $DefaultCertificateExpiration
     )
 
-    if ($null -eq $Subject -or $Subject -eq "") {
-        $Subject = "Azure IoT Test Certificate {0}" -f (New-Guid)
+    if ([string]::IsNullOrWhiteSpace($Subject)) {
+        $Subject = "Azure IoT Test Certificate {0}" -f (New-GuidString)
     }
 
     $DpsCertificateName = $Subject.Replace(" ", "-")
@@ -627,7 +645,7 @@ function Add-DpsSymmetricKeyIndividualEnrollment {
 
     Write-Host "Creating Azure DPS symmetric-key individual enrollment ($EnrollmentId; $AdrPolicyName)."
 
-    if ($AdrPolicyName -eq $null -or $AdrPolicyName -eq "") {
+    if ([string]::IsNullOrWhiteSpace($AdrPolicyName)) {
         $EnrollmentInfo = az iot dps enrollment create --dps-name $DpsName --resource-group $ResourceGroup --at symmetricKey --enrollment-id $EnrollmentId  | ConvertFrom-Json
     } else {
         $EnrollmentInfo = az iot dps enrollment create --dps-name $DpsName --resource-group $ResourceGroup --at symmetricKey --enrollment-id $EnrollmentId --credential-policy $AdrPolicyName | ConvertFrom-Json
@@ -658,7 +676,7 @@ function Add-DpsX509IndividualEnrollment {
     $DpsDeviceCertificatePath = New-TempFile
     Export-X509CertificateToPemFile -Cert $DpsDeviceCertificate -Path $DpsDeviceCertificatePath
 
-    if ($AdrPolicyName -eq $null -or $AdrPolicyName -eq "") {
+    if ([string]::IsNullOrWhiteSpace($AdrPolicyName)) {
         az iot dps enrollment create --dps-name $DpsName --resource-group $ResourceGroup --at x509 --enrollment-id $EnrollmentId --cp $DpsDeviceCertificatePath | Out-Null
     } else {
         az iot dps enrollment create --dps-name $DpsName --resource-group $ResourceGroup --at x509 --enrollment-id $EnrollmentId --cp $DpsDeviceCertificatePath --credential-policy $AdrPolicyName | Out-Null
@@ -684,7 +702,7 @@ function Add-DpsSymmetricKeyEnrollmentGroup {
 
     Write-Host "Creating Azure DPS symmetric-key enrollment group ($EnrollmentId; $AdrPolicyName)."
 
-    if ($AdrPolicyName -eq $null -or $AdrPolicyName -eq "") {
+    if ([string]::IsNullOrWhiteSpace($AdrPolicyName)) {
         $EnrollmentInfo = az iot dps enrollment-group create --dps-name $DpsName --resource-group $ResourceGroup --enrollment-id $EnrollmentId | ConvertFrom-Json
     } else {
         $EnrollmentInfo = az iot dps enrollment-group create --dps-name $DpsName --resource-group $ResourceGroup --enrollment-id $EnrollmentId --credential-policy $AdrPolicyName | ConvertFrom-Json
@@ -718,7 +736,7 @@ function Add-DpsX509EnrollmentGroup {
     $ICACertificatePath = New-TempFile
     $ICA.ExportToPemFile($ICACertificatePath)
 
-    if ($AdrPolicyName -eq $null -or $AdrPolicyName -eq "") {
+    if ([string]::IsNullOrWhiteSpace($AdrPolicyName)) {
         az iot dps enrollment-group create --dps-name $DpsName --resource-group $ResourceGroup --enrollment-id $EnrollmentId --ap static --cp $ICACertificatePath --provisioning-status enabled --iot-hubs $IotHubFqdn  | Out-Null
     } else {
         az iot dps enrollment-group create --dps-name $DpsName --resource-group $ResourceGroup --enrollment-id $EnrollmentId --ap static --cp $ICACertificatePath --provisioning-status enabled --iot-hubs $IotHubFqdn --credential-policy $AdrPolicyName | Out-Null
@@ -734,9 +752,9 @@ function Add-DpsX509EnrollmentGroup {
 function New-AzureResourceGroupName {
     param([string]$Prefix = "rg-", [string]$OutFile = $null)
 
-    $ResourceGroupName = $Prefix + $(New-Guid -NoDashes)
+    $ResourceGroupName = $Prefix + $(New-GuidString -NoDashes)
 
-    if ($null -ne $OutFile -and $OutFile -ne "") {
+    if (-not [string]::IsNullOrWhiteSpace($OutFile)) {
         $OutFileDir = Split-Path -Path $OutFile -Parent
         if ($OutFileDir -ne "" -and $(Test-Path $OutFileDir) -eq $false) {
             New-Item -ItemType Directory -Force -Path $OutFileDir | Out-Null
@@ -818,10 +836,10 @@ function New-AzIotTestEnvironment {
         [string]$AzureSubscriptionId = $null,
         [string]$ResourceGroup = $(New-AzureResourceGroupName),
         [Hashtable]$ResourceGroupTags = $null,
-        [string]$DpsName       = "dps-$(New-Guid -NoDashes)",
-        [string]$IotHubName    = "iothub-$(New-Guid -NoDashes)",
+        [string]$DpsName       = "dps-$(New-GuidString -NoDashes)",
+        [string]$IotHubName    = "iothub-$(New-GuidString -NoDashes)",
         [string]$IotHubDomainName = "azure-devices.net",
-        [string]$StorageAccountName = "teststoacc$(New-Guid -NoDashes)".Substring(0, 24), # Max size of Storage Account name
+        [string]$StorageAccountName = "teststoacc$(New-GuidString -NoDashes)".Substring(0, 24), # Max size of Storage Account name
         [int]$DpsSymmKeyIndividualEnrollments = 0,
         [int]$DpsX509IndividualEnrollments = 0,
         [int]$DpsSymmKeyGroupEnrollmentDevices = 0,
@@ -853,7 +871,7 @@ function New-AzIotTestEnvironment {
     $IsAzureAccountServicePrincipal = $AzureAccount.user.type -eq "servicePrincipal"
 
     # Subscription id...
-    if ($AzureSubscriptionId -eq $null -or $AzureSubscriptionId -imatch "[ `t]*") {
+    if ([string]::IsNullOrWhiteSpace($AzureSubscriptionId)) {
         Stop-OnError -Step "Get Azure account information"
         $AzureSubscriptionId = $AzureAccount.id
     } else {
@@ -879,16 +897,16 @@ function New-AzIotTestEnvironment {
     }
 
     # Create resource group (if does not exist).
-    $ResouceGroupExists = az group exists --name $ResourceGroup -o tsv
-    if ($ResouceGroupExists -eq 'true') {
+    $ResourceGroupExists = az group exists --name $ResourceGroup -o tsv
+    if ($ResourceGroupExists -eq 'true') {
        $AzureResourceGroup = az group show --name "$ResourceGroup" | ConvertFrom-Json
     } else {
-        $ResouceGroupTagsString = $(Join-Hashtable -Hashtable $ResourceGroupTags)
+        $ResourceGroupTagsString = $(Join-Hashtable -Hashtable $ResourceGroupTags)
 
-        Write-Host "Creating Azure resource group ($ResourceGroup; $ResouceGroupTagsString)"
+        Write-Host "Creating Azure resource group ($ResourceGroup; $ResourceGroupTagsString)"
 
         if ($null -ne $ResourceGroupTags -and $ResourceGroupTags.Count -gt 0) {
-            $AzureResourceGroup = az group create --name "$ResourceGroup" --location "$AzureLocation" --tags "$ResouceGroupTagsString" 2>$null | ConvertFrom-json 
+            $AzureResourceGroup = az group create --name "$ResourceGroup" --location "$AzureLocation" --tags "$ResourceGroupTagsString" 2>$null | ConvertFrom-json 
         } else {
             $AzureResourceGroup = az group create --name "$ResourceGroup" --location "$AzureLocation" 2>$null | ConvertFrom-json 
         }
@@ -902,7 +920,7 @@ function New-AzIotTestEnvironment {
         $AzureIotHubAppId = "89d10474-74af-4874-99a7-c23c2f643083" # Azure IoT Hub application ID (same for all tenants)
         $AzureIotHubObjectId = "0aab4033-4ad9-4b0b-9934-542334eceffb" # Manually obtained...
 
-        $ResouceGroupScope = "/subscriptions/$AzureSubscriptionId/resourceGroups/$ResourceGroup"
+        $ResourceGroupScope = "/subscriptions/$AzureSubscriptionId/resourceGroups/$ResourceGroup"
         Write-Host "Creating Azure role assignment for certificate management (scope=$ResouceGroupScope)"
         if ($IsAzureAccountServicePrincipal) {
             az role assignment create --assignee-object-id $AzureIotHubObjectId --assignee-principal-type ServicePrincipal --role Contributor --scope "$ResouceGroupScope" --only-show-errors | Out-Null
@@ -981,7 +999,7 @@ function New-AzIotTestEnvironment {
 
     # Create IoT Hub Devices
     for ($i = 0; $i -lt $IotHubSymmKeyDevices; $i++) {
-        $IotHubDeviceId = "sk-$(New-Guid -NoDashes)"
+        $IotHubDeviceId = "sk-$(New-GuidString -NoDashes)"
 
         Write-Host "Creating Azure IoT Hub symmetric-key device ($IotHubDeviceId)"
         $IotHubDeviceInfo = az iot hub device-identity create --resource-group $ResourceGroup --hub-name $IotHubName --device-id $IotHubDeviceId | ConvertFrom-Json
@@ -1003,7 +1021,7 @@ function New-AzIotTestEnvironment {
     }
 
     for ($i = 0; $i -lt $IotHubX509ThumbprintDevices; $i++) {
-        $IotHubDeviceId = "x509tp-$(New-Guid -NoDashes)"
+        $IotHubDeviceId = "x509tp-$(New-GuidString -NoDashes)"
         $CertificateSubjectName = "C=US, ST=Washington, L=Redmond, O=Company, OU=Org, CN=www.company.com"
 
         $IotHubDevicePrivateKey = New-RsaPrivateKey
@@ -1243,10 +1261,11 @@ function Get-AzIotTestEnvironment {
     $TestEnvInfo.AzureResourceGroup = $AzureResourceGroup.name
     $TestEnvInfo.Dps.ResourceGroup = $AzureResourceGroup.name
 
-    $AzureAdrNamespaceName = $AzureIotHub.properties.deviceRegistry.namespaceResourceId.split("/")[8]
-    $AzureAdrPolicy = az iot adr ns policy list --resource-group "$ResourceGroup" --ns "$AzureAdrNamespaceName" | ConvertFrom-Json
-
-    $TestEnvInfo.AzureAdrPolicyName = $AzureAdrPolicy.name
+    if ($null -ne $AzureIoTHub.properties.deviceRegistry.namespaceResourceId) {
+        $AzureAdrNamespaceName = $AzureIoTHub.properties.deviceRegistry.namespaceResourceId.split("/")[8]
+        $AzureAdrPolicy = az iot adr ns policy list --resource-group "$ResourceGroup" --ns "$AzureAdrNamespaceName" | ConvertFrom-Json
+        $TestEnvInfo.AzureAdrPolicyName = $AzureAdrPolicy.name
+    }
 
     Write-Host "Getting IoT Hub Connection String"
     $TestEnvInfo.IotHub.ConnectionString = $(az iot hub connection-string show -g $ResourceGroup -n $IotHubName --kt primary --pn iothubowner --query connectionString -o tsv)
@@ -1263,6 +1282,35 @@ function Get-AzIotTestEnvironment {
     az iot hub consumer-group list --hub-name $IotHubName --resource-group $ResourceGroup | ConvertFrom-Json | %{ $TestEnvInfo.IotHub.EventHub.ConsumerGroups += $_.name }
     Stop-OnError -Step "Get IoT Hub's Event Hub Consumer Groups"
 
+    Write-Host "Retrieving IoT Hub's Device Identities"
+    $IotHubDevices = az iot hub device-identity list --hub-name $IotHubName --resource-group $ResourceGroup | ConvertFrom-Json
+    Stop-OnError -Step "Retrieve IoT Hub's Device Identities"
+
+    foreach ($Device in $IotHubDevices) {
+        if ($Device.authentication.type -eq "sas") {
+            $DeviceIdentity = [IotHubSymmetricKeyIdentityInfo]::new(
+                $Device.deviceId,
+                $Device.authentication.symmetricKey.primaryKey,
+                $Device.authentication.symmetricKey.secondaryKey,
+                $(az iot hub device-identity connection-string show --resource-group $ResourceGroup --hub-name $IotHubName -d $Device.deviceId --kt primary --query connectionString -o tsv),
+                $(az iot hub device-identity connection-string show --resource-group $ResourceGroup --hub-name $IotHubName -d $Device.deviceId --kt secondary --query connectionString -o tsv)
+            )
+
+            $TestEnvInfo.IotHub.Devices.SymmetricKey += $DeviceIdentity
+        } elseif ($Device.authentication.type -eq "x509_thumbprint") {
+            $ConnectionString = az iot hub device-identity connection-string show --resource-group $ResourceGroup --hub-name $IotHubName -d $Device.deviceId | ConvertFrom-Json
+
+            $DeviceIdentity = [IotHubX509IdentityInfo]::new(
+                $Device.deviceId,
+                $ConnectionString.connectionString,
+                [X509CertificateInfo]::new($null, $null), # Certificate and private key retrieval for x509 enrollments would require additional steps, such as downloading the certificate from Azure Key Vault if stored there.
+                [X509CertificateInfo]::new($null, $null)
+            )
+
+            $TestEnvInfo.IotHub.Devices.X509Thumbprint += $DeviceIdentity
+        }
+    }
+
     $TestEnvInfo.Dps.DeviceFqdn = $AzureDps.properties.deviceProvisioningHostName
     $TestEnvInfo.Dps.ServiceFqdn = $AzureDps.properties.serviceOperationsHostName
     $TestEnvInfo.Dps.IdScope = $AzureDps.properties.idScope
@@ -1270,6 +1318,60 @@ function Get-AzIotTestEnvironment {
     Write-Host "Getting DPS Connection String"
     $TestEnvInfo.Dps.ConnectionString = $(az iot dps connection-string show -g $ResourceGroup -n $AzureDps.name --kt primary --pn provisioningserviceowner --query connectionString -o tsv)
     Stop-OnError -Step "Get DPS Connection String"
+
+    Write-Host "Retrieving DPS individual enrollments"
+    $IndividualEnrollments = az iot dps enrollment list --dps-name $AzureDps.name --resource-group $ResourceGroup | ConvertFrom-Json
+    Stop-OnError -Step "Retrieve DPS individual enrollments"
+
+    foreach ($Enrollment in $IndividualEnrollments) {
+        if ($Enrollment.attestation.type -eq "symmetricKey") {
+            Write-Host "Retrieving DPS individual enrollment ($($Enrollment.registrationId))"
+            $IndividualEnrollment = az iot dps enrollment show --dps-name $AzureDps.name --resource-group $ResourceGroup --enrollment-id $($Enrollment.registrationId) --show-keys | ConvertFrom-Json
+            Stop-OnError -Step "Retrieve DPS individual enrollment ($($Enrollment.registrationId))"
+
+            $EnrollmentInfo = [DpsSymmetricKeyIndividualEnrollmentInfo]::new(
+                $IndividualEnrollment.registrationId,
+                $IndividualEnrollment.attestation.symmetricKey.primaryKey,
+                $IndividualEnrollment.attestation.symmetricKey.secondaryKey
+            )
+
+            $TestEnvInfo.Dps.Enrollments.IndividualSymmetricKey += $EnrollmentInfo
+        } elseif ($Enrollment.attestation.type -eq "x509") {
+            $EnrollmentInfo = [DpsX509IndividualEnrollmentInfo]::new(
+                $Enrollment.registrationId,
+                $null # Certificate and private key retrieval for x509 enrollments would require additional steps, such as downloading the certificate from Azure Key Vault if stored there.
+            )
+
+            $TestEnvInfo.Dps.Enrollments.IndividualX509 += $EnrollmentInfo
+        }
+    }
+
+    Write-Host "Retrieving DPS enrollment groups"
+    $EnrollmentGroups = az iot dps enrollment-group list --dps-name $AzureDps.name --resource-group $ResourceGroup | ConvertFrom-Json
+    Stop-OnError -Step "Retrieve DPS enrollment groups"
+
+    foreach ($EnrollmentGroup in $EnrollmentGroups) {
+        if ($EnrollmentGroup.attestation.type -eq "symmetricKey") {
+            Write-Host "Retrieving DPS enrollment group ($($EnrollmentGroup.enrollmentGroupId))"
+            $SymmetricKeyEnrollmentGroup = az iot dps enrollment-group show --dps-name $AzureDps.name --resource-group $ResourceGroup --group-id $($EnrollmentGroup.enrollmentGroupId) --show-keys | ConvertFrom-Json
+            Stop-OnError -Step "Retrieve DPS enrollment group ($($EnrollmentGroup.enrollmentGroupId))"
+
+            $EnrollmentGroupInfo = [DpsSymmetricKeyEnrollmentGroupInfo]::new(
+                $SymmetricKeyEnrollmentGroup.enrollmentGroupId,
+                $SymmetricKeyEnrollmentGroup.attestation.symmetricKey.primaryKey,
+                $SymmetricKeyEnrollmentGroup.attestation.symmetricKey.secondaryKey
+            )
+
+            $TestEnvInfo.Dps.Enrollments.GroupSymmetricKey += $EnrollmentGroupInfo
+        } elseif ($EnrollmentGroup.attestation.type -eq "x509") {
+            $EnrollmentGroupInfo = [DpsX509EnrollmentGroupInfo]::new(
+                $EnrollmentGroup.enrollmentGroupId,
+                $null # Certificate and private key retrieval for x509 enrollments would require additional steps, such as downloading the certificate from Azure Key Vault if stored there.
+            )
+
+            $TestEnvInfo.Dps.Enrollments.GroupX509 += $EnrollmentGroupInfo
+        }
+    }
 
     return $TestEnvInfo    
 }
@@ -1282,7 +1384,7 @@ function New-AzIotCSDKE2ETestConfig {
         [string]$OutFile
     )
 
-    if ($OutFile -eq $null -or $OutFile -eq "") {
+    if ([string]::IsNullOrWhiteSpace($OutFile)) {
         $OutFile = "./azure-iot-sdk-c-e2e-test-config"
         if ($Target -eq "powershell") {
             $OutFile += ".ps1"
@@ -1366,7 +1468,7 @@ function New-AzIotPythonSDKE2ETestConfig {
         [string]$OutFile
     )
 
-    if ($OutFile -eq $null -or $OutFile -eq "") {
+    if ([string]::IsNullOrWhiteSpace($OutFile)) {
         $OutFile = "./azure-iot-sdk-python-e2e-test-config"
         if ($Target -eq "powershell") {
             $OutFile += ".ps1"
@@ -1385,8 +1487,8 @@ function New-AzIotPythonSDKE2ETestConfig {
     if ($Target -eq "powershell") {
         $Lines = @(
             "`$env:IOTHUB_CONNECTION_STRING = `"$($TestEnvInfo.IotHub.ConnectionString)`""
-            "`$env:IOTHUB_E2E_IOTHUB_CONNECTION_SRING = `"$($TestEnvInfo.IotHub.ConnectionString)`""
-            "`$env:IOTHUB_EVENTHUB_CONNECTION_STING = `"$($TestEnvInfo.IotHub.EventHub.ConnectionString)`""
+            "`$env:IOTHUB_E2E_IOTHUB_CONNECTION_STRING = `"$($TestEnvInfo.IotHub.ConnectionString)`""
+            "`$env:IOTHUB_EVENTHUB_CONNECTION_STRING = `"$($TestEnvInfo.IotHub.EventHub.ConnectionString)`""
             "`$env:IOTHUB_E2E_EVENTHUB_CONNECTION_STRING = `"$($TestEnvInfo.IotHub.EventHub.ConnectionString)`""
             "`$env:EVENTHUB_CONNECTION_STRING = `"$($TestEnvInfo.IotHub.EventHub.ConnectionString)`""
             "`$env:IOTHUB_E2E_EVENTHUB_CONSUMER_GROUP = `"``$($TestEnvInfo.IotHub.EventHub.ConsumerGroups[0])`""
@@ -1458,7 +1560,7 @@ function New-AzIotPythonSdkSampleConfig {
         [string]$PrivateKeyDir = "$(pwd)/private"
     )
 
-    if ($null -eq $OutFile -or $OutFile -eq "") {
+    if ([string]::IsNullOrWhiteSpace($OutFile)) {
         $OutFile = "./azure-iot-sdk-python-sample-config"
         if ($TargetEnvironment -eq "powershell") {
             $OutFile += ".ps1"
@@ -1536,3 +1638,4 @@ Export-ModuleMember -Function New-AzIotTestEnvironment
 Export-ModuleMember -Function Get-AzIotTestEnvironment
 Export-ModuleMember -Function New-AzIotCSDKE2ETestConfig
 Export-ModuleMember -Function New-AzIotPythonSDKE2ETestConfig
+Export-ModuleMember -Function New-AzIotPythonSdkSampleConfig
