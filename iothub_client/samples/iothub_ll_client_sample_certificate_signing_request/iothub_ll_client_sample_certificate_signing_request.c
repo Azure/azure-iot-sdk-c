@@ -71,7 +71,7 @@ static const char* x509privatekey =
 
 // Certificate Signing Request for renewal (raw base64, without PEM headers/footers).
 // See readme.md for generation instructions.
-static const char* certificateSigningRequest =
+static const char* certificate_signing_request =
 "MIHoMIGPAgEAMBMxETAPBgNVBAMMCGRldmljZUlkMFkwEwYHKoZIzj0CAQYIKoZI"
 "...";
 
@@ -300,6 +300,8 @@ int main(void)
         {
             int csr_timeout = CSR_TIMEOUT_SECS;
             (void)IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_CSR_TIMEOUT_SECS, &csr_timeout);
+            bool traceOn = true;
+            (void)IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_LOG_TRACE, &traceOn);
             (void)IoTHubDeviceClient_LL_SetConnectionStatusCallback(device_ll_handle, connection_status_callback, NULL);
 
             // Wait for connection
@@ -313,11 +315,14 @@ int main(void)
             // Send certificate signing request
             (void)printf("Sending certificate signing request...\r\n");
 
+            // The certificate signing request id must be unique for each new request, unless a request is being re-submitted.
+            // GUIDs are recommended for production applications.
+            const char* request_id = "7e0e4fec";
             CSR_CALLBACK_CONTEXT csr_ctx;
             memset(&csr_ctx, 0, sizeof(csr_ctx));
 
             if (IoTHubDeviceClient_LL_SendCertificateSigningRequestAsync(
-                    device_ll_handle, certificateSigningRequest, NULL,
+                    device_ll_handle, certificate_signing_request, request_id, NULL,
                     csr_response_callback, &csr_ctx) != IOTHUB_CLIENT_OK)
             {
                 (void)printf("Failed to send CSR\r\n");

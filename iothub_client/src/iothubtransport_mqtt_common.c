@@ -88,7 +88,7 @@ static const char* DEVICE_METHOD_RESPONSE_TOPIC = "$iothub/methods/res/%d/?$rid=
 
 static const char CERTIFICATE_SIGNING_RESPONSE_TOPIC_PREFIX[] = "$iothub/credentials";
 static const char* CERTIFICATE_SIGNING_RESPONSE_TOPIC = "$iothub/credentials/res/#";
-static const char* CERTIFICATE_SIGNING_REQUEST_TOPIC = "$iothub/credentials/POST/issueCertificate/?$rid=%05"PRIu16;
+static const char* CERTIFICATE_SIGNING_REQUEST_TOPIC = "$iothub/credentials/POST/issueCertificate/?$rid=%s";
 #ifdef RUN_SFC_TESTS
     static const char* FAULT_OPERATION_TYPE = "AzIoTHub_FaultOperationType";
 #endif //RUN_SFC_TESTS
@@ -214,6 +214,7 @@ typedef struct MQTT_CSR_ITEM_TAG
     tickcounter_ms_t msgPublishTime;
     uint16_t packet_id;
     uint32_t iothub_msg_id;
+    char* request_id;
     IOTHUB_CSR_REQUEST* csr_data;
     bool accepted;
     DLIST_ENTRY entry;
@@ -671,7 +672,7 @@ static int parseDeviceTwinTopicInfo(const char* resp_topic, bool* patch_msg, siz
 // parseCertificateSigningResponseTopicInfo parses information about a certificate signing response topic.
 // Expected format: $iothub/credentials/res/{status}/?$rid={request_id}
 //
-static int parseCertificateSigningResponseTopicInfo(const char* resp_topic, size_t* request_id, int* status_code)
+static int parseCertificateSigningResponseTopicInfo(const char* resp_topic, char** request_id, int* status_code)
 {
     int result;
     STRING_TOKENIZER_HANDLE token_handle = STRING_TOKENIZER_create_from_char(resp_topic);
@@ -680,7 +681,7 @@ static int parseCertificateSigningResponseTopicInfo(const char* resp_topic, size
         LogError("Failed creating token from certificate signing response topic.");
         result = MU_FAILURE;
         *status_code = 0;
-        *request_id = 0;
+        *request_id = NULL;
     }
     else
     {
@@ -690,7 +691,7 @@ static int parseCertificateSigningResponseTopicInfo(const char* resp_topic, size
             LogError("Failed allocating new string.");
             result = MU_FAILURE;
             *status_code = 0;
-            *request_id = 0;
+            *request_id = NULL;
         }
         else
         {
@@ -708,13 +709,22 @@ static int parseCertificateSigningResponseTopicInfo(const char* resp_topic, size
                     if (strncmp(request_id_string, REQUEST_ID_PROPERTY, REQUEST_ID_PROPERTY_LEN) != 0)
                     {
                         LogError("requestId does not begin with string format %s", REQUEST_ID_PROPERTY);
-                        *request_id = 0;
+                        *request_id = NULL;
                         result = MU_FAILURE;
                     }
                     else
                     {
-                        *request_id = (size_t)atol(request_id_string + REQUEST_ID_PROPERTY_LEN);
-                        result = 0;
+                        // Add REQUEST_ID_PROPERTY_LEN to skip copying the property name and equal sign.
+                        if (mallocAndStrcpy_s(request_id, request_id_string + REQUEST_ID_PROPERTY_LEN) != 0)
+                        {
+                            LogError("Failed copying request_id string from topic");
+                            *request_id = NULL;
+                            result = MU_FAILURE;
+                        }
+                        else
+                        {
+                            result = 0;
+                        }
                     }
                     break;
                 }
@@ -735,6 +745,7 @@ static void freeCsrItem(MQTT_CSR_ITEM* csr_item)
 {
     if (csr_item != NULL)
     {
+        free(csr_item->request_id);
         free(csr_item);
     }
 }
@@ -1292,6 +1303,13 @@ static MQTT_CSR_ITEM* createCsrMsg(MQTTTRANSPORT_HANDLE_DATA* transport_data, ui
         result->packet_id = getNextPacketId(transport_data);
         result->iothub_msg_id = iothub_msg_id;
         result->csr_data = csr_data;
+
+        if (mallocAndStrcpy_s(&result->request_id, csr_data->request_id) != 0)
+        {
+            LogError("Failed copying request_id");
+            freeCsrItem(result);
+            result = NULL;
+        }
     }
 
     return result;
@@ -1517,7 +1535,7 @@ static int publishCsrMsg(MQTTTRANSPORT_HANDLE_DATA* transport_data, IOTHUB_CSR_R
 {
     int result;
 
-    STRING_HANDLE msgTopic = STRING_construct_sprintf(CERTIFICATE_SIGNING_REQUEST_TOPIC, csr_item->packet_id);
+    STRING_HANDLE msgTopic = STRING_construct_sprintf(CERTIFICATE_SIGNING_REQUEST_TOPIC, csr_item->request_id);
     if (msgTopic == NULL)
     {
         LogError("Failure constructing certificate signing request topic");
@@ -2262,7 +2280,7 @@ static void processIncomingMessageNotification(PMQTTTRANSPORT_HANDLE_DATA transp
 //
 static void processCertificateSigningRequestNotification(PMQTTTRANSPORT_HANDLE_DATA transportData, MQTT_MESSAGE_HANDLE msgHandle, const char* topicName)
 {
-    size_t request_id;
+    char* request_id = NULL;
     int status_code;
 
     if (parseCertificateSigningResponseTopicInfo(topicName, &request_id, &status_code) != 0)
@@ -2271,14 +2289,14 @@ static void processCertificateSigningRequestNotification(PMQTTTRANSPORT_HANDLE_D
     }
     else
     {
-        // Search pending_csr_queue by packet_id
+        // Search pending_csr_queue by request_id
         PDLIST_ENTRY list_item = transportData->pending_csr_queue.Flink;
         MQTT_CSR_ITEM* matched_entry = NULL;
 
         while (list_item != &transportData->pending_csr_queue)
         {
             MQTT_CSR_ITEM* msg_entry = containingRecord(list_item, MQTT_CSR_ITEM, entry);
-            if (request_id == msg_entry->packet_id)
+            if (msg_entry->request_id != NULL && strcmp(request_id, msg_entry->request_id) == 0)
             {
                 matched_entry = msg_entry;
                 break;
@@ -2288,7 +2306,7 @@ static void processCertificateSigningRequestNotification(PMQTTTRANSPORT_HANDLE_D
 
         if (matched_entry == NULL)
         {
-            LogError("Received certificate signing response with unknown request id %lu", (unsigned long)request_id);
+            LogError("Received certificate signing response with unknown request id %s", request_id);
         }
         else if (status_code == 202)
         {
@@ -2343,6 +2361,8 @@ static void processCertificateSigningRequestNotification(PMQTTTRANSPORT_HANDLE_D
             DList_RemoveEntryList(&matched_entry->entry);
             freeCsrItem(matched_entry);
         }
+
+        free(request_id);
     }
 }
 

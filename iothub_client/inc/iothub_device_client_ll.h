@@ -333,6 +333,10 @@ typedef IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE IOTHUB_CLIENT_LL_AZURE_STOR
      *
      * @param    iotHubClientHandle                          The handle created by a call to the create function.
      * @param    certificateSigningRequest                   The PEM-encoded certificate signing request.
+     * @param    requestId                                   The request identifier.
+     *                                                      Must not be @c NULL. ASCII alphanumerics and dash
+     *                                                      allowed, 4 to 36 characters inclusive. Must not
+     *                                                      begin or end with a dash.
      * @param    replace                                     Optional certificate fingerprint to replace. Can be @c NULL.
      * @param    certificateSigningResponseCallback          The callback invoked with the result. May be called more
      *                                                      than once: first with @c IOTHUB_CLIENT_CONFIRMATION_ACCEPTED
@@ -346,7 +350,7 @@ typedef IOTHUB_CLIENT_LL_UPLOADTOBLOB_CONTEXT_HANDLE IOTHUB_CLIENT_LL_AZURE_STOR
      *
      * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
      */
-     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_LL_SendCertificateSigningRequestAsync, IOTHUB_DEVICE_CLIENT_LL_HANDLE, iotHubClientHandle, const char*, certificateSigningRequest, const char*, replace, IOTHUB_CLIENT_CERTIFICATE_SIGNING_RESPONSE_CALLBACK, certificateSigningResponseCallback, void*, userContextCallback);
+     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_LL_SendCertificateSigningRequestAsync, IOTHUB_DEVICE_CLIENT_LL_HANDLE, iotHubClientHandle, const char*, certificateSigningRequest, const char*, requestId, const char*, replace, IOTHUB_CLIENT_CERTIFICATE_SIGNING_RESPONSE_CALLBACK, certificateSigningResponseCallback, void*, userContextCallback);
 
      /**
      * @brief    This API sets the callback for async cloud to device method calls.

@@ -98,9 +98,9 @@ IOTHUB_CLIENT_RESULT IoTHubDeviceClient_DeviceMethodResponse(IOTHUB_DEVICE_CLIEN
     return IoTHubClientCore_DeviceMethodResponse((IOTHUB_CLIENT_CORE_HANDLE)iotHubClientHandle, methodId, response, respSize, statusCode);
 }
 
-IOTHUB_CLIENT_RESULT IoTHubDeviceClient_SendCertificateSigningRequestAsync(IOTHUB_DEVICE_CLIENT_HANDLE iotHubClientHandle, const char* certificateSigningRequest, const char* replace, IOTHUB_CLIENT_CERTIFICATE_SIGNING_RESPONSE_CALLBACK certificateSigningResponseCallback, void* userContextCallback)
+IOTHUB_CLIENT_RESULT IoTHubDeviceClient_SendCertificateSigningRequestAsync(IOTHUB_DEVICE_CLIENT_HANDLE iotHubClientHandle, const char* certificateSigningRequest, const char* requestId, const char* replace, IOTHUB_CLIENT_CERTIFICATE_SIGNING_RESPONSE_CALLBACK certificateSigningResponseCallback, void* userContextCallback)
 {
-    return IoTHubClientCore_SendCertificateSigningRequestAsync((IOTHUB_CLIENT_CORE_HANDLE)iotHubClientHandle, certificateSigningRequest, replace, certificateSigningResponseCallback, userContextCallback);
+    return IoTHubClientCore_SendCertificateSigningRequestAsync((IOTHUB_CLIENT_CORE_HANDLE)iotHubClientHandle, certificateSigningRequest, requestId, replace, certificateSigningResponseCallback, userContextCallback);
 }
 
 IOTHUB_CLIENT_RESULT IoTHubDeviceClient_SendMessageDisposition(IOTHUB_DEVICE_CLIENT_HANDLE iotHubClientHandle, IOTHUB_MESSAGE_HANDLE message, IOTHUBMESSAGE_DISPOSITION_RESULT disposition)

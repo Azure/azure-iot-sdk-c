@@ -1,12 +1,12 @@
 #Copyright (c) Microsoft. All rights reserved.
 #Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#this is CMakeLists.txt for iothub_client_sample_certificate_signing_request
+#this is CMakeLists.txt for iothub_ll_client_sample_certificate_signing_request
 
 compileAsC99()
 
 set(iothub_c_files
-    iothub_client_sample_certificate_signing_request.c
+    iothub_ll_client_sample_certificate_signing_request.c
 )
 
 IF(WIN32)
@@ -24,13 +24,13 @@ endif()
 include_directories(.)
 include_directories(${PROJECT_SOURCE_DIR}/deps/parson)
 
-add_executable(iothub_client_sample_certificate_signing_request ${iothub_c_files})
+add_executable(iothub_ll_client_sample_certificate_signing_request ${iothub_c_files})
 
-target_link_libraries(iothub_client_sample_certificate_signing_request
+target_link_libraries(iothub_ll_client_sample_certificate_signing_request
     iothub_client
     iothub_client_mqtt_transport
     aziotsharedutil
     parson
 )
 
-linkMqttLibrary(iothub_client_sample_certificate_signing_request)
+linkMqttLibrary(iothub_ll_client_sample_certificate_signing_request)
