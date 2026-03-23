@@ -71,7 +71,7 @@ static const char* x509privatekey =
 
 // Certificate Signing Request for renewal (raw base64, without PEM headers/footers).
 // See readme.md for generation instructions.
-static const char* certificateSigningRequest =
+static const char* certificate_signing_request =
 "MIHoMIGPAgEAMBMxETAPBgNVBAMMCGRldmljZUlkMFkwEwYHKoZIzj0CAQYIKoZI"
 "...";
 
@@ -322,7 +322,7 @@ int main(void)
             memset(&csr_ctx, 0, sizeof(csr_ctx));
 
             if (IoTHubDeviceClient_LL_SendCertificateSigningRequestAsync(
-                    device_ll_handle, certificateSigningRequest, request_id, NULL,
+                    device_ll_handle, certificate_signing_request, request_id, NULL,
                     csr_response_callback, &csr_ctx) != IOTHUB_CLIENT_OK)
             {
                 (void)printf("Failed to send CSR\r\n");
