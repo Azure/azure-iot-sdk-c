@@ -301,7 +301,7 @@ function New-Certificate {
     $NotBefore = [datetime]::UtcNow
     $NotAfter = [datetime]::UtcNow.AddDays($Days)
 
-    if ($IssuerCert -eq $null) {
+    if ($null -eq $IssuerCert) {
         # Self-signed (Root CA)
         $NewCertificate = $req.CreateSelfSigned($NotBefore, $NotAfter)
 
@@ -452,7 +452,7 @@ class X509CertificateInfo {
     }
 
     static [X509CertificateInfo] FromHashtable([hashtable]$Hashtable) {
-        if ($Hashtable -eq $null) {
+        if ($null -eq $Hashtable) {
             return $null
         } else {
             $Instance = [X509CertificateInfo]::new()
@@ -535,8 +535,8 @@ class IotHubX509IdentityInfo {
     }
 
     static [IotHubX509IdentityInfo] FromHashtable([hashtable]$Hashtable) {
-        $Certificate1 = if ($Hashtable.PrimaryCertificate -ne $null) { [X509CertificateInfo]::FromHashtable($Hashtable.PrimaryCertificate) } else { $null }
-        $Certificate2 = if ($Hashtable.SecondaryCertificate -ne $null) { [X509CertificateInfo]::FromHashtable($Hashtable.SecondaryCertificate) } else { $null }
+        $Certificate1 = if ($null -ne $Hashtable.PrimaryCertificate) { [X509CertificateInfo]::FromHashtable($Hashtable.PrimaryCertificate) } else { $null }
+        $Certificate2 = if ($null -ne $Hashtable.SecondaryCertificate) { [X509CertificateInfo]::FromHashtable($Hashtable.SecondaryCertificate) } else { $null }
 
         return [IotHubX509IdentityInfo]::new($Hashtable.Id, $Hashtable.ConnectionString, $Certificate1, $Certificate2)
      }
@@ -1272,14 +1272,14 @@ function New-AzIotTestEnvironment {
     # TODO: install non-preview version after GA.
     $AzCliAzureIotExtension = $(az extension list | Convertfrom-json | ?{$_.name -eq "azure-iot"})
 
-    if ($AzCliAzureIotExtension -ne $null -and $AzCliAzureIotExtension.preview -eq $false) {
+    if ($null -ne $AzCliAzureIotExtension -and $AzCliAzureIotExtension.preview -eq $false) {
         Write-Host "Non-preview Azure IoT extension found (version $($AzCliAzureIotExtension.version)). Removing..."
         az extension remove --name azure-iot --only-show-errors | Out-Null
         Stop-OnError -Step "Remove non-preview Azure IoT extension"
         $AzCliAzureIotExtension = $null
     }
 
-    if ($AzCliAzureIotExtension -eq $null) {
+    if ($null -eq $AzCliAzureIotExtension) {
         Write-Host "Installing Azure IoT extension."
         az extension add --name azure-iot --allow-preview --only-show-errors | Out-Null
         Stop-OnError -Step "Install Azure IoT extension"
@@ -1604,14 +1604,14 @@ function Get-AzIotTestEnvironment {
     # TODO: install non-preview version after GA.
     $AzCliAzureIotExtension = $(az extension list | Convertfrom-json | ?{$_.name -eq "azure-iot"})
 
-    if ($AzCliAzureIotExtension -ne $null -and $AzCliAzureIotExtension.preview -eq $false) {
+    if ($null -ne $AzCliAzureIotExtension -and $AzCliAzureIotExtension.preview -eq $false) {
         Write-Host "Non-preview Azure IoT extension found (version $($AzCliAzureIotExtension.version)). Removing..."
         az extension remove --name azure-iot --only-show-errors | Out-Null
         Stop-OnError -Step "Remove non-preview Azure IoT extension"
         $AzCliAzureIotExtension = $null
     }
 
-    if ($AzCliAzureIotExtension -eq $null) {
+    if ($null -eq $AzCliAzureIotExtension) {
         Write-Host "Installing Azure IoT extension."
         az extension add --name azure-iot --allow-preview --only-show-errors | Out-Null
         Stop-OnError -Step "Install Azure IoT extension"
@@ -1640,7 +1640,7 @@ function Get-AzIotTestEnvironment {
     } else {
         $DpsLinkedIotHub = $AzureDps.properties.iotHubs | ?{$_.name -imatch "$IotHubName" }
 
-        if ($DpsLinkedIotHub -eq $null) {
+        if ($null -eq $DpsLinkedIotHub) {
             throw "Iot Hub $IotHubName is not linked to $DpsName"
         }
     }
