@@ -82,7 +82,6 @@ static const char* csrPrivateKey =
 "...""\n"
 "-----END PRIVATE KEY-----";
 
-
 #define CSR_TIMEOUT_SECS            60
 
 static volatile bool g_connected = false;
@@ -316,12 +315,14 @@ int main(void)
             // Send certificate signing request
             (void)printf("Sending certificate signing request...\r\n");
 
-            const char* requestId = "7e0e4fec";
+            // The certificate signing request id must be unique for each new request, unless a request is being re-submitted.
+            // GUIDs are recommended for production applications.
+            const char* request_id = "7e0e4fec";
             CSR_CALLBACK_CONTEXT csr_ctx;
             memset(&csr_ctx, 0, sizeof(csr_ctx));
 
             if (IoTHubDeviceClient_LL_SendCertificateSigningRequestAsync(
-                    device_ll_handle, certificateSigningRequest, requestId, NULL,
+                    device_ll_handle, certificateSigningRequest, request_id, NULL,
                     csr_response_callback, &csr_ctx) != IOTHUB_CLIENT_OK)
             {
                 (void)printf("Failed to send CSR\r\n");
