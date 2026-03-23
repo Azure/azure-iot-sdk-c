@@ -109,6 +109,35 @@ function Join-Hashtable {
     }
 }
 
+function Convert-CollectionToHashtable {
+    param([array]$Collection)
+    if ($null -eq $Collection) { return @() }
+    return @(foreach ($item in $Collection) { if ($null -ne $item) { $item.ToHashtable() } })
+}
+
+function ConvertTo-Hashtable {
+    param($Object)
+    if ($null -ne $Object) {
+        return $Object.ToHashtable()
+    } else {
+        return $null
+    }
+}
+
+function ConvertFrom-PSObject {
+    param($Object)
+    if ($Object -is [System.Management.Automation.PSCustomObject]) {
+        $Hashtable = [ordered]@{}
+        foreach ($Property in $Object.PSObject.Properties) {
+            $Hashtable[$Property.Name] = ConvertFrom-PSObject $Property.Value
+        }
+        return $Hashtable
+    } elseif ($Object -is [System.Collections.IEnumerable] -and $Object -isnot [string]) {
+        return @(foreach ($Item in $Object) { ConvertFrom-PSObject $Item })
+    } else {
+        return $Object
+    }
+}
 # Certificates
 
 function Export-Pkcs8PrivateKeyPem {
@@ -121,6 +150,23 @@ function Export-Pkcs8PrivateKeyPem {
     } else {
         return $Key.ExportPkcs8PrivateKeyPem()
     }
+}
+
+function New-RsaKeyFromPem {
+    param([string]$Pem)
+
+    $rsa = [System.Security.Cryptography.RSA]::Create()
+
+    if ($PSVersionTable.PSVersion.Major -lt 7) {
+        $Base64 = ($Pem -replace "-----BEGIN PRIVATE KEY-----", "" -replace "-----END PRIVATE KEY-----", "").Trim() -replace "\s+", ""
+        $KeyBytes = [Convert]::FromBase64String($Base64)
+        $bytesRead = 0
+        $rsa.ImportPkcs8PrivateKey($KeyBytes, [ref]$bytesRead)
+    } else {
+        $rsa.ImportFromPem($Pem)
+    }
+
+    return $rsa
 }
 
 function New-RsaPrivateKey {
@@ -313,14 +359,27 @@ function Export-X509CertificateToPem {
     }
 }
 
+function New-X509Certificate2FromPem {
+    param([string]$Pem)
+
+    $Base64 = ($Pem -replace "-----BEGIN CERTIFICATE-----", "" -replace "-----END CERTIFICATE-----", "").Trim() -replace "\s+", ""
+    $CertBytes = [Convert]::FromBase64String($Base64)
+
+    if ($PSVersionTable.PSVersion.Major -lt 7) {
+        return [System.Security.Cryptography.X509Certificates.X509Certificate2]::new($CertBytes)
+    } else {
+        $Cert = [System.Security.Cryptography.X509Certificates.X509Certificate2]::new()
+        $Cert.ImportFromPem($Pem)
+        return $Cert
+    }
+}
+
 function Export-X509CertificateToPemFile {
     param([System.Security.Cryptography.X509Certificates.X509Certificate2]$Cert, [string]$Path)
     $pem = Export-X509CertificateToPem -Certificate $Cert
     Write-Host "Exporting certificate to $Path"
     Set-FileContent -Path $Path -Content $pem
 }
-
-
 
 # Generic Types
 class RsaPrivateKeyInfo {
@@ -339,11 +398,27 @@ class RsaPrivateKeyInfo {
     [string]ToPem() {
         return Export-Pkcs8PrivateKeyPem -Key $this.PrivateKey
     }
+
+    [hashtable]ToHashtable() {
+        return [ordered]@{
+            PrivateKey = $this.ToPem()
+        }
+    }
+
+    static [RsaPrivateKeyInfo]FromHashtable([hashtable]$Hashtable) {
+        if ($null -eq $Hashtable) {
+            return $null
+        } else {
+            return [RsaPrivateKeyInfo]::new($(New-RsaKeyFromPem -Pem $Hashtable.PrivateKey))
+        }
+    }
 }
 
 class X509CertificateInfo {
     [RsaPrivateKeyInfo]$PrivateKey = $null
     [System.Security.Cryptography.X509Certificates.X509Certificate2]$Certificate = $null
+
+    X509CertificateInfo() { }
 
     X509CertificateInfo(
         [System.Security.Cryptography.RSA]$PrivateKey,
@@ -368,6 +443,24 @@ class X509CertificateInfo {
     [void]ExportToPemFile([string]$Path) {
         Export-X509CertificateToPemFile -Cert $this.Certificate -Path $Path
     }
+
+    [hashtable]ToHashtable() {
+        return [ordered]@{
+            PrivateKey = ConvertTo-Hashtable -Object $this.PrivateKey
+            Certificate = $this.ToPem()
+        }
+    }
+
+    static [X509CertificateInfo] FromHashtable([hashtable]$Hashtable) {
+        if ($Hashtable -eq $null) {
+            return $null
+        } else {
+            $Instance = [X509CertificateInfo]::new()
+            $Instance.PrivateKey = [RsaPrivateKeyInfo]::FromHashtable($Hashtable.PrivateKey)
+            $Instance.Certificate = New-X509Certificate2FromPem -Pem $Hashtable.Certificate
+            return $Instance
+        }
+     }
 }
 
 
@@ -392,6 +485,26 @@ class IotHubSymmetricKeyIdentityInfo {
         $this.PrimaryConnectionString = $PrimaryConnectionString
         $this.SecondaryConnectionString = $SecondaryConnectionString
     }
+    
+    [hashtable] ToHashtable() {
+        return [ordered]@{
+            Id = $this.Id
+            PrimaryKey = $this.PrimaryKey
+            SecondaryKey = $this.SecondaryKey
+            PrimaryConnectionString = $this.PrimaryConnectionString
+            SecondaryConnectionString = $this.SecondaryConnectionString
+        }
+    }
+
+    static [IotHubSymmetricKeyIdentityInfo] FromHashtable([hashtable]$Hashtable) {
+        return [IotHubSymmetricKeyIdentityInfo]::new(
+            $Hashtable.Id,
+            $Hashtable.PrimaryKey,
+            $Hashtable.SecondaryKey,
+            $Hashtable.PrimaryConnectionString,
+            $Hashtable.SecondaryConnectionString
+        )
+     }
 }
 
 class IotHubX509IdentityInfo {
@@ -411,12 +524,34 @@ class IotHubX509IdentityInfo {
         $this.PrimaryCertificate = $PrimaryCertificate
         $this.SecondaryCertificate = $SecondaryCertificate
     }
+
+    [hashtable] ToHashtable() {
+        return [ordered]@{
+            Id = $this.Id
+            ConnectionString = $this.ConnectionString
+            PrimaryCertificate = ConvertTo-Hashtable -Object $this.PrimaryCertificate
+            SecondaryCertificate = ConvertTo-Hashtable -Object $this.SecondaryCertificate
+        }
+    }
+
+    static [IotHubX509IdentityInfo] FromHashtable([hashtable]$Hashtable) {
+        $Certificate1 = if ($Hashtable.PrimaryCertificate -ne $null) { [X509CertificateInfo]::FromHashtable($Hashtable.PrimaryCertificate) } else { $null }
+        $Certificate2 = if ($Hashtable.SecondaryCertificate -ne $null) { [X509CertificateInfo]::FromHashtable($Hashtable.SecondaryCertificate) } else { $null }
+
+        return [IotHubX509IdentityInfo]::new($Hashtable.Id, $Hashtable.ConnectionString, $Certificate1, $Certificate2)
+     }
 }
 
 class DpsSymmetricKeyIdentityInfo {
     [string]$Id
     [string]$PrimaryKey
     [string]$SecondaryKey
+
+    DpsSymmetricKeyIdentityInfo() {
+        $this.Id = $null
+        $this.PrimaryKey = $null
+        $this.SecondaryKey = $null
+    }
 
     DpsSymmetricKeyIdentityInfo(
         [string]$Id,
@@ -435,6 +570,18 @@ class DpsSymmetricKeyIdentityInfo {
             $(New-DpsDerivedSymmetricKey -SymmetricKey $this.SecondaryKey -DeviceId $DeviceId)
         )
     }
+
+    [hashtable] ToHashtable() {
+        return [ordered]@{
+            Id = $this.Id
+            PrimaryKey = $this.PrimaryKey
+            SecondaryKey = $this.SecondaryKey
+        }
+    }
+
+    static [DpsSymmetricKeyIdentityInfo] FromHashtable([hashtable]$Hashtable) {
+        return [DpsSymmetricKeyIdentityInfo]::new($Hashtable.Id, $Hashtable.PrimaryKey, $Hashtable.SecondaryKey)
+    }
 }
 
 class DpsX509IdentityInfo {
@@ -448,6 +595,18 @@ class DpsX509IdentityInfo {
         $this.Id = $Id
         $this.Certificate = $Certificate
      }
+
+    [hashtable] ToHashtable() {
+        return [ordered]@{
+            Id = $this.Id
+            Certificate = $(ConvertTo-Hashtable -Object $this.Certificate)
+        }
+    }
+
+    static [DpsX509IdentityInfo] FromHashtable([hashtable]$Hashtable) {
+        $ParsedCertificate = [X509CertificateInfo]::FromHashtable($Hashtable.Certificate)
+        return [DpsX509IdentityInfo]::new($Hashtable.Id, $ParsedCertificate)
+     }
 }
 
 class DpsSymmetricKeyIndividualEnrollmentInfo : DpsSymmetricKeyIdentityInfo {
@@ -456,6 +615,10 @@ class DpsSymmetricKeyIndividualEnrollmentInfo : DpsSymmetricKeyIdentityInfo {
         [string]$PrimaryKey,
         [string]$SecondaryKey
     ) : base($Id, $PrimaryKey, $SecondaryKey) { }
+
+    static [DpsSymmetricKeyIndividualEnrollmentInfo] FromHashtable([hashtable]$Hashtable) {
+        return [DpsSymmetricKeyIndividualEnrollmentInfo]::new($Hashtable.Id, $Hashtable.PrimaryKey, $Hashtable.SecondaryKey)
+    }
 }
 
 class DpsX509IndividualEnrollmentInfo : DpsX509IdentityInfo {
@@ -463,6 +626,11 @@ class DpsX509IndividualEnrollmentInfo : DpsX509IdentityInfo {
         [string]$Id,
         [X509CertificateInfo]$Certificate
      ) : base($Id, $Certificate) { }
+
+    static [DpsX509IndividualEnrollmentInfo] FromHashtable([hashtable]$Hashtable) {
+        $ParsedCertificate = if ($null -ne $Hashtable.Certificate) { [X509CertificateInfo]::FromHashtable($Hashtable.Certificate) } else { $null }
+        return [DpsX509IndividualEnrollmentInfo]::new($Hashtable.Id, $ParsedCertificate)
+    }
 }
 
 class DpsSymmetricKeyEnrollmentGroupInfo : DpsSymmetricKeyIdentityInfo {
@@ -474,17 +642,34 @@ class DpsSymmetricKeyEnrollmentGroupInfo : DpsSymmetricKeyIdentityInfo {
         [string]$SecondaryKey
     ) : base($Id, $PrimaryKey, $SecondaryKey) { }
 
-     [DpsSymmetricKeyIdentityInfo]AddIdentity([string]$DeviceId) {
+    [DpsSymmetricKeyIdentityInfo]AddIdentity([string]$DeviceId) {
         $DeviceIdentityInfo = $this.DeriveKeysForDevice($DeviceId)
 
         $this.Identities += $DeviceIdentityInfo
 
         return $DeviceIdentityInfo
+    }
+
+    [hashtable] ToHashtable() {
+        return [ordered]@{
+            Id = $this.Id
+            PrimaryKey = $this.PrimaryKey
+            SecondaryKey = $this.SecondaryKey
+            Identities = Convert-CollectionToHashtable -Collection $this.Identities
+        }
+    }
+
+    static [DpsSymmetricKeyEnrollmentGroupInfo]FromHashtable([hashtable]$Hashtable) {
+        $DpsSymmetricKeyEnrollmentGroupInfo = [DpsSymmetricKeyEnrollmentGroupInfo]::new($Hashtable.Id, $Hashtable.PrimaryKey, $Hashtable.SecondaryKey)
+        if ($null -ne $Hashtable.Identities) { $DpsSymmetricKeyEnrollmentGroupInfo.Identities = @($Hashtable.Identities | ?{ $null -ne $_ } | %{ [DpsSymmetricKeyIdentityInfo]::FromHashtable($_) }) }
+        return $DpsSymmetricKeyEnrollmentGroupInfo
      }
 }
 
 class DpsX509EnrollmentGroupInfo : DpsX509IdentityInfo {
     [DpsX509IdentityInfo[]]$Identities = @()
+
+    DpsX509EnrollmentGroupInfo() { }
 
     DpsX509EnrollmentGroupInfo(
         [string]$Id,
@@ -507,6 +692,22 @@ class DpsX509EnrollmentGroupInfo : DpsX509IdentityInfo {
 
         return $DeviceIdentityInfo
      }
+
+     [hashtable] ToHashtable() {
+        return [ordered]@{
+            Id = $this.Id
+            Certificate = ConvertTo-Hashtable -Object $this.Certificate
+            Identities = Convert-CollectionToHashtable -Collection $this.Identities
+        }
+     }
+
+     static [DpsX509EnrollmentGroupInfo]FromHashtable([hashtable]$Hashtable) {
+        $Certificate = [X509CertificateInfo]::FromHashtable($Hashtable.Certificate)
+        $DpsX509EnrollmentGroupInfo = [DpsX509EnrollmentGroupInfo]::new($Hashtable.Id, $Certificate)
+        if ($null -ne $Hashtable.Identities) { $DpsX509EnrollmentGroupInfo.Identities = @($Hashtable.Identities | ?{ $null -ne $_ } | %{ [DpsX509IdentityInfo]::FromHashtable($_) }) }
+        return $DpsX509EnrollmentGroupInfo
+     }
+
 }
 
 class DpsEnrollmentsSet {
@@ -514,6 +715,33 @@ class DpsEnrollmentsSet {
     [DpsX509IndividualEnrollmentInfo[]]$IndividualX509 = [DpsX509IndividualEnrollmentInfo[]]@()
     [DpsSymmetricKeyEnrollmentGroupInfo[]]$GroupSymmetricKey = [DpsSymmetricKeyEnrollmentGroupInfo[]]@()
     [DpsX509EnrollmentGroupInfo[]]$GroupX509 = [DpsX509EnrollmentGroupInfo[]]@()
+
+    DpsEnrollmentsSet() { }
+
+    [hashtable]ToHashtable() {
+        return [ordered]@{
+            IndividualSymmetricKey = Convert-CollectionToHashtable -Collection $this.IndividualSymmetricKey
+            IndividualX509 = Convert-CollectionToHashtable -Collection $this.IndividualX509
+            GroupSymmetricKey = Convert-CollectionToHashtable -Collection $this.GroupSymmetricKey
+            GroupX509 = Convert-CollectionToHashtable -Collection $this.GroupX509
+        }
+    }
+
+    static [DpsEnrollmentsSet]FromHashtable([hashtable]$Hashtable) {
+        $DpsEnrollmentsSet = [DpsEnrollmentsSet]::new()
+        if ($null -ne $Hashtable.IndividualSymmetricKey) {
+            foreach ($Enrollment in $Hashtable.IndividualSymmetricKey) {
+                if ($null -ne $Enrollment) {
+                    $IndividualSymmetricKeyEnrollment = [DpsSymmetricKeyIndividualEnrollmentInfo]::FromHashtable($Enrollment)
+                    $DpsEnrollmentsSet.IndividualSymmetricKey += $IndividualSymmetricKeyEnrollment
+                }
+            }
+        }
+        if ($null -ne $Hashtable.IndividualX509) { $DpsEnrollmentsSet.IndividualX509 = @($Hashtable.IndividualX509 | ?{ $null -ne $_ } | %{ [DpsX509IndividualEnrollmentInfo]::FromHashtable($_) }) }
+        if ($null -ne $Hashtable.GroupSymmetricKey) { $DpsEnrollmentsSet.GroupSymmetricKey = @($Hashtable.GroupSymmetricKey | ?{ $null -ne $_ } | %{ [DpsSymmetricKeyEnrollmentGroupInfo]::FromHashtable($_) }) }
+        if ($null -ne $Hashtable.GroupX509) { $DpsEnrollmentsSet.GroupX509 = @($Hashtable.GroupX509 | ?{ $null -ne $_ } | %{ [DpsX509EnrollmentGroupInfo]::FromHashtable($_) }) }
+        return $DpsEnrollmentsSet
+     }
 }
 
 class DpsInfo {
@@ -524,12 +752,91 @@ class DpsInfo {
     [string]$IdScope = $null
     [X509CertificateInfo[]]$RootCaCertificates = @()
     [DpsEnrollmentsSet]$Enrollments = [DpsEnrollmentsSet]::new()
+    [string[]]$LinkedIotHubs = @()
+
+    DpsInfo() { }
+
+    [string]GetName() {
+        return $this.ServiceFqdn.split(".")[0]
+    }
 
     [X509CertificateInfo]AddRootCaCertificate() {
-        $DpsName = $this.ServiceFqdn.split(".")[0]
-        $DpsRootCertificate = Add-DpsCertificate -ResourceGroup $this.ResourceGroup -DpsName $DpsName
+        $DpsRootCertificate = Add-DpsCertificate -ResourceGroup $this.ResourceGroup -DpsName $this.GetName()
         $this.RootCaCertificates += $DpsRootCertificate
         return $DpsRootCertificate
+    }
+
+    [DpsX509EnrollmentGroupInfo]AddX509GroupEnrollment([string]$EnrollmentId) {
+        return $this.AddX509GroupEnrollment($EnrollmentId, $null, $null, $null, $null, $null, $true)
+    }
+
+    [DpsX509EnrollmentGroupInfo]AddX509GroupEnrollment(
+        [string]$EnrollmentId,
+        [string]$IotHubFqdn,
+        [System.Security.Cryptography.X509Certificates.X509Certificate2]$IssuerCertificate,
+        [System.Security.Cryptography.RSA]$IssuerPrivateKey,
+        [string]$AzureAdrPolicyName,
+        [timespan]$CertificateExpiration,
+        [bool]$UseAdrPolicy
+    ) {
+        if ([string]::IsNullOrWhiteSpace($IotHubFqdn)) {
+            if ($this.LinkedIotHubs.Count -gt 0) {
+                $IotHubFqdn = $this.LinkedIotHubs[0]
+            } else {
+                throw "Cannot create DPS X509 enrollment group without IoT Hub FQDN (no linked IoT Hubs)"
+            }
+        }
+
+        if ($null -eq $IssuerCertificate -and $null -eq $IssuerPrivateKey) {
+            if ($this.RootCaCertificates.Count -eq 0) {
+                $this.AddRootCaCertificate() | Out-Null
+            }
+
+            $IssuerCertificate = $this.RootCaCertificates[0].ToNativeX509Certificate2()
+            $IssuerPrivateKey = $this.RootCaCertificates[0].PrivateKey.ToNativeRsaKey()
+        } elseif ($null -in ($IssuerCertificate, $IssuerPrivateKey)) {
+            throw "Both IssuerCertificate and IssuerPrivateKey must be provided together"
+        }
+
+        if ([string]::IsNullOrWhiteSpace($AzureAdrPolicyName) -and $UseAdrPolicy) {
+            $AzureAdrPolicyName = $this.AzureAdrPolicyName
+        }
+
+        if ($null -eq $CertificateExpiration) {
+            $DefaultCertificateExpiration = [TimeSpan]::FromDays(365)
+
+            $CertificateExpiration = $DefaultCertificateExpiration
+        }
+
+        $GroupX509Enrollment = Add-DpsX509EnrollmentGroup -ResourceGroup $this.ResourceGroup -DpsName $this.GetName() -EnrollmentId $EnrollmentId -IssuerCertificate $IssuerCertificate -IssuerPrivateKey $IssuerPrivateKey -IotHubFqdn $IotHubFqdn -AdrPolicyName $AzureAdrPolicyName -CertificateExpiration $CertificateExpiration
+        $this.Enrollments.GroupX509 += [DpsX509EnrollmentGroupInfo]::new($GroupX509Enrollment.Id, $GroupX509Enrollment.PrimaryCertificate)
+        return $GroupX509Enrollment
+     }
+
+     [hashtable]ToHashtable() {
+        return [ordered]@{
+            ResourceGroup = $this.ResourceGroup
+            DeviceFqdn = $this.DeviceFqdn
+            ServiceFqdn = $this.ServiceFqdn
+            ConnectionString = $this.ConnectionString
+            IdScope = $this.IdScope
+            RootCaCertificates = Convert-CollectionToHashtable -Collection $this.RootCaCertificates
+            Enrollments =  ConvertTo-Hashtable -Object $this.Enrollments
+            LinkedIotHubs = $this.LinkedIotHubs
+        }
+     }
+
+    static [DpsInfo]FromHashtable([hashtable]$Hashtable) {
+        $DpsInfo = [DpsInfo]::new()
+        $DpsInfo.ResourceGroup = $Hashtable.ResourceGroup
+        $DpsInfo.DeviceFqdn = $Hashtable.DeviceFqdn
+        $DpsInfo.ServiceFqdn = $Hashtable.ServiceFqdn
+        $DpsInfo.ConnectionString = $Hashtable.ConnectionString
+        $DpsInfo.IdScope = $Hashtable.IdScope
+        if ($null -ne $Hashtable.RootCaCertificates) { $DpsInfo.RootCaCertificates = @($Hashtable.RootCaCertificates | ?{ $null -ne $_ } | %{ [X509CertificateInfo]::FromHashtable($_) }) }
+        $DpsInfo.Enrollments = [DpsEnrollmentsSet]::FromHashtable($Hashtable.Enrollments)
+        $DpsInfo.LinkedIotHubs = $Hashtable.LinkedIotHubs
+        return $DpsInfo
     }
 }
 
@@ -538,18 +845,72 @@ class EventHubInfo {
     [string]$CompatibleName = $null
     [int]$PartitionCount = 0
     [array]$ConsumerGroups = @()
+
+    EventHubInfo() { }
+
+    [hashtable]ToHashtable() {
+        return [ordered]@{
+            ConnectionString = $this.ConnectionString
+            CompatibleName = $this.CompatibleName
+            PartitionCount = $this.PartitionCount
+            ConsumerGroups = $this.ConsumerGroups
+        }
+    }
+
+    static [EventHubInfo]FromHashtable([hashtable]$Hashtable) {
+        $EventHubInfo = [EventHubInfo]::new()
+        $EventHubInfo.ConnectionString = $Hashtable.ConnectionString
+        $EventHubInfo.CompatibleName = $Hashtable.CompatibleName
+        $EventHubInfo.PartitionCount = $Hashtable.PartitionCount
+        $EventHubInfo.ConsumerGroups = $Hashtable.ConsumerGroups
+        return $EventHubInfo
+    }
 }
 
 class IotHubDeviceSet {
     [IotHubSymmetricKeyIdentityInfo[]]$SymmetricKey = @()
-    [array]$X509Thumbprint = @()
+    [IotHubX509IdentityInfo[]]$X509Thumbprint = @()
     # $X509CA = @()
+
+    IotHubDeviceSet() { }
+
+    [hashtable]ToHashtable() {
+        return [ordered]@{
+            SymmetricKey = Convert-CollectionToHashtable -Collection $this.SymmetricKey
+            X509Thumbprint = Convert-CollectionToHashtable -Collection $this.X509Thumbprint
+        }
+    }
+
+    static [IotHubDeviceSet]FromHashtable([hashtable]$Hashtable) {
+        $IotHubDeviceSet = [IotHubDeviceSet]::new()
+        if ($null -ne $Hashtable.SymmetricKey) { $IotHubDeviceSet.SymmetricKey = @($Hashtable.SymmetricKey | ?{ $null -ne $_ } | %{ [IotHubSymmetricKeyIdentityInfo]::FromHashtable($_) }) }
+        if ($null -ne $Hashtable.X509Thumbprint) { $IotHubDeviceSet.X509Thumbprint = @($Hashtable.X509Thumbprint | ?{ $null -ne $_ } | %{ [IotHubX509IdentityInfo]::FromHashtable($_) }) }
+        return $IotHubDeviceSet
+    }
 }
 
 class IotHubInfo {
     [string]$ConnectionString = $null
     [EventHubInfo]$EventHub = [EventHubInfo]::new()
     [IotHubDeviceSet]$Devices = [IotHubDeviceSet]::new()
+
+    IotHubInfo() { }
+
+    [hashtable]ToHashtable() {
+        return [ordered]@{
+            ConnectionString = $this.ConnectionString
+            EventHub = ConvertTo-Hashtable -Object $this.EventHub
+            Devices = ConvertTo-Hashtable -Object $this.Devices
+        }
+    }
+
+    static [IotHubInfo]FromHashtable([hashtable]$Hashtable) {
+        $IotHubInfo = [IotHubInfo]::new()
+        $IotHubInfo.ConnectionString = $Hashtable.ConnectionString
+        $IotHubInfo.EventHub = [EventHubInfo]::FromHashtable($Hashtable.EventHub)
+        $IotHubInfo.Devices = [IotHubDeviceSet]::FromHashtable($Hashtable.Devices)
+        return $IotHubInfo
+    }
 }
 
 class TestEnvironmentInfo {
@@ -560,6 +921,33 @@ class TestEnvironmentInfo {
     [DpsInfo]$Dps = [DpsInfo]::new()
 
     [string]$AzureAdrPolicyName = $null
+
+    [hashtable]ToHashtable() {
+        return [ordered]@{
+            AzureResourceGroup = $this.AzureResourceGroup
+            IotHub = ConvertTo-Hashtable -Object $this.IotHub
+            Dps = ConvertTo-Hashtable -Object $this.Dps
+            AzureAdrPolicyName = $this.AzureAdrPolicyName
+        }
+    }
+
+    static [TestEnvironmentInfo]FromHashtable([hashtable]$Hashtable) {
+        $TestEnvironmentInfo = [TestEnvironmentInfo]::new()
+        $TestEnvironmentInfo.AzureResourceGroup = $Hashtable.AzureResourceGroup
+        $TestEnvironmentInfo.AzureAdrPolicyName = $Hashtable.AzureAdrPolicyName
+        $TestEnvironmentInfo.IotHub = [IotHubInfo]::FromHashtable($Hashtable.IotHub)
+        $TestEnvironmentInfo.Dps = [DpsInfo]::FromHashtable($Hashtable.Dps)
+        return $TestEnvironmentInfo
+    }
+
+
+    [string]ToJson() {
+        return ($this.ToHashtable() | ConvertTo-Json -Depth 20)
+    }
+
+    static [TestEnvironmentInfo]FromJson([string]$Json) {
+        return [TestEnvironmentInfo]::FromHashtable($(ConvertFrom-PSObject $($Json | ConvertFrom-Json)))
+    }
 }
 
 
@@ -665,13 +1053,14 @@ function Add-DpsX509IndividualEnrollment {
         [string]$ResourceGroup = $null,
         [string]$DpsName = $null,
         [string]$EnrollmentId = $null,
-        [string]$AdrPolicyName = $null
+        [string]$AdrPolicyName = $null,
+        [timespan]$CertificateExpiration = $DefaultCertificateExpiration
     )
 
-    Write-Host "Creating Azure DPS x509 individual enrollment ($EnrollmentId; $AdrPolicyName; $CertificatesDir; $PrivateKeysDir)."
+    Write-Host "Creating Azure DPS x509 individual enrollment ($EnrollmentId; $AdrPolicyName; $CertificatesDir; $PrivateKeysDir; $CertificateExpiration)."
 
     $DpsDevicePrivateKey = New-RsaPrivateKey
-    $DpsDeviceCertificate = New-Certificate -Subject "CN=$EnrollmentId" -Key $DpsDevicePrivateKey -IssuerCert $null -IssuerKey $null -IsCA $false -Days $DefaultCertificateExpiration.TotalDays
+    $DpsDeviceCertificate = New-Certificate -Subject "CN=$EnrollmentId" -Key $DpsDevicePrivateKey -IssuerCert $null -IssuerKey $null -IsCA $false -Days $CertificateExpiration.TotalDays
 
     $DpsDeviceCertificatePath = New-TempFile
     Export-X509CertificateToPemFile -Cert $DpsDeviceCertificate -Path $DpsDeviceCertificatePath
@@ -682,7 +1071,7 @@ function Add-DpsX509IndividualEnrollment {
         az iot dps enrollment create --dps-name $DpsName --resource-group $ResourceGroup --at x509 --enrollment-id $EnrollmentId --cp $DpsDeviceCertificatePath --credential-policy $AdrPolicyName | Out-Null
     }
 
-    Stop-OnError -Step "Create an Azure DPS x509 individual enrollment ($EnrollmentId; $AdrPolicyName)"
+    Stop-OnError -Step "Create an Azure DPS x509 individual enrollment ($EnrollmentId)"
 
     Remove-Item $DpsDeviceCertificatePath
 
@@ -921,11 +1310,11 @@ function New-AzIotTestEnvironment {
         $AzureIotHubObjectId = "0aab4033-4ad9-4b0b-9934-542334eceffb" # Manually obtained...
 
         $ResourceGroupScope = "/subscriptions/$AzureSubscriptionId/resourceGroups/$ResourceGroup"
-        Write-Host "Creating Azure role assignment for certificate management (scope=$ResouceGroupScope)"
+        Write-Host "Creating Azure role assignment for certificate management (scope=$ResourceGroupScope)"
         if ($IsAzureAccountServicePrincipal) {
-            az role assignment create --assignee-object-id $AzureIotHubObjectId --assignee-principal-type ServicePrincipal --role Contributor --scope "$ResouceGroupScope" --only-show-errors | Out-Null
+            az role assignment create --assignee-object-id $AzureIotHubObjectId --assignee-principal-type ServicePrincipal --role Contributor --scope "$ResourceGroupScope" --only-show-errors | Out-Null
         } else {
-            az role assignment create --assignee $AzureIotHubAppId --role Contributor --scope "$ResouceGroupScope" --only-show-errors | Out-Null
+            az role assignment create --assignee $AzureIotHubAppId --role Contributor --scope "$ResourceGroupScope" --only-show-errors | Out-Null
         }
         Stop-OnError -Step "Create Azure role assignment for certificate management"
 
@@ -1143,6 +1532,7 @@ function New-AzIotTestEnvironment {
         $TestEnvInfo.Dps.DeviceFqdn = $AzureDps.properties.deviceProvisioningHostName
         $TestEnvInfo.Dps.ServiceFqdn = $AzureDps.properties.serviceOperationsHostName
         $TestEnvInfo.Dps.IdScope = $AzureDps.properties.idScope
+        $AzureDps.properties.iotHubs | %{ $TestEnvInfo.Dps.LinkedIotHubs += $_.name }
 
         Write-Host "Getting DPS Connection String"
         $TestEnvInfo.Dps.ConnectionString = $(az iot dps connection-string show -g $ResourceGroup -n $DpsName --kt primary --pn provisioningserviceowner --query connectionString -o tsv)
@@ -1314,6 +1704,7 @@ function Get-AzIotTestEnvironment {
     $TestEnvInfo.Dps.DeviceFqdn = $AzureDps.properties.deviceProvisioningHostName
     $TestEnvInfo.Dps.ServiceFqdn = $AzureDps.properties.serviceOperationsHostName
     $TestEnvInfo.Dps.IdScope = $AzureDps.properties.idScope
+    $AzureDps.properties.iotHubs | %{ $TestEnvInfo.Dps.LinkedIotHubs += $_.name }
 
     Write-Host "Getting DPS Connection String"
     $TestEnvInfo.Dps.ConnectionString = $(az iot dps connection-string show -g $ResourceGroup -n $AzureDps.name --kt primary --pn provisioningserviceowner --query connectionString -o tsv)
@@ -1374,6 +1765,14 @@ function Get-AzIotTestEnvironment {
     }
 
     return $TestEnvInfo    
+}
+
+function ConvertFrom-JsonToTestEnvironmentInfo {
+    param(
+        [string]$JsonString
+    )
+
+    return [TestEnvironmentInfo]::FromJson($JsonString)
 }
 
 function New-AzIotCSDKE2ETestConfig {
@@ -1569,6 +1968,10 @@ function New-AzIotPythonSdkSampleConfig {
         }
     }
 
+    if ($TestEnvInfo.Dps.Enrollments.GroupX509.Count -eq 0) {
+        $TestEnvInfo.Dps.AddX509GroupEnrollment("group1") | Out-Null
+    }
+
     $X509EnrollmentGroupIdentity = $TestEnvInfo.Dps.Enrollments.GroupX509[0].AddIdentity($DeviceId, [timespan]::FromDays(365))
 
     $DeviceDpsX509PrivateKeyFile = "$PrivateKeyDir/$DeviceId.key.pem"    
@@ -1633,9 +2036,14 @@ function New-AzIotPythonSdkSampleConfig {
     return $OutFile
 }
 
+Export-ModuleMember -Function Debug-PSScript
+Export-ModuleMember -Function Invoke-Script
 Export-ModuleMember -Function New-AzureResourceGroupName
 Export-ModuleMember -Function New-AzIotTestEnvironment
 Export-ModuleMember -Function Get-AzIotTestEnvironment
+Export-ModuleMember -Function ConvertFrom-JsonToTestEnvironmentInfo
 Export-ModuleMember -Function New-AzIotCSDKE2ETestConfig
 Export-ModuleMember -Function New-AzIotPythonSDKE2ETestConfig
 Export-ModuleMember -Function New-AzIotPythonSdkSampleConfig
+
+
