@@ -1016,10 +1016,6 @@ static void setup_IoTHubTransport_MQTT_Common_Create_mocks(bool use_gateway, con
 {
     STRICT_EXPECTED_CALL(IoTHub_Transport_ValidateCallbacks(IGNORED_PTR_ARG));
     EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(DList_InitializeListHead(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(DList_InitializeListHead(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(DList_InitializeListHead(IGNORED_PTR_ARG)); // pending_get_twin_queue
-    STRICT_EXPECTED_CALL(DList_InitializeListHead(IGNORED_PTR_ARG)); // pending_csr_queue
     STRICT_EXPECTED_CALL(tickcounter_create());
     STRICT_EXPECTED_CALL(retry_control_create(DEFAULT_RETRY_POLICY, DEFAULT_RETRY_TIMEOUT_IN_SECONDS));
     STRICT_EXPECTED_CALL(STRING_construct(IGNORED_PTR_ARG));
@@ -1036,6 +1032,10 @@ static void setup_IoTHubTransport_MQTT_Common_Create_mocks(bool use_gateway, con
         STRICT_EXPECTED_CALL(STRING_construct(IGNORED_PTR_ARG));
     }
 
+    EXPECTED_CALL(DList_InitializeListHead(IGNORED_PTR_ARG));
+    EXPECTED_CALL(DList_InitializeListHead(IGNORED_PTR_ARG));
+    EXPECTED_CALL(DList_InitializeListHead(IGNORED_PTR_ARG)); // pending_get_twin_queue
+    EXPECTED_CALL(DList_InitializeListHead(IGNORED_PTR_ARG)); // pending_csr_queue
     STRICT_EXPECTED_CALL(get_time(IGNORED_PTR_ARG))
         .IgnoreArgument(1).SetReturn(TEST_SMALL_TIME_T).CallCannotFail();
 }

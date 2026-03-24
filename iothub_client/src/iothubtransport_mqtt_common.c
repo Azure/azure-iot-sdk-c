@@ -472,11 +472,14 @@ static void freeTransportHandleData(MQTTTRANSPORT_HANDLE_DATA* transport_data)
     STRING_delete(transport_data->topic_InputQueue);
     STRING_delete(transport_data->topic_csr_response);
 
-    while (!DList_IsListEmpty(&transport_data->pending_csr_queue))
+    if (transport_data->pending_csr_queue.Flink != NULL)
     {
-        PDLIST_ENTRY currentEntry = DList_RemoveHeadList(&transport_data->pending_csr_queue);
-        MQTT_CSR_ITEM* csr_item = containingRecord(currentEntry, MQTT_CSR_ITEM, entry);
-        freeCsrItem(csr_item);
+        while (!DList_IsListEmpty(&transport_data->pending_csr_queue))
+        {
+            PDLIST_ENTRY currentEntry = DList_RemoveHeadList(&transport_data->pending_csr_queue);
+            MQTT_CSR_ITEM* csr_item = containingRecord(currentEntry, MQTT_CSR_ITEM, entry);
+            freeCsrItem(csr_item);
+        }
     }
 
     DestroyXioTransport(transport_data);
@@ -3397,10 +3400,6 @@ static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLI
     else
     {
         memset(state, 0, sizeof(MQTTTRANSPORT_HANDLE_DATA));
-        DList_InitializeListHead(&(state->telemetry_waitingForAck));
-        DList_InitializeListHead(&(state->ack_waiting_queue));
-        DList_InitializeListHead(&(state->pending_get_twin_queue));
-        DList_InitializeListHead(&(state->pending_csr_queue));
         if ((state->msgTickCounter = tickcounter_create()) == NULL)
         {
             LogError("Invalid Argument: iotHubName is empty");
@@ -3472,6 +3471,10 @@ static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLI
                     }
                     else
                     {
+                        DList_InitializeListHead(&(state->telemetry_waitingForAck));
+                        DList_InitializeListHead(&(state->ack_waiting_queue));
+                        DList_InitializeListHead(&(state->pending_get_twin_queue));
+                        DList_InitializeListHead(&(state->pending_csr_queue));
                         state->mqttClientStatus = MQTT_CLIENT_STATUS_NOT_CONNECTED;
                         state->isRecoverableError = true;
                         state->packetId = 1;
