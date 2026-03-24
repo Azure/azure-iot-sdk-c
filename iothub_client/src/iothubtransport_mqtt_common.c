@@ -3397,6 +3397,10 @@ static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLI
     else
     {
         memset(state, 0, sizeof(MQTTTRANSPORT_HANDLE_DATA));
+        DList_InitializeListHead(&(state->telemetry_waitingForAck));
+        DList_InitializeListHead(&(state->ack_waiting_queue));
+        DList_InitializeListHead(&(state->pending_get_twin_queue));
+        DList_InitializeListHead(&(state->pending_csr_queue));
         if ((state->msgTickCounter = tickcounter_create()) == NULL)
         {
             LogError("Invalid Argument: iotHubName is empty");
@@ -3468,10 +3472,6 @@ static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLI
                     }
                     else
                     {
-                        DList_InitializeListHead(&(state->telemetry_waitingForAck));
-                        DList_InitializeListHead(&(state->ack_waiting_queue));
-                        DList_InitializeListHead(&(state->pending_get_twin_queue));
-                        DList_InitializeListHead(&(state->pending_csr_queue));
                         state->mqttClientStatus = MQTT_CLIENT_STATUS_NOT_CONNECTED;
                         state->isRecoverableError = true;
                         state->packetId = 1;
@@ -3497,6 +3497,7 @@ static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLI
                         state->topic_NotifyState = NULL;
                         state->topic_DeviceMethods = NULL;
                         state->topic_InputQueue = NULL;
+                        state->topic_csr_response = NULL;
                         state->log_trace = state->raw_trace = false;
                         state->isConnectUsernameSet = false;
                         state->auto_url_encode_decode = false;

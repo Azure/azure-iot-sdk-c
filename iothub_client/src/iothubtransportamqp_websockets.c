@@ -212,7 +212,6 @@ static TRANSPORT_PROVIDER thisTransportProvider_WebSocketsOverTls =
     IoTHubTransportAMQP_WS_DeviceMethod_Response,
     IoTHubTransportAMQP_WS_Subscribe_DeviceTwin,                       /*pfIoTHubTransport_Subscribe_DeviceTwin IoTHubTransport_Subscribe_DeviceTwin;*/
     IoTHubTransportAMQP_WS_Unsubscribe_DeviceTwin,                     /*pfIoTHubTransport_Unsubscribe_DeviceTwin IoTHubTransport_Unsubscribe_DeviceTwin;*/
-    IoTHubTransportAMQP_WS_Subscribe_CertificateSigningResponse,        /*pfIoTHubTransport_Subscribe_CertificateSigningResponse IoTHubTransport_Subscribe_CertificateSigningResponse;*/
     IoTHubTransportAMQP_WS_ProcessItem,                                /*pfIoTHubTransport_ProcessItem IoTHubTransport_ProcessItem;*/
     IoTHubTransportAMQP_WS_GetHostname,                                /*pfIoTHubTransport_GetHostname IoTHubTransport_GetHostname;*/
     IoTHubTransportAMQP_WS_SetOption,                                  /*pfIoTHubTransport_SetOption IoTHubTransport_SetOption;*/
@@ -229,7 +228,8 @@ static TRANSPORT_PROVIDER thisTransportProvider_WebSocketsOverTls =
     IotHubTransportAMQP_WS_Unsubscribe_InputQueue,                     /*pfIoTHubTransport_Unsubscribe_InputQueue IoTHubTransport_Unsubscribe_InputQueue; */
     IoTHubTransportAMQP_WS_SetCallbackContext,                         /*pfIoTHubTransport_SetCallbackContext IoTHubTransport_SetCallbackContext; */
     IoTHubTransportAMQP_WS_GetTwinAsync,                               /*pfIoTHubTransport_GetTwinAsync IoTHubTransport_GetTwinAsync;*/
-    IoTHubTransportAMQP_WS_GetSupportedPlatformInfo                         /*pfIoTHubTransport_GetSupportedPlatformInfo IoTHubTransport_GetSupportedPlatformInfo;*/
+    IoTHubTransportAMQP_WS_GetSupportedPlatformInfo,                    /*pfIoTHubTransport_GetSupportedPlatformInfo IoTHubTransport_GetSupportedPlatformInfo;*/
+    IoTHubTransportAMQP_WS_Subscribe_CertificateSigningResponse         /*pfIoTHubTransport_Subscribe_CertificateSigningResponse IoTHubTransport_Subscribe_CertificateSigningResponse;*/
 };
 
 extern const TRANSPORT_PROVIDER* AMQP_Protocol_over_WebSocketsTls(void)

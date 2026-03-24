@@ -207,7 +207,6 @@ static TRANSPORT_PROVIDER thisTransportProvider_WebSocketsOverTls = {
     IoTHubTransportMqtt_WS_DeviceMethod_Response,
     IoTHubTransportMqtt_WS_Subscribe_DeviceTwin,
     IoTHubTransportMqtt_WS_Unsubscribe_DeviceTwin,
-    IoTHubTransportMqtt_WS_Subscribe_CertificateSigningResponse,
     IoTHubTransportMqtt_WS_ProcessItem,
     IoTHubTransportMqtt_WS_GetHostname,
     IoTHubTransportMqtt_WS_SetOption,
@@ -224,7 +223,8 @@ static TRANSPORT_PROVIDER thisTransportProvider_WebSocketsOverTls = {
     IoTHubTransportMqtt_WS_Unsubscribe_InputQueue,
     IotHubTransportMqtt_WS_SetCallbackContext,
     IoTHubTransportMqtt_WS_GetTwinAsync,
-    IotHubTransportMqtt_WS_GetSupportedPlatformInfo
+    IotHubTransportMqtt_WS_GetSupportedPlatformInfo,
+    IoTHubTransportMqtt_WS_Subscribe_CertificateSigningResponse
 };
 
 const TRANSPORT_PROVIDER* MQTT_WebSocket_Protocol(void)

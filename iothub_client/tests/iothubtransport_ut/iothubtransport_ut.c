@@ -53,6 +53,7 @@ MOCKABLE_FUNCTION(, int, FAKE_IoTHubTransport_Subscribe_DeviceMethod, IOTHUB_DEV
 MOCKABLE_FUNCTION(, void, FAKE_IoTHubTransport_Unsubscribe_DeviceMethod, IOTHUB_DEVICE_HANDLE, handle);
 MOCKABLE_FUNCTION(, int, FAKE_IoTHubTransport_Subscribe_DeviceTwin, IOTHUB_DEVICE_HANDLE, handle);
 MOCKABLE_FUNCTION(, void, FAKE_IoTHubTransport_Unsubscribe_DeviceTwin, IOTHUB_DEVICE_HANDLE, handle);
+MOCKABLE_FUNCTION(, int, FAKE_IoTHubTransport_Subscribe_CertificateSigningResponse, IOTHUB_DEVICE_HANDLE, handle);
 MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, FAKE_IoTHubTransport_GetTwinAsync, IOTHUB_DEVICE_HANDLE, handle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK, completionCallback, void*, callbackContext);
 MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, FAKE_IoTHubTransport_SendMessageDisposition, IOTHUB_DEVICE_HANDLE, handle, IOTHUB_MESSAGE_HANDLE, message, IOTHUBMESSAGE_DISPOSITION_RESULT, disposition);
 MOCKABLE_FUNCTION(, IOTHUB_PROCESS_ITEM_RESULT, FAKE_IoTHubTransport_ProcessItem, TRANSPORT_LL_HANDLE, handle, IOTHUB_IDENTITY_TYPE, item_type, IOTHUB_IDENTITY_INFO*, iothub_item);
@@ -71,6 +72,7 @@ MOCKABLE_FUNCTION(, TRANSPORT_LL_HANDLE, FAKE_IoTHubTransport_Create, const IOTH
 MOCKABLE_FUNCTION(, int, FAKE_IoTHubTransport_Subscribe_InputQueue, IOTHUB_DEVICE_HANDLE, handle);
 MOCKABLE_FUNCTION(, void, FAKE_IoTHubTransport_Unsubscribe_InputQueue, IOTHUB_DEVICE_HANDLE, handle);
 MOCKABLE_FUNCTION(, int, FAKE_IoTHubTransport_SetCallbackContext, TRANSPORT_LL_HANDLE, handle, void*, ctx);
+MOCKABLE_FUNCTION(, int, FAKE_IoTHubTransport_GetSupportedPlatformInfo, TRANSPORT_LL_HANDLE, handle, PLATFORM_INFO_OPTION*, info);
 
 #undef ENABLE_MOCKS
 
@@ -184,7 +186,9 @@ static TRANSPORT_PROVIDER FAKE_transport_provider =
     FAKE_IoTHubTransport_Subscribe_InputQueue,
     FAKE_IoTHubTransport_Unsubscribe_InputQueue,
     FAKE_IoTHubTransport_SetCallbackContext,
-    FAKE_IoTHubTransport_GetTwinAsync
+    FAKE_IoTHubTransport_GetTwinAsync,
+    FAKE_IoTHubTransport_GetSupportedPlatformInfo,
+    FAKE_IoTHubTransport_Subscribe_CertificateSigningResponse
 };
 
 static const TRANSPORT_PROVIDER* provideFAKE(void)

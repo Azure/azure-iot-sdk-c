@@ -130,6 +130,7 @@ MOCKABLE_FUNCTION(, void, Transport_Twin_ReportedStateComplete_Callback, uint32_
 MOCKABLE_FUNCTION(, void, Transport_Twin_RetrievePropertyComplete_Callback, DEVICE_TWIN_UPDATE_STATE, update_state, const unsigned char*, payLoad, size_t, size, void*, ctx);
 MOCKABLE_FUNCTION(, int, Transport_DeviceMethod_Complete_Callback, const char*, method_name, const unsigned char*, payLoad, size_t, size, METHOD_HANDLE, response_id, void*, ctx);
 MOCKABLE_FUNCTION(, const char*, Transport_GetOption_Model_Id_Callback, void*, ctx);
+MOCKABLE_FUNCTION(, int, FAKE_IoTHubTransport_Subscribe_CertificateSigningResponse, IOTHUB_DEVICE_HANDLE, handle);
 
 static int bool_Compare(bool left, bool right)
 {
@@ -631,7 +632,8 @@ static TRANSPORT_PROVIDER FAKE_transport_provider =
     FAKE_IotHubTransport_Unsubscribe_InputQueue, /*pfIoTHubTransport_Unsubscribe_InputQueue IoTHubTransport_Unsubscribe_InputQueue; */
     FAKE_IoTHubTransport_SetCallbackContext,
     FAKE_IoTHubTransport_GetTwinAsync,   /*pfIoTHubTransport_GetTwinAsync IoTHubTransport_GetTwinAsync;*/
-    FAKE_IoTHubTransport_GetSupportedPlatformInfo
+    FAKE_IoTHubTransport_GetSupportedPlatformInfo,
+    FAKE_IoTHubTransport_Subscribe_CertificateSigningResponse
 };
 
 static const TRANSPORT_PROVIDER* provideFAKE(void)
@@ -1073,6 +1075,8 @@ static void setup_IoTHubClientCore_LL_create_mocks(bool use_device_config, bool 
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
     STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
 
+    STRICT_EXPECTED_CALL(DList_InitializeListHead(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(DList_InitializeListHead(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(DList_InitializeListHead(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(DList_InitializeListHead(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(DList_InitializeListHead(IGNORED_PTR_ARG));
@@ -1739,6 +1743,8 @@ TEST_FUNCTION(IoTHubClientCore_LL_CreateWithTransport_Succeeds)
     STRICT_EXPECTED_CALL(DList_InitializeListHead(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(DList_InitializeListHead(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(DList_InitializeListHead(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(DList_InitializeListHead(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(DList_InitializeListHead(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_Register(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_SetRetryPolicy(IGNORED_PTR_ARG, TEST_RETRY_POLICY, 0));
 
@@ -1966,6 +1972,8 @@ TEST_FUNCTION(IoTHubClientCore_LL_CreateWithTransport_register_fails_shared_tran
     STRICT_EXPECTED_CALL(DList_InitializeListHead(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(DList_InitializeListHead(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(DList_InitializeListHead(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(DList_InitializeListHead(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(DList_InitializeListHead(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_Register(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .SetReturn(NULL);
 
@@ -2031,6 +2039,8 @@ TEST_FUNCTION(IoTHubClientCore_LL_CreateWithTransport_set_retry_policy_fails_sha
     STRICT_EXPECTED_CALL(DList_InitializeListHead(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(DList_InitializeListHead(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(DList_InitializeListHead(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(DList_InitializeListHead(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(DList_InitializeListHead(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_Register(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_SetRetryPolicy(IGNORED_PTR_ARG, TEST_RETRY_POLICY, 0))
         .SetReturn(IOTHUB_CLIENT_ERROR);
@@ -2089,6 +2099,9 @@ TEST_FUNCTION(IoTHubClientCore_LL_Destroys_the_underlying_transport_succeeds)
     STRICT_EXPECTED_CALL(DList_RemoveHeadList(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(DList_RemoveHeadList(IGNORED_PTR_ARG));
 
+    STRICT_EXPECTED_CALL(DList_RemoveHeadList(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(DList_RemoveHeadList(IGNORED_PTR_ARG));
+
     STRICT_EXPECTED_CALL(IoTHubClient_Auth_Destroy(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(tickcounter_destroy(IGNORED_PTR_ARG));
 
@@ -2122,6 +2135,9 @@ TEST_FUNCTION(IoTHubClientCore_LL_Destroys_unregisters_but_does_not_destroy_tran
     STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_Unregister(IGNORED_PTR_ARG));
 
     STRICT_EXPECTED_CALL(DList_RemoveHeadList(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(DList_RemoveHeadList(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(DList_RemoveHeadList(IGNORED_PTR_ARG));
+
     STRICT_EXPECTED_CALL(DList_RemoveHeadList(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(DList_RemoveHeadList(IGNORED_PTR_ARG));
 
@@ -2234,6 +2250,9 @@ TEST_FUNCTION(IoTHubClientCore_LL_Destroy_after_sendEvent_succeeds)
     STRICT_EXPECTED_CALL(DList_RemoveHeadList(IGNORED_PTR_ARG)); /*because there is one item in the list*/
     STRICT_EXPECTED_CALL(DList_RemoveHeadList(IGNORED_PTR_ARG)); /*because there is one item in the list*/
     STRICT_EXPECTED_CALL(DList_RemoveHeadList(IGNORED_PTR_ARG)); /*because there is one item in the list*/
+
+    STRICT_EXPECTED_CALL(DList_RemoveHeadList(IGNORED_PTR_ARG)); /*csr_msg_queue*/
+    STRICT_EXPECTED_CALL(DList_RemoveHeadList(IGNORED_PTR_ARG)); /*csr_ack_queue*/
 
     STRICT_EXPECTED_CALL(IoTHubClient_Auth_Destroy(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(tickcounter_destroy(IGNORED_PTR_ARG));
@@ -4405,6 +4424,9 @@ TEST_FUNCTION(IoTHubClientCore_LL_Destroy_with_pending_reported_state_succeeds)
 
     STRICT_EXPECTED_CALL(DList_RemoveHeadList(IGNORED_PTR_ARG)); /*because there is one item in the list*/
     STRICT_EXPECTED_CALL(DList_RemoveHeadList(IGNORED_PTR_ARG)); /*because there is one item in the list*/
+
+    STRICT_EXPECTED_CALL(DList_RemoveHeadList(IGNORED_PTR_ARG)); /*csr_msg_queue*/
+    STRICT_EXPECTED_CALL(DList_RemoveHeadList(IGNORED_PTR_ARG)); /*csr_ack_queue*/
 
     STRICT_EXPECTED_CALL(IoTHubClient_Auth_Destroy(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(tickcounter_destroy(IGNORED_PTR_ARG));
