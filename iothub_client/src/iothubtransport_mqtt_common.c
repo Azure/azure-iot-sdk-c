@@ -472,11 +472,14 @@ static void freeTransportHandleData(MQTTTRANSPORT_HANDLE_DATA* transport_data)
     STRING_delete(transport_data->topic_InputQueue);
     STRING_delete(transport_data->topic_csr_response);
 
-    while (!DList_IsListEmpty(&transport_data->pending_csr_queue))
+    if (transport_data->pending_csr_queue.Flink != NULL)
     {
-        PDLIST_ENTRY currentEntry = DList_RemoveHeadList(&transport_data->pending_csr_queue);
-        MQTT_CSR_ITEM* csr_item = containingRecord(currentEntry, MQTT_CSR_ITEM, entry);
-        freeCsrItem(csr_item);
+        while (!DList_IsListEmpty(&transport_data->pending_csr_queue))
+        {
+            PDLIST_ENTRY currentEntry = DList_RemoveHeadList(&transport_data->pending_csr_queue);
+            MQTT_CSR_ITEM* csr_item = containingRecord(currentEntry, MQTT_CSR_ITEM, entry);
+            freeCsrItem(csr_item);
+        }
     }
 
     DestroyXioTransport(transport_data);
@@ -3497,6 +3500,7 @@ static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLI
                         state->topic_NotifyState = NULL;
                         state->topic_DeviceMethods = NULL;
                         state->topic_InputQueue = NULL;
+                        state->topic_csr_response = NULL;
                         state->log_trace = state->raw_trace = false;
                         state->isConnectUsernameSet = false;
                         state->auto_url_encode_decode = false;

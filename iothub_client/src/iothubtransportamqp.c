@@ -174,7 +174,6 @@ static TRANSPORT_PROVIDER thisTransportProvider =
     IoTHubTransportAMQP_DeviceMethod_Response,
     IoTHubTransportAMQP_Subscribe_DeviceTwin,       /*pfIoTHubTransport_Subscribe_DeviceTwin IoTHubTransport_Subscribe_DeviceTwin;*/
     IoTHubTransportAMQP_Unsubscribe_DeviceTwin,     /*pfIoTHubTransport_Unsubscribe_DeviceTwin IoTHubTransport_Unsubscribe_DeviceTwin;*/
-    IoTHubTransportAMQP_Subscribe_CertificateSigningResponse, /*pfIoTHubTransport_Subscribe_CertificateSigningResponse IoTHubTransport_Subscribe_CertificateSigningResponse;*/
     IoTHubTransportAMQP_ProcessItem,                /*pfIoTHubTransport_ProcessItem IoTHubTransport_ProcessItem;*/
     IoTHubTransportAMQP_GetHostname,                /*pfIoTHubTransport_GetHostname IoTHubTransport_GetHostname;*/
     IoTHubTransportAMQP_SetOption,                  /*pfIoTHubTransport_SetOption IoTHubTransport_SetOption;*/
@@ -191,7 +190,8 @@ static TRANSPORT_PROVIDER thisTransportProvider =
     IotHubTransportAMQP_Unsubscribe_InputQueue,     /*pfIoTHubTransport_Unsubscribe_InputQueue IoTHubTransport_Unsubscribe_InputQueue; */
     IoTHubTransportAMQP_SetCallbackContext,         /*pfIoTHubTransport_SetTransportCallbacks IoTHubTransport_SetTransportCallbacks; */
     IoTHubTransportAMQP_GetTwinAsync,               /*pfIoTHubTransport_GetTwinAsync IoTHubTransport_GetTwinAsync;*/
-    IoTHubTransportAMQP_GetSupportedPlatformInfo      /*pfIoTHubTransport_GetSupportedPlatformInfo IoTHubTransport_GetSupportedPlatformInfo;*/
+    IoTHubTransportAMQP_GetSupportedPlatformInfo,    /*pfIoTHubTransport_GetSupportedPlatformInfo IoTHubTransport_GetSupportedPlatformInfo;*/
+    IoTHubTransportAMQP_Subscribe_CertificateSigningResponse      /*pfIoTHubTransport_Subscribe_CertificateSigningResponse IoTHubTransport_Subscribe_CertificateSigningResponse;*/
 };
 
 extern const TRANSPORT_PROVIDER* AMQP_Protocol(void)

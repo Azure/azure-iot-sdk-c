@@ -97,7 +97,6 @@ pfIoTHubTransport_Unsubscribe_DeviceMethod IoTHubTransport_Unsubscribe_DeviceMet
 pfIoTHubTransport_DeviceMethod_Response IoTHubTransport_DeviceMethod_Response;      \
 pfIoTHubTransport_Subscribe_DeviceTwin IoTHubTransport_Subscribe_DeviceTwin;        \
 pfIoTHubTransport_Unsubscribe_DeviceTwin IoTHubTransport_Unsubscribe_DeviceTwin;    \
-pfIoTHubTransport_Subscribe_CertificateSigningResponse IoTHubTransport_Subscribe_CertificateSigningResponse;      \
 pfIoTHubTransport_ProcessItem IoTHubTransport_ProcessItem;                          \
 pfIoTHubTransport_GetHostname IoTHubTransport_GetHostname;                          \
 pfIoTHubTransport_SetOption IoTHubTransport_SetOption;                              \
@@ -114,7 +113,8 @@ pfIoTHubTransport_Subscribe_InputQueue IoTHubTransport_Subscribe_InputQueue;    
 pfIoTHubTransport_Unsubscribe_InputQueue IoTHubTransport_Unsubscribe_InputQueue;    \
 pfIoTHubTransport_SetCallbackContext IoTHubTransport_SetCallbackContext;            \
 pfIoTHubTransport_GetTwinAsync IoTHubTransport_GetTwinAsync;                        \
-pfIoTHubTransport_GetSupportedPlatformInfo IoTHubTransport_GetSupportedPlatformInfo     /*there's an intentional missing ; on this line*/
+pfIoTHubTransport_GetSupportedPlatformInfo IoTHubTransport_GetSupportedPlatformInfo; \
+pfIoTHubTransport_Subscribe_CertificateSigningResponse IoTHubTransport_Subscribe_CertificateSigningResponse     /*there's an intentional missing ; on this line*/
 
     struct TRANSPORT_PROVIDER_TAG
     {
