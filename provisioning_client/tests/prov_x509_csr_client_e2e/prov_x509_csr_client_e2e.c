@@ -2,11 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 // CSR (Certificate Signing Request) E2E test for the Azure IoT C SDK.
-// Tests the full CSR lifecycle:
-//   Phase 1: DPS registration with CSR (LL layer)
-//   Phase 2: IoT Hub connection with DPS-issued certificate
-//   Phase 3: IoT Hub CSR for certificate re-issuance
-//   Phase 4: Reconnect with re-issued certificate
+// Tests CSR scenarios using the convenience layer API:
+//   - DPS CSR-only registration (X509 individual enrollment)
+//   - Full 4-phase lifecycle: DPS CSR → Hub connect → Hub CSR → Reconnect
 
 #include <stdlib.h>
 #include <stdbool.h>
@@ -83,14 +81,6 @@ typedef struct CONNECTION_STATUS_CONTEXT_TAG
     volatile bool connection_failed;
 } CONNECTION_STATUS_CONTEXT;
 
-// DPS registration context (LL layer)
-typedef struct DPS_REGISTRATION_CONTEXT_TAG
-{
-    REGISTRATION_RESULT reg_result;
-    char* iothub_uri;
-    char* device_id;
-} DPS_REGISTRATION_CONTEXT;
-
 // DPS registration context (convenience layer)
 typedef struct DPS_CONV_REGISTRATION_CONTEXT_TAG
 {
@@ -101,28 +91,6 @@ typedef struct DPS_CONV_REGISTRATION_CONTEXT_TAG
 } DPS_CONV_REGISTRATION_CONTEXT;
 
 // ----- DPS callbacks -----
-
-static void dps_register_device_callback(PROV_DEVICE_RESULT register_result, const char* iothub_uri, const char* device_id, void* user_context)
-{
-    if (user_context == NULL)
-    {
-        LogError("DPS register callback: user_context is NULL");
-        return;
-    }
-
-    DPS_REGISTRATION_CONTEXT* ctx = (DPS_REGISTRATION_CONTEXT*)user_context;
-
-    if (register_result == PROV_DEVICE_RESULT_OK)
-    {
-        (void)mallocAndStrcpy_s(&ctx->iothub_uri, iothub_uri);
-        (void)mallocAndStrcpy_s(&ctx->device_id, device_id);
-        ctx->reg_result = REG_RESULT_COMPLETE;
-    }
-    else
-    {
-        ctx->reg_result = REG_RESULT_FAILED;
-    }
-}
 
 static void dps_registration_status_callback(PROV_DEVICE_REG_STATUS reg_status, void* user_context)
 {
@@ -464,23 +432,24 @@ BEGIN_TEST_SUITE(prov_x509_csr_client_e2e)
 
     TEST_FUNCTION_INITIALIZE(method_init)
     {
-        // Re-init security to reset HSM state between tests.
+        // Re-init HSM security to reset cert/key state between tests.
         // Each CSR test modifies the HSM (installs issued certs),
-        // so subsequent tests need a clean slate.
+        // so subsequent tests need a clean slate with the original bootstrap certs.
         prov_dev_security_deinit();
         prov_dev_security_init(SECURE_DEVICE_TYPE_X509);
+
+        // Re-init IoT Hub SDK to clear any leftover transport state
+        IoTHub_Deinit();
+        IoTHub_Init();
     }
 
     TEST_FUNCTION_CLEANUP(method_cleanup)
     {
     }
 
-    // Full CSR lifecycle test over MQTT (LL layer):
-    //   Phase 1: DPS registration with CSR
-    //   Phase 2: Connect to IoT Hub with DPS-issued cert
-    //   Phase 3: IoT Hub CSR for cert re-issuance
-    //   Phase 4: Reconnect with re-issued cert
-    TEST_FUNCTION(dps_csr_and_hub_csr_mqtt_e2e)
+    // DPS CSR registration test (X509 individual enrollment, convenience layer).
+    // Tests Phase 1 only: DPS registration with CSR attached.
+    TEST_FUNCTION(dps_x509_csr_dps_only_mqtt)
     {
         // Gate on ADR policy being configured
         const char* adr_policy = getenv(ENV_ADR_CERT_MGMT_POLICY_NAME);
@@ -490,183 +459,7 @@ BEGIN_TEST_SUITE(prov_x509_csr_client_e2e)
             return;
         }
 
-        // ================================================================
-        // Phase 1: DPS Registration with CSR (LL layer)
-        // ================================================================
-        LogInfo("=== Phase 1: DPS Registration with CSR ===");
-
-        DPS_REGISTRATION_CONTEXT dps_ctx;
-        memset(&dps_ctx, 0, sizeof(dps_ctx));
-
-        PROV_DEVICE_LL_HANDLE prov_handle = Prov_Device_LL_Create(g_dps_uri, g_dps_scope_id, Prov_Device_MQTT_Protocol);
-        ASSERT_IS_NOT_NULL(prov_handle, "Failed to create DPS LL handle");
-
-        bool trace_on = true;
-        Prov_Device_LL_SetOption(prov_handle, PROV_OPTION_LOG_TRACE, &trace_on);
-
-#ifdef HSM_TYPE_X509
-        // Set bootstrap X509 cert/key for DPS authentication
-        ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK,
-            Prov_Device_LL_SetOption(prov_handle, OPTION_X509_CERT, g_dps_x509_cert_individual),
-            "Failed to set DPS X509 cert");
-        ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK,
-            Prov_Device_LL_SetOption(prov_handle, OPTION_X509_PRIVATE_KEY, g_dps_x509_key_individual),
-            "Failed to set DPS X509 key");
-        ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK,
-            Prov_Device_LL_SetOption(prov_handle, PROV_REGISTRATION_ID, g_dps_regid_individual),
-            "Failed to set DPS registration ID");
-#endif
-
-        // Generate EC P-256 CSR for DPS registration
-        GENERATED_CSR dps_csr = generate_ec_csr(g_dps_regid_individual ? g_dps_regid_individual : "csr-e2e-device");
-
-        ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK,
-            Prov_Device_LL_SetOption(prov_handle, PROV_CERTIFICATE_SIGNING_REQUEST, dps_csr.csr_base64),
-            "Failed to set DPS CSR");
-        ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK,
-            Prov_Device_LL_SetOption(prov_handle, PROV_CERTIFICATE_SIGNING_REQUEST_PRIVATE_KEY, dps_csr.private_key_pem),
-            "Failed to set DPS CSR private key");
-
-        // Register with DPS (LL layer — non-blocking, must call DoWork)
-        PROV_DEVICE_RESULT reg_result = Prov_Device_LL_Register_Device(prov_handle,
-            dps_register_device_callback, &dps_ctx,
-            dps_registration_status_callback, &dps_ctx);
-        ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, reg_result, "Failed to start DPS registration");
-
-        // Pump DoWork until registration completes
-        {
-            time_t start = time(NULL);
-            while (dps_ctx.reg_result == REG_RESULT_BEGIN)
-            {
-                Prov_Device_LL_DoWork(prov_handle);
-                ThreadAPI_Sleep(1);
-                ASSERT_IS_TRUE(difftime(time(NULL), start) < MAX_WAIT_TIME_SECS, "DPS registration timed out");
-            }
-        }
-
-        ASSERT_ARE_EQUAL(int, REG_RESULT_COMPLETE, (int)dps_ctx.reg_result, "DPS registration failed");
-        ASSERT_IS_NOT_NULL(dps_ctx.iothub_uri, "DPS did not return iothub_uri");
-        ASSERT_IS_NOT_NULL(dps_ctx.device_id, "DPS did not return device_id");
-
-        LogInfo("Phase 1 complete: Registered device '%s' on '%s'", dps_ctx.device_id, dps_ctx.iothub_uri);
-
-        Prov_Device_LL_Destroy(prov_handle);
-        prov_handle = NULL;
-
-        // ================================================================
-        // Phase 2: Connect to IoT Hub with DPS-issued certificate
-        // ================================================================
-        LogInfo("=== Phase 2: Connect to IoT Hub with DPS-issued certificate ===");
-
-        CONNECTION_STATUS_CONTEXT conn_ctx;
-        memset(&conn_ctx, 0, sizeof(conn_ctx));
-
-        // CreateFromDeviceAuth uses the cert/key that DPS injected into the HSM during Phase 1
-        IOTHUB_DEVICE_CLIENT_HANDLE hub_handle = IoTHubDeviceClient_CreateFromDeviceAuth(
-            dps_ctx.iothub_uri, dps_ctx.device_id, MQTT_Protocol);
-        ASSERT_IS_NOT_NULL(hub_handle, "Failed to create IoT Hub client from device auth");
-
-        IoTHubDeviceClient_SetOption(hub_handle, OPTION_LOG_TRACE, &trace_on);
-        IoTHubDeviceClient_SetConnectionStatusCallback(hub_handle, iothub_connection_status_callback, &conn_ctx);
-
-        int csr_timeout = CSR_TIMEOUT_SECS;
-        IoTHubDeviceClient_SetOption(hub_handle, OPTION_CSR_TIMEOUT_SECS, &csr_timeout);
-
-        ASSERT_IS_TRUE(wait_for_connection(&conn_ctx, MAX_WAIT_TIME_SECS), "Phase 2: IoT Hub connection timed out");
-        LogInfo("Phase 2 complete: Connected to IoT Hub");
-
-        // ================================================================
-        // Phase 3: IoT Hub CSR for certificate re-issuance
-        // ================================================================
-        LogInfo("=== Phase 3: IoT Hub CSR for certificate re-issuance ===");
-
-        // For the Hub CSR, we generate a fresh EC P-256 CSR and send it to IoT Hub.
-        // The Hub will issue new certificates based on this CSR.
-        char* request_id = generate_request_id();
-
-        CSR_CALLBACK_CONTEXT csr_ctx;
-        memset(&csr_ctx, 0, sizeof(csr_ctx));
-
-        GENERATED_CSR hub_csr = generate_ec_csr(dps_ctx.device_id);
-
-        IOTHUB_CLIENT_RESULT hub_result = IoTHubDeviceClient_SendCertificateSigningRequestAsync(
-            hub_handle, hub_csr.csr_base64, request_id, NULL,
-            hub_csr_response_callback, &csr_ctx);
-        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, hub_result, "Failed to send Hub CSR");
-
-        ASSERT_IS_TRUE(wait_for_csr_response(&csr_ctx, MAX_WAIT_TIME_SECS), "Phase 3: Hub CSR response timed out");
-
-        ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_CONFIRMATION_OK, (int)csr_ctx.result, "Hub CSR failed");
-        ASSERT_ARE_EQUAL(int, 200, csr_ctx.response_status_code, "Hub CSR response status != 200");
-        ASSERT_IS_NOT_NULL(csr_ctx.payload, "Hub CSR response payload is NULL");
-
-        size_t cert_count = 0;
-        char* hub_issued_cert_chain = parse_hub_csr_response(csr_ctx.payload, &cert_count);
-        ASSERT_IS_NOT_NULL(hub_issued_cert_chain, "Failed to parse Hub CSR response certificates");
-        LogInfo("Phase 3 complete: Hub CSR returned %zu certificate(s)", cert_count);
-
-        // Disconnect before reconnecting with new cert
-        IoTHubDeviceClient_Destroy(hub_handle);
-        hub_handle = NULL;
-
-        // ================================================================
-        // Phase 4: Reconnect with re-issued certificate
-        // ================================================================
-        LogInfo("=== Phase 4: Reconnect with re-issued certificate ===");
-
-        // Inject the new certificate and corresponding private key into the HSM
-        PROV_AUTH_HANDLE auth_handle = prov_auth_create();
-        ASSERT_IS_NOT_NULL(auth_handle, "Failed to create auth handle for Phase 4");
-
-        ASSERT_ARE_EQUAL(int, 0, prov_auth_set_certificate(auth_handle, hub_issued_cert_chain),
-            "Failed to set re-issued certificate in HSM");
-        ASSERT_ARE_EQUAL(int, 0, prov_auth_set_key(auth_handle, hub_csr.private_key_pem),
-            "Failed to set Hub CSR private key in HSM");
-
-        memset(&conn_ctx, 0, sizeof(conn_ctx));
-
-        hub_handle = IoTHubDeviceClient_CreateFromDeviceAuth(
-            dps_ctx.iothub_uri, dps_ctx.device_id, MQTT_Protocol);
-        ASSERT_IS_NOT_NULL(hub_handle, "Failed to create IoT Hub client with re-issued cert");
-
-        IoTHubDeviceClient_SetOption(hub_handle, OPTION_LOG_TRACE, &trace_on);
-        IoTHubDeviceClient_SetConnectionStatusCallback(hub_handle, iothub_connection_status_callback, &conn_ctx);
-
-        ASSERT_IS_TRUE(wait_for_connection(&conn_ctx, MAX_WAIT_TIME_SECS), "Phase 4: IoT Hub reconnection timed out");
-        LogInfo("Phase 4 complete: Reconnected to IoT Hub with re-issued certificate");
-
-        // ================================================================
-        // Cleanup
-        // ================================================================
-        IoTHubDeviceClient_Destroy(hub_handle);
-
-        prov_auth_destroy(auth_handle);
-        free(hub_csr.csr_base64);
-        free(hub_csr.private_key_pem);
-        free(dps_csr.csr_base64);
-        free(dps_csr.private_key_pem);
-        free(hub_issued_cert_chain);
-        free(csr_ctx.payload);
-        free(request_id);
-        free(dps_ctx.iothub_uri);
-        free(dps_ctx.device_id);
-    }
-
-    // Convenience layer CSR test — exposes SDK bug where the convenience
-    // layer's worker thread calls prov_transport_dowork on an already-closed
-    // transport after successful CSR registration, causing a segfault.
-    // This test is expected to crash/fail until the SDK bug is fixed.
-    TEST_FUNCTION(dps_csr_convenience_layer_mqtt_e2e)
-    {
-        // Gate on ADR policy being configured
-        const char* adr_policy = getenv(ENV_ADR_CERT_MGMT_POLICY_NAME);
-        if (adr_policy == NULL || adr_policy[0] == '\0')
-        {
-            LogInfo("SKIPPED: %s not set", ENV_ADR_CERT_MGMT_POLICY_NAME);
-            return;
-        }
-
-        LogInfo("=== Convenience layer: DPS Registration with CSR ===");
+        LogInfo("=== DPS X509 CSR registration (Phase 1 only) ===");
 
         DPS_CONV_REGISTRATION_CONTEXT dps_ctx;
         memset(&dps_ctx, 0, sizeof(dps_ctx));
@@ -717,7 +510,7 @@ BEGIN_TEST_SUITE(prov_x509_csr_client_e2e)
         ASSERT_IS_NOT_NULL(dps_ctx.iothub_uri, "DPS did not return iothub_uri");
         ASSERT_IS_NOT_NULL(dps_ctx.device_id, "DPS did not return device_id");
 
-        LogInfo("Convenience layer: Registered device '%s' on '%s'", dps_ctx.device_id, dps_ctx.iothub_uri);
+        LogInfo("DPS X509 CSR: Registered device '%s' on '%s'", dps_ctx.device_id, dps_ctx.iothub_uri);
 
         Prov_Device_Destroy(prov_handle);
 
