@@ -614,6 +614,10 @@ BEGIN_TEST_SUITE(prov_x509_csr_client_e2e)
         ASSERT_IS_TRUE(wait_for_connection(&conn_ctx, MAX_WAIT_TIME_SECS), "Phase 2: IoT Hub connection timed out");
         LogInfo("Phase 2 complete: Connected to IoT Hub");
 
+        // Brief settle delay — let the convenience layer's worker thread
+        // finish processing the CONNACK before we queue the CSR subscribe
+        ThreadAPI_Sleep(2000);
+
         // ================================================================
         // Phase 3: IoT Hub CSR for certificate re-issuance
         // ================================================================
