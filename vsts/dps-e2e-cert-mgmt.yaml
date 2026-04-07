@@ -1,0 +1,199 @@
+# Copyright (c) Microsoft. All rights reserved.
+# Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+# CSR (Certificate Signing Request) E2E pipeline for Azure IoT C SDK.
+# Provisions Azure resources with ADR (Auto Device Registration) enabled,
+# builds the C SDK, and runs the prov_x509_csr_client_e2e test.
+
+name: $(BuildID)_$(BuildDefinitionName)_$(SourceBranchName)_$(Date:yyyyMMdd)$(Rev:.r)
+
+trigger: none
+
+pr:
+  branches:
+    include:
+      - main
+      - feature/*
+
+variables:
+  runCodesignValidationInjection: false
+
+parameters:
+  - name: azureLocation
+    type: string
+    displayName: 'Azure region for resource provisioning'
+    default: 'centraluseuap'
+
+stages:
+# ---------------------------------------------------------------------------
+# Stage 1: Setup — provision Azure resources with ADR/cert management enabled
+# ---------------------------------------------------------------------------
+- stage: setup
+  displayName: 'Setup Azure Resources'
+  jobs:
+  - job: provision
+    displayName: 'Provision DPS + IoT Hub with cert management'
+    pool:
+      vmImage: 'windows-latest'
+    steps:
+    - checkout: self
+      fetchDepth: 1
+      sparseCheckoutDirectories: testtools/scripts
+
+    - task: AzureCLI@2
+      displayName: 'Provision resources and generate env var script'
+      inputs:
+        azureSubscription: 'iot hub sdk service connection'
+        scriptType: ps
+        scriptLocation: inlineScript
+        inlineScript: |
+          Import-Module ./testtools/scripts/Azure.Iot.Sdk.Test.psm1
+
+          New-Item -ItemType Directory -Path "test_config" -Force | Out-Null
+
+          $ResourceGroupName = New-AzureResourceGroupName
+          $ResourceGroupName = "$ResourceGroupName-c-sdk-e2e"
+
+          # Write RG name early so cleanup can find it even if later steps fail
+          Set-Content -Path "test_config/resource_group_name.txt" -Value $ResourceGroupName
+
+          $TestEnvInfo = New-AzIotTestEnvironment `
+              -AzureLocation '${{ parameters.azureLocation }}' `
+              -ResourceGroup $ResourceGroupName `
+              -EnableCertificateManagement `
+              -EnableFileUpload `
+              -DpsX509IndividualEnrollments 1 `
+              -IotHubX509ThumbprintDevices 1
+
+          New-AzIotCSDKE2ETestConfig `
+              -TestEnvInfo $TestEnvInfo `
+              -Target bash `
+              -OutFile test_config/set_e2e_test_env_vars.sh
+
+          $outFile = "test_config/set_e2e_test_env_vars.sh"
+
+          # Append ADR/CSR-specific env vars not yet in the PS module
+          Add-Content $outFile "export ADR_CERT_MGMT_POLICY_NAME=`"$($TestEnvInfo.AzureAdrPolicyName)`""
+
+          $rootCertPem = $TestEnvInfo.Dps.RootCaCertificates[0].ToPem()
+          $rootKeyPem  = $TestEnvInfo.Dps.RootCaCertificates[0].PrivateKey.ToPem()
+          $certB64 = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($rootCertPem))
+          $keyB64  = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($rootKeyPem))
+          Add-Content $outFile "export PROVISIONING_ROOT_CERT=`"$certB64`""
+          Add-Content $outFile "export PROVISIONING_ROOT_CERT_KEY=`"$keyB64`""
+
+          Write-Host "##vso[task.setvariable variable=RESOURCE_GROUP_NAME;isOutput=true]$($TestEnvInfo.ResourceGroupName)"
+      name: provisionStep
+
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish test config artifact'
+      condition: always()
+      inputs:
+        PathtoPublish: 'test_config'
+        ArtifactName: 'test_config_scripts'
+
+# ---------------------------------------------------------------------------
+# Stage 2: Build & Test — build C SDK on Linux and run CSR E2E test
+# ---------------------------------------------------------------------------
+- stage: build_and_tests
+  displayName: 'Build & CSR E2E Test'
+  dependsOn: setup
+  jobs:
+  - job: linux_csr_e2e
+    displayName: 'Linux CSR E2E (Ubuntu 22.04)'
+    timeoutInMinutes: 60
+    pool:
+      vmImage: 'ubuntu-22.04'
+    steps:
+    - checkout: self
+      submodules: recursive
+
+    - script: |
+        sudo apt-get update
+        sudo apt-get install -y cmake gcc g++ make libssl-dev uuid-dev libcurl4-openssl-dev
+      displayName: 'Install build dependencies'
+
+    - task: DownloadBuildArtifacts@1
+      displayName: 'Download test config'
+      inputs:
+        buildType: 'current'
+        downloadType: 'single'
+        artifactName: 'test_config_scripts'
+        downloadPath: '$(System.ArtifactsDirectory)'
+
+    - script: |
+        mkdir -p cmake && cd cmake
+        cmake .. \
+          -Drun_e2e_tests:BOOL=ON \
+          -Duse_prov_client:BOOL=ON \
+          -Dhsm_type_x509:BOOL=ON \
+          -Duse_mqtt:BOOL=ON \
+          -Duse_amqp:BOOL=ON \
+          -Duse_http:BOOL=ON
+        cmake --build . --parallel $(nproc)
+      displayName: 'Build C SDK'
+      workingDirectory: '$(Build.SourcesDirectory)'
+
+    - script: |
+        source $(System.ArtifactsDirectory)/test_config_scripts/set_e2e_test_env_vars.sh
+        cd cmake
+        ctest -T test --no-compress-output -R prov_x509_csr_client_e2e -V --timeout 300
+      displayName: 'Run CSR E2E test'
+      workingDirectory: '$(Build.SourcesDirectory)'
+
+    - task: PublishTestResults@2
+      displayName: 'Publish CSR E2E test results'
+      inputs:
+        testRunner: CTest
+        testResultsFiles: '**/Test.xml'
+        mergeTestResults: true
+        testRunTitle: 'linux_csr_e2e'
+      condition: succeededOrFailed()
+
+# ---------------------------------------------------------------------------
+# Stage 3: Cleanup — delete provisioned Azure resource group
+# ---------------------------------------------------------------------------
+- stage: cleanup
+  displayName: 'Cleanup Azure Resources'
+  dependsOn:
+    - setup
+    - build_and_tests
+  condition: always()
+  jobs:
+  - job: delete_resources
+    displayName: 'Delete resource group'
+    condition: always()
+    pool:
+      vmImage: 'ubuntu-22.04'
+    steps:
+    - checkout: none
+
+    - task: DownloadBuildArtifacts@1
+      displayName: 'Download test config'
+      condition: always()
+      inputs:
+        buildType: 'current'
+        downloadType: 'single'
+        artifactName: 'test_config_scripts'
+        downloadPath: '$(System.ArtifactsDirectory)'
+
+    - task: AzureCLI@2
+      displayName: 'Delete resource group'
+      condition: always()
+      inputs:
+        azureSubscription: 'iot hub sdk service connection'
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+          RG_FILE="$(System.ArtifactsDirectory)/test_config_scripts/resource_group_name.txt"
+          if [ ! -f "$RG_FILE" ]; then
+            echo "##[warning]resource_group_name.txt not found — nothing to clean up"
+            exit 0
+          fi
+          RG_NAME=$(cat "$RG_FILE")
+          if [ -z "$RG_NAME" ]; then
+            echo "##[warning]Resource group name is empty — nothing to clean up"
+            exit 0
+          fi
+          echo "Deleting resource group: $RG_NAME"
+          az group delete --name "$RG_NAME" --yes --no-wait
