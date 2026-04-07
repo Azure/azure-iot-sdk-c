@@ -196,4 +196,8 @@ stages:
             exit 0
           fi
           echo "Deleting resource group: $RG_NAME"
-          az group delete --name "$RG_NAME" --yes --no-wait
+          # Try synchronous delete first; fall back to force-delete if it fails
+          if ! az group delete --name "$RG_NAME" --yes 2>/dev/null; then
+            echo "##[warning]Synchronous delete failed, retrying with --force-deletion-types..."
+            az group delete --name "$RG_NAME" --yes --force-deletion-types Microsoft.DeviceRegistry/discoveryAssetEndpointProfiles 2>/dev/null || true
+          fi
