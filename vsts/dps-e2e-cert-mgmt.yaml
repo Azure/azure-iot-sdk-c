@@ -163,7 +163,9 @@ stages:
     - script: |
         source $(System.ArtifactsDirectory)/test_config_scripts/set_e2e_test_env_vars.sh
         cd cmake
-        ctest -T test --no-compress-output -R prov_x509_csr_client_e2e -V --timeout 300
+        ctest -T test --no-compress-output -R prov_x509_csr_client_e2e -VV --timeout 300 2>&1 || true
+        echo "--- Last 200 lines of LastTest.log ---"
+        tail -200 Testing/Temporary/LastTest.log 2>/dev/null || true
       displayName: 'Run CSR E2E test'
       workingDirectory: '$(Build.SourcesDirectory)'
 
