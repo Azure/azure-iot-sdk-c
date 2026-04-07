@@ -25,11 +25,11 @@ parameters:
     default: 'centraluseuap'
   - name: reuseResourceGroup
     type: string
-    displayName: 'Reuse existing resource group (skip setup/cleanup). Leave empty to provision new resources.'
-    default: ''
+    displayName: 'Reuse existing resource group name (leave as "new" to provision fresh resources)'
+    default: 'new'
   - name: reuseBuildId
     type: string
-    displayName: 'Build ID of previous run to download env vars artifact from (required when reuseResourceGroup is set)'
+    displayName: 'Build ID of previous run to download env vars artifact from (required when reuseResourceGroup is not "new")'
     default: '0'
 
 stages:
@@ -38,7 +38,7 @@ stages:
 # ---------------------------------------------------------------------------
 - stage: setup
   displayName: 'Setup Azure Resources'
-  condition: eq('${{ parameters.reuseResourceGroup }}', '')
+  condition: eq('${{ parameters.reuseResourceGroup }}', 'new')
   jobs:
   - job: provision
     displayName: 'Provision DPS + IoT Hub with cert management'
@@ -134,7 +134,7 @@ stages:
     # When reusing existing resources, download env vars from a previous build
     - task: DownloadBuildArtifacts@1
       displayName: 'Download test config from previous build'
-      condition: ne('${{ parameters.reuseResourceGroup }}', '')
+      condition: ne('${{ parameters.reuseResourceGroup }}', 'new')
       inputs:
         buildType: 'specific'
         project: '$(System.TeamProjectId)'
@@ -148,7 +148,7 @@ stages:
     # When using fresh resources from setup stage, download the artifact
     - task: DownloadBuildArtifacts@1
       displayName: 'Download test config'
-      condition: eq('${{ parameters.reuseResourceGroup }}', '')
+      condition: eq('${{ parameters.reuseResourceGroup }}', 'new')
       inputs:
         buildType: 'current'
         downloadType: 'single'
@@ -195,7 +195,7 @@ stages:
   dependsOn:
     - setup
     - build_and_tests
-  condition: and(always(), eq('${{ parameters.reuseResourceGroup }}', ''))
+  condition: and(always(), eq('${{ parameters.reuseResourceGroup }}', 'new'))
   jobs:
   - job: delete_resources
     displayName: 'Delete resource group'
