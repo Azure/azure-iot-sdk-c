@@ -3,7 +3,7 @@
 
 // CSR (Certificate Signing Request) E2E test for the Azure IoT C SDK.
 // Tests the full CSR lifecycle:
-//   Phase 1: DPS registration with CSR (convenience layer)
+//   Phase 1: DPS registration with CSR (LL layer)
 //   Phase 2: IoT Hub connection with DPS-issued certificate
 //   Phase 3: IoT Hub CSR for certificate re-issuance
 //   Phase 4: Reconnect with re-issued certificate
@@ -30,7 +30,6 @@
 #include "azure_macro_utils/macro_utils.h"
 #include "azure_c_shared_utility/shared_util_options.h"
 
-#include "azure_prov_client/prov_device_client.h"
 #include "azure_prov_client/prov_device_ll_client.h"
 #include "azure_prov_client/prov_security_factory.h"
 #include "azure_prov_client/internal/prov_auth_client.h"
@@ -83,11 +82,10 @@ typedef struct CONNECTION_STATUS_CONTEXT_TAG
     volatile bool connection_failed;
 } CONNECTION_STATUS_CONTEXT;
 
-// DPS registration context (convenience layer)
+// DPS registration context (LL layer)
 typedef struct DPS_REGISTRATION_CONTEXT_TAG
 {
-    volatile bool registration_complete;
-    PROV_DEVICE_RESULT reg_result;
+    REGISTRATION_RESULT reg_result;
     char* iothub_uri;
     char* device_id;
 } DPS_REGISTRATION_CONTEXT;
@@ -96,21 +94,24 @@ typedef struct DPS_REGISTRATION_CONTEXT_TAG
 
 static void dps_register_device_callback(PROV_DEVICE_RESULT register_result, const char* iothub_uri, const char* device_id, void* user_context)
 {
+    if (user_context == NULL)
+    {
+        LogError("DPS register callback: user_context is NULL");
+        return;
+    }
+
     DPS_REGISTRATION_CONTEXT* ctx = (DPS_REGISTRATION_CONTEXT*)user_context;
-    ASSERT_IS_NOT_NULL(ctx, "DPS register callback: user_context is NULL");
 
     if (register_result == PROV_DEVICE_RESULT_OK)
     {
         (void)mallocAndStrcpy_s(&ctx->iothub_uri, iothub_uri);
         (void)mallocAndStrcpy_s(&ctx->device_id, device_id);
-        ctx->reg_result = PROV_DEVICE_RESULT_OK;
+        ctx->reg_result = REG_RESULT_COMPLETE;
     }
     else
     {
-        ctx->reg_result = register_result;
+        ctx->reg_result = REG_RESULT_FAILED;
     }
-
-    ctx->registration_complete = true;
 }
 
 static void dps_registration_status_callback(PROV_DEVICE_REG_STATUS reg_status, void* user_context)
@@ -435,7 +436,7 @@ BEGIN_TEST_SUITE(prov_x509_csr_client_e2e)
     {
     }
 
-    // Full CSR lifecycle test over MQTT (convenience layer):
+    // Full CSR lifecycle test over MQTT (LL layer):
     //   Phase 1: DPS registration with CSR
     //   Phase 2: Connect to IoT Hub with DPS-issued cert
     //   Phase 3: IoT Hub CSR for cert re-issuance
@@ -451,29 +452,29 @@ BEGIN_TEST_SUITE(prov_x509_csr_client_e2e)
         }
 
         // ================================================================
-        // Phase 1: DPS Registration with CSR (convenience layer)
+        // Phase 1: DPS Registration with CSR (LL layer)
         // ================================================================
         LogInfo("=== Phase 1: DPS Registration with CSR ===");
 
         DPS_REGISTRATION_CONTEXT dps_ctx;
         memset(&dps_ctx, 0, sizeof(dps_ctx));
 
-        PROV_DEVICE_HANDLE prov_handle = Prov_Device_Create(g_dps_uri, g_dps_scope_id, Prov_Device_MQTT_Protocol);
-        ASSERT_IS_NOT_NULL(prov_handle, "Failed to create DPS convenience layer handle");
+        PROV_DEVICE_LL_HANDLE prov_handle = Prov_Device_LL_Create(g_dps_uri, g_dps_scope_id, Prov_Device_MQTT_Protocol);
+        ASSERT_IS_NOT_NULL(prov_handle, "Failed to create DPS LL handle");
 
         bool trace_on = true;
-        Prov_Device_SetOption(prov_handle, PROV_OPTION_LOG_TRACE, &trace_on);
+        Prov_Device_LL_SetOption(prov_handle, PROV_OPTION_LOG_TRACE, &trace_on);
 
 #ifdef HSM_TYPE_X509
         // Set bootstrap X509 cert/key for DPS authentication
         ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK,
-            Prov_Device_SetOption(prov_handle, OPTION_X509_CERT, g_dps_x509_cert_individual),
+            Prov_Device_LL_SetOption(prov_handle, OPTION_X509_CERT, g_dps_x509_cert_individual),
             "Failed to set DPS X509 cert");
         ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK,
-            Prov_Device_SetOption(prov_handle, OPTION_X509_PRIVATE_KEY, g_dps_x509_key_individual),
+            Prov_Device_LL_SetOption(prov_handle, OPTION_X509_PRIVATE_KEY, g_dps_x509_key_individual),
             "Failed to set DPS X509 key");
         ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK,
-            Prov_Device_SetOption(prov_handle, PROV_REGISTRATION_ID, g_dps_regid_individual),
+            Prov_Device_LL_SetOption(prov_handle, PROV_REGISTRATION_ID, g_dps_regid_individual),
             "Failed to set DPS registration ID");
 #endif
 
@@ -481,35 +482,36 @@ BEGIN_TEST_SUITE(prov_x509_csr_client_e2e)
         GENERATED_CSR dps_csr = generate_ec_csr(g_dps_regid_individual ? g_dps_regid_individual : "csr-e2e-device");
 
         ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK,
-            Prov_Device_SetOption(prov_handle, PROV_CERTIFICATE_SIGNING_REQUEST, dps_csr.csr_base64),
+            Prov_Device_LL_SetOption(prov_handle, PROV_CERTIFICATE_SIGNING_REQUEST, dps_csr.csr_base64),
             "Failed to set DPS CSR");
         ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK,
-            Prov_Device_SetOption(prov_handle, PROV_CERTIFICATE_SIGNING_REQUEST_PRIVATE_KEY, dps_csr.private_key_pem),
+            Prov_Device_LL_SetOption(prov_handle, PROV_CERTIFICATE_SIGNING_REQUEST_PRIVATE_KEY, dps_csr.private_key_pem),
             "Failed to set DPS CSR private key");
 
-        // Register with DPS
-        PROV_DEVICE_RESULT reg_result = Prov_Device_Register_Device(prov_handle,
+        // Register with DPS (LL layer — non-blocking, must call DoWork)
+        PROV_DEVICE_RESULT reg_result = Prov_Device_LL_Register_Device(prov_handle,
             dps_register_device_callback, &dps_ctx,
-            dps_registration_status_callback, NULL);
+            dps_registration_status_callback, &dps_ctx);
         ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, reg_result, "Failed to start DPS registration");
 
-        // Wait for registration to complete (convenience layer manages its own thread)
+        // Pump DoWork until registration completes
         {
             time_t start = time(NULL);
-            while (!dps_ctx.registration_complete)
+            while (dps_ctx.reg_result == REG_RESULT_BEGIN)
             {
-                ThreadAPI_Sleep(500);
+                Prov_Device_LL_DoWork(prov_handle);
+                ThreadAPI_Sleep(1);
                 ASSERT_IS_TRUE(difftime(time(NULL), start) < MAX_WAIT_TIME_SECS, "DPS registration timed out");
             }
         }
 
-        ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, dps_ctx.reg_result, "DPS registration failed");
+        ASSERT_ARE_EQUAL(int, REG_RESULT_COMPLETE, (int)dps_ctx.reg_result, "DPS registration failed");
         ASSERT_IS_NOT_NULL(dps_ctx.iothub_uri, "DPS did not return iothub_uri");
         ASSERT_IS_NOT_NULL(dps_ctx.device_id, "DPS did not return device_id");
 
         LogInfo("Phase 1 complete: Registered device '%s' on '%s'", dps_ctx.device_id, dps_ctx.iothub_uri);
 
-        Prov_Device_Destroy(prov_handle);
+        Prov_Device_LL_Destroy(prov_handle);
         prov_handle = NULL;
 
         // ================================================================
