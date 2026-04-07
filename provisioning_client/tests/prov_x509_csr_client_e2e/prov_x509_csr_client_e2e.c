@@ -150,9 +150,9 @@ static void hub_csr_response_callback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, 
 
     LogInfo("CSR response (result=%d, status=%d)", (int)result, response_status_code);
 
-    if (result == IOTHUB_CLIENT_CONFIRMATION_OK && response_status_code != 200)
+    if (result == IOTHUB_CLIENT_CONFIRMATION_ACCEPTED)
     {
-        // Intermediate response — request still being processed
+        // Intermediate 202 response — request accepted, final response pending
         LogInfo("CSR intermediate response (%d), waiting...", response_status_code);
         return;
     }

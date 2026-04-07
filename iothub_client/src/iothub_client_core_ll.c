@@ -1344,9 +1344,10 @@ static void IoTHubClientCore_LL_CsrComplete(uint32_t item_id, int status_code, c
                     }
                     else
                     {
-                        // For any other status code, we don't remove the request from the list as we are not sure if the request was processed or not,
-                        // so we let it time out eventually and report failure at that time if it does time out.
-                        csr_data->callback(IOTHUB_CLIENT_CONFIRMATION_OK, status_code, response_payload, csr_data->context);
+                        // Intermediate response (e.g. 202 Accepted) — keep the request in the queue
+                        // and signal IOTHUB_CLIENT_CONFIRMATION_ACCEPTED so the convenience layer
+                        // knows not to free the callback context yet.
+                        csr_data->callback(IOTHUB_CLIENT_CONFIRMATION_ACCEPTED, status_code, response_payload, csr_data->context);
                     }
                 }
                 break;
