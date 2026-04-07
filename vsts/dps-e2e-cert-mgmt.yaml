@@ -23,6 +23,14 @@ parameters:
     type: string
     displayName: 'Azure region for resource provisioning'
     default: 'centraluseuap'
+  - name: reuseResourceGroup
+    type: string
+    displayName: 'Reuse existing resource group (skip setup/cleanup). Leave empty to provision new resources.'
+    default: 'rg-d60f703f9607459a97b58203b403fcbc-c-sdk-e2e'
+  - name: reuseBuildId
+    type: string
+    displayName: 'Build ID of previous run to download env vars artifact from (required when reuseResourceGroup is set)'
+    default: ''
 
 stages:
 # ---------------------------------------------------------------------------
@@ -30,6 +38,7 @@ stages:
 # ---------------------------------------------------------------------------
 - stage: setup
   displayName: 'Setup Azure Resources'
+  condition: eq('${{ parameters.reuseResourceGroup }}', '')
   jobs:
   - job: provision
     displayName: 'Provision DPS + IoT Hub with cert management'
@@ -98,6 +107,7 @@ stages:
 - stage: build_and_tests
   displayName: 'Build & CSR E2E Test'
   dependsOn: setup
+  condition: not(failed('setup'))
   jobs:
   - job: linux_csr_e2e
     displayName: 'Linux CSR E2E (Ubuntu 22.04)'
@@ -113,8 +123,24 @@ stages:
         sudo apt-get install -y cmake gcc g++ make libssl-dev uuid-dev libcurl4-openssl-dev
       displayName: 'Install build dependencies'
 
+    # When reusing existing resources, download env vars from a previous build
+    - task: DownloadBuildArtifacts@1
+      displayName: 'Download test config from previous build'
+      condition: ne('${{ parameters.reuseResourceGroup }}', '')
+      inputs:
+        buildType: 'specific'
+        project: '$(System.TeamProjectId)'
+        pipeline: '$(System.DefinitionId)'
+        buildVersionToDownload: 'specific'
+        buildId: '${{ parameters.reuseBuildId }}'
+        downloadType: 'single'
+        artifactName: 'test_config_scripts'
+        downloadPath: '$(System.ArtifactsDirectory)'
+
+    # When using fresh resources from setup stage, download the artifact
     - task: DownloadBuildArtifacts@1
       displayName: 'Download test config'
+      condition: eq('${{ parameters.reuseResourceGroup }}', '')
       inputs:
         buildType: 'current'
         downloadType: 'single'
@@ -158,7 +184,7 @@ stages:
   dependsOn:
     - setup
     - build_and_tests
-  condition: always()
+  condition: and(always(), eq('${{ parameters.reuseResourceGroup }}', ''))
   jobs:
   - job: delete_resources
     displayName: 'Delete resource group'
