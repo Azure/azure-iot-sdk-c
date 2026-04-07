@@ -26,11 +26,11 @@ parameters:
   - name: reuseResourceGroup
     type: string
     displayName: 'Reuse existing resource group (skip setup/cleanup). Leave empty to provision new resources.'
-    default: 'rg-d60f703f9607459a97b58203b403fcbc-c-sdk-e2e'
+    default: ''
   - name: reuseBuildId
     type: string
     displayName: 'Build ID of previous run to download env vars artifact from (required when reuseResourceGroup is set)'
-    default: ''
+    default: '0'
 
 stages:
 # ---------------------------------------------------------------------------
