@@ -1343,9 +1343,16 @@ static void IoTHubClientCore_LL_CsrComplete(uint32_t item_id, int status_code, c
                         // knows not to free the callback context yet.
                         csr_data->callback(IOTHUB_CLIENT_CONFIRMATION_ACCEPTED, status_code, response_payload, csr_data->context);
                     }
+                    else if (status_code >= 400)
+                    {
+                        csr_data->callback(IOTHUB_CLIENT_CONFIRMATION_ERROR, status_code, response_payload, csr_data->context);
+                        DList_RemoveEntryList(client_item);
+                        csr_request_data_destroy(csr_data);
+                    }
                     else
                     {
-                        // Any other status code (4xx, 5xx, or unexpected) is treated as a final error.
+                        // Unexpected status code — treat as error
+                        LogError("CSR response with unexpected status code %d", status_code);
                         csr_data->callback(IOTHUB_CLIENT_CONFIRMATION_ERROR, status_code, response_payload, csr_data->context);
                         DList_RemoveEntryList(client_item);
                         csr_request_data_destroy(csr_data);
