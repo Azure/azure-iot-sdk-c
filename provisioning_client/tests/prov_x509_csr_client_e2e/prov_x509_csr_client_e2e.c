@@ -5,6 +5,7 @@
 // Tests CSR scenarios using the convenience layer API:
 //   - DPS CSR-only registration (X509 individual enrollment)
 //   - Full 4-phase lifecycle: DPS CSR → Hub connect → Hub CSR → Reconnect
+//   - Symmetric key group enrollment with CSR → full lifecycle
 
 #include <stdlib.h>
 #include <stdbool.h>
@@ -20,6 +21,7 @@
 #include "testrunnerswitcher.h"
 
 #include "azure_c_shared_utility/azure_base64.h"
+#include "azure_c_shared_utility/hmacsha256.h"
 #include "azure_c_shared_utility/platform.h"
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
@@ -59,6 +61,8 @@ const bool g_enable_tracing = true;
 
 // CSR-specific env var names
 static const char* ENV_ADR_CERT_MGMT_POLICY_NAME = "ADR_CERT_MGMT_POLICY_NAME";
+static const char* ENV_SYMM_KEY_GROUP_ENROLLMENT_ID = "IOT_DPS_SYMM_KEY_GROUP_ENROLLMENT_ID";
+static const char* ENV_SYMM_KEY_GROUP_PRIMARY_KEY = "IOT_DPS_SYMM_KEY_GROUP_PRIMARY_KEY";
 
 // Timeouts
 #define MAX_WAIT_TIME_SECS          180
@@ -371,6 +375,37 @@ static GENERATED_CSR generate_ec_csr(const char* common_name)
 
     X509_REQ_free(req);
     EVP_PKEY_free(pkey);
+
+    return result;
+}
+
+// Derive per-device symmetric key from group key via HMAC-SHA256.
+// derived_key = Base64Encode(HMAC-SHA256(Base64Decode(group_key), registration_id))
+static char* derive_device_key(const char* group_key, const char* registration_id)
+{
+    BUFFER_HANDLE decoded_key = Azure_Base64_Decode(group_key);
+    ASSERT_IS_NOT_NULL(decoded_key, "Failed to base64-decode group key");
+
+    BUFFER_HANDLE hash = BUFFER_new();
+    ASSERT_IS_NOT_NULL(hash, "Failed to allocate HMAC hash buffer");
+
+    ASSERT_ARE_EQUAL(int, HMACSHA256_OK,
+        (int)HMACSHA256_ComputeHash(
+            BUFFER_u_char(decoded_key), BUFFER_length(decoded_key),
+            (const unsigned char*)registration_id, strlen(registration_id),
+            hash),
+        "Failed to compute HMAC-SHA256 for device key derivation");
+
+    STRING_HANDLE derived_b64 = Azure_Base64_Encode(hash);
+    ASSERT_IS_NOT_NULL(derived_b64, "Failed to base64-encode derived key");
+
+    char* result = NULL;
+    ASSERT_ARE_EQUAL(int, 0, mallocAndStrcpy_s(&result, STRING_c_str(derived_b64)),
+        "Failed to copy derived key");
+
+    STRING_delete(derived_b64);
+    BUFFER_delete(hash);
+    BUFFER_delete(decoded_key);
 
     return result;
 }
@@ -688,6 +723,193 @@ BEGIN_TEST_SUITE(prov_x509_csr_client_e2e)
         free(hub_issued_cert_chain);
         free(csr_ctx.payload);
         free(request_id);
+        free(dps_ctx.iothub_uri);
+        free(dps_ctx.device_id);
+    }
+
+    // Full 4-phase CSR lifecycle test (symmetric key group enrollment, convenience layer):
+    //   Phase 1: DPS registration with derived symmetric key + CSR
+    //   Phase 2: Connect to IoT Hub with DPS-issued cert
+    //   Phase 3: IoT Hub CSR for certificate re-issuance
+    //   Phase 4: Reconnect with re-issued cert
+    TEST_FUNCTION(dps_symkey_csr_full_lifecycle_mqtt)
+    {
+        // Gate on ADR policy + symmetric key group env vars
+        const char* adr_policy = getenv(ENV_ADR_CERT_MGMT_POLICY_NAME);
+        if (adr_policy == NULL || adr_policy[0] == '\0')
+        {
+            LogInfo("SKIPPED: %s not set", ENV_ADR_CERT_MGMT_POLICY_NAME);
+            return;
+        }
+
+        const char* group_primary_key = getenv(ENV_SYMM_KEY_GROUP_PRIMARY_KEY);
+        if (group_primary_key == NULL || group_primary_key[0] == '\0')
+        {
+            LogInfo("SKIPPED: %s not set", ENV_SYMM_KEY_GROUP_PRIMARY_KEY);
+            return;
+        }
+
+        // ================================================================
+        // Phase 1: DPS Registration with symmetric key + CSR
+        // ================================================================
+        LogInfo("=== [SymKey] Phase 1: DPS Registration with CSR ===");
+
+        // Generate a unique device/registration ID
+        char reg_id[GUID_SIZE + 16];
+        {
+            char guid[GUID_SIZE];
+            ASSERT_ARE_EQUAL(int, UNIQUEID_OK, (int)UniqueId_Generate(guid, GUID_SIZE));
+            snprintf(reg_id, sizeof(reg_id), "csr-sk-%s", guid);
+        }
+
+        // Derive per-device key from group primary key
+        char* derived_key = derive_device_key(group_primary_key, reg_id);
+        LogInfo("Derived device key for '%s'", reg_id);
+
+        // Switch HSM to symmetric key mode for this test
+        prov_dev_security_deinit();
+        prov_dev_security_init(SECURE_DEVICE_TYPE_SYMMETRIC_KEY);
+        prov_dev_set_symmetric_key_info(reg_id, derived_key);
+
+        DPS_CONV_REGISTRATION_CONTEXT dps_ctx;
+        memset(&dps_ctx, 0, sizeof(dps_ctx));
+
+        PROV_DEVICE_HANDLE prov_handle = Prov_Device_Create(g_dps_uri, g_dps_scope_id, Prov_Device_MQTT_Protocol);
+        ASSERT_IS_NOT_NULL(prov_handle, "Failed to create DPS handle");
+
+        bool trace_on = true;
+        Prov_Device_SetOption(prov_handle, PROV_OPTION_LOG_TRACE, &trace_on);
+
+        GENERATED_CSR dps_csr = generate_ec_csr(reg_id);
+
+        ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK,
+            Prov_Device_SetOption(prov_handle, PROV_CERTIFICATE_SIGNING_REQUEST, dps_csr.csr_base64),
+            "Failed to set DPS CSR");
+        ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK,
+            Prov_Device_SetOption(prov_handle, PROV_CERTIFICATE_SIGNING_REQUEST_PRIVATE_KEY, dps_csr.private_key_pem),
+            "Failed to set DPS CSR private key");
+
+        PROV_DEVICE_RESULT reg_result = Prov_Device_Register_Device(prov_handle,
+            dps_conv_register_device_callback, &dps_ctx,
+            dps_registration_status_callback, NULL);
+        ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, reg_result, "Failed to start DPS registration");
+
+        {
+            time_t start = time(NULL);
+            while (!dps_ctx.registration_complete)
+            {
+                ThreadAPI_Sleep(500);
+                ASSERT_IS_TRUE(difftime(time(NULL), start) < MAX_WAIT_TIME_SECS, "DPS registration timed out");
+            }
+        }
+
+        ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, dps_ctx.reg_result, "DPS registration failed");
+        ASSERT_IS_NOT_NULL(dps_ctx.iothub_uri, "DPS did not return iothub_uri");
+        ASSERT_IS_NOT_NULL(dps_ctx.device_id, "DPS did not return device_id");
+
+        LogInfo("[SymKey] Phase 1 complete: Registered device '%s' on '%s'", dps_ctx.device_id, dps_ctx.iothub_uri);
+
+        Prov_Device_Destroy(prov_handle);
+        prov_handle = NULL;
+
+        // After DPS registration with CSR, the HSM now has the issued X509 cert.
+        // Switch HSM back to X509 mode for IoT Hub connection.
+        prov_dev_security_deinit();
+        prov_dev_security_init(SECURE_DEVICE_TYPE_X509);
+
+        // ================================================================
+        // Phase 2: Connect to IoT Hub with DPS-issued certificate
+        // ================================================================
+        LogInfo("=== [SymKey] Phase 2: Connect to IoT Hub with DPS-issued certificate ===");
+
+        CONNECTION_STATUS_CONTEXT conn_ctx;
+        memset(&conn_ctx, 0, sizeof(conn_ctx));
+
+        IOTHUB_DEVICE_CLIENT_HANDLE hub_handle = IoTHubDeviceClient_CreateFromDeviceAuth(
+            dps_ctx.iothub_uri, dps_ctx.device_id, MQTT_Protocol);
+        ASSERT_IS_NOT_NULL(hub_handle, "Failed to create IoT Hub client from device auth");
+
+        IoTHubDeviceClient_SetOption(hub_handle, OPTION_LOG_TRACE, &trace_on);
+        IoTHubDeviceClient_SetConnectionStatusCallback(hub_handle, iothub_connection_status_callback, &conn_ctx);
+
+        int csr_timeout = CSR_TIMEOUT_SECS;
+        IoTHubDeviceClient_SetOption(hub_handle, OPTION_CSR_TIMEOUT_SECS, &csr_timeout);
+
+        ASSERT_IS_TRUE(wait_for_connection(&conn_ctx, MAX_WAIT_TIME_SECS), "[SymKey] Phase 2: IoT Hub connection timed out");
+        LogInfo("[SymKey] Phase 2 complete: Connected to IoT Hub");
+
+        ThreadAPI_Sleep(2000);
+
+        // ================================================================
+        // Phase 3: IoT Hub CSR for certificate re-issuance
+        // ================================================================
+        LogInfo("=== [SymKey] Phase 3: IoT Hub CSR for certificate re-issuance ===");
+
+        char* request_id = generate_request_id();
+
+        CSR_CALLBACK_CONTEXT csr_ctx;
+        memset(&csr_ctx, 0, sizeof(csr_ctx));
+
+        GENERATED_CSR hub_csr = generate_ec_csr(dps_ctx.device_id);
+
+        IOTHUB_CLIENT_RESULT hub_result = IoTHubDeviceClient_SendCertificateSigningRequestAsync(
+            hub_handle, hub_csr.csr_base64, request_id, NULL,
+            hub_csr_response_callback, &csr_ctx);
+        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, hub_result, "Failed to send Hub CSR");
+
+        ASSERT_IS_TRUE(wait_for_csr_response(&csr_ctx, MAX_WAIT_TIME_SECS), "[SymKey] Phase 3: Hub CSR response timed out");
+
+        ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_CONFIRMATION_OK, (int)csr_ctx.result, "Hub CSR failed");
+        ASSERT_ARE_EQUAL(int, 200, csr_ctx.response_status_code, "Hub CSR response status != 200");
+        ASSERT_IS_NOT_NULL(csr_ctx.payload, "Hub CSR response payload is NULL");
+
+        size_t cert_count = 0;
+        char* hub_issued_cert_chain = parse_hub_csr_response(csr_ctx.payload, &cert_count);
+        ASSERT_IS_NOT_NULL(hub_issued_cert_chain, "Failed to parse Hub CSR response certificates");
+        LogInfo("[SymKey] Phase 3 complete: Hub CSR returned %zu certificate(s)", cert_count);
+
+        IoTHubDeviceClient_Destroy(hub_handle);
+        hub_handle = NULL;
+
+        // ================================================================
+        // Phase 4: Reconnect with re-issued certificate
+        // ================================================================
+        LogInfo("=== [SymKey] Phase 4: Reconnect with re-issued certificate ===");
+
+        PROV_AUTH_HANDLE auth_handle = prov_auth_create();
+        ASSERT_IS_NOT_NULL(auth_handle, "Failed to create auth handle for Phase 4");
+
+        ASSERT_ARE_EQUAL(int, 0, prov_auth_set_certificate(auth_handle, hub_issued_cert_chain),
+            "Failed to set re-issued certificate in HSM");
+        ASSERT_ARE_EQUAL(int, 0, prov_auth_set_key(auth_handle, hub_csr.private_key_pem),
+            "Failed to set Hub CSR private key in HSM");
+
+        memset(&conn_ctx, 0, sizeof(conn_ctx));
+
+        hub_handle = IoTHubDeviceClient_CreateFromDeviceAuth(
+            dps_ctx.iothub_uri, dps_ctx.device_id, MQTT_Protocol);
+        ASSERT_IS_NOT_NULL(hub_handle, "Failed to create IoT Hub client with re-issued cert");
+
+        IoTHubDeviceClient_SetOption(hub_handle, OPTION_LOG_TRACE, &trace_on);
+        IoTHubDeviceClient_SetConnectionStatusCallback(hub_handle, iothub_connection_status_callback, &conn_ctx);
+
+        ASSERT_IS_TRUE(wait_for_connection(&conn_ctx, MAX_WAIT_TIME_SECS), "[SymKey] Phase 4: IoT Hub reconnection timed out");
+        LogInfo("[SymKey] Phase 4 complete: Reconnected to IoT Hub with re-issued certificate");
+
+        // ================================================================
+        // Cleanup
+        // ================================================================
+        IoTHubDeviceClient_Destroy(hub_handle);
+
+        prov_auth_destroy(auth_handle);
+        free(hub_csr.csr_base64);
+        free(hub_csr.private_key_pem);
+        free(dps_csr.csr_base64);
+        free(dps_csr.private_key_pem);
+        free(hub_issued_cert_chain);
+        free(csr_ctx.payload);
+        free(request_id);
+        free(derived_key);
         free(dps_ctx.iothub_uri);
         free(dps_ctx.device_id);
     }

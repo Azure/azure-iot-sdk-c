@@ -72,6 +72,7 @@ stages:
               -EnableCertificateManagement `
               -EnableFileUpload `
               -DpsX509IndividualEnrollments 1 `
+              -DpsSymmKeyGroupEnrollmentDevices 1 `
               -IotHubX509ThumbprintDevices 1
 
           New-AzIotCSDKE2ETestConfig `
@@ -90,6 +91,13 @@ stages:
           $keyB64  = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($rootKeyPem))
           Add-Content $outFile "export PROVISIONING_ROOT_CERT=`"$certB64`""
           Add-Content $outFile "export PROVISIONING_ROOT_CERT_KEY=`"$keyB64`""
+
+          # Symmetric key group enrollment env vars
+          if ($TestEnvInfo.Dps.Enrollments.GroupSymmetricKey.Count -gt 0) {
+              $skGroup = $TestEnvInfo.Dps.Enrollments.GroupSymmetricKey[0]
+              Add-Content $outFile "export IOT_DPS_SYMM_KEY_GROUP_ENROLLMENT_ID=`"$($skGroup.Id)`""
+              Add-Content $outFile "export IOT_DPS_SYMM_KEY_GROUP_PRIMARY_KEY=`"$($skGroup.PrimaryKey)`""
+          }
 
           Write-Host "##vso[task.setvariable variable=RESOURCE_GROUP_NAME;isOutput=true]$($TestEnvInfo.ResourceGroupName)"
       name: provisionStep
@@ -153,6 +161,7 @@ stages:
           -Drun_e2e_tests:BOOL=ON \
           -Duse_prov_client:BOOL=ON \
           -Dhsm_type_x509:BOOL=ON \
+          -Dhsm_type_symm_key:BOOL=ON \
           -Duse_mqtt:BOOL=ON \
           -Duse_amqp:BOOL=ON \
           -Duse_http:BOOL=ON
