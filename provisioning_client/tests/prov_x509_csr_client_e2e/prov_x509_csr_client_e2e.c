@@ -464,6 +464,11 @@ BEGIN_TEST_SUITE(prov_x509_csr_client_e2e)
 
     TEST_FUNCTION_INITIALIZE(method_init)
     {
+        // Re-init security to reset HSM state between tests.
+        // Each CSR test modifies the HSM (installs issued certs),
+        // so subsequent tests need a clean slate.
+        prov_dev_security_deinit();
+        prov_dev_security_init(SECURE_DEVICE_TYPE_X509);
     }
 
     TEST_FUNCTION_CLEANUP(method_cleanup)
