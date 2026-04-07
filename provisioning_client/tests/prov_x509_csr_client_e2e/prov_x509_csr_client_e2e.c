@@ -30,6 +30,7 @@
 #include "azure_macro_utils/macro_utils.h"
 #include "azure_c_shared_utility/shared_util_options.h"
 
+#include "azure_prov_client/prov_device_client.h"
 #include "azure_prov_client/prov_device_ll_client.h"
 #include "azure_prov_client/prov_security_factory.h"
 #include "azure_prov_client/internal/prov_auth_client.h"
@@ -90,6 +91,15 @@ typedef struct DPS_REGISTRATION_CONTEXT_TAG
     char* device_id;
 } DPS_REGISTRATION_CONTEXT;
 
+// DPS registration context (convenience layer)
+typedef struct DPS_CONV_REGISTRATION_CONTEXT_TAG
+{
+    volatile bool registration_complete;
+    PROV_DEVICE_RESULT reg_result;
+    char* iothub_uri;
+    char* device_id;
+} DPS_CONV_REGISTRATION_CONTEXT;
+
 // ----- DPS callbacks -----
 
 static void dps_register_device_callback(PROV_DEVICE_RESULT register_result, const char* iothub_uri, const char* device_id, void* user_context)
@@ -118,6 +128,30 @@ static void dps_registration_status_callback(PROV_DEVICE_REG_STATUS reg_status, 
 {
     (void)user_context;
     LogInfo("DPS status: %d", (int)reg_status);
+}
+
+static void dps_conv_register_device_callback(PROV_DEVICE_RESULT register_result, const char* iothub_uri, const char* device_id, void* user_context)
+{
+    if (user_context == NULL)
+    {
+        LogError("DPS conv register callback: user_context is NULL");
+        return;
+    }
+
+    DPS_CONV_REGISTRATION_CONTEXT* ctx = (DPS_CONV_REGISTRATION_CONTEXT*)user_context;
+
+    if (register_result == PROV_DEVICE_RESULT_OK)
+    {
+        (void)mallocAndStrcpy_s(&ctx->iothub_uri, iothub_uri);
+        (void)mallocAndStrcpy_s(&ctx->device_id, device_id);
+        ctx->reg_result = PROV_DEVICE_RESULT_OK;
+    }
+    else
+    {
+        ctx->reg_result = register_result;
+    }
+
+    ctx->registration_complete = true;
 }
 
 // ----- IoT Hub callbacks -----
@@ -609,6 +643,81 @@ BEGIN_TEST_SUITE(prov_x509_csr_client_e2e)
         free(hub_issued_cert_chain);
         free(csr_ctx.payload);
         free(request_id);
+        free(dps_ctx.iothub_uri);
+        free(dps_ctx.device_id);
+    }
+
+    // Convenience layer CSR test — exposes SDK bug where the convenience
+    // layer's worker thread calls prov_transport_dowork on an already-closed
+    // transport after successful CSR registration, causing a segfault.
+    // This test is expected to crash/fail until the SDK bug is fixed.
+    TEST_FUNCTION(dps_csr_convenience_layer_mqtt_e2e)
+    {
+        // Gate on ADR policy being configured
+        const char* adr_policy = getenv(ENV_ADR_CERT_MGMT_POLICY_NAME);
+        if (adr_policy == NULL || adr_policy[0] == '\0')
+        {
+            LogInfo("SKIPPED: %s not set", ENV_ADR_CERT_MGMT_POLICY_NAME);
+            return;
+        }
+
+        LogInfo("=== Convenience layer: DPS Registration with CSR ===");
+
+        DPS_CONV_REGISTRATION_CONTEXT dps_ctx;
+        memset(&dps_ctx, 0, sizeof(dps_ctx));
+
+        PROV_DEVICE_HANDLE prov_handle = Prov_Device_Create(g_dps_uri, g_dps_scope_id, Prov_Device_MQTT_Protocol);
+        ASSERT_IS_NOT_NULL(prov_handle, "Failed to create DPS convenience layer handle");
+
+        bool trace_on = true;
+        Prov_Device_SetOption(prov_handle, PROV_OPTION_LOG_TRACE, &trace_on);
+
+#ifdef HSM_TYPE_X509
+        ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK,
+            Prov_Device_SetOption(prov_handle, OPTION_X509_CERT, g_dps_x509_cert_individual),
+            "Failed to set DPS X509 cert");
+        ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK,
+            Prov_Device_SetOption(prov_handle, OPTION_X509_PRIVATE_KEY, g_dps_x509_key_individual),
+            "Failed to set DPS X509 key");
+        ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK,
+            Prov_Device_SetOption(prov_handle, PROV_REGISTRATION_ID, g_dps_regid_individual),
+            "Failed to set DPS registration ID");
+#endif
+
+        GENERATED_CSR dps_csr = generate_ec_csr(g_dps_regid_individual ? g_dps_regid_individual : "csr-e2e-device");
+
+        ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK,
+            Prov_Device_SetOption(prov_handle, PROV_CERTIFICATE_SIGNING_REQUEST, dps_csr.csr_base64),
+            "Failed to set DPS CSR");
+        ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK,
+            Prov_Device_SetOption(prov_handle, PROV_CERTIFICATE_SIGNING_REQUEST_PRIVATE_KEY, dps_csr.private_key_pem),
+            "Failed to set DPS CSR private key");
+
+        PROV_DEVICE_RESULT reg_result = Prov_Device_Register_Device(prov_handle,
+            dps_conv_register_device_callback, &dps_ctx,
+            dps_registration_status_callback, NULL);
+        ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, reg_result, "Failed to start DPS registration");
+
+        // Wait for registration to complete (convenience layer manages its own thread)
+        {
+            time_t start = time(NULL);
+            while (!dps_ctx.registration_complete)
+            {
+                ThreadAPI_Sleep(500);
+                ASSERT_IS_TRUE(difftime(time(NULL), start) < MAX_WAIT_TIME_SECS, "DPS registration timed out");
+            }
+        }
+
+        ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, dps_ctx.reg_result, "DPS registration failed");
+        ASSERT_IS_NOT_NULL(dps_ctx.iothub_uri, "DPS did not return iothub_uri");
+        ASSERT_IS_NOT_NULL(dps_ctx.device_id, "DPS did not return device_id");
+
+        LogInfo("Convenience layer: Registered device '%s' on '%s'", dps_ctx.device_id, dps_ctx.iothub_uri);
+
+        Prov_Device_Destroy(prov_handle);
+
+        free(dps_csr.csr_base64);
+        free(dps_csr.private_key_pem);
         free(dps_ctx.iothub_uri);
         free(dps_ctx.device_id);
     }
