@@ -1351,11 +1351,8 @@ static void IoTHubClientCore_LL_CsrComplete(uint32_t item_id, int status_code, c
                     }
                     else
                     {
-                        // Unexpected status code — treat as error
-                        LogError("CSR response with unexpected status code %d", status_code);
-                        csr_data->callback(IOTHUB_CLIENT_CONFIRMATION_ERROR, status_code, response_payload, csr_data->context);
-                        DList_RemoveEntryList(client_item);
-                        csr_request_data_destroy(csr_data);
+                        // Unexpected status code — invoke callback and let the request expire naturally via timeout
+                        csr_data->callback(IOTHUB_CLIENT_CONFIRMATION_OK, status_code, response_payload, csr_data->context);
                     }
                 }
                 break;
