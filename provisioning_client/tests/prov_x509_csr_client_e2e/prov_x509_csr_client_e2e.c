@@ -3,9 +3,8 @@
 
 // CSR (Certificate Signing Request) E2E test for the Azure IoT C SDK.
 // Tests CSR scenarios using the convenience layer API:
-//   - DPS CSR-only registration (X509 individual enrollment)
-//   - Full 4-phase lifecycle: DPS CSR → Hub connect → Hub CSR → Reconnect
-//   - Symmetric key group enrollment with CSR → full lifecycle
+//   - X509 individual enrollment: full 4-phase lifecycle
+//   - Symmetric key group enrollment: full 4-phase lifecycle
 
 #include <stdlib.h>
 #include <stdbool.h>

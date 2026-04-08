@@ -93,11 +93,8 @@ stages:
           Add-Content $outFile "export PROVISIONING_ROOT_CERT_KEY=`"$keyB64`""
 
           # Symmetric key group enrollment env vars
-          Write-Host "DEBUG: Dps.Enrollments keys = $($TestEnvInfo.Dps.Enrollments | Get-Member -MemberType NoteProperty | ForEach-Object { $_.Name })"
-          Write-Host "DEBUG: Dps.Enrollments = $($TestEnvInfo.Dps.Enrollments | ConvertTo-Json -Depth 3 -Compress)"
           if ($TestEnvInfo.Dps.Enrollments.GroupSymmetricKey.Count -gt 0) {
               $skGroup = $TestEnvInfo.Dps.Enrollments.GroupSymmetricKey[0]
-              Write-Host "DEBUG: skGroup = $($skGroup | ConvertTo-Json -Depth 2 -Compress)"
               Add-Content $outFile "export IOT_DPS_SYMM_KEY_GROUP_ENROLLMENT_ID=`"$($skGroup.Id)`""
               Add-Content $outFile "export IOT_DPS_SYMM_KEY_GROUP_PRIMARY_KEY=`"$($skGroup.PrimaryKey)`""
           } else {
@@ -239,8 +236,24 @@ stages:
             exit 0
           fi
           echo "Deleting resource group: $RG_NAME"
-          # Try synchronous delete first; fall back to force-delete if it fails
-          if ! az group delete --name "$RG_NAME" --yes 2>/dev/null; then
-            echo "##[warning]Synchronous delete failed, retrying with --force-deletion-types..."
-            az group delete --name "$RG_NAME" --yes --force-deletion-types Microsoft.DeviceRegistry/discoveryAssetEndpointProfiles 2>/dev/null || true
+          # Check if the resource group exists before attempting deletion
+          if ! az group exists --name "$RG_NAME" -o tsv 2>/dev/null | grep -qi true; then
+            echo "Resource group '$RG_NAME' does not exist — nothing to clean up"
+            exit 0
           fi
+          # Delete with --no-wait to avoid synchronous timeout,
+          # then poll until the group is gone (or give up after 10 min).
+          echo "Starting async resource group deletion..."
+          az group delete --name "$RG_NAME" --yes --no-wait \
+            --force-deletion-types Microsoft.Devices/IotHubs Microsoft.Devices/provisioningServices 2>/dev/null || true
+          SECONDS=0
+          TIMEOUT=600
+          while az group exists --name "$RG_NAME" -o tsv 2>/dev/null | grep -qi true; do
+            if [ $SECONDS -ge $TIMEOUT ]; then
+              echo "##[warning]Resource group '$RG_NAME' still exists after ${TIMEOUT}s — giving up"
+              exit 0
+            fi
+            echo "Waiting for deletion... (${SECONDS}s elapsed)"
+            sleep 15
+          done
+          echo "Resource group '$RG_NAME' deleted successfully (${SECONDS}s)"
