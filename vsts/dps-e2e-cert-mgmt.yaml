@@ -177,8 +177,6 @@ stages:
     - script: |
         sed -i 's/\r$//' $(System.ArtifactsDirectory)/test_config_scripts/set_e2e_test_env_vars.sh
         source $(System.ArtifactsDirectory)/test_config_scripts/set_e2e_test_env_vars.sh
-        echo "DEBUG: IOT_DPS_SYMM_KEY_GROUP_ENROLLMENT_ID=${IOT_DPS_SYMM_KEY_GROUP_ENROLLMENT_ID}"
-        echo "DEBUG: IOT_DPS_SYMM_KEY_GROUP_PRIMARY_KEY length=${#IOT_DPS_SYMM_KEY_GROUP_PRIMARY_KEY}"
         cd cmake
         stdbuf -oL ctest -T test --no-compress-output -R prov_x509_csr_client_e2e -VV --timeout 300 2>&1 || true
         echo "--- Last 200 lines of LastTest.log ---"
