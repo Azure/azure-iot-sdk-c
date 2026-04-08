@@ -33,6 +33,7 @@
 #include "azure_prov_client/prov_device_client.h"
 #include "azure_prov_client/prov_device_ll_client.h"
 #include "azure_prov_client/prov_security_factory.h"
+#include "azure_prov_client/iothub_security_factory.h"
 #include "azure_prov_client/internal/prov_auth_client.h"
 
 #include "azure_prov_client/prov_transport_mqtt_client.h"
@@ -471,6 +472,7 @@ BEGIN_TEST_SUITE(prov_x509_csr_client_e2e)
         // Each CSR test modifies the HSM (installs issued certs),
         // so subsequent tests need a clean slate with the original bootstrap certs.
         prov_dev_security_deinit();
+        iothub_security_deinit();
         prov_dev_security_init(SECURE_DEVICE_TYPE_X509);
 
         // Re-init IoT Hub SDK to clear any leftover transport state
@@ -767,7 +769,9 @@ BEGIN_TEST_SUITE(prov_x509_csr_client_e2e)
         LogInfo("Derived device key for '%s'", reg_id);
 
         // Switch HSM to symmetric key mode for this test
+        // Must deinit both layers so cached security type is cleared
         prov_dev_security_deinit();
+        iothub_security_deinit();
         prov_dev_security_init(SECURE_DEVICE_TYPE_SYMMETRIC_KEY);
         prov_dev_set_symmetric_key_info(reg_id, derived_key);
 
@@ -815,6 +819,7 @@ BEGIN_TEST_SUITE(prov_x509_csr_client_e2e)
         // After DPS registration with CSR, the HSM now has the issued X509 cert.
         // Switch HSM back to X509 mode for IoT Hub connection.
         prov_dev_security_deinit();
+        iothub_security_deinit();
         prov_dev_security_init(SECURE_DEVICE_TYPE_X509);
 
         // ================================================================
