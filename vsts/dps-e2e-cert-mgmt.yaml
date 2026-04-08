@@ -93,10 +93,15 @@ stages:
           Add-Content $outFile "export PROVISIONING_ROOT_CERT_KEY=`"$keyB64`""
 
           # Symmetric key group enrollment env vars
+          Write-Host "DEBUG: Dps.Enrollments keys = $($TestEnvInfo.Dps.Enrollments | Get-Member -MemberType NoteProperty | ForEach-Object { $_.Name })"
+          Write-Host "DEBUG: Dps.Enrollments = $($TestEnvInfo.Dps.Enrollments | ConvertTo-Json -Depth 3 -Compress)"
           if ($TestEnvInfo.Dps.Enrollments.GroupSymmetricKey.Count -gt 0) {
               $skGroup = $TestEnvInfo.Dps.Enrollments.GroupSymmetricKey[0]
+              Write-Host "DEBUG: skGroup = $($skGroup | ConvertTo-Json -Depth 2 -Compress)"
               Add-Content $outFile "export IOT_DPS_SYMM_KEY_GROUP_ENROLLMENT_ID=`"$($skGroup.Id)`""
               Add-Content $outFile "export IOT_DPS_SYMM_KEY_GROUP_PRIMARY_KEY=`"$($skGroup.PrimaryKey)`""
+          } else {
+              Write-Host "WARNING: No GroupSymmetricKey enrollments found in TestEnvInfo"
           }
 
           Write-Host "##vso[task.setvariable variable=RESOURCE_GROUP_NAME;isOutput=true]$($TestEnvInfo.ResourceGroupName)"
@@ -171,6 +176,8 @@ stages:
 
     - script: |
         source $(System.ArtifactsDirectory)/test_config_scripts/set_e2e_test_env_vars.sh
+        echo "DEBUG: IOT_DPS_SYMM_KEY_GROUP_ENROLLMENT_ID=${IOT_DPS_SYMM_KEY_GROUP_ENROLLMENT_ID}"
+        echo "DEBUG: IOT_DPS_SYMM_KEY_GROUP_PRIMARY_KEY length=${#IOT_DPS_SYMM_KEY_GROUP_PRIMARY_KEY}"
         cd cmake
         stdbuf -oL ctest -T test --no-compress-output -R prov_x509_csr_client_e2e -VV --timeout 300 2>&1 || true
         echo "--- Last 200 lines of LastTest.log ---"
