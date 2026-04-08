@@ -175,6 +175,7 @@ stages:
       workingDirectory: '$(Build.SourcesDirectory)'
 
     - script: |
+        sed -i 's/\r$//' $(System.ArtifactsDirectory)/test_config_scripts/set_e2e_test_env_vars.sh
         source $(System.ArtifactsDirectory)/test_config_scripts/set_e2e_test_env_vars.sh
         echo "DEBUG: IOT_DPS_SYMM_KEY_GROUP_ENROLLMENT_ID=${IOT_DPS_SYMM_KEY_GROUP_ENROLLMENT_ID}"
         echo "DEBUG: IOT_DPS_SYMM_KEY_GROUP_PRIMARY_KEY length=${#IOT_DPS_SYMM_KEY_GROUP_PRIMARY_KEY}"
