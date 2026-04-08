@@ -1,6 +1,11 @@
 [TimeSpan]$DefaultCertificateExpiration = [TimeSpan]::FromDays(365)
 
-# Generic helper functions
+# This script is divided by sections, tagged as # <[Section Name]>.
+# The sections are:
+
+
+
+# <[Generic Helper Functions]>
 function Debug-PSScript {
     param($Path)
 
@@ -138,7 +143,21 @@ function ConvertFrom-PSObject {
         return $Object
     }
 }
-# Certificates
+
+function New-RandomNumber {
+    param($Length = 16)
+
+    if ($PSVersionTable.PSVersion.Major -lt 7) {
+        $RandomNumber = New-Object byte[] $Length
+        [System.Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($RandomNumber)
+        return $RandomNumber
+    } else {
+        return [System.Security.Cryptography.RandomNumberGenerator]::GetBytes($Length)
+    }
+}
+
+
+# <[Certificate Handling]>
 
 function Export-Pkcs8PrivateKeyPem {
     param($Key) 
@@ -234,18 +253,6 @@ function New-X509CertificateSigningRequest {
             $Base64Csr = [Convert]::ToBase64String($csr.CreateSigningRequest(), 'InsertLineBreaks')
             return "-----BEGIN CERTIFICATE REQUEST-----`n$Base64Csr`n-----END CERTIFICATE REQUEST-----"
         }
-    }
-}
-
-function New-RandomNumber {
-    param($Length = 16)
-
-    if ($PSVersionTable.PSVersion.Major -lt 7) {
-        $RandomNumber = New-Object byte[] $Length
-        [System.Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($RandomNumber)
-        return $RandomNumber
-    } else {
-        return [System.Security.Cryptography.RandomNumberGenerator]::GetBytes($Length)
     }
 }
 
@@ -381,7 +388,7 @@ function Export-X509CertificateToPemFile {
     Set-FileContent -Path $Path -Content $pem
 }
 
-# Generic Types
+# <[Generic Types]>
 class RsaPrivateKeyInfo {
     [System.Security.Cryptography.RSA]$PrivateKey = $null
 
@@ -464,7 +471,7 @@ class X509CertificateInfo {
 }
 
 
-# Azure IoT Types
+# <[Azure IoT Types]>
 class IotHubSymmetricKeyIdentityInfo {
     [string]$Id = $null
     [string]$PrimaryKey = $null
@@ -913,6 +920,8 @@ class IotHubInfo {
     }
 }
 
+
+
 class TestEnvironmentInfo {
     [string]$AzureResourceGroup = $null
 
@@ -951,7 +960,7 @@ class TestEnvironmentInfo {
 }
 
 
-
+# <[Azure DPS Helper Functions]>
 
 function New-DpsDerivedSymmetricKey {
     param(
@@ -1138,6 +1147,7 @@ function Add-DpsX509EnrollmentGroup {
     return [DpsX509EnrollmentGroupInfo]::new($EnrollmentId, $ICA)
 }
 
+# <[Azure DPS Helper Functions]>
 function New-AzureResourceGroupName {
     param([string]$Prefix = "rg-", [string]$OutFile = $null)
 
