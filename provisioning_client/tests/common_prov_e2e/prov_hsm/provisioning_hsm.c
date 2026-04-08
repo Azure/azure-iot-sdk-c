@@ -442,12 +442,29 @@ const HSM_CLIENT_TPM_INTERFACE* hsm_client_tpm_interface(void)
     return &tpm_interface;
 }
 
+int iothub_hsm_set_key_info(HSM_CLIENT_HANDLE handle, const char* reg_name, const char* symm_key)
+{
+    int result;
+    if (handle == NULL)
+    {
+        (void)printf("Invalid handle value specified");
+        result = __LINE__;
+    }
+    else
+    {
+        IOTHUB_HSM_IMPL* hsm_impl = (IOTHUB_HSM_IMPL*)handle;
+        result = symm_key_info_set(hsm_impl->key_info, reg_name, symm_key);
+    }
+    return result;
+}
+
 static const HSM_CLIENT_KEY_INTERFACE key_interface =
 {
-    iothub_hsm_tpm_create,
+    iothub_hsm_key_create,
     iothub_hsm_destroy,
     iothub_hsm_key_symm_key,
-    iothub_hsm_get_registry_id
+    iothub_hsm_get_registry_id,
+    iothub_hsm_set_key_info
 };
 
 const HSM_CLIENT_KEY_INTERFACE* hsm_client_key_interface(void)

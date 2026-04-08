@@ -76,3 +76,33 @@ const char* symm_key_info_get_reg_id(SYMM_KEY_INFO_HANDLE handle)
     }
     return result;
 }
+
+int symm_key_info_set(SYMM_KEY_INFO_HANDLE handle, const char* reg_name, const char* symm_key)
+{
+    int result;
+    if (handle == NULL || reg_name == NULL || symm_key == NULL)
+    {
+        LogError("Invalid parameter specified handle: %p, reg_name: %p, symm_key: %p", handle, reg_name, symm_key);
+        result = __LINE__;
+    }
+    else
+    {
+        if (strlen(symm_key) >= sizeof(handle->symm_key))
+        {
+            LogError("Symmetric key too long (%zu >= %zu)", strlen(symm_key), sizeof(handle->symm_key));
+            result = __LINE__;
+        }
+        else if (strlen(reg_name) >= sizeof(handle->reg_id))
+        {
+            LogError("Registration ID too long (%zu >= %zu)", strlen(reg_name), sizeof(handle->reg_id));
+            result = __LINE__;
+        }
+        else
+        {
+            strcpy(handle->symm_key, symm_key);
+            strcpy(handle->reg_id, reg_name);
+            result = 0;
+        }
+    }
+    return result;
+}
