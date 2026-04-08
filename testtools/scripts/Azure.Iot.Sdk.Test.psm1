@@ -1295,20 +1295,43 @@ function New-AzIotTestEnvironment {
         Stop-OnError -Step "Install Azure IoT extension"
     }
 
+    # Add default Azure resource group tags 
+    if ($ResourceGroupTags -eq $null) {
+        $ResourceGroupTags = @{}
+    }
+
     # Create resource group (if does not exist).
     $ResourceGroupExists = az group exists --name $ResourceGroup -o tsv
     if ($ResourceGroupExists -eq 'true') {
+        if (-not $ResourceGroupTags.ContainsKey("UpdatedBy")) {
+            $ResourceGroupTags.Add("UpdatedBy", $AzureAccount.user.name)
+        }
+
+        if (-not $ResourceGroupTags.ContainsKey("UpdatedOn")) {
+            $ResourceGroupTags.Add("UpdatedOn", (Get-Date).ToString("o"))
+        }
+
+        $ResourceGroupTagsString = $(Join-Hashtable -Hashtable $ResourceGroupTags)
+
+        Write-Host "Updating Azure resource group ($ResourceGroup; $ResourceGroupTagsString)"
+        az group update --name "$ResourceGroup" --tags "$ResourceGroupTagsString" --only-show-errors | Out-Null
+        Stop-OnError -Step "Update Azure resource group tags"
+
        $AzureResourceGroup = az group show --name "$ResourceGroup" | ConvertFrom-Json
     } else {
+        if (-not $ResourceGroupTags.ContainsKey("CreatedBy")) {
+            $ResourceGroupTags.Add("CreatedBy", $AzureAccount.user.name)
+        }
+
+        if (-not $ResourceGroupTags.ContainsKey("CreatedOn")) {
+            $ResourceGroupTags.Add("CreatedOn", (Get-Date).ToString("o"))
+        }
+
         $ResourceGroupTagsString = $(Join-Hashtable -Hashtable $ResourceGroupTags)
 
         Write-Host "Creating Azure resource group ($ResourceGroup; $ResourceGroupTagsString)"
 
-        if ($null -ne $ResourceGroupTags -and $ResourceGroupTags.Count -gt 0) {
-            $AzureResourceGroup = az group create --name "$ResourceGroup" --location "$AzureLocation" --tags "$ResourceGroupTagsString" 2>$null | ConvertFrom-json 
-        } else {
-            $AzureResourceGroup = az group create --name "$ResourceGroup" --location "$AzureLocation" 2>$null | ConvertFrom-json 
-        }
+        $AzureResourceGroup = az group create --name "$ResourceGroup" --location "$AzureLocation" --tags "$ResourceGroupTagsString" 2>$null | ConvertFrom-json 
 
         Stop-OnError -Step "Create Azure resource group"
     }
