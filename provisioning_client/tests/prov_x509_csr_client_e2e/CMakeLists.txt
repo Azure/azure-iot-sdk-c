@@ -27,6 +27,7 @@ include_directories(${DEV_AUTH_MODULES_CLIENT_INC_FOLDER})
 include_directories(${SHARED_UTIL_INC_FOLDER})
 include_directories(${PROVISIONING_SERVICE_CLIENT_INC_FOLDER})
 include_directories(../common_prov_e2e)
+include_directories(${CMAKE_CURRENT_LIST_DIR}/../../adapters)
 
 file(COPY ../common_prov_e2e/prov_valgrind_suppression.supp DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 build_c_test_artifacts(${theseTestsName} ON "tests/provisioning_e2e_tests" VALGRIND_SUPPRESSIONS_FILE prov_valgrind_suppression.supp)

@@ -47,6 +47,8 @@
 
 #include "common_prov_e2e.h"
 
+#include "hsm_client_x509.h"
+
 TEST_DEFINE_ENUM_TYPE(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_VALUE);
 TEST_DEFINE_ENUM_TYPE(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
 
@@ -816,11 +818,24 @@ BEGIN_TEST_SUITE(prov_x509_csr_client_e2e)
         Prov_Device_Destroy(prov_handle);
         prov_handle = NULL;
 
-        // After DPS registration with CSR, the HSM now has the issued X509 cert.
-        // Switch HSM back to X509 mode for IoT Hub connection.
+        // After DPS registration with CSR, the X509 HSM singleton has the issued cert.
+        // Save cert/key before deinit (which clears the X509 singleton),
+        // then restore after switching HSM back to X509 mode.
+        HSM_CLIENT_HANDLE x509_hsm = hsm_client_x509_create();
+        char* saved_cert = hsm_client_x509_get_certificate(x509_hsm);
+        char* saved_key = hsm_client_x509_get_key(x509_hsm);
+        ASSERT_IS_NOT_NULL(saved_cert, "DPS did not store X509 certificate in HSM");
+        ASSERT_IS_NOT_NULL(saved_key, "DPS did not store X509 key in HSM");
+
         prov_dev_security_deinit();
         iothub_security_deinit();
         prov_dev_security_init(SECURE_DEVICE_TYPE_X509);
+
+        // Restore the DPS-issued cert and key into the freshly initialized X509 HSM
+        ASSERT_ARE_EQUAL(int, 0, hsm_client_x509_set_certificate(hsm_client_x509_create(), saved_cert));
+        ASSERT_ARE_EQUAL(int, 0, hsm_client_x509_set_key(hsm_client_x509_create(), saved_key));
+        free(saved_cert);
+        free(saved_key);
 
         // ================================================================
         // Phase 2: Connect to IoT Hub with DPS-issued certificate
