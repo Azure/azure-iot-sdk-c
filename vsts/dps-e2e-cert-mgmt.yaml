@@ -244,8 +244,7 @@ stages:
           # Delete with --no-wait to avoid synchronous timeout,
           # then poll until the group is gone (or give up after 10 min).
           echo "Starting async resource group deletion..."
-          az group delete --name "$RG_NAME" --yes --no-wait \
-            --force-deletion-types Microsoft.Devices/IotHubs Microsoft.Devices/provisioningServices 2>/dev/null || true
+          az group delete --name "$RG_NAME" --yes --no-wait 2>/dev/null || true
           SECONDS=0
           TIMEOUT=600
           while az group exists --name "$RG_NAME" -o tsv 2>/dev/null | grep -qi true; do
