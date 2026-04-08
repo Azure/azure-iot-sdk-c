@@ -48,6 +48,15 @@
 
 #include "hsm_client_x509.h"
 
+// Test filter support — when main.c receives a test name argument,
+// only the matching TEST_FUNCTION runs; the rest are skipped.
+extern const char* csr_test_get_filter(void);
+#define SKIP_IF_FILTERED(testName) \
+    do { \
+        const char* _f = csr_test_get_filter(); \
+        if (_f != NULL && strcmp(_f, #testName) != 0) { return; } \
+    } while (0)
+
 TEST_DEFINE_ENUM_TYPE(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_VALUE);
 TEST_DEFINE_ENUM_TYPE(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
 
@@ -492,6 +501,8 @@ BEGIN_TEST_SUITE(prov_x509_csr_client_e2e)
     //   Phase 4: Reconnect with re-issued cert
     TEST_FUNCTION(dps_x509_csr_full_lifecycle_mqtt)
     {
+        SKIP_IF_FILTERED(dps_x509_csr_full_lifecycle_mqtt);
+
         // Gate on ADR policy being configured
         const char* adr_policy = getenv(ENV_ADR_CERT_MGMT_POLICY_NAME);
         if (adr_policy == NULL || adr_policy[0] == '\0')
@@ -664,6 +675,8 @@ BEGIN_TEST_SUITE(prov_x509_csr_client_e2e)
     //   Phase 4: Reconnect with re-issued cert
     TEST_FUNCTION(dps_symkey_csr_full_lifecycle_mqtt)
     {
+        SKIP_IF_FILTERED(dps_symkey_csr_full_lifecycle_mqtt);
+
         // Gate on ADR policy + symmetric key group env vars
         const char* adr_policy = getenv(ENV_ADR_CERT_MGMT_POLICY_NAME);
         if (adr_policy == NULL || adr_policy[0] == '\0')

@@ -92,3 +92,15 @@ target_link_libraries(${theseTestsName}_exe
     hsm_security_client
     parson
 )
+
+# Override the default single-test registration from build_c_test_artifacts
+# with per-function tests so each TEST_FUNCTION appears individually in CTest/Azure DevOps.
+if(TARGET ${theseTestsName}_exe)
+    # Remove the suite-level test added by build_c_test_artifacts
+    set_tests_properties(${theseTestsName} PROPERTIES DISABLED TRUE)
+
+    add_test(NAME dps_x509_csr_full_lifecycle_mqtt
+        COMMAND ${theseTestsName}_exe dps_x509_csr_full_lifecycle_mqtt)
+    add_test(NAME dps_symkey_csr_full_lifecycle_mqtt
+        COMMAND ${theseTestsName}_exe dps_symkey_csr_full_lifecycle_mqtt)
+endif()
