@@ -230,7 +230,7 @@ stages:
             echo "##[warning]resource_group_name.txt not found — nothing to clean up"
             exit 0
           fi
-          RG_NAME=$(cat "$RG_FILE")
+          RG_NAME=$(cat "$RG_FILE" | tr -d '\r\n')
           if [ -z "$RG_NAME" ]; then
             echo "##[warning]Resource group name is empty — nothing to clean up"
             exit 0
