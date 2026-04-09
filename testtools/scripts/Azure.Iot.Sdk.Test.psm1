@@ -2,7 +2,13 @@
 
 # This script is divided by sections, tagged as # <[Section Name]>.
 # The sections are:
-
+# - Generic Helper Functions
+# - Certificate Handling
+# - Generic Types
+# - Azure IoT Types
+# - Azure DPS Helper Functions
+# - Azure DevOps
+# - Azure IoT Test Environment Public Functions
 
 
 # <[Generic Helper Functions]>
@@ -1166,6 +1172,20 @@ function New-AzureResourceGroupName {
     return $ResourceGroupName
 }
 
+
+# <[Azure DevOps]>
+
+function Get-AzureDevOpsRunUrl {
+    if ($env:SYSTEM_COLLECTIONURI -and $env:SYSTEM_TEAMPROJECT -and $env:BUILD_BUILDID) {
+        return "$($env:SYSTEM_COLLECTIONURI)$($env:SYSTEM_TEAMPROJECT)/_build/results?buildId=$($env:BUILD_BUILDID)"
+    } else {
+        return $null
+    }
+}
+
+
+# <[Azure IoT Test Environment Public Functions]>
+
 function New-AzIotTestEnvironment {
     <#
     .SYNOPSIS
@@ -1298,6 +1318,11 @@ function New-AzIotTestEnvironment {
     # Add default Azure resource group tags 
     if ($ResourceGroupTags -eq $null) {
         $ResourceGroupTags = @{}
+    }
+
+    $AzureDevOpsRunUrl = Get-AzureDevOpsRunUrl
+    if ($null -ne $AzureDevOpsRunUrl) {
+        $ResourceGroupTags.Add("AzureDevOpsRunUrl", $AzureDevOpsRunUrl)
     }
 
     # Create resource group (if does not exist).
