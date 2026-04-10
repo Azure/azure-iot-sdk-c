@@ -14,7 +14,29 @@ resources:
     ref: refs/heads/ewertons/horton-fixes
     endpoint: 'azure-iot-sdk-python-github'
 
-jobs:
-- template: vsts/templates/jobs-gate-c.yaml@e2e_fx
+stages:
+- stage: setup
+  jobs:
+  - job: create_azure_resources
+    pool:
+      vmImage: 'windows-latest'
+    steps:
+    - template: vsts/templates/steps-create-azure-resources.yaml@e2e_fx
 
-  
+- stage: build_and_test
+  dependsOn: setup
+  jobs:
+  - template: vsts/templates/jobs-gate-c.yaml@e2e_fx
+
+- stage: cleanup
+  dependsOn:
+  - setup
+  - build_and_test
+  condition: always()
+  jobs:
+  - job: destroy_azure_resource_group
+    condition: always()
+    pool:
+      vmImage: 'ubuntu-24.04'
+    steps:
+    - template: vsts/templates/steps-destroy-azure-resources.yaml@e2e_fx
