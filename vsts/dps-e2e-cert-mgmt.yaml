@@ -80,27 +80,6 @@ stages:
               -Target bash `
               -OutFile test_config/set_e2e_test_env_vars.sh
 
-          $outFile = "test_config/set_e2e_test_env_vars.sh"
-
-          # Append ADR/CSR-specific env vars not yet in the PS module
-          Add-Content $outFile "export ADR_CERT_MGMT_POLICY_NAME=`"$($TestEnvInfo.AzureAdrPolicyName)`""
-
-          $rootCertPem = $TestEnvInfo.Dps.RootCaCertificates[0].ToPem()
-          $rootKeyPem  = $TestEnvInfo.Dps.RootCaCertificates[0].PrivateKey.ToPem()
-          $certB64 = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($rootCertPem))
-          $keyB64  = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($rootKeyPem))
-          Add-Content $outFile "export PROVISIONING_ROOT_CERT=`"$certB64`""
-          Add-Content $outFile "export PROVISIONING_ROOT_CERT_KEY=`"$keyB64`""
-
-          # Symmetric key group enrollment env vars
-          if ($TestEnvInfo.Dps.Enrollments.GroupSymmetricKey.Count -gt 0) {
-              $skGroup = $TestEnvInfo.Dps.Enrollments.GroupSymmetricKey[0]
-              Add-Content $outFile "export IOT_DPS_SYMM_KEY_GROUP_ENROLLMENT_ID=`"$($skGroup.Id)`""
-              Add-Content $outFile "export IOT_DPS_SYMM_KEY_GROUP_PRIMARY_KEY=`"$($skGroup.PrimaryKey)`""
-          } else {
-              Write-Host "WARNING: No GroupSymmetricKey enrollments found in TestEnvInfo"
-          }
-
           Write-Host "##vso[task.setvariable variable=RESOURCE_GROUP_NAME;isOutput=true]$($TestEnvInfo.ResourceGroupName)"
       name: provisionStep
 
