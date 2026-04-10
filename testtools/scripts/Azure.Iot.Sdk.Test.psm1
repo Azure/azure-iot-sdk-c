@@ -1305,7 +1305,7 @@ function New-AzIotTestEnvironment {
         [switch]$EnableFileUpload,
         [switch]$NoDps,
         [switch]$EnableCertificateManagement,
-        [switch]$AddContainterRegistry
+        [switch]$AddContainerRegistry
     )
 
     $IotHubFqdn = "$($IotHubName).$($IotHubDomainName)"
@@ -1608,7 +1608,7 @@ function New-AzIotTestEnvironment {
         }
     }
 
-    if ($AddContainterRegistry) {
+    if ($AddContainerRegistry) {
         $ContainerRegistryName = "cr$(New-GuidString -NoDashes -MaxLength 22)" # Max length for container registry is 24, and we need to add a prefix.
         Write-Host "Creating Azure Container Registry ($ContainerRegistryName)"
         $AzureContainerRegistry = az acr create --name "$ContainerRegistryName" --resource-group "$ResourceGroup" --location "$AzureLocation" --sku Basic --admin-enabled true | ConvertFrom-Json
