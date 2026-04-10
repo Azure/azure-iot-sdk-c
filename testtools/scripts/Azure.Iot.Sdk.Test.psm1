@@ -2159,6 +2159,7 @@ function New-AzIotPythonSdkSampleConfig {
 
 Export-ModuleMember -Function Debug-PSScript
 Export-ModuleMember -Function Invoke-Script
+Export-ModuleMember -Function Set-FileContent
 Export-ModuleMember -Function New-AzureResourceGroupName
 Export-ModuleMember -Function New-AzIotTestEnvironment
 Export-ModuleMember -Function Get-AzIotTestEnvironment
