@@ -204,34 +204,20 @@ stages:
         scriptType: bash
         scriptLocation: inlineScript
         inlineScript: |
-          RG_FILE="$(System.ArtifactsDirectory)/test_config_scripts/resource_group_name.txt"
-          if [ ! -f "$RG_FILE" ]; then
-            echo "##[warning]resource_group_name.txt not found — nothing to clean up"
-            exit 0
-          fi
-          RG_NAME=$(cat "$RG_FILE" | tr -d '\r\n')
+          RG_NAME=$(cat "$(System.ArtifactsDirectory)/test_config_scripts/resource_group_name.txt" 2>/dev/null | tr -d '\r\n')
           if [ -z "$RG_NAME" ]; then
-            echo "##[warning]Resource group name is empty — nothing to clean up"
+            echo "##[warning]Resource group name not found or empty — nothing to clean up"
             exit 0
           fi
           echo "Deleting resource group: $RG_NAME"
-          # Check if the resource group exists before attempting deletion
-          if ! az group exists --name "$RG_NAME" -o tsv 2>/dev/null | grep -qi true; then
-            echo "Resource group '$RG_NAME' does not exist — nothing to clean up"
-            exit 0
-          fi
-          # Delete with --no-wait to avoid synchronous timeout,
-          # then poll until the group is gone (or give up after 10 min).
-          echo "Starting async resource group deletion..."
           az group delete --name "$RG_NAME" --yes --no-wait 2>/dev/null || true
           SECONDS=0
-          TIMEOUT=600
           while az group exists --name "$RG_NAME" -o tsv 2>/dev/null | grep -qi true; do
-            if [ $SECONDS -ge $TIMEOUT ]; then
-              echo "##[warning]Resource group '$RG_NAME' still exists after ${TIMEOUT}s — giving up"
+            if [ $SECONDS -ge 600 ]; then
+              echo "##[warning]Resource group still exists after 600s — giving up"
               exit 0
             fi
-            echo "Waiting for deletion... (${SECONDS}s elapsed)"
+            echo "Waiting for deletion... (${SECONDS}s)"
             sleep 15
           done
-          echo "Resource group '$RG_NAME' deleted successfully (${SECONDS}s)"
+          echo "Resource group deleted (${SECONDS}s)"
