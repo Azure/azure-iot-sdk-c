@@ -51,12 +51,19 @@ function Invoke-Script {
 }
 
 function New-GuidString {
-    param([switch]$NoDashes)
+    param(
+        [switch]$NoDashes,
+        [int]$MaxLength = 0
+    )
 
     $Guid = [guid]::NewGuid().ToString()
 
     if ($NoDashes) {
         $Guid = $Guid.Replace('-', '')
+    }
+
+    if ($MaxLength -gt 0 -and $Guid.Length -gt $MaxLength) {
+        $Guid = $Guid.Substring(0, $MaxLength)
     }
 
     return $Guid
@@ -926,7 +933,29 @@ class IotHubInfo {
     }
 }
 
+class ContainerRegistryInfo {
+    [string]$Name = $null
+    [string]$LoginServer = $null
+    [bool]$AdminUserEnabled = $false
+    [string]$Username = $null
+    [string]$Password = $null
 
+    ContainerRegistryInfo(
+        [string]$Name,
+        [string]$LoginServer,
+        [bool]$AdminUserEnabled,
+        [string]$Username,
+        [string]$Password
+     ) {
+        $this.Name = $Name
+        $this.LoginServer = $LoginServer
+        $this.AdminUserEnabled = $AdminUserEnabled
+        $this.Username = $Username
+        $this.Password = $Password
+     }
+
+     ContainerRegistryInfo() { }
+}
 
 class TestEnvironmentInfo {
     [string]$AzureResourceGroup = $null
@@ -935,6 +964,8 @@ class TestEnvironmentInfo {
 
     [DpsInfo]$Dps = [DpsInfo]::new()
 
+    [ContainerRegistryInfo[]]$ContainerRegistry = @()
+
     [string]$AzureAdrPolicyName = $null
 
     [hashtable]ToHashtable() {
@@ -942,6 +973,7 @@ class TestEnvironmentInfo {
             AzureResourceGroup = $this.AzureResourceGroup
             IotHub = ConvertTo-Hashtable -Object $this.IotHub
             Dps = ConvertTo-Hashtable -Object $this.Dps
+            # TODO: add container registry
             AzureAdrPolicyName = $this.AzureAdrPolicyName
         }
     }
@@ -952,6 +984,7 @@ class TestEnvironmentInfo {
         $TestEnvironmentInfo.AzureAdrPolicyName = $Hashtable.AzureAdrPolicyName
         $TestEnvironmentInfo.IotHub = [IotHubInfo]::FromHashtable($Hashtable.IotHub)
         $TestEnvironmentInfo.Dps = [DpsInfo]::FromHashtable($Hashtable.Dps)
+        # TODO: add container registry
         return $TestEnvironmentInfo
     }
 
@@ -1211,6 +1244,8 @@ function New-AzIotTestEnvironment {
     Specifies the domain name of the IoT Hub. Default is "azure-devices.net".
     .PARAMETER StorageAccountName
     Specifies the name of the Storage Account. If not provided, a new Storage Account will be created.
+    .PARAMETER KeyVaultName
+    Specifies the name of the Azure Key Vault to create and add the IoT Hub and DPS certificates to. If not provided, a random name will be generated.
     .PARAMETER DpsSymmKeyIndividualEnrollments
     Specifies the number of symmetric key individual enrollments to create in DPS. Default is 0.
     .PARAMETER DpsX509IndividualEnrollments
@@ -1258,7 +1293,8 @@ function New-AzIotTestEnvironment {
         [string]$DpsName       = "dps-$(New-GuidString -NoDashes)",
         [string]$IotHubName    = "iothub-$(New-GuidString -NoDashes)",
         [string]$IotHubDomainName = "azure-devices.net",
-        [string]$StorageAccountName = "teststoacc$(New-GuidString -NoDashes)".Substring(0, 24), # Max size of Storage Account name
+        [string]$StorageAccountName = "stoacc$(New-GuidString -NoDashes -MaxLength  18)", # Max size of Storage Account name is 24 characters.
+        [string]$KeyVaultName = "kv-$(New-GuidString -NoDashes -MaxLength 21)", # Max size of Key Vault name is 24 characters.
         [int]$DpsSymmKeyIndividualEnrollments = 0,
         [int]$DpsX509IndividualEnrollments = 0,
         [int]$DpsSymmKeyGroupEnrollmentDevices = 0,
@@ -1268,7 +1304,8 @@ function New-AzIotTestEnvironment {
         [int]$IotHubX509CADevices = 0,
         [switch]$EnableFileUpload,
         [switch]$NoDps,
-        [switch]$EnableCertificateManagement
+        [switch]$EnableCertificateManagement,
+        [switch]$AddContainterRegistry
     )
 
     $IotHubFqdn = "$($IotHubName).$($IotHubDomainName)"
@@ -1362,6 +1399,11 @@ function New-AzIotTestEnvironment {
     }
 
     $TestEnvInfo = [TestEnvironmentInfo]::new()
+
+    # TODO: create Storage Account (required for IoT Hub file upload, if enabled) and add to $TestEnvInfo
+    # Write-Host "Creating Azure Key Vault ($KeyVaultName)"
+    # $AzureKeyVault = az keyvault create --name "$KeyVaultName" --resource-group "$ResourceGroup" --location "$AzureLocation" 2>$null | ConvertFrom-Json
+    # Stop-OnError -Step "Create Azure Key Vault"
 
     if ($EnableCertificateManagement -eq $true) {
         $AzureIotHubAppId = "89d10474-74af-4874-99a7-c23c2f643083" # Azure IoT Hub application ID (same for all tenants)
@@ -1564,6 +1606,27 @@ function New-AzIotTestEnvironment {
             az iot hub update --name "$IotHubName" --resource-group "$ResourceGroup" --fcs "$AzureStorageConnectionString" --fc $AzureStorageContainerName --fileupload-sas-ttl 1 | Out-Null
             Stop-OnError -Step "Updating Azure IoT Hub file upload settings"
         }
+    }
+
+    if ($AddContainterRegistry) {
+        $ContainerRegistryName = "cr$(New-GuidString -NoDashes -MaxLength 22)" # Max length for container registry is 24, and we need to add a prefix.
+        Write-Host "Creating Azure Container Registry ($ContainerRegistryName)"
+        $AzureContainerRegistry = az acr create --name "$ContainerRegistryName" --resource-group "$ResourceGroup" --location "$AzureLocation" --sku Basic --admin-enabled true | ConvertFrom-Json
+        Stop-OnError -Step "Create Azure Container Registry"
+
+        Write-Host "Getting Azure Container Registry credentials"
+        $AzureContainerRegistrySecret = az acr credential show --name "$ContainerRegistryName" --resource-group "$ResourceGroup" | ConvertFrom-Json
+        Stop-OnError -Step "Get Azure Container Registry credentials"
+
+        $ContainerRegistryInfo = [ContainerRegistryInfo]::new(
+            $AzureContainerRegistry.name,
+            $AzureContainerRegistry.loginServer,
+            $AzureContainerRegistry.adminUserEnabled,
+            $AzureContainerRegistrySecret.username,
+            $AzureContainerRegistrySecret.passwords[0].value
+        )
+
+        $TestEnvInfo.ContainerRegistry += $ContainerRegistryInfo
     }
 
     # Gathering Test Environment settings.
