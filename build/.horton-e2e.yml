@@ -1,6 +1,6 @@
 variables:
   Horton.FrameworkRoot: $(Agent.BuildDirectory)/e2e-fx
-  Horton.FrameworkRef: master
+  Horton.FrameworkRef: ewertons/horton-fixes
   Horton.Language: c
   Horton.Repo: $(Build.Repository.Uri)
   Horton.Commit: $(Build.SourceBranch)
