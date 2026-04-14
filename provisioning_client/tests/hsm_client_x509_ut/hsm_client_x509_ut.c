@@ -209,6 +209,7 @@ TEST_FUNCTION(hsm_client_x509_set_certificate_succeed)
 
     umock_c_reset_all_calls();
     STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     
     //act
     int ret = hsm_client_x509_set_certificate(sec_handle, TEST_CERTIFICATE_VALUE);
@@ -257,21 +258,27 @@ TEST_FUNCTION(hsm_client_x509_set_certificate_null_fail)
     hsm_client_x509_deinit();
 }
 
-TEST_FUNCTION(hsm_client_x509_set_certificate_twice_fail)
+TEST_FUNCTION(hsm_client_x509_set_certificate_twice_succeed)
 {
     // arrange
     hsm_client_x509_init();
     HSM_CLIENT_HANDLE sec_handle = hsm_client_x509_create();
     umock_c_reset_all_calls();
+    // First set: mallocAndStrcpy_s + free(NULL old value)
     STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    // Second set: mallocAndStrcpy_s + free(previous value)
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     
     //act
     int ret = hsm_client_x509_set_certificate(sec_handle, TEST_CERTIFICATE_VALUE);
+    ASSERT_ARE_EQUAL(int, 0, ret);
     ret = hsm_client_x509_set_certificate(sec_handle, TEST_CERTIFICATE_VALUE);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-    ASSERT_ARE_NOT_EQUAL(int, 0, ret);
+    ASSERT_ARE_EQUAL(int, 0, ret);
 
     //cleanup
     hsm_client_x509_destroy(sec_handle);
@@ -314,6 +321,7 @@ TEST_FUNCTION(hsm_client_x509_set_key_succeed)
 
     umock_c_reset_all_calls();
     STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     
     //act
     int ret = hsm_client_x509_set_key(sec_handle, TEST_KEY_VALUE);
@@ -362,21 +370,27 @@ TEST_FUNCTION(hsm_client_x509_set_key_null_fail)
     hsm_client_x509_deinit();
 }
 
-TEST_FUNCTION(hsm_client_x509_set_key_twice_fail)
+TEST_FUNCTION(hsm_client_x509_set_key_twice_succeed)
 {
     // arrange
     hsm_client_x509_init();
     HSM_CLIENT_HANDLE sec_handle = hsm_client_x509_create();
     umock_c_reset_all_calls();
+    // First set: mallocAndStrcpy_s + free(NULL old value)
     STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    // Second set: mallocAndStrcpy_s + free(previous value)
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     
     //act
     int ret = hsm_client_x509_set_key(sec_handle, TEST_KEY_VALUE);
+    ASSERT_ARE_EQUAL(int, 0, ret);
     ret = hsm_client_x509_set_key(sec_handle, TEST_KEY_VALUE);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-    ASSERT_ARE_NOT_EQUAL(int, 0, ret);
+    ASSERT_ARE_EQUAL(int, 0, ret);
 
     //cleanup
     hsm_client_x509_destroy(sec_handle);
