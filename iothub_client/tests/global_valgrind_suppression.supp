@@ -1669,3 +1669,13 @@
    fun:__pthread_disable_asynccancel
    fun:clock_nanosleep@@GLIBC_2.17
 }
+{
+   libp11-kit pthread_mutex_destroy invalid arg on exit
+   Helgrind:Misc
+   obj:/usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so
+   obj:/usr/lib/x86_64-linux-gnu/libp11-kit.so*
+   fun:_dl_fini
+   fun:__run_exit_handlers
+   fun:exit
+   fun:(below main)
+}
