@@ -56,7 +56,8 @@ stages:
         scriptType: ps
         scriptLocation: inlineScript
         inlineScript: |
-          Import-Module ./testtools/scripts/Azure.Iot.Sdk.Test.psm1
+          Invoke-WebRequest -Uri https://raw.githubusercontent.com/Azure/azure-iot-sdk-c/refs/heads/ewertons/pipelinefixes/testtools/scripts/Azure.Iot.Sdk.Test.psm1 -OutFile ./Azure.Iot.Sdk.Test.psm1
+          Import-Module ./Azure.Iot.Sdk.Test.psm1
 
           New-Item -ItemType Directory -Path "test_config" -Force | Out-Null
 
