@@ -145,39 +145,78 @@ stages:
         cd ..
         docker build -t armiotapp:latest . --network=host --file ./ARM/Dockerfile_adjunct
       displayName: 'Build ARM'
-  - job: ubuntu2204debug
-    timeoutInMinutes: 190
+  - job: ubuntu2204_build
     pool:
       vmImage: 'ubuntu-22.04'
-    displayName: 'Ubuntu 22.04 (Debug)'
+    displayName: 'Ubuntu 22.04 Build (Debug)'
+    steps:
+    - checkout: self
+      submodules: true
+    - script: |
+        set -e
+        sudo apt-get update && sudo apt-get upgrade
+        sudo ./build_all/linux/setup.sh
+      displayName: 'Host setup'
+    - script: |
+        sudo -E ./jenkins/ubuntu_c.sh
+      displayName: 'Build'
+    - script: |
+        sudo chmod -R 755 .
+        tar cf $(Build.ArtifactStagingDirectory)/build_output.tar -C $(Build.SourcesDirectory) cmake
+      displayName: 'Package build output'
+    - publish: $(Build.ArtifactStagingDirectory)/build_output.tar
+      artifact: ubuntu2204_build_output
+      displayName: 'Publish build output'
+
+  - job: ubuntu2204_tests
+    dependsOn: ubuntu2204_build
+    timeoutInMinutes: 90
+    pool:
+      vmImage: 'ubuntu-22.04'
+    displayName: 'Ubuntu 22.04 Tests'
+    strategy:
+      matrix:
+        ut_e2e:
+          RUN_TESTS_ARGS: '--e2e'
+          NEEDS_E2E_CONFIG: 'true'
+        valgrind:
+          RUN_TESTS_ARGS: '--valgrind --e2e'
+          NEEDS_E2E_CONFIG: 'true'
+        helgrind:
+          RUN_TESTS_ARGS: '--helgrind --e2e'
+          NEEDS_E2E_CONFIG: 'true'
+        drd:
+          RUN_TESTS_ARGS: '--drd --e2e'
+          NEEDS_E2E_CONFIG: 'true'
     steps:
     - checkout: self
       submodules: true
     - download: current
       artifact: test_config_scripts
       displayName: Download artifact (test config scripts)
+    - download: current
+      artifact: ubuntu2204_build_output
+      displayName: Download artifact (build output)
     - script: |
         set -e
         sudo apt-get update && sudo apt-get upgrade
         sudo ./build_all/linux/setup.sh
       displayName: 'Host setup'
-      condition: always()
     - script: |
-        sudo -E ./jenkins/ubuntu_c.sh
-      displayName: 'Build'
-    - script: |
+        set -e
+        tar xf "$(Pipeline.Workspace)/ubuntu2204_build_output/build_output.tar" -C $(Build.SourcesDirectory)
         export OPENSSL_ia32cap=0x00000000
         sudo chmod -R 755 .
         cd cmake
-        sudo bash -c 'source "$(Pipeline.Workspace)/test_config_scripts/set_e2e_test_env_vars.sh" && ../build_all/linux/run_tests.sh'
-      displayName: "Run Tests (+E2E)"
+        sudo bash -c 'source "$(Pipeline.Workspace)/test_config_scripts/set_e2e_test_env_vars.sh" && ../build_all/linux/run_tests.sh $(RUN_TESTS_ARGS)'
+      displayName: "Run Tests ($(RUN_TESTS_ARGS))"
     - task: PublishTestResults@2
-      displayName: 'Publish Ubuntu 22 (Debug) Results'
+      displayName: 'Publish Test Results ($(RUN_TESTS_ARGS))'
       inputs:
         testRunner: CTest
         testResultsFiles: '**/Test.xml'
         mergeTestResults: true
-        testRunTitle: 'ubuntu2204debug'
+        testRunTitle: 'ubuntu2204_$(System.JobPositionInPhase)'
       condition: succeededOrFailed()
 - stage: Cleanup
   dependsOn:
