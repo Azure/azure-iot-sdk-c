@@ -18,6 +18,11 @@ TEST_SUITE_CLEANUP(TestClassCleanup)
     dt_e2e_deinit();
 }
 
+TEST_FUNCTION_CLEANUP(TestFunctionCleanup)
+{
+    dt_e2e_function_cleanup();
+}
+
 //
 // MQTT tests.
 //

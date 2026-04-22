@@ -430,6 +430,11 @@ static void destroy_client_handle()
     LogInfo("destroy_client_handle(): Completed destroy of IoTHub client handle.");
 }
 
+void dt_e2e_function_cleanup(void)
+{
+    destroy_client_handle();
+}
+
 static void twin_callback(DEVICE_TWIN_UPDATE_STATE update_state, const unsigned char* payload,
                            size_t size, void* user_context_callback)
 {
