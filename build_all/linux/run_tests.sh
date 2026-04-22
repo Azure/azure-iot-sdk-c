@@ -67,8 +67,10 @@ fi
 if $run_drd; then
     # Unit tests under drd
     ctest -T test --no-compress-output -C "Debug" -V -j $VALGRIND_UT_CORES --schedule-random -R "_drd$" -E "e2e"
-    if $run_e2e; then
-        # E2E tests under drd
-        ctest -T test --no-compress-output -C "Debug" -V -j $VALGRIND_E2E_CORES --schedule-random -R "e2e_drd$"
-    fi
+    # NOTE: E2E tests are intentionally not run under drd.  drd's thread instrumentation adds
+    # 20-50x performance overhead, which makes libcurl's TLS handshakes to Azure services fail
+    # with "SSL connect error".  Each failed IoTHubDeviceMethod_Invoke then cascades through
+    # its retry loop (~85s per retry), causing individual test suites to exceed 30+ minutes
+    # and the overall pipeline to hit its timeout.  Thread-race detection for E2E scenarios
+    # is still provided by the helgrind pass, which is the primary thread-safety tool.
 fi

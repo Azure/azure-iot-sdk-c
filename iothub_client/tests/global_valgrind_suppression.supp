@@ -188,7 +188,7 @@
 {
    OpenSSL/libp11-0.4.11
    Helgrind:Misc
-   obj:/usr/lib/x86_64-linux-gnu/valgrind/vgpreload_helgrind-amd64-linux.so
+   obj:*/vgpreload_helgrind-amd64-linux.so
    ...
    fun:_dl_fini
    fun:__run_exit_handlers
@@ -339,7 +339,7 @@
 {
    Helgrind thinks LOCK_HANDLE is not a mutex
    Helgrind:Misc
-   obj:/usr/lib/x86_64-linux-gnu/valgrind/vgpreload_helgrind-amd64-linux.so
+   obj:*/vgpreload_helgrind-amd64-linux.so
    fun:_dl_fini
    fun:__run_exit_handlers
    fun:exit
@@ -348,7 +348,7 @@
 {
    Helgrind thinks LOCK_HANDLE is not a mutex
    Helgrind:Misc
-   obj:/usr/lib/x86_64-linux-gnu/valgrind/vgpreload_helgrind-amd64-linux.so
+   obj:*/vgpreload_helgrind-amd64-linux.so
    obj:/usr/lib/x86_64-linux-gnu/libp11-kit.so.0.3.0
    fun:_dl_fini
    fun:__run_exit_handlers
@@ -1672,7 +1672,7 @@
 {
    libp11-kit pthread_mutex_destroy invalid arg on exit
    Helgrind:Misc
-   obj:/usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so
+   obj:*/vgpreload_helgrind-amd64-linux.so
    obj:/usr/lib/x86_64-linux-gnu/libp11-kit.so*
    fun:_dl_fini
    fun:__run_exit_handlers
