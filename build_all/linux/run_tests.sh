@@ -9,7 +9,6 @@ set -o pipefail # Exit if pipe failed.
 TEST_CORES=16
 VALGRIND_CORES=4
 E2E_VALGRIND_CORES=2
-
 overall_result=0
 
 # Refresh dynamic libs to link to
