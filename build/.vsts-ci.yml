@@ -145,10 +145,10 @@ stages:
         cd ..
         docker build -t armiotapp:latest . --network=host --file ./ARM/Dockerfile_adjunct
       displayName: 'Build ARM'
-  - job: ubuntu2204_build
+  - job: ubuntu2404_dbg_build
     pool:
-      vmImage: 'ubuntu-22.04'
-    displayName: 'Ubuntu 22.04 Build (Debug)'
+      vmImage: 'ubuntu-24.04'
+    displayName: 'Ubuntu 24.04 Build (Debug)'
     steps:
     - checkout: self
       submodules: true
@@ -165,15 +165,15 @@ stages:
         tar cf $(Build.ArtifactStagingDirectory)/build_output.tar -C $(Build.SourcesDirectory) cmake
       displayName: 'Package build output'
     - publish: $(Build.ArtifactStagingDirectory)/build_output.tar
-      artifact: ubuntu2204_build_output
+      artifact: ubuntu2404_dbg_build_output
       displayName: 'Publish build output'
 
-  - job: ubuntu2204_tests
-    dependsOn: ubuntu2204_build
+  - job: ubuntu2404_tests
+    dependsOn: ubuntu2404_dbg_build
     timeoutInMinutes: 90
     pool:
-      vmImage: 'ubuntu-22.04'
-    displayName: 'Ubuntu 22.04 Tests'
+      vmImage: 'ubuntu-24.04'
+    displayName: 'Ubuntu 24.04 Tests'
     strategy:
       matrix:
         ut_e2e:
@@ -195,7 +195,7 @@ stages:
       artifact: test_config_scripts
       displayName: Download artifact (test config scripts)
     - download: current
-      artifact: ubuntu2204_build_output
+      artifact: ubuntu2404_dbg_build_output
       displayName: Download artifact (build output)
     - script: |
         set -e
@@ -204,7 +204,7 @@ stages:
       displayName: 'Host setup'
     - script: |
         set -e
-        tar xf "$(Pipeline.Workspace)/ubuntu2204_build_output/build_output.tar" -C $(Build.SourcesDirectory)
+        tar xf "$(Pipeline.Workspace)/ubuntu2404_dbg_build_output/build_output.tar" -C $(Build.SourcesDirectory)
         export OPENSSL_ia32cap=0x00000000
         sudo chmod -R 755 .
         cd cmake
@@ -216,7 +216,7 @@ stages:
         testRunner: CTest
         testResultsFiles: '**/Test.xml'
         mergeTestResults: true
-        testRunTitle: 'ubuntu2204_$(System.JobPositionInPhase)'
+        testRunTitle: 'ubuntu2404_$(System.JobPositionInPhase)'
       condition: succeededOrFailed()
 - stage: Cleanup
   dependsOn:
