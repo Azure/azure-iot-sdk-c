@@ -294,6 +294,10 @@ stages:
       condition: succeededOrFailed()
 
   - job: ubuntu2404_custom_cmake
+    # Previously named ubuntu2204arm.  Originally ran on a self-hosted ARM64
+    # agent; that pool is gone, and the Microsoft-hosted ubuntu-24.04 vmImage is
+    # x64 only.  This job still exercises the same set of custom CMake options
+    # the old job used.  For ARM coverage see ubuntu2404arm below.
     timeoutInMinutes: 90
     pool:
       vmImage: 'ubuntu-24.04'
@@ -327,6 +331,46 @@ stages:
         testResultsFiles: '**/Test.xml'
         mergeTestResults: true
         testRunTitle: 'ubuntu2404_custom_cmake'
+      condition: succeededOrFailed()
+
+  - job: ubuntu2404arm
+    # ARM64 replacement for the retired ubuntu2204arm self-hosted ARM agent.
+    # Uses the Microsoft-hosted ARM64 pool (vmImage ubuntu-24.04-arm64).
+    # Runs the same custom CMake configuration so we retain native-ARM build
+    # coverage for the SDK.
+    timeoutInMinutes: 90
+    pool:
+      vmImage: 'ubuntu-24.04-arm64'
+    displayName: 'Ubuntu 24.04 ARM64 (Custom CMake Options)'
+    steps:
+    - checkout: self
+      submodules: true
+    - download: current
+      artifact: test_config_scripts
+      displayName: Download artifact (test config scripts)
+    - script: |
+        set -e
+        sudo apt-get update && sudo apt-get upgrade
+        sudo apt-get install -y git cmake build-essential curl libcurl4-openssl-dev libssl-dev uuid-dev ca-certificates
+      displayName: 'Host setup'
+    - script: |
+        set -e
+        mkdir cmake
+        cd cmake
+        sudo cmake '-DcompileOption_C:STRING= ' -DCMAKE_BUILD_TYPE=Debug -Drun_e2e_tests:BOOL=OFF -Drun_sfc_tests:BOOL=OFF -Drun_longhaul_tests=OFF -Duse_amqp:BOOL=ON -Duse_http:BOOL=ON -Duse_mqtt:BOOL=ON -Ddont_use_uploadtoblob:BOOL=OFF -Drun_unittests:BOOL=ON -Dno_logging:BOOL=OFF -Duse_prov_client:BOOL=ON -Duse_tpm_simulator:BOOL=OFF -Duse_edge_modules=ON -Dhsm_type_riot=OFF -Dhsm_type_x509=ON -Dhsm_type_symm_key=ON -Dhsm_type_sastoken=ON -Denable_ipv6=OFF ..
+        sudo make -j$(nproc)
+      displayName: 'Build'
+    - script: |
+        cd cmake
+        sudo bash -c 'source "$(Pipeline.Workspace)/test_config_scripts/set_e2e_test_env_vars.sh" && ctest -T test --no-compress-output -V'
+      displayName: 'Run Tests'
+    - task: PublishTestResults@2
+      displayName: 'Publish Test Results (ARM64 Custom CMake)'
+      inputs:
+        testRunner: CTest
+        testResultsFiles: '**/Test.xml'
+        mergeTestResults: true
+        testRunTitle: 'ubuntu2404arm'
       condition: succeededOrFailed()
 
   - job: ubuntuRIOT
@@ -519,11 +563,14 @@ stages:
         testRunTitle: 'bearssl'
       condition: succeededOrFailed()
 
-  - job: mbedtls
+  - job: mbedtls_2_16
+    # Coverage for mbedTLS 2.16.x, previously provided by the linux-c-ubuntu-mbed
+    # Docker image (Ubuntu 20.04 + apt libmbedtls-dev).  Ubuntu 24.04 ships 3.x,
+    # so install 2.16.x from source.
     timeoutInMinutes: 90
     pool:
       vmImage: 'ubuntu-24.04'
-    displayName: 'mbedTLS'
+    displayName: 'mbedTLS 2.16'
     steps:
     - checkout: self
       submodules: true
@@ -534,22 +581,130 @@ stages:
         set -e
         sudo apt-get update && sudo apt-get upgrade
         sudo ./build_all/linux/setup.sh
-        sudo apt-get install -y libmbedtls-dev
       displayName: 'Host setup'
+    - script: |
+        set -e
+        # Install mbedTLS 2.16.x from source (latest 2.16 point release).
+        git clone --depth 1 -b mbedtls-2.16.12 https://github.com/Mbed-TLS/mbedtls /tmp/mbedtls-2.16
+        cd /tmp/mbedtls-2.16
+        mkdir build && cd build
+        cmake -DUSE_SHARED_MBEDTLS_LIBRARY=ON -DCMAKE_INSTALL_PREFIX=/usr/local ..
+        make -j$(nproc)
+        sudo make install
+        sudo ldconfig
+      displayName: 'Install mbedTLS 2.16'
     - script: |
         sudo -E bash jenkins/linux_mbedtls.sh
       displayName: 'Build'
+      env:
+        LD_LIBRARY_PATH: /usr/local/lib
     - script: |
         cd cmake
-        sudo bash -c 'source "$(Pipeline.Workspace)/test_config_scripts/set_e2e_test_env_vars.sh" && ../build_all/linux/run_tests.sh --e2e'
+        sudo bash -c 'export LD_LIBRARY_PATH=/usr/local/lib && source "$(Pipeline.Workspace)/test_config_scripts/set_e2e_test_env_vars.sh" && ../build_all/linux/run_tests.sh --e2e'
       displayName: 'Run Tests'
     - task: PublishTestResults@2
-      displayName: 'Publish Test Results (mbedTLS)'
+      displayName: 'Publish Test Results (mbedTLS 2.16)'
       inputs:
         testRunner: CTest
         testResultsFiles: '**/Test.xml'
         mergeTestResults: true
-        testRunTitle: 'mbedtls'
+        testRunTitle: 'mbedtls_2_16'
+      condition: succeededOrFailed()
+
+  - job: mbedtls_2_28
+    # Coverage for mbedTLS 2.28.x, previously provided by the linux-c-ubuntu-2204
+    # Docker image (Ubuntu 22.04 + apt libmbedtls-dev).  Ubuntu 24.04 ships 3.x,
+    # so install 2.28.x from source.
+    timeoutInMinutes: 90
+    pool:
+      vmImage: 'ubuntu-24.04'
+    displayName: 'mbedTLS 2.28'
+    steps:
+    - checkout: self
+      submodules: true
+    - download: current
+      artifact: test_config_scripts
+      displayName: Download artifact (test config scripts)
+    - script: |
+        set -e
+        sudo apt-get update && sudo apt-get upgrade
+        sudo ./build_all/linux/setup.sh
+      displayName: 'Host setup'
+    - script: |
+        set -e
+        # Install mbedTLS 2.28.x from source (latest long-term-support 2.28 release).
+        git clone --depth 1 -b mbedtls-2.28.10 https://github.com/Mbed-TLS/mbedtls /tmp/mbedtls-2.28
+        cd /tmp/mbedtls-2.28
+        mkdir build && cd build
+        cmake -DUSE_SHARED_MBEDTLS_LIBRARY=ON -DCMAKE_INSTALL_PREFIX=/usr/local ..
+        make -j$(nproc)
+        sudo make install
+        sudo ldconfig
+      displayName: 'Install mbedTLS 2.28'
+    - script: |
+        sudo -E bash jenkins/linux_mbedtls.sh
+      displayName: 'Build'
+      env:
+        LD_LIBRARY_PATH: /usr/local/lib
+    - script: |
+        cd cmake
+        sudo bash -c 'export LD_LIBRARY_PATH=/usr/local/lib && source "$(Pipeline.Workspace)/test_config_scripts/set_e2e_test_env_vars.sh" && ../build_all/linux/run_tests.sh --e2e'
+      displayName: 'Run Tests'
+    - task: PublishTestResults@2
+      displayName: 'Publish Test Results (mbedTLS 2.28)'
+      inputs:
+        testRunner: CTest
+        testResultsFiles: '**/Test.xml'
+        mergeTestResults: true
+        testRunTitle: 'mbedtls_2_28'
+      condition: succeededOrFailed()
+
+  - job: mbedtls_3x
+    # Coverage for mbedTLS 3.x, previously provided by the linux-c-ubuntu-2404
+    # Docker image which built v3.6.2 from source.  Reproduce that here.
+    timeoutInMinutes: 90
+    pool:
+      vmImage: 'ubuntu-24.04'
+    displayName: 'mbedTLS 3.x'
+    steps:
+    - checkout: self
+      submodules: true
+    - download: current
+      artifact: test_config_scripts
+      displayName: Download artifact (test config scripts)
+    - script: |
+        set -e
+        sudo apt-get update && sudo apt-get upgrade
+        sudo ./build_all/linux/setup.sh
+      displayName: 'Host setup'
+    - script: |
+        set -e
+        # Install mbedTLS 3.6.x from source, matching the old linux-c-ubuntu-2404 image.
+        git clone --depth 1 -b v3.6.2 https://github.com/Mbed-TLS/mbedtls /tmp/mbedtls-3x
+        cd /tmp/mbedtls-3x
+        git submodule update --init --depth 1
+        mkdir build && cd build
+        cmake -DUSE_SHARED_MBEDTLS_LIBRARY=ON -DCMAKE_INSTALL_PREFIX=/usr/local ..
+        make -j$(nproc)
+        sudo make install
+        sudo ldconfig
+      displayName: 'Install mbedTLS 3.x'
+    - script: |
+        sudo -E bash jenkins/linux_mbedtls.sh
+      displayName: 'Build'
+      env:
+        LD_LIBRARY_PATH: /usr/local/lib
+    - script: |
+        cd cmake
+        sudo bash -c 'export LD_LIBRARY_PATH=/usr/local/lib && source "$(Pipeline.Workspace)/test_config_scripts/set_e2e_test_env_vars.sh" && ../build_all/linux/run_tests.sh --e2e'
+      displayName: 'Run Tests'
+    - task: PublishTestResults@2
+      displayName: 'Publish Test Results (mbedTLS 3.x)'
+      inputs:
+        testRunner: CTest
+        testResultsFiles: '**/Test.xml'
+        mergeTestResults: true
+        testRunTitle: 'mbedtls_3x'
       condition: succeededOrFailed()
 
   - job: cares
