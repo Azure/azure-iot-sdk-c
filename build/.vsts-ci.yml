@@ -168,7 +168,7 @@ stages:
       artifact: ubuntu2404_dbg_build_output
       displayName: 'Publish build output'
 
-  - job: ubuntu2404_tests
+  - job: ubuntu2404_dbg_tests
     dependsOn: ubuntu2404_dbg_build
     timeoutInMinutes: 90
     pool:
@@ -218,6 +218,409 @@ stages:
         mergeTestResults: true
         testRunTitle: 'ubuntu2404_$(System.JobPositionInPhase)'
       condition: succeededOrFailed()
+
+  - job: clang
+    timeoutInMinutes: 90
+    pool:
+      vmImage: 'ubuntu-24.04'
+    displayName: 'Clang (Debug)'
+    steps:
+    - checkout: self
+      submodules: true
+    - download: current
+      artifact: test_config_scripts
+      displayName: Download artifact (test config scripts)
+    - script: |
+        set -e
+        sudo apt-get update && sudo apt-get upgrade
+        sudo ./build_all/linux/setup.sh
+        sudo apt-get install -y clang
+      displayName: 'Host setup'
+    - script: |
+        export OPENSSL_ia32cap=0x00000000
+        sudo chmod -R 755 .
+        sudo -E ./jenkins/ubuntu_clang.sh
+      displayName: 'Build'
+    - script: |
+        export OPENSSL_ia32cap=0x00000000
+        sudo chmod -R 755 .
+        cd cmake
+        sudo bash -c 'source "$(Pipeline.Workspace)/test_config_scripts/set_e2e_test_env_vars.sh" && ../build_all/linux/run_tests.sh --e2e'
+      displayName: 'Run Tests'
+    - task: PublishTestResults@2
+      displayName: 'Publish Test Results (Clang Debug)'
+      inputs:
+        testRunner: CTest
+        testResultsFiles: '**/Test.xml'
+        mergeTestResults: true
+        testRunTitle: 'clang'
+      condition: succeededOrFailed()
+
+  - job: clang_release
+    timeoutInMinutes: 90
+    pool:
+      vmImage: 'ubuntu-24.04'
+    displayName: 'Clang (Release)'
+    steps:
+    - checkout: self
+      submodules: true
+    - download: current
+      artifact: test_config_scripts
+      displayName: Download artifact (test config scripts)
+    - script: |
+        set -e
+        sudo apt-get update && sudo apt-get upgrade
+        sudo ./build_all/linux/setup.sh
+        sudo apt-get install -y clang
+      displayName: 'Host setup'
+    - script: |
+        export OPENSSL_ia32cap=0x00000000
+        sudo chmod -R 755 .
+        sudo -E ./jenkins/ubuntu_clang_release.sh
+      displayName: 'Build'
+    - script: |
+        export OPENSSL_ia32cap=0x00000000
+        sudo chmod -R 755 .
+        cd cmake
+        sudo bash -c 'source "$(Pipeline.Workspace)/test_config_scripts/set_e2e_test_env_vars.sh" && ../build_all/linux/run_tests.sh --e2e'
+      displayName: 'Run Tests'
+    - task: PublishTestResults@2
+      displayName: 'Publish Test Results (Clang Release)'
+      inputs:
+        testRunner: CTest
+        testResultsFiles: '**/Test.xml'
+        mergeTestResults: true
+        testRunTitle: 'clang_release'
+      condition: succeededOrFailed()
+
+  - job: ubuntu2404_custom_cmake
+    timeoutInMinutes: 90
+    pool:
+      vmImage: 'ubuntu-24.04'
+    displayName: 'Ubuntu 24.04 (Custom CMake Options)'
+    steps:
+    - checkout: self
+      submodules: true
+    - download: current
+      artifact: test_config_scripts
+      displayName: Download artifact (test config scripts)
+    - script: |
+        set -e
+        sudo apt-get update && sudo apt-get upgrade
+        sudo apt-get install -y git cmake build-essential curl libcurl4-openssl-dev libssl-dev uuid-dev ca-certificates
+      displayName: 'Host setup'
+    - script: |
+        set -e
+        mkdir cmake
+        cd cmake
+        sudo cmake '-DcompileOption_C:STRING= ' -DCMAKE_BUILD_TYPE=Debug -Drun_e2e_tests:BOOL=OFF -Drun_sfc_tests:BOOL=OFF -Drun_longhaul_tests=OFF -Duse_amqp:BOOL=ON -Duse_http:BOOL=ON -Duse_mqtt:BOOL=ON -Ddont_use_uploadtoblob:BOOL=OFF -Drun_unittests:BOOL=ON -Dno_logging:BOOL=OFF -Duse_prov_client:BOOL=ON -Duse_tpm_simulator:BOOL=OFF -Duse_edge_modules=ON -Dhsm_type_riot=OFF -Dhsm_type_x509=ON -Dhsm_type_symm_key=ON -Dhsm_type_sastoken=ON -Denable_ipv6=OFF ..
+        sudo make -j$(nproc)
+      displayName: 'Build'
+    - script: |
+        cd cmake
+        sudo bash -c 'source "$(Pipeline.Workspace)/test_config_scripts/set_e2e_test_env_vars.sh" && ctest -T test --no-compress-output -V'
+      displayName: 'Run Tests'
+    - task: PublishTestResults@2
+      displayName: 'Publish Test Results (Custom CMake)'
+      inputs:
+        testRunner: CTest
+        testResultsFiles: '**/Test.xml'
+        mergeTestResults: true
+        testRunTitle: 'ubuntu2404_custom_cmake'
+      condition: succeededOrFailed()
+
+  - job: ubuntuRIOT
+    timeoutInMinutes: 90
+    pool:
+      vmImage: 'ubuntu-24.04'
+    displayName: 'Ubuntu RIOT/DICE'
+    steps:
+    - checkout: self
+      submodules: true
+    - download: current
+      artifact: test_config_scripts
+      displayName: Download artifact (test config scripts)
+    - script: |
+        set -e
+        sudo apt-get update && sudo apt-get upgrade
+        sudo ./build_all/linux/setup.sh
+      displayName: 'Host setup'
+    - script: |
+        sudo -E ./jenkins/ubuntu_c_riot.sh
+      displayName: 'Build'
+    - script: |
+        export OPENSSL_ia32cap=0x00000000
+        sudo chmod -R 755 .
+        cd cmake
+        sudo bash -c 'source "$(Pipeline.Workspace)/test_config_scripts/set_e2e_test_env_vars.sh" && ../build_all/linux/run_tests.sh --e2e'
+      displayName: 'Run Tests'
+    - task: PublishTestResults@2
+      displayName: 'Publish Test Results (Ubuntu RIOT)'
+      inputs:
+        testRunner: CTest
+        testResultsFiles: '**/Test.xml'
+        mergeTestResults: true
+        testRunTitle: 'ubuntuRIOT'
+      condition: succeededOrFailed()
+
+  - job: ubuntu2404dualipstack
+    timeoutInMinutes: 90
+    pool:
+      vmImage: 'ubuntu-24.04'
+    displayName: 'Ubuntu 24.04 with Dual IP Stack'
+    steps:
+    - checkout: self
+      submodules: true
+    - download: current
+      artifact: test_config_scripts
+      displayName: Download artifact (test config scripts)
+    - script: |
+        set -e
+        sudo apt-get update && sudo apt-get upgrade
+        sudo ./build_all/linux/setup.sh
+      displayName: 'Host setup'
+    - script: |
+        cat /etc/*release | grep VERSION*
+        gcc --version
+        openssl version
+        curl --version
+        sudo -E env PATH="$PATH" ./build_all/linux/build.sh --run-unittests --run-e2e-tests --provisioning --use-hsmsymmkey --use-hsmsas --use-hsmx509 --use-edge-modules --use-ipv6-dualstack --config Debug
+      displayName: 'Build'
+    - script: |
+        export OPENSSL_ia32cap=0x00000000
+        sudo chmod -R 755 .
+        cd cmake
+        sudo bash -c 'source "$(Pipeline.Workspace)/test_config_scripts/set_e2e_test_env_vars.sh" && ../build_all/linux/run_tests.sh --e2e'
+      displayName: 'Run Tests'
+    - task: PublishTestResults@2
+      displayName: 'Publish Test Results (Dual IP Stack)'
+      inputs:
+        testRunner: CTest
+        testResultsFiles: '**/Test.xml'
+        mergeTestResults: true
+        testRunTitle: 'ubuntu2404dualipstack'
+      condition: succeededOrFailed()
+
+  - job: debian
+    timeoutInMinutes: 90
+    pool:
+      vmImage: 'ubuntu-24.04'
+    displayName: 'Debian Build Script'
+    steps:
+    - checkout: self
+      submodules: true
+    - download: current
+      artifact: test_config_scripts
+      displayName: Download artifact (test config scripts)
+    - script: |
+        set -e
+        sudo apt-get update && sudo apt-get upgrade
+        sudo ./build_all/linux/setup.sh
+      displayName: 'Host setup'
+    - script: |
+        sudo ./jenkins/debian_c.sh
+      displayName: 'Build'
+    - script: |
+        export OPENSSL_ia32cap=0x00000000
+        sudo chmod -R 755 .
+        cd cmake
+        sudo bash -c 'source "$(Pipeline.Workspace)/test_config_scripts/set_e2e_test_env_vars.sh" && ../build_all/linux/run_tests.sh --e2e'
+      displayName: 'Run Tests'
+    - task: PublishTestResults@2
+      displayName: 'Publish Test Results (Debian)'
+      inputs:
+        testRunner: CTest
+        testResultsFiles: '**/Test.xml'
+        mergeTestResults: true
+        testRunTitle: 'debian'
+      condition: succeededOrFailed()
+
+  - job: linux_installed_deps
+    pool:
+      vmImage: 'ubuntu-24.04'
+    displayName: 'Linux with Installed Deps'
+    steps:
+    - checkout: self
+      submodules: true
+    - script: |
+        set -e
+        sudo apt-get update && sudo apt-get upgrade
+        sudo ./build_all/linux/setup.sh
+      displayName: 'Host setup'
+    - script: |
+        export OPENSSL_ia32cap=0x00000000
+        sudo chmod -R 755 .
+        sudo -E ./jenkins/linux_install_deps.sh
+      displayName: 'Build'
+
+  - job: wolfssl
+    timeoutInMinutes: 90
+    pool:
+      vmImage: 'ubuntu-24.04'
+    displayName: 'WolfSSL'
+    steps:
+    - checkout: self
+      submodules: true
+    - download: current
+      artifact: test_config_scripts
+      displayName: Download artifact (test config scripts)
+    - script: |
+        set -e
+        sudo apt-get update && sudo apt-get upgrade
+        sudo ./build_all/linux/setup.sh
+        # wolfSSL is not in Ubuntu main; install dev headers from universe.
+        sudo apt-get install -y libwolfssl-dev || true
+      displayName: 'Host setup'
+    - script: |
+        sudo -E jenkins/linux_wolfssl.sh
+      displayName: 'Build'
+    - script: |
+        cd cmake
+        sudo bash -c 'source "$(Pipeline.Workspace)/test_config_scripts/set_e2e_test_env_vars.sh" && ../build_all/linux/run_tests.sh --e2e'
+      displayName: 'Run Tests'
+    - task: PublishTestResults@2
+      displayName: 'Publish Test Results (WolfSSL)'
+      inputs:
+        testRunner: CTest
+        testResultsFiles: '**/Test.xml'
+        mergeTestResults: true
+        testRunTitle: 'wolfssl'
+      condition: succeededOrFailed()
+
+  - job: bearssl
+    timeoutInMinutes: 90
+    pool:
+      vmImage: 'ubuntu-24.04'
+    displayName: 'BearSSL'
+    steps:
+    - checkout: self
+      submodules: true
+    - download: current
+      artifact: test_config_scripts
+      displayName: Download artifact (test config scripts)
+    - script: |
+        set -e
+        sudo apt-get update && sudo apt-get upgrade
+        sudo ./build_all/linux/setup.sh
+      displayName: 'Host setup'
+    - script: |
+        sudo -E bash jenkins/linux_bearssl.sh
+      displayName: 'Build'
+    - script: |
+        cd cmake
+        sudo bash -c 'source "$(Pipeline.Workspace)/test_config_scripts/set_e2e_test_env_vars.sh" && ../build_all/linux/run_tests.sh --e2e'
+      displayName: 'Run Tests'
+    - task: PublishTestResults@2
+      displayName: 'Publish Test Results (BearSSL)'
+      inputs:
+        testRunner: CTest
+        testResultsFiles: '**/Test.xml'
+        mergeTestResults: true
+        testRunTitle: 'bearssl'
+      condition: succeededOrFailed()
+
+  - job: mbedtls
+    timeoutInMinutes: 90
+    pool:
+      vmImage: 'ubuntu-24.04'
+    displayName: 'mbedTLS'
+    steps:
+    - checkout: self
+      submodules: true
+    - download: current
+      artifact: test_config_scripts
+      displayName: Download artifact (test config scripts)
+    - script: |
+        set -e
+        sudo apt-get update && sudo apt-get upgrade
+        sudo ./build_all/linux/setup.sh
+        sudo apt-get install -y libmbedtls-dev
+      displayName: 'Host setup'
+    - script: |
+        sudo -E bash jenkins/linux_mbedtls.sh
+      displayName: 'Build'
+    - script: |
+        cd cmake
+        sudo bash -c 'source "$(Pipeline.Workspace)/test_config_scripts/set_e2e_test_env_vars.sh" && ../build_all/linux/run_tests.sh --e2e'
+      displayName: 'Run Tests'
+    - task: PublishTestResults@2
+      displayName: 'Publish Test Results (mbedTLS)'
+      inputs:
+        testRunner: CTest
+        testResultsFiles: '**/Test.xml'
+        mergeTestResults: true
+        testRunTitle: 'mbedtls'
+      condition: succeededOrFailed()
+
+  - job: cares
+    timeoutInMinutes: 90
+    pool:
+      vmImage: 'ubuntu-24.04'
+    displayName: 'Linux with C-Ares'
+    steps:
+    - checkout: self
+      submodules: true
+    - download: current
+      artifact: test_config_scripts
+      displayName: Download artifact (test config scripts)
+    - script: |
+        set -e
+        sudo apt-get update && sudo apt-get upgrade
+        sudo ./build_all/linux/setup.sh
+        sudo apt-get install -y libc-ares-dev
+      displayName: 'Host setup'
+    - script: |
+        sudo -E bash jenkins/linux_cares.sh
+      displayName: 'Build'
+    - script: |
+        cd cmake
+        sudo bash -c 'source "$(Pipeline.Workspace)/test_config_scripts/set_e2e_test_env_vars.sh" && ../build_all/linux/run_tests.sh --e2e'
+      displayName: 'Run Tests'
+    - task: PublishTestResults@2
+      displayName: 'Publish Test Results (C-Ares)'
+      inputs:
+        testRunner: CTest
+        testResultsFiles: '**/Test.xml'
+        mergeTestResults: true
+        testRunTitle: 'cares'
+      condition: succeededOrFailed()
+
+  - job: openssl_engine
+    timeoutInMinutes: 90
+    pool:
+      vmImage: 'ubuntu-24.04'
+    displayName: 'OpenSSL with pkcs11 engine and SoftHSM'
+    steps:
+    - checkout: self
+      submodules: true
+    - download: current
+      artifact: test_config_scripts
+      displayName: Download artifact (test config scripts)
+    - script: |
+        set -e
+        sudo apt-get update && sudo apt-get upgrade
+        sudo ./build_all/linux/setup.sh
+        sudo apt-get install -y softhsm2 libengine-pkcs11-openssl opensc libp11-dev
+      displayName: 'Host setup'
+    - script: |
+        sudo -E bash jenkins/linux_openssl_engine.sh
+      displayName: 'Build'
+      env:
+        IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
+        IOT_DPS_INDIVIDUAL_X509_KEY: $(IOTHUB-E2E-X509-ECC-PRIVATE-KEY-BASE64)
+    - script: |
+        cd cmake
+        sudo bash -c 'source "$(Pipeline.Workspace)/test_config_scripts/set_e2e_test_env_vars.sh" && ../build_all/linux/run_tests.sh --e2e'
+      displayName: 'Run Tests'
+    - task: PublishTestResults@2
+      displayName: 'Publish Test Results (OpenSSL Engine)'
+      inputs:
+        testRunner: CTest
+        testResultsFiles: '**/Test.xml'
+        mergeTestResults: true
+        testRunTitle: 'openssl_engine'
+      condition: succeededOrFailed()
+
 - stage: Cleanup
   dependsOn:
   - Setup
@@ -572,92 +975,6 @@ stages:
 #         mergeTestResults: true
 #         testRunTitle: 'clang_release'
 #       condition: succeededOrFailed()
-#   - job: ubuntu2004debug
-#     timeoutInMinutes: 190
-#     container: linux-c-ubuntu-2004
-#     pool:
-#       name: 'sdk-c--ubuntu-22'
-#     displayName: 'Ubuntu 20.04 (Debug)'
-#     steps:
-#     - script: |
-#         sudo -E ./jenkins/ubuntu_c.sh
-#       displayName: 'Build'
-#     - script: |
-#         export OPENSSL_ia32cap=0x00000000
-#         sudo chmod -R 755 .
-#         cd cmake && sudo -E ../build_all/linux/run_tests.sh
-#       displayName: "Run Tests"
-#       env:
-#         IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
-#         IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
-#         IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
-#         IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
-#         IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
-#         IOTHUB_POLICY_KEY: $(IOTHUB-POLICY-KEY)
-#         STORAGE_ACCOUNT_CONNECTION_STRING: $(STORAGE-ACCOUNT-CONNECTION-STRING)
-#         IOT_DPS_CONNECTION_STRING: $(IOT-DPS-CONNECTION-STRING)
-#         IOT_DPS_ID_SCOPE: $(IOT-DPS-ID-SCOPE)
-#         IOTHUB_CA_ROOT_CERT: $(IOTHUB-CA-ROOT-CERT)
-#         IOTHUB_CA_ROOT_CERT_KEY: $(IOTHUB-CA-ROOT-CERT-KEY)
-#         IOT_DPS_GLOBAL_ENDPOINT: $(IOT-DPS-GLOBAL-ENDPOINT)
-#         IOTHUB_DEVICE_CONN_STRING_INVALIDCERT: $(IOTHUB-DEVICE-CONN-STRING-INVALIDCERT)
-#         IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
-#         DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
-#         PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
-#         IOT_DPS_INDIVIDUAL_X509_CERTIFICATE: $(IOTHUB-E2E-X509-ECC-CERT-BASE64)
-#         IOT_DPS_INDIVIDUAL_X509_KEY: $(IOTHUB-E2E-X509-ECC-PRIVATE-KEY-BASE64)
-#         IOT_DPS_INDIVIDUAL_REGISTRATION_ID: $(IOT-DPS-INDIVIDUAL-REGISTRATION-ID)
-#     - task: PublishTestResults@2
-#       displayName: 'Publish Ubuntu 20 (Debug) Results'
-#       inputs:
-#         testRunner: CTest
-#         testResultsFiles: '**/Test.xml'
-#         mergeTestResults: true
-#         testRunTitle: 'ubuntu2004debug'
-#       condition: succeededOrFailed()
-#   - job: ubuntu2004release
-#     timeoutInMinutes: 190
-#     container: linux-c-ubuntu-2004
-#     pool:
-#       name: 'sdk-c--ubuntu-22'
-#     displayName: 'Ubuntu 20.04 (Release)'
-#     steps:
-#     - script: |
-#         sudo -E ./jenkins/ubuntu_c_release.sh
-#       displayName: 'Build'
-#     - script: |
-#         export OPENSSL_ia32cap=0x00000000
-#         sudo chmod -R 755 .
-#         cd cmake && sudo -E ../build_all/linux/run_tests.sh
-#       displayName: "Run Tests"
-#       env:
-#         IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
-#         IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
-#         IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
-#         IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
-#         IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
-#         IOTHUB_POLICY_KEY: $(IOTHUB-POLICY-KEY)
-#         STORAGE_ACCOUNT_CONNECTION_STRING: $(STORAGE-ACCOUNT-CONNECTION-STRING)
-#         IOT_DPS_CONNECTION_STRING: $(IOT-DPS-CONNECTION-STRING)
-#         IOT_DPS_ID_SCOPE: $(IOT-DPS-ID-SCOPE)
-#         IOTHUB_CA_ROOT_CERT: $(IOTHUB-CA-ROOT-CERT)
-#         IOTHUB_CA_ROOT_CERT_KEY: $(IOTHUB-CA-ROOT-CERT-KEY)
-#         IOT_DPS_GLOBAL_ENDPOINT: $(IOT-DPS-GLOBAL-ENDPOINT)
-#         IOTHUB_DEVICE_CONN_STRING_INVALIDCERT: $(IOTHUB-DEVICE-CONN-STRING-INVALIDCERT)
-#         IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
-#         DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
-#         PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
-#         IOT_DPS_INDIVIDUAL_X509_CERTIFICATE: $(IOTHUB-E2E-X509-ECC-CERT-BASE64)
-#         IOT_DPS_INDIVIDUAL_X509_KEY: $(IOTHUB-E2E-X509-ECC-PRIVATE-KEY-BASE64)
-#         IOT_DPS_INDIVIDUAL_REGISTRATION_ID: $(IOT-DPS-INDIVIDUAL-REGISTRATION-ID)
-#     - task: PublishTestResults@2
-#       displayName: 'Publish Ubuntu 20 (Release) Results'
-#       inputs:
-#         testRunner: CTest
-#         testResultsFiles: '**/Test.xml'
-#         mergeTestResults: true
-#         testRunTitle: 'ubuntu2004release'
-#       condition: succeededOrFailed()
 #   - job: ubuntu2204arm
 #     pool: 
 #       name: 'sdk-c--ubuntu-22-arm'
@@ -703,53 +1020,6 @@ stages:
 #         mergeTestResults: true
 #         testRunTitle: 'debian'
 #       condition: succeededOrFailed()
-#   - job: ubuntu2204build
-#     timeoutInMinutes: 190
-#     container: linux-c-ubuntu-2204
-#     pool:
-#       name: 'sdk-c--ubuntu-22'
-#     displayName: 'Ubuntu 22.04 Unit Tests (Debug)'
-#     steps:
-#     - script: |
-#         cat /etc/*release | grep VERSION*
-#         gcc --version
-#         openssl version
-#         curl --version
-#         sudo -E env PATH="$PATH" ./build_all/linux/build.sh --run-unittests --provisioning --use-hsmsymmkey --use-hsmsas --use-hsmx509 --use-edge-modules --config Debug
-#       displayName: 'Build'
-#     - script: |
-#         export OPENSSL_ia32cap=0x00000000
-#         sudo chmod -R 755 .
-#         cd cmake && sudo -E ../build_all/linux/run_tests.sh
-#       displayName: "Run Tests"
-#       env:
-#         IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
-#         IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
-#         IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
-#         IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
-#         IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
-#         IOTHUB_POLICY_KEY: $(IOTHUB-POLICY-KEY)
-#         STORAGE_ACCOUNT_CONNECTION_STRING: $(STORAGE-ACCOUNT-CONNECTION-STRING)
-#         IOT_DPS_CONNECTION_STRING: $(IOT-DPS-CONNECTION-STRING)
-#         IOT_DPS_ID_SCOPE: $(IOT-DPS-ID-SCOPE)
-#         IOTHUB_CA_ROOT_CERT: $(IOTHUB-CA-ROOT-CERT)
-#         IOTHUB_CA_ROOT_CERT_KEY: $(IOTHUB-CA-ROOT-CERT-KEY)
-#         IOT_DPS_GLOBAL_ENDPOINT: $(IOT-DPS-GLOBAL-ENDPOINT)
-#         IOTHUB_DEVICE_CONN_STRING_INVALIDCERT: $(IOTHUB-DEVICE-CONN-STRING-INVALIDCERT)
-#         IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
-#         DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
-#         PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
-#         IOT_DPS_INDIVIDUAL_X509_CERTIFICATE: $(IOTHUB-E2E-X509-ECC-CERT-BASE64)
-#         IOT_DPS_INDIVIDUAL_X509_KEY: $(IOTHUB-E2E-X509-ECC-PRIVATE-KEY-BASE64)
-#         IOT_DPS_INDIVIDUAL_REGISTRATION_ID: $(IOT-DPS-INDIVIDUAL-REGISTRATION-ID)
-#     - task: PublishTestResults@2
-#       displayName: 'Publish Ubuntu 22 (Debug) Results'
-#       inputs:
-#         testRunner: CTest
-#         testResultsFiles: '**/Test.xml'
-#         mergeTestResults: true
-#         testRunTitle: 'ubuntu2004debug'
-#       condition: succeededOrFailed()
 #   - job: ubuntuRIOT
 #     timeoutInMinutes: 190
 #     container: linux-c-ubuntu-2004
@@ -792,49 +1062,6 @@ stages:
 #         testResultsFiles: '**/Test.xml'
 #         mergeTestResults: true
 #         testRunTitle: 'ubuntuRIOT'
-#       condition: succeededOrFailed()
-#   - job: ubuntu2004dualipstack
-#     timeoutInMinutes: 190
-#     container: linux-c-ubuntu-2004
-#     pool:
-#       name: 'sdk-c--ubuntu-22'
-#     displayName: 'Ubuntu 20.04 with Dual IP Stack'
-#     steps:
-#     - script: |
-#         export OPENSSL_ia32cap=0x00000000
-#         sudo chmod -R 755 .
-#         sudo -E ./jenkins/ubuntu_c_ipv6_dual_stack.sh
-#       displayName: 'Build'
-#     - script: |
-#         cd cmake && sudo -E ../build_all/linux/run_tests.sh
-#       displayName: "Run Tests"
-#       env:
-#         IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
-#         IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
-#         IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
-#         IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
-#         IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
-#         IOTHUB_POLICY_KEY: $(IOTHUB-POLICY-KEY)
-#         STORAGE_ACCOUNT_CONNECTION_STRING: $(STORAGE-ACCOUNT-CONNECTION-STRING)
-#         IOT_DPS_CONNECTION_STRING: $(IOT-DPS-CONNECTION-STRING)
-#         IOT_DPS_ID_SCOPE: $(IOT-DPS-ID-SCOPE)
-#         IOTHUB_CA_ROOT_CERT: $(IOTHUB-CA-ROOT-CERT)
-#         IOTHUB_CA_ROOT_CERT_KEY: $(IOTHUB-CA-ROOT-CERT-KEY)
-#         IOT_DPS_GLOBAL_ENDPOINT: $(IOT-DPS-GLOBAL-ENDPOINT)
-#         IOTHUB_DEVICE_CONN_STRING_INVALIDCERT: $(IOTHUB-DEVICE-CONN-STRING-INVALIDCERT)
-#         IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
-#         DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
-#         PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
-#         IOT_DPS_INDIVIDUAL_X509_CERTIFICATE: $(IOTHUB-E2E-X509-ECC-CERT-BASE64)
-#         IOT_DPS_INDIVIDUAL_X509_KEY: $(IOTHUB-E2E-X509-ECC-PRIVATE-KEY-BASE64)
-#         IOT_DPS_INDIVIDUAL_REGISTRATION_ID: $(IOT-DPS-INDIVIDUAL-REGISTRATION-ID)
-#     - task: PublishTestResults@2
-#       displayName: 'Publish Ubuntu 20.04 with Dual IP Stack Results'
-#       inputs:
-#         testRunner: CTest
-#         testResultsFiles: '**/Test.xml'
-#         mergeTestResults: true
-#         testRunTitle: 'ubuntu2004dualipstack'
 #       condition: succeededOrFailed()
 #   - job: ubuntu2204dualipstack
 #     timeoutInMinutes: 190
@@ -1351,50 +1578,6 @@ stages:
 #        chmod +x jenkins/raspberrypi_c_buster.sh
 #         ./jenkins/raspberrypi_c_buster.sh
 #       displayName: 'Build'
-#   - job: crosscompile_mips32
-#     pool:
-#       vmImage: 'ubuntu-24.04'
-#     displayName: "Cross Compile (MIPS32)"
-#     steps:
-#     - script: |
-#         sudo apt-get update && sudo apt-get install -y \
-#         curl \
-#         git \
-#         python-software-properties \
-#         build-essential \
-#         pkg-config \
-#         docker.io
-#         sudo curl -sL https://deb.nodesource.com/setup_16.x | bash -
-#         sudo apt-get install -y nodejs
-#       displayName: 'Setup'
-#     - script: |
-#         cd samples/dockerbuilds/MIPS32
-#         docker build --build-arg TARGET_BRANCH=$BUILD_SOURCEBRANCH -t mipsiotbuild:latest . --network=host
-#         cd ..
-#         docker build -t mipsiotapp:latest . --network=host --file ./MIPS32/Dockerfile_adjunct
-#       displayName: 'Build MIPS32'
-#   - job: crosscompile_arm
-#     pool:
-#       vmImage: 'ubuntu-24.04'
-#     displayName: "Cross Compile (ARM)"
-#     steps:
-#     - script: |
-#         sudo apt-get update && sudo apt-get install -y \
-#         curl \
-#         git \
-#         python-software-properties \
-#         build-essential \
-#         pkg-config \
-#         docker.io
-#         sudo curl -sL https://deb.nodesource.com/setup_16.x | bash -
-#         sudo apt-get install -y nodejs
-#       displayName: 'Setup'
-#     - script: |
-#         cd samples/dockerbuilds/ARM
-#         docker build --build-arg TARGET_BRANCH=$BUILD_SOURCEBRANCH -t armiotbuild:latest . --network=host
-#         cd ..
-#         docker build -t armiotapp:latest . --network=host --file ./ARM/Dockerfile_adjunct
-#       displayName: 'Build ARM'
 #   - job: DotNET
 #     displayName: .NET
 #     variables:
