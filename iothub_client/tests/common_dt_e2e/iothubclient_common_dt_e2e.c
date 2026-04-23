@@ -281,34 +281,39 @@ static bool service_client_update_twin(IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE 
                                         IOTHUB_PROVISIONED_DEVICE* device_to_use,
                                         const char* twin_json)
 {
-    char* twin_response;
-    bool result;
+    char* twin_response = NULL;
+    bool result = false;
 
     LogInfo("service_client_update_twin(): Beginning update of twin via Service SDK.");
 
-    if (device_to_use->moduleId != NULL)
+    // The service-side REST call over libcurl/TLS can fail transiently (e.g. "SSL connect error")
+    // especially when the test process is heavily instrumented (valgrind/helgrind/drd).  Retry a
+    // few times before giving up, mirroring what common_device_method_e2e does for Invoke.
+    for (int tryCounter = 0; tryCounter < TEST_METHOD_INVOKE_MAX_RETRIES; tryCounter++)
     {
-        twin_response = IoTHubDeviceTwin_UpdateModuleTwin(serviceclient_devicetwin_handle,
-                                                          device_to_use->deviceId,
-                                                          device_to_use->moduleId, twin_json);
-    }
-    else
-    {
-        twin_response = IoTHubDeviceTwin_UpdateTwin(serviceclient_devicetwin_handle,
-                                                    device_to_use->deviceId, twin_json);
-    }
+        if (device_to_use->moduleId != NULL)
+        {
+            twin_response = IoTHubDeviceTwin_UpdateModuleTwin(serviceclient_devicetwin_handle,
+                                                              device_to_use->deviceId,
+                                                              device_to_use->moduleId, twin_json);
+        }
+        else
+        {
+            twin_response = IoTHubDeviceTwin_UpdateTwin(serviceclient_devicetwin_handle,
+                                                        device_to_use->deviceId, twin_json);
+        }
 
-    if (twin_response == NULL)
-    {
-        LogInfo("IoTHubDeviceTwin_Update(Module)Twin failed.");
-        result = false;
-    }
-    else
-    {
-        LogInfo("service_client_update_twin(): Twin response from Service SDK after update is <%s>.",
-            twin_response);
-        free(twin_response);
-        result = true;
+        if (twin_response != NULL)
+        {
+            LogInfo("service_client_update_twin(): Twin response from Service SDK after update is <%s>.",
+                twin_response);
+            free(twin_response);
+            result = true;
+            break;
+        }
+
+        LogError("(Try %d) IoTHubDeviceTwin_Update(Module)Twin failed.", tryCounter + 1);
+        ThreadAPI_Sleep(TEST_SLEEP_BETWEEN_METHOD_INVOKE_FAILURES_MSEC);
     }
 
     return result;
@@ -317,18 +322,32 @@ static bool service_client_update_twin(IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE 
 static char* service_client_get_twin(IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE serviceclient_devicetwin_handle,
                                       IOTHUB_PROVISIONED_DEVICE* device_to_use)
 {
-    char* twin_data;
+    char* twin_data = NULL;
 
-    if (device_to_use->moduleId != NULL)
+    // The service-side REST call over libcurl/TLS can fail transiently (e.g. "SSL connect error")
+    // especially when the test process is heavily instrumented (valgrind/helgrind/drd).  Retry a
+    // few times before asserting, mirroring what common_device_method_e2e does for Invoke.
+    for (int tryCounter = 0; tryCounter < TEST_METHOD_INVOKE_MAX_RETRIES; tryCounter++)
     {
-        twin_data = IoTHubDeviceTwin_GetModuleTwin(serviceclient_devicetwin_handle,
-                                                   device_to_use->deviceId,
-                                                   device_to_use->moduleId);
-    }
-    else
-    {
-        twin_data = IoTHubDeviceTwin_GetTwin(serviceclient_devicetwin_handle,
-                                             device_to_use->deviceId);
+        if (device_to_use->moduleId != NULL)
+        {
+            twin_data = IoTHubDeviceTwin_GetModuleTwin(serviceclient_devicetwin_handle,
+                                                       device_to_use->deviceId,
+                                                       device_to_use->moduleId);
+        }
+        else
+        {
+            twin_data = IoTHubDeviceTwin_GetTwin(serviceclient_devicetwin_handle,
+                                                 device_to_use->deviceId);
+        }
+
+        if (twin_data != NULL)
+        {
+            break;
+        }
+
+        LogError("(Try %d) IoTHubDeviceTwin_Get(Module)Twin failed.", tryCounter + 1);
+        ThreadAPI_Sleep(TEST_SLEEP_BETWEEN_METHOD_INVOKE_FAILURES_MSEC);
     }
 
     ASSERT_IS_NOT_NULL(twin_data, "IoTHubDeviceTwin_Get(Module)Twin failed.");
