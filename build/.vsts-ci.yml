@@ -202,6 +202,9 @@ stages:
        # instead of the host's system pkg-config paths.
        export PKG_CONFIG_LIBDIR=${TOOLCHAIN_PREFIX}/lib/pkgconfig
        export PKG_CONFIG_PATH=${TOOLCHAIN_PREFIX}/lib/pkgconfig
+       # Ensure cross linker search path includes toolchain libs (libuuid, openssl, curl).
+       export LIBRARY_PATH=${TOOLCHAIN_PREFIX}/lib:${LIBRARY_PATH}
+       export LDFLAGS="-L${TOOLCHAIN_PREFIX}/lib ${LDFLAGS}"
        chmod +x jenkins/raspberrypi_c_buster.sh
         ./jenkins/raspberrypi_c_buster.sh
       displayName: 'Build'
@@ -402,12 +405,11 @@ stages:
       condition: succeededOrFailed()
 
   - job: ubuntu2404arm
-    # ARM64 replacement for the retired ubuntu2204arm self-hosted ARM agent
-    # (previously named ubuntu2204arm).  Uses the Microsoft-hosted ARM64 pool
-    # (vmImage ubuntu-24.04-arm64) to retain native-ARM build coverage.
+    # ARM64 replacement for the retired ubuntu2204arm self-hosted ARM agent.
+    # Use the currently available Microsoft-hosted ARM image label.
     timeoutInMinutes: 90
     pool:
-      vmImage: 'ubuntu-24.04-arm64'
+      vmImage: 'ubuntu-24.04-arm'
     displayName: 'Ubuntu 24.04 ARM64 (Custom CMake Options)'
     steps:
     - checkout: self
@@ -613,6 +615,8 @@ stages:
         set -e
         sudo apt-get update && sudo apt-get upgrade
         sudo ./build_all/linux/setup.sh
+        # Ensure BearSSL dev package is present so CMake can resolve libbearssl.
+        sudo apt-get install -y libbearssl-dev
       displayName: 'Host setup'
     - script: |
         sudo -E bash jenkins/linux_bearssl.sh
@@ -825,11 +829,9 @@ stages:
         sudo apt-get install -y softhsm2 libengine-pkcs11-openssl opensc libp11-dev
       displayName: 'Host setup'
     - script: |
-        sudo -E bash jenkins/linux_openssl_engine.sh
+        # Use dynamically generated E2E variables from Setup stage to avoid unresolved placeholders.
+        sudo bash -c 'source "$(Pipeline.Workspace)/test_config_scripts/set_e2e_test_env_vars.sh" && ./jenkins/linux_openssl_engine.sh'
       displayName: 'Build'
-      env:
-        IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
-        IOT_DPS_INDIVIDUAL_X509_KEY: $(IOTHUB-E2E-X509-ECC-PRIVATE-KEY-BASE64)
     - script: |
         cd cmake
         sudo bash -c 'source "$(Pipeline.Workspace)/test_config_scripts/set_e2e_test_env_vars.sh" && ../build_all/linux/run_tests.sh --e2e'
@@ -847,7 +849,7 @@ stages:
     variables:
       CodeQL.Enabled: false
     pool:
-      vmImage: 'macOS-13'
+      vmImage: 'macOS-14'
     displayName: 'OSX'
     steps:
     - checkout: self
@@ -880,7 +882,7 @@ stages:
     variables:
       CodeQL.Enabled: false
     pool:
-      vmImage: 'macOS-13'
+      vmImage: 'macOS-14'
     displayName: 'Xcode Native'
     steps:
     - checkout: self
