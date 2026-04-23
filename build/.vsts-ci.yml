@@ -843,6 +843,99 @@ stages:
         testRunTitle: 'openssl_engine'
       condition: succeededOrFailed()
 
+  - job: OSX
+    variables:
+      CodeQL.Enabled: false
+    pool:
+      vmImage: 'macOS-13'
+    displayName: 'OSX'
+    steps:
+    - checkout: self
+      submodules: true
+    - download: current
+      artifact: test_config_scripts
+      displayName: Download artifact (test config scripts)
+    - script: |
+        ./jenkins/osx_gcc_openssl.sh
+      displayName: 'Build'
+    - script: |
+        cd cmake
+        bash -c 'source "$(Pipeline.Workspace)/test_config_scripts/set_e2e_test_env_vars.sh" && ctest -T test --no-compress-output -C "Debug" -V -j 8 --schedule-random'
+      displayName: 'Run Tests'
+    - task: PublishTestResults@2
+      displayName: 'Publish OSX Results'
+      inputs:
+        testRunner: CTest
+        testResultsFiles: '**/Test.xml'
+        mergeTestResults: true
+        testRunTitle: 'OSX'
+      condition: succeededOrFailed()
+    - task: ComponentGovernanceComponentDetection@0
+      displayName: 'Component Detection'
+    - script: rm -rf $(Agent.BuildDirectory)/*
+      displayName: 'Cleanup'
+      condition: always()
+
+  - job: xcodenative
+    variables:
+      CodeQL.Enabled: false
+    pool:
+      vmImage: 'macOS-13'
+    displayName: 'Xcode Native'
+    steps:
+    - checkout: self
+      submodules: true
+    - download: current
+      artifact: test_config_scripts
+      displayName: Download artifact (test config scripts)
+    - script: |
+        curl --version
+        export DYLD_LIBRARY_PATH="/usr/local/Cellar/curl/$(ls -b /usr/local/Cellar/curl | grep -e '[0-9\.]')/lib"
+        ./jenkins/osx_xcode_native.sh
+      displayName: 'Build'
+    - script: |
+        export DYLD_LIBRARY_PATH="/usr/local/Cellar/curl/$(ls -b /usr/local/Cellar/curl | grep -e '[0-9\.]')/lib"
+        cd cmake
+        bash -c 'source "$(Pipeline.Workspace)/test_config_scripts/set_e2e_test_env_vars.sh" && ctest -T test --no-compress-output -C "Debug" -V -j 8 --schedule-random'
+      displayName: 'Run Tests'
+    - task: PublishTestResults@2
+      displayName: 'Publish XCode Results'
+      inputs:
+        testRunner: CTest
+        testResultsFiles: '**/Test.xml'
+        mergeTestResults: true
+        testRunTitle: 'XCode'
+      condition: succeededOrFailed()
+    - task: ComponentGovernanceComponentDetection@0
+      displayName: 'Component Detection'
+    - script: rm -rf $(Agent.BuildDirectory)/*
+      displayName: 'Cleanup'
+      condition: always()
+
+  - job: DotNET
+    displayName: '.NET'
+    variables:
+      Codeql.Enabled: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
+      Codeql.Language: csharp,python
+    pool:
+      vmImage: 'windows-2022'
+    steps:
+    - checkout: self
+      submodules: true
+    - task: CodeQL3000Init@0
+    - task: NuGetCommand@2
+      inputs:
+        command: 'restore'
+        restoreSolution: 'tools\traceabilitytool\traceabilitytool.sln'
+        feedsToUse: 'select'
+        vstsFeed: 'f9b79625-2860-4d92-a4ee-57b03fabfd10/805c1538-e9e5-488f-9e17-6c63b6879ace'
+    - task: DotNetCoreCLI@2
+      inputs:
+        command: 'build'
+        projects: 'tools\traceabilitytool\traceabilitytool.sln'
+    - task: CodeQL3000Finalize@0
+      condition: always()
+
 - stage: Cleanup
   dependsOn:
   - Setup
