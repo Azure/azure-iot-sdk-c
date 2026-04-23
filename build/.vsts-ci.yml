@@ -57,15 +57,7 @@ stages:
       displayName: 'Setup'
     - script: |
         npm install check_submodules 
-        if [ -n "${SYSTEM_PULLREQUEST_TARGETBRANCH:-}" ]; then
-          TARGET_BRANCH="${SYSTEM_PULLREQUEST_TARGETBRANCH#refs/heads/}"
-        elif [ "${BUILD_SOURCEBRANCH:-}" = "refs/heads/main" ]; then
-          TARGET_BRANCH="main"
-        else
-          echo "Skipping strict submodule branch check for ${BUILD_SOURCEBRANCH:-unknown}; enforced on PRs and main only."
-          exit 0
-        fi
-        node_modules/.bin/check_submodules . "$TARGET_BRANCH"
+        node_modules/.bin/check_submodules . main
       displayName: 'Check Submodules Match'
 
   - job: windowsx64debug
