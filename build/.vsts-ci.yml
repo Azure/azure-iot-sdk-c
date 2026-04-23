@@ -59,6 +59,109 @@ stages:
         npm install check_submodules 
         node_modules/.bin/check_submodules . main
       displayName: 'Check Submodules Match'
+
+  - job: windowsx64debug
+    timeoutInMinutes: 190
+    pool:
+      vmImage: 'windows-2022'
+    displayName: 'Windows x64 (Debug)'
+    steps:
+    - checkout: self
+      submodules: true
+    - download: current
+      artifact: test_config_scripts
+      displayName: Download artifact (test config scripts)
+    - script: |
+        call jenkins\windows_c.cmd --platform x64
+      displayName: 'Build'
+    - powershell: |
+        . "$(Pipeline.Workspace)\test_config_scripts\Set-E2ETestEnvVars.ps1"
+        cmd /c "call jenkins\windows_c_VsDevCmd.cmd x64 && cd cmake && ctest -T test --no-compress-output -C Debug -V -j 16 --schedule-random"
+      displayName: "Run Tests"
+    - task: PublishTestResults@2
+      displayName: 'Publish Windows x64 (Debug) Results'
+      inputs:
+        testRunner: CTest
+        testResultsFiles: '**/Test.xml'
+        mergeTestResults: true
+        testRunTitle: 'windowsx64'
+      condition: succeededOrFailed()
+
+  - job: windowsx86
+    timeoutInMinutes: 190
+    pool:
+      vmImage: 'windows-2022'
+    displayName: 'Windows x86'
+    steps:
+    - checkout: self
+      submodules: true
+    - download: current
+      artifact: test_config_scripts
+      displayName: Download artifact (test config scripts)
+    - script: |
+        call jenkins\windows_c.cmd
+      displayName: 'Build'
+    - powershell: |
+        . "$(Pipeline.Workspace)\test_config_scripts\Set-E2ETestEnvVars.ps1"
+        cmd /c "call jenkins\windows_c_VsDevCmd.cmd x86 && cd cmake && ctest -T test --no-compress-output -C Debug -V -j 16 --schedule-random"
+      displayName: 'Run Tests'
+    - task: PublishTestResults@2
+      displayName: 'Publish Windows x86 Results'
+      inputs:
+        testRunner: CTest
+        testResultsFiles: '**/Test.xml'
+        mergeTestResults: true
+        testRunTitle: 'windowsx86'
+      condition: succeededOrFailed()
+
+  - job: windowsx64release
+    timeoutInMinutes: 190
+    variables:
+      CodeQL.Enabled: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
+      CodeQL.Language: cpp
+    pool:
+      vmImage: 'windows-2022'
+    displayName: 'Windows x64 (Release)'
+    steps:
+    - checkout: self
+      submodules: true
+    - download: current
+      artifact: test_config_scripts
+      displayName: Download artifact (test config scripts)
+    - task: CodeQL3000Init@0
+    - script: |
+        call jenkins\windows_c_release.cmd --platform x64
+      displayName: 'Build'
+    - task: CodeQL3000Finalize@0
+      condition: always()
+    - powershell: |
+        . "$(Pipeline.Workspace)\test_config_scripts\Set-E2ETestEnvVars.ps1"
+        cmd /c "call jenkins\windows_c_VsDevCmd.cmd x64 && cd cmake && ctest -T test --no-compress-output -C Release -V -j 16 --schedule-random"
+      displayName: 'Run Tests'
+    - task: PublishTestResults@2
+      displayName: 'Publish Windows x64 (Release) Results'
+      inputs:
+        testRunner: CTest
+        testResultsFiles: '**/Test.xml'
+        mergeTestResults: true
+        testRunTitle: 'windowsx64release'
+      condition: succeededOrFailed()
+
+  - job: windowsdynamic
+    timeoutInMinutes: 190
+    pool:
+      vmImage: 'windows-2022'
+    displayName: 'Windows Dynamic'
+    steps:
+    - checkout: self
+      submodules: true
+    - download: current
+      artifact: test_config_scripts
+      displayName: Download artifact (test config scripts)
+    - powershell: |
+        . "$(Pipeline.Workspace)\test_config_scripts\Set-E2ETestEnvVars.ps1"
+        cmd /c "call jenkins\windows_c_VsDevCmd.cmd && call jenkins\windows_c_build_as_dynamic.cmd"
+      displayName: 'Build'
   - job: linuxoptions
     pool:
       vmImage: 'ubuntu-24.04'
