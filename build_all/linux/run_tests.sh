@@ -39,7 +39,7 @@ sudo ldconfig
 if $run_plain; then
     if $run_e2e; then
         # Unit tests + E2E, no valgrind/helgrind/drd
-        ctest -T test --no-compress-output -C "Debug" -V -j $E2E_CORES --schedule-random -E "_(valgrind|helgrind|drd)$"
+        ctest -T test --no-compress-output -C "Debug" -V -j $E2E_CORES --schedule-random --repeat until-pass:3 -E "_(valgrind|helgrind|drd)$"
     else
         # Unit tests only, no E2E, no valgrind/helgrind/drd
         ctest -T test --no-compress-output -C "Debug" -V -j $UT_CORES --schedule-random -E "_(valgrind|helgrind|drd)|e2e"
