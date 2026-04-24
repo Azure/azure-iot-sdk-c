@@ -8,7 +8,15 @@ set -o pipefail # Exit if pipe failed.
 
 # Parallelism settings
 UT_CORES=16
-E2E_CORES=16
+# E2E tests are latency-sensitive: every test opens multiple AMQP+HTTPS
+# connections to IoT Hub in parallel and asserts on MAX_CLOUD_TRAVEL_TIME
+# (seconds). Microsoft-hosted Ubuntu agents are 4-vCPU VMs, so running the
+# ~16 E2E binaries all at -j 16 oversubscribes CPU and network and causes
+# per-request latency to spike above the assertion threshold
+# (seen: service_client_update_twin taking 126s vs ~1s baseline, which
+# blew MAX_CLOUD_TRAVEL_TIME in iothubclient_amqp_dt_e2e on the mbedTLS
+# job). Keep E2E parallelism at 4 to match the hosted-agent core count.
+E2E_CORES=4
 VALGRIND_UT_CORES=4
 VALGRIND_E2E_CORES=2
 
