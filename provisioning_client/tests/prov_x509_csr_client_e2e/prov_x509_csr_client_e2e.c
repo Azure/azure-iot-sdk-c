@@ -11,16 +11,8 @@
 #include <string.h>
 #include <time.h>
 
-#include <openssl/evp.h>
-#include <openssl/x509.h>
-#include <openssl/pem.h>
-#include <openssl/bio.h>
-#include <openssl/err.h>
-
 #include "testrunnerswitcher.h"
 
-#include "azure_c_shared_utility/azure_base64.h"
-#include "azure_c_shared_utility/hmacsha256.h"
 #include "azure_c_shared_utility/platform.h"
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
@@ -28,6 +20,7 @@
 #include "azure_c_shared_utility/uniqueid.h"
 #include "azure_macro_utils/macro_utils.h"
 #include "azure_c_shared_utility/shared_util_options.h"
+#include "azure_c_shared_utility/csr_gen.h"
 
 #include "azure_prov_client/prov_device_client.h"
 #include "azure_prov_client/prov_device_ll_client.h"
@@ -41,8 +34,6 @@
 #include "iothub_device_client.h"
 #include "iothub_client_options.h"
 #include "iothubtransportmqtt.h"
-
-#include "parson.h"
 
 #include "common_prov_e2e.h"
 
@@ -183,90 +174,28 @@ static void hub_csr_response_callback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, 
     ctx->response_received = true;
 }
 
-// ----- Certificate helpers -----
+// ----- Certificate / CSR helpers -----
+// Certificate format helpers and CSR/key generation live outside this file:
+//   - base64-DER <-> PEM and CSR response parsing are in common_prov_e2e.c
+//   - ECDSA P-256 keygen + CSR signing lives in c-utility/adapters/csr_gen_*
+// so this test file has zero direct dependency on OpenSSL / Schannel.
 
-// Convert base64 DER to PEM certificate
-static char* base64_to_pem_certificate(const char* base64)
+// Context holding a generated CSR (base64 DER) and its private key (PKCS#8 PEM).
+typedef struct GENERATED_CSR_TAG
 {
-    size_t b64len = strlen(base64);
-    size_t num_lines = (b64len + 63) / 64;
-    size_t pem_size = 28 + b64len + num_lines + 26 + 1; // header + data + newlines + footer + null
-    char* pem = (char*)calloc(1, pem_size);
+    char* csr_base64;
+    char* private_key_pem;
+} GENERATED_CSR;
 
-    if (pem != NULL)
-    {
-        char* p = pem;
-        p += sprintf(p, "-----BEGIN CERTIFICATE-----\n");
-
-        for (size_t i = 0; i < b64len; i += 64)
-        {
-            size_t chunk = (b64len - i < 64) ? b64len - i : 64;
-            memcpy(p, base64 + i, chunk);
-            p += chunk;
-            *p++ = '\n';
-        }
-
-        (void)sprintf(p, "-----END CERTIFICATE-----\n");
-    }
-
-    return pem;
-}
-
-// Parse IoT Hub CSR response JSON: {"certificates": ["b64cert1", ...]}
-// Returns concatenated PEM chain and sets cert_count.
-static char* parse_hub_csr_response(const char* responseJson, size_t* cert_count)
+static GENERATED_CSR generate_ec_csr(const char* common_name)
 {
-    char* result = NULL;
-    *cert_count = 0;
-
-    JSON_Value* root_value = json_parse_string(responseJson);
-    ASSERT_IS_NOT_NULL(root_value, "Failed to parse CSR response JSON");
-
-    JSON_Object* root_obj = json_value_get_object(root_value);
-    ASSERT_IS_NOT_NULL(root_obj, "CSR response is not a JSON object");
-
-    JSON_Array* certs_array = json_object_get_array(root_obj, "certificates");
-    ASSERT_IS_NOT_NULL(certs_array, "CSR response missing 'certificates' array");
-
-    size_t count = json_array_get_count(certs_array);
-    ASSERT_IS_TRUE(count > 0, "CSR response certificates array is empty");
-
-    size_t total_size = 0;
-    bool success = true;
-    char** pem_certs = (char**)calloc(count, sizeof(char*));
-    ASSERT_IS_NOT_NULL(pem_certs, "Failed to allocate pem_certs array");
-
-    for (size_t i = 0; i < count && success; i++)
-    {
-        const char* base64_cert = json_array_get_string(certs_array, i);
-        if (base64_cert == NULL || (pem_certs[i] = base64_to_pem_certificate(base64_cert)) == NULL)
-        {
-            success = false;
-        }
-        else
-        {
-            total_size += strlen(pem_certs[i]);
-        }
-    }
-
-    ASSERT_IS_TRUE(success, "Failed to convert one or more certificates to PEM");
-
-    result = (char*)calloc(1, total_size + 1);
-    ASSERT_IS_NOT_NULL(result, "Failed to allocate certificate chain buffer");
-
-    char* p = result;
-    for (size_t i = 0; i < count; i++)
-    {
-        size_t len = strlen(pem_certs[i]);
-        memcpy(p, pem_certs[i], len);
-        p += len;
-        free(pem_certs[i]);
-    }
-    free(pem_certs);
-
-    *cert_count = count;
-
-    json_value_free(root_value);
+    GENERATED_CSR result;
+    memset(&result, 0, sizeof(result));
+    ASSERT_ARE_EQUAL(int, 0,
+        csr_gen_ec_p256(common_name, &result.csr_base64, &result.private_key_pem),
+        "csr_gen_ec_p256 failed");
+    ASSERT_IS_NOT_NULL(result.csr_base64, "csr_gen_ec_p256 returned NULL csr_base64");
+    ASSERT_IS_NOT_NULL(result.private_key_pem, "csr_gen_ec_p256 returned NULL private_key_pem");
     return result;
 }
 
@@ -309,116 +238,6 @@ static char* generate_request_id(void)
     char* request_id = NULL;
     ASSERT_ARE_EQUAL(int, 0, mallocAndStrcpy_s(&request_id, guid), "Failed to copy request ID");
     return request_id;
-}
-
-// ----- OpenSSL CSR generation -----
-
-// Context holding a generated CSR (base64 DER) and its private key (PKCS#8 PEM).
-typedef struct GENERATED_CSR_TAG
-{
-    char* csr_base64;       // base64(DER(CSR)), no PEM headers
-    char* private_key_pem;  // PKCS#8 PEM string
-} GENERATED_CSR;
-
-// Generate a P-256 EC key pair, create a CSR signed with it, and return
-// the base64-encoded DER CSR plus the PKCS#8 PEM private key.
-static GENERATED_CSR generate_ec_csr(const char* common_name)
-{
-    GENERATED_CSR result;
-    memset(&result, 0, sizeof(result));
-
-    // Generate EC P-256 key
-    EVP_PKEY* pkey = EVP_EC_gen("P-256");
-    ASSERT_IS_NOT_NULL(pkey, "Failed to generate EC P-256 key");
-
-    // Create CSR
-    X509_REQ* req = X509_REQ_new();
-    ASSERT_IS_NOT_NULL(req, "Failed to create X509_REQ");
-
-    X509_REQ_set_version(req, 0);
-
-    X509_NAME* name = X509_REQ_get_subject_name(req);
-    ASSERT_IS_NOT_NULL(name, "Failed to get CSR subject name");
-    X509_NAME_add_entry_by_txt(name, "CN", MBSTRING_ASC, (const unsigned char*)common_name, -1, -1, 0);
-
-    X509_REQ_set_pubkey(req, pkey);
-    ASSERT_IS_TRUE(X509_REQ_sign(req, pkey, EVP_sha256()) > 0, "Failed to sign CSR");
-
-    // Encode CSR to DER -> base64
-    {
-        unsigned char* der_buf = NULL;
-        int der_len = i2d_X509_REQ(req, &der_buf);
-        ASSERT_IS_TRUE(der_len > 0, "Failed to encode CSR to DER");
-
-        BUFFER_HANDLE der_buffer = BUFFER_create(der_buf, (size_t)der_len);
-        ASSERT_IS_NOT_NULL(der_buffer, "Failed to create BUFFER from DER");
-
-        STRING_HANDLE b64 = Azure_Base64_Encode(der_buffer);
-        ASSERT_IS_NOT_NULL(b64, "Failed to base64 encode CSR DER");
-
-        ASSERT_ARE_EQUAL(int, 0, mallocAndStrcpy_s(&result.csr_base64, STRING_c_str(b64)),
-            "Failed to copy base64 CSR");
-
-        STRING_delete(b64);
-        BUFFER_delete(der_buffer);
-        OPENSSL_free(der_buf);
-    }
-
-    // Encode private key to PKCS#8 PEM string
-    {
-        BIO* bio = BIO_new(BIO_s_mem());
-        ASSERT_IS_NOT_NULL(bio, "Failed to create BIO");
-
-        ASSERT_IS_TRUE(PEM_write_bio_PrivateKey(bio, pkey, NULL, NULL, 0, NULL, NULL) == 1,
-            "Failed to write private key PEM");
-
-        char* pem_data = NULL;
-        long pem_len = BIO_get_mem_data(bio, &pem_data);
-        ASSERT_IS_TRUE(pem_len > 0, "PEM data is empty");
-
-        result.private_key_pem = (char*)malloc((size_t)pem_len + 1);
-        ASSERT_IS_NOT_NULL(result.private_key_pem, "Failed to allocate private key PEM");
-        memcpy(result.private_key_pem, pem_data, (size_t)pem_len);
-        result.private_key_pem[pem_len] = '\0';
-
-        BIO_free(bio);
-    }
-
-    X509_REQ_free(req);
-    EVP_PKEY_free(pkey);
-
-    return result;
-}
-
-// Derive per-device symmetric key from group key via HMAC-SHA256.
-// derived_key = Base64Encode(HMAC-SHA256(Base64Decode(group_key), registration_id))
-static char* derive_device_key(const char* group_key, const char* registration_id)
-{
-    BUFFER_HANDLE decoded_key = Azure_Base64_Decode(group_key);
-    ASSERT_IS_NOT_NULL(decoded_key, "Failed to base64-decode group key");
-
-    BUFFER_HANDLE hash = BUFFER_new();
-    ASSERT_IS_NOT_NULL(hash, "Failed to allocate HMAC hash buffer");
-
-    ASSERT_ARE_EQUAL(int, HMACSHA256_OK,
-        (int)HMACSHA256_ComputeHash(
-            BUFFER_u_char(decoded_key), BUFFER_length(decoded_key),
-            (const unsigned char*)registration_id, strlen(registration_id),
-            hash),
-        "Failed to compute HMAC-SHA256 for device key derivation");
-
-    STRING_HANDLE derived_b64 = Azure_Base64_Encode(hash);
-    ASSERT_IS_NOT_NULL(derived_b64, "Failed to base64-encode derived key");
-
-    char* result = NULL;
-    ASSERT_ARE_EQUAL(int, 0, mallocAndStrcpy_s(&result, STRING_c_str(derived_b64)),
-        "Failed to copy derived key");
-
-    STRING_delete(derived_b64);
-    BUFFER_delete(hash);
-    BUFFER_delete(decoded_key);
-
-    return result;
 }
 
 
@@ -618,7 +437,7 @@ BEGIN_TEST_SUITE(prov_x509_csr_client_e2e)
         ASSERT_IS_NOT_NULL(csr_ctx.payload, "Hub CSR response payload is NULL");
 
         size_t cert_count = 0;
-        char* hub_issued_cert_chain = parse_hub_csr_response(csr_ctx.payload, &cert_count);
+        char* hub_issued_cert_chain = csr_e2e_parse_hub_csr_response(csr_ctx.payload, &cert_count);
         ASSERT_IS_NOT_NULL(hub_issued_cert_chain, "Failed to parse Hub CSR response certificates");
         LogInfo("Phase 3 complete: Hub CSR returned %zu certificate(s)", cert_count);
 
@@ -706,7 +525,8 @@ BEGIN_TEST_SUITE(prov_x509_csr_client_e2e)
         }
 
         // Derive per-device key from group primary key
-        char* derived_key = derive_device_key(group_primary_key, reg_id);
+        char* derived_key = csr_e2e_derive_device_symmetric_key(group_primary_key, reg_id);
+        ASSERT_IS_NOT_NULL(derived_key, "Failed to derive per-device key");
         LogInfo("Derived device key for '%s'", reg_id);
 
         // Switch HSM to symmetric key mode for this test
@@ -823,7 +643,7 @@ BEGIN_TEST_SUITE(prov_x509_csr_client_e2e)
         ASSERT_IS_NOT_NULL(csr_ctx.payload, "Hub CSR response payload is NULL");
 
         size_t cert_count = 0;
-        char* hub_issued_cert_chain = parse_hub_csr_response(csr_ctx.payload, &cert_count);
+        char* hub_issued_cert_chain = csr_e2e_parse_hub_csr_response(csr_ctx.payload, &cert_count);
         ASSERT_IS_NOT_NULL(hub_issued_cert_chain, "Failed to parse Hub CSR response certificates");
         LogInfo("[SymKey] Phase 3 complete: Hub CSR returned %zu certificate(s)", cert_count);
 
