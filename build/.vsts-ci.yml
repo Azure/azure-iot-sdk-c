@@ -409,7 +409,7 @@ stages:
     # Use the currently available Microsoft-hosted ARM image label.
     timeoutInMinutes: 90
     pool:
-      vmImage: 'ubuntu-24.04-arm'
+      vmImage: 'ubuntu-24.04'
     displayName: 'Ubuntu 24.04 ARM64 (Custom CMake Options)'
     steps:
     - checkout: self

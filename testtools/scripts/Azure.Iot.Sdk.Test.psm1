@@ -184,6 +184,22 @@ function Export-Pkcs8PrivateKeyPem {
     }
 }
 
+function Export-RsaPkcs1PrivateKeyPem {
+    param([System.Security.Cryptography.RSA]$Key)
+
+    try {
+        if ($PSVersionTable.PSVersion.Major -lt 7) {
+            throw "ExportRSAPrivateKeyPem is unavailable"
+        }
+
+        return $Key.ExportRSAPrivateKeyPem()
+    }
+    catch {
+        # Fallback for older runtimes; PKCS8 is still accepted by non-Schannel paths.
+        return Export-Pkcs8PrivateKeyPem -Key $Key
+    }
+}
+
 function New-RsaKeyFromPem {
     param([string]$Pem)
 
@@ -417,6 +433,10 @@ class RsaPrivateKeyInfo {
 
     [string]ToPem() {
         return Export-Pkcs8PrivateKeyPem -Key $this.PrivateKey
+    }
+
+    [string]ToRsaPkcs1Pem() {
+        return Export-RsaPkcs1PrivateKeyPem -Key $this.PrivateKey
     }
 
     [hashtable]ToHashtable() {
@@ -1914,11 +1934,11 @@ function New-AzIotCSDKE2ETestConfig {
     }
 
     $IotHubDeviceCertificateBase64 = $(ConvertTo-Base64 -Content $TestEnvInfo.IotHub.Devices.X509Thumbprint[0].PrimaryCertificate.ToPem())
-    $IotHubDevicePrivateKeyBase64 = $(ConvertTo-Base64 -Content $TestEnvInfo.IotHub.Devices.X509Thumbprint[0].PrimaryCertificate.PrivateKey.ToPem())
+    $IotHubDevicePrivateKeyBase64 = $(ConvertTo-Base64 -Content $TestEnvInfo.IotHub.Devices.X509Thumbprint[0].PrimaryCertificate.PrivateKey.ToRsaPkcs1Pem())
     $IotHubDeviceCertificateThumbprint = $($TestEnvInfo.IotHub.Devices.X509Thumbprint[0].PrimaryCertificate.GetThumbprint())
 
     $DpsCertificateBase64 = $(ConvertTo-Base64 -Content $TestEnvInfo.Dps.Enrollments.IndividualX509[0].Certificate.ToPem())
-    $DpsPrivateKeyBase64 = $(ConvertTo-Base64 -Content $TestEnvInfo.Dps.Enrollments.IndividualX509[0].Certificate.PrivateKey.ToPem())
+    $DpsPrivateKeyBase64 = $(ConvertTo-Base64 -Content $TestEnvInfo.Dps.Enrollments.IndividualX509[0].Certificate.PrivateKey.ToRsaPkcs1Pem())
     $DpsRegistrationId = $($TestEnvInfo.Dps.Enrollments.IndividualX509[0].Id)
 
     # Root CA certificate for CSR/ADR tests (create one if not already present)
@@ -1926,7 +1946,7 @@ function New-AzIotCSDKE2ETestConfig {
         $TestEnvInfo.Dps.AddRootCaCertificate() | Out-Null
     }
     $DpsRootCACertificateBase64 = ConvertTo-Base64 -Content $($TestEnvInfo.Dps.RootCaCertificates[0].ToPem())
-    $DpsRootCAPrivateKeyBase64 = ConvertTo-Base64 -Content $($TestEnvInfo.Dps.RootCaCertificates[0].PrivateKey.ToPem())
+    $DpsRootCAPrivateKeyBase64 = ConvertTo-Base64 -Content $($TestEnvInfo.Dps.RootCaCertificates[0].PrivateKey.ToRsaPkcs1Pem())
 
     # Symmetric key group enrollment (optional)
     $SymmKeyGroupEnrollmentId = $null
