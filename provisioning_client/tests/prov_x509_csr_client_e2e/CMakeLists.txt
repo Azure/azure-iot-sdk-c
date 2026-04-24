@@ -32,19 +32,16 @@ include_directories(${CMAKE_CURRENT_LIST_DIR}/../../adapters)
 file(COPY ../common_prov_e2e/prov_valgrind_suppression.supp DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 build_c_test_artifacts(${theseTestsName} ON "tests/provisioning_e2e_tests" VALGRIND_SUPPRESSIONS_FILE prov_valgrind_suppression.supp)
 
-set(prov_transport)
-if (${use_http})
-    add_definitions(-DUSE_HTTP)
-    set(prov_transport ${prov_transport} prov_http_transport)
+# CSR (Certificate Signing Request) over DPS / IoT Hub is currently only
+# supported over MQTT. Guard the test on use_mqtt so it is not built / run
+# when only HTTP or AMQP transports are enabled.
+if (NOT ${use_mqtt})
+    message(STATUS "Skipping ${theseTestsName}: use_mqtt is OFF (CSR is MQTT-only)")
+    return()
 endif()
-if (${use_mqtt})
-    add_definitions(-DUSE_MQTT)
-    set(prov_transport ${prov_transport} prov_mqtt_transport prov_mqtt_ws_transport)
-endif()
-if (${use_amqp})
-    add_definitions(-DUSE_AMQP)
-    set(prov_transport ${prov_transport} prov_amqp_transport prov_amqp_ws_transport)
-endif()
+
+add_definitions(-DUSE_MQTT)
+set(prov_transport prov_mqtt_transport prov_mqtt_ws_transport)
 
 if(WIN32)
     if(TARGET ${theseTestsName}_dll)
