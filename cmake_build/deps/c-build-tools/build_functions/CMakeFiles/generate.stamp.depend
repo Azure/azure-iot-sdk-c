@@ -1,0 +1,3 @@
+# CMake generation dependency list for this directory.
+C:/Program Files/CMake/share/cmake-4.0/Modules/CheckSymbolExists.cmake
+C:/code/s3/azure-iot-sdk-c/deps/c-build-tools/build_functions/CMakeLists.txt

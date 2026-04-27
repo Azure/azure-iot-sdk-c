@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\code\s3\azure-iot-sdk-c\uamqp\deps\c-testrunnerswitcher\src\ctrs_sprintf.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\code\s3\azure-iot-sdk-c\uamqp\deps\c-testrunnerswitcher\src\testmutex.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\code\s3\azure-iot-sdk-c\uamqp\deps\c-testrunnerswitcher\src\cppunittest_mutex_fixtures.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\code\s3\azure-iot-sdk-c\uamqp\deps\c-testrunnerswitcher\inc\testrunnerswitcher.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s3\azure-iot-sdk-c\uamqp\deps\c-testrunnerswitcher\inc\cppunittest_mutex_fixtures.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s3\azure-iot-sdk-c\uamqp\deps\c-testrunnerswitcher\inc\ctest_2_cppunittest.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s3\azure-iot-sdk-c\uamqp\deps\c-testrunnerswitcher\inc\ctrs_sprintf.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s3\azure-iot-sdk-c\uamqp\deps\c-testrunnerswitcher\inc\testmutex.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s3\azure-iot-sdk-c\uamqp\deps\c-testrunnerswitcher\inc\run_cppunittest_suite.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\code\s3\azure-iot-sdk-c\uamqp\deps\c-testrunnerswitcher\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{2382409B-4D0D-3D6E-AEFD-097BC53EC9BE}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{3C833C84-7A41-3681-A271-9BA143EF3CCA}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

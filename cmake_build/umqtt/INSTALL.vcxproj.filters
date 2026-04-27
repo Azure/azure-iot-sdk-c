@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\code\s3\azure-iot-sdk-c\cmake_build\CMakeFiles\e1554cd73740dda206feea39299db740\INSTALL_force.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{2F6BA228-6935-3366-8778-2BFC4F080CAD}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

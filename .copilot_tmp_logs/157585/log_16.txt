@@ -1,0 +1,102 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+    
+    
+
+<html lang="en-US">
+<head><title>
+	
+            Azure DevOps Services | Sign In
+        
+</title><meta http-equiv="X-UA-Compatible" content="IE=11;&#32;IE=10;&#32;IE=9;&#32;IE=8" />
+    <link rel="SHORTCUT ICON" href="/favicon.ico"/>
+
+    <link data-bundlelength="516085" data-bundlename="commoncss" data-highcontrast="/_static/tfs/M272_20260409.11/_cssbundles/HighContrast/vss-bundle-commoncss-vM3HCC22eD0oWtPEbH4RDSm54rp68Q2N_1JCAvjFKd4M=" data-includedstyles="jQueryUI-Modified;Core;Splitter;PivotView" href="/_static/tfs/M272_20260409.11/_cssbundles/Default/vss-bundle-commoncss-vVleoV7R0qTd8pEnREipvI5W1MCAR5-lhJ73tyraGzxU=" rel="stylesheet" />
+<link data-bundlelength="117396" data-bundlename="viewcss" data-highcontrast="/_static/tfs/M272_20260409.11/_cssbundles/HighContrast/vss-bundle-viewcss-v1jE4aiLdxPMgHhbh3VVwEAr_YTiW6VPUrGANGKqMlG8=" data-includedstyles="VSS.Controls" href="/_static/tfs/M272_20260409.11/_cssbundles/Default/vss-bundle-viewcss-vO9tUvdS9zDyHtHPT2UV3b_Hta_yLEWGTqpaQnkyk2oo=" rel="stylesheet" />
+
+    <!--UxServices customizations -->
+    
+    <link href="/_static/tfs/M272_20260409.11/_content/Authentication.css" type="text/css" rel="stylesheet" />
+    
+</head>
+
+<body class="platform">
+
+    <script type="text/javascript"> var __vssPageContext = {"webContext":{"user":{"id":"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa","name":"Anonymous","email":"","uniqueName":"TEAM FOUNDATION\\Anonymous"},"host":{"id":"f249db1b-a38a-4702-b484-162d177ab072","name":"TEAM FOUNDATION","uri":"https://spsprodeus27.vssps.visualstudio.com/","relativeUri":"/","hostType":"deployment","scheme":"https","authority":"spsprodeus27.vssps.visualstudio.com"}},"moduleLoaderConfig":{"baseUrl":"/_static/tfs/M272_20260409.11/_scripts/TFS/min/","paths":{"Account/Scripts/Resources":"en-US","Profile/Scripts/Resources":"en-US","UserManagement/Scripts/Resources":"en-US","Authentication/Scripts/Resources":"en-US","VSS/Resources":"en-US"},"map":{},"contributionPaths":{"VSS":{"value":"/_static/tfs/M272_20260409.11/_scripts/TFS/min/VSS","pathType":"default"},"VSS/Resources":{"value":"en-US","pathType":"resource"},"q":{"value":"/_static/tfs/M272_20260409.11/_scripts/TFS/min/q","pathType":"default"},"knockout":{"value":"/_static/tfs/M272_20260409.11/_scripts/TFS/min/knockout","pathType":"default"},"mousetrap":{"value":"/_static/tfs/M272_20260409.11/_scripts/TFS/min/mousetrap","pathType":"default"},"mustache":{"value":"/_static/tfs/M272_20260409.11/_scripts/TFS/min/mustache","pathType":"default"},"react":{"value":"/_static/tfs/M272_20260409.11/_scripts/TFS/min/react.15.3","pathType":"default"},"react-dom":{"value":"/_static/tfs/M272_20260409.11/_scripts/TFS/min/react-dom.15.3","pathType":"default"},"react-transition-group":{"value":"/_static/tfs/M272_20260409.11/_scripts/TFS/min/react-transition-group.15.3","pathType":"default"},"jQueryUI":{"value":"/_static/tfs/M272_20260409.11/_scripts/TFS/min/jQueryUI","pathType":"default"},"jquery":{"value":"/_static/tfs/M272_20260409.11/_scripts/TFS/min/jquery","pathType":"default"},"OfficeFabric":{"value":"/_static/tfs/M272_20260409.11/_scripts/TFS/min/OfficeFabric","pathType":"default"},"tslib":{"value":"/_static/tfs/M272_20260409.11/_scripts/TFS/min/tslib","pathType":"default"},"@uifabric":{"value":"/_static/tfs/M272_20260409.11/_scripts/TFS/min/@uifabric","pathType":"default"},"VSSUI":{"value":"/_static/tfs/M272_20260409.11/_scripts/TFS/min/VSSUI","pathType":"default"}},"shim":{"jquery":{"deps":[],"exports":"jQuery"}},"waitSeconds":30},"coreReferences":{"stylesheets":[{"url":"/_static/tfs/M272_20260409.11/_cssbundles/Default/vss-bundle-ext-core-css-vjapY0wXg0TR6OC6NvdB3QBXQvwBy2yRgojbz3lmWNas=","highContrastUrl":null,"isCoreStylesheet":true}],"scripts":[{"identifier":"JQuery","url":"/_static/3rdParty/_scripts/jquery-3.6.0.min.js","fallbackUrl":null,"fallbackCondition":null,"isCoreModule":true},{"identifier":"JQueryXDomain","url":"/_static/3rdParty/_scripts/jquery.xdomainrequest.min.js","fallbackUrl":null,"fallbackCondition":null,"isCoreModule":true},{"identifier":"Promise","url":"/_static/tfs/M272_20260409.11/_scripts/TFS/min/promise.js","fallbackUrl":null,"fallbackCondition":null,"isCoreModule":true},{"identifier":"GlobalScripts","url":"/_static/tfs/M272_20260409.11/_scripts/TFS/min/global-scripts.js","fallbackUrl":null,"fallbackCondition":null,"isCoreModule":true},{"identifier":"LoaderFixes","url":"/_static/tfs/M272_20260409.11/_scripts/TFS/pre-loader-shim.min.js","fallbackUrl":null,"fallbackCondition":null,"isCoreModule":false},{"identifier":"AMDLoader","url":"/_static/3rdParty/_scripts/require.min.js","fallbackUrl":null,"fallbackCondition":null,"isCoreModule":true},{"identifier":"LoaderFixes","url":"/_static/tfs/M272_20260409.11/_scripts/TFS/post-loader-shim.min.js","fallbackUrl":null,"fallbackCondition":null,"isCoreModule":false}],"coreScriptsBundle":{"identifier":"CoreBundle","url":"/_public/_Bundling/Content?bundle=vss-bundle-basejs-vh-5EDj0aiCZ8U3pbGPKlySQ9T_RAycY0i4geeP5oQDs=","fallbackUrl":null,"fallbackCondition":null,"isCoreModule":true},"extensionCoreReferences":{"identifier":"CoreBundle","url":"/_public/_Bundling/Content?bundle=vss-bundle-ext-core-vjVqDur8EtVehBgutdj97B0RdtYkdPig9GoSAfy3EBek=","fallbackUrl":null,"fallbackCondition":null,"isCoreModule":true}},"webAccessConfiguration":{"isHosted":true,"paths":{"rootPath":"/","staticContentRootPath":"/","staticContentVersion":"M272_20260409.11","resourcesPath":"/_static/tfs/M272_20260409.11/_content/","staticRootTfs":"/_static/tfs/M272_20260409.11/","cdnFallbackStaticRootTfs":"/_static/tfs/M272_20260409.11/","staticRoot3rdParty":"/_static/3rdParty/"},"api":{"webApiVersion":"1","areaPrefix":"_","controllerPrefix":""},"mailSettings":{"enabled":false},"registryItems":{}},"microsoftAjaxConfig":{"cultureInfo":{"name":"en-US","numberFormat":{"CurrencyDecimalDigits":2,"CurrencyDecimalSeparator":".","IsReadOnly":true,"CurrencyGroupSizes":[3],"NumberGroupSizes":[3],"PercentGroupSizes":[3],"CurrencyGroupSeparator":",","CurrencySymbol":"$","NaNSymbol":"NaN","CurrencyNegativePattern":0,"NumberNegativePattern":1,"PercentPositivePattern":1,"PercentNegativePattern":1,"NegativeInfinitySymbol":"-∞","NegativeSign":"-","NumberDecimalDigits":2,"NumberDecimalSeparator":".","NumberGroupSeparator":",","CurrencyPositivePattern":0,"PositiveInfinitySymbol":"∞","PositiveSign":"+","PercentDecimalDigits":2,"PercentDecimalSeparator":".","PercentGroupSeparator":",","PercentSymbol":"%","PerMilleSymbol":"‰","NativeDigits":["0","1","2","3","4","5","6","7","8","9"],"DigitSubstitution":1},"dateTimeFormat":{"AMDesignator":"AM","Calendar":{"MinSupportedDateTime":"0001-01-01T00:00:00","MaxSupportedDateTime":"9999-12-31T23:59:59.9999999","AlgorithmType":1,"CalendarType":1,"Eras":[1],"TwoDigitYearMax":2049,"IsReadOnly":true},"DateSeparator":"/","FirstDayOfWeek":0,"CalendarWeekRule":0,"FullDateTimePattern":"dddd, MMMM d, yyyy h:mm:ss tt","LongDatePattern":"dddd, MMMM d, yyyy","LongTimePattern":"h:mm:ss tt","MonthDayPattern":"MMMM d","PMDesignator":"PM","RFC1123Pattern":"ddd, dd MMM yyyy HH':'mm':'ss 'GMT'","ShortDatePattern":"M/d/yyyy","ShortTimePattern":"h:mm tt","SortableDateTimePattern":"yyyy'-'MM'-'dd'T'HH':'mm':'ss","TimeSeparator":":","UniversalSortableDateTimePattern":"yyyy'-'MM'-'dd HH':'mm':'ss'Z'","YearMonthPattern":"MMMM yyyy","AbbreviatedDayNames":["Sun","Mon","Tue","Wed","Thu","Fri","Sat"],"ShortestDayNames":["Su","Mo","Tu","We","Th","Fr","Sa"],"DayNames":["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],"AbbreviatedMonthNames":["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec",""],"MonthNames":["January","February","March","April","May","June","July","August","September","October","November","December",""],"IsReadOnly":true,"NativeCalendarName":"Gregorian Calendar","AbbreviatedMonthGenitiveNames":["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec",""],"MonthGenitiveNames":["January","February","March","April","May","June","July","August","September","October","November","December",""]},"numberShortForm":{"QuantitySymbols":["K","M","B"],"NumberGroupSize":1000,"ThousandSymbol":"K"},"eras":null}},"timeZonesConfiguration":{},"featureAvailability":{"featureStates":{"VisualStudio.Services.Contribution.EnableOnPremUnsecureBrowsers":false,"VisualStudio.Service.WebPlatform.ClientErrorReporting":false,"Microsoft.VisualStudio.Services.Gallery.Client.UseCdnAssetUri":false,"VisualStudio.Services.WebAccess.SubresourceIntegrity":false,"VisualStudio.Services.IdentityPicker.ReactProfileCard":true}},"appInsightsConfiguration":{"enabled":false,"instrumentationKey":"00000000-0000-0000-0000-000000000000","insightsScriptUrl":null},"diagnostics":{"sessionId":"61306532-400f-4b0c-91c0-f02a7ace5932","activityId":"61306532-400f-4b0c-91c0-f02a7ace5932","bundlingEnabled":true,"webPlatformVersion":"M272","serviceVersion":"Dev20.M272.1 (build: AzureDevOps_M272_20260409.11)"},"navigation":{"topMostLevel":"deployment","area":"","currentController":"Signin","currentAction":"Index","routeId":"LegacyWebAccessRoute","routeValues":{"controller":"Signin","action":"Index"}},"globalization":{"explicitTheme":"","theme":"Default","culture":"en-US","timezoneOffset":0,"timeZoneId":"UTC"},"serviceInstanceId":"951917ac-a960-4999-8464-e3f0aa25b381","hubsContext":{},"serviceLocations":{"locations":{"951917ac-a960-4999-8464-e3f0aa25b381":{"Application":"https://spsprodeus27.vssps.visualstudio.com/","Deployment":"https://spsprodeus27.vssps.visualstudio.com/"}}}};</script><script type="text/javascript"> var __cultureInfo = __vssPageContext.microsoftAjaxConfig.cultureInfo;</script>
+<script type="text/javascript">if (window.performance && window.performance.mark) { window.performance.mark('startLoadBundleOuter-basejs'); }</script>
+<script data-bundlelength="138887" data-bundlename="basejs" src="/_public/_Bundling/Content?bundle=vss-bundle-basejs-vh-5EDj0aiCZ8U3pbGPKlySQ9T_RAycY0i4geeP5oQDs=" type="text/javascript"></script>
+<script type="text/javascript">if (window.performance && window.performance.mark) { window.performance.mark('endLoadBundleOuter-basejs'); }</script>
+
+
+<script type="text/javascript"> require.config(__vssPageContext.moduleLoaderConfig);</script>
+
+    <input name="__RequestVerificationToken" type="hidden" value="ZfCFut2x5gS0dTnSAXZLQXcVmJ_ah03PozM3W2bGilZZyRpnKK-HCW4okeeBeKSwZLM54dptNIGvpPCjGyFeDQ0tg4ohKmy2ou2JXhOkPWY1" /><input name="__RequestVerificationToken2" type="hidden" value="__RequestVerificationToken2993c59dd-16fe-4eec-a849-3933362b0866" />
+    
+    
+
+
+    
+    
+    <div class="account signin main-container hide">
+
+
+            <div class="page-content">
+                <div class="header-section" role="banner">
+                    
+
+                    <link rel="stylesheet" type="text/css" href="/_static/tfs/M272_20260409.11/_content/Combined.css">
+                    <div id="ux-header" class="FF ltr vsIntegrate" xmlns="http://www.w3.org/1999/xhtml">
+                        <span id="isMobile"></span>
+                        <div class="upperBand">
+                            <div class="upperBandContent">
+                                <div class="left"></div>
+                                <div class="right">
+                                    <div class="profileImage"></div>
+
+                                    <div id="signIn">
+                                        <a class=":SignedOutProfileElement: createProfileLink" href="/go/profile" title="Anonymous">Anonymous</a>
+                                        <a class="scarabLink" href="/_signout">Sign out</a>
+                                    </div>
+                                </div>
+                                <div class="clear-both"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="content-section" role="main">
+                    
+    
+            <div class="signin-main-content">
+                <noscript>
+                    <span class="error">Microsoft Internet Explorer&#39;s Enhanced Security Configuration is currently enabled on your environment. This enhanced level of security prevents our web integration experiences from displaying or performing correctly. To continue with your operation please disable this configuration or contact your administrator.</span>
+                </noscript>
+                <div class="provider-control">                    
+                    <script class="options" defer="defer" type="application/json">{"providerOptions":{"force":false,"orgIdAuthUrl":"https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47/oauth2/authorize?client_id=499b84ac-1321-427f-aa17-267ca6975798\u0026site_id=501454\u0026response_mode=form_post\u0026response_type=code+id_token\u0026redirect_uri=https%3A%2F%2Fspsprodeus27.vssps.visualstudio.com%2F_signedin\u0026nonce=d427306f-403e-40db-a881-ac233b92c3b4\u0026state=realm%3Ddev.azure.com%26reply_to%3Dhttps%253A%252F%252Fdev.azure.com%252Fazure-iot-sdks%252Fazure-iot-sdks%252F_apis%252Fbuild%252Fbuilds%252F157585%252Flogs%252F16%26ht%3D2%26hid%3D73c09e29-7340-4b0f-b321-67710737f21b%26nonce%3Dd427306f-403e-40db-a881-ac233b92c3b4%26lltid%3Dd07d81f3-027a-463f-852c-b8ea2efffe0a%26protocol%3Dwsfederation\u0026resource=499b84ac-1321-427f-aa17-267ca6975798\u0026cid=d427306f-403e-40db-a881-ac233b92c3b4\u0026wsucxt=1\u0026instance_aware=true","user":null,"signInContext":"eyJodCI6MiwiaGlkIjoiYmJjNTYzZGQtZjMyYS00ZWZkLWJkZGItMWVkNDlkZTM2NjQzIiwicXMiOnsicmVhbG0iOiJkZXYuYXp1cmUuY29tIiwicmVwbHlfdG8iOiJodHRwczovL2Rldi5henVyZS5jb20vYXp1cmUtaW90LXNka3MvYXp1cmUtaW90LXNka3MvX2FwaXMvYnVpbGQvYnVpbGRzLzE1NzU4NS9sb2dzLzE2IiwiaHQiOiIyIiwiaGlkIjoiNzNjMDllMjktNzM0MC00YjBmLWIzMjEtNjc3MTA3MzdmMjFiIiwibm9uY2UiOiJkNDI3MzA2Zi00MDNlLTQwZGItYTg4MS1hYzIzM2I5MmMzYjQiLCJsbHRpZCI6ImQwN2Q4MWYzLTAyN2EtNDYzZi04NTJjLWI4ZWEyZWZmZmUwYSIsInByb3RvY29sIjoid3NmZWRlcmF0aW9uIn0sInJyIjoiIiwidmgiOiIiLCJjdiI6IiIsImNzIjoiIn01"}}</script>
+                </div>
+            </div>
+
+
+                </div>
+                 
+    
+    </div>
+
+
+    
+    
+
+    <script type="text/javascript">if (window.performance && window.performance.mark) { window.performance.mark('startLoadBundleOuter-common'); }</script>
+<script data-bundlelength="224205" data-bundlename="common" data-includedscripts="VSS/Bundling" src="/_public/_Bundling/Content?bundle=vss-bundle-common-vfRGj21zxZYTZJOipbqtIE1OepQHG2g1okdN3HXozo6A=" type="text/javascript"></script>
+<script type="text/javascript">if (window.performance && window.performance.mark) { window.performance.mark('endLoadBundleOuter-common'); }</script>
+<script type="text/javascript">if (window.performance && window.performance.mark) { window.performance.mark('startLoadBundleOuter-view'); }</script>
+<script data-bundlelength="157556" data-bundlename="view" data-includedscripts="Authentication/Scripts/SPS.Authentication.Controls;Authentication/Scripts/SPS.Authentication" src="/_public/_Bundling/Content?bundle=vss-bundle-view-vljpv_LAGHAk0iZLv60MAdeNmjorRF-Dy6Y6UvYVvEb8=" type="text/javascript"></script>
+<script type="text/javascript">if (window.performance && window.performance.mark) { window.performance.mark('endLoadBundleOuter-view'); }</script>
+
+<script type="text/javascript"> if (window.performance && window.performance.mark) { window.performance.mark('requireStart'); }
+require(["Authentication/Scripts/SPS.Authentication.Controls","Authentication/Scripts/SPS.Authentication"], function(){  if (window.performance && window.performance.mark) { window.performance.mark('requireEnd'); } window.requiredModulesLoaded=true;  });
+</script>
+
+</body>
+</html>

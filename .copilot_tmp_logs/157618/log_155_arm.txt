@@ -1,0 +1,769 @@
+2026-04-24T16:00:51.1758966Z ##[section]Starting: Cross-compile SDK for aarch64
+2026-04-24T16:00:51.1765434Z ==============================================================================
+2026-04-24T16:00:51.1765728Z Task         : Command line
+2026-04-24T16:00:51.1766021Z Description  : Run a command line script using Bash on Linux and macOS and cmd.exe on Windows
+2026-04-24T16:00:51.1766319Z Version      : 2.268.0
+2026-04-24T16:00:51.1766557Z Author       : Microsoft Corporation
+2026-04-24T16:00:51.1766800Z Help         : https://docs.microsoft.com/azure/devops/pipelines/tasks/utility/command-line
+2026-04-24T16:00:51.1767280Z ==============================================================================
+2026-04-24T16:00:51.2885663Z Generating script.
+2026-04-24T16:00:51.2905153Z ========================== Starting Command Output ===========================
+2026-04-24T16:00:51.2908223Z [command]/usr/bin/bash --noprofile --norc /home/vsts/work/_temp/ef92771c-2097-4377-b1f1-554dd6271094.sh
+2026-04-24T16:00:51.9122090Z CMake Deprecation Warning at CMakeLists.txt:4 (cmake_minimum_required):
+2026-04-24T16:00:51.9123702Z   Compatibility with CMake < 3.10 will be removed from a future version of
+2026-04-24T16:00:51.9124450Z   CMake.
+2026-04-24T16:00:51.9125301Z 
+2026-04-24T16:00:51.9125944Z   Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+2026-04-24T16:00:51.9126561Z   to tell CMake that the project requires at least <min> but has been updated
+2026-04-24T16:00:51.9127376Z   to work with policies introduced by <max> or earlier.
+2026-04-24T16:00:51.9127744Z 
+2026-04-24T16:00:51.9127986Z 
+2026-04-24T16:00:52.5006535Z -- The C compiler identification is GNU 13.3.0
+2026-04-24T16:00:52.6624817Z -- The CXX compiler identification is GNU 13.3.0
+2026-04-24T16:00:52.7912544Z -- Detecting C compiler ABI info
+2026-04-24T16:00:52.8976279Z -- Detecting C compiler ABI info - done
+2026-04-24T16:00:52.9160600Z -- Check for working C compiler: /usr/bin/aarch64-linux-gnu-gcc - skipped
+2026-04-24T16:00:52.9220576Z -- Detecting C compile features
+2026-04-24T16:00:52.9268969Z -- Detecting C compile features - done
+2026-04-24T16:00:52.9660661Z -- Detecting CXX compiler ABI info
+2026-04-24T16:00:53.0526873Z -- Detecting CXX compiler ABI info - done
+2026-04-24T16:00:53.0714981Z -- Check for working CXX compiler: /usr/bin/aarch64-linux-gnu-g++ - skipped
+2026-04-24T16:00:53.0719410Z -- Detecting CXX compile features
+2026-04-24T16:00:53.0728647Z -- Detecting CXX compile features - done
+2026-04-24T16:00:53.1086940Z -- IoT Client SDK Version = 1.15.0
+2026-04-24T16:00:53.1094138Z -- Provisioning SDK Version = 1.15.0
+2026-04-24T16:00:53.1107596Z CMake Deprecation Warning at deps/azure-macro-utils-c/CMakeLists.txt:4 (cmake_minimum_required):
+2026-04-24T16:00:53.1109431Z   Compatibility with CMake < 3.10 will be removed from a future version of
+2026-04-24T16:00:53.1110406Z   CMake.
+2026-04-24T16:00:53.1110922Z 
+2026-04-24T16:00:53.1111639Z   Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+2026-04-24T16:00:53.1112412Z   to tell CMake that the project requires at least <min> but has been updated
+2026-04-24T16:00:53.1113201Z   to work with policies introduced by <max> or earlier.
+2026-04-24T16:00:53.1113718Z 
+2026-04-24T16:00:53.1114190Z 
+2026-04-24T16:00:53.1325350Z CMake Deprecation Warning at deps/umock-c/CMakeLists.txt:4 (cmake_minimum_required):
+2026-04-24T16:00:53.1328451Z   Compatibility with CMake < 3.10 will be removed from a future version of
+2026-04-24T16:00:53.1329493Z   CMake.
+2026-04-24T16:00:53.1329961Z 
+2026-04-24T16:00:53.1330808Z   Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+2026-04-24T16:00:53.1331607Z   to tell CMake that the project requires at least <min> but has been updated
+2026-04-24T16:00:53.1332340Z   to work with policies introduced by <max> or earlier.
+2026-04-24T16:00:53.1332801Z 
+2026-04-24T16:00:53.1333171Z 
+2026-04-24T16:00:53.1365474Z -- Looking for include file stdint.h
+2026-04-24T16:00:53.1978442Z -- Looking for include file stdint.h - found
+2026-04-24T16:00:53.1981392Z -- Looking for include file stdbool.h
+2026-04-24T16:00:53.2574769Z -- Looking for include file stdbool.h - found
+2026-04-24T16:00:53.2602683Z CMake Warning (dev) at deps/umock-c/CMakeLists.txt:173 (install):
+2026-04-24T16:00:53.2604294Z   Policy CMP0177 is not set: install() DESTINATION paths are normalized.  Run
+2026-04-24T16:00:53.2605290Z   "cmake --help-policy CMP0177" for policy details.  Use the cmake_policy
+2026-04-24T16:00:53.2606048Z   command to set the policy and suppress this warning.
+2026-04-24T16:00:53.2606784Z This warning is for project developers.  Use -Wno-dev to suppress it.
+2026-04-24T16:00:53.2607541Z 
+2026-04-24T16:00:53.2626472Z CMake Deprecation Warning at deps/parson/CMakeLists.txt:1 (cmake_minimum_required):
+2026-04-24T16:00:53.2628333Z   Compatibility with CMake < 3.10 will be removed from a future version of
+2026-04-24T16:00:53.2629173Z   CMake.
+2026-04-24T16:00:53.2629624Z 
+2026-04-24T16:00:53.2630381Z   Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+2026-04-24T16:00:53.2631173Z   to tell CMake that the project requires at least <min> but has been updated
+2026-04-24T16:00:53.2631921Z   to work with policies introduced by <max> or earlier.
+2026-04-24T16:00:53.2632421Z 
+2026-04-24T16:00:53.2632866Z 
+2026-04-24T16:00:53.2663488Z CMake Deprecation Warning at c-utility/CMakeLists.txt:4 (cmake_minimum_required):
+2026-04-24T16:00:53.2665198Z   Compatibility with CMake < 3.10 will be removed from a future version of
+2026-04-24T16:00:53.2666044Z   CMake.
+2026-04-24T16:00:53.2666481Z 
+2026-04-24T16:00:53.2667389Z   Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+2026-04-24T16:00:53.2668211Z   to tell CMake that the project requires at least <min> but has been updated
+2026-04-24T16:00:53.2668987Z   to work with policies introduced by <max> or earlier.
+2026-04-24T16:00:53.2669503Z 
+2026-04-24T16:00:53.2669950Z 
+2026-04-24T16:00:53.3641253Z -- target architecture: GENERIC
+2026-04-24T16:00:53.3806343Z -- Performing Test CXX_FLAG_CXX11
+2026-04-24T16:00:53.4522262Z -- Performing Test CXX_FLAG_CXX11 - Success
+2026-04-24T16:00:53.5201143Z -- Found OpenSSL: /usr/lib/x86_64-linux-gnu/libcrypto.so (found version "3.0.13")
+2026-04-24T16:00:53.5658498Z -- Found CURL: /usr/lib/aarch64-linux-gnu/libcurl.so (found version "8.5.0")
+2026-04-24T16:00:53.5662765Z -- Found CURL: /usr/lib/aarch64-linux-gnu/libcurl.so
+2026-04-24T16:00:53.5714390Z CMake Deprecation Warning at uamqp/CMakeLists.txt:4 (cmake_minimum_required):
+2026-04-24T16:00:53.5716185Z   Compatibility with CMake < 3.10 will be removed from a future version of
+2026-04-24T16:00:53.5717479Z   CMake.
+2026-04-24T16:00:53.5718007Z 
+2026-04-24T16:00:53.5718722Z   Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+2026-04-24T16:00:53.5719500Z   to tell CMake that the project requires at least <min> but has been updated
+2026-04-24T16:00:53.5720243Z   to work with policies introduced by <max> or earlier.
+2026-04-24T16:00:53.5720697Z 
+2026-04-24T16:00:53.5721120Z 
+2026-04-24T16:00:53.5755133Z -- target architecture: GENERIC
+2026-04-24T16:00:53.5785780Z CMake Warning (dev) at uamqp/CMakeLists.txt:273 (install):
+2026-04-24T16:00:53.5787670Z   Policy CMP0177 is not set: install() DESTINATION paths are normalized.  Run
+2026-04-24T16:00:53.5788725Z   "cmake --help-policy CMP0177" for policy details.  Use the cmake_policy
+2026-04-24T16:00:53.5789491Z   command to set the policy and suppress this warning.
+2026-04-24T16:00:53.5790245Z This warning is for project developers.  Use -Wno-dev to suppress it.
+2026-04-24T16:00:53.5790727Z 
+2026-04-24T16:00:53.5812841Z CMake Deprecation Warning at umqtt/CMakeLists.txt:4 (cmake_minimum_required):
+2026-04-24T16:00:53.5814530Z   Compatibility with CMake < 3.10 will be removed from a future version of
+2026-04-24T16:00:53.5815506Z   CMake.
+2026-04-24T16:00:53.5816000Z 
+2026-04-24T16:00:53.5816833Z   Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+2026-04-24T16:00:53.5818048Z   to tell CMake that the project requires at least <min> but has been updated
+2026-04-24T16:00:53.5819093Z   to work with policies introduced by <max> or earlier.
+2026-04-24T16:00:53.5819611Z 
+2026-04-24T16:00:53.5820086Z 
+2026-04-24T16:00:53.5859977Z CMake Deprecation Warning at deps/uhttp/CMakeLists.txt:4 (cmake_minimum_required):
+2026-04-24T16:00:53.5861681Z   Compatibility with CMake < 3.10 will be removed from a future version of
+2026-04-24T16:00:53.5862587Z   CMake.
+2026-04-24T16:00:53.5863085Z 
+2026-04-24T16:00:53.5863855Z   Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+2026-04-24T16:00:53.5864690Z   to tell CMake that the project requires at least <min> but has been updated
+2026-04-24T16:00:53.5865546Z   to work with policies introduced by <max> or earlier.
+2026-04-24T16:00:53.5866076Z 
+2026-04-24T16:00:53.5866505Z 
+2026-04-24T16:00:53.5908625Z -- IoT Hub Architecture: GENERIC
+2026-04-24T16:00:53.6013838Z CMake Deprecation Warning at provisioning_client/CMakeLists.txt:4 (cmake_minimum_required):
+2026-04-24T16:00:53.6015549Z   Compatibility with CMake < 3.10 will be removed from a future version of
+2026-04-24T16:00:53.6017886Z   CMake.
+2026-04-24T16:00:53.6018580Z 
+2026-04-24T16:00:53.6019347Z   Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+2026-04-24T16:00:53.6020175Z   to tell CMake that the project requires at least <min> but has been updated
+2026-04-24T16:00:53.6021016Z   to work with policies introduced by <max> or earlier.
+2026-04-24T16:00:53.6021583Z 
+2026-04-24T16:00:53.6022111Z 
+2026-04-24T16:00:53.6660323Z CMake Deprecation Warning at provisioning_client/deps/utpm/CMakeLists.txt:4 (cmake_minimum_required):
+2026-04-24T16:00:53.6662905Z   Compatibility with CMake < 3.10 will be removed from a future version of
+2026-04-24T16:00:53.6663668Z   CMake.
+2026-04-24T16:00:53.6666203Z 
+2026-04-24T16:00:53.6667815Z   Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+2026-04-24T16:00:53.6668600Z   to tell CMake that the project requires at least <min> but has been updated
+2026-04-24T16:00:53.6669275Z   to work with policies introduced by <max> or earlier.
+2026-04-24T16:00:53.6669634Z 
+2026-04-24T16:00:53.6669956Z 
+2026-04-24T16:00:53.6732168Z CMake Deprecation Warning at provisioning_client/tests/CMakeLists.txt:4 (cmake_minimum_required):
+2026-04-24T16:00:53.6733889Z   Compatibility with CMake < 3.10 will be removed from a future version of
+2026-04-24T16:00:53.6734616Z   CMake.
+2026-04-24T16:00:53.6735040Z 
+2026-04-24T16:00:53.6735649Z   Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+2026-04-24T16:00:53.6736321Z   to tell CMake that the project requires at least <min> but has been updated
+2026-04-24T16:00:53.6736965Z   to work with policies introduced by <max> or earlier.
+2026-04-24T16:00:53.6737776Z 
+2026-04-24T16:00:53.6738150Z 
+2026-04-24T16:00:53.6747317Z CMake Deprecation Warning at provisioning_client/samples/custom_hsm_example/CMakeLists.txt:4 (cmake_minimum_required):
+2026-04-24T16:00:53.6749143Z   Compatibility with CMake < 3.10 will be removed from a future version of
+2026-04-24T16:00:53.6750014Z   CMake.
+2026-04-24T16:00:53.6750478Z 
+2026-04-24T16:00:53.6751219Z   Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+2026-04-24T16:00:53.6752385Z   to tell CMake that the project requires at least <min> but has been updated
+2026-04-24T16:00:53.6753267Z   to work with policies introduced by <max> or earlier.
+2026-04-24T16:00:53.6753866Z 
+2026-04-24T16:00:53.6754337Z 
+2026-04-24T16:00:53.6785811Z CMake Deprecation Warning at provisioning_client/tools/tpm_device_provision/CMakeLists.txt:5 (cmake_minimum_required):
+2026-04-24T16:00:53.6788027Z   Compatibility with CMake < 3.10 will be removed from a future version of
+2026-04-24T16:00:53.6789016Z   CMake.
+2026-04-24T16:00:53.6789558Z 
+2026-04-24T16:00:53.6790331Z   Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+2026-04-24T16:00:53.6791255Z   to tell CMake that the project requires at least <min> but has been updated
+2026-04-24T16:00:53.6792159Z   to work with policies introduced by <max> or earlier.
+2026-04-24T16:00:53.6792935Z 
+2026-04-24T16:00:53.6794439Z 
+2026-04-24T16:00:53.6795444Z CMake Deprecation Warning at provisioning_client/tools/symm_key_provision/CMakeLists.txt:5 (cmake_minimum_required):
+2026-04-24T16:00:53.6796551Z   Compatibility with CMake < 3.10 will be removed from a future version of
+2026-04-24T16:00:53.6797620Z   CMake.
+2026-04-24T16:00:53.6798243Z 
+2026-04-24T16:00:53.6799042Z   Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+2026-04-24T16:00:53.6799858Z   to tell CMake that the project requires at least <min> but has been updated
+2026-04-24T16:00:53.6800685Z   to work with policies introduced by <max> or earlier.
+2026-04-24T16:00:53.6801230Z 
+2026-04-24T16:00:53.6801683Z 
+2026-04-24T16:00:53.6811360Z CMake Deprecation Warning at iothub_client/CMakeLists.txt:4 (cmake_minimum_required):
+2026-04-24T16:00:53.6812975Z   Compatibility with CMake < 3.10 will be removed from a future version of
+2026-04-24T16:00:53.6813844Z   CMake.
+2026-04-24T16:00:53.6814425Z 
+2026-04-24T16:00:53.6815192Z   Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+2026-04-24T16:00:53.6816046Z   to tell CMake that the project requires at least <min> but has been updated
+2026-04-24T16:00:53.6816913Z   to work with policies introduced by <max> or earlier.
+2026-04-24T16:00:53.6817761Z 
+2026-04-24T16:00:53.6818255Z 
+2026-04-24T16:00:53.6924641Z CMake Deprecation Warning at iothub_client/samples/iothub_client_sample_mqtt_dm/CMakeLists.txt:4 (cmake_minimum_required):
+2026-04-24T16:00:53.6926816Z   Compatibility with CMake < 3.10 will be removed from a future version of
+2026-04-24T16:00:53.6928221Z   CMake.
+2026-04-24T16:00:53.6928732Z 
+2026-04-24T16:00:53.6929489Z   Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+2026-04-24T16:00:53.6930370Z   to tell CMake that the project requires at least <min> but has been updated
+2026-04-24T16:00:53.6931280Z   to work with policies introduced by <max> or earlier.
+2026-04-24T16:00:53.6931906Z 
+2026-04-24T16:00:53.6932425Z 
+2026-04-24T16:00:53.6981091Z CMake Deprecation Warning at iothub_client/tests/CMakeLists.txt:4 (cmake_minimum_required):
+2026-04-24T16:00:53.6988172Z   Compatibility with CMake < 3.10 will be removed from a future version of
+2026-04-24T16:00:53.6989149Z   CMake.
+2026-04-24T16:00:53.6989717Z 
+2026-04-24T16:00:53.6990538Z   Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+2026-04-24T16:00:53.6991410Z   to tell CMake that the project requires at least <min> but has been updated
+2026-04-24T16:00:53.6992259Z   to work with policies introduced by <max> or earlier.
+2026-04-24T16:00:53.6992806Z 
+2026-04-24T16:00:53.6993274Z 
+2026-04-24T16:00:53.7006924Z CMake Deprecation Warning at serializer/CMakeLists.txt:4 (cmake_minimum_required):
+2026-04-24T16:00:53.7008855Z   Compatibility with CMake < 3.10 will be removed from a future version of
+2026-04-24T16:00:53.7009782Z   CMake.
+2026-04-24T16:00:53.7010422Z 
+2026-04-24T16:00:53.7011195Z   Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+2026-04-24T16:00:53.7012049Z   to tell CMake that the project requires at least <min> but has been updated
+2026-04-24T16:00:53.7012958Z   to work with policies introduced by <max> or earlier.
+2026-04-24T16:00:53.7013693Z 
+2026-04-24T16:00:53.7014126Z 
+2026-04-24T16:00:53.7078926Z -- Configuring done (1.8s)
+2026-04-24T16:00:53.7896684Z CMake Warning at iothub_service_client/samples/iothub_deviceconfiguration_sample/CMakeLists.txt:20 (add_executable):
+2026-04-24T16:00:53.7899810Z   Cannot generate a safe runtime search path for target
+2026-04-24T16:00:53.7900949Z   iothub_deviceconfiguration_sample because files in some directories may
+2026-04-24T16:00:53.7902072Z   conflict with libraries in implicit directories:
+2026-04-24T16:00:53.7902711Z 
+2026-04-24T16:00:53.7903536Z     runtime library [libcurl.so.4] in /usr/lib/aarch64-linux-gnu may be hidden by files in:
+2026-04-24T16:00:53.7904375Z       /usr/lib/x86_64-linux-gnu
+2026-04-24T16:00:53.7905181Z 
+2026-04-24T16:00:53.7906022Z   Some of these libraries may not be found correctly.
+2026-04-24T16:00:53.7906692Z 
+2026-04-24T16:00:53.7907565Z 
+2026-04-24T16:00:53.7928530Z CMake Warning at iothub_service_client/samples/iothub_devicemethod_sample/CMakeLists.txt:20 (add_executable):
+2026-04-24T16:00:53.7930444Z   Cannot generate a safe runtime search path for target
+2026-04-24T16:00:53.7931523Z   iothub_devicemethod_sample because files in some directories may conflict
+2026-04-24T16:00:53.7932500Z   with libraries in implicit directories:
+2026-04-24T16:00:53.7933100Z 
+2026-04-24T16:00:53.7934012Z     runtime library [libcurl.so.4] in /usr/lib/aarch64-linux-gnu may be hidden by files in:
+2026-04-24T16:00:53.7934977Z       /usr/lib/x86_64-linux-gnu
+2026-04-24T16:00:53.7935538Z 
+2026-04-24T16:00:53.7936321Z   Some of these libraries may not be found correctly.
+2026-04-24T16:00:53.7936917Z 
+2026-04-24T16:00:53.7937694Z 
+2026-04-24T16:00:53.7959776Z CMake Warning at iothub_service_client/samples/iothub_devicetwin_sample/CMakeLists.txt:17 (add_executable):
+2026-04-24T16:00:53.7961625Z   Cannot generate a safe runtime search path for target
+2026-04-24T16:00:53.7962676Z   iothub_devicetwin_sample because files in some directories may conflict
+2026-04-24T16:00:53.7963604Z   with libraries in implicit directories:
+2026-04-24T16:00:53.7964164Z 
+2026-04-24T16:00:53.7965037Z     runtime library [libcurl.so.4] in /usr/lib/aarch64-linux-gnu may be hidden by files in:
+2026-04-24T16:00:53.7965984Z       /usr/lib/x86_64-linux-gnu
+2026-04-24T16:00:53.7966568Z 
+2026-04-24T16:00:53.7967733Z   Some of these libraries may not be found correctly.
+2026-04-24T16:00:53.7968332Z 
+2026-04-24T16:00:53.7968813Z 
+2026-04-24T16:00:53.7991258Z CMake Warning at iothub_service_client/samples/iothub_messaging_sample/CMakeLists.txt:16 (add_executable):
+2026-04-24T16:00:53.7993008Z   Cannot generate a safe runtime search path for target
+2026-04-24T16:00:53.7994074Z   iothub_messaging_sample because files in some directories may conflict with
+2026-04-24T16:00:53.7994992Z   libraries in implicit directories:
+2026-04-24T16:00:53.7995567Z 
+2026-04-24T16:00:53.7996446Z     runtime library [libcurl.so.4] in /usr/lib/aarch64-linux-gnu may be hidden by files in:
+2026-04-24T16:00:53.7997643Z       /usr/lib/x86_64-linux-gnu
+2026-04-24T16:00:53.7998240Z 
+2026-04-24T16:00:53.7999021Z   Some of these libraries may not be found correctly.
+2026-04-24T16:00:53.7999571Z 
+2026-04-24T16:00:53.8000035Z 
+2026-04-24T16:00:53.8022619Z CMake Warning at iothub_service_client/samples/iothub_messaging_ll_sample/CMakeLists.txt:24 (add_executable):
+2026-04-24T16:00:53.8024370Z   Cannot generate a safe runtime search path for target
+2026-04-24T16:00:53.8025418Z   iothub_messaging_ll_sample because files in some directories may conflict
+2026-04-24T16:00:53.8026411Z   with libraries in implicit directories:
+2026-04-24T16:00:53.8026953Z 
+2026-04-24T16:00:53.8028107Z     runtime library [libcurl.so.4] in /usr/lib/aarch64-linux-gnu may be hidden by files in:
+2026-04-24T16:00:53.8029034Z       /usr/lib/x86_64-linux-gnu
+2026-04-24T16:00:53.8029593Z 
+2026-04-24T16:00:53.8030342Z   Some of these libraries may not be found correctly.
+2026-04-24T16:00:53.8030864Z 
+2026-04-24T16:00:53.8031307Z 
+2026-04-24T16:00:53.8053310Z CMake Warning at iothub_service_client/samples/iothub_registrymanager_sample/CMakeLists.txt:17 (add_executable):
+2026-04-24T16:00:53.8055040Z   Cannot generate a safe runtime search path for target
+2026-04-24T16:00:53.8056090Z   iothub_registrymanager_sample because files in some directories may
+2026-04-24T16:00:53.8057354Z   conflict with libraries in implicit directories:
+2026-04-24T16:00:53.8058042Z 
+2026-04-24T16:00:53.8058939Z     runtime library [libcurl.so.4] in /usr/lib/aarch64-linux-gnu may be hidden by files in:
+2026-04-24T16:00:53.8059863Z       /usr/lib/x86_64-linux-gnu
+2026-04-24T16:00:53.8060446Z 
+2026-04-24T16:00:53.8061210Z   Some of these libraries may not be found correctly.
+2026-04-24T16:00:53.8061752Z 
+2026-04-24T16:00:53.8062216Z 
+2026-04-24T16:00:53.8127707Z CMake Warning at provisioning_service_client/samples/prov_sc_individual_enrollment_sample/CMakeLists.txt:24 (add_executable):
+2026-04-24T16:00:53.8129409Z   Cannot generate a safe runtime search path for target
+2026-04-24T16:00:53.8130503Z   prov_sc_individual_enrollment_sample because files in some directories may
+2026-04-24T16:00:53.8131490Z   conflict with libraries in implicit directories:
+2026-04-24T16:00:53.8132073Z 
+2026-04-24T16:00:53.8132955Z     runtime library [libcurl.so.4] in /usr/lib/aarch64-linux-gnu may be hidden by files in:
+2026-04-24T16:00:53.8133874Z       /usr/lib/x86_64-linux-gnu
+2026-04-24T16:00:53.8134456Z 
+2026-04-24T16:00:53.8135235Z   Some of these libraries may not be found correctly.
+2026-04-24T16:00:53.8135789Z 
+2026-04-24T16:00:53.8136253Z 
+2026-04-24T16:00:53.8162804Z CMake Warning at provisioning_service_client/samples/prov_sc_enrollment_group_sample/CMakeLists.txt:24 (add_executable):
+2026-04-24T16:00:53.8164504Z   Cannot generate a safe runtime search path for target
+2026-04-24T16:00:53.8165530Z   prov_sc_enrollment_group_sample because files in some directories may
+2026-04-24T16:00:53.8166514Z   conflict with libraries in implicit directories:
+2026-04-24T16:00:53.8167349Z 
+2026-04-24T16:00:53.8168289Z     runtime library [libcurl.so.4] in /usr/lib/aarch64-linux-gnu may be hidden by files in:
+2026-04-24T16:00:53.8169252Z       /usr/lib/x86_64-linux-gnu
+2026-04-24T16:00:53.8169825Z 
+2026-04-24T16:00:53.8170608Z   Some of these libraries may not be found correctly.
+2026-04-24T16:00:53.8171158Z 
+2026-04-24T16:00:53.8171616Z 
+2026-04-24T16:00:53.8196177Z CMake Warning at provisioning_service_client/samples/prov_sc_bulk_operation_sample/CMakeLists.txt:24 (add_executable):
+2026-04-24T16:00:53.8198183Z   Cannot generate a safe runtime search path for target
+2026-04-24T16:00:53.8199208Z   prov_sc_bulk_operation_sample because files in some directories may
+2026-04-24T16:00:53.8200192Z   conflict with libraries in implicit directories:
+2026-04-24T16:00:53.8200754Z 
+2026-04-24T16:00:53.8201616Z     runtime library [libcurl.so.4] in /usr/lib/aarch64-linux-gnu may be hidden by files in:
+2026-04-24T16:00:53.8202519Z       /usr/lib/x86_64-linux-gnu
+2026-04-24T16:00:53.8203086Z 
+2026-04-24T16:00:53.8203857Z   Some of these libraries may not be found correctly.
+2026-04-24T16:00:53.8204385Z 
+2026-04-24T16:00:53.8204838Z 
+2026-04-24T16:00:53.8229589Z CMake Warning at provisioning_service_client/samples/prov_sc_query_sample/CMakeLists.txt:24 (add_executable):
+2026-04-24T16:00:53.8231448Z   Cannot generate a safe runtime search path for target prov_sc_query_sample
+2026-04-24T16:00:53.8232542Z   because files in some directories may conflict with libraries in implicit
+2026-04-24T16:00:53.8233430Z   directories:
+2026-04-24T16:00:53.8233935Z 
+2026-04-24T16:00:53.8234801Z     runtime library [libcurl.so.4] in /usr/lib/aarch64-linux-gnu may be hidden by files in:
+2026-04-24T16:00:53.8235697Z       /usr/lib/x86_64-linux-gnu
+2026-04-24T16:00:53.8236273Z 
+2026-04-24T16:00:53.8237326Z   Some of these libraries may not be found correctly.
+2026-04-24T16:00:53.8237980Z 
+2026-04-24T16:00:53.8238470Z 
+2026-04-24T16:00:53.8489939Z CMake Warning at provisioning_client/deps/utpm/samples/utpm_sample/CMakeLists.txt:21 (add_executable):
+2026-04-24T16:00:53.8492220Z   Cannot generate a safe runtime search path for target utpm_sample because
+2026-04-24T16:00:53.8493203Z   files in some directories may conflict with libraries in implicit
+2026-04-24T16:00:53.8494044Z   directories:
+2026-04-24T16:00:53.8494559Z 
+2026-04-24T16:00:53.8495369Z     runtime library [libcurl.so.4] in /usr/lib/aarch64-linux-gnu may be hidden by files in:
+2026-04-24T16:00:53.8496194Z       /usr/lib/x86_64-linux-gnu
+2026-04-24T16:00:53.8496685Z 
+2026-04-24T16:00:53.8498522Z   Some of these libraries may not be found correctly.
+2026-04-24T16:00:53.8499137Z 
+2026-04-24T16:00:53.8499627Z 
+2026-04-24T16:00:53.8549104Z CMake Warning at provisioning_client/samples/iothub_client_sample_hsm/CMakeLists.txt:30 (add_executable):
+2026-04-24T16:00:53.8550745Z   Cannot generate a safe runtime search path for target
+2026-04-24T16:00:53.8551763Z   iothub_client_sample_hsm because files in some directories may conflict
+2026-04-24T16:00:53.8552600Z   with libraries in implicit directories:
+2026-04-24T16:00:53.8553148Z 
+2026-04-24T16:00:53.8553901Z     runtime library [libcurl.so.4] in /usr/lib/aarch64-linux-gnu may be hidden by files in:
+2026-04-24T16:00:53.8554672Z       /usr/lib/x86_64-linux-gnu
+2026-04-24T16:00:53.8555078Z 
+2026-04-24T16:00:53.8555776Z   Some of these libraries may not be found correctly.
+2026-04-24T16:00:53.8556370Z 
+2026-04-24T16:00:53.8556847Z 
+2026-04-24T16:00:53.8584094Z CMake Warning at provisioning_client/samples/prov_dev_client_ll_sample/CMakeLists.txt:31 (add_executable):
+2026-04-24T16:00:53.8585724Z   Cannot generate a safe runtime search path for target
+2026-04-24T16:00:53.8586623Z   prov_dev_client_ll_sample because files in some directories may conflict
+2026-04-24T16:00:53.8587755Z   with libraries in implicit directories:
+2026-04-24T16:00:53.8588301Z 
+2026-04-24T16:00:53.8589164Z     runtime library [libcurl.so.4] in /usr/lib/aarch64-linux-gnu may be hidden by files in:
+2026-04-24T16:00:53.8589973Z       /usr/lib/x86_64-linux-gnu
+2026-04-24T16:00:53.8590379Z 
+2026-04-24T16:00:53.8590994Z   Some of these libraries may not be found correctly.
+2026-04-24T16:00:53.8591478Z 
+2026-04-24T16:00:53.8591913Z 
+2026-04-24T16:00:53.8618420Z CMake Warning at provisioning_client/samples/prov_dev_client_ll_x509_sample/CMakeLists.txt:31 (add_executable):
+2026-04-24T16:00:53.8620132Z   Cannot generate a safe runtime search path for target
+2026-04-24T16:00:53.8621040Z   prov_dev_client_ll_x509_sample because files in some directories may
+2026-04-24T16:00:53.8621883Z   conflict with libraries in implicit directories:
+2026-04-24T16:00:53.8622393Z 
+2026-04-24T16:00:53.8623182Z     runtime library [libcurl.so.4] in /usr/lib/aarch64-linux-gnu may be hidden by files in:
+2026-04-24T16:00:53.8624000Z       /usr/lib/x86_64-linux-gnu
+2026-04-24T16:00:53.8624412Z 
+2026-04-24T16:00:53.8625034Z   Some of these libraries may not be found correctly.
+2026-04-24T16:00:53.8625485Z 
+2026-04-24T16:00:53.8625907Z 
+2026-04-24T16:00:53.8654163Z CMake Warning at provisioning_client/samples/prov_dev_client_sample/CMakeLists.txt:31 (add_executable):
+2026-04-24T16:00:53.8655203Z   Cannot generate a safe runtime search path for target
+2026-04-24T16:00:53.8656068Z   prov_dev_client_sample because files in some directories may conflict with
+2026-04-24T16:00:53.8656808Z   libraries in implicit directories:
+2026-04-24T16:00:53.8657744Z 
+2026-04-24T16:00:53.8658579Z     runtime library [libcurl.so.4] in /usr/lib/aarch64-linux-gnu may be hidden by files in:
+2026-04-24T16:00:53.8659390Z       /usr/lib/x86_64-linux-gnu
+2026-04-24T16:00:53.8659802Z 
+2026-04-24T16:00:53.8660410Z   Some of these libraries may not be found correctly.
+2026-04-24T16:00:53.8660822Z 
+2026-04-24T16:00:53.8661205Z 
+2026-04-24T16:00:53.8692515Z CMake Warning at provisioning_client/tools/tpm_device_provision/CMakeLists.txt:29 (add_executable):
+2026-04-24T16:00:53.8693551Z   Cannot generate a safe runtime search path for target tpm_device_provision
+2026-04-24T16:00:53.8694422Z   because files in some directories may conflict with libraries in implicit
+2026-04-24T16:00:53.8695395Z   directories:
+2026-04-24T16:00:53.8695847Z 
+2026-04-24T16:00:53.8696544Z     runtime library [libcurl.so.4] in /usr/lib/aarch64-linux-gnu may be hidden by files in:
+2026-04-24T16:00:53.8697744Z       /usr/lib/x86_64-linux-gnu
+2026-04-24T16:00:53.8698263Z 
+2026-04-24T16:00:53.8698993Z   Some of these libraries may not be found correctly.
+2026-04-24T16:00:53.8699488Z 
+2026-04-24T16:00:53.8699982Z 
+2026-04-24T16:00:53.8723860Z CMake Warning at provisioning_client/tools/symm_key_provision/CMakeLists.txt:28 (add_executable):
+2026-04-24T16:00:53.8724912Z   Cannot generate a safe runtime search path for target symm_key_provision
+2026-04-24T16:00:53.8725809Z   because files in some directories may conflict with libraries in implicit
+2026-04-24T16:00:53.8726590Z   directories:
+2026-04-24T16:00:53.8727629Z 
+2026-04-24T16:00:53.8728446Z     runtime library [libcurl.so.4] in /usr/lib/aarch64-linux-gnu may be hidden by files in:
+2026-04-24T16:00:53.8729289Z       /usr/lib/x86_64-linux-gnu
+2026-04-24T16:00:53.8729829Z 
+2026-04-24T16:00:53.8730516Z   Some of these libraries may not be found correctly.
+2026-04-24T16:00:53.8730983Z 
+2026-04-24T16:00:53.8731369Z 
+2026-04-24T16:00:53.8949694Z CMake Warning at iothub_client/samples/iothub_convenience_sample/CMakeLists.txt:28 (add_executable):
+2026-04-24T16:00:53.8951384Z   Cannot generate a safe runtime search path for target
+2026-04-24T16:00:53.8952429Z   iothub_convenience_sample because files in some directories may conflict
+2026-04-24T16:00:53.8953390Z   with libraries in implicit directories:
+2026-04-24T16:00:53.8954068Z 
+2026-04-24T16:00:53.8954908Z     runtime library [libcurl.so.4] in /usr/lib/aarch64-linux-gnu may be hidden by files in:
+2026-04-24T16:00:53.8955751Z       /usr/lib/x86_64-linux-gnu
+2026-04-24T16:00:53.8956278Z 
+2026-04-24T16:00:53.8957299Z   Some of these libraries may not be found correctly.
+2026-04-24T16:00:53.8958018Z 
+2026-04-24T16:00:53.8958588Z 
+2026-04-24T16:00:53.8984205Z CMake Warning at iothub_client/samples/iothub_ll_c2d_sample/CMakeLists.txt:31 (add_executable):
+2026-04-24T16:00:53.8986086Z   Cannot generate a safe runtime search path for target iothub_ll_c2d_sample
+2026-04-24T16:00:53.8987477Z   because files in some directories may conflict with libraries in implicit
+2026-04-24T16:00:53.8988457Z   directories:
+2026-04-24T16:00:53.8989127Z 
+2026-04-24T16:00:53.8989935Z     runtime library [libcurl.so.4] in /usr/lib/aarch64-linux-gnu may be hidden by files in:
+2026-04-24T16:00:53.8990714Z       /usr/lib/x86_64-linux-gnu
+2026-04-24T16:00:53.8991300Z 
+2026-04-24T16:00:53.8992123Z   Some of these libraries may not be found correctly.
+2026-04-24T16:00:53.8992764Z 
+2026-04-24T16:00:53.8993297Z 
+2026-04-24T16:00:53.9024710Z CMake Warning at iothub_client/samples/iothub_ll_client_x509_sample/CMakeLists.txt:26 (add_executable):
+2026-04-24T16:00:53.9038510Z   Cannot generate a safe runtime search path for target
+2026-04-24T16:00:53.9064934Z   iothub_ll_client_x509_sample because files in some directories may conflict
+2026-04-24T16:00:53.9069813Z   with libraries in implicit directories:
+2026-04-24T16:00:53.9070746Z 
+2026-04-24T16:00:53.9071789Z     runtime library [libcurl.so.4] in /usr/lib/aarch64-linux-gnu may be hidden by files in:
+2026-04-24T16:00:53.9072888Z       /usr/lib/x86_64-linux-gnu
+2026-04-24T16:00:53.9073647Z 
+2026-04-24T16:00:53.9074586Z   Some of these libraries may not be found correctly.
+2026-04-24T16:00:53.9075459Z 
+2026-04-24T16:00:53.9076105Z 
+2026-04-24T16:00:53.9077579Z CMake Warning at iothub_client/samples/iothub_ll_telemetry_sample/CMakeLists.txt:30 (add_executable):
+2026-04-24T16:00:53.9079003Z   Cannot generate a safe runtime search path for target
+2026-04-24T16:00:53.9079963Z   iothub_ll_telemetry_sample because files in some directories may conflict
+2026-04-24T16:00:53.9081127Z   with libraries in implicit directories:
+2026-04-24T16:00:53.9081982Z 
+2026-04-24T16:00:53.9083135Z     runtime library [libcurl.so.4] in /usr/lib/aarch64-linux-gnu may be hidden by files in:
+2026-04-24T16:00:53.9084425Z       /usr/lib/x86_64-linux-gnu
+2026-04-24T16:00:53.9085114Z 
+2026-04-24T16:00:53.9086264Z   Some of these libraries may not be found correctly.
+2026-04-24T16:00:53.9086966Z 
+2026-04-24T16:00:53.9087906Z 
+2026-04-24T16:00:53.9110591Z CMake Warning at iothub_client/samples/iotedge_downstream_device_sample/CMakeLists.txt:21 (add_executable):
+2026-04-24T16:00:53.9112764Z   Cannot generate a safe runtime search path for target
+2026-04-24T16:00:53.9113901Z   iotedge_downstream_device_sample because files in some directories may
+2026-04-24T16:00:53.9114909Z   conflict with libraries in implicit directories:
+2026-04-24T16:00:53.9115429Z 
+2026-04-24T16:00:53.9116279Z     runtime library [libcurl.so.4] in /usr/lib/aarch64-linux-gnu may be hidden by files in:
+2026-04-24T16:00:53.9117613Z       /usr/lib/x86_64-linux-gnu
+2026-04-24T16:00:53.9118428Z 
+2026-04-24T16:00:53.9119219Z   Some of these libraries may not be found correctly.
+2026-04-24T16:00:53.9119779Z 
+2026-04-24T16:00:53.9120273Z 
+2026-04-24T16:00:53.9149457Z CMake Warning at iothub_client/samples/iothub_client_sample_upload_to_blob/CMakeLists.txt:34 (add_executable):
+2026-04-24T16:00:53.9150687Z   Cannot generate a safe runtime search path for target
+2026-04-24T16:00:53.9151919Z   iothub_client_sample_upload_to_blob because files in some directories may
+2026-04-24T16:00:53.9153177Z   conflict with libraries in implicit directories:
+2026-04-24T16:00:53.9153979Z 
+2026-04-24T16:00:53.9154900Z     runtime library [libcurl.so.4] in /usr/lib/aarch64-linux-gnu may be hidden by files in:
+2026-04-24T16:00:53.9155748Z       /usr/lib/x86_64-linux-gnu
+2026-04-24T16:00:53.9156434Z 
+2026-04-24T16:00:53.9157787Z   Some of these libraries may not be found correctly.
+2026-04-24T16:00:53.9158917Z 
+2026-04-24T16:00:53.9159804Z 
+2026-04-24T16:00:53.9192055Z CMake Warning at iothub_client/samples/iothub_client_sample_upload_to_blob_mb/CMakeLists.txt:34 (add_executable):
+2026-04-24T16:00:53.9194966Z   Cannot generate a safe runtime search path for target
+2026-04-24T16:00:53.9196057Z   iothub_client_sample_upload_to_blob_mb because files in some directories
+2026-04-24T16:00:53.9197347Z   may conflict with libraries in implicit directories:
+2026-04-24T16:00:53.9198238Z 
+2026-04-24T16:00:53.9199103Z     runtime library [libcurl.so.4] in /usr/lib/aarch64-linux-gnu may be hidden by files in:
+2026-04-24T16:00:53.9200466Z       /usr/lib/x86_64-linux-gnu
+2026-04-24T16:00:53.9201038Z 
+2026-04-24T16:00:53.9202162Z   Some of these libraries may not be found correctly.
+2026-04-24T16:00:53.9202748Z 
+2026-04-24T16:00:53.9203255Z 
+2026-04-24T16:00:53.9229895Z CMake Warning at iothub_client/samples/iothub_client_sample_upload_to_blob_with_retry/CMakeLists.txt:34 (add_executable):
+2026-04-24T16:00:53.9231990Z   Cannot generate a safe runtime search path for target
+2026-04-24T16:00:53.9233061Z   iothub_client_sample_upload_to_blob_with_retry because files in some
+2026-04-24T16:00:53.9234083Z   directories may conflict with libraries in implicit directories:
+2026-04-24T16:00:53.9234667Z 
+2026-04-24T16:00:53.9235537Z     runtime library [libcurl.so.4] in /usr/lib/aarch64-linux-gnu may be hidden by files in:
+2026-04-24T16:00:53.9236436Z       /usr/lib/x86_64-linux-gnu
+2026-04-24T16:00:53.9237434Z 
+2026-04-24T16:00:53.9238320Z   Some of these libraries may not be found correctly.
+2026-04-24T16:00:53.9238888Z 
+2026-04-24T16:00:53.9239370Z 
+2026-04-24T16:00:53.9266766Z CMake Warning at iothub_client/samples/iothub_client_sample_module_method_invoke/CMakeLists.txt:15 (add_executable):
+2026-04-24T16:00:53.9269524Z   Cannot generate a safe runtime search path for target
+2026-04-24T16:00:53.9270555Z   iothub_client_sample_module_method_invoke because files in some directories
+2026-04-24T16:00:53.9271462Z   may conflict with libraries in implicit directories:
+2026-04-24T16:00:53.9272075Z 
+2026-04-24T16:00:53.9272935Z     runtime library [libcurl.so.4] in /usr/lib/aarch64-linux-gnu may be hidden by files in:
+2026-04-24T16:00:53.9273842Z       /usr/lib/x86_64-linux-gnu
+2026-04-24T16:00:53.9274398Z 
+2026-04-24T16:00:53.9275447Z   Some of these libraries may not be found correctly.
+2026-04-24T16:00:53.9276050Z 
+2026-04-24T16:00:53.9276521Z 
+2026-04-24T16:00:53.9304634Z CMake Warning at iothub_client/samples/iothub_client_sample_mqtt_dm/CMakeLists.txt:38 (add_executable):
+2026-04-24T16:00:53.9306610Z   Cannot generate a safe runtime search path for target
+2026-04-24T16:00:53.9308022Z   iothub_client_sample_mqtt_dm because files in some directories may conflict
+2026-04-24T16:00:53.9309017Z   with libraries in implicit directories:
+2026-04-24T16:00:53.9309586Z 
+2026-04-24T16:00:53.9310303Z     runtime library [libcurl.so.4] in /usr/lib/aarch64-linux-gnu may be hidden by files in:
+2026-04-24T16:00:53.9311138Z       /usr/lib/x86_64-linux-gnu
+2026-04-24T16:00:53.9311730Z 
+2026-04-24T16:00:53.9312530Z   Some of these libraries may not be found correctly.
+2026-04-24T16:00:53.9313309Z 
+2026-04-24T16:00:53.9313816Z 
+2026-04-24T16:00:53.9339572Z CMake Warning at iothub_client/samples/iothub_client_sample_module_sender/CMakeLists.txt:35 (add_executable):
+2026-04-24T16:00:53.9341468Z   Cannot generate a safe runtime search path for target
+2026-04-24T16:00:53.9342481Z   iothub_client_sample_module_sender because files in some directories may
+2026-04-24T16:00:53.9343526Z   conflict with libraries in implicit directories:
+2026-04-24T16:00:53.9344071Z 
+2026-04-24T16:00:53.9344838Z     runtime library [libcurl.so.4] in /usr/lib/aarch64-linux-gnu may be hidden by files in:
+2026-04-24T16:00:53.9345721Z       /usr/lib/x86_64-linux-gnu
+2026-04-24T16:00:53.9346278Z 
+2026-04-24T16:00:53.9347386Z   Some of these libraries may not be found correctly.
+2026-04-24T16:00:53.9348078Z 
+2026-04-24T16:00:53.9348559Z 
+2026-04-24T16:00:53.9374444Z CMake Warning at iothub_client/samples/iothub_client_sample_module_filter/CMakeLists.txt:27 (add_executable):
+2026-04-24T16:00:53.9376381Z   Cannot generate a safe runtime search path for target
+2026-04-24T16:00:53.9377979Z   iothub_client_sample_module_filter because files in some directories may
+2026-04-24T16:00:53.9379099Z   conflict with libraries in implicit directories:
+2026-04-24T16:00:53.9379790Z 
+2026-04-24T16:00:53.9380603Z     runtime library [libcurl.so.4] in /usr/lib/aarch64-linux-gnu may be hidden by files in:
+2026-04-24T16:00:53.9381381Z       /usr/lib/x86_64-linux-gnu
+2026-04-24T16:00:53.9381952Z 
+2026-04-24T16:00:53.9382761Z   Some of these libraries may not be found correctly.
+2026-04-24T16:00:53.9383376Z 
+2026-04-24T16:00:53.9383900Z 
+2026-04-24T16:00:53.9410967Z CMake Warning at iothub_client/samples/iothub_client_sample_amqp_shared_methods/CMakeLists.txt:34 (add_executable):
+2026-04-24T16:00:53.9412811Z   Cannot generate a safe runtime search path for target
+2026-04-24T16:00:53.9413816Z   iothub_client_sample_amqp_shared_methods because files in some directories
+2026-04-24T16:00:53.9414882Z   may conflict with libraries in implicit directories:
+2026-04-24T16:00:53.9415494Z 
+2026-04-24T16:00:53.9416231Z     runtime library [libcurl.so.4] in /usr/lib/aarch64-linux-gnu may be hidden by files in:
+2026-04-24T16:00:53.9417461Z       /usr/lib/x86_64-linux-gnu
+2026-04-24T16:00:53.9418090Z 
+2026-04-24T16:00:53.9418943Z   Some of these libraries may not be found correctly.
+2026-04-24T16:00:53.9419554Z 
+2026-04-24T16:00:53.9420044Z 
+2026-04-24T16:00:53.9445711Z CMake Warning at iothub_client/samples/iothub_ll_client_shared_sample/CMakeLists.txt:34 (add_executable):
+2026-04-24T16:00:53.9455407Z   Cannot generate a safe runtime search path for target
+2026-04-24T16:00:53.9456436Z   iothub_ll_client_shared_sample because files in some directories may
+2026-04-24T16:00:53.9457607Z   conflict with libraries in implicit directories:
+2026-04-24T16:00:53.9458284Z 
+2026-04-24T16:00:53.9459194Z     runtime library [libcurl.so.4] in /usr/lib/aarch64-linux-gnu may be hidden by files in:
+2026-04-24T16:00:53.9460116Z       /usr/lib/x86_64-linux-gnu
+2026-04-24T16:00:53.9460721Z 
+2026-04-24T16:00:53.9461561Z   Some of these libraries may not be found correctly.
+2026-04-24T16:00:53.9462158Z 
+2026-04-24T16:00:53.9462702Z 
+2026-04-24T16:00:53.9483973Z CMake Warning at iothub_client/samples/iothub_client_device_twin_and_methods_sample/CMakeLists.txt:35 (add_executable):
+2026-04-24T16:00:53.9485705Z   Cannot generate a safe runtime search path for target
+2026-04-24T16:00:53.9486706Z   iothub_client_device_twin_and_methods_sample because files in some
+2026-04-24T16:00:53.9488085Z   directories may conflict with libraries in implicit directories:
+2026-04-24T16:00:53.9488702Z 
+2026-04-24T16:00:53.9489519Z     runtime library [libcurl.so.4] in /usr/lib/aarch64-linux-gnu may be hidden by files in:
+2026-04-24T16:00:53.9490426Z       /usr/lib/x86_64-linux-gnu
+2026-04-24T16:00:53.9491004Z 
+2026-04-24T16:00:53.9491789Z   Some of these libraries may not be found correctly.
+2026-04-24T16:00:53.9492354Z 
+2026-04-24T16:00:53.9492824Z 
+2026-04-24T16:00:53.9525026Z CMake Warning at iothub_client/samples/pnp/pnp_simple_thermostat/CMakeLists.txt:31 (add_executable):
+2026-04-24T16:00:53.9527654Z   Cannot generate a safe runtime search path for target pnp_simple_thermostat
+2026-04-24T16:00:53.9528853Z   because files in some directories may conflict with libraries in implicit
+2026-04-24T16:00:53.9529777Z   directories:
+2026-04-24T16:00:53.9530300Z 
+2026-04-24T16:00:53.9531066Z     runtime library [libcurl.so.4] in /usr/lib/aarch64-linux-gnu may be hidden by files in:
+2026-04-24T16:00:53.9531971Z       /usr/lib/x86_64-linux-gnu
+2026-04-24T16:00:53.9532573Z 
+2026-04-24T16:00:53.9533411Z   Some of these libraries may not be found correctly.
+2026-04-24T16:00:53.9533987Z 
+2026-04-24T16:00:53.9534478Z 
+2026-04-24T16:00:53.9564324Z CMake Warning at iothub_client/samples/pnp/pnp_temperature_controller/CMakeLists.txt:33 (add_executable):
+2026-04-24T16:00:53.9566034Z   Cannot generate a safe runtime search path for target
+2026-04-24T16:00:53.9567325Z   pnp_temperature_controller because files in some directories may conflict
+2026-04-24T16:00:53.9568398Z   with libraries in implicit directories:
+2026-04-24T16:00:53.9569003Z 
+2026-04-24T16:00:53.9569838Z     runtime library [libcurl.so.4] in /usr/lib/aarch64-linux-gnu may be hidden by files in:
+2026-04-24T16:00:53.9570620Z       /usr/lib/x86_64-linux-gnu
+2026-04-24T16:00:53.9571163Z 
+2026-04-24T16:00:53.9571963Z   Some of these libraries may not be found correctly.
+2026-04-24T16:00:53.9572553Z 
+2026-04-24T16:00:53.9573054Z 
+2026-04-24T16:00:53.9638708Z CMake Warning at samples/solutions/remote_monitoring_client/CMakeLists.txt:28 (add_executable):
+2026-04-24T16:00:53.9640404Z   Cannot generate a safe runtime search path for target
+2026-04-24T16:00:53.9641416Z   remote_monitoring_client because files in some directories may conflict
+2026-04-24T16:00:53.9642365Z   with libraries in implicit directories:
+2026-04-24T16:00:53.9642979Z 
+2026-04-24T16:00:53.9643779Z     runtime library [libcurl.so.4] in /usr/lib/aarch64-linux-gnu may be hidden by files in:
+2026-04-24T16:00:53.9644641Z       /usr/lib/x86_64-linux-gnu
+2026-04-24T16:00:53.9645224Z 
+2026-04-24T16:00:53.9646051Z   Some of these libraries may not be found correctly.
+2026-04-24T16:00:53.9646675Z 
+2026-04-24T16:00:53.9647536Z 
+2026-04-24T16:00:53.9844065Z -- Generating done (0.3s)
+2026-04-24T16:00:53.9847698Z CMake Warning:
+2026-04-24T16:00:53.9848795Z   Manually-specified variables were not used by the project:
+2026-04-24T16:00:53.9849415Z 
+2026-04-24T16:00:53.9850144Z     PKG_CONFIG_LIBDIR
+2026-04-24T16:00:53.9850684Z 
+2026-04-24T16:00:53.9851200Z 
+2026-04-24T16:00:53.9853358Z -- Build files have been written to: /home/vsts/work/1/s/cmake-arm64
+2026-04-24T16:00:54.0285529Z [  0%] Building C object deps/parson/CMakeFiles/parson.dir/parson.c.o
+2026-04-24T16:00:54.0314356Z [  0%] Building C object deps/umock-c/CMakeFiles/umock_c.dir/src/umock_c.c.o
+2026-04-24T16:00:54.1228540Z [  0%] Building C object deps/umock-c/CMakeFiles/umock_c.dir/src/umock_c_negative_tests.c.o
+2026-04-24T16:00:54.2128215Z [  0%] Building C object deps/umock-c/CMakeFiles/umock_c.dir/src/umockalloc.c.o
+2026-04-24T16:00:54.2608211Z [  1%] Building C object deps/umock-c/CMakeFiles/umock_c.dir/src/umockcall.c.o
+2026-04-24T16:00:54.3178168Z [  1%] Building C object deps/umock-c/CMakeFiles/umock_c.dir/src/umockcallrecorder.c.o
+2026-04-24T16:00:54.3227943Z [  1%] Linking C static library libparson.a
+2026-04-24T16:00:54.3921414Z [  1%] Building C object deps/umock-c/CMakeFiles/umock_c.dir/src/umocktypename.c.o
+2026-04-24T16:00:54.4207586Z [  2%] Building C object deps/umock-c/CMakeFiles/umock_c.dir/src/umocktypes.c.o
+2026-04-24T16:00:54.4874285Z [  2%] Building C object deps/umock-c/CMakeFiles/umock_c.dir/src/umocktypes_bool.c.o
+2026-04-24T16:00:54.5441548Z [  2%] Building C object deps/umock-c/CMakeFiles/umock_c.dir/src/umocktypes_c.c.o
+2026-04-24T16:00:54.6357843Z [  3%] Building C object deps/umock-c/CMakeFiles/umock_c.dir/src/umocktypes_stdint.c.o
+2026-04-24T16:00:54.7114168Z [  3%] Building C object deps/umock-c/CMakeFiles/umock_c.dir/src/umocktypes_charptr.c.o
+2026-04-24T16:00:54.7711070Z [  3%] Building C object deps/umock-c/CMakeFiles/umock_c.dir/src/umocktypes_wcharptr.c.o
+2026-04-24T16:00:54.8342942Z [  3%] Building C object deps/umock-c/CMakeFiles/umock_c.dir/src/umockcallpairs.c.o
+2026-04-24T16:00:54.8898026Z [  4%] Building C object deps/umock-c/CMakeFiles/umock_c.dir/src/umockstring.c.o
+2026-04-24T16:00:54.9139759Z [  4%] Building C object deps/umock-c/CMakeFiles/umock_c.dir/src/umockautoignoreargs.c.o
+2026-04-24T16:00:54.9612779Z [  4%] Building C object deps/umock-c/CMakeFiles/umock_c.dir/src/umock_log.c.o
+2026-04-24T16:00:55.0117424Z [  5%] Linking C static library libumock_c.a
+2026-04-24T16:01:02.3845789Z [  5%] Built target parson
+2026-04-24T16:01:02.3898114Z [  5%] Built target umock_c
+2026-04-24T16:01:02.3968948Z [  5%] Building C object c-utility/CMakeFiles/aziotsharedutil.dir/src/azure_base32.c.o
+2026-04-24T16:01:02.4001598Z [  5%] Building C object provisioning_client/samples/custom_hsm_example/CMakeFiles/custom_hsm_example.dir/custom_hsm_example.c.o
+2026-04-24T16:01:02.4653829Z [  6%] Linking C static library libcustom_hsm_example.a
+2026-04-24T16:01:02.5265264Z [  6%] Building C object c-utility/CMakeFiles/aziotsharedutil.dir/src/azure_base64.c.o
+2026-04-24T16:01:02.5839364Z [  6%] Built target custom_hsm_example
+2026-04-24T16:01:02.5966198Z [  7%] Building C object serializer/CMakeFiles/serializer.dir/src/agenttypesystem.c.o
+2026-04-24T16:01:02.6590968Z [  7%] Building C object c-utility/CMakeFiles/aziotsharedutil.dir/src/buffer.c.o
+2026-04-24T16:01:02.7885383Z [  8%] Building C object c-utility/CMakeFiles/aziotsharedutil.dir/src/constbuffer_array.c.o
+2026-04-24T16:01:02.9330729Z [  8%] Building C object c-utility/CMakeFiles/aziotsharedutil.dir/src/constbuffer_array_batcher.c.o
+2026-04-24T16:01:03.0168606Z [  8%] Building C object serializer/CMakeFiles/serializer.dir/src/codefirst.c.o
+2026-04-24T16:01:03.0779691Z [  8%] Building C object c-utility/CMakeFiles/aziotsharedutil.dir/src/connection_string_parser.c.o
+2026-04-24T16:01:03.1866449Z [  9%] Building C object c-utility/CMakeFiles/aziotsharedutil.dir/src/constbuffer.c.o
+2026-04-24T16:01:03.3047410Z [  9%] Building C object c-utility/CMakeFiles/aziotsharedutil.dir/src/consolelogger.c.o
+2026-04-24T16:01:03.3168249Z [  9%] Building C object serializer/CMakeFiles/serializer.dir/src/commanddecoder.c.o
+2026-04-24T16:01:03.3848434Z [  9%] Building C object c-utility/CMakeFiles/aziotsharedutil.dir/src/crt_abstractions.c.o
+2026-04-24T16:01:03.5189902Z [  9%] Building C object c-utility/CMakeFiles/aziotsharedutil.dir/src/constmap.c.o
+2026-04-24T16:01:03.5758361Z [ 10%] Building C object serializer/CMakeFiles/serializer.dir/src/datamarshaller.c.o
+2026-04-24T16:01:03.6458297Z [ 11%] Building C object c-utility/CMakeFiles/aziotsharedutil.dir/src/doublylinkedlist.c.o
+2026-04-24T16:01:03.7188412Z [ 11%] Building C object c-utility/CMakeFiles/aziotsharedutil.dir/src/gballoc.c.o
+2026-04-24T16:01:03.7648198Z [ 11%] Building C object serializer/CMakeFiles/serializer.dir/src/datapublisher.c.o
+2026-04-24T16:01:03.8231448Z [ 11%] Building C object c-utility/CMakeFiles/aziotsharedutil.dir/src/gbnetwork.c.o
+2026-04-24T16:01:03.9218334Z [ 12%] Building C object c-utility/CMakeFiles/aziotsharedutil.dir/src/gb_stdio.c.o
+2026-04-24T16:01:03.9438193Z [ 12%] Building C object c-utility/CMakeFiles/aziotsharedutil.dir/src/gb_time.c.o
+2026-04-24T16:01:03.9658175Z [ 12%] Building C object c-utility/CMakeFiles/aziotsharedutil.dir/src/hmac.c.o
+2026-04-24T16:01:03.9738424Z [ 12%] Building C object serializer/CMakeFiles/serializer.dir/src/dataserializer.c.o
+2026-04-24T16:01:04.0092546Z [ 13%] Building C object c-utility/CMakeFiles/aziotsharedutil.dir/src/hmacsha256.c.o
+2026-04-24T16:01:04.0840917Z [ 14%] Building C object serializer/CMakeFiles/serializer.dir/src/iotdevice.c.o
+2026-04-24T16:01:04.0855257Z [ 14%] Building C object c-utility/CMakeFiles/aziotsharedutil.dir/src/xio.c.o
+2026-04-24T16:01:04.1848150Z [ 14%] Building C object c-utility/CMakeFiles/aziotsharedutil.dir/src/singlylinkedlist.c.o
+2026-04-24T16:01:04.2824808Z [ 14%] Building C object serializer/CMakeFiles/serializer.dir/src/jsondecoder.c.o
+2026-04-24T16:01:04.2863071Z [ 14%] Building C object c-utility/CMakeFiles/aziotsharedutil.dir/src/map.c.o
+2026-04-24T16:01:04.4058373Z [ 14%] Building C object serializer/CMakeFiles/serializer.dir/src/jsonencoder.c.o
+2026-04-24T16:01:04.4330682Z [ 15%] Building C object c-utility/CMakeFiles/aziotsharedutil.dir/src/sastoken.c.o
+2026-04-24T16:01:04.5288301Z [ 15%] Building C object serializer/CMakeFiles/serializer.dir/src/multitree.c.o
+2026-04-24T16:01:04.5618223Z [ 15%] Building C object c-utility/CMakeFiles/aziotsharedutil.dir/src/sha1.c.o
+2026-04-24T16:01:04.6538303Z [ 15%] Building C object c-utility/CMakeFiles/aziotsharedutil.dir/src/sha224.c.o
+2026-04-24T16:01:04.6858195Z [ 16%] Building C object serializer/CMakeFiles/serializer.dir/src/schema.c.o
+2026-04-24T16:01:04.7188207Z [ 17%] Building C object c-utility/CMakeFiles/aziotsharedutil.dir/src/sha384-512.c.o
+2026-04-24T16:01:04.8178352Z [ 17%] Building C object c-utility/CMakeFiles/aziotsharedutil.dir/src/strings.c.o
+2026-04-24T16:01:04.9729176Z [ 17%] Building C object c-utility/CMakeFiles/aziotsharedutil.dir/src/string_token.c.o
+2026-04-24T16:01:05.0668474Z [ 17%] Building C object serializer/CMakeFiles/serializer.dir/src/schemalib.c.o
+2026-04-24T16:01:05.0888053Z [ 18%] Building C object c-utility/CMakeFiles/aziotsharedutil.dir/src/string_tokenizer.c.o
+2026-04-24T16:01:05.1888229Z [ 18%] Building C object c-utility/CMakeFiles/aziotsharedutil.dir/src/uuid.c.o
+2026-04-24T16:01:05.2548122Z [ 18%] Building C object serializer/CMakeFiles/serializer.dir/src/schemaserializer.c.o
+2026-04-24T16:01:05.2838263Z [ 18%] Building C object c-utility/CMakeFiles/aziotsharedutil.dir/src/urlencode.c.o
+2026-04-24T16:01:05.3977466Z [ 18%] Building C object c-utility/CMakeFiles/aziotsharedutil.dir/src/usha.c.o
+2026-04-24T16:01:05.4048675Z [ 19%] Building C object serializer/CMakeFiles/serializer.dir/src/methodreturn.c.o
+2026-04-24T16:01:05.4415763Z [ 20%] Building C object c-utility/CMakeFiles/aziotsharedutil.dir/src/vector.c.o
+2026-04-24T16:01:05.5098263Z [ 20%] Linking C static library libserializer.a
+2026-04-24T16:01:05.5584004Z [ 20%] Building C object c-utility/CMakeFiles/aziotsharedutil.dir/src/xlogging.c.o
+2026-04-24T16:01:05.6418574Z [ 20%] Building C object c-utility/CMakeFiles/aziotsharedutil.dir/src/optionhandler.c.o
+2026-04-24T16:01:05.6423114Z [ 20%] Built target serializer
+2026-04-24T16:01:05.6445883Z [ 21%] Building C object c-utility/CMakeFiles/aziotsharedutil.dir/src/memory_data.c.o
+2026-04-24T16:01:05.7469472Z [ 21%] Building C object c-utility/CMakeFiles/aziotsharedutil.dir/adapters/agenttime.c.o
+2026-04-24T16:01:05.7498046Z [ 21%] Building C object c-utility/CMakeFiles/aziotsharedutil.dir/adapters/condition_pthreads.c.o
+2026-04-24T16:01:05.8198384Z [ 22%] Building C object c-utility/CMakeFiles/aziotsharedutil.dir/adapters/lock_pthreads.c.o
+2026-04-24T16:01:05.8428190Z [ 22%] Building C object c-utility/CMakeFiles/aziotsharedutil.dir/adapters/random_posix.c.o
+2026-04-24T16:01:05.9089546Z [ 22%] Building C object c-utility/CMakeFiles/aziotsharedutil.dir/adapters/platform_linux.c.o
+2026-04-24T16:01:05.9100908Z [ 22%] Building C object c-utility/CMakeFiles/aziotsharedutil.dir/adapters/socketio_berkeley.c.o
+2026-04-24T16:01:06.0351264Z [ 23%] Building C object c-utility/CMakeFiles/aziotsharedutil.dir/adapters/tickcounter_linux.c.o
+2026-04-24T16:01:06.1212496Z [ 23%] Building C object c-utility/CMakeFiles/aziotsharedutil.dir/adapters/threadapi_pthreads.c.o
+2026-04-24T16:01:06.1223336Z [ 23%] Building C object c-utility/CMakeFiles/aziotsharedutil.dir/adapters/uniqueid_linux.c.o
+2026-04-24T16:01:06.2070730Z [ 24%] Building C object c-utility/CMakeFiles/aziotsharedutil.dir/adapters/envvariable.c.o
+2026-04-24T16:01:06.2228675Z [ 24%] Building C object c-utility/CMakeFiles/aziotsharedutil.dir/src/dns_resolver_sync.c.o
+2026-04-24T16:01:06.2775517Z [ 24%] Building C object c-utility/CMakeFiles/aziotsharedutil.dir/adapters/linux_time.c.o
+2026-04-24T16:01:06.3278535Z [ 25%] Building C object c-utility/CMakeFiles/aziotsharedutil.dir/src/httpapiex.c.o
+2026-04-24T16:01:06.3599648Z [ 25%] Building C object c-utility/CMakeFiles/aziotsharedutil.dir/src/httpapiexsas.c.o
+2026-04-24T16:01:06.4835097Z [ 25%] Building C object c-utility/CMakeFiles/aziotsharedutil.dir/src/httpheaders.c.o
+2026-04-24T16:01:06.4851623Z [ 25%] Building C object c-utility/CMakeFiles/aziotsharedutil.dir/adapters/httpapi_curl.c.o
+2026-04-24T16:01:06.6113225Z [ 26%] Building C object c-utility/CMakeFiles/aziotsharedutil.dir/src/http_proxy_io.c.o
+2026-04-24T16:01:06.7978195Z [ 26%] Building C object c-utility/CMakeFiles/aziotsharedutil.dir/adapters/tlsio_openssl.c.o
+2026-04-24T16:01:06.9450597Z [ 26%] Building C object c-utility/CMakeFiles/aziotsharedutil.dir/adapters/x509_openssl.c.o
+2026-04-24T16:01:07.1084484Z [ 27%] Building C object c-utility/CMakeFiles/aziotsharedutil.dir/src/wsio.c.o
+2026-04-24T16:01:07.1328837Z [ 27%] Building C object c-utility/CMakeFiles/aziotsharedutil.dir/src/uws_client.c.o
+2026-04-24T16:01:07.2578294Z [ 27%] Building C object c-utility/CMakeFiles/aziotsharedutil.dir/src/uws_frame_encoder.c.o
+2026-04-24T16:01:07.3576525Z [ 28%] Building C object c-utility/CMakeFiles/aziotsharedutil.dir/src/utf8_checker.c.o
+2026-04-24T16:01:07.4098336Z [ 28%] Building C object c-utility/CMakeFiles/aziotsharedutil.dir/src/ws_url.c.o
+2026-04-24T16:01:07.4858887Z [ 28%] Linking C static library libaziotsharedutil.a
+2026-04-24T16:01:07.6201772Z [ 28%] Built target aziotsharedutil
+2026-04-24T16:01:07.6337474Z [ 28%] Building C object umqtt/CMakeFiles/umqtt.dir/src/mqtt_client.c.o
+2026-04-24T16:01:07.6342732Z [ 29%] Building C object uamqp/CMakeFiles/uamqp.dir/src/amqp_definitions.c.o
+2026-04-24T16:01:07.8618483Z [ 29%] Building C object umqtt/CMakeFiles/umqtt.dir/src/mqtt_codec.c.o
+2026-04-24T16:01:08.0458696Z [ 30%] Building C object umqtt/CMakeFiles/umqtt.dir/src/mqtt_message.c.o
+2026-04-24T16:01:08.1698339Z [ 30%] Linking C static library libumqtt.a
+2026-04-24T16:01:08.2982248Z [ 30%] Built target umqtt
+2026-04-24T16:01:08.3107947Z [ 30%] Building C object deps/uhttp/CMakeFiles/uhttp.dir/src/uhttp.c.o
+2026-04-24T16:01:08.5657677Z [ 31%] Linking C static library libuhttp.a
+2026-04-24T16:01:08.6868113Z [ 31%] Built target uhttp
+2026-04-24T16:01:08.6887965Z [ 31%] Building C object uamqp/CMakeFiles/uamqp.dir/src/amqp_frame_codec.c.o
+2026-04-24T16:01:08.7048235Z [ 31%] Building C object provisioning_client/deps/utpm/CMakeFiles/utpm.dir/src/Marshal.c.o
+2026-04-24T16:01:08.8318111Z [ 31%] Building C object uamqp/CMakeFiles/uamqp.dir/src/amqp_management.c.o
+2026-04-24T16:01:09.2568744Z [ 31%] Building C object provisioning_client/deps/utpm/CMakeFiles/utpm.dir/src/Memory.c.o
+2026-04-24T16:01:09.3248247Z [ 32%] Building C object uamqp/CMakeFiles/uamqp.dir/src/amqpvalue.c.o
+2026-04-24T16:01:09.3608201Z [ 33%] Building C object provisioning_client/deps/utpm/CMakeFiles/utpm.dir/src/tpm_codec.c.o
+2026-04-24T16:01:09.6708389Z [ 33%] Building C object provisioning_client/deps/utpm/CMakeFiles/utpm.dir/src/gbfiledescript.c.o
+2026-04-24T16:01:09.7548119Z [ 33%] Building C object provisioning_client/deps/utpm/CMakeFiles/utpm.dir/src/tpm_comm_linux.c.o
+2026-04-24T16:01:09.8925877Z [ 34%] Building C object uamqp/CMakeFiles/uamqp.dir/src/amqpvalue_to_string.c.o
+2026-04-24T16:01:09.8927904Z [ 34%] Building C object provisioning_client/deps/utpm/CMakeFiles/utpm.dir/src/tpm_socket_comm.c.o
+2026-04-24T16:01:10.0028310Z [ 34%] Linking C static library libutpm.a
+2026-04-24T16:01:10.0629698Z [ 34%] Building C object uamqp/CMakeFiles/uamqp.dir/src/async_operation.c.o
+2026-04-24T16:01:10.1270896Z [ 34%] Built target utpm
+2026-04-24T16:01:10.1366734Z [ 35%] Building C object provisioning_client/CMakeFiles/prov_http_transport.dir/src/prov_transport_http_client.c.o
+2026-04-24T16:01:10.1447920Z [ 36%] Building C object uamqp/CMakeFiles/uamqp.dir/src/cbs.c.o
+2026-04-24T16:01:10.3615700Z [ 36%] Linking C static library libprov_http_transport.a
+2026-04-24T16:01:10.4528165Z [ 36%] Building C object uamqp/CMakeFiles/uamqp.dir/src/connection.c.o
+2026-04-24T16:01:10.4818302Z [ 36%] Built target prov_http_transport
+2026-04-24T16:01:10.4917949Z [ 36%] Building C object provisioning_client/CMakeFiles/prov_mqtt_ws_transport.dir/src/prov_transport_mqtt_ws_client.c.o
+2026-04-24T16:01:10.6191314Z [ 36%] Building C object provisioning_client/CMakeFiles/prov_mqtt_ws_transport.dir/src/prov_transport_mqtt_common.c.o
+2026-04-24T16:01:10.8508524Z [ 37%] Linking C static library libprov_mqtt_ws_transport.a
+2026-04-24T16:01:10.9336700Z [ 37%] Building C object uamqp/CMakeFiles/uamqp.dir/src/frame_codec.c.o
+2026-04-24T16:01:10.9729474Z [ 37%] Built target prov_mqtt_ws_transport
+2026-04-24T16:01:10.9768055Z [ 37%] Building C object uamqp/CMakeFiles/uamqp.dir/src/header_detect_io.c.o
+2026-04-24T16:01:11.1018229Z [ 37%] Building C object provisioning_client/CMakeFiles/prov_mqtt_transport.dir/src/prov_transport_mqtt_client.c.o
+2026-04-24T16:01:11.1258302Z [ 38%] Building C object uamqp/CMakeFiles/uamqp.dir/src/link.c.o
+2026-04-24T16:01:11.2338504Z [ 38%] Building C object provisioning_client/CMakeFiles/prov_mqtt_transport.dir/src/prov_transport_mqtt_common.c.o
+2026-04-24T16:01:11.4628385Z [ 39%] Linking C static library libprov_mqtt_transport.a
+2026-04-24T16:01:11.5818686Z [ 39%] Built target prov_mqtt_transport
+2026-04-24T16:01:11.5931809Z [ 39%] Building C object provisioning_client/deps/utpm/samples/utpm_sample/CMakeFiles/utpm_sample.dir/utpm_sample.c.o
+2026-04-24T16:01:11.6248466Z [ 39%] Building C object uamqp/CMakeFiles/uamqp.dir/src/message.c.o
+2026-04-24T16:01:11.7748272Z [ 40%] Linking C executable utpm_sample
+2026-04-24T16:01:11.7888069Z /usr/lib/gcc-cross/aarch64-linux-gnu/13/../../../../aarch64-linux-gnu/bin/ld: /usr/lib/x86_64-linux-gnu/libssl.so: error adding symbols: file in wrong format
+2026-04-24T16:01:11.7927718Z collect2: error: ld returned 1 exit status
+2026-04-24T16:01:11.7947837Z make[2]: *** [provisioning_client/deps/utpm/samples/utpm_sample/CMakeFiles/utpm_sample.dir/build.make:106: provisioning_client/deps/utpm/samples/utpm_sample/utpm_sample] Error 1
+2026-04-24T16:01:11.7949002Z make[1]: *** [CMakeFiles/Makefile2:3356: provisioning_client/deps/utpm/samples/utpm_sample/CMakeFiles/utpm_sample.dir/all] Error 2
+2026-04-24T16:01:11.7987701Z make[1]: *** Waiting for unfinished jobs....
+2026-04-24T16:01:11.8007670Z [ 40%] Building C object uamqp/CMakeFiles/uamqp.dir/src/message_receiver.c.o
+2026-04-24T16:01:12.0215008Z [ 41%] Building C object uamqp/CMakeFiles/uamqp.dir/src/message_sender.c.o
+2026-04-24T16:01:12.2088323Z [ 41%] Building C object uamqp/CMakeFiles/uamqp.dir/src/messaging.c.o
+2026-04-24T16:01:12.4579888Z [ 41%] Building C object uamqp/CMakeFiles/uamqp.dir/src/sasl_anonymous.c.o
+2026-04-24T16:01:12.5288218Z [ 42%] Building C object uamqp/CMakeFiles/uamqp.dir/src/sasl_frame_codec.c.o
+2026-04-24T16:01:12.5438228Z [ 42%] Building C object uamqp/CMakeFiles/uamqp.dir/src/sasl_mechanism.c.o
+2026-04-24T16:01:12.6327910Z [ 42%] Building C object uamqp/CMakeFiles/uamqp.dir/src/sasl_server_mechanism.c.o
+2026-04-24T16:01:12.7208208Z [ 42%] Building C object uamqp/CMakeFiles/uamqp.dir/src/sasl_mssbcbs.c.o
+2026-04-24T16:01:12.8018466Z [ 43%] Building C object uamqp/CMakeFiles/uamqp.dir/src/sasl_plain.c.o
+2026-04-24T16:01:12.8638307Z [ 43%] Building C object uamqp/CMakeFiles/uamqp.dir/src/saslclientio.c.o
+2026-04-24T16:01:12.9022944Z [ 43%] Building C object uamqp/CMakeFiles/uamqp.dir/src/session.c.o
+2026-04-24T16:01:13.2644828Z [ 44%] Building C object uamqp/CMakeFiles/uamqp.dir/src/socket_listener_berkeley.c.o
+2026-04-24T16:01:13.3586291Z [ 44%] Linking C static library libuamqp.a
+2026-04-24T16:01:13.4692678Z [ 44%] Built target uamqp
+2026-04-24T16:01:13.4699019Z make: *** [Makefile:146: all] Error 2
+2026-04-24T16:01:13.4720273Z 
+2026-04-24T16:01:13.4757516Z ##[error]Bash exited with code '2'.
+2026-04-24T16:01:13.4795694Z ##[section]Finishing: Cross-compile SDK for aarch64

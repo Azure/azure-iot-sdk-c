@@ -1,0 +1,1530 @@
+2026-04-23T17:50:31.9414394Z ##[section]Starting: Check Submodules
+2026-04-23T17:50:32.0810753Z ##[section]Starting: Initialize job
+2026-04-23T17:50:32.0815124Z Agent name: 'Azure Pipelines 2'
+2026-04-23T17:50:32.0816363Z Agent machine name: 'runnervmddnds'
+2026-04-23T17:50:32.0816828Z Current agent version: '4.272.0'
+2026-04-23T17:50:32.0844256Z ##[group]Runner Image Provisioner
+2026-04-23T17:50:32.0844726Z Hosted Compute Agent
+2026-04-23T17:50:32.0845142Z Version: 20260213.493
+2026-04-23T17:50:32.0845568Z Commit: 5c115507f6dd24b8de37d8bbe0bb4509d0cc0fa3
+2026-04-23T17:50:32.0846563Z Build Date: 2026-02-13T00:28:41Z
+2026-04-23T17:50:32.0847049Z Worker ID: {c3ac4cda-78c5-4dad-b731-8e5054aea772}
+2026-04-23T17:50:32.0847481Z Azure Region: northcentralus
+2026-04-23T17:50:32.0847865Z ##[endgroup]
+2026-04-23T17:50:32.0848250Z ##[group]_internal_runner_telemetry
+2026-04-23T17:50:32.0848741Z ProcessLifetimeId: 46c76ee7-e952-4171-8af7-74463d15f46f
+2026-04-23T17:50:32.0849188Z Azure Region: northcentralus
+2026-04-23T17:50:32.0849569Z ##[endgroup]
+2026-04-23T17:50:32.0850066Z ##[group]Operating System
+2026-04-23T17:50:32.0850446Z Ubuntu
+2026-04-23T17:50:32.0850786Z 24.04.4
+2026-04-23T17:50:32.0851110Z LTS
+2026-04-23T17:50:32.0851446Z ##[endgroup]
+2026-04-23T17:50:32.0851807Z ##[group]Runner Image
+2026-04-23T17:50:32.0852198Z Image: ubuntu-24.04
+2026-04-23T17:50:32.0852578Z Version: 20260413.86.1
+2026-04-23T17:50:32.0853105Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260413.86/images/ubuntu/Ubuntu2404-Readme.md
+2026-04-23T17:50:32.0853769Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260413.86
+2026-04-23T17:50:32.0854265Z ##[endgroup]
+2026-04-23T17:50:32.0859185Z Current image version: '20260413.86.1'
+2026-04-23T17:50:32.1561364Z Agent running as: 'vsts'
+2026-04-23T17:50:32.1615746Z Prepare build directory.
+2026-04-23T17:50:32.2002676Z Set build variables.
+2026-04-23T17:50:32.2026641Z Download all required tasks.
+2026-04-23T17:50:32.2122564Z Downloading task: 1ESHostedPoolValidation (1.0.31377996)
+2026-04-23T17:50:36.5423222Z Downloading task: nuget-security-analysis (0.2.216)
+2026-04-23T17:50:36.8275557Z Downloading task: CmdLine (2.268.0)
+2026-04-23T17:50:37.1008021Z Downloading task: ComponentGovernanceComponentDetection (0.2620414.3)
+2026-04-23T17:50:38.6110777Z Checking job knob settings.
+2026-04-23T17:50:38.6112989Z    Knob: DockerActionRetries = true Source: $(VSTSAGENT_DOCKER_ACTION_RETRIES) 
+2026-04-23T17:50:38.6113221Z    Knob: AgentToolsDirectory = /opt/hostedtoolcache Source: ${AGENT_TOOLSDIRECTORY} 
+2026-04-23T17:50:38.6114213Z    Knob: UseGitLongPaths = true Source: $(USE_GIT_LONG_PATHS) 
+2026-04-23T17:50:38.6115269Z    Knob: UseNode24withHandlerData = True Source: $(DistributedTask.Agent.UseNode24withHandlerData) 
+2026-04-23T17:50:38.6116680Z    Knob: EnableIssueSourceValidation = true Source: $(ENABLE_ISSUE_SOURCE_VALIDATION) 
+2026-04-23T17:50:38.6117257Z    Knob: AgentEnablePipelineArtifactLargeChunkSize = true Source: $(AGENT_ENABLE_PIPELINEARTIFACT_LARGE_CHUNK_SIZE) 
+2026-04-23T17:50:38.6118935Z    Knob: ContinueAfterCancelProcessTreeKillAttempt = true Source: $(VSTSAGENT_CONTINUE_AFTER_CANCEL_PROCESSTREEKILL_ATTEMPT) 
+2026-04-23T17:50:38.6119405Z    Knob: ProcessHandlerSecureArguments = false Source: $(AZP_75787_ENABLE_NEW_LOGIC) 
+2026-04-23T17:50:38.6119719Z    Knob: ProcessHandlerSecureArguments = false Source: $(AZP_75787_ENABLE_NEW_LOGIC_LOG) 
+2026-04-23T17:50:38.6120035Z    Knob: ProcessHandlerTelemetry = true Source: $(AZP_75787_ENABLE_COLLECT) 
+2026-04-23T17:50:38.6120379Z    Knob: UseNewNodeHandlerTelemetry = True Source: $(DistributedTask.Agent.USENEWNODEHANDLERTELEMETRY) 
+2026-04-23T17:50:38.6120719Z    Knob: ProcessHandlerEnableNewLogic = true Source: $(AZP_75787_ENABLE_NEW_PH_LOGIC) 
+2026-04-23T17:50:38.6121365Z    Knob: EnableResourceMonitorDebugOutput = true Source: $(AZP_ENABLE_RESOURCE_MONITOR_DEBUG_OUTPUT) 
+2026-04-23T17:50:38.6121696Z    Knob: EnableResourceUtilizationWarnings = true Source: $(AZP_ENABLE_RESOURCE_UTILIZATION_WARNINGS) 
+2026-04-23T17:50:38.6122501Z    Knob: IgnoreVSTSTaskLib = true Source: $(AZP_AGENT_IGNORE_VSTSTASKLIB) 
+2026-04-23T17:50:38.6122807Z    Knob: FailJobWhenAgentDies = true Source: $(FAIL_JOB_WHEN_AGENT_DIES) 
+2026-04-23T17:50:38.6122996Z    Knob: EnhancedWorkerCrashHandling = true Source: ${AZP_ENHANCED_WORKER_CRASH_HANDLING} 
+2026-04-23T17:50:38.6123398Z    Knob: CheckForTaskDeprecation = true Source: $(AZP_AGENT_CHECK_FOR_TASK_DEPRECATION) 
+2026-04-23T17:50:38.6123824Z    Knob: CheckIfTaskNodeRunnerIsDeprecated246 = True Source: $(DistributedTask.Agent.CheckIfTaskNodeRunnerIsDeprecated246) 
+2026-04-23T17:50:38.6124174Z    Knob: UseNode20ToStartContainer = True Source: $(DistributedTask.Agent.UseNode20ToStartContainer) 
+2026-04-23T17:50:38.6124671Z    Knob: EnableTimeoutLogFlushing = True Source: $(DistributedTask.Agent.EnableTimeoutLogFlushing) 
+2026-04-23T17:50:38.6125130Z    Knob: LogTaskNameInUserAgent = true Source: $(AZP_AGENT_LOG_TASKNAME_IN_USERAGENT) 
+2026-04-23T17:50:38.6125444Z    Knob: UseFetchFilterInCheckoutTask = true Source: $(AGENT_USE_FETCH_FILTER_IN_CHECKOUT_TASK) 
+2026-04-23T17:50:38.6126396Z    Knob: Rosetta2Warning = true Source: $(ROSETTA2_WARNING) 
+2026-04-23T17:50:38.6127317Z    Knob: AddForceCredentialsToGitCheckout = True Source: $(DistributedTask.Agent.AddForceCredentialsToGitCheckout) 
+2026-04-23T17:50:38.6127789Z    Knob: AddForceCredentialsToGitCheckoutEnhanced = True Source: $(DistributedTask.Agent.AddForceCredentialsToGitCheckoutEnhanced) 
+2026-04-23T17:50:38.6128366Z    Knob: UseLatestTfExe = True Source: $(DistributedTask.Agent.UseLatestTfExe) 
+2026-04-23T17:50:38.6128688Z    Knob: UseSparseCheckoutInCheckoutTask = true Source: $(AGENT_USE_SPARSE_CHECKOUT_IN_CHECKOUT_TASK) 
+2026-04-23T17:50:38.6129115Z    Knob: AgentCDNConnectivityFailWarning = False Source: $(DistributedTask.Agent.AgentCDNConnectivityFailWarning) 
+2026-04-23T17:50:38.6129398Z    Knob: UseEnhancedLogging = true Source: ${AZP_USE_ENHANCED_LOGGING} 
+2026-04-23T17:50:38.6129870Z Finished checking job knob settings.
+2026-04-23T17:50:38.6599523Z Plugin: 'Test Result Parser plugin' is running in background.
+2026-04-23T17:50:38.6599868Z Plugin: 'Test File Publisher plugin' is running in background.
+2026-04-23T17:50:38.6600497Z Start tracking orphan processes.
+2026-04-23T17:50:38.6821034Z ##[section]Finishing: Initialize job
+2026-04-23T17:50:38.6928216Z ##[section]Async Command Start: DetectDockerContainer
+2026-04-23T17:50:38.6929182Z ##[section]Async Command End: DetectDockerContainer
+2026-04-23T17:50:38.6931332Z ##[section]Async Command Start: DetectDockerContainer
+2026-04-23T17:50:38.6931759Z ##[section]Async Command End: DetectDockerContainer
+2026-04-23T17:50:38.7230080Z ##[section]Starting: Agent Pool Validation
+2026-04-23T17:50:38.7358216Z ==============================================================================
+2026-04-23T17:50:38.7359197Z Task         : 1ES Hosted Pool Validation
+2026-04-23T17:50:38.7359491Z Description  : Validates that pipelines use secure and compliant Azure DevOps pools
+2026-04-23T17:50:38.7359640Z Version      : 1.0.31377996
+2026-04-23T17:50:38.7359883Z Author       : 1ES Resource Management
+2026-04-23T17:50:38.7360177Z Help         : See https://aka.ms/noselfhostedpools for more information. Please start a conversation in our [Teams channel](https://aka.ms/hostedpoolsonboardingsupport) if you run into problems or have questions with this task.
+2026-04-23T17:50:38.7360399Z ==============================================================================
+2026-04-23T17:50:39.9370502Z ##[section]Finishing: Agent Pool Validation
+2026-04-23T17:50:39.9454708Z ##[section]Starting: Checkout Azure/azure-iot-sdk-c@ewertons/pipelinefixes to s
+2026-04-23T17:50:39.9463830Z ==============================================================================
+2026-04-23T17:50:39.9464628Z Task         : Get sources
+2026-04-23T17:50:39.9465009Z Description  : Get sources from a repository. Supports Git, TfsVC, and SVN repositories.
+2026-04-23T17:50:39.9465350Z Version      : 1.0.0
+2026-04-23T17:50:39.9465621Z Author       : Microsoft
+2026-04-23T17:50:39.9466564Z Help         : [More Information](https://go.microsoft.com/fwlink/?LinkId=798199)
+2026-04-23T17:50:39.9466883Z ==============================================================================
+2026-04-23T17:50:41.1140070Z Syncing repository: Azure/azure-iot-sdk-c (GitHub)
+2026-04-23T17:50:41.1150538Z ##[command]git version
+2026-04-23T17:50:41.1158442Z git version 2.53.0
+2026-04-23T17:50:41.1159823Z ##[command]git lfs version
+2026-04-23T17:50:41.1220597Z git-lfs/3.7.1 (GitHub; linux amd64; go 1.24.4)
+2026-04-23T17:50:41.1222978Z ##[command]git init "/home/vsts/work/1/s"
+2026-04-23T17:50:41.1229033Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-04-23T17:50:41.1229698Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-04-23T17:50:41.1230302Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-04-23T17:50:41.1230839Z hint: call:
+2026-04-23T17:50:41.1231372Z hint:
+2026-04-23T17:50:41.1232015Z hint: 	git config --global init.defaultBranch <name>
+2026-04-23T17:50:41.1232557Z hint:
+2026-04-23T17:50:41.1233147Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-04-23T17:50:41.1233807Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-04-23T17:50:41.1234403Z hint:
+2026-04-23T17:50:41.1234949Z hint: 	git branch -m <name>
+2026-04-23T17:50:41.1235453Z hint:
+2026-04-23T17:50:41.1236207Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-04-23T17:50:41.1237516Z Initialized empty Git repository in /home/vsts/work/1/s/.git/
+2026-04-23T17:50:41.1239262Z ##[command]git remote add origin https://github.com/Azure/azure-iot-sdk-c
+2026-04-23T17:50:41.1246614Z ##[command]git sparse-checkout disable
+2026-04-23T17:50:41.1257798Z ##[command]git config gc.auto 0
+2026-04-23T17:50:41.1265139Z ##[command]git config core.longpaths true
+2026-04-23T17:50:41.1272407Z ##[command]git config --get-all http.https://github.com/Azure/azure-iot-sdk-c.extraheader
+2026-04-23T17:50:41.1279463Z ##[command]git config --get-all http.extraheader
+2026-04-23T17:50:41.1286793Z ##[command]git config --get-regexp .*extraheader
+2026-04-23T17:50:41.1294068Z ##[command]git config --get-all http.proxy
+2026-04-23T17:50:41.1301489Z ##[command]git config http.version HTTP/1.1
+2026-04-23T17:50:41.1312754Z ##[command]git config --get-all remote.origin.promisor
+2026-04-23T17:50:41.1320699Z ##[command]git config --get-all remote.origin.partialclonefilter
+2026-04-23T17:50:41.1330414Z ##[command]git --config-env=http.extraheader=env_var_http.extraheader fetch --force --no-tags --prune --prune-tags --progress --no-recurse-submodules origin
+2026-04-23T17:50:41.1336524Z remote: Enumerating objects: 80534, done.        
+2026-04-23T17:50:41.1337120Z remote: Counting objects:   0% (1/833)        
+2026-04-23T17:50:41.1337709Z remote: Counting objects:   1% (9/833)        
+2026-04-23T17:50:41.1338280Z remote: Counting objects:   2% (17/833)        
+2026-04-23T17:50:41.1338846Z remote: Counting objects:   3% (25/833)        
+2026-04-23T17:50:41.1339399Z remote: Counting objects:   4% (34/833)        
+2026-04-23T17:50:41.1339942Z remote: Counting objects:   5% (42/833)        
+2026-04-23T17:50:41.1340498Z remote: Counting objects:   6% (50/833)        
+2026-04-23T17:50:41.1341057Z remote: Counting objects:   7% (59/833)        
+2026-04-23T17:50:41.1341655Z remote: Counting objects:   8% (67/833)        
+2026-04-23T17:50:41.1342206Z remote: Counting objects:   9% (75/833)        
+2026-04-23T17:50:41.1343107Z remote: Counting objects:  10% (84/833)        
+2026-04-23T17:50:41.1343720Z remote: Counting objects:  11% (92/833)        
+2026-04-23T17:50:41.1344301Z remote: Counting objects:  12% (100/833)        
+2026-04-23T17:50:41.1344848Z remote: Counting objects:  13% (109/833)        
+2026-04-23T17:50:41.1345406Z remote: Counting objects:  14% (117/833)        
+2026-04-23T17:50:41.1346081Z remote: Counting objects:  15% (125/833)        
+2026-04-23T17:50:41.1346701Z remote: Counting objects:  16% (134/833)        
+2026-04-23T17:50:41.1347442Z remote: Counting objects:  17% (142/833)        
+2026-04-23T17:50:41.1348012Z remote: Counting objects:  18% (150/833)        
+2026-04-23T17:50:41.1348561Z remote: Counting objects:  19% (159/833)        
+2026-04-23T17:50:41.1349173Z remote: Counting objects:  20% (167/833)        
+2026-04-23T17:50:41.1349731Z remote: Counting objects:  21% (175/833)        
+2026-04-23T17:50:41.1350297Z remote: Counting objects:  22% (184/833)        
+2026-04-23T17:50:41.1350863Z remote: Counting objects:  23% (192/833)        
+2026-04-23T17:50:41.1351482Z remote: Counting objects:  24% (200/833)        
+2026-04-23T17:50:41.1352130Z remote: Counting objects:  25% (209/833)        
+2026-04-23T17:50:41.1352738Z remote: Counting objects:  26% (217/833)        
+2026-04-23T17:50:41.1353362Z remote: Counting objects:  27% (225/833)        
+2026-04-23T17:50:41.1354005Z remote: Counting objects:  28% (234/833)        
+2026-04-23T17:50:41.1354563Z remote: Counting objects:  29% (242/833)        
+2026-04-23T17:50:41.1355173Z remote: Counting objects:  30% (250/833)        
+2026-04-23T17:50:41.1355757Z remote: Counting objects:  31% (259/833)        
+2026-04-23T17:50:41.1356530Z remote: Counting objects:  32% (267/833)        
+2026-04-23T17:50:41.1357157Z remote: Counting objects:  33% (275/833)        
+2026-04-23T17:50:41.1357758Z remote: Counting objects:  34% (284/833)        
+2026-04-23T17:50:41.1358389Z remote: Counting objects:  35% (292/833)        
+2026-04-23T17:50:41.1358956Z remote: Counting objects:  36% (300/833)        
+2026-04-23T17:50:41.1359514Z remote: Counting objects:  37% (309/833)        
+2026-04-23T17:50:41.1360106Z remote: Counting objects:  38% (317/833)        
+2026-04-23T17:50:41.1360680Z remote: Counting objects:  39% (325/833)        
+2026-04-23T17:50:41.1361232Z remote: Counting objects:  40% (334/833)        
+2026-04-23T17:50:41.1361784Z remote: Counting objects:  41% (342/833)        
+2026-04-23T17:50:41.1362377Z remote: Counting objects:  42% (350/833)        
+2026-04-23T17:50:41.1362956Z remote: Counting objects:  43% (359/833)        
+2026-04-23T17:50:41.1363558Z remote: Counting objects:  44% (367/833)        
+2026-04-23T17:50:41.1364219Z remote: Counting objects:  45% (375/833)        
+2026-04-23T17:50:41.1364857Z remote: Counting objects:  46% (384/833)        
+2026-04-23T17:50:41.1365464Z remote: Counting objects:  47% (392/833)        
+2026-04-23T17:50:41.1366377Z remote: Counting objects:  48% (400/833)        
+2026-04-23T17:50:41.1366994Z remote: Counting objects:  49% (409/833)        
+2026-04-23T17:50:41.1367629Z remote: Counting objects:  50% (417/833)        
+2026-04-23T17:50:41.1368226Z remote: Counting objects:  51% (425/833)        
+2026-04-23T17:50:41.1368773Z remote: Counting objects:  52% (434/833)        
+2026-04-23T17:50:41.1369333Z remote: Counting objects:  53% (442/833)        
+2026-04-23T17:50:41.1369887Z remote: Counting objects:  54% (450/833)        
+2026-04-23T17:50:41.1370441Z remote: Counting objects:  55% (459/833)        
+2026-04-23T17:50:41.1371042Z remote: Counting objects:  56% (467/833)        
+2026-04-23T17:50:41.1371605Z remote: Counting objects:  57% (475/833)        
+2026-04-23T17:50:41.1372149Z remote: Counting objects:  58% (484/833)        
+2026-04-23T17:50:41.1372896Z remote: Counting objects:  59% (492/833)        
+2026-04-23T17:50:41.1373448Z remote: Counting objects:  60% (500/833)        
+2026-04-23T17:50:41.1374004Z remote: Counting objects:  61% (509/833)        
+2026-04-23T17:50:41.1374698Z remote: Counting objects:  62% (517/833)        
+2026-04-23T17:50:41.1375295Z remote: Counting objects:  63% (525/833)        
+2026-04-23T17:50:41.1376032Z remote: Counting objects:  64% (534/833)        
+2026-04-23T17:50:41.1376633Z remote: Counting objects:  65% (542/833)        
+2026-04-23T17:50:41.1377208Z remote: Counting objects:  66% (550/833)        
+2026-04-23T17:50:41.1377755Z remote: Counting objects:  67% (559/833)        
+2026-04-23T17:50:41.1378315Z remote: Counting objects:  68% (567/833)        
+2026-04-23T17:50:41.1379059Z remote: Counting objects:  69% (575/833)        
+2026-04-23T17:50:41.1379678Z remote: Counting objects:  70% (584/833)        
+2026-04-23T17:50:41.1380286Z remote: Counting objects:  71% (592/833)        
+2026-04-23T17:50:41.1380931Z remote: Counting objects:  72% (600/833)        
+2026-04-23T17:50:41.1381555Z remote: Counting objects:  73% (609/833)        
+2026-04-23T17:50:41.1382154Z remote: Counting objects:  74% (617/833)        
+2026-04-23T17:50:41.1382865Z remote: Counting objects:  75% (625/833)        
+2026-04-23T17:50:41.1383470Z remote: Counting objects:  76% (634/833)        
+2026-04-23T17:50:41.1384221Z remote: Counting objects:  77% (642/833)        
+2026-04-23T17:50:41.1384834Z remote: Counting objects:  78% (650/833)        
+2026-04-23T17:50:41.1385450Z remote: Counting objects:  79% (659/833)        
+2026-04-23T17:50:41.1386263Z remote: Counting objects:  80% (667/833)        
+2026-04-23T17:50:41.1386854Z remote: Counting objects:  81% (675/833)        
+2026-04-23T17:50:41.1387620Z remote: Counting objects:  82% (684/833)        
+2026-04-23T17:50:41.1388311Z remote: Counting objects:  83% (692/833)        
+2026-04-23T17:50:41.1388997Z remote: Counting objects:  84% (700/833)        
+2026-04-23T17:50:41.1389540Z remote: Counting objects:  85% (709/833)        
+2026-04-23T17:50:41.1390097Z remote: Counting objects:  86% (717/833)        
+2026-04-23T17:50:41.1390673Z remote: Counting objects:  87% (725/833)        
+2026-04-23T17:50:41.1391223Z remote: Counting objects:  88% (734/833)        
+2026-04-23T17:50:41.1391769Z remote: Counting objects:  89% (742/833)        
+2026-04-23T17:50:41.1392348Z remote: Counting objects:  90% (750/833)        
+2026-04-23T17:50:41.1392897Z remote: Counting objects:  91% (759/833)        
+2026-04-23T17:50:41.1393444Z remote: Counting objects:  92% (767/833)        
+2026-04-23T17:50:41.1393996Z remote: Counting objects:  93% (775/833)        
+2026-04-23T17:50:41.1394710Z remote: Counting objects:  94% (784/833)        
+2026-04-23T17:50:41.1395321Z remote: Counting objects:  95% (792/833)        
+2026-04-23T17:50:41.1396285Z remote: Counting objects:  96% (800/833)        
+2026-04-23T17:50:41.1396858Z remote: Counting objects:  97% (809/833)        
+2026-04-23T17:50:41.1397469Z remote: Counting objects:  98% (817/833)        
+2026-04-23T17:50:41.1398071Z remote: Counting objects:  99% (825/833)        
+2026-04-23T17:50:41.1398627Z remote: Counting objects: 100% (833/833)        
+2026-04-23T17:50:41.1399274Z remote: Counting objects: 100% (833/833), done.        
+2026-04-23T17:50:41.1399837Z remote: Compressing objects:   0% (1/356)        
+2026-04-23T17:50:41.1400432Z remote: Compressing objects:   1% (4/356)        
+2026-04-23T17:50:41.1401026Z remote: Compressing objects:   2% (8/356)        
+2026-04-23T17:50:41.1401637Z remote: Compressing objects:   3% (11/356)        
+2026-04-23T17:50:41.1402246Z remote: Compressing objects:   4% (15/356)        
+2026-04-23T17:50:41.1402814Z remote: Compressing objects:   5% (18/356)        
+2026-04-23T17:50:41.1403370Z remote: Compressing objects:   6% (22/356)        
+2026-04-23T17:50:41.1404003Z remote: Compressing objects:   7% (25/356)        
+2026-04-23T17:50:41.1404550Z remote: Compressing objects:   8% (29/356)        
+2026-04-23T17:50:41.1405098Z remote: Compressing objects:   9% (33/356)        
+2026-04-23T17:50:41.1405654Z remote: Compressing objects:  10% (36/356)        
+2026-04-23T17:50:41.1406335Z remote: Compressing objects:  11% (40/356)        
+2026-04-23T17:50:42.1022895Z remote: Compressing objects:  12% (43/356)        
+2026-04-23T17:50:42.1089187Z remote: Compressing objects:  13% (47/356)        
+2026-04-23T17:50:42.1090242Z remote: Compressing objects:  14% (50/356)        
+2026-04-23T17:50:42.1091012Z remote: Compressing objects:  15% (54/356)        
+2026-04-23T17:50:42.1091737Z remote: Compressing objects:  16% (57/356)        
+2026-04-23T17:50:42.1092513Z remote: Compressing objects:  17% (61/356)        
+2026-04-23T17:50:42.1093240Z remote: Compressing objects:  18% (65/356)        
+2026-04-23T17:50:42.1094206Z remote: Compressing objects:  19% (68/356)        
+2026-04-23T17:50:42.1095073Z remote: Compressing objects:  20% (72/356)        
+2026-04-23T17:50:42.1104583Z remote: Compressing objects:  21% (75/356)        
+2026-04-23T17:50:42.1105424Z remote: Compressing objects:  22% (79/356)        
+2026-04-23T17:50:42.1106692Z remote: Compressing objects:  23% (82/356)        
+2026-04-23T17:50:42.1108312Z remote: Compressing objects:  24% (86/356)        
+2026-04-23T17:50:42.1109112Z remote: Compressing objects:  25% (89/356)        
+2026-04-23T17:50:42.1109972Z remote: Compressing objects:  26% (93/356)        
+2026-04-23T17:50:42.1126610Z remote: Compressing objects:  27% (97/356)        
+2026-04-23T17:50:42.1131708Z remote: Compressing objects:  28% (100/356)        
+2026-04-23T17:50:42.1134028Z remote: Compressing objects:  29% (104/356)        
+2026-04-23T17:50:42.1134913Z remote: Compressing objects:  30% (107/356)        
+2026-04-23T17:50:42.1136097Z remote: Compressing objects:  31% (111/356)        
+2026-04-23T17:50:42.1171861Z remote: Compressing objects:  32% (114/356)        
+2026-04-23T17:50:42.1172734Z remote: Compressing objects:  33% (118/356)        
+2026-04-23T17:50:42.1173492Z remote: Compressing objects:  34% (122/356)        
+2026-04-23T17:50:42.1179528Z remote: Compressing objects:  35% (125/356)        
+2026-04-23T17:50:42.1180389Z remote: Compressing objects:  36% (129/356)        
+2026-04-23T17:50:42.1181129Z remote: Compressing objects:  37% (132/356)        
+2026-04-23T17:50:42.1181883Z remote: Compressing objects:  38% (136/356)        
+2026-04-23T17:50:42.1182665Z remote: Compressing objects:  39% (139/356)        
+2026-04-23T17:50:42.1183398Z remote: Compressing objects:  40% (143/356)        
+2026-04-23T17:50:42.1184124Z remote: Compressing objects:  41% (146/356)        
+2026-04-23T17:50:42.1185318Z remote: Compressing objects:  42% (150/356)        
+2026-04-23T17:50:42.1206694Z remote: Compressing objects:  43% (154/356)        
+2026-04-23T17:50:42.1209628Z remote: Compressing objects:  44% (157/356)        
+2026-04-23T17:50:42.1226572Z remote: Compressing objects:  45% (161/356)        
+2026-04-23T17:50:42.1237784Z remote: Compressing objects:  46% (164/356)        
+2026-04-23T17:50:42.1246673Z remote: Compressing objects:  47% (168/356)        
+2026-04-23T17:50:42.1266618Z remote: Compressing objects:  48% (171/356)        
+2026-04-23T17:50:42.1281488Z remote: Compressing objects:  49% (175/356)        
+2026-04-23T17:50:42.1296689Z remote: Compressing objects:  50% (178/356)        
+2026-04-23T17:50:42.1316577Z remote: Compressing objects:  51% (182/356)        
+2026-04-23T17:50:42.1325523Z remote: Compressing objects:  52% (186/356)        
+2026-04-23T17:50:42.1346404Z remote: Compressing objects:  53% (189/356)        
+2026-04-23T17:50:42.1353284Z remote: Compressing objects:  54% (193/356)        
+2026-04-23T17:50:42.1354296Z remote: Compressing objects:  55% (196/356)        
+2026-04-23T17:50:42.1355061Z remote: Compressing objects:  56% (200/356)        
+2026-04-23T17:50:42.1355804Z remote: Compressing objects:  57% (203/356)        
+2026-04-23T17:50:42.1356765Z remote: Compressing objects:  58% (207/356)        
+2026-04-23T17:50:42.1357454Z remote: Compressing objects:  59% (211/356)        
+2026-04-23T17:50:42.1358115Z remote: Compressing objects:  60% (214/356)        
+2026-04-23T17:50:42.1358810Z remote: Compressing objects:  61% (218/356)        
+2026-04-23T17:50:42.1359455Z remote: Compressing objects:  62% (221/356)        
+2026-04-23T17:50:42.1360269Z remote: Compressing objects:  63% (225/356)        
+2026-04-23T17:50:42.1361000Z remote: Compressing objects:  64% (228/356)        
+2026-04-23T17:50:42.1361657Z remote: Compressing objects:  65% (232/356)        
+2026-04-23T17:50:42.1362301Z remote: Compressing objects:  66% (235/356)        
+2026-04-23T17:50:42.1362942Z remote: Compressing objects:  67% (239/356)        
+2026-04-23T17:50:42.1363591Z remote: Compressing objects:  68% (243/356)        
+2026-04-23T17:50:42.1364342Z remote: Compressing objects:  69% (246/356)        
+2026-04-23T17:50:42.1365308Z remote: Compressing objects:  70% (250/356)        
+2026-04-23T17:50:42.1366257Z remote: Compressing objects:  71% (253/356)        
+2026-04-23T17:50:42.1366981Z remote: Compressing objects:  72% (257/356)        
+2026-04-23T17:50:42.1367636Z remote: Compressing objects:  73% (260/356)        
+2026-04-23T17:50:42.1368279Z remote: Compressing objects:  74% (264/356)        
+2026-04-23T17:50:42.1368975Z remote: Compressing objects:  75% (267/356)        
+2026-04-23T17:50:42.1369652Z remote: Compressing objects:  76% (271/356)        
+2026-04-23T17:50:42.1370332Z remote: Compressing objects:  77% (275/356)        
+2026-04-23T17:50:42.1371003Z remote: Compressing objects:  78% (278/356)        
+2026-04-23T17:50:42.1371683Z remote: Compressing objects:  79% (282/356)        
+2026-04-23T17:50:42.1372396Z remote: Compressing objects:  80% (285/356)        
+2026-04-23T17:50:42.1373082Z remote: Compressing objects:  81% (289/356)        
+2026-04-23T17:50:42.1373745Z remote: Compressing objects:  82% (292/356)        
+2026-04-23T17:50:42.1374671Z remote: Compressing objects:  83% (296/356)        
+2026-04-23T17:50:42.1392503Z remote: Compressing objects:  84% (300/356)        
+2026-04-23T17:50:42.1393308Z remote: Compressing objects:  85% (303/356)        
+2026-04-23T17:50:42.1393985Z remote: Compressing objects:  86% (307/356)        
+2026-04-23T17:50:42.1394650Z remote: Compressing objects:  87% (310/356)        
+2026-04-23T17:50:42.1395337Z remote: Compressing objects:  88% (314/356)        
+2026-04-23T17:50:42.1396477Z remote: Compressing objects:  89% (317/356)        
+2026-04-23T17:50:42.1397294Z remote: Compressing objects:  90% (321/356)        
+2026-04-23T17:50:42.1398008Z remote: Compressing objects:  91% (324/356)        
+2026-04-23T17:50:42.1398832Z remote: Compressing objects:  92% (328/356)        
+2026-04-23T17:50:42.1399547Z remote: Compressing objects:  93% (332/356)        
+2026-04-23T17:50:42.1400278Z remote: Compressing objects:  94% (335/356)        
+2026-04-23T17:50:42.1401020Z remote: Compressing objects:  95% (339/356)        
+2026-04-23T17:50:42.1401702Z remote: Compressing objects:  96% (342/356)        
+2026-04-23T17:50:42.1402345Z remote: Compressing objects:  97% (346/356)        
+2026-04-23T17:50:42.1402981Z remote: Compressing objects:  98% (349/356)        
+2026-04-23T17:50:42.1403651Z remote: Compressing objects:  99% (353/356)        
+2026-04-23T17:50:42.1404348Z remote: Compressing objects: 100% (356/356)        
+2026-04-23T17:50:42.1405082Z remote: Compressing objects: 100% (356/356), done.        
+2026-04-23T17:50:42.1405848Z Receiving objects:   0% (1/80534)
+2026-04-23T17:50:42.1406751Z Receiving objects:   1% (806/80534)
+2026-04-23T17:50:42.1407440Z Receiving objects:   2% (1611/80534)
+2026-04-23T17:50:42.1408136Z Receiving objects:   3% (2417/80534)
+2026-04-23T17:50:42.1408837Z Receiving objects:   4% (3222/80534)
+2026-04-23T17:50:42.1409488Z Receiving objects:   5% (4027/80534)
+2026-04-23T17:50:42.1410132Z Receiving objects:   6% (4833/80534)
+2026-04-23T17:50:42.1410775Z Receiving objects:   7% (5638/80534)
+2026-04-23T17:50:42.1411404Z Receiving objects:   8% (6443/80534)
+2026-04-23T17:50:42.1412210Z Receiving objects:   9% (7249/80534)
+2026-04-23T17:50:42.1412870Z Receiving objects:  10% (8054/80534)
+2026-04-23T17:50:42.1413556Z Receiving objects:  11% (8859/80534)
+2026-04-23T17:50:42.1414203Z Receiving objects:  12% (9665/80534)
+2026-04-23T17:50:42.1414843Z Receiving objects:  13% (10470/80534)
+2026-04-23T17:50:42.1415681Z Receiving objects:  14% (11275/80534)
+2026-04-23T17:50:42.1416691Z Receiving objects:  15% (12081/80534)
+2026-04-23T17:50:42.1417408Z Receiving objects:  16% (12886/80534)
+2026-04-23T17:50:42.1418079Z Receiving objects:  17% (13691/80534)
+2026-04-23T17:50:42.1418735Z Receiving objects:  18% (14497/80534)
+2026-04-23T17:50:42.1419367Z Receiving objects:  19% (15302/80534)
+2026-04-23T17:50:42.1419999Z Receiving objects:  20% (16107/80534)
+2026-04-23T17:50:42.1420677Z Receiving objects:  21% (16913/80534), 10.06 MiB | 20.11 MiB/s
+2026-04-23T17:50:42.1421635Z Receiving objects:  22% (17718/80534), 10.06 MiB | 20.11 MiB/s
+2026-04-23T17:50:42.1422359Z Receiving objects:  23% (18523/80534), 10.06 MiB | 20.11 MiB/s
+2026-04-23T17:50:42.1423069Z Receiving objects:  24% (19329/80534), 10.06 MiB | 20.11 MiB/s
+2026-04-23T17:50:42.1423762Z Receiving objects:  25% (20134/80534), 10.06 MiB | 20.11 MiB/s
+2026-04-23T17:50:42.1424510Z Receiving objects:  26% (20939/80534), 10.06 MiB | 20.11 MiB/s
+2026-04-23T17:50:42.1425272Z Receiving objects:  27% (21745/80534), 10.06 MiB | 20.11 MiB/s
+2026-04-23T17:50:42.1426212Z Receiving objects:  28% (22550/80534), 10.06 MiB | 20.11 MiB/s
+2026-04-23T17:50:42.1426951Z Receiving objects:  29% (23355/80534), 10.06 MiB | 20.11 MiB/s
+2026-04-23T17:50:42.1427660Z Receiving objects:  30% (24161/80534), 10.06 MiB | 20.11 MiB/s
+2026-04-23T17:50:42.1428393Z Receiving objects:  31% (24966/80534), 10.06 MiB | 20.11 MiB/s
+2026-04-23T17:50:42.1429132Z Receiving objects:  32% (25771/80534), 10.06 MiB | 20.11 MiB/s
+2026-04-23T17:50:42.1429850Z Receiving objects:  33% (26577/80534), 10.06 MiB | 20.11 MiB/s
+2026-04-23T17:50:42.1430590Z Receiving objects:  34% (27382/80534), 10.06 MiB | 20.11 MiB/s
+2026-04-23T17:50:42.1431352Z Receiving objects:  35% (28187/80534), 10.06 MiB | 20.11 MiB/s
+2026-04-23T17:50:42.1432131Z Receiving objects:  36% (28993/80534), 10.06 MiB | 20.11 MiB/s
+2026-04-23T17:50:42.1432887Z Receiving objects:  37% (29798/80534), 10.06 MiB | 20.11 MiB/s
+2026-04-23T17:50:42.1433633Z Receiving objects:  38% (30603/80534), 10.06 MiB | 20.11 MiB/s
+2026-04-23T17:50:42.1434410Z Receiving objects:  39% (31409/80534), 10.06 MiB | 20.11 MiB/s
+2026-04-23T17:50:42.1435267Z Receiving objects:  40% (32214/80534), 10.06 MiB | 20.11 MiB/s
+2026-04-23T17:50:42.1436282Z Receiving objects:  41% (33019/80534), 10.06 MiB | 20.11 MiB/s
+2026-04-23T17:50:42.1437053Z Receiving objects:  42% (33825/80534), 10.06 MiB | 20.11 MiB/s
+2026-04-23T17:50:42.1437832Z Receiving objects:  43% (34630/80534), 10.06 MiB | 20.11 MiB/s
+2026-04-23T17:50:42.1438542Z Receiving objects:  44% (35435/80534), 10.06 MiB | 20.11 MiB/s
+2026-04-23T17:50:42.1439283Z Receiving objects:  45% (36241/80534), 10.06 MiB | 20.11 MiB/s
+2026-04-23T17:50:42.1440024Z Receiving objects:  46% (37046/80534), 10.06 MiB | 20.11 MiB/s
+2026-04-23T17:50:42.2207646Z Receiving objects:  47% (37851/80534), 10.06 MiB | 20.11 MiB/s
+2026-04-23T17:50:42.3417249Z Receiving objects:  48% (38657/80534), 10.06 MiB | 20.11 MiB/s
+2026-04-23T17:50:42.3806973Z Receiving objects:  48% (39256/80534), 28.21 MiB | 28.21 MiB/s
+2026-04-23T17:50:42.4417279Z Receiving objects:  49% (39462/80534), 28.21 MiB | 28.21 MiB/s
+2026-04-23T17:50:42.4438513Z Receiving objects:  50% (40267/80534), 28.21 MiB | 28.21 MiB/s
+2026-04-23T17:50:42.4648932Z Receiving objects:  51% (41073/80534), 28.21 MiB | 28.21 MiB/s
+2026-04-23T17:50:42.4668677Z Receiving objects:  52% (41878/80534), 28.21 MiB | 28.21 MiB/s
+2026-04-23T17:50:42.4824588Z Receiving objects:  53% (42684/80534), 28.21 MiB | 28.21 MiB/s
+2026-04-23T17:50:42.4847012Z Receiving objects:  54% (43489/80534), 28.21 MiB | 28.21 MiB/s
+2026-04-23T17:50:42.5047123Z Receiving objects:  55% (44294/80534), 28.21 MiB | 28.21 MiB/s
+2026-04-23T17:50:42.5067822Z Receiving objects:  56% (45100/80534), 28.21 MiB | 28.21 MiB/s
+2026-04-23T17:50:42.5280272Z Receiving objects:  57% (45905/80534), 28.21 MiB | 28.21 MiB/s
+2026-04-23T17:50:42.5312612Z Receiving objects:  58% (46710/80534), 28.21 MiB | 28.21 MiB/s
+2026-04-23T17:50:42.5424510Z Receiving objects:  59% (47516/80534), 28.21 MiB | 28.21 MiB/s
+2026-04-23T17:50:42.5490268Z Receiving objects:  60% (48321/80534), 28.21 MiB | 28.21 MiB/s
+2026-04-23T17:50:42.5547124Z Receiving objects:  61% (49126/80534), 28.21 MiB | 28.21 MiB/s
+2026-04-23T17:50:42.5687821Z Receiving objects:  62% (49932/80534), 28.21 MiB | 28.21 MiB/s
+2026-04-23T17:50:42.5814247Z Receiving objects:  63% (50737/80534), 28.21 MiB | 28.21 MiB/s
+2026-04-23T17:50:42.5890938Z Receiving objects:  64% (51542/80534), 28.21 MiB | 28.21 MiB/s
+2026-04-23T17:50:42.6049994Z Receiving objects:  65% (52348/80534), 28.21 MiB | 28.21 MiB/s
+2026-04-23T17:50:42.6166564Z Receiving objects:  66% (53153/80534), 28.21 MiB | 28.21 MiB/s
+2026-04-23T17:50:42.6288587Z Receiving objects:  67% (53958/80534), 28.21 MiB | 28.21 MiB/s
+2026-04-23T17:50:42.6420244Z Receiving objects:  68% (54764/80534), 28.21 MiB | 28.21 MiB/s
+2026-04-23T17:50:42.6598198Z Receiving objects:  69% (55569/80534), 28.21 MiB | 28.21 MiB/s
+2026-04-23T17:50:42.6720518Z Receiving objects:  70% (56374/80534), 28.21 MiB | 28.21 MiB/s
+2026-04-23T17:50:42.6931892Z Receiving objects:  71% (57180/80534), 28.21 MiB | 28.21 MiB/s
+2026-04-23T17:50:42.6953180Z Receiving objects:  72% (57985/80534), 28.21 MiB | 28.21 MiB/s
+2026-04-23T17:50:42.7081225Z Receiving objects:  73% (58790/80534), 28.21 MiB | 28.21 MiB/s
+2026-04-23T17:50:42.7692937Z Receiving objects:  74% (59596/80534), 28.21 MiB | 28.21 MiB/s
+2026-04-23T17:50:42.8561630Z Receiving objects:  75% (60401/80534), 28.21 MiB | 28.21 MiB/s
+2026-04-23T17:50:42.8712771Z Receiving objects:  76% (61206/80534), 47.78 MiB | 31.85 MiB/s
+2026-04-23T17:50:42.8750792Z Receiving objects:  77% (62012/80534), 47.78 MiB | 31.85 MiB/s
+2026-04-23T17:50:42.8821925Z Receiving objects:  78% (62817/80534), 47.78 MiB | 31.85 MiB/s
+2026-04-23T17:50:42.8893676Z Receiving objects:  79% (63622/80534), 47.78 MiB | 31.85 MiB/s
+2026-04-23T17:50:42.8937363Z Receiving objects:  80% (64428/80534), 47.78 MiB | 31.85 MiB/s
+2026-04-23T17:50:42.8961592Z Receiving objects:  81% (65233/80534), 47.78 MiB | 31.85 MiB/s
+2026-04-23T17:50:42.9046560Z Receiving objects:  82% (66038/80534), 47.78 MiB | 31.85 MiB/s
+2026-04-23T17:50:42.9077248Z Receiving objects:  83% (66844/80534), 47.78 MiB | 31.85 MiB/s
+2026-04-23T17:50:42.9223979Z Receiving objects:  84% (67649/80534), 47.78 MiB | 31.85 MiB/s
+2026-04-23T17:50:42.9330078Z Receiving objects:  85% (68454/80534), 47.78 MiB | 31.85 MiB/s
+2026-04-23T17:50:42.9371287Z Receiving objects:  86% (69260/80534), 47.78 MiB | 31.85 MiB/s
+2026-04-23T17:50:42.9476956Z Receiving objects:  87% (70065/80534), 47.78 MiB | 31.85 MiB/s
+2026-04-23T17:50:42.9509183Z Receiving objects:  88% (70870/80534), 47.78 MiB | 31.85 MiB/s
+2026-04-23T17:50:42.9547135Z Receiving objects:  89% (71676/80534), 47.78 MiB | 31.85 MiB/s
+2026-04-23T17:50:42.9865596Z Receiving objects:  90% (72481/80534), 47.78 MiB | 31.85 MiB/s
+2026-04-23T17:50:42.9867435Z Receiving objects:  91% (73286/80534), 47.78 MiB | 31.85 MiB/s
+2026-04-23T17:50:43.0027688Z Receiving objects:  92% (74092/80534), 47.78 MiB | 31.85 MiB/s
+2026-04-23T17:50:43.0160433Z Receiving objects:  93% (74897/80534), 47.78 MiB | 31.85 MiB/s
+2026-04-23T17:50:43.0286469Z Receiving objects:  94% (75702/80534), 47.78 MiB | 31.85 MiB/s
+2026-04-23T17:50:43.0485274Z Receiving objects:  95% (76508/80534), 47.78 MiB | 31.85 MiB/s
+2026-04-23T17:50:43.0652288Z Receiving objects:  96% (77313/80534), 47.78 MiB | 31.85 MiB/s
+2026-04-23T17:50:43.0992267Z Receiving objects:  97% (78118/80534), 47.78 MiB | 31.85 MiB/s
+2026-04-23T17:50:43.1118203Z Receiving objects:  98% (78924/80534), 47.78 MiB | 31.85 MiB/s
+2026-04-23T17:50:43.1359779Z Receiving objects:  99% (79729/80534), 47.78 MiB | 31.85 MiB/s
+2026-04-23T17:50:43.1360847Z remote: Total 80534 (delta 647), reused 509 (delta 477), pack-reused 79701 (from 6)        
+2026-04-23T17:50:43.1390912Z Receiving objects: 100% (80534/80534), 47.78 MiB | 31.85 MiB/s
+2026-04-23T17:50:43.1406814Z Receiving objects: 100% (80534/80534), 60.98 MiB | 33.46 MiB/s, done.
+2026-04-23T17:50:43.1777879Z Resolving deltas:   0% (0/54898)
+2026-04-23T17:50:43.1929896Z Resolving deltas:   1% (549/54898)
+2026-04-23T17:50:43.2004730Z Resolving deltas:   2% (1098/54898)
+2026-04-23T17:50:43.2244299Z Resolving deltas:   3% (1647/54898)
+2026-04-23T17:50:43.2356270Z Resolving deltas:   4% (2197/54898)
+2026-04-23T17:50:43.2506566Z Resolving deltas:   5% (2745/54898)
+2026-04-23T17:50:43.2679501Z Resolving deltas:   6% (3294/54898)
+2026-04-23T17:50:43.3696992Z Resolving deltas:   7% (3843/54898)
+2026-04-23T17:50:43.5079868Z Resolving deltas:   8% (4392/54898)
+2026-04-23T17:50:43.6599135Z Resolving deltas:   9% (4941/54898)
+2026-04-23T17:50:43.6916763Z Resolving deltas:  10% (5490/54898)
+2026-04-23T17:50:43.7511761Z Resolving deltas:  11% (6039/54898)
+2026-04-23T17:50:43.8956839Z Resolving deltas:  12% (6588/54898)
+2026-04-23T17:50:44.1467042Z Resolving deltas:  13% (7137/54898)
+2026-04-23T17:50:44.1526620Z Resolving deltas:  13% (7677/54898)
+2026-04-23T17:50:44.3271250Z Resolving deltas:  14% (7686/54898)
+2026-04-23T17:50:44.3774459Z Resolving deltas:  15% (8235/54898)
+2026-04-23T17:50:44.3999643Z Resolving deltas:  16% (8784/54898)
+2026-04-23T17:50:44.4671119Z Resolving deltas:  17% (9333/54898)
+2026-04-23T17:50:44.5147147Z Resolving deltas:  18% (9882/54898)
+2026-04-23T17:50:44.6402506Z Resolving deltas:  19% (10431/54898)
+2026-04-23T17:50:44.6846881Z Resolving deltas:  20% (10980/54898)
+2026-04-23T17:50:44.8162210Z Resolving deltas:  21% (11529/54898)
+2026-04-23T17:50:44.8697102Z Resolving deltas:  22% (12078/54898)
+2026-04-23T17:50:44.8872778Z Resolving deltas:  23% (12627/54898)
+2026-04-23T17:50:44.8989227Z Resolving deltas:  24% (13176/54898)
+2026-04-23T17:50:44.9356986Z Resolving deltas:  25% (13725/54898)
+2026-04-23T17:50:44.9736865Z Resolving deltas:  26% (14274/54898)
+2026-04-23T17:50:45.0326674Z Resolving deltas:  27% (14823/54898)
+2026-04-23T17:50:45.0506875Z Resolving deltas:  28% (15372/54898)
+2026-04-23T17:50:45.0650364Z Resolving deltas:  29% (15921/54898)
+2026-04-23T17:50:45.0716501Z Resolving deltas:  30% (16470/54898)
+2026-04-23T17:50:45.0754204Z Resolving deltas:  31% (17019/54898)
+2026-04-23T17:50:45.0850215Z Resolving deltas:  32% (17569/54898)
+2026-04-23T17:50:45.0910089Z Resolving deltas:  33% (18117/54898)
+2026-04-23T17:50:45.1026426Z Resolving deltas:  34% (18666/54898)
+2026-04-23T17:50:45.1074647Z Resolving deltas:  35% (19215/54898)
+2026-04-23T17:50:45.1155110Z Resolving deltas:  36% (19764/54898)
+2026-04-23T17:50:45.1444478Z Resolving deltas:  37% (20313/54898)
+2026-04-23T17:50:45.1477029Z Resolving deltas:  38% (20862/54898)
+2026-04-23T17:50:45.2049052Z Resolving deltas:  38% (20904/54898)
+2026-04-23T17:50:45.2140851Z Resolving deltas:  39% (21411/54898)
+2026-04-23T17:50:45.2446949Z Resolving deltas:  40% (21960/54898)
+2026-04-23T17:50:45.2487960Z Resolving deltas:  41% (22509/54898)
+2026-04-23T17:50:45.2751442Z Resolving deltas:  42% (23058/54898)
+2026-04-23T17:50:45.2831930Z Resolving deltas:  43% (23607/54898)
+2026-04-23T17:50:45.2976154Z Resolving deltas:  44% (24156/54898)
+2026-04-23T17:50:45.3043950Z Resolving deltas:  45% (24705/54898)
+2026-04-23T17:50:45.3089603Z Resolving deltas:  46% (25254/54898)
+2026-04-23T17:50:45.3164569Z Resolving deltas:  47% (25803/54898)
+2026-04-23T17:50:45.3233837Z Resolving deltas:  48% (26352/54898)
+2026-04-23T17:50:45.3247937Z Resolving deltas:  49% (26901/54898)
+2026-04-23T17:50:45.3302342Z Resolving deltas:  50% (27449/54898)
+2026-04-23T17:50:45.3356875Z Resolving deltas:  51% (27998/54898)
+2026-04-23T17:50:45.3707037Z Resolving deltas:  52% (28547/54898)
+2026-04-23T17:50:45.3954416Z Resolving deltas:  53% (29096/54898)
+2026-04-23T17:50:45.4053717Z Resolving deltas:  54% (29645/54898)
+2026-04-23T17:50:45.4088203Z Resolving deltas:  55% (30194/54898)
+2026-04-23T17:50:45.4122992Z Resolving deltas:  56% (30743/54898)
+2026-04-23T17:50:45.4247025Z Resolving deltas:  57% (31292/54898)
+2026-04-23T17:50:45.4439764Z Resolving deltas:  58% (31841/54898)
+2026-04-23T17:50:45.5301326Z Resolving deltas:  59% (32390/54898)
+2026-04-23T17:50:45.5470402Z Resolving deltas:  60% (32939/54898)
+2026-04-23T17:50:45.5621273Z Resolving deltas:  61% (33488/54898)
+2026-04-23T17:50:45.5900281Z Resolving deltas:  62% (34037/54898)
+2026-04-23T17:50:45.6040079Z Resolving deltas:  63% (34586/54898)
+2026-04-23T17:50:45.6154887Z Resolving deltas:  64% (35135/54898)
+2026-04-23T17:50:45.6247810Z Resolving deltas:  65% (35684/54898)
+2026-04-23T17:50:45.6322811Z Resolving deltas:  66% (36233/54898)
+2026-04-23T17:50:45.6391651Z Resolving deltas:  67% (36782/54898)
+2026-04-23T17:50:45.6466836Z Resolving deltas:  68% (37331/54898)
+2026-04-23T17:50:45.6562381Z Resolving deltas:  69% (37880/54898)
+2026-04-23T17:50:45.6821615Z Resolving deltas:  70% (38429/54898)
+2026-04-23T17:50:45.6863758Z Resolving deltas:  71% (38978/54898)
+2026-04-23T17:50:45.7359427Z Resolving deltas:  72% (39527/54898)
+2026-04-23T17:50:45.7510405Z Resolving deltas:  73% (40076/54898)
+2026-04-23T17:50:45.7656490Z Resolving deltas:  74% (40625/54898)
+2026-04-23T17:50:45.7723597Z Resolving deltas:  75% (41174/54898)
+2026-04-23T17:50:45.8013746Z Resolving deltas:  76% (41723/54898)
+2026-04-23T17:50:45.8049401Z Resolving deltas:  77% (42272/54898)
+2026-04-23T17:50:45.8129964Z Resolving deltas:  78% (42821/54898)
+2026-04-23T17:50:45.8180782Z Resolving deltas:  79% (43370/54898)
+2026-04-23T17:50:45.8266668Z Resolving deltas:  80% (43919/54898)
+2026-04-23T17:50:45.8528304Z Resolving deltas:  81% (44468/54898)
+2026-04-23T17:50:45.8694346Z Resolving deltas:  82% (45017/54898)
+2026-04-23T17:50:45.8844218Z Resolving deltas:  83% (45566/54898)
+2026-04-23T17:50:45.8968273Z Resolving deltas:  84% (46115/54898)
+2026-04-23T17:50:45.9043059Z Resolving deltas:  85% (46664/54898)
+2026-04-23T17:50:45.9141657Z Resolving deltas:  86% (47213/54898)
+2026-04-23T17:50:45.9179390Z Resolving deltas:  87% (47762/54898)
+2026-04-23T17:50:45.9205051Z Resolving deltas:  88% (48311/54898)
+2026-04-23T17:50:45.9277144Z Resolving deltas:  89% (48860/54898)
+2026-04-23T17:50:45.9339955Z Resolving deltas:  90% (49409/54898)
+2026-04-23T17:50:45.9376728Z Resolving deltas:  91% (49958/54898)
+2026-04-23T17:50:45.9426155Z Resolving deltas:  92% (50507/54898)
+2026-04-23T17:50:45.9454894Z Resolving deltas:  93% (51056/54898)
+2026-04-23T17:50:45.9507833Z Resolving deltas:  94% (51605/54898)
+2026-04-23T17:50:45.9646427Z Resolving deltas:  95% (52155/54898)
+2026-04-23T17:50:45.9745320Z Resolving deltas:  96% (52703/54898)
+2026-04-23T17:50:46.0015003Z Resolving deltas:  97% (53252/54898)
+2026-04-23T17:50:46.0137875Z Resolving deltas:  98% (53801/54898)
+2026-04-23T17:50:46.0607109Z Resolving deltas:  99% (54350/54898)
+2026-04-23T17:50:46.0626879Z Resolving deltas: 100% (54898/54898)
+2026-04-23T17:50:46.0628320Z Resolving deltas: 100% (54898/54898), done.
+2026-04-23T17:50:46.3314908Z From https://github.com/Azure/azure-iot-sdk-c
+2026-04-23T17:50:46.3316770Z  * [new branch]          SecInfoInSample            -> origin/SecInfoInSample
+2026-04-23T17:50:46.3319649Z  * [new branch]          dane/fixtypo               -> origin/dane/fixtypo
+2026-04-23T17:50:46.3320857Z  * [new branch]          dawalton/cbor              -> origin/dawalton/cbor
+2026-04-23T17:50:46.3323899Z  * [new branch]          dawalton/cbortweak         -> origin/dawalton/cbortweak
+2026-04-23T17:50:46.3325073Z  * [new branch]          ds_version                 -> origin/ds_version
+2026-04-23T17:50:46.3328558Z  * [new branch]          ericwol/prov_lib_so        -> origin/ericwol/prov_lib_so
+2026-04-23T17:50:46.3329775Z  * [new branch]          ewertons/1.3.9+1f4fd95b2   -> origin/ewertons/1.3.9+1f4fd95b2
+2026-04-23T17:50:46.3332860Z  * [new branch]          ewertons/1.9.0+1f4fd95b2   -> origin/ewertons/1.9.0+1f4fd95b2
+2026-04-23T17:50:46.3334143Z  * [new branch]          ewertons/addbatchtelemetrye2etest -> origin/ewertons/addbatchtelemetrye2etest
+2026-04-23T17:50:46.3337571Z  * [new branch]          ewertons/check1esvm        -> origin/ewertons/check1esvm
+2026-04-23T17:50:46.3338751Z  * [new branch]          ewertons/horton-fixes      -> origin/ewertons/horton-fixes
+2026-04-23T17:50:46.3341865Z  * [new branch]          ewertons/new1eswinpool     -> origin/ewertons/new1eswinpool
+2026-04-23T17:50:46.3343316Z  * [new branch]          ewertons/openssl-no-engine -> origin/ewertons/openssl-no-engine
+2026-04-23T17:50:46.3346515Z  * [new branch]          ewertons/pipelinefixes     -> origin/ewertons/pipelinefixes
+2026-04-23T17:50:46.3347906Z  * [new branch]          ewertons/reenableu2b       -> origin/ewertons/reenableu2b
+2026-04-23T17:50:46.3351282Z  * [new branch]          ewertons/testtls           -> origin/ewertons/testtls
+2026-04-23T17:50:46.3358886Z  * [new branch]          ewertons/testtls2          -> origin/ewertons/testtls2
+2026-04-23T17:50:46.3362398Z  * [new branch]          ewertons/tlsioschannel     -> origin/ewertons/tlsioschannel
+2026-04-23T17:50:46.3363683Z  * [new branch]          ewertons/u2b_x509_sample   -> origin/ewertons/u2b_x509_sample
+2026-04-23T17:50:46.3367068Z  * [new branch]          ewertons/upload_to_blob_dps_x509-sample -> origin/ewertons/upload_to_blob_dps_x509-sample
+2026-04-23T17:50:46.3368159Z  * [new branch]          feature/dps-csr-20250701-private-preview -> origin/feature/dps-csr-20250701-private-preview
+2026-04-23T17:50:46.3371449Z  * [new branch]          feature/dps-csr-preview    -> origin/feature/dps-csr-preview
+2026-04-23T17:50:46.3372744Z  * [new branch]          feature/iot_pnp_stage_merge2 -> origin/feature/iot_pnp_stage_merge2
+2026-04-23T17:50:46.3375800Z  * [new branch]          gh-pages                   -> origin/gh-pages
+2026-04-23T17:50:46.3377181Z  * [new branch]          jose/fix_warning_erros     -> origin/jose/fix_warning_erros
+2026-04-23T17:50:46.3380237Z  * [new branch]          jose/removeAuthDataLogging -> origin/jose/removeAuthDataLogging
+2026-04-23T17:50:46.3381404Z  * [new branch]          jose/removeAuthLogging     -> origin/jose/removeAuthLogging
+2026-04-23T17:50:46.3384477Z  * [new branch]          jspaith/warning_experiment -> origin/jspaith/warning_experiment
+2026-04-23T17:50:46.3385702Z  * [new branch]          lts_01_2021                -> origin/lts_01_2021
+2026-04-23T17:50:46.3389043Z  * [new branch]          lts_01_2022                -> origin/lts_01_2022
+2026-04-23T17:50:46.3390212Z  * [new branch]          lts_01_2023                -> origin/lts_01_2023
+2026-04-23T17:50:46.3393059Z  * [new branch]          lts_02                     -> origin/lts_02
+2026-04-23T17:50:46.3394316Z  * [new branch]          lts_03_2024                -> origin/lts_03_2024
+2026-04-23T17:50:46.3397697Z  * [new branch]          lts_03_2025                -> origin/lts_03_2025
+2026-04-23T17:50:46.3398718Z  * [new branch]          lts_07_2021                -> origin/lts_07_2021
+2026-04-23T17:50:46.3401613Z  * [new branch]          lts_07_2022                -> origin/lts_07_2022
+2026-04-23T17:50:46.3402894Z  * [new branch]          lts_08_2023                -> origin/lts_08_2023
+2026-04-23T17:50:46.3406332Z  * [new branch]          lts_08_2024                -> origin/lts_08_2024
+2026-04-23T17:50:46.3407534Z  * [new branch]          main                       -> origin/main
+2026-04-23T17:50:46.3410472Z  * [new branch]          public-preview             -> origin/public-preview
+2026-04-23T17:50:46.3411618Z  * [new branch]          public-preview-DeviceStreaming -> origin/public-preview-DeviceStreaming
+2026-04-23T17:50:46.3414656Z  * [new branch]          public-preview-cert-mgmt   -> origin/public-preview-cert-mgmt
+2026-04-23T17:50:46.3415775Z  * [new branch]          public-preview-ecc         -> origin/public-preview-ecc
+2026-04-23T17:50:46.3418952Z  * [new branch]          subup-202205111027         -> origin/subup-202205111027
+2026-04-23T17:50:46.3420119Z  * [new branch]          tke/enobufs                -> origin/tke/enobufs
+2026-04-23T17:50:46.3422820Z  * [new branch]          uhttp_upload               -> origin/uhttp_upload
+2026-04-23T17:50:46.3428902Z  * [new branch]          vaavva/vsnprintf-fix       -> origin/vaavva/vsnprintf-fix
+2026-04-23T17:50:46.3429740Z  * [new tag]             1.0.0-pre-release-1.0.7-h  -> 1.0.0-pre-release-1.0.7-h
+2026-04-23T17:50:46.3430501Z  * [new tag]             1.0.0-pre-release-1.0.8    -> 1.0.0-pre-release-1.0.8
+2026-04-23T17:50:46.3431348Z  * [new tag]             1.0.0-pre-release-1.0.9    -> 1.0.0-pre-release-1.0.9
+2026-04-23T17:50:46.3432087Z  * [new tag]             1.10.1                     -> 1.10.1
+2026-04-23T17:50:46.3432750Z  * [new tag]             1.11.0                     -> 1.11.0
+2026-04-23T17:50:46.3433405Z  * [new tag]             1.12.0                     -> 1.12.0
+2026-04-23T17:50:46.3434054Z  * [new tag]             1.13.0                     -> 1.13.0
+2026-04-23T17:50:46.3434689Z  * [new tag]             1.14.0                     -> 1.14.0
+2026-04-23T17:50:46.3435459Z  * [new tag]             1.2.1                      -> 1.2.1
+2026-04-23T17:50:46.3436327Z  * [new tag]             1.2.10                     -> 1.2.10
+2026-04-23T17:50:46.3437007Z  * [new tag]             1.2.11                     -> 1.2.11
+2026-04-23T17:50:46.3437659Z  * [new tag]             1.2.12                     -> 1.2.12
+2026-04-23T17:50:46.3438303Z  * [new tag]             1.2.13                     -> 1.2.13
+2026-04-23T17:50:46.3438945Z  * [new tag]             1.2.14                     -> 1.2.14
+2026-04-23T17:50:46.3439579Z  * [new tag]             1.2.2                      -> 1.2.2
+2026-04-23T17:50:46.3440232Z  * [new tag]             1.2.3                      -> 1.2.3
+2026-04-23T17:50:46.3440866Z  * [new tag]             1.2.4                      -> 1.2.4
+2026-04-23T17:50:46.3441517Z  * [new tag]             1.2.5                      -> 1.2.5
+2026-04-23T17:50:46.3442138Z  * [new tag]             1.2.6                      -> 1.2.6
+2026-04-23T17:50:46.3442795Z  * [new tag]             1.2.7                      -> 1.2.7
+2026-04-23T17:50:46.3443448Z  * [new tag]             1.2.8                      -> 1.2.8
+2026-04-23T17:50:46.3444097Z  * [new tag]             1.2.9                      -> 1.2.9
+2026-04-23T17:50:46.3444728Z  * [new tag]             1.3.0                      -> 1.3.0
+2026-04-23T17:50:46.3445361Z  * [new tag]             1.3.1                      -> 1.3.1
+2026-04-23T17:50:46.3446284Z  * [new tag]             1.3.10                     -> 1.3.10
+2026-04-23T17:50:46.3446966Z  * [new tag]             1.3.2                      -> 1.3.2
+2026-04-23T17:50:46.3447621Z  * [new tag]             1.3.3                      -> 1.3.3
+2026-04-23T17:50:46.3448277Z  * [new tag]             1.3.4                      -> 1.3.4
+2026-04-23T17:50:46.3448928Z  * [new tag]             1.3.5                      -> 1.3.5
+2026-04-23T17:50:46.3449573Z  * [new tag]             1.3.6                      -> 1.3.6
+2026-04-23T17:50:46.3450228Z  * [new tag]             1.3.7                      -> 1.3.7
+2026-04-23T17:50:46.3450862Z  * [new tag]             1.3.8                      -> 1.3.8
+2026-04-23T17:50:46.3451510Z  * [new tag]             1.3.9                      -> 1.3.9
+2026-04-23T17:50:46.3452138Z  * [new tag]             1.4.0                      -> 1.4.0
+2026-04-23T17:50:46.3452777Z  * [new tag]             1.4.1                      -> 1.4.1
+2026-04-23T17:50:46.3453405Z  * [new tag]             1.5.0                      -> 1.5.0
+2026-04-23T17:50:46.3454044Z  * [new tag]             1.6.0                      -> 1.6.0
+2026-04-23T17:50:46.3454755Z  * [new tag]             1.7.0                      -> 1.7.0
+2026-04-23T17:50:46.3455413Z  * [new tag]             1.8.0                      -> 1.8.0
+2026-04-23T17:50:46.3456265Z  * [new tag]             1.9.0                      -> 1.9.0
+2026-04-23T17:50:46.3456937Z  * [new tag]             1.9.1                      -> 1.9.1
+2026-04-23T17:50:46.3457589Z  * [new tag]             2015-11-13                 -> 2015-11-13
+2026-04-23T17:50:46.3458250Z  * [new tag]             2015-11-30                 -> 2015-11-30
+2026-04-23T17:50:46.3458915Z  * [new tag]             2015-12-17                 -> 2015-12-17
+2026-04-23T17:50:46.3459585Z  * [new tag]             2016-01-15                 -> 2016-01-15
+2026-04-23T17:50:46.3460252Z  * [new tag]             2016-02-03                 -> 2016-02-03
+2026-04-23T17:50:46.3460926Z  * [new tag]             2016-02-16                 -> 2016-02-16
+2026-04-23T17:50:46.3461679Z  * [new tag]             2016-03-11                 -> 2016-03-11
+2026-04-23T17:50:46.3462372Z  * [new tag]             2016-03-28                 -> 2016-03-28
+2026-04-23T17:50:46.3463036Z  * [new tag]             2016-04-08                 -> 2016-04-08
+2026-04-23T17:50:46.3463704Z  * [new tag]             2016-04-22                 -> 2016-04-22
+2026-04-23T17:50:46.3464361Z  * [new tag]             2016-05-06                 -> 2016-05-06
+2026-04-23T17:50:46.3465018Z  * [new tag]             2016-05-20                 -> 2016-05-20
+2026-04-23T17:50:46.3465743Z  * [new tag]             2016-06-03                 -> 2016-06-03
+2026-04-23T17:50:46.3466656Z  * [new tag]             2016-06-17                 -> 2016-06-17
+2026-04-23T17:50:46.3467343Z  * [new tag]             2016-06-30                 -> 2016-06-30
+2026-04-23T17:50:46.3468016Z  * [new tag]             2016-07-15                 -> 2016-07-15
+2026-04-23T17:50:46.3468690Z  * [new tag]             2016-07-29                 -> 2016-07-29
+2026-04-23T17:50:46.3469329Z  * [new tag]             2016-08-15                 -> 2016-08-15
+2026-04-23T17:50:46.3470004Z  * [new tag]             2016-08-26                 -> 2016-08-26
+2026-04-23T17:50:46.3470630Z  * [new tag]             2016-09-09                 -> 2016-09-09
+2026-04-23T17:50:46.3471280Z  * [new tag]             2016-09-26                 -> 2016-09-26
+2026-04-23T17:50:46.3471920Z  * [new tag]             2016-10-14                 -> 2016-10-14
+2026-04-23T17:50:46.3472548Z  * [new tag]             2016-12-06                 -> 2016-12-06
+2026-04-23T17:50:46.3473258Z  * [new tag]             2017-01-06                 -> 2017-01-06
+2026-04-23T17:50:46.3473957Z  * [new tag]             2017-01-13                 -> 2017-01-13
+2026-04-23T17:50:46.3474634Z  * [new tag]             2017-01-20                 -> 2017-01-20
+2026-04-23T17:50:46.3475310Z  * [new tag]             2017-01-27                 -> 2017-01-27
+2026-04-23T17:50:46.3476256Z  * [new tag]             2017-02-10                 -> 2017-02-10
+2026-04-23T17:50:46.3477033Z  * [new tag]             2017-02-24                 -> 2017-02-24
+2026-04-23T17:50:46.3477714Z  * [new tag]             2017-03-10                 -> 2017-03-10
+2026-04-23T17:50:46.3478393Z  * [new tag]             2017-03-24                 -> 2017-03-24
+2026-04-23T17:50:46.3479063Z  * [new tag]             2017-04-06                 -> 2017-04-06
+2026-04-23T17:50:46.3479734Z  * [new tag]             2017-04-07                 -> 2017-04-07
+2026-04-23T17:50:46.3480419Z  * [new tag]             2017-04-21                 -> 2017-04-21
+2026-04-23T17:50:46.3481086Z  * [new tag]             2017-05-05                 -> 2017-05-05
+2026-04-23T17:50:46.3481764Z  * [new tag]             2017-05-19                 -> 2017-05-19
+2026-04-23T17:50:46.3482447Z  * [new tag]             2017-06-02                 -> 2017-06-02
+2026-04-23T17:50:46.3483122Z  * [new tag]             2017-06-16                 -> 2017-06-16
+2026-04-23T17:50:46.3483804Z  * [new tag]             2017-06-16-test2           -> 2017-06-16-test2
+2026-04-23T17:50:46.3484520Z  * [new tag]             2017-06-30                 -> 2017-06-30
+2026-04-23T17:50:46.3485202Z  * [new tag]             2017-07-14                 -> 2017-07-14
+2026-04-23T17:50:46.3486086Z  * [new tag]             2017-07-28                 -> 2017-07-28
+2026-04-23T17:50:46.3486792Z  * [new tag]             2017-08-11                 -> 2017-08-11
+2026-04-23T17:50:46.3487458Z  * [new tag]             2017-08-25                 -> 2017-08-25
+2026-04-23T17:50:46.3488141Z  * [new tag]             2017-09-08                 -> 2017-09-08
+2026-04-23T17:50:46.3488807Z  * [new tag]             2017-09-25                 -> 2017-09-25
+2026-04-23T17:50:46.3489499Z  * [new tag]             2017-09-25_invalid         -> 2017-09-25_invalid
+2026-04-23T17:50:46.3490190Z  * [new tag]             2017-10-06                 -> 2017-10-06
+2026-04-23T17:50:46.3490863Z  * [new tag]             2017-10-09                 -> 2017-10-09
+2026-04-23T17:50:46.3491634Z  * [new tag]             2017-10-20                 -> 2017-10-20
+2026-04-23T17:50:46.3492341Z  * [new tag]             2017-11-03                 -> 2017-11-03
+2026-04-23T17:50:46.3493027Z  * [new tag]             2017-11-17                 -> 2017-11-17
+2026-04-23T17:50:46.3493695Z  * [new tag]             2017-12-14                 -> 2017-12-14
+2026-04-23T17:50:46.3494359Z  * [new tag]             2018-01-12                 -> 2018-01-12
+2026-04-23T17:50:46.3495025Z  * [new tag]             2018-01-29                 -> 2018-01-29
+2026-04-23T17:50:46.3495809Z  * [new tag]             2018-02-09                 -> 2018-02-09
+2026-04-23T17:50:46.3496811Z  * [new tag]             2018-03-01-temp-pod-1      -> 2018-03-01-temp-pod-1
+2026-04-23T17:50:46.3497531Z  * [new tag]             2018-03-02                 -> 2018-03-02
+2026-04-23T17:50:46.3498208Z  * [new tag]             2018-03-07-temp-pod        -> 2018-03-07-temp-pod
+2026-04-23T17:50:46.3498918Z  * [new tag]             2018-03-16                 -> 2018-03-16
+2026-04-23T17:50:46.3499595Z  * [new tag]             2018-04-02                 -> 2018-04-02
+2026-04-23T17:50:46.3500266Z  * [new tag]             2018-04-13                 -> 2018-04-13
+2026-04-23T17:50:46.3500930Z  * [new tag]             2018-05-04                 -> 2018-05-04
+2026-04-23T17:50:46.3501592Z  * [new tag]             2018-06-08                 -> 2018-06-08
+2026-04-23T17:50:46.3502258Z  * [new tag]             2018-06-15                 -> 2018-06-15
+2026-04-23T17:50:46.3502926Z  * [new tag]             2018-06-26                 -> 2018-06-26
+2026-04-23T17:50:46.3503597Z  * [new tag]             2018-06-27                 -> 2018-06-27
+2026-04-23T17:50:46.3504286Z  * [new tag]             2018-07-03                 -> 2018-07-03
+2026-04-23T17:50:46.3504958Z  * [new tag]             2018-07-11                 -> 2018-07-11
+2026-04-23T17:50:46.3505655Z  * [new tag]             2018-09-11                 -> 2018-09-11
+2026-04-23T17:50:46.3506530Z  * [new tag]             2018-10-03                 -> 2018-10-03
+2026-04-23T17:50:46.3507226Z  * [new tag]             2018-11-20                 -> 2018-11-20
+2026-04-23T17:50:46.3507909Z  * [new tag]             2018-12-13                 -> 2018-12-13
+2026-04-23T17:50:46.3508644Z  * [new tag]             2019-01-22-public-preview  -> 2019-01-22-public-preview
+2026-04-23T17:50:46.3509370Z  * [new tag]             2019-01-31                 -> 2019-01-31
+2026-04-23T17:50:46.3510028Z  * [new tag]             2019-02-11                 -> 2019-02-11
+2026-04-23T17:50:46.3510716Z  * [new tag]             2019-03-18                 -> 2019-03-18
+2026-04-23T17:50:46.3511408Z  * [new tag]             2019-03-18-public-preview  -> 2019-03-18-public-preview
+2026-04-23T17:50:46.3512116Z  * [new tag]             2019-04-11                 -> 2019-04-11
+2026-04-23T17:50:46.3512812Z  * [new tag]             2019-04-11-public-preview  -> 2019-04-11-public-preview
+2026-04-23T17:50:46.3513514Z  * [new tag]             2019-04-30                 -> 2019-04-30
+2026-04-23T17:50:46.3514200Z  * [new tag]             2019-05-16                 -> 2019-05-16
+2026-04-23T17:50:46.3514867Z  * [new tag]             2019-07-01                 -> 2019-07-01
+2026-04-23T17:50:46.3515525Z  * [new tag]             2019-09-23                 -> 2019-09-23
+2026-04-23T17:50:46.3516522Z  * [new tag]             2019-10-07                 -> 2019-10-07
+2026-04-23T17:50:46.3517199Z  * [new tag]             2019-11-08                 -> 2019-11-08
+2026-04-23T17:50:46.3517887Z  * [new tag]             2019-12-11                 -> 2019-12-11
+2026-04-23T17:50:46.3518554Z  * [new tag]             2020-01-22                 -> 2020-01-22
+2026-04-23T17:50:46.3519225Z  * [new tag]             2020-07-17                 -> 2020-07-17
+2026-04-23T17:50:46.3519883Z  * [new tag]             2020-07-19                 -> 2020-07-19
+2026-04-23T17:50:46.3520535Z  * [new tag]             2020-12-09                 -> 2020-12-09
+2026-04-23T17:50:46.3521314Z  * [new tag]             LTS_01_2018_Ref01          -> LTS_01_2018_Ref01
+2026-04-23T17:50:46.3522060Z  * [new tag]             LTS_01_2021_Ref01          -> LTS_01_2021_Ref01
+2026-04-23T17:50:46.3522773Z  * [new tag]             LTS_01_2022_Ref01          -> LTS_01_2022_Ref01
+2026-04-23T17:50:46.3523479Z  * [new tag]             LTS_01_2023_Ref01          -> LTS_01_2023_Ref01
+2026-04-23T17:50:46.3524176Z  * [new tag]             LTS_01_2023_Ref02          -> LTS_01_2023_Ref02
+2026-04-23T17:50:46.3524869Z  * [new tag]             LTS_02_2020_Ref01          -> LTS_02_2020_Ref01
+2026-04-23T17:50:46.3525693Z  * [new tag]             LTS_02_2020_Ref02          -> LTS_02_2020_Ref02
+2026-04-23T17:50:46.3526611Z  * [new tag]             LTS_03_2024                -> LTS_03_2024
+2026-04-23T17:50:46.3527312Z  * [new tag]             LTS_03_2024_Ref02          -> LTS_03_2024_Ref02
+2026-04-23T17:50:46.3527998Z  * [new tag]             LTS_03_2025                -> LTS_03_2025
+2026-04-23T17:50:46.3528683Z  * [new tag]             LTS_07_2019_Ref01          -> LTS_07_2019_Ref01
+2026-04-23T17:50:46.3529481Z  * [new tag]             LTS_07_2020_Ref01          -> LTS_07_2020_Ref01
+2026-04-23T17:50:46.3530195Z  * [new tag]             LTS_07_2020_Ref02          -> LTS_07_2020_Ref02
+2026-04-23T17:50:46.3530886Z  * [new tag]             LTS_07_2021_Ref01          -> LTS_07_2021_Ref01
+2026-04-23T17:50:46.3531578Z  * [new tag]             LTS_07_2022_Ref01          -> LTS_07_2022_Ref01
+2026-04-23T17:50:46.3532271Z  * [new tag]             LTS_07_2022_Ref02          -> LTS_07_2022_Ref02
+2026-04-23T17:50:46.3532965Z  * [new tag]             LTS_08_2023                -> LTS_08_2023
+2026-04-23T17:50:46.3533625Z  * [new tag]             LTS_08_2024                -> LTS_08_2024
+2026-04-23T17:50:46.3534330Z  * [new tag]             public-preview-pnp-2020-06 -> public-preview-pnp-2020-06
+2026-04-23T17:50:46.3535062Z  * [new tag]             release_2017_06_30         -> release_2017_06_30
+2026-04-23T17:50:46.3535784Z  * [new tag]             release_2017_08_25         -> release_2017_08_25
+2026-04-23T17:50:46.3536784Z  * [new tag]             service-cocoapod           -> service-cocoapod
+2026-04-23T17:50:46.3537505Z  * [new tag]             v1.0.0-preview.3           -> v1.0.0-preview.3
+2026-04-23T17:50:46.3538205Z  * [new tag]             v1.0.0-preview.4           -> v1.0.0-preview.4
+2026-04-23T17:50:46.3538896Z  * [new tag]             v20151102                  -> v20151102
+2026-04-23T17:50:46.3762635Z ##[command]git --config-env=http.extraheader=env_var_http.extraheader fetch --force --no-tags --prune --prune-tags --progress --no-recurse-submodules origin   +e370cfcdb75204dc072797df3ce2ced465fcd2ad
+2026-04-23T17:50:46.3812053Z From https://github.com/Azure/azure-iot-sdk-c
+2026-04-23T17:50:46.3814100Z  * branch                e370cfcdb75204dc072797df3ce2ced465fcd2ad -> FETCH_HEAD
+2026-04-23T17:50:46.4018854Z ##[command]git checkout --progress --force e370cfcdb75204dc072797df3ce2ced465fcd2ad
+2026-04-23T17:50:46.5078500Z Note: switching to 'e370cfcdb75204dc072797df3ce2ced465fcd2ad'.
+2026-04-23T17:50:46.5089730Z 
+2026-04-23T17:50:46.5090800Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-04-23T17:50:46.5091800Z changes and commit them, and you can discard any commits you make in this
+2026-04-23T17:50:46.5092727Z state without impacting any branches by switching back to a branch.
+2026-04-23T17:50:46.5093241Z 
+2026-04-23T17:50:46.5093987Z If you want to create a new branch to retain commits you create, you may
+2026-04-23T17:50:46.5094823Z do so (now or later) by using -c with the switch command. Example:
+2026-04-23T17:50:46.5095342Z 
+2026-04-23T17:50:46.5096202Z   git switch -c <new-branch-name>
+2026-04-23T17:50:46.5096699Z 
+2026-04-23T17:50:46.5097348Z Or undo this operation with:
+2026-04-23T17:50:46.5097791Z 
+2026-04-23T17:50:46.5098426Z   git switch -
+2026-04-23T17:50:46.5098862Z 
+2026-04-23T17:50:46.5099526Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-04-23T17:50:46.5100603Z 
+2026-04-23T17:50:46.5101576Z HEAD is now at e370cfcdb Fix CI job failures in hosted pipeline
+2026-04-23T17:50:46.5117339Z ##[command]git submodule sync --recursive
+2026-04-23T17:50:46.6261866Z ##[command]git --config-env=http.https://github.com.extraheader=env_var_http.https://github.com.extraheader submodule update --init --force --recursive
+2026-04-23T17:50:46.6507571Z Submodule 'azure-c-shared-utility' (https://github.com/Azure/azure-c-shared-utility.git) registered for path 'c-utility'
+2026-04-23T17:50:46.6536875Z Submodule 'deps/azure-c-testrunnerswitcher' (https://github.com/Azure/azure-c-testrunnerswitcher.git) registered for path 'deps/azure-c-testrunnerswitcher'
+2026-04-23T17:50:46.6542876Z Submodule 'deps/azure-ctest' (https://github.com/Azure/azure-ctest.git) registered for path 'deps/azure-ctest'
+2026-04-23T17:50:46.6547536Z Submodule 'deps/azure-macro-utils-c' (https://github.com/Azure/azure-macro-utils-c.git) registered for path 'deps/azure-macro-utils-c'
+2026-04-23T17:50:46.6549138Z Submodule 'deps/parson' (https://github.com/kgabis/parson.git) registered for path 'deps/parson'
+2026-04-23T17:50:46.6551985Z Submodule 'deps/uhttp' (https://github.com/Azure/azure-uhttp-c.git) registered for path 'deps/uhttp'
+2026-04-23T17:50:46.6553357Z Submodule 'deps/umock-c' (https://github.com/Azure/umock-c.git) registered for path 'deps/umock-c'
+2026-04-23T17:50:46.6556577Z Submodule 'provisioning_client/deps/RIoT' (https://github.com/Microsoft/RIoT.git) registered for path 'provisioning_client/deps/RIoT'
+2026-04-23T17:50:46.6557958Z Submodule 'provisioning_client/deps/utpm' (https://github.com/Azure/azure-utpm-c.git) registered for path 'provisioning_client/deps/utpm'
+2026-04-23T17:50:46.6560755Z Submodule 'azure-uamqp-c' (https://github.com/Azure/azure-uamqp-c.git) registered for path 'uamqp'
+2026-04-23T17:50:46.6576311Z Submodule 'azure-umqtt-c' (https://github.com/Azure/azure-umqtt-c.git) registered for path 'umqtt'
+2026-04-23T17:50:46.6596840Z Cloning into '/home/vsts/work/1/s/c-utility'...
+2026-04-23T17:50:48.0913080Z Cloning into '/home/vsts/work/1/s/deps/azure-c-testrunnerswitcher'...
+2026-04-23T17:50:48.7972045Z Cloning into '/home/vsts/work/1/s/deps/azure-ctest'...
+2026-04-23T17:50:49.5177194Z Cloning into '/home/vsts/work/1/s/deps/azure-macro-utils-c'...
+2026-04-23T17:50:50.2997791Z Cloning into '/home/vsts/work/1/s/deps/parson'...
+2026-04-23T17:50:50.7224616Z Cloning into '/home/vsts/work/1/s/deps/uhttp'...
+2026-04-23T17:50:51.1169544Z Cloning into '/home/vsts/work/1/s/deps/umock-c'...
+2026-04-23T17:50:52.0627714Z Cloning into '/home/vsts/work/1/s/provisioning_client/deps/RIoT'...
+2026-04-23T17:50:52.8333249Z Cloning into '/home/vsts/work/1/s/provisioning_client/deps/utpm'...
+2026-04-23T17:50:53.3727498Z Cloning into '/home/vsts/work/1/s/uamqp'...
+2026-04-23T17:50:54.4558443Z Cloning into '/home/vsts/work/1/s/umqtt'...
+2026-04-23T17:50:55.1008985Z Submodule path 'c-utility': checked out 'acbd7a8ae73497311fc5ad30973d4b0459cbcee5'
+2026-04-23T17:50:55.1029068Z Submodule 'deps/azure-macro-utils-c' (https://github.com/Azure/azure-macro-utils-c.git) registered for path 'c-utility/deps/azure-macro-utils-c'
+2026-04-23T17:50:55.1032724Z Submodule 'deps/umock-c' (https://github.com/Azure/umock-c.git) registered for path 'c-utility/deps/umock-c'
+2026-04-23T17:50:55.1049034Z Submodule 'testtools/ctest' (https://github.com/Azure/azure-ctest.git) registered for path 'c-utility/testtools/ctest'
+2026-04-23T17:50:55.1049926Z Submodule 'testtools/testrunner' (https://github.com/Azure/azure-c-testrunnerswitcher.git) registered for path 'c-utility/testtools/testrunner'
+2026-04-23T17:50:55.1074720Z Cloning into '/home/vsts/work/1/s/c-utility/deps/azure-macro-utils-c'...
+2026-04-23T17:50:55.8483006Z Cloning into '/home/vsts/work/1/s/c-utility/deps/umock-c'...
+2026-04-23T17:50:56.7938290Z Cloning into '/home/vsts/work/1/s/c-utility/testtools/ctest'...
+2026-04-23T17:50:57.5457147Z Cloning into '/home/vsts/work/1/s/c-utility/testtools/testrunner'...
+2026-04-23T17:50:58.3186255Z Submodule path 'c-utility/deps/azure-macro-utils-c': checked out '5926caf4e42e98e730e6d03395788205649a3ada'
+2026-04-23T17:50:58.3469914Z Submodule path 'c-utility/deps/umock-c': checked out '504193e65d1c2f6eb50c15357167600a296df7ff'
+2026-04-23T17:50:58.3489913Z Submodule 'deps/azure-macro-utils-c' (https://github.com/Azure/azure-macro-utils-c.git) registered for path 'c-utility/deps/umock-c/deps/azure-macro-utils-c'
+2026-04-23T17:50:58.3494640Z Submodule 'deps/azure-ctest' (https://github.com/Azure/azure-ctest.git) registered for path 'c-utility/deps/umock-c/deps/ctest'
+2026-04-23T17:50:58.3503216Z Submodule 'deps/testrunner' (https://github.com/Azure/azure-c-testrunnerswitcher.git) registered for path 'c-utility/deps/umock-c/deps/testrunner'
+2026-04-23T17:50:58.3530894Z Cloning into '/home/vsts/work/1/s/c-utility/deps/umock-c/deps/azure-macro-utils-c'...
+2026-04-23T17:50:59.0297244Z Cloning into '/home/vsts/work/1/s/c-utility/deps/umock-c/deps/ctest'...
+2026-04-23T17:50:59.6757703Z Cloning into '/home/vsts/work/1/s/c-utility/deps/umock-c/deps/testrunner'...
+2026-04-23T17:51:00.3793208Z Submodule path 'c-utility/deps/umock-c/deps/azure-macro-utils-c': checked out '5926caf4e42e98e730e6d03395788205649a3ada'
+2026-04-23T17:51:00.4001700Z Submodule path 'c-utility/deps/umock-c/deps/ctest': checked out '4aa84c45236ecda21983fb682f542f17d0b21e19'
+2026-04-23T17:51:00.4022670Z Submodule 'deps/azure-macro-utils-c' (https://github.com/Azure/azure-macro-utils-c.git) registered for path 'c-utility/deps/umock-c/deps/ctest/deps/azure-macro-utils-c'
+2026-04-23T17:51:00.4053996Z Cloning into '/home/vsts/work/1/s/c-utility/deps/umock-c/deps/ctest/deps/azure-macro-utils-c'...
+2026-04-23T17:51:01.1679659Z Submodule path 'c-utility/deps/umock-c/deps/ctest/deps/azure-macro-utils-c': checked out '5926caf4e42e98e730e6d03395788205649a3ada'
+2026-04-23T17:51:01.1853365Z Submodule path 'c-utility/deps/umock-c/deps/testrunner': checked out '8734bd6c53c88dd6c0cea8e87d70b9964726484a'
+2026-04-23T17:51:01.1873925Z Submodule 'deps/azure-macro-utils-c' (https://github.com/Azure/azure-macro-utils-c) registered for path 'c-utility/deps/umock-c/deps/testrunner/deps/azure-macro-utils-c'
+2026-04-23T17:51:01.1904872Z Cloning into '/home/vsts/work/1/s/c-utility/deps/umock-c/deps/testrunner/deps/azure-macro-utils-c'...
+2026-04-23T17:51:01.9358714Z Submodule path 'c-utility/deps/umock-c/deps/testrunner/deps/azure-macro-utils-c': checked out '5926caf4e42e98e730e6d03395788205649a3ada'
+2026-04-23T17:51:01.9577939Z Submodule path 'c-utility/testtools/ctest': checked out '4aa84c45236ecda21983fb682f542f17d0b21e19'
+2026-04-23T17:51:01.9599470Z Submodule 'deps/azure-macro-utils-c' (https://github.com/Azure/azure-macro-utils-c.git) registered for path 'c-utility/testtools/ctest/deps/azure-macro-utils-c'
+2026-04-23T17:51:01.9648026Z Cloning into '/home/vsts/work/1/s/c-utility/testtools/ctest/deps/azure-macro-utils-c'...
+2026-04-23T17:51:02.7770946Z Submodule path 'c-utility/testtools/ctest/deps/azure-macro-utils-c': checked out '5926caf4e42e98e730e6d03395788205649a3ada'
+2026-04-23T17:51:02.7932828Z Submodule path 'c-utility/testtools/testrunner': checked out '8734bd6c53c88dd6c0cea8e87d70b9964726484a'
+2026-04-23T17:51:02.7952513Z Submodule 'deps/azure-macro-utils-c' (https://github.com/Azure/azure-macro-utils-c) registered for path 'c-utility/testtools/testrunner/deps/azure-macro-utils-c'
+2026-04-23T17:51:02.7981327Z Cloning into '/home/vsts/work/1/s/c-utility/testtools/testrunner/deps/azure-macro-utils-c'...
+2026-04-23T17:51:03.5678461Z Submodule path 'c-utility/testtools/testrunner/deps/azure-macro-utils-c': checked out '5926caf4e42e98e730e6d03395788205649a3ada'
+2026-04-23T17:51:03.5841358Z Submodule path 'deps/azure-c-testrunnerswitcher': checked out '8734bd6c53c88dd6c0cea8e87d70b9964726484a'
+2026-04-23T17:51:03.5861994Z Submodule 'deps/azure-macro-utils-c' (https://github.com/Azure/azure-macro-utils-c) registered for path 'deps/azure-c-testrunnerswitcher/deps/azure-macro-utils-c'
+2026-04-23T17:51:03.5891422Z Cloning into '/home/vsts/work/1/s/deps/azure-c-testrunnerswitcher/deps/azure-macro-utils-c'...
+2026-04-23T17:51:04.4139499Z Submodule path 'deps/azure-c-testrunnerswitcher/deps/azure-macro-utils-c': checked out '5926caf4e42e98e730e6d03395788205649a3ada'
+2026-04-23T17:51:04.4352859Z Submodule path 'deps/azure-ctest': checked out '4aa84c45236ecda21983fb682f542f17d0b21e19'
+2026-04-23T17:51:04.4379350Z Submodule 'deps/azure-macro-utils-c' (https://github.com/Azure/azure-macro-utils-c.git) registered for path 'deps/azure-ctest/deps/azure-macro-utils-c'
+2026-04-23T17:51:04.4403236Z Cloning into '/home/vsts/work/1/s/deps/azure-ctest/deps/azure-macro-utils-c'...
+2026-04-23T17:51:05.2959571Z Submodule path 'deps/azure-ctest/deps/azure-macro-utils-c': checked out '5926caf4e42e98e730e6d03395788205649a3ada'
+2026-04-23T17:51:05.3144028Z Submodule path 'deps/azure-macro-utils-c': checked out '5926caf4e42e98e730e6d03395788205649a3ada'
+2026-04-23T17:51:05.3249339Z Submodule path 'deps/parson': checked out '60c37844d7a1c97547812cac3423d458c73e60f9'
+2026-04-23T17:51:05.3375364Z Submodule path 'deps/uhttp': checked out '01dc7139d3da3141aa2017dff927db1dbbe86e49'
+2026-04-23T17:51:05.3395619Z Submodule 'deps/azure-c-testrunnerswitcher' (https://github.com/Azure/azure-c-testrunnerswitcher.git) registered for path 'deps/uhttp/deps/azure-c-testrunnerswitcher'
+2026-04-23T17:51:05.3400354Z Submodule 'deps/azure-ctest' (https://github.com/Azure/azure-ctest.git) registered for path 'deps/uhttp/deps/azure-ctest'
+2026-04-23T17:51:05.3405579Z Submodule 'deps/azure-macro-utils-c' (https://github.com/Azure/azure-macro-utils-c.git) registered for path 'deps/uhttp/deps/azure-macro-utils-c'
+2026-04-23T17:51:05.3411191Z Submodule 'deps/c-utility' (https://github.com/Azure/azure-c-shared-utility.git) registered for path 'deps/uhttp/deps/c-utility'
+2026-04-23T17:51:05.3416556Z Submodule 'deps/umock-c' (https://github.com/Azure/umock-c.git) registered for path 'deps/uhttp/deps/umock-c'
+2026-04-23T17:51:05.3446520Z Cloning into '/home/vsts/work/1/s/deps/uhttp/deps/azure-c-testrunnerswitcher'...
+2026-04-23T17:51:06.1381396Z Cloning into '/home/vsts/work/1/s/deps/uhttp/deps/azure-ctest'...
+2026-04-23T17:51:07.6088984Z Cloning into '/home/vsts/work/1/s/deps/uhttp/deps/azure-macro-utils-c'...
+2026-04-23T17:51:07.6089999Z Cloning into '/home/vsts/work/1/s/deps/uhttp/deps/c-utility'...
+2026-04-23T17:51:09.0873706Z Cloning into '/home/vsts/work/1/s/deps/uhttp/deps/umock-c'...
+2026-04-23T17:51:10.6113121Z Submodule path 'deps/uhttp/deps/azure-c-testrunnerswitcher': checked out '8734bd6c53c88dd6c0cea8e87d70b9964726484a'
+2026-04-23T17:51:10.6114649Z Submodule 'deps/azure-macro-utils-c' (https://github.com/Azure/azure-macro-utils-c) registered for path 'deps/uhttp/deps/azure-c-testrunnerswitcher/deps/azure-macro-utils-c'
+2026-04-23T17:51:10.6115573Z Cloning into '/home/vsts/work/1/s/deps/uhttp/deps/azure-c-testrunnerswitcher/deps/azure-macro-utils-c'...
+2026-04-23T17:51:10.8989801Z Submodule path 'deps/uhttp/deps/azure-c-testrunnerswitcher/deps/azure-macro-utils-c': checked out '5926caf4e42e98e730e6d03395788205649a3ada'
+2026-04-23T17:51:10.9201600Z Submodule path 'deps/uhttp/deps/azure-ctest': checked out '4aa84c45236ecda21983fb682f542f17d0b21e19'
+2026-04-23T17:51:10.9220746Z Submodule 'deps/azure-macro-utils-c' (https://github.com/Azure/azure-macro-utils-c.git) registered for path 'deps/uhttp/deps/azure-ctest/deps/azure-macro-utils-c'
+2026-04-23T17:51:10.9248927Z Cloning into '/home/vsts/work/1/s/deps/uhttp/deps/azure-ctest/deps/azure-macro-utils-c'...
+2026-04-23T17:51:11.7158165Z Submodule path 'deps/uhttp/deps/azure-ctest/deps/azure-macro-utils-c': checked out '5926caf4e42e98e730e6d03395788205649a3ada'
+2026-04-23T17:51:11.7341180Z Submodule path 'deps/uhttp/deps/azure-macro-utils-c': checked out '5926caf4e42e98e730e6d03395788205649a3ada'
+2026-04-23T17:51:11.7978350Z Submodule path 'deps/uhttp/deps/c-utility': checked out '772a4f8bc338140b4a0f404cf9c344283c5c937f'
+2026-04-23T17:51:11.8000322Z Submodule 'deps/azure-macro-utils-c' (https://github.com/Azure/azure-macro-utils-c.git) registered for path 'deps/uhttp/deps/c-utility/deps/azure-macro-utils-c'
+2026-04-23T17:51:11.8007514Z Submodule 'deps/umock-c' (https://github.com/Azure/umock-c.git) registered for path 'deps/uhttp/deps/c-utility/deps/umock-c'
+2026-04-23T17:51:11.8013939Z Submodule 'testtools/ctest' (https://github.com/Azure/azure-ctest.git) registered for path 'deps/uhttp/deps/c-utility/testtools/ctest'
+2026-04-23T17:51:11.8020344Z Submodule 'testtools/testrunner' (https://github.com/Azure/azure-c-testrunnerswitcher.git) registered for path 'deps/uhttp/deps/c-utility/testtools/testrunner'
+2026-04-23T17:51:11.8047668Z Cloning into '/home/vsts/work/1/s/deps/uhttp/deps/c-utility/deps/azure-macro-utils-c'...
+2026-04-23T17:51:12.6372215Z Cloning into '/home/vsts/work/1/s/deps/uhttp/deps/c-utility/deps/umock-c'...
+2026-04-23T17:51:13.5301172Z Cloning into '/home/vsts/work/1/s/deps/uhttp/deps/c-utility/testtools/ctest'...
+2026-04-23T17:51:14.1707480Z Cloning into '/home/vsts/work/1/s/deps/uhttp/deps/c-utility/testtools/testrunner'...
+2026-04-23T17:51:15.2927822Z Submodule path 'deps/uhttp/deps/c-utility/deps/azure-macro-utils-c': checked out '5926caf4e42e98e730e6d03395788205649a3ada'
+2026-04-23T17:51:15.3230838Z Submodule path 'deps/uhttp/deps/c-utility/deps/umock-c': checked out '504193e65d1c2f6eb50c15357167600a296df7ff'
+2026-04-23T17:51:15.3252293Z Submodule 'deps/azure-macro-utils-c' (https://github.com/Azure/azure-macro-utils-c.git) registered for path 'deps/uhttp/deps/c-utility/deps/umock-c/deps/azure-macro-utils-c'
+2026-04-23T17:51:15.3261688Z Submodule 'deps/azure-ctest' (https://github.com/Azure/azure-ctest.git) registered for path 'deps/uhttp/deps/c-utility/deps/umock-c/deps/ctest'
+2026-04-23T17:51:15.3263628Z Submodule 'deps/testrunner' (https://github.com/Azure/azure-c-testrunnerswitcher.git) registered for path 'deps/uhttp/deps/c-utility/deps/umock-c/deps/testrunner'
+2026-04-23T17:51:15.3293586Z Cloning into '/home/vsts/work/1/s/deps/uhttp/deps/c-utility/deps/umock-c/deps/azure-macro-utils-c'...
+2026-04-23T17:51:16.0936318Z Cloning into '/home/vsts/work/1/s/deps/uhttp/deps/c-utility/deps/umock-c/deps/ctest'...
+2026-04-23T17:51:16.8657251Z Cloning into '/home/vsts/work/1/s/deps/uhttp/deps/c-utility/deps/umock-c/deps/testrunner'...
+2026-04-23T17:51:17.6718670Z Submodule path 'deps/uhttp/deps/c-utility/deps/umock-c/deps/azure-macro-utils-c': checked out '5926caf4e42e98e730e6d03395788205649a3ada'
+2026-04-23T17:51:17.6933537Z Submodule path 'deps/uhttp/deps/c-utility/deps/umock-c/deps/ctest': checked out '4aa84c45236ecda21983fb682f542f17d0b21e19'
+2026-04-23T17:51:17.6953431Z Submodule 'deps/azure-macro-utils-c' (https://github.com/Azure/azure-macro-utils-c.git) registered for path 'deps/uhttp/deps/c-utility/deps/umock-c/deps/ctest/deps/azure-macro-utils-c'
+2026-04-23T17:51:17.6983749Z Cloning into '/home/vsts/work/1/s/deps/uhttp/deps/c-utility/deps/umock-c/deps/ctest/deps/azure-macro-utils-c'...
+2026-04-23T17:51:18.4927426Z Submodule path 'deps/uhttp/deps/c-utility/deps/umock-c/deps/ctest/deps/azure-macro-utils-c': checked out '5926caf4e42e98e730e6d03395788205649a3ada'
+2026-04-23T17:51:18.5105664Z Submodule path 'deps/uhttp/deps/c-utility/deps/umock-c/deps/testrunner': checked out '8734bd6c53c88dd6c0cea8e87d70b9964726484a'
+2026-04-23T17:51:18.5122988Z Submodule 'deps/azure-macro-utils-c' (https://github.com/Azure/azure-macro-utils-c) registered for path 'deps/uhttp/deps/c-utility/deps/umock-c/deps/testrunner/deps/azure-macro-utils-c'
+2026-04-23T17:51:18.5154459Z Cloning into '/home/vsts/work/1/s/deps/uhttp/deps/c-utility/deps/umock-c/deps/testrunner/deps/azure-macro-utils-c'...
+2026-04-23T17:51:19.2758455Z Submodule path 'deps/uhttp/deps/c-utility/deps/umock-c/deps/testrunner/deps/azure-macro-utils-c': checked out '5926caf4e42e98e730e6d03395788205649a3ada'
+2026-04-23T17:51:19.2980876Z Submodule path 'deps/uhttp/deps/c-utility/testtools/ctest': checked out '4aa84c45236ecda21983fb682f542f17d0b21e19'
+2026-04-23T17:51:19.3000891Z Submodule 'deps/azure-macro-utils-c' (https://github.com/Azure/azure-macro-utils-c.git) registered for path 'deps/uhttp/deps/c-utility/testtools/ctest/deps/azure-macro-utils-c'
+2026-04-23T17:51:19.3031758Z Cloning into '/home/vsts/work/1/s/deps/uhttp/deps/c-utility/testtools/ctest/deps/azure-macro-utils-c'...
+2026-04-23T17:51:20.1035637Z Submodule path 'deps/uhttp/deps/c-utility/testtools/ctest/deps/azure-macro-utils-c': checked out '5926caf4e42e98e730e6d03395788205649a3ada'
+2026-04-23T17:51:20.1195548Z Submodule path 'deps/uhttp/deps/c-utility/testtools/testrunner': checked out '8734bd6c53c88dd6c0cea8e87d70b9964726484a'
+2026-04-23T17:51:20.1215078Z Submodule 'deps/azure-macro-utils-c' (https://github.com/Azure/azure-macro-utils-c) registered for path 'deps/uhttp/deps/c-utility/testtools/testrunner/deps/azure-macro-utils-c'
+2026-04-23T17:51:20.1244911Z Cloning into '/home/vsts/work/1/s/deps/uhttp/deps/c-utility/testtools/testrunner/deps/azure-macro-utils-c'...
+2026-04-23T17:51:20.8191769Z Submodule path 'deps/uhttp/deps/c-utility/testtools/testrunner/deps/azure-macro-utils-c': checked out '5926caf4e42e98e730e6d03395788205649a3ada'
+2026-04-23T17:51:20.8483074Z Submodule path 'deps/uhttp/deps/umock-c': checked out '504193e65d1c2f6eb50c15357167600a296df7ff'
+2026-04-23T17:51:20.8502806Z Submodule 'deps/azure-macro-utils-c' (https://github.com/Azure/azure-macro-utils-c.git) registered for path 'deps/uhttp/deps/umock-c/deps/azure-macro-utils-c'
+2026-04-23T17:51:20.8507645Z Submodule 'deps/azure-ctest' (https://github.com/Azure/azure-ctest.git) registered for path 'deps/uhttp/deps/umock-c/deps/ctest'
+2026-04-23T17:51:20.8512419Z Submodule 'deps/testrunner' (https://github.com/Azure/azure-c-testrunnerswitcher.git) registered for path 'deps/uhttp/deps/umock-c/deps/testrunner'
+2026-04-23T17:51:20.8542433Z Cloning into '/home/vsts/work/1/s/deps/uhttp/deps/umock-c/deps/azure-macro-utils-c'...
+2026-04-23T17:51:21.5655712Z Cloning into '/home/vsts/work/1/s/deps/uhttp/deps/umock-c/deps/ctest'...
+2026-04-23T17:51:22.2077299Z Cloning into '/home/vsts/work/1/s/deps/uhttp/deps/umock-c/deps/testrunner'...
+2026-04-23T17:51:23.1595087Z Submodule path 'deps/uhttp/deps/umock-c/deps/azure-macro-utils-c': checked out '5926caf4e42e98e730e6d03395788205649a3ada'
+2026-04-23T17:51:23.1801033Z Submodule path 'deps/uhttp/deps/umock-c/deps/ctest': checked out '4aa84c45236ecda21983fb682f542f17d0b21e19'
+2026-04-23T17:51:23.1821036Z Submodule 'deps/azure-macro-utils-c' (https://github.com/Azure/azure-macro-utils-c.git) registered for path 'deps/uhttp/deps/umock-c/deps/ctest/deps/azure-macro-utils-c'
+2026-04-23T17:51:23.1851337Z Cloning into '/home/vsts/work/1/s/deps/uhttp/deps/umock-c/deps/ctest/deps/azure-macro-utils-c'...
+2026-04-23T17:51:23.9548223Z Submodule path 'deps/uhttp/deps/umock-c/deps/ctest/deps/azure-macro-utils-c': checked out '5926caf4e42e98e730e6d03395788205649a3ada'
+2026-04-23T17:51:23.9715010Z Submodule path 'deps/uhttp/deps/umock-c/deps/testrunner': checked out '8734bd6c53c88dd6c0cea8e87d70b9964726484a'
+2026-04-23T17:51:23.9730408Z Submodule 'deps/azure-macro-utils-c' (https://github.com/Azure/azure-macro-utils-c) registered for path 'deps/uhttp/deps/umock-c/deps/testrunner/deps/azure-macro-utils-c'
+2026-04-23T17:51:23.9759789Z Cloning into '/home/vsts/work/1/s/deps/uhttp/deps/umock-c/deps/testrunner/deps/azure-macro-utils-c'...
+2026-04-23T17:51:24.7740631Z Submodule path 'deps/uhttp/deps/umock-c/deps/testrunner/deps/azure-macro-utils-c': checked out '5926caf4e42e98e730e6d03395788205649a3ada'
+2026-04-23T17:51:24.8048468Z Submodule path 'deps/umock-c': checked out '504193e65d1c2f6eb50c15357167600a296df7ff'
+2026-04-23T17:51:24.8070954Z Submodule 'deps/azure-macro-utils-c' (https://github.com/Azure/azure-macro-utils-c.git) registered for path 'deps/umock-c/deps/azure-macro-utils-c'
+2026-04-23T17:51:24.8074800Z Submodule 'deps/azure-ctest' (https://github.com/Azure/azure-ctest.git) registered for path 'deps/umock-c/deps/ctest'
+2026-04-23T17:51:24.8080150Z Submodule 'deps/testrunner' (https://github.com/Azure/azure-c-testrunnerswitcher.git) registered for path 'deps/umock-c/deps/testrunner'
+2026-04-23T17:51:24.8110095Z Cloning into '/home/vsts/work/1/s/deps/umock-c/deps/azure-macro-utils-c'...
+2026-04-23T17:51:25.6197162Z Cloning into '/home/vsts/work/1/s/deps/umock-c/deps/ctest'...
+2026-04-23T17:51:26.2477502Z Cloning into '/home/vsts/work/1/s/deps/umock-c/deps/testrunner'...
+2026-04-23T17:51:26.9837025Z Submodule path 'deps/umock-c/deps/azure-macro-utils-c': checked out '5926caf4e42e98e730e6d03395788205649a3ada'
+2026-04-23T17:51:27.0056630Z Submodule path 'deps/umock-c/deps/ctest': checked out '4aa84c45236ecda21983fb682f542f17d0b21e19'
+2026-04-23T17:51:27.0073302Z Submodule 'deps/azure-macro-utils-c' (https://github.com/Azure/azure-macro-utils-c.git) registered for path 'deps/umock-c/deps/ctest/deps/azure-macro-utils-c'
+2026-04-23T17:51:27.0104335Z Cloning into '/home/vsts/work/1/s/deps/umock-c/deps/ctest/deps/azure-macro-utils-c'...
+2026-04-23T17:51:27.7854004Z Submodule path 'deps/umock-c/deps/ctest/deps/azure-macro-utils-c': checked out '5926caf4e42e98e730e6d03395788205649a3ada'
+2026-04-23T17:51:27.8027959Z Submodule path 'deps/umock-c/deps/testrunner': checked out '8734bd6c53c88dd6c0cea8e87d70b9964726484a'
+2026-04-23T17:51:27.8047873Z Submodule 'deps/azure-macro-utils-c' (https://github.com/Azure/azure-macro-utils-c) registered for path 'deps/umock-c/deps/testrunner/deps/azure-macro-utils-c'
+2026-04-23T17:51:27.8077584Z Cloning into '/home/vsts/work/1/s/deps/umock-c/deps/testrunner/deps/azure-macro-utils-c'...
+2026-04-23T17:51:28.5247301Z Submodule path 'deps/umock-c/deps/testrunner/deps/azure-macro-utils-c': checked out '5926caf4e42e98e730e6d03395788205649a3ada'
+2026-04-23T17:51:28.5653304Z Submodule path 'provisioning_client/deps/RIoT': checked out 'f6bebff2f5a68f5bc18d23ed164800db33b7d2a4'
+2026-04-23T17:51:28.5882590Z Submodule path 'provisioning_client/deps/utpm': checked out 'd250abe1d33cb38437d540bf77c80f014f60e472'
+2026-04-23T17:51:28.5906360Z Submodule 'deps/azure-c-testrunnerswitcher' (https://github.com/Azure/azure-c-testrunnerswitcher.git) registered for path 'provisioning_client/deps/utpm/deps/azure-c-testrunnerswitcher'
+2026-04-23T17:51:28.5911023Z Submodule 'deps/azure-ctest' (https://github.com/Azure/azure-ctest.git) registered for path 'provisioning_client/deps/utpm/deps/azure-ctest'
+2026-04-23T17:51:28.5916522Z Submodule 'deps/azure-macro-utils-c' (https://github.com/Azure/azure-macro-utils-c.git) registered for path 'provisioning_client/deps/utpm/deps/azure-macro-utils-c'
+2026-04-23T17:51:28.5922167Z Submodule 'deps/c-utility' (https://github.com/Azure/azure-c-shared-utility.git) registered for path 'provisioning_client/deps/utpm/deps/c-utility'
+2026-04-23T17:51:28.5927912Z Submodule 'deps/umock-c' (https://github.com/Azure/umock-c.git) registered for path 'provisioning_client/deps/utpm/deps/umock-c'
+2026-04-23T17:51:28.5959310Z Cloning into '/home/vsts/work/1/s/provisioning_client/deps/utpm/deps/azure-c-testrunnerswitcher'...
+2026-04-23T17:51:29.2483745Z Cloning into '/home/vsts/work/1/s/provisioning_client/deps/utpm/deps/azure-ctest'...
+2026-04-23T17:51:29.9074502Z Cloning into '/home/vsts/work/1/s/provisioning_client/deps/utpm/deps/azure-macro-utils-c'...
+2026-04-23T17:51:30.7267921Z Cloning into '/home/vsts/work/1/s/provisioning_client/deps/utpm/deps/c-utility'...
+2026-04-23T17:51:32.2913988Z Cloning into '/home/vsts/work/1/s/provisioning_client/deps/utpm/deps/umock-c'...
+2026-04-23T17:51:33.3975152Z Submodule path 'provisioning_client/deps/utpm/deps/azure-c-testrunnerswitcher': checked out '8734bd6c53c88dd6c0cea8e87d70b9964726484a'
+2026-04-23T17:51:33.3994231Z Submodule 'deps/azure-macro-utils-c' (https://github.com/Azure/azure-macro-utils-c) registered for path 'provisioning_client/deps/utpm/deps/azure-c-testrunnerswitcher/deps/azure-macro-utils-c'
+2026-04-23T17:51:33.4024201Z Cloning into '/home/vsts/work/1/s/provisioning_client/deps/utpm/deps/azure-c-testrunnerswitcher/deps/azure-macro-utils-c'...
+2026-04-23T17:51:34.1820336Z Submodule path 'provisioning_client/deps/utpm/deps/azure-c-testrunnerswitcher/deps/azure-macro-utils-c': checked out '5926caf4e42e98e730e6d03395788205649a3ada'
+2026-04-23T17:51:34.2030754Z Submodule path 'provisioning_client/deps/utpm/deps/azure-ctest': checked out '4aa84c45236ecda21983fb682f542f17d0b21e19'
+2026-04-23T17:51:34.2050561Z Submodule 'deps/azure-macro-utils-c' (https://github.com/Azure/azure-macro-utils-c.git) registered for path 'provisioning_client/deps/utpm/deps/azure-ctest/deps/azure-macro-utils-c'
+2026-04-23T17:51:34.2079670Z Cloning into '/home/vsts/work/1/s/provisioning_client/deps/utpm/deps/azure-ctest/deps/azure-macro-utils-c'...
+2026-04-23T17:51:34.9876332Z Submodule path 'provisioning_client/deps/utpm/deps/azure-ctest/deps/azure-macro-utils-c': checked out '5926caf4e42e98e730e6d03395788205649a3ada'
+2026-04-23T17:51:35.0062786Z Submodule path 'provisioning_client/deps/utpm/deps/azure-macro-utils-c': checked out '5926caf4e42e98e730e6d03395788205649a3ada'
+2026-04-23T17:51:35.0706317Z Submodule path 'provisioning_client/deps/utpm/deps/c-utility': checked out '772a4f8bc338140b4a0f404cf9c344283c5c937f'
+2026-04-23T17:51:35.0726425Z Submodule 'deps/azure-macro-utils-c' (https://github.com/Azure/azure-macro-utils-c.git) registered for path 'provisioning_client/deps/utpm/deps/c-utility/deps/azure-macro-utils-c'
+2026-04-23T17:51:35.0730987Z Submodule 'deps/umock-c' (https://github.com/Azure/umock-c.git) registered for path 'provisioning_client/deps/utpm/deps/c-utility/deps/umock-c'
+2026-04-23T17:51:35.0739306Z Submodule 'testtools/ctest' (https://github.com/Azure/azure-ctest.git) registered for path 'provisioning_client/deps/utpm/deps/c-utility/testtools/ctest'
+2026-04-23T17:51:35.0741845Z Submodule 'testtools/testrunner' (https://github.com/Azure/azure-c-testrunnerswitcher.git) registered for path 'provisioning_client/deps/utpm/deps/c-utility/testtools/testrunner'
+2026-04-23T17:51:35.0772658Z Cloning into '/home/vsts/work/1/s/provisioning_client/deps/utpm/deps/c-utility/deps/azure-macro-utils-c'...
+2026-04-23T17:51:35.9398358Z Cloning into '/home/vsts/work/1/s/provisioning_client/deps/utpm/deps/c-utility/deps/umock-c'...
+2026-04-23T17:51:36.7645237Z Cloning into '/home/vsts/work/1/s/provisioning_client/deps/utpm/deps/c-utility/testtools/ctest'...
+2026-04-23T17:51:37.4276340Z Cloning into '/home/vsts/work/1/s/provisioning_client/deps/utpm/deps/c-utility/testtools/testrunner'...
+2026-04-23T17:51:38.1682146Z Submodule path 'provisioning_client/deps/utpm/deps/c-utility/deps/azure-macro-utils-c': checked out '5926caf4e42e98e730e6d03395788205649a3ada'
+2026-04-23T17:51:38.1978429Z Submodule path 'provisioning_client/deps/utpm/deps/c-utility/deps/umock-c': checked out '504193e65d1c2f6eb50c15357167600a296df7ff'
+2026-04-23T17:51:38.1999967Z Submodule 'deps/azure-macro-utils-c' (https://github.com/Azure/azure-macro-utils-c.git) registered for path 'provisioning_client/deps/utpm/deps/c-utility/deps/umock-c/deps/azure-macro-utils-c'
+2026-04-23T17:51:38.2005026Z Submodule 'deps/azure-ctest' (https://github.com/Azure/azure-ctest.git) registered for path 'provisioning_client/deps/utpm/deps/c-utility/deps/umock-c/deps/ctest'
+2026-04-23T17:51:38.2010492Z Submodule 'deps/testrunner' (https://github.com/Azure/azure-c-testrunnerswitcher.git) registered for path 'provisioning_client/deps/utpm/deps/c-utility/deps/umock-c/deps/testrunner'
+2026-04-23T17:51:38.2042386Z Cloning into '/home/vsts/work/1/s/provisioning_client/deps/utpm/deps/c-utility/deps/umock-c/deps/azure-macro-utils-c'...
+2026-04-23T17:51:39.0057076Z Cloning into '/home/vsts/work/1/s/provisioning_client/deps/utpm/deps/c-utility/deps/umock-c/deps/ctest'...
+2026-04-23T17:51:39.6530509Z Cloning into '/home/vsts/work/1/s/provisioning_client/deps/utpm/deps/c-utility/deps/umock-c/deps/testrunner'...
+2026-04-23T17:51:40.6932937Z Submodule path 'provisioning_client/deps/utpm/deps/c-utility/deps/umock-c/deps/azure-macro-utils-c': checked out '5926caf4e42e98e730e6d03395788205649a3ada'
+2026-04-23T17:51:40.7158128Z Submodule path 'provisioning_client/deps/utpm/deps/c-utility/deps/umock-c/deps/ctest': checked out '4aa84c45236ecda21983fb682f542f17d0b21e19'
+2026-04-23T17:51:40.7179711Z Submodule 'deps/azure-macro-utils-c' (https://github.com/Azure/azure-macro-utils-c.git) registered for path 'provisioning_client/deps/utpm/deps/c-utility/deps/umock-c/deps/ctest/deps/azure-macro-utils-c'
+2026-04-23T17:51:40.7214921Z Cloning into '/home/vsts/work/1/s/provisioning_client/deps/utpm/deps/c-utility/deps/umock-c/deps/ctest/deps/azure-macro-utils-c'...
+2026-04-23T17:51:41.5377839Z Submodule path 'provisioning_client/deps/utpm/deps/c-utility/deps/umock-c/deps/ctest/deps/azure-macro-utils-c': checked out '5926caf4e42e98e730e6d03395788205649a3ada'
+2026-04-23T17:51:41.5544994Z Submodule path 'provisioning_client/deps/utpm/deps/c-utility/deps/umock-c/deps/testrunner': checked out '8734bd6c53c88dd6c0cea8e87d70b9964726484a'
+2026-04-23T17:51:41.5564527Z Submodule 'deps/azure-macro-utils-c' (https://github.com/Azure/azure-macro-utils-c) registered for path 'provisioning_client/deps/utpm/deps/c-utility/deps/umock-c/deps/testrunner/deps/azure-macro-utils-c'
+2026-04-23T17:51:41.5594736Z Cloning into '/home/vsts/work/1/s/provisioning_client/deps/utpm/deps/c-utility/deps/umock-c/deps/testrunner/deps/azure-macro-utils-c'...
+2026-04-23T17:51:42.3187036Z Submodule path 'provisioning_client/deps/utpm/deps/c-utility/deps/umock-c/deps/testrunner/deps/azure-macro-utils-c': checked out '5926caf4e42e98e730e6d03395788205649a3ada'
+2026-04-23T17:51:42.3424819Z Submodule path 'provisioning_client/deps/utpm/deps/c-utility/testtools/ctest': checked out '4aa84c45236ecda21983fb682f542f17d0b21e19'
+2026-04-23T17:51:42.3447387Z Submodule 'deps/azure-macro-utils-c' (https://github.com/Azure/azure-macro-utils-c.git) registered for path 'provisioning_client/deps/utpm/deps/c-utility/testtools/ctest/deps/azure-macro-utils-c'
+2026-04-23T17:51:42.3487687Z Cloning into '/home/vsts/work/1/s/provisioning_client/deps/utpm/deps/c-utility/testtools/ctest/deps/azure-macro-utils-c'...
+2026-04-23T17:51:43.1123098Z Submodule path 'provisioning_client/deps/utpm/deps/c-utility/testtools/ctest/deps/azure-macro-utils-c': checked out '5926caf4e42e98e730e6d03395788205649a3ada'
+2026-04-23T17:51:43.1287743Z Submodule path 'provisioning_client/deps/utpm/deps/c-utility/testtools/testrunner': checked out '8734bd6c53c88dd6c0cea8e87d70b9964726484a'
+2026-04-23T17:51:43.1308446Z Submodule 'deps/azure-macro-utils-c' (https://github.com/Azure/azure-macro-utils-c) registered for path 'provisioning_client/deps/utpm/deps/c-utility/testtools/testrunner/deps/azure-macro-utils-c'
+2026-04-23T17:51:43.1340809Z Cloning into '/home/vsts/work/1/s/provisioning_client/deps/utpm/deps/c-utility/testtools/testrunner/deps/azure-macro-utils-c'...
+2026-04-23T17:51:43.8969217Z Submodule path 'provisioning_client/deps/utpm/deps/c-utility/testtools/testrunner/deps/azure-macro-utils-c': checked out '5926caf4e42e98e730e6d03395788205649a3ada'
+2026-04-23T17:51:43.9264328Z Submodule path 'provisioning_client/deps/utpm/deps/umock-c': checked out '504193e65d1c2f6eb50c15357167600a296df7ff'
+2026-04-23T17:51:43.9285343Z Submodule 'deps/azure-macro-utils-c' (https://github.com/Azure/azure-macro-utils-c.git) registered for path 'provisioning_client/deps/utpm/deps/umock-c/deps/azure-macro-utils-c'
+2026-04-23T17:51:43.9290792Z Submodule 'deps/azure-ctest' (https://github.com/Azure/azure-ctest.git) registered for path 'provisioning_client/deps/utpm/deps/umock-c/deps/ctest'
+2026-04-23T17:51:43.9297021Z Submodule 'deps/testrunner' (https://github.com/Azure/azure-c-testrunnerswitcher.git) registered for path 'provisioning_client/deps/utpm/deps/umock-c/deps/testrunner'
+2026-04-23T17:51:43.9326896Z Cloning into '/home/vsts/work/1/s/provisioning_client/deps/utpm/deps/umock-c/deps/azure-macro-utils-c'...
+2026-04-23T17:51:44.6185284Z Cloning into '/home/vsts/work/1/s/provisioning_client/deps/utpm/deps/umock-c/deps/ctest'...
+2026-04-23T17:51:45.3958533Z Cloning into '/home/vsts/work/1/s/provisioning_client/deps/utpm/deps/umock-c/deps/testrunner'...
+2026-04-23T17:51:46.1281624Z Submodule path 'provisioning_client/deps/utpm/deps/umock-c/deps/azure-macro-utils-c': checked out '5926caf4e42e98e730e6d03395788205649a3ada'
+2026-04-23T17:51:46.1503786Z Submodule path 'provisioning_client/deps/utpm/deps/umock-c/deps/ctest': checked out '4aa84c45236ecda21983fb682f542f17d0b21e19'
+2026-04-23T17:51:46.1528596Z Submodule 'deps/azure-macro-utils-c' (https://github.com/Azure/azure-macro-utils-c.git) registered for path 'provisioning_client/deps/utpm/deps/umock-c/deps/ctest/deps/azure-macro-utils-c'
+2026-04-23T17:51:46.1560410Z Cloning into '/home/vsts/work/1/s/provisioning_client/deps/utpm/deps/umock-c/deps/ctest/deps/azure-macro-utils-c'...
+2026-04-23T17:51:46.8988074Z Submodule path 'provisioning_client/deps/utpm/deps/umock-c/deps/ctest/deps/azure-macro-utils-c': checked out '5926caf4e42e98e730e6d03395788205649a3ada'
+2026-04-23T17:51:46.9157060Z Submodule path 'provisioning_client/deps/utpm/deps/umock-c/deps/testrunner': checked out '8734bd6c53c88dd6c0cea8e87d70b9964726484a'
+2026-04-23T17:51:46.9176675Z Submodule 'deps/azure-macro-utils-c' (https://github.com/Azure/azure-macro-utils-c) registered for path 'provisioning_client/deps/utpm/deps/umock-c/deps/testrunner/deps/azure-macro-utils-c'
+2026-04-23T17:51:46.9206619Z Cloning into '/home/vsts/work/1/s/provisioning_client/deps/utpm/deps/umock-c/deps/testrunner/deps/azure-macro-utils-c'...
+2026-04-23T17:51:47.6297341Z Submodule path 'provisioning_client/deps/utpm/deps/umock-c/deps/testrunner/deps/azure-macro-utils-c': checked out '5926caf4e42e98e730e6d03395788205649a3ada'
+2026-04-23T17:51:47.6666182Z Submodule path 'uamqp': checked out '6bb9accbbc036ed5ef1df7467760762c99a7094b'
+2026-04-23T17:51:47.6685417Z Submodule 'deps/azure-c-shared-utility' (https://github.com/Azure/azure-c-shared-utility) registered for path 'uamqp/deps/azure-c-shared-utility'
+2026-04-23T17:51:47.6689930Z Submodule 'deps/azure-c-testrunnerswitcher' (https://github.com/Azure/azure-c-testrunnerswitcher) registered for path 'uamqp/deps/azure-c-testrunnerswitcher'
+2026-04-23T17:51:47.6697097Z Submodule 'deps/azure-ctest' (https://github.com/Azure/azure-ctest) registered for path 'uamqp/deps/azure-ctest'
+2026-04-23T17:51:47.6706610Z Submodule 'deps/azure-macro-utils-c' (https://github.com/Azure/azure-macro-utils-c.git) registered for path 'uamqp/deps/azure-macro-utils-c'
+2026-04-23T17:51:47.6707826Z Submodule 'deps/umock-c' (https://github.com/Azure/umock-c) registered for path 'uamqp/deps/umock-c'
+2026-04-23T17:51:47.6736166Z Cloning into '/home/vsts/work/1/s/uamqp/deps/azure-c-shared-utility'...
+2026-04-23T17:51:49.1365242Z Cloning into '/home/vsts/work/1/s/uamqp/deps/azure-c-testrunnerswitcher'...
+2026-04-23T17:51:49.9024459Z Cloning into '/home/vsts/work/1/s/uamqp/deps/azure-ctest'...
+2026-04-23T17:51:50.6597846Z Cloning into '/home/vsts/work/1/s/uamqp/deps/azure-macro-utils-c'...
+2026-04-23T17:51:51.3577133Z Cloning into '/home/vsts/work/1/s/uamqp/deps/umock-c'...
+2026-04-23T17:51:52.2166391Z Submodule path 'uamqp/deps/azure-c-shared-utility': checked out '772a4f8bc338140b4a0f404cf9c344283c5c937f'
+2026-04-23T17:51:52.2189669Z Submodule 'deps/azure-macro-utils-c' (https://github.com/Azure/azure-macro-utils-c.git) registered for path 'uamqp/deps/azure-c-shared-utility/deps/azure-macro-utils-c'
+2026-04-23T17:51:52.2193590Z Submodule 'deps/umock-c' (https://github.com/Azure/umock-c.git) registered for path 'uamqp/deps/azure-c-shared-utility/deps/umock-c'
+2026-04-23T17:51:52.2204564Z Submodule 'testtools/ctest' (https://github.com/Azure/azure-ctest.git) registered for path 'uamqp/deps/azure-c-shared-utility/testtools/ctest'
+2026-04-23T17:51:52.2206307Z Submodule 'testtools/testrunner' (https://github.com/Azure/azure-c-testrunnerswitcher.git) registered for path 'uamqp/deps/azure-c-shared-utility/testtools/testrunner'
+2026-04-23T17:51:52.2235156Z Cloning into '/home/vsts/work/1/s/uamqp/deps/azure-c-shared-utility/deps/azure-macro-utils-c'...
+2026-04-23T17:51:52.9857306Z Cloning into '/home/vsts/work/1/s/uamqp/deps/azure-c-shared-utility/deps/umock-c'...
+2026-04-23T17:51:53.9227483Z Cloning into '/home/vsts/work/1/s/uamqp/deps/azure-c-shared-utility/testtools/ctest'...
+2026-04-23T17:51:54.5767981Z Cloning into '/home/vsts/work/1/s/uamqp/deps/azure-c-shared-utility/testtools/testrunner'...
+2026-04-23T17:51:55.4304346Z Submodule path 'uamqp/deps/azure-c-shared-utility/deps/azure-macro-utils-c': checked out '5926caf4e42e98e730e6d03395788205649a3ada'
+2026-04-23T17:51:55.4593996Z Submodule path 'uamqp/deps/azure-c-shared-utility/deps/umock-c': checked out '504193e65d1c2f6eb50c15357167600a296df7ff'
+2026-04-23T17:51:55.4615759Z Submodule 'deps/azure-macro-utils-c' (https://github.com/Azure/azure-macro-utils-c.git) registered for path 'uamqp/deps/azure-c-shared-utility/deps/umock-c/deps/azure-macro-utils-c'
+2026-04-23T17:51:55.4620649Z Submodule 'deps/azure-ctest' (https://github.com/Azure/azure-ctest.git) registered for path 'uamqp/deps/azure-c-shared-utility/deps/umock-c/deps/ctest'
+2026-04-23T17:51:55.4626263Z Submodule 'deps/testrunner' (https://github.com/Azure/azure-c-testrunnerswitcher.git) registered for path 'uamqp/deps/azure-c-shared-utility/deps/umock-c/deps/testrunner'
+2026-04-23T17:51:55.4657105Z Cloning into '/home/vsts/work/1/s/uamqp/deps/azure-c-shared-utility/deps/umock-c/deps/azure-macro-utils-c'...
+2026-04-23T17:51:56.1768238Z Cloning into '/home/vsts/work/1/s/uamqp/deps/azure-c-shared-utility/deps/umock-c/deps/ctest'...
+2026-04-23T17:51:56.8359584Z Cloning into '/home/vsts/work/1/s/uamqp/deps/azure-c-shared-utility/deps/umock-c/deps/testrunner'...
+2026-04-23T17:51:57.6127479Z Submodule path 'uamqp/deps/azure-c-shared-utility/deps/umock-c/deps/azure-macro-utils-c': checked out '5926caf4e42e98e730e6d03395788205649a3ada'
+2026-04-23T17:51:57.6349424Z Submodule path 'uamqp/deps/azure-c-shared-utility/deps/umock-c/deps/ctest': checked out '4aa84c45236ecda21983fb682f542f17d0b21e19'
+2026-04-23T17:51:57.6364392Z Submodule 'deps/azure-macro-utils-c' (https://github.com/Azure/azure-macro-utils-c.git) registered for path 'uamqp/deps/azure-c-shared-utility/deps/umock-c/deps/ctest/deps/azure-macro-utils-c'
+2026-04-23T17:51:57.6416728Z Cloning into '/home/vsts/work/1/s/uamqp/deps/azure-c-shared-utility/deps/umock-c/deps/ctest/deps/azure-macro-utils-c'...
+2026-04-23T17:51:58.3166943Z Submodule path 'uamqp/deps/azure-c-shared-utility/deps/umock-c/deps/ctest/deps/azure-macro-utils-c': checked out '5926caf4e42e98e730e6d03395788205649a3ada'
+2026-04-23T17:51:58.3338568Z Submodule path 'uamqp/deps/azure-c-shared-utility/deps/umock-c/deps/testrunner': checked out '8734bd6c53c88dd6c0cea8e87d70b9964726484a'
+2026-04-23T17:51:58.3391640Z Submodule 'deps/azure-macro-utils-c' (https://github.com/Azure/azure-macro-utils-c) registered for path 'uamqp/deps/azure-c-shared-utility/deps/umock-c/deps/testrunner/deps/azure-macro-utils-c'
+2026-04-23T17:51:58.3421187Z Cloning into '/home/vsts/work/1/s/uamqp/deps/azure-c-shared-utility/deps/umock-c/deps/testrunner/deps/azure-macro-utils-c'...
+2026-04-23T17:51:59.0341976Z Submodule path 'uamqp/deps/azure-c-shared-utility/deps/umock-c/deps/testrunner/deps/azure-macro-utils-c': checked out '5926caf4e42e98e730e6d03395788205649a3ada'
+2026-04-23T17:51:59.0552838Z Submodule path 'uamqp/deps/azure-c-shared-utility/testtools/ctest': checked out '4aa84c45236ecda21983fb682f542f17d0b21e19'
+2026-04-23T17:51:59.0572428Z Submodule 'deps/azure-macro-utils-c' (https://github.com/Azure/azure-macro-utils-c.git) registered for path 'uamqp/deps/azure-c-shared-utility/testtools/ctest/deps/azure-macro-utils-c'
+2026-04-23T17:51:59.0603248Z Cloning into '/home/vsts/work/1/s/uamqp/deps/azure-c-shared-utility/testtools/ctest/deps/azure-macro-utils-c'...
+2026-04-23T17:51:59.8401195Z Submodule path 'uamqp/deps/azure-c-shared-utility/testtools/ctest/deps/azure-macro-utils-c': checked out '5926caf4e42e98e730e6d03395788205649a3ada'
+2026-04-23T17:51:59.8571573Z Submodule path 'uamqp/deps/azure-c-shared-utility/testtools/testrunner': checked out '8734bd6c53c88dd6c0cea8e87d70b9964726484a'
+2026-04-23T17:51:59.8592393Z Submodule 'deps/azure-macro-utils-c' (https://github.com/Azure/azure-macro-utils-c) registered for path 'uamqp/deps/azure-c-shared-utility/testtools/testrunner/deps/azure-macro-utils-c'
+2026-04-23T17:51:59.8622779Z Cloning into '/home/vsts/work/1/s/uamqp/deps/azure-c-shared-utility/testtools/testrunner/deps/azure-macro-utils-c'...
+2026-04-23T17:52:00.6545764Z Submodule path 'uamqp/deps/azure-c-shared-utility/testtools/testrunner/deps/azure-macro-utils-c': checked out '5926caf4e42e98e730e6d03395788205649a3ada'
+2026-04-23T17:52:00.6707604Z Submodule path 'uamqp/deps/azure-c-testrunnerswitcher': checked out '8734bd6c53c88dd6c0cea8e87d70b9964726484a'
+2026-04-23T17:52:00.6728237Z Submodule 'deps/azure-macro-utils-c' (https://github.com/Azure/azure-macro-utils-c) registered for path 'uamqp/deps/azure-c-testrunnerswitcher/deps/azure-macro-utils-c'
+2026-04-23T17:52:00.6759656Z Cloning into '/home/vsts/work/1/s/uamqp/deps/azure-c-testrunnerswitcher/deps/azure-macro-utils-c'...
+2026-04-23T17:52:01.3770627Z Submodule path 'uamqp/deps/azure-c-testrunnerswitcher/deps/azure-macro-utils-c': checked out '5926caf4e42e98e730e6d03395788205649a3ada'
+2026-04-23T17:52:01.3994610Z Submodule path 'uamqp/deps/azure-ctest': checked out '4aa84c45236ecda21983fb682f542f17d0b21e19'
+2026-04-23T17:52:01.4015576Z Submodule 'deps/azure-macro-utils-c' (https://github.com/Azure/azure-macro-utils-c.git) registered for path 'uamqp/deps/azure-ctest/deps/azure-macro-utils-c'
+2026-04-23T17:52:01.4049834Z Cloning into '/home/vsts/work/1/s/uamqp/deps/azure-ctest/deps/azure-macro-utils-c'...
+2026-04-23T17:52:02.1741190Z Submodule path 'uamqp/deps/azure-ctest/deps/azure-macro-utils-c': checked out '5926caf4e42e98e730e6d03395788205649a3ada'
+2026-04-23T17:52:02.1932325Z Submodule path 'uamqp/deps/azure-macro-utils-c': checked out '5926caf4e42e98e730e6d03395788205649a3ada'
+2026-04-23T17:52:02.2246495Z Submodule path 'uamqp/deps/umock-c': checked out '504193e65d1c2f6eb50c15357167600a296df7ff'
+2026-04-23T17:52:02.2267982Z Submodule 'deps/azure-macro-utils-c' (https://github.com/Azure/azure-macro-utils-c.git) registered for path 'uamqp/deps/umock-c/deps/azure-macro-utils-c'
+2026-04-23T17:52:02.2272489Z Submodule 'deps/azure-ctest' (https://github.com/Azure/azure-ctest.git) registered for path 'uamqp/deps/umock-c/deps/ctest'
+2026-04-23T17:52:02.2281139Z Submodule 'deps/testrunner' (https://github.com/Azure/azure-c-testrunnerswitcher.git) registered for path 'uamqp/deps/umock-c/deps/testrunner'
+2026-04-23T17:52:02.2310475Z Cloning into '/home/vsts/work/1/s/uamqp/deps/umock-c/deps/azure-macro-utils-c'...
+2026-04-23T17:52:02.9277244Z Cloning into '/home/vsts/work/1/s/uamqp/deps/umock-c/deps/ctest'...
+2026-04-23T17:52:03.6978854Z Cloning into '/home/vsts/work/1/s/uamqp/deps/umock-c/deps/testrunner'...
+2026-04-23T17:52:04.5066379Z Submodule path 'uamqp/deps/umock-c/deps/azure-macro-utils-c': checked out '5926caf4e42e98e730e6d03395788205649a3ada'
+2026-04-23T17:52:04.5284953Z Submodule path 'uamqp/deps/umock-c/deps/ctest': checked out '4aa84c45236ecda21983fb682f542f17d0b21e19'
+2026-04-23T17:52:04.5304627Z Submodule 'deps/azure-macro-utils-c' (https://github.com/Azure/azure-macro-utils-c.git) registered for path 'uamqp/deps/umock-c/deps/ctest/deps/azure-macro-utils-c'
+2026-04-23T17:52:04.5333852Z Cloning into '/home/vsts/work/1/s/uamqp/deps/umock-c/deps/ctest/deps/azure-macro-utils-c'...
+2026-04-23T17:52:05.2014806Z Submodule path 'uamqp/deps/umock-c/deps/ctest/deps/azure-macro-utils-c': checked out '5926caf4e42e98e730e6d03395788205649a3ada'
+2026-04-23T17:52:05.2185183Z Submodule path 'uamqp/deps/umock-c/deps/testrunner': checked out '8734bd6c53c88dd6c0cea8e87d70b9964726484a'
+2026-04-23T17:52:05.2202594Z Submodule 'deps/azure-macro-utils-c' (https://github.com/Azure/azure-macro-utils-c) registered for path 'uamqp/deps/umock-c/deps/testrunner/deps/azure-macro-utils-c'
+2026-04-23T17:52:05.2232642Z Cloning into '/home/vsts/work/1/s/uamqp/deps/umock-c/deps/testrunner/deps/azure-macro-utils-c'...
+2026-04-23T17:52:05.9248455Z Submodule path 'uamqp/deps/umock-c/deps/testrunner/deps/azure-macro-utils-c': checked out '5926caf4e42e98e730e6d03395788205649a3ada'
+2026-04-23T17:52:05.9412746Z Submodule path 'umqtt': checked out 'd08d530fc3ae3f60d3f750fab6629a5b7839f754'
+2026-04-23T17:52:05.9433008Z Submodule 'deps/azure-macro-utils-c' (https://github.com/Azure/azure-macro-utils-c.git) registered for path 'umqtt/deps/azure-macro-utils-c'
+2026-04-23T17:52:05.9441942Z Submodule 'deps/c-utility' (https://github.com/Azure/azure-c-shared-utility.git) registered for path 'umqtt/deps/c-utility'
+2026-04-23T17:52:05.9443655Z Submodule 'deps/ctest' (https://github.com/Azure/azure-ctest.git) registered for path 'umqtt/deps/ctest'
+2026-04-23T17:52:05.9449730Z Submodule 'deps/testrunnerswitcher' (https://github.com/Azure/azure-c-testrunnerswitcher.git) registered for path 'umqtt/deps/testrunnerswitcher'
+2026-04-23T17:52:05.9457123Z Submodule 'deps/umock-c' (https://github.com/Azure/umock-c.git) registered for path 'umqtt/deps/umock-c'
+2026-04-23T17:52:05.9486998Z Cloning into '/home/vsts/work/1/s/umqtt/deps/azure-macro-utils-c'...
+2026-04-23T17:52:07.1371729Z Cloning into '/home/vsts/work/1/s/umqtt/deps/c-utility'...
+2026-04-23T17:52:08.1408817Z Cloning into '/home/vsts/work/1/s/umqtt/deps/ctest'...
+2026-04-23T17:52:08.9418753Z Cloning into '/home/vsts/work/1/s/umqtt/deps/testrunnerswitcher'...
+2026-04-23T17:52:10.1391722Z Cloning into '/home/vsts/work/1/s/umqtt/deps/umock-c'...
+2026-04-23T17:52:10.6105307Z Submodule path 'umqtt/deps/azure-macro-utils-c': checked out '5926caf4e42e98e730e6d03395788205649a3ada'
+2026-04-23T17:52:10.6800137Z Submodule path 'umqtt/deps/c-utility': checked out '772a4f8bc338140b4a0f404cf9c344283c5c937f'
+2026-04-23T17:52:10.6821914Z Submodule 'deps/azure-macro-utils-c' (https://github.com/Azure/azure-macro-utils-c.git) registered for path 'umqtt/deps/c-utility/deps/azure-macro-utils-c'
+2026-04-23T17:52:10.6827824Z Submodule 'deps/umock-c' (https://github.com/Azure/umock-c.git) registered for path 'umqtt/deps/c-utility/deps/umock-c'
+2026-04-23T17:52:10.6832610Z Submodule 'testtools/ctest' (https://github.com/Azure/azure-ctest.git) registered for path 'umqtt/deps/c-utility/testtools/ctest'
+2026-04-23T17:52:10.6837657Z Submodule 'testtools/testrunner' (https://github.com/Azure/azure-c-testrunnerswitcher.git) registered for path 'umqtt/deps/c-utility/testtools/testrunner'
+2026-04-23T17:52:10.6867075Z Cloning into '/home/vsts/work/1/s/umqtt/deps/c-utility/deps/azure-macro-utils-c'...
+2026-04-23T17:52:11.4478870Z Cloning into '/home/vsts/work/1/s/umqtt/deps/c-utility/deps/umock-c'...
+2026-04-23T17:52:12.3791746Z Cloning into '/home/vsts/work/1/s/umqtt/deps/c-utility/testtools/ctest'...
+2026-04-23T17:52:13.1258024Z Cloning into '/home/vsts/work/1/s/umqtt/deps/c-utility/testtools/testrunner'...
+2026-04-23T17:52:13.8778265Z Submodule path 'umqtt/deps/c-utility/deps/azure-macro-utils-c': checked out '5926caf4e42e98e730e6d03395788205649a3ada'
+2026-04-23T17:52:13.9066490Z Submodule path 'umqtt/deps/c-utility/deps/umock-c': checked out '504193e65d1c2f6eb50c15357167600a296df7ff'
+2026-04-23T17:52:13.9088328Z Submodule 'deps/azure-macro-utils-c' (https://github.com/Azure/azure-macro-utils-c.git) registered for path 'umqtt/deps/c-utility/deps/umock-c/deps/azure-macro-utils-c'
+2026-04-23T17:52:13.9092744Z Submodule 'deps/azure-ctest' (https://github.com/Azure/azure-ctest.git) registered for path 'umqtt/deps/c-utility/deps/umock-c/deps/ctest'
+2026-04-23T17:52:13.9097996Z Submodule 'deps/testrunner' (https://github.com/Azure/azure-c-testrunnerswitcher.git) registered for path 'umqtt/deps/c-utility/deps/umock-c/deps/testrunner'
+2026-04-23T17:52:13.9128233Z Cloning into '/home/vsts/work/1/s/umqtt/deps/c-utility/deps/umock-c/deps/azure-macro-utils-c'...
+2026-04-23T17:52:14.6283959Z Cloning into '/home/vsts/work/1/s/umqtt/deps/c-utility/deps/umock-c/deps/ctest'...
+2026-04-23T17:52:15.2627422Z Cloning into '/home/vsts/work/1/s/umqtt/deps/c-utility/deps/umock-c/deps/testrunner'...
+2026-04-23T17:52:16.1608909Z Submodule path 'umqtt/deps/c-utility/deps/umock-c/deps/azure-macro-utils-c': checked out '5926caf4e42e98e730e6d03395788205649a3ada'
+2026-04-23T17:52:16.1828945Z Submodule path 'umqtt/deps/c-utility/deps/umock-c/deps/ctest': checked out '4aa84c45236ecda21983fb682f542f17d0b21e19'
+2026-04-23T17:52:16.1851497Z Submodule 'deps/azure-macro-utils-c' (https://github.com/Azure/azure-macro-utils-c.git) registered for path 'umqtt/deps/c-utility/deps/umock-c/deps/ctest/deps/azure-macro-utils-c'
+2026-04-23T17:52:16.1883810Z Cloning into '/home/vsts/work/1/s/umqtt/deps/c-utility/deps/umock-c/deps/ctest/deps/azure-macro-utils-c'...
+2026-04-23T17:52:16.9437418Z Submodule path 'umqtt/deps/c-utility/deps/umock-c/deps/ctest/deps/azure-macro-utils-c': checked out '5926caf4e42e98e730e6d03395788205649a3ada'
+2026-04-23T17:52:16.9601944Z Submodule path 'umqtt/deps/c-utility/deps/umock-c/deps/testrunner': checked out '8734bd6c53c88dd6c0cea8e87d70b9964726484a'
+2026-04-23T17:52:16.9622270Z Submodule 'deps/azure-macro-utils-c' (https://github.com/Azure/azure-macro-utils-c) registered for path 'umqtt/deps/c-utility/deps/umock-c/deps/testrunner/deps/azure-macro-utils-c'
+2026-04-23T17:52:16.9652614Z Cloning into '/home/vsts/work/1/s/umqtt/deps/c-utility/deps/umock-c/deps/testrunner/deps/azure-macro-utils-c'...
+2026-04-23T17:52:17.7166316Z Submodule path 'umqtt/deps/c-utility/deps/umock-c/deps/testrunner/deps/azure-macro-utils-c': checked out '5926caf4e42e98e730e6d03395788205649a3ada'
+2026-04-23T17:52:17.7383117Z Submodule path 'umqtt/deps/c-utility/testtools/ctest': checked out '4aa84c45236ecda21983fb682f542f17d0b21e19'
+2026-04-23T17:52:17.7403720Z Submodule 'deps/azure-macro-utils-c' (https://github.com/Azure/azure-macro-utils-c.git) registered for path 'umqtt/deps/c-utility/testtools/ctest/deps/azure-macro-utils-c'
+2026-04-23T17:52:17.7433761Z Cloning into '/home/vsts/work/1/s/umqtt/deps/c-utility/testtools/ctest/deps/azure-macro-utils-c'...
+2026-04-23T17:52:18.4080168Z Submodule path 'umqtt/deps/c-utility/testtools/ctest/deps/azure-macro-utils-c': checked out '5926caf4e42e98e730e6d03395788205649a3ada'
+2026-04-23T17:52:18.4237935Z Submodule path 'umqtt/deps/c-utility/testtools/testrunner': checked out '8734bd6c53c88dd6c0cea8e87d70b9964726484a'
+2026-04-23T17:52:18.4257463Z Submodule 'deps/azure-macro-utils-c' (https://github.com/Azure/azure-macro-utils-c) registered for path 'umqtt/deps/c-utility/testtools/testrunner/deps/azure-macro-utils-c'
+2026-04-23T17:52:18.4287053Z Cloning into '/home/vsts/work/1/s/umqtt/deps/c-utility/testtools/testrunner/deps/azure-macro-utils-c'...
+2026-04-23T17:52:19.2064414Z Submodule path 'umqtt/deps/c-utility/testtools/testrunner/deps/azure-macro-utils-c': checked out '5926caf4e42e98e730e6d03395788205649a3ada'
+2026-04-23T17:52:19.2277021Z Submodule path 'umqtt/deps/ctest': checked out '4aa84c45236ecda21983fb682f542f17d0b21e19'
+2026-04-23T17:52:19.2297097Z Submodule 'deps/azure-macro-utils-c' (https://github.com/Azure/azure-macro-utils-c.git) registered for path 'umqtt/deps/ctest/deps/azure-macro-utils-c'
+2026-04-23T17:52:19.2325576Z Cloning into '/home/vsts/work/1/s/umqtt/deps/ctest/deps/azure-macro-utils-c'...
+2026-04-23T17:52:19.9485132Z Submodule path 'umqtt/deps/ctest/deps/azure-macro-utils-c': checked out '5926caf4e42e98e730e6d03395788205649a3ada'
+2026-04-23T17:52:19.9650631Z Submodule path 'umqtt/deps/testrunnerswitcher': checked out '8734bd6c53c88dd6c0cea8e87d70b9964726484a'
+2026-04-23T17:52:19.9668044Z Submodule 'deps/azure-macro-utils-c' (https://github.com/Azure/azure-macro-utils-c) registered for path 'umqtt/deps/testrunnerswitcher/deps/azure-macro-utils-c'
+2026-04-23T17:52:19.9698294Z Cloning into '/home/vsts/work/1/s/umqtt/deps/testrunnerswitcher/deps/azure-macro-utils-c'...
+2026-04-23T17:52:20.7478866Z Submodule path 'umqtt/deps/testrunnerswitcher/deps/azure-macro-utils-c': checked out '5926caf4e42e98e730e6d03395788205649a3ada'
+2026-04-23T17:52:20.7769249Z Submodule path 'umqtt/deps/umock-c': checked out '504193e65d1c2f6eb50c15357167600a296df7ff'
+2026-04-23T17:52:20.7792216Z Submodule 'deps/azure-macro-utils-c' (https://github.com/Azure/azure-macro-utils-c.git) registered for path 'umqtt/deps/umock-c/deps/azure-macro-utils-c'
+2026-04-23T17:52:20.7796734Z Submodule 'deps/azure-ctest' (https://github.com/Azure/azure-ctest.git) registered for path 'umqtt/deps/umock-c/deps/ctest'
+2026-04-23T17:52:20.7801724Z Submodule 'deps/testrunner' (https://github.com/Azure/azure-c-testrunnerswitcher.git) registered for path 'umqtt/deps/umock-c/deps/testrunner'
+2026-04-23T17:52:20.7833086Z Cloning into '/home/vsts/work/1/s/umqtt/deps/umock-c/deps/azure-macro-utils-c'...
+2026-04-23T17:52:21.5217470Z Cloning into '/home/vsts/work/1/s/umqtt/deps/umock-c/deps/ctest'...
+2026-04-23T17:52:22.2057649Z Cloning into '/home/vsts/work/1/s/umqtt/deps/umock-c/deps/testrunner'...
+2026-04-23T17:52:22.8926471Z Submodule path 'umqtt/deps/umock-c/deps/azure-macro-utils-c': checked out '5926caf4e42e98e730e6d03395788205649a3ada'
+2026-04-23T17:52:22.9149482Z Submodule path 'umqtt/deps/umock-c/deps/ctest': checked out '4aa84c45236ecda21983fb682f542f17d0b21e19'
+2026-04-23T17:52:22.9195826Z Submodule 'deps/azure-macro-utils-c' (https://github.com/Azure/azure-macro-utils-c.git) registered for path 'umqtt/deps/umock-c/deps/ctest/deps/azure-macro-utils-c'
+2026-04-23T17:52:22.9211037Z Cloning into '/home/vsts/work/1/s/umqtt/deps/umock-c/deps/ctest/deps/azure-macro-utils-c'...
+2026-04-23T17:52:23.7384089Z Submodule path 'umqtt/deps/umock-c/deps/ctest/deps/azure-macro-utils-c': checked out '5926caf4e42e98e730e6d03395788205649a3ada'
+2026-04-23T17:52:23.7548556Z Submodule path 'umqtt/deps/umock-c/deps/testrunner': checked out '8734bd6c53c88dd6c0cea8e87d70b9964726484a'
+2026-04-23T17:52:23.7569392Z Submodule 'deps/azure-macro-utils-c' (https://github.com/Azure/azure-macro-utils-c) registered for path 'umqtt/deps/umock-c/deps/testrunner/deps/azure-macro-utils-c'
+2026-04-23T17:52:23.7598952Z Cloning into '/home/vsts/work/1/s/umqtt/deps/umock-c/deps/testrunner/deps/azure-macro-utils-c'...
+2026-04-23T17:52:24.5052838Z Submodule path 'umqtt/deps/umock-c/deps/testrunner/deps/azure-macro-utils-c': checked out '5926caf4e42e98e730e6d03395788205649a3ada'
+2026-04-23T17:52:24.5188888Z ##[section]Finishing: Checkout Azure/azure-iot-sdk-c@ewertons/pipelinefixes to s
+2026-04-23T17:52:24.5228035Z ##[section]Starting: Secure Supply Chain Analysis (auto-injected by policy)
+2026-04-23T17:52:24.5234166Z ==============================================================================
+2026-04-23T17:52:24.5234450Z Task         : Secure Supply Chain Analysis
+2026-04-23T17:52:24.5234735Z Description  : A task to scan for vulnerabilities in your software supply chain. Formerly "NuGet Security Analysis".
+2026-04-23T17:52:24.5235023Z Version      : 0.2.216
+2026-04-23T17:52:24.5235245Z Author       : Microsoft Corporation
+2026-04-23T17:52:24.5235482Z Help         : See https://aka.ms/sscatask for more information.
+2026-04-23T17:52:24.5235705Z ==============================================================================
+2026-04-23T17:52:24.8982308Z Telemetry ID: 39954a9f-6403-4ea7-ae49-7078873068d8
+2026-04-23T17:52:24.9018247Z For more information please visit: https://aka.ms/sscatask
+2026-04-23T17:52:25.1346523Z Scanning repository contents at source path: /home/vsts/work/1/s
+2026-04-23T17:52:25.1348941Z > Starting Multifeed Nuget Security Analysis:
+2026-04-23T17:52:25.1471399Z > Starting Multifeed Corext Analysis:
+2026-04-23T17:52:25.1590315Z > Starting Multifeed Python Security Analysis:
+2026-04-23T17:52:25.1798338Z > Starting CFS NuGet Analysis:
+2026-04-23T17:52:25.2294993Z ##[warning]tools/traceabilitytool/traceability_tool/traceabilitytool.csproj - CFS0011: Missing in scope NuGet.config file(s). (https://aka.ms/cfs/nuget)
+2026-04-23T17:52:25.2301658Z > Starting CFS NPM Analysis:
+2026-04-23T17:52:25.2701092Z > Starting CFS Maven Analysis:
+2026-04-23T17:52:25.2800002Z > Starting CFS Cargo Analysis:
+2026-04-23T17:52:25.2995132Z > Starting CFS CoreXT Analysis:
+2026-04-23T17:52:25.3093849Z > Starting CFS CDPx Analysis:
+2026-04-23T17:52:25.3261518Z > Starting Kubernetes Deployment File Analysis:
+2026-04-23T17:52:25.3608487Z > Starting Helm Charts Analysis:
+2026-04-23T17:52:25.3703993Z > Starting Pipeline Configuration Security Analysis:
+2026-04-23T17:52:25.3984185Z Azure Artifacts Configuration Analysis found 1 package configuration file in the repository which do not comply with Microsoft package feed security policies. The specific problems and links to their mitigations are listed above. If you need further assistance, please visit https://aka.ms/cfs/detectors .
+2026-04-23T17:52:27.4096580Z ##[section]Finishing: Secure Supply Chain Analysis (auto-injected by policy)
+2026-04-23T17:52:27.4134330Z ##[section]Starting: Setup
+2026-04-23T17:52:27.4141161Z ==============================================================================
+2026-04-23T17:52:27.4141453Z Task         : Command line
+2026-04-23T17:52:27.4141734Z Description  : Run a command line script using Bash on Linux and macOS and cmd.exe on Windows
+2026-04-23T17:52:27.4142018Z Version      : 2.268.0
+2026-04-23T17:52:27.4142260Z Author       : Microsoft Corporation
+2026-04-23T17:52:27.4142497Z Help         : https://docs.microsoft.com/azure/devops/pipelines/tasks/utility/command-line
+2026-04-23T17:52:27.4142888Z ==============================================================================
+2026-04-23T17:52:27.5226884Z Generating script.
+2026-04-23T17:52:27.5241428Z ========================== Starting Command Output ===========================
+2026-04-23T17:52:27.5245785Z [command]/usr/bin/bash --noprofile --norc /home/vsts/work/_temp/b9de452d-5bb9-47c6-9aaa-a996ac651063.sh
+2026-04-23T17:52:27.7309082Z Get:1 file:/etc/apt/apt-mirrors.txt Mirrorlist [144 B]
+2026-04-23T17:52:27.8713369Z Hit:2 http://azure.archive.ubuntu.com/ubuntu noble InRelease
+2026-04-23T17:52:27.8783758Z Hit:6 https://packages.microsoft.com/repos/azure-cli noble InRelease
+2026-04-23T17:52:27.8853847Z Get:7 https://packages.microsoft.com/ubuntu/24.04/prod noble InRelease [3600 B]
+2026-04-23T17:52:27.8886240Z Get:3 http://azure.archive.ubuntu.com/ubuntu noble-updates InRelease [126 kB]
+2026-04-23T17:52:27.8906802Z Get:4 http://azure.archive.ubuntu.com/ubuntu noble-backports InRelease [126 kB]
+2026-04-23T17:52:27.8907774Z Get:5 http://azure.archive.ubuntu.com/ubuntu noble-security InRelease [126 kB]
+2026-04-23T17:52:27.9018808Z Get:8 https://dl.google.com/linux/chrome-stable/deb stable InRelease [1825 B]
+2026-04-23T17:52:28.2971285Z Get:9 https://packages.microsoft.com/ubuntu/24.04/prod noble/main amd64 Packages [124 kB]
+2026-04-23T17:52:28.3172895Z Get:10 https://packages.microsoft.com/ubuntu/24.04/prod noble/main armhf Packages [11.6 kB]
+2026-04-23T17:52:28.3219142Z Get:11 https://packages.microsoft.com/ubuntu/24.04/prod noble/main arm64 Packages [100 kB]
+2026-04-23T17:52:28.3922731Z Get:12 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 Packages [1918 kB]
+2026-04-23T17:52:28.4146915Z Get:13 http://azure.archive.ubuntu.com/ubuntu noble-updates/main Translation-en [345 kB]
+2026-04-23T17:52:28.4233927Z Get:14 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 Components [177 kB]
+2026-04-23T17:52:28.4297780Z Get:15 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 c-n-f Metadata [17.1 kB]
+2026-04-23T17:52:28.4317011Z Get:16 http://azure.archive.ubuntu.com/ubuntu noble-updates/universe amd64 Packages [1685 kB]
+2026-04-23T17:52:28.4539713Z Get:17 http://azure.archive.ubuntu.com/ubuntu noble-updates/universe Translation-en [324 kB]
+2026-04-23T17:52:28.4610428Z Get:18 http://azure.archive.ubuntu.com/ubuntu noble-updates/universe amd64 Components [387 kB]
+2026-04-23T17:52:28.4689770Z Get:19 http://azure.archive.ubuntu.com/ubuntu noble-updates/universe amd64 c-n-f Metadata [34.5 kB]
+2026-04-23T17:52:28.4739394Z Get:20 http://azure.archive.ubuntu.com/ubuntu noble-updates/restricted amd64 Packages [2981 kB]
+2026-04-23T17:52:28.5102920Z Get:21 http://azure.archive.ubuntu.com/ubuntu noble-updates/restricted Translation-en [697 kB]
+2026-04-23T17:52:28.5867582Z Get:22 http://azure.archive.ubuntu.com/ubuntu noble-updates/restricted amd64 Components [212 B]
+2026-04-23T17:52:28.5901407Z Get:23 http://azure.archive.ubuntu.com/ubuntu noble-updates/multiverse amd64 Packages [32.5 kB]
+2026-04-23T17:52:28.5940620Z Get:24 http://azure.archive.ubuntu.com/ubuntu noble-updates/multiverse Translation-en [8180 B]
+2026-04-23T17:52:28.5962114Z Get:25 http://azure.archive.ubuntu.com/ubuntu noble-updates/multiverse amd64 Components [940 B]
+2026-04-23T17:52:28.5988828Z Get:26 http://azure.archive.ubuntu.com/ubuntu noble-updates/multiverse amd64 c-n-f Metadata [512 B]
+2026-04-23T17:52:28.6014644Z Get:27 http://azure.archive.ubuntu.com/ubuntu noble-backports/main amd64 Packages [40.6 kB]
+2026-04-23T17:52:28.6041269Z Get:28 http://azure.archive.ubuntu.com/ubuntu noble-backports/main Translation-en [9172 B]
+2026-04-23T17:52:28.6070914Z Get:29 http://azure.archive.ubuntu.com/ubuntu noble-backports/main amd64 Components [7368 B]
+2026-04-23T17:52:28.6082354Z Get:30 http://azure.archive.ubuntu.com/ubuntu noble-backports/universe amd64 Packages [30.6 kB]
+2026-04-23T17:52:28.6096884Z Get:31 http://azure.archive.ubuntu.com/ubuntu noble-backports/universe Translation-en [18.2 kB]
+2026-04-23T17:52:28.6126617Z Get:32 http://azure.archive.ubuntu.com/ubuntu noble-backports/universe amd64 Components [10.5 kB]
+2026-04-23T17:52:28.6149586Z Get:33 http://azure.archive.ubuntu.com/ubuntu noble-backports/universe amd64 c-n-f Metadata [1484 B]
+2026-04-23T17:52:28.6153261Z Get:34 http://azure.archive.ubuntu.com/ubuntu noble-backports/restricted amd64 Components [212 B]
+2026-04-23T17:52:28.6200685Z Get:35 http://azure.archive.ubuntu.com/ubuntu noble-backports/multiverse amd64 Packages [748 B]
+2026-04-23T17:52:28.6537052Z Get:36 http://azure.archive.ubuntu.com/ubuntu noble-backports/multiverse amd64 Components [212 B]
+2026-04-23T17:52:28.6554621Z Get:37 http://azure.archive.ubuntu.com/ubuntu noble-security/main amd64 Packages [1620 kB]
+2026-04-23T17:52:28.6776824Z Get:38 http://azure.archive.ubuntu.com/ubuntu noble-security/main Translation-en [259 kB]
+2026-04-23T17:52:28.6836727Z Get:39 http://azure.archive.ubuntu.com/ubuntu noble-security/main amd64 Components [21.9 kB]
+2026-04-23T17:52:28.6856716Z Get:40 http://azure.archive.ubuntu.com/ubuntu noble-security/main amd64 c-n-f Metadata [11.0 kB]
+2026-04-23T17:52:28.6896848Z Get:41 http://azure.archive.ubuntu.com/ubuntu noble-security/universe amd64 Packages [1182 kB]
+2026-04-23T17:52:28.6955193Z Get:42 http://azure.archive.ubuntu.com/ubuntu noble-security/universe Translation-en [227 kB]
+2026-04-23T17:52:28.6986976Z Get:43 http://azure.archive.ubuntu.com/ubuntu noble-security/universe amd64 Components [74.2 kB]
+2026-04-23T17:52:28.7012904Z Get:44 http://azure.archive.ubuntu.com/ubuntu noble-security/universe amd64 c-n-f Metadata [23.1 kB]
+2026-04-23T17:52:28.7050917Z Get:45 http://azure.archive.ubuntu.com/ubuntu noble-security/restricted amd64 Packages [2833 kB]
+2026-04-23T17:52:28.7297100Z Get:46 http://azure.archive.ubuntu.com/ubuntu noble-security/restricted Translation-en [666 kB]
+2026-04-23T17:52:28.7334654Z Get:47 http://azure.archive.ubuntu.com/ubuntu noble-security/restricted amd64 Components [212 B]
+2026-04-23T17:52:28.7367598Z Get:48 http://azure.archive.ubuntu.com/ubuntu noble-security/multiverse amd64 Packages [28.8 kB]
+2026-04-23T17:52:28.7378554Z Get:49 http://azure.archive.ubuntu.com/ubuntu noble-security/multiverse Translation-en [7172 B]
+2026-04-23T17:52:28.7407321Z Get:50 http://azure.archive.ubuntu.com/ubuntu noble-security/multiverse amd64 Components [208 B]
+2026-04-23T17:52:28.7907707Z Get:51 https://dl.google.com/linux/chrome-stable/deb stable/main amd64 Packages [1218 B]
+2026-04-23T17:52:40.2112459Z Fetched 16.3 MB in 2s (6580 kB/s)
+2026-04-23T17:52:41.0433110Z Reading package lists...
+2026-04-23T17:52:41.0617943Z E: Could not open lock file /var/lib/dpkg/lock-frontend - open (13: Permission denied)
+2026-04-23T17:52:41.0620606Z E: Unable to acquire the dpkg frontend lock (/var/lib/dpkg/lock-frontend), are you root?
+2026-04-23T17:52:41.1268162Z 
+2026-04-23T17:52:41.1269772Z ================================================================================
+2026-04-23T17:52:41.1276154Z ================================================================================
+2026-04-23T17:52:41.1276941Z 
+2026-04-23T17:52:41.1277765Z                               DEPRECATION WARNING                            
+2026-04-23T17:52:41.1278271Z 
+2026-04-23T17:52:41.1278884Z      Node.js 16.x is no longer actively supported!
+2026-04-23T17:52:41.1279434Z 
+2026-04-23T17:52:41.1280013Z   You will not receive security or critical stability updates for this version.
+2026-04-23T17:52:41.1280361Z 
+2026-04-23T17:52:41.1281114Z   You should migrate to a supported version of Node.js as soon as possible.
+2026-04-23T17:52:41.1281777Z   Use the installation script that corresponds to the version of Node.js you
+2026-04-23T17:52:41.1282329Z   wish to install. e.g.
+2026-04-23T17:52:41.1282800Z   
+2026-04-23T17:52:41.1363228Z    * https://deb.nodesource.com/setup_16.x — Node.js 16 "Gallium" (deprecated)
+2026-04-23T17:52:41.1363905Z    * https://deb.nodesource.com/setup_18.x — Node.js 18 "Hydrogen" (Maintenance)
+2026-04-23T17:52:41.1364434Z    * https://deb.nodesource.com/setup_19.x — Node.js 19 "Nineteen" (deprecated)
+2026-04-23T17:52:41.1365137Z    * https://deb.nodesource.com/setup_20.x — Node.js 20 LTS "Iron" (recommended)
+2026-04-23T17:52:41.1365683Z    * https://deb.nodesource.com/setup_21.x — Node.js 21 "Iron" (current)
+2026-04-23T17:52:41.1366341Z    
+2026-04-23T17:52:41.1366558Z 
+2026-04-23T17:52:41.1366813Z 
+2026-04-23T17:52:41.1367422Z   Please see https://github.com/nodejs/Release for details about which
+2026-04-23T17:52:41.1367865Z   version may be appropriate for you.
+2026-04-23T17:52:41.1368052Z 
+2026-04-23T17:52:41.1368644Z   The NodeSource Node.js distributions repository contains
+2026-04-23T17:52:41.1369115Z   information both about supported versions of Node.js and supported Linux
+2026-04-23T17:52:41.1369567Z   distributions. To learn more about usage, see the repository:
+2026-04-23T17:52:41.1369986Z    https://github.com/nodesource/distributions
+2026-04-23T17:52:41.1370208Z 
+2026-04-23T17:52:41.1370780Z ================================================================================
+2026-04-23T17:52:41.1371300Z ================================================================================
+2026-04-23T17:52:41.1371496Z 
+2026-04-23T17:52:41.1372056Z Continuing in 10 seconds ...
+2026-04-23T17:52:41.1372260Z 
+2026-04-23T17:52:51.1558217Z [38;5;79m2026-04-23 17:52:51 - Installing pre-requisites[0m
+2026-04-23T17:52:51.1561653Z 
+2026-04-23T17:52:51.1562493Z WARNING: apt does not have a stable CLI interface. Use with caution in scripts.
+2026-04-23T17:52:51.1562962Z 
+2026-04-23T17:52:51.1563539Z Reading package lists...
+2026-04-23T17:52:51.1564216Z E: Could not open lock file /var/lib/apt/lists/lock - open (13: Permission denied)
+2026-04-23T17:52:51.1564870Z E: Unable to lock directory /var/lib/apt/lists/
+2026-04-23T17:52:51.1565521Z W: Problem unlinking the file /var/cache/apt/pkgcache.bin - RemoveCaches (13: Permission denied)
+2026-04-23T17:52:51.1566595Z W: Problem unlinking the file /var/cache/apt/srcpkgcache.bin - RemoveCaches (13: Permission denied)
+2026-04-23T17:52:51.1589922Z [1;31m2026-04-23 17:52:51 - Error: Failed to run 'apt update' (Exit Code: 0)[0m
+2026-04-23T17:52:51.1815145Z Reading package lists...
+2026-04-23T17:52:52.1560714Z Building dependency tree...
+2026-04-23T17:52:52.1568585Z Reading state information...
+2026-04-23T17:52:52.1569446Z The following additional packages will be installed:
+2026-04-23T17:52:52.1570265Z   libnode109 node-acorn node-busboy node-cjs-module-lexer node-undici
+2026-04-23T17:52:52.1570953Z   node-xtend nodejs-doc
+2026-04-23T17:52:52.1571600Z Suggested packages:
+2026-04-23T17:52:52.1572185Z   npm
+2026-04-23T17:52:52.1572789Z The following NEW packages will be installed:
+2026-04-23T17:52:52.1573467Z   libnode109 node-acorn node-busboy node-cjs-module-lexer node-undici
+2026-04-23T17:52:52.1574109Z   node-xtend nodejs nodejs-doc
+2026-04-23T17:52:52.1575011Z 0 upgraded, 8 newly installed, 0 to remove and 40 not upgraded.
+2026-04-23T17:52:52.1575695Z Need to get 16.0 MB of archives.
+2026-04-23T17:52:52.1576452Z After this operation, 70.2 MB of additional disk space will be used.
+2026-04-23T17:52:52.1577107Z Get:1 file:/etc/apt/apt-mirrors.txt Mirrorlist [144 B]
+2026-04-23T17:52:52.1577720Z Get:2 http://azure.archive.ubuntu.com/ubuntu noble/universe amd64 node-xtend all 4.0.2-3 [3902 B]
+2026-04-23T17:52:52.1578287Z Get:3 http://azure.archive.ubuntu.com/ubuntu noble/universe amd64 nodejs amd64 18.19.1+dfsg-6ubuntu5 [306 kB]
+2026-04-23T17:52:52.1579083Z Get:4 http://azure.archive.ubuntu.com/ubuntu noble/universe amd64 node-acorn all 8.8.1+ds+~cs25.17.7-2 [115 kB]
+2026-04-23T17:52:52.1579720Z Get:5 http://azure.archive.ubuntu.com/ubuntu noble/universe amd64 node-cjs-module-lexer all 1.2.3+dfsg-1 [32.1 kB]
+2026-04-23T17:52:52.1580295Z Get:6 http://azure.archive.ubuntu.com/ubuntu noble/universe amd64 node-busboy all 1.6.0+~cs2.6.0-2 [17.3 kB]
+2026-04-23T17:52:52.1581004Z Get:7 http://azure.archive.ubuntu.com/ubuntu noble/universe amd64 node-undici all 5.26.3+dfsg1+~cs23.10.12-2 [325 kB]
+2026-04-23T17:52:52.1581820Z Get:8 http://azure.archive.ubuntu.com/ubuntu noble/universe amd64 libnode109 amd64 18.19.1+dfsg-6ubuntu5 [11.6 MB]
+2026-04-23T17:52:52.1613529Z Get:9 http://azure.archive.ubuntu.com/ubuntu noble/universe amd64 nodejs-doc all 18.19.1+dfsg-6ubuntu5 [3552 kB]
+2026-04-23T17:52:52.5510164Z Fetched 16.0 MB in 0s (32.8 MB/s)
+2026-04-23T17:52:52.5867775Z Selecting previously unselected package node-xtend.
+2026-04-23T17:52:52.9186762Z (Reading database ... 
+2026-04-23T17:52:52.9187471Z (Reading database ... 5%
+2026-04-23T17:52:52.9188161Z (Reading database ... 10%
+2026-04-23T17:52:52.9188641Z (Reading database ... 15%
+2026-04-23T17:52:52.9189017Z (Reading database ... 20%
+2026-04-23T17:52:52.9189400Z (Reading database ... 25%
+2026-04-23T17:52:52.9189805Z (Reading database ... 30%
+2026-04-23T17:52:52.9190213Z (Reading database ... 35%
+2026-04-23T17:52:52.9190610Z (Reading database ... 40%
+2026-04-23T17:52:52.9191086Z (Reading database ... 45%
+2026-04-23T17:52:52.9191502Z (Reading database ... 50%
+2026-04-23T17:52:53.0010446Z (Reading database ... 55%
+2026-04-23T17:52:53.6471950Z (Reading database ... 60%
+2026-04-23T17:52:54.0472513Z (Reading database ... 65%
+2026-04-23T17:52:54.3885843Z (Reading database ... 70%
+2026-04-23T17:52:54.8188933Z (Reading database ... 75%
+2026-04-23T17:52:55.4627749Z (Reading database ... 80%
+2026-04-23T17:52:56.6178068Z (Reading database ... 85%
+2026-04-23T17:52:57.9638206Z (Reading database ... 90%
+2026-04-23T17:53:00.1275233Z (Reading database ... 95%
+2026-04-23T17:53:00.1276702Z (Reading database ... 100%
+2026-04-23T17:53:00.1277581Z (Reading database ... 220764 files and directories currently installed.)
+2026-04-23T17:53:00.1326621Z Preparing to unpack .../0-node-xtend_4.0.2-3_all.deb ...
+2026-04-23T17:53:00.1358317Z Unpacking node-xtend (4.0.2-3) ...
+2026-04-23T17:53:00.1701413Z Selecting previously unselected package nodejs.
+2026-04-23T17:53:00.1850291Z Preparing to unpack .../1-nodejs_18.19.1+dfsg-6ubuntu5_amd64.deb ...
+2026-04-23T17:53:00.1858605Z Unpacking nodejs (18.19.1+dfsg-6ubuntu5) ...
+2026-04-23T17:53:00.3353622Z Selecting previously unselected package node-acorn.
+2026-04-23T17:53:00.3498049Z Preparing to unpack .../2-node-acorn_8.8.1+ds+~cs25.17.7-2_all.deb ...
+2026-04-23T17:53:00.3506654Z Unpacking node-acorn (8.8.1+ds+~cs25.17.7-2) ...
+2026-04-23T17:53:00.4389591Z Selecting previously unselected package node-cjs-module-lexer.
+2026-04-23T17:53:00.4530935Z Preparing to unpack .../3-node-cjs-module-lexer_1.2.3+dfsg-1_all.deb ...
+2026-04-23T17:53:00.4539918Z Unpacking node-cjs-module-lexer (1.2.3+dfsg-1) ...
+2026-04-23T17:53:00.4775359Z Selecting previously unselected package node-busboy.
+2026-04-23T17:53:00.4933627Z Preparing to unpack .../4-node-busboy_1.6.0+~cs2.6.0-2_all.deb ...
+2026-04-23T17:53:00.4941119Z Unpacking node-busboy (1.6.0+~cs2.6.0-2) ...
+2026-04-23T17:53:00.5174333Z Selecting previously unselected package node-undici.
+2026-04-23T17:53:00.5316851Z Preparing to unpack .../5-node-undici_5.26.3+dfsg1+~cs23.10.12-2_all.deb ...
+2026-04-23T17:53:00.5327071Z Unpacking node-undici (5.26.3+dfsg1+~cs23.10.12-2) ...
+2026-04-23T17:53:00.5919429Z Selecting previously unselected package libnode109:amd64.
+2026-04-23T17:53:00.6065578Z Preparing to unpack .../6-libnode109_18.19.1+dfsg-6ubuntu5_amd64.deb ...
+2026-04-23T17:53:00.6086776Z Unpacking libnode109:amd64 (18.19.1+dfsg-6ubuntu5) ...
+2026-04-23T17:53:00.8197324Z Selecting previously unselected package nodejs-doc.
+2026-04-23T17:53:00.8345008Z Preparing to unpack .../7-nodejs-doc_18.19.1+dfsg-6ubuntu5_all.deb ...
+2026-04-23T17:53:00.8356647Z Unpacking nodejs-doc (18.19.1+dfsg-6ubuntu5) ...
+2026-04-23T17:53:00.9560892Z Setting up node-cjs-module-lexer (1.2.3+dfsg-1) ...
+2026-04-23T17:53:00.9596822Z Setting up nodejs-doc (18.19.1+dfsg-6ubuntu5) ...
+2026-04-23T17:53:00.9617722Z Setting up node-xtend (4.0.2-3) ...
+2026-04-23T17:53:00.9640624Z Setting up node-busboy (1.6.0+~cs2.6.0-2) ...
+2026-04-23T17:53:00.9663504Z Setting up node-undici (5.26.3+dfsg1+~cs23.10.12-2) ...
+2026-04-23T17:53:00.9692611Z Setting up node-acorn (8.8.1+ds+~cs25.17.7-2) ...
+2026-04-23T17:53:00.9742535Z Setting up libnode109:amd64 (18.19.1+dfsg-6ubuntu5) ...
+2026-04-23T17:53:00.9769562Z Setting up nodejs (18.19.1+dfsg-6ubuntu5) ...
+2026-04-23T17:53:00.9832744Z update-alternatives: using /usr/bin/nodejs to provide /usr/bin/js (js) in auto mode
+2026-04-23T17:53:01.0268844Z Processing triggers for man-db (2.12.0-4build2) ...
+2026-04-23T17:53:01.0286984Z Not building database; man-db/auto-update is not 'true'.
+2026-04-23T17:53:01.0301309Z Processing triggers for libc-bin (2.39-0ubuntu8.7) ...
+2026-04-23T17:53:04.1230888Z 
+2026-04-23T17:53:04.1232451Z Running kernel seems to be up-to-date.
+2026-04-23T17:53:04.1232874Z 
+2026-04-23T17:53:04.1233481Z No services need to be restarted.
+2026-04-23T17:53:04.1233883Z 
+2026-04-23T17:53:04.1234497Z No containers need to be restarted.
+2026-04-23T17:53:04.1234894Z 
+2026-04-23T17:53:04.1235520Z No user sessions are running outdated binaries.
+2026-04-23T17:53:04.1236307Z 
+2026-04-23T17:53:04.1237124Z No VM ***s are running outdated hypervisor (qemu) binaries on this host.
+2026-04-23T17:53:05.1504827Z 
+2026-04-23T17:53:05.1573516Z ##[section]Finishing: Setup
+2026-04-23T17:53:05.1615520Z ##[section]Starting: Check Submodules Match
+2026-04-23T17:53:05.1622249Z ==============================================================================
+2026-04-23T17:53:05.1622541Z Task         : Command line
+2026-04-23T17:53:05.1622819Z Description  : Run a command line script using Bash on Linux and macOS and cmd.exe on Windows
+2026-04-23T17:53:05.1623092Z Version      : 2.268.0
+2026-04-23T17:53:05.1623332Z Author       : Microsoft Corporation
+2026-04-23T17:53:05.1623570Z Help         : https://docs.microsoft.com/azure/devops/pipelines/tasks/utility/command-line
+2026-04-23T17:53:05.1623819Z ==============================================================================
+2026-04-23T17:53:05.2827464Z Generating script.
+2026-04-23T17:53:05.2847884Z ========================== Starting Command Output ===========================
+2026-04-23T17:53:05.2851128Z [command]/usr/bin/bash --noprofile --norc /home/vsts/work/_temp/43d5e4ea-058f-4a73-93c1-1a64c0aca06b.sh
+2026-04-23T17:53:09.0111147Z 
+2026-04-23T17:53:09.0112566Z added 1 package in 2s
+2026-04-23T17:53:17.8542628Z .: 
+2026-04-23T17:53:17.8545291Z   c-utility: acbd7a8ae73497311fc5ad30973d4b0459cbcee5
+2026-04-23T17:53:17.8566235Z  *** FAILURE *** In line above  Error: submodule mismatch  Error: submodule is 1 commits ahead of master
+2026-04-23T17:53:17.8567238Z     deps/azure-macro-utils-c: 5926caf4e42e98e730e6d03395788205649a3ada
+2026-04-23T17:53:17.8568107Z     deps/umock-c: 504193e65d1c2f6eb50c15357167600a296df7ff
+2026-04-23T17:53:17.8568884Z       deps/azure-macro-utils-c: 5926caf4e42e98e730e6d03395788205649a3ada
+2026-04-23T17:53:17.8569670Z       deps/ctest: 4aa84c45236ecda21983fb682f542f17d0b21e19
+2026-04-23T17:53:17.8570467Z         deps/azure-macro-utils-c: 5926caf4e42e98e730e6d03395788205649a3ada
+2026-04-23T17:53:17.8571289Z       deps/testrunner: 8734bd6c53c88dd6c0cea8e87d70b9964726484a
+2026-04-23T17:53:17.8571994Z         deps/azure-macro-utils-c: 5926caf4e42e98e730e6d03395788205649a3ada
+2026-04-23T17:53:17.8572829Z     testtools/ctest: 4aa84c45236ecda21983fb682f542f17d0b21e19
+2026-04-23T17:53:17.8573579Z       deps/azure-macro-utils-c: 5926caf4e42e98e730e6d03395788205649a3ada
+2026-04-23T17:53:17.8574265Z     testtools/testrunner: 8734bd6c53c88dd6c0cea8e87d70b9964726484a
+2026-04-23T17:53:17.8575023Z       deps/azure-macro-utils-c: 5926caf4e42e98e730e6d03395788205649a3ada
+2026-04-23T17:53:17.8575773Z   deps/azure-c-testrunnerswitcher: 8734bd6c53c88dd6c0cea8e87d70b9964726484a
+2026-04-23T17:53:17.8576793Z     deps/azure-macro-utils-c: 5926caf4e42e98e730e6d03395788205649a3ada
+2026-04-23T17:53:17.8577573Z   deps/azure-ctest: 4aa84c45236ecda21983fb682f542f17d0b21e19
+2026-04-23T17:53:17.8578326Z     deps/azure-macro-utils-c: 5926caf4e42e98e730e6d03395788205649a3ada
+2026-04-23T17:53:17.8579032Z   deps/azure-macro-utils-c: 5926caf4e42e98e730e6d03395788205649a3ada
+2026-04-23T17:53:17.8579870Z   deps/parson: 60c37844d7a1c97547812cac3423d458c73e60f9
+2026-04-23T17:53:17.8580939Z   deps/uhttp: 01dc7139d3da3141aa2017dff927db1dbbe86e49
+2026-04-23T17:53:17.8581702Z     deps/azure-c-testrunnerswitcher: 8734bd6c53c88dd6c0cea8e87d70b9964726484a
+2026-04-23T17:53:17.8582473Z       deps/azure-macro-utils-c: 5926caf4e42e98e730e6d03395788205649a3ada
+2026-04-23T17:53:17.8583242Z     deps/azure-ctest: 4aa84c45236ecda21983fb682f542f17d0b21e19
+2026-04-23T17:53:17.8583978Z       deps/azure-macro-utils-c: 5926caf4e42e98e730e6d03395788205649a3ada
+2026-04-23T17:53:17.8584682Z     deps/azure-macro-utils-c: 5926caf4e42e98e730e6d03395788205649a3ada
+2026-04-23T17:53:17.8585475Z     deps/c-utility: 772a4f8bc338140b4a0f404cf9c344283c5c937f
+2026-04-23T17:53:17.8592679Z  *** FAILURE *** In line above  Error: submodule mismatch 
+2026-04-23T17:53:17.8593514Z       deps/azure-macro-utils-c: 5926caf4e42e98e730e6d03395788205649a3ada
+2026-04-23T17:53:17.8594126Z       deps/umock-c: 504193e65d1c2f6eb50c15357167600a296df7ff
+2026-04-23T17:53:17.8594722Z         deps/azure-macro-utils-c: 5926caf4e42e98e730e6d03395788205649a3ada
+2026-04-23T17:53:17.8595777Z         deps/ctest: 4aa84c45236ecda21983fb682f542f17d0b21e19
+2026-04-23T17:53:17.8597810Z           deps/azure-macro-utils-c: 5926caf4e42e98e730e6d03395788205649a3ada
+2026-04-23T17:53:17.8598536Z         deps/testrunner: 8734bd6c53c88dd6c0cea8e87d70b9964726484a
+2026-04-23T17:53:17.8599125Z           deps/azure-macro-utils-c: 5926caf4e42e98e730e6d03395788205649a3ada
+2026-04-23T17:53:17.8599654Z       testtools/ctest: 4aa84c45236ecda21983fb682f542f17d0b21e19
+2026-04-23T17:53:17.8600185Z         deps/azure-macro-utils-c: 5926caf4e42e98e730e6d03395788205649a3ada
+2026-04-23T17:53:17.8600755Z       testtools/testrunner: 8734bd6c53c88dd6c0cea8e87d70b9964726484a
+2026-04-23T17:53:17.8601303Z         deps/azure-macro-utils-c: 5926caf4e42e98e730e6d03395788205649a3ada
+2026-04-23T17:53:17.8601825Z     deps/umock-c: 504193e65d1c2f6eb50c15357167600a296df7ff
+2026-04-23T17:53:17.8602393Z       deps/azure-macro-utils-c: 5926caf4e42e98e730e6d03395788205649a3ada
+2026-04-23T17:53:17.8602942Z       deps/ctest: 4aa84c45236ecda21983fb682f542f17d0b21e19
+2026-04-23T17:53:17.8603508Z         deps/azure-macro-utils-c: 5926caf4e42e98e730e6d03395788205649a3ada
+2026-04-23T17:53:17.8604114Z       deps/testrunner: 8734bd6c53c88dd6c0cea8e87d70b9964726484a
+2026-04-23T17:53:17.8604708Z         deps/azure-macro-utils-c: 5926caf4e42e98e730e6d03395788205649a3ada
+2026-04-23T17:53:17.8605350Z   deps/umock-c: 504193e65d1c2f6eb50c15357167600a296df7ff
+2026-04-23T17:53:17.8606176Z     deps/azure-macro-utils-c: 5926caf4e42e98e730e6d03395788205649a3ada
+2026-04-23T17:53:17.8606791Z     deps/ctest: 4aa84c45236ecda21983fb682f542f17d0b21e19
+2026-04-23T17:53:17.8607374Z       deps/azure-macro-utils-c: 5926caf4e42e98e730e6d03395788205649a3ada
+2026-04-23T17:53:17.8607926Z     deps/testrunner: 8734bd6c53c88dd6c0cea8e87d70b9964726484a
+2026-04-23T17:53:17.8616581Z       deps/azure-macro-utils-c: 5926caf4e42e98e730e6d03395788205649a3ada
+2026-04-23T17:53:17.8617231Z   provisioning_client/deps/RIoT: f6bebff2f5a68f5bc18d23ed164800db33b7d2a4
+2026-04-23T17:53:17.8617837Z   provisioning_client/deps/utpm: d250abe1d33cb38437d540bf77c80f014f60e472
+2026-04-23T17:53:17.8618399Z     deps/azure-c-testrunnerswitcher: 8734bd6c53c88dd6c0cea8e87d70b9964726484a
+2026-04-23T17:53:17.8618933Z       deps/azure-macro-utils-c: 5926caf4e42e98e730e6d03395788205649a3ada
+2026-04-23T17:53:17.8619501Z     deps/azure-ctest: 4aa84c45236ecda21983fb682f542f17d0b21e19
+2026-04-23T17:53:17.8620052Z       deps/azure-macro-utils-c: 5926caf4e42e98e730e6d03395788205649a3ada
+2026-04-23T17:53:17.8620623Z     deps/azure-macro-utils-c: 5926caf4e42e98e730e6d03395788205649a3ada
+2026-04-23T17:53:17.8621151Z     deps/c-utility: 772a4f8bc338140b4a0f404cf9c344283c5c937f
+2026-04-23T17:53:17.8621685Z  *** FAILURE *** In line above  Error: submodule mismatch 
+2026-04-23T17:53:17.8622236Z       deps/azure-macro-utils-c: 5926caf4e42e98e730e6d03395788205649a3ada
+2026-04-23T17:53:17.8622782Z       deps/umock-c: 504193e65d1c2f6eb50c15357167600a296df7ff
+2026-04-23T17:53:17.8623544Z         deps/azure-macro-utils-c: 5926caf4e42e98e730e6d03395788205649a3ada
+2026-04-23T17:53:17.8624099Z         deps/ctest: 4aa84c45236ecda21983fb682f542f17d0b21e19
+2026-04-23T17:53:17.8624622Z           deps/azure-macro-utils-c: 5926caf4e42e98e730e6d03395788205649a3ada
+2026-04-23T17:53:17.8625164Z         deps/testrunner: 8734bd6c53c88dd6c0cea8e87d70b9964726484a
+2026-04-23T17:53:17.8625775Z           deps/azure-macro-utils-c: 5926caf4e42e98e730e6d03395788205649a3ada
+2026-04-23T17:53:17.8626717Z       testtools/ctest: 4aa84c45236ecda21983fb682f542f17d0b21e19
+2026-04-23T17:53:17.8627310Z         deps/azure-macro-utils-c: 5926caf4e42e98e730e6d03395788205649a3ada
+2026-04-23T17:53:17.8627877Z       testtools/testrunner: 8734bd6c53c88dd6c0cea8e87d70b9964726484a
+2026-04-23T17:53:17.8628417Z         deps/azure-macro-utils-c: 5926caf4e42e98e730e6d03395788205649a3ada
+2026-04-23T17:53:17.8628932Z     deps/umock-c: 504193e65d1c2f6eb50c15357167600a296df7ff
+2026-04-23T17:53:17.8629524Z       deps/azure-macro-utils-c: 5926caf4e42e98e730e6d03395788205649a3ada
+2026-04-23T17:53:17.8630241Z       deps/ctest: 4aa84c45236ecda21983fb682f542f17d0b21e19
+2026-04-23T17:53:17.8630829Z         deps/azure-macro-utils-c: 5926caf4e42e98e730e6d03395788205649a3ada
+2026-04-23T17:53:17.8631376Z       deps/testrunner: 8734bd6c53c88dd6c0cea8e87d70b9964726484a
+2026-04-23T17:53:17.8631930Z         deps/azure-macro-utils-c: 5926caf4e42e98e730e6d03395788205649a3ada
+2026-04-23T17:53:17.8632482Z   uamqp: 6bb9accbbc036ed5ef1df7467760762c99a7094b
+2026-04-23T17:53:17.8633032Z     deps/azure-c-shared-utility: 772a4f8bc338140b4a0f404cf9c344283c5c937f
+2026-04-23T17:53:17.8633589Z       deps/azure-macro-utils-c: 5926caf4e42e98e730e6d03395788205649a3ada
+2026-04-23T17:53:17.8634129Z       deps/umock-c: 504193e65d1c2f6eb50c15357167600a296df7ff
+2026-04-23T17:53:17.8634679Z         deps/azure-macro-utils-c: 5926caf4e42e98e730e6d03395788205649a3ada
+2026-04-23T17:53:17.8635207Z         deps/ctest: 4aa84c45236ecda21983fb682f542f17d0b21e19
+2026-04-23T17:53:17.8635762Z           deps/azure-macro-utils-c: 5926caf4e42e98e730e6d03395788205649a3ada
+2026-04-23T17:53:17.8636607Z         deps/testrunner: 8734bd6c53c88dd6c0cea8e87d70b9964726484a
+2026-04-23T17:53:17.8637157Z           deps/azure-macro-utils-c: 5926caf4e42e98e730e6d03395788205649a3ada
+2026-04-23T17:53:17.8637689Z       testtools/ctest: 4aa84c45236ecda21983fb682f542f17d0b21e19
+2026-04-23T17:53:17.8638221Z         deps/azure-macro-utils-c: 5926caf4e42e98e730e6d03395788205649a3ada
+2026-04-23T17:53:17.8638750Z       testtools/testrunner: 8734bd6c53c88dd6c0cea8e87d70b9964726484a
+2026-04-23T17:53:17.8639285Z         deps/azure-macro-utils-c: 5926caf4e42e98e730e6d03395788205649a3ada
+2026-04-23T17:53:17.8639844Z     deps/azure-c-testrunnerswitcher: 8734bd6c53c88dd6c0cea8e87d70b9964726484a
+2026-04-23T17:53:17.8640381Z       deps/azure-macro-utils-c: 5926caf4e42e98e730e6d03395788205649a3ada
+2026-04-23T17:53:17.8640911Z     deps/azure-ctest: 4aa84c45236ecda21983fb682f542f17d0b21e19
+2026-04-23T17:53:17.8641438Z       deps/azure-macro-utils-c: 5926caf4e42e98e730e6d03395788205649a3ada
+2026-04-23T17:53:17.8641985Z     deps/azure-macro-utils-c: 5926caf4e42e98e730e6d03395788205649a3ada
+2026-04-23T17:53:17.8642547Z     deps/umock-c: 504193e65d1c2f6eb50c15357167600a296df7ff
+2026-04-23T17:53:17.8643075Z       deps/azure-macro-utils-c: 5926caf4e42e98e730e6d03395788205649a3ada
+2026-04-23T17:53:17.8643590Z       deps/ctest: 4aa84c45236ecda21983fb682f542f17d0b21e19
+2026-04-23T17:53:17.8644114Z         deps/azure-macro-utils-c: 5926caf4e42e98e730e6d03395788205649a3ada
+2026-04-23T17:53:17.8644632Z       deps/testrunner: 8734bd6c53c88dd6c0cea8e87d70b9964726484a
+2026-04-23T17:53:17.8645176Z         deps/azure-macro-utils-c: 5926caf4e42e98e730e6d03395788205649a3ada
+2026-04-23T17:53:17.8645726Z   umqtt: d08d530fc3ae3f60d3f750fab6629a5b7839f754
+2026-04-23T17:53:17.8646557Z     deps/azure-macro-utils-c: 5926caf4e42e98e730e6d03395788205649a3ada
+2026-04-23T17:53:17.8647101Z     deps/c-utility: 772a4f8bc338140b4a0f404cf9c344283c5c937f
+2026-04-23T17:53:17.8647781Z  *** FAILURE *** In line above  Error: submodule mismatch 
+2026-04-23T17:53:17.8648324Z       deps/azure-macro-utils-c: 5926caf4e42e98e730e6d03395788205649a3ada
+2026-04-23T17:53:17.8648982Z       deps/umock-c: 504193e65d1c2f6eb50c15357167600a296df7ff
+2026-04-23T17:53:17.8649537Z         deps/azure-macro-utils-c: 5926caf4e42e98e730e6d03395788205649a3ada
+2026-04-23T17:53:17.8650075Z         deps/ctest: 4aa84c45236ecda21983fb682f542f17d0b21e19
+2026-04-23T17:53:17.8650612Z           deps/azure-macro-utils-c: 5926caf4e42e98e730e6d03395788205649a3ada
+2026-04-23T17:53:17.8651155Z         deps/testrunner: 8734bd6c53c88dd6c0cea8e87d70b9964726484a
+2026-04-23T17:53:17.8651707Z           deps/azure-macro-utils-c: 5926caf4e42e98e730e6d03395788205649a3ada
+2026-04-23T17:53:17.8652256Z       testtools/ctest: 4aa84c45236ecda21983fb682f542f17d0b21e19
+2026-04-23T17:53:17.8652802Z         deps/azure-macro-utils-c: 5926caf4e42e98e730e6d03395788205649a3ada
+2026-04-23T17:53:17.8653359Z       testtools/testrunner: 8734bd6c53c88dd6c0cea8e87d70b9964726484a
+2026-04-23T17:53:17.8654019Z         deps/azure-macro-utils-c: 5926caf4e42e98e730e6d03395788205649a3ada
+2026-04-23T17:53:17.8654582Z     deps/ctest: 4aa84c45236ecda21983fb682f542f17d0b21e19
+2026-04-23T17:53:17.8655130Z       deps/azure-macro-utils-c: 5926caf4e42e98e730e6d03395788205649a3ada
+2026-04-23T17:53:17.8655685Z     deps/testrunnerswitcher: 8734bd6c53c88dd6c0cea8e87d70b9964726484a
+2026-04-23T17:53:17.8656462Z       deps/azure-macro-utils-c: 5926caf4e42e98e730e6d03395788205649a3ada
+2026-04-23T17:53:17.8657033Z     deps/umock-c: 504193e65d1c2f6eb50c15357167600a296df7ff
+2026-04-23T17:53:17.8657633Z       deps/azure-macro-utils-c: 5926caf4e42e98e730e6d03395788205649a3ada
+2026-04-23T17:53:17.8658187Z       deps/ctest: 4aa84c45236ecda21983fb682f542f17d0b21e19
+2026-04-23T17:53:17.8658726Z         deps/azure-macro-utils-c: 5926caf4e42e98e730e6d03395788205649a3ada
+2026-04-23T17:53:17.8659275Z       deps/testrunner: 8734bd6c53c88dd6c0cea8e87d70b9964726484a
+2026-04-23T17:53:17.8659828Z         deps/azure-macro-utils-c: 5926caf4e42e98e730e6d03395788205649a3ada
+2026-04-23T17:53:17.8682051Z 
+2026-04-23T17:53:17.8712120Z ##[error]Bash exited with code '255'.
+2026-04-23T17:53:17.8772016Z ##[section]Finishing: Check Submodules Match
+2026-04-23T17:53:17.8823063Z Skipping step due to condition evaluation.
+Evaluating: and(succeeded(), ne(variables['CG_RAN'], 'true'))
+Expanded: and(False, ne(variables['CG_RAN'], 'true'))
+Result: False
+
+2026-04-23T17:53:17.8856660Z ##[section]Starting: Checkout Azure/azure-iot-sdk-c@ewertons/pipelinefixes to s
+2026-04-23T17:53:17.8861298Z ==============================================================================
+2026-04-23T17:53:17.8861603Z Task         : Get sources
+2026-04-23T17:53:17.8861809Z Description  : Get sources from a repository. Supports Git, TfsVC, and SVN repositories.
+2026-04-23T17:53:17.8862107Z Version      : 1.0.0
+2026-04-23T17:53:17.8862320Z Author       : Microsoft
+2026-04-23T17:53:17.8862579Z Help         : [More Information](https://go.microsoft.com/fwlink/?LinkId=798199)
+2026-04-23T17:53:17.8862899Z ==============================================================================
+2026-04-23T17:53:18.1118279Z Cleaning any cached credential from repository: Azure/azure-iot-sdk-c (GitHub)
+2026-04-23T17:53:18.1214490Z ##[section]Finishing: Checkout Azure/azure-iot-sdk-c@ewertons/pipelinefixes to s
+2026-04-23T17:53:18.1240345Z ##[section]Starting: Finalize Job
+2026-04-23T17:53:18.1252846Z TestResultLogParser: JasmineTestResultParser : Starting jasmine test result parser.
+2026-04-23T17:53:18.1253680Z TestResultLogParser: JestTestResultParser : Starting jest test result parser.
+2026-04-23T17:53:18.1254010Z TestResultLogParser: MochaTestResultParser : Starting mocha test result parser.
+2026-04-23T17:53:18.1254341Z TestResultLogParser: PythonTestResultParser : Starting python test result parser.
+2026-04-23T17:53:18.3758273Z TestResultLogParser: Waiting for log plugin to finish, pending process 2 log lines.
+2026-04-23T17:53:18.5652271Z Cleaning up task key
+2026-04-23T17:53:18.5653361Z Start cleaning up orphan processes.
+2026-04-23T17:53:18.5823101Z ##[section]Finishing: Finalize Job
+2026-04-23T17:53:18.5846404Z ##[section]Finishing: Check Submodules

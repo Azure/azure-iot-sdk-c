@@ -1,8 +1,14 @@
 # Copyright (c) Microsoft. All rights reserved.
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-cmake_minimum_required (VERSION 3.5)
+cmake_minimum_required (VERSION 3.18)
 project(azure_iot_sdks)
+
+# Load c-build-tools (sets /Zc:preprocessor and other default build options)
+if ((NOT TARGET c_build_tools) AND (EXISTS ${CMAKE_CURRENT_LIST_DIR}/deps/c-build-tools/CMakeLists.txt))
+    add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/deps/c-build-tools)
+    set_default_build_options()
+endif()
 
 ########## Enable CMake Features ##########
 # Use solution folders.

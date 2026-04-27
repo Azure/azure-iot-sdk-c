@@ -1,0 +1,1003 @@
+2026-04-23T17:57:07.6731680Z ##[section]Starting: OSX
+2026-04-23T17:57:07.9111610Z ##[section]Starting: Initialize job
+2026-04-23T17:57:07.9119050Z Agent name: 'Azure Pipelines 20'
+2026-04-23T17:57:07.9120610Z Agent machine name: 'sat12-jr318-3468a3fb-3c75-444c-b88a-a78c2bf9067a-B6E6BCA14539'
+2026-04-23T17:57:07.9121540Z Current agent version: '4.272.0'
+2026-04-23T17:57:07.9156720Z ##[group]Runner Image Provisioner
+2026-04-23T17:57:07.9157330Z Hosted Compute Agent
+2026-04-23T17:57:07.9157990Z Version: 20260422.526
+2026-04-23T17:57:07.9158770Z Commit: e1a9e573f4d0838b3a7c1b07401aeb29ed3635a9
+2026-04-23T17:57:07.9159380Z Build Date: 2026-04-22T09:31:31Z
+2026-04-23T17:57:07.9159900Z Worker ID: {ddc350d5-287f-4af5-a3b4-f922df8a72c4}
+2026-04-23T17:57:07.9160540Z Azure Region: westus
+2026-04-23T17:57:07.9161160Z ##[endgroup]
+2026-04-23T17:57:07.9161680Z ##[group]_internal_runner_telemetry
+2026-04-23T17:57:07.9162220Z ProcessLifetimeId: e4e2f61c-2c0d-4319-88b9-1886e38f11b8
+2026-04-23T17:57:07.9162740Z Azure Region: westus
+2026-04-23T17:57:07.9163260Z ##[endgroup]
+2026-04-23T17:57:07.9163690Z ##[group]Operating System
+2026-04-23T17:57:07.9164480Z macOS
+2026-04-23T17:57:07.9165120Z 14.8.5
+2026-04-23T17:57:07.9165500Z 23J423
+2026-04-23T17:57:07.9165860Z ##[endgroup]
+2026-04-23T17:57:07.9166260Z ##[group]Runner Image
+2026-04-23T17:57:07.9166680Z Image: macos-14
+2026-04-23T17:57:07.9167110Z Version: 20260413.0412.1
+2026-04-23T17:57:07.9167740Z Included Software: https://github.com/actions/runner-images/blob/macos-14/20260413.0412/images/macos/macos-14-Readme.md
+2026-04-23T17:57:07.9168890Z Image Release: https://github.com/actions/runner-images/releases/tag/macos-14%2F20260413.0412
+2026-04-23T17:57:07.9169500Z ##[endgroup]
+2026-04-23T17:57:07.9175300Z Current image version: '20260413.0412.1'
+2026-04-23T17:57:08.0089050Z Agent running as: 'runner'
+2026-04-23T17:57:08.0189810Z Prepare build directory.
+2026-04-23T17:57:08.0699510Z Set build variables.
+2026-04-23T17:57:08.0749640Z Download all required tasks.
+2026-04-23T17:57:08.0915770Z Downloading task: 1ESHostedPoolValidation (1.0.31377996)
+2026-04-23T17:57:43.8590530Z Downloading task: nuget-security-analysis (0.2.216)
+2026-04-23T17:57:44.4533420Z Downloading task: DownloadPipelineArtifact (1.230.0)
+2026-04-23T17:57:44.5267000Z Downloading task: CmdLine (2.268.0)
+2026-04-23T17:57:45.1821200Z Downloading task: PublishTestResults (2.273.0)
+2026-04-23T17:57:46.4703320Z Downloading task: ComponentGovernanceComponentDetection (0.2620414.3)
+2026-04-23T17:57:49.1525910Z Checking job knob settings.
+2026-04-23T17:57:49.1532780Z    Knob: DockerActionRetries = true Source: $(VSTSAGENT_DOCKER_ACTION_RETRIES) 
+2026-04-23T17:57:49.1533550Z    Knob: AgentToolsDirectory = /Users/runner/hostedtoolcache Source: ${AGENT_TOOLSDIRECTORY} 
+2026-04-23T17:57:49.1537220Z    Knob: UseGitLongPaths = true Source: $(USE_GIT_LONG_PATHS) 
+2026-04-23T17:57:49.1542960Z    Knob: UseNode24withHandlerData = True Source: $(DistributedTask.Agent.UseNode24withHandlerData) 
+2026-04-23T17:57:49.1548300Z    Knob: EnableIssueSourceValidation = true Source: $(ENABLE_ISSUE_SOURCE_VALIDATION) 
+2026-04-23T17:57:49.1550430Z    Knob: AgentEnablePipelineArtifactLargeChunkSize = true Source: $(AGENT_ENABLE_PIPELINEARTIFACT_LARGE_CHUNK_SIZE) 
+2026-04-23T17:57:49.1558980Z    Knob: ContinueAfterCancelProcessTreeKillAttempt = true Source: $(VSTSAGENT_CONTINUE_AFTER_CANCEL_PROCESSTREEKILL_ATTEMPT) 
+2026-04-23T17:57:49.1560690Z    Knob: ProcessHandlerSecureArguments = false Source: $(AZP_75787_ENABLE_NEW_LOGIC) 
+2026-04-23T17:57:49.1561800Z    Knob: ProcessHandlerSecureArguments = false Source: $(AZP_75787_ENABLE_NEW_LOGIC_LOG) 
+2026-04-23T17:57:49.1562870Z    Knob: ProcessHandlerTelemetry = true Source: $(AZP_75787_ENABLE_COLLECT) 
+2026-04-23T17:57:49.1563980Z    Knob: UseNewNodeHandlerTelemetry = True Source: $(DistributedTask.Agent.USENEWNODEHANDLERTELEMETRY) 
+2026-04-23T17:57:49.1565230Z    Knob: ProcessHandlerEnableNewLogic = true Source: $(AZP_75787_ENABLE_NEW_PH_LOGIC) 
+2026-04-23T17:57:49.1569880Z    Knob: EnableResourceMonitorDebugOutput = true Source: $(AZP_ENABLE_RESOURCE_MONITOR_DEBUG_OUTPUT) 
+2026-04-23T17:57:49.1571800Z    Knob: EnableResourceUtilizationWarnings = true Source: $(AZP_ENABLE_RESOURCE_UTILIZATION_WARNINGS) 
+2026-04-23T17:57:49.1573110Z    Knob: IgnoreVSTSTaskLib = true Source: $(AZP_AGENT_IGNORE_VSTSTASKLIB) 
+2026-04-23T17:57:49.1573870Z    Knob: FailJobWhenAgentDies = true Source: $(FAIL_JOB_WHEN_AGENT_DIES) 
+2026-04-23T17:57:49.1574380Z    Knob: EnhancedWorkerCrashHandling = true Source: ${AZP_ENHANCED_WORKER_CRASH_HANDLING} 
+2026-04-23T17:57:49.1575440Z    Knob: CheckForTaskDeprecation = true Source: $(AZP_AGENT_CHECK_FOR_TASK_DEPRECATION) 
+2026-04-23T17:57:49.1576740Z    Knob: CheckIfTaskNodeRunnerIsDeprecated246 = True Source: $(DistributedTask.Agent.CheckIfTaskNodeRunnerIsDeprecated246) 
+2026-04-23T17:57:49.1577740Z    Knob: UseNode20ToStartContainer = True Source: $(DistributedTask.Agent.UseNode20ToStartContainer) 
+2026-04-23T17:57:49.1579090Z    Knob: EnableTimeoutLogFlushing = True Source: $(DistributedTask.Agent.EnableTimeoutLogFlushing) 
+2026-04-23T17:57:49.1580340Z    Knob: LogTaskNameInUserAgent = true Source: $(AZP_AGENT_LOG_TASKNAME_IN_USERAGENT) 
+2026-04-23T17:57:49.1581190Z    Knob: UseFetchFilterInCheckoutTask = true Source: $(AGENT_USE_FETCH_FILTER_IN_CHECKOUT_TASK) 
+2026-04-23T17:57:49.1582820Z    Knob: Rosetta2Warning = true Source: $(ROSETTA2_WARNING) 
+2026-04-23T17:57:49.1585230Z    Knob: AddForceCredentialsToGitCheckout = True Source: $(DistributedTask.Agent.AddForceCredentialsToGitCheckout) 
+2026-04-23T17:57:49.1586470Z    Knob: AddForceCredentialsToGitCheckoutEnhanced = True Source: $(DistributedTask.Agent.AddForceCredentialsToGitCheckoutEnhanced) 
+2026-04-23T17:57:49.1587930Z    Knob: UseLatestTfExe = True Source: $(DistributedTask.Agent.UseLatestTfExe) 
+2026-04-23T17:57:49.1588800Z    Knob: UseSparseCheckoutInCheckoutTask = true Source: $(AGENT_USE_SPARSE_CHECKOUT_IN_CHECKOUT_TASK) 
+2026-04-23T17:57:49.1589960Z    Knob: AgentCDNConnectivityFailWarning = False Source: $(DistributedTask.Agent.AgentCDNConnectivityFailWarning) 
+2026-04-23T17:57:49.1590740Z    Knob: UseEnhancedLogging = true Source: ${AZP_USE_ENHANCED_LOGGING} 
+2026-04-23T17:57:49.1591960Z Finished checking job knob settings.
+2026-04-23T17:57:49.4291740Z Plugin: 'Test Result Parser plugin' is running in background.
+2026-04-23T17:57:49.4292900Z Plugin: 'Test File Publisher plugin' is running in background.
+2026-04-23T17:57:49.4294620Z Start tracking orphan processes.
+2026-04-23T17:57:49.4418970Z ##[section]Finishing: Initialize job
+2026-04-23T17:57:49.4649520Z ##[section]Async Command Start: DetectDockerContainer
+2026-04-23T17:57:49.4651400Z ##[section]Async Command End: DetectDockerContainer
+2026-04-23T17:57:49.4730410Z ##[section]Async Command Start: DetectDockerContainer
+2026-04-23T17:57:49.4731380Z ##[section]Async Command End: DetectDockerContainer
+2026-04-23T17:57:49.5253660Z ##[section]Starting: Agent Pool Validation
+2026-04-23T17:57:49.5633180Z ==============================================================================
+2026-04-23T17:57:49.5637130Z Task         : 1ES Hosted Pool Validation
+2026-04-23T17:57:49.5638540Z Description  : Validates that pipelines use secure and compliant Azure DevOps pools
+2026-04-23T17:57:49.5639350Z Version      : 1.0.31377996
+2026-04-23T17:57:49.5640500Z Author       : 1ES Resource Management
+2026-04-23T17:57:49.5642280Z Help         : See https://aka.ms/noselfhostedpools for more information. Please start a conversation in our [Teams channel](https://aka.ms/hostedpoolsonboardingsupport) if you run into problems or have questions with this task.
+2026-04-23T17:57:49.5646380Z ==============================================================================
+2026-04-23T17:57:57.5804480Z ##[section]Finishing: Agent Pool Validation
+2026-04-23T17:57:57.6036920Z ##[section]Starting: Checkout Azure/azure-iot-sdk-c@ewertons/pipelinefixes to s
+2026-04-23T17:57:57.6068050Z ==============================================================================
+2026-04-23T17:57:57.6069600Z Task         : Get sources
+2026-04-23T17:57:57.6070450Z Description  : Get sources from a repository. Supports Git, TfsVC, and SVN repositories.
+2026-04-23T17:57:57.6072860Z Version      : 1.0.0
+2026-04-23T17:57:57.6073680Z Author       : Microsoft
+2026-04-23T17:57:57.6074620Z Help         : [More Information](https://go.microsoft.com/fwlink/?LinkId=798199)
+2026-04-23T17:57:57.6075540Z ==============================================================================
+2026-04-23T17:58:00.1549250Z Syncing repository: Azure/azure-iot-sdk-c (GitHub)
+2026-04-23T17:58:01.1071830Z ##[command]git version
+2026-04-23T17:58:01.7381300Z git version 2.53.0
+2026-04-23T17:58:01.7702140Z ##[command]git lfs version
+2026-04-23T17:58:02.4148610Z git-lfs/3.7.1 (GitHub; darwin amd64; go 1.25.3)
+2026-04-23T17:58:02.4992080Z ##[command]git init "/Users/runner/work/1/s"
+2026-04-23T17:58:04.0750830Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-04-23T17:58:04.0780580Z Initialized empty Git repository in /Users/runner/work/1/s/.git/
+2026-04-23T17:58:04.0846510Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-04-23T17:58:04.0876160Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-04-23T17:58:04.0905330Z hint: call:
+2026-04-23T17:58:04.0940740Z hint:
+2026-04-23T17:58:04.0974350Z hint: 	git config --global init.defaultBranch <name>
+2026-04-23T17:58:04.1008490Z hint:
+2026-04-23T17:58:04.1039740Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-04-23T17:58:04.1077700Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-04-23T17:58:04.1080970Z hint:
+2026-04-23T17:58:04.1098470Z hint: 	git branch -m <name>
+2026-04-23T17:58:04.1133650Z hint:
+2026-04-23T17:58:04.1154060Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-04-23T17:58:04.1273310Z ##[command]git remote add origin https://github.com/Azure/azure-iot-sdk-c
+2026-04-23T17:58:04.1829780Z ##[command]git sparse-checkout disable
+2026-04-23T17:58:04.2147740Z ##[command]git config gc.auto 0
+2026-04-23T17:58:04.2366600Z ##[command]git config core.longpaths true
+2026-04-23T17:58:04.2718510Z ##[command]git config --get-all http.https://github.com/Azure/azure-iot-sdk-c.extraheader
+2026-04-23T17:58:04.2897220Z ##[command]git config --get-all http.extraheader
+2026-04-23T17:58:04.3139230Z ##[command]git config --get-regexp .*extraheader
+2026-04-23T17:58:04.3390050Z ##[command]git config --get-all http.proxy
+2026-04-23T17:58:04.4071070Z ##[command]git config http.version HTTP/1.1
+2026-04-23T17:58:04.5241590Z ##[command]git config --get-all remote.origin.promisor
+2026-04-23T17:58:04.5571350Z ##[command]git config --get-all remote.origin.partialclonefilter
+2026-04-23T17:58:04.6076650Z ##[command]git --config-env=http.extraheader=env_var_http.extraheader fetch --force --no-tags --prune --prune-tags --progress --no-recurse-submodules origin
+2026-04-23T17:58:04.6386630Z remote: Enumerating objects: 80534, done.        
+2026-04-23T17:58:04.6401720Z remote: Counting objects:   0% (1/780)        
+2026-04-23T17:58:04.6445630Z remote: Counting objects:   1% (8/780)        
+2026-04-23T17:58:04.6478920Z remote: Counting objects:   2% (16/780)        
+2026-04-23T17:58:04.6514250Z remote: Counting objects:   3% (24/780)        
+2026-04-23T17:58:04.6569550Z remote: Counting objects:   4% (32/780)        
+2026-04-23T17:58:04.6610090Z remote: Counting objects:   5% (39/780)        
+2026-04-23T17:58:04.6647560Z remote: Counting objects:   6% (47/780)        
+2026-04-23T17:58:04.6668690Z remote: Counting objects:   7% (55/780)        
+2026-04-23T17:58:04.6689340Z remote: Counting objects:   8% (63/780)        
+2026-04-23T17:58:04.6704300Z remote: Counting objects:   9% (71/780)        
+2026-04-23T17:58:04.6714970Z remote: Counting objects:  10% (78/780)        
+2026-04-23T17:58:04.6748660Z remote: Counting objects:  11% (86/780)        
+2026-04-23T17:58:04.6779510Z remote: Counting objects:  12% (94/780)        
+2026-04-23T17:58:04.6801470Z remote: Counting objects:  13% (102/780)        
+2026-04-23T17:58:04.6820480Z remote: Counting objects:  14% (110/780)        
+2026-04-23T17:58:04.6835290Z remote: Counting objects:  15% (117/780)        
+2026-04-23T17:58:04.6870750Z remote: Counting objects:  16% (125/780)        
+2026-04-23T17:58:04.6904510Z remote: Counting objects:  17% (133/780)        
+2026-04-23T17:58:04.6969770Z remote: Counting objects:  18% (141/780)        
+2026-04-23T17:58:04.7001440Z remote: Counting objects:  19% (149/780)        
+2026-04-23T17:58:04.7028930Z remote: Counting objects:  20% (156/780)        
+2026-04-23T17:58:04.7057350Z remote: Counting objects:  21% (164/780)        
+2026-04-23T17:58:04.7075940Z remote: Counting objects:  22% (172/780)        
+2026-04-23T17:58:04.7107400Z remote: Counting objects:  23% (180/780)        
+2026-04-23T17:58:04.7140350Z remote: Counting objects:  24% (188/780)        
+2026-04-23T17:58:04.7180670Z remote: Counting objects:  25% (195/780)        
+2026-04-23T17:58:04.7191440Z remote: Counting objects:  26% (203/780)        
+2026-04-23T17:58:04.7236910Z remote: Counting objects:  27% (211/780)        
+2026-04-23T17:58:04.7274240Z remote: Counting objects:  28% (219/780)        
+2026-04-23T17:58:04.7303820Z remote: Counting objects:  29% (227/780)        
+2026-04-23T17:58:04.7335180Z remote: Counting objects:  30% (234/780)        
+2026-04-23T17:58:04.7369680Z remote: Counting objects:  31% (242/780)        
+2026-04-23T17:58:04.7388260Z remote: Counting objects:  32% (250/780)        
+2026-04-23T17:58:04.7411590Z remote: Counting objects:  33% (258/780)        
+2026-04-23T17:58:04.7441190Z remote: Counting objects:  34% (266/780)        
+2026-04-23T17:58:04.7449770Z remote: Counting objects:  35% (273/780)        
+2026-04-23T17:58:04.7490170Z remote: Counting objects:  36% (281/780)        
+2026-04-23T17:58:04.7514600Z remote: Counting objects:  37% (289/780)        
+2026-04-23T17:58:04.7548690Z remote: Counting objects:  38% (297/780)        
+2026-04-23T17:58:04.7592980Z remote: Counting objects:  39% (305/780)        
+2026-04-23T17:58:04.7619830Z remote: Counting objects:  40% (312/780)        
+2026-04-23T17:58:04.8625180Z remote: Counting objects:  41% (320/780)        
+2026-04-23T17:58:04.9836190Z remote: Counting objects:  42% (328/780)        
+2026-04-23T17:58:05.0045670Z remote: Counting objects:  43% (336/780)        
+2026-04-23T17:58:05.0382450Z remote: Counting objects:  44% (344/780)        
+2026-04-23T17:58:05.0760960Z remote: Counting objects:  45% (351/780)        
+2026-04-23T17:58:05.0941930Z remote: Counting objects:  46% (359/780)        
+2026-04-23T17:58:05.1150820Z remote: Counting objects:  47% (367/780)        
+2026-04-23T17:58:05.1218140Z remote: Counting objects:  48% (375/780)        
+2026-04-23T17:58:05.1280060Z remote: Counting objects:  49% (383/780)        
+2026-04-23T17:58:05.1373710Z remote: Counting objects:  50% (390/780)        
+2026-04-23T17:58:05.2379300Z remote: Counting objects:  51% (398/780)        
+2026-04-23T17:58:05.3381140Z remote: Counting objects:  52% (406/780)        
+2026-04-23T17:58:05.4384400Z remote: Counting objects:  53% (414/780)        
+2026-04-23T17:58:05.5113540Z remote: Counting objects:  54% (422/780)        
+2026-04-23T17:58:05.6117720Z remote: Counting objects:  55% (429/780)        
+2026-04-23T17:58:05.6543220Z remote: Counting objects:  56% (437/780)        
+2026-04-23T17:58:05.6613950Z remote: Counting objects:  57% (445/780)        
+2026-04-23T17:58:05.6744990Z remote: Counting objects:  58% (453/780)        
+2026-04-23T17:58:05.6809320Z remote: Counting objects:  59% (461/780)        
+2026-04-23T17:58:05.6900140Z remote: Counting objects:  60% (468/780)        
+2026-04-23T17:58:05.6935080Z remote: Counting objects:  61% (476/780)        
+2026-04-23T17:58:05.7037260Z remote: Counting objects:  62% (484/780)        
+2026-04-23T17:58:05.7099380Z remote: Counting objects:  63% (492/780)        
+2026-04-23T17:58:05.7183330Z remote: Counting objects:  64% (500/780)        
+2026-04-23T17:58:05.7249200Z remote: Counting objects:  65% (507/780)        
+2026-04-23T17:58:05.7292370Z remote: Counting objects:  66% (515/780)        
+2026-04-23T17:58:05.7329290Z remote: Counting objects:  67% (523/780)        
+2026-04-23T17:58:05.7388650Z remote: Counting objects:  68% (531/780)        
+2026-04-23T17:58:05.7425940Z remote: Counting objects:  69% (539/780)        
+2026-04-23T17:58:05.7475270Z remote: Counting objects:  70% (546/780)        
+2026-04-23T17:58:05.7531050Z remote: Counting objects:  71% (554/780)        
+2026-04-23T17:58:05.7581900Z remote: Counting objects:  72% (562/780)        
+2026-04-23T17:58:05.8203480Z remote: Counting objects:  73% (570/780)        
+2026-04-23T17:58:05.8317020Z remote: Counting objects:  74% (578/780)        
+2026-04-23T17:58:05.8512780Z remote: Counting objects:  75% (585/780)        
+2026-04-23T17:58:05.8577850Z remote: Counting objects:  76% (593/780)        
+2026-04-23T17:58:05.8618420Z remote: Counting objects:  77% (601/780)        
+2026-04-23T17:58:05.8688970Z remote: Counting objects:  78% (609/780)        
+2026-04-23T17:58:05.8751160Z remote: Counting objects:  79% (617/780)        
+2026-04-23T17:58:05.8821290Z remote: Counting objects:  80% (624/780)        
+2026-04-23T17:58:05.8877830Z remote: Counting objects:  81% (632/780)        
+2026-04-23T17:58:05.9013810Z remote: Counting objects:  82% (640/780)        
+2026-04-23T17:58:05.9066510Z remote: Counting objects:  83% (648/780)        
+2026-04-23T17:58:05.9097650Z remote: Counting objects:  84% (656/780)        
+2026-04-23T17:58:05.9152370Z remote: Counting objects:  85% (663/780)        
+2026-04-23T17:58:05.9222280Z remote: Counting objects:  86% (671/780)        
+2026-04-23T17:58:05.9329570Z remote: Counting objects:  87% (679/780)        
+2026-04-23T17:58:05.9379170Z remote: Counting objects:  88% (687/780)        
+2026-04-23T17:58:05.9463510Z remote: Counting objects:  89% (695/780)        
+2026-04-23T17:58:05.9511330Z remote: Counting objects:  90% (702/780)        
+2026-04-23T17:58:05.9623310Z remote: Counting objects:  91% (710/780)        
+2026-04-23T17:58:05.9660550Z remote: Counting objects:  92% (718/780)        
+2026-04-23T17:58:05.9690670Z remote: Counting objects:  93% (726/780)        
+2026-04-23T17:58:05.9748970Z remote: Counting objects:  94% (734/780)        
+2026-04-23T17:58:05.9781260Z remote: Counting objects:  95% (741/780)        
+2026-04-23T17:58:05.9840650Z remote: Counting objects:  96% (749/780)        
+2026-04-23T17:58:05.9874350Z remote: Counting objects:  97% (757/780)        
+2026-04-23T17:58:05.9923330Z remote: Counting objects:  98% (765/780)        
+2026-04-23T17:58:05.9944050Z remote: Counting objects:  99% (773/780)        
+2026-04-23T17:58:05.9985290Z remote: Counting objects: 100% (780/780)        
+2026-04-23T17:58:06.0023230Z remote: Counting objects: 100% (780/780), done.        
+2026-04-23T17:58:06.0106230Z remote: Compressing objects:   0% (1/300)        
+2026-04-23T17:58:06.1111110Z remote: Compressing objects:   1% (3/300)        
+2026-04-23T17:58:06.1945150Z remote: Compressing objects:   2% (6/300)        
+2026-04-23T17:58:06.2035410Z remote: Compressing objects:   3% (9/300)        
+2026-04-23T17:58:06.2127930Z remote: Compressing objects:   4% (12/300)        
+2026-04-23T17:58:06.2203040Z remote: Compressing objects:   5% (15/300)        
+2026-04-23T17:58:06.2280480Z remote: Compressing objects:   6% (18/300)        
+2026-04-23T17:58:06.2539670Z remote: Compressing objects:   7% (21/300)        
+2026-04-23T17:58:06.2547520Z remote: Compressing objects:   8% (24/300)        
+2026-04-23T17:58:06.2650620Z remote: Compressing objects:   9% (27/300)        
+2026-04-23T17:58:06.3655220Z remote: Compressing objects:  10% (30/300)        
+2026-04-23T17:58:06.4659660Z remote: Compressing objects:  11% (33/300)        
+2026-04-23T17:58:06.4720810Z remote: Compressing objects:  12% (36/300)        
+2026-04-23T17:58:06.4799520Z remote: Compressing objects:  13% (39/300)        
+2026-04-23T17:58:06.4832320Z remote: Compressing objects:  14% (42/300)        
+2026-04-23T17:58:06.4893570Z remote: Compressing objects:  15% (45/300)        
+2026-04-23T17:58:06.4969020Z remote: Compressing objects:  16% (48/300)        
+2026-04-23T17:58:06.5084400Z remote: Compressing objects:  17% (51/300)        
+2026-04-23T17:58:06.5144210Z remote: Compressing objects:  18% (54/300)        
+2026-04-23T17:58:06.5379290Z remote: Compressing objects:  19% (57/300)        
+2026-04-23T17:58:06.5430720Z remote: Compressing objects:  20% (60/300)        
+2026-04-23T17:58:06.5472840Z remote: Compressing objects:  21% (63/300)        
+2026-04-23T17:58:06.5567440Z remote: Compressing objects:  22% (66/300)        
+2026-04-23T17:58:06.5622240Z remote: Compressing objects:  23% (69/300)        
+2026-04-23T17:58:06.5665650Z remote: Compressing objects:  24% (72/300)        
+2026-04-23T17:58:06.5714770Z remote: Compressing objects:  25% (75/300)        
+2026-04-23T17:58:06.5763250Z remote: Compressing objects:  26% (78/300)        
+2026-04-23T17:58:06.5797510Z remote: Compressing objects:  27% (81/300)        
+2026-04-23T17:58:06.5813310Z remote: Compressing objects:  28% (84/300)        
+2026-04-23T17:58:06.5845320Z remote: Compressing objects:  29% (87/300)        
+2026-04-23T17:58:06.5879610Z remote: Compressing objects:  30% (90/300)        
+2026-04-23T17:58:06.5899930Z remote: Compressing objects:  31% (93/300)        
+2026-04-23T17:58:06.5934740Z remote: Compressing objects:  32% (96/300)        
+2026-04-23T17:58:06.6012290Z remote: Compressing objects:  33% (99/300)        
+2026-04-23T17:58:06.6051570Z remote: Compressing objects:  34% (102/300)        
+2026-04-23T17:58:06.6084180Z remote: Compressing objects:  35% (105/300)        
+2026-04-23T17:58:06.6144820Z remote: Compressing objects:  36% (108/300)        
+2026-04-23T17:58:06.6195820Z remote: Compressing objects:  37% (111/300)        
+2026-04-23T17:58:06.6236460Z remote: Compressing objects:  38% (114/300)        
+2026-04-23T17:58:06.6301370Z remote: Compressing objects:  39% (117/300)        
+2026-04-23T17:58:06.6338150Z remote: Compressing objects:  40% (120/300)        
+2026-04-23T17:58:06.6371530Z remote: Compressing objects:  41% (123/300)        
+2026-04-23T17:58:06.6487450Z remote: Compressing objects:  42% (126/300)        
+2026-04-23T17:58:06.6540930Z remote: Compressing objects:  43% (129/300)        
+2026-04-23T17:58:06.6614040Z remote: Compressing objects:  44% (132/300)        
+2026-04-23T17:58:06.6691080Z remote: Compressing objects:  45% (135/300)        
+2026-04-23T17:58:06.6735130Z remote: Compressing objects:  46% (138/300)        
+2026-04-23T17:58:06.6778310Z remote: Compressing objects:  47% (141/300)        
+2026-04-23T17:58:06.6803090Z remote: Compressing objects:  48% (144/300)        
+2026-04-23T17:58:06.6841170Z remote: Compressing objects:  49% (147/300)        
+2026-04-23T17:58:06.6898570Z remote: Compressing objects:  50% (150/300)        
+2026-04-23T17:58:06.6936960Z remote: Compressing objects:  51% (153/300)        
+2026-04-23T17:58:06.7020570Z remote: Compressing objects:  52% (156/300)        
+2026-04-23T17:58:06.7058530Z remote: Compressing objects:  53% (159/300)        
+2026-04-23T17:58:06.7109270Z remote: Compressing objects:  54% (162/300)        
+2026-04-23T17:58:06.7144850Z remote: Compressing objects:  55% (165/300)        
+2026-04-23T17:58:06.7182480Z remote: Compressing objects:  56% (168/300)        
+2026-04-23T17:58:06.7207910Z remote: Compressing objects:  57% (171/300)        
+2026-04-23T17:58:06.7239490Z remote: Compressing objects:  58% (174/300)        
+2026-04-23T17:58:06.7269070Z remote: Compressing objects:  59% (177/300)        
+2026-04-23T17:58:06.7329600Z remote: Compressing objects:  60% (180/300)        
+2026-04-23T17:58:06.7331700Z remote: Compressing objects:  61% (183/300)        
+2026-04-23T17:58:06.7379610Z remote: Compressing objects:  62% (186/300)        
+2026-04-23T17:58:06.7440320Z remote: Compressing objects:  63% (189/300)        
+2026-04-23T17:58:06.7488070Z remote: Compressing objects:  64% (192/300)        
+2026-04-23T17:58:06.7519370Z remote: Compressing objects:  65% (195/300)        
+2026-04-23T17:58:06.7567320Z remote: Compressing objects:  66% (198/300)        
+2026-04-23T17:58:06.7600720Z remote: Compressing objects:  67% (201/300)        
+2026-04-23T17:58:06.7630930Z remote: Compressing objects:  68% (204/300)        
+2026-04-23T17:58:06.7657130Z remote: Compressing objects:  69% (207/300)        
+2026-04-23T17:58:06.8661710Z remote: Compressing objects:  70% (210/300)        
+2026-04-23T17:58:06.9553230Z remote: Compressing objects:  71% (213/300)        
+2026-04-23T17:58:06.9646520Z remote: Compressing objects:  72% (216/300)        
+2026-04-23T17:58:06.9792400Z remote: Compressing objects:  73% (219/300)        
+2026-04-23T17:58:07.0060900Z remote: Compressing objects:  74% (222/300)        
+2026-04-23T17:58:07.0404220Z remote: Compressing objects:  75% (225/300)        
+2026-04-23T17:58:07.0458720Z remote: Compressing objects:  76% (228/300)        
+2026-04-23T17:58:07.0514820Z remote: Compressing objects:  77% (231/300)        
+2026-04-23T17:58:07.0560380Z remote: Compressing objects:  78% (234/300)        
+2026-04-23T17:58:07.0623430Z remote: Compressing objects:  79% (237/300)        
+2026-04-23T17:58:07.0659820Z remote: Compressing objects:  80% (240/300)        
+2026-04-23T17:58:07.0741160Z remote: Compressing objects:  81% (243/300)        
+2026-04-23T17:58:07.0906600Z remote: Compressing objects:  82% (246/300)        
+2026-04-23T17:58:07.1013780Z remote: Compressing objects:  83% (249/300)        
+2026-04-23T17:58:07.1069990Z remote: Compressing objects:  84% (252/300)        
+2026-04-23T17:58:07.1131700Z remote: Compressing objects:  85% (255/300)        
+2026-04-23T17:58:07.1199790Z remote: Compressing objects:  86% (258/300)        
+2026-04-23T17:58:07.1251730Z remote: Compressing objects:  87% (261/300)        
+2026-04-23T17:58:07.1291810Z remote: Compressing objects:  88% (264/300)        
+2026-04-23T17:58:07.1345180Z remote: Compressing objects:  89% (267/300)        
+2026-04-23T17:58:07.1408350Z remote: Compressing objects:  90% (270/300)        
+2026-04-23T17:58:07.2412820Z remote: Compressing objects:  91% (273/300)        
+2026-04-23T17:58:07.3350260Z remote: Compressing objects:  92% (276/300)        
+2026-04-23T17:58:07.3538260Z remote: Compressing objects:  93% (279/300)        
+2026-04-23T17:58:07.3730000Z remote: Compressing objects:  94% (282/300)        
+2026-04-23T17:58:07.3855080Z remote: Compressing objects:  95% (285/300)        
+2026-04-23T17:58:07.4090600Z remote: Compressing objects:  96% (288/300)        
+2026-04-23T17:58:07.4216440Z remote: Compressing objects:  97% (291/300)        
+2026-04-23T17:58:07.4270440Z remote: Compressing objects:  98% (294/300)        
+2026-04-23T17:58:07.4405410Z remote: Compressing objects:  99% (297/300)        
+2026-04-23T17:58:07.4473560Z remote: Compressing objects: 100% (300/300)        
+2026-04-23T17:58:07.4558490Z remote: Compressing objects: 100% (300/300), done.        
+2026-04-23T17:58:07.4593590Z Receiving objects:   0% (1/80534)
+2026-04-23T17:58:07.4649690Z Receiving objects:   1% (806/80534)
+2026-04-23T17:58:07.4705610Z Receiving objects:   2% (1611/80534)
+2026-04-23T17:58:07.4758040Z Receiving objects:   3% (2417/80534)
+2026-04-23T17:58:07.4796930Z Receiving objects:   4% (3222/80534)
+2026-04-23T17:58:07.4840980Z Receiving objects:   5% (4027/80534)
+2026-04-23T17:58:07.4924890Z Receiving objects:   6% (4833/80534)
+2026-04-23T17:58:07.4975320Z Receiving objects:   7% (5638/80534)
+2026-04-23T17:58:07.5024460Z Receiving objects:   8% (6443/80534)
+2026-04-23T17:58:07.5083250Z Receiving objects:   9% (7249/80534), 1.62 MiB | 2.45 MiB/s
+2026-04-23T17:58:07.5085500Z Receiving objects:  10% (8054/80534), 1.62 MiB | 2.45 MiB/s
+2026-04-23T17:58:07.5142380Z Receiving objects:  11% (8859/80534), 1.62 MiB | 2.45 MiB/s
+2026-04-23T17:58:07.6155670Z Receiving objects:  12% (9665/80534), 1.62 MiB | 2.45 MiB/s
+2026-04-23T17:58:07.6179500Z Receiving objects:  13% (10470/80534), 1.62 MiB | 2.45 MiB/s
+2026-04-23T17:58:07.6526380Z Receiving objects:  13% (10565/80534), 1.62 MiB | 2.45 MiB/s
+2026-04-23T17:58:07.6786830Z Receiving objects:  14% (11275/80534), 1.62 MiB | 2.45 MiB/s
+2026-04-23T17:58:07.6909800Z Receiving objects:  15% (12081/80534), 7.16 MiB | 6.18 MiB/s
+2026-04-23T17:58:07.6986980Z Receiving objects:  16% (12886/80534), 7.16 MiB | 6.18 MiB/s
+2026-04-23T17:58:07.7076220Z Receiving objects:  17% (13691/80534), 7.16 MiB | 6.18 MiB/s
+2026-04-23T17:58:07.7137050Z Receiving objects:  18% (14497/80534), 7.16 MiB | 6.18 MiB/s
+2026-04-23T17:58:07.7198200Z Receiving objects:  19% (15302/80534), 7.16 MiB | 6.18 MiB/s
+2026-04-23T17:58:07.7259540Z Receiving objects:  20% (16107/80534), 7.16 MiB | 6.18 MiB/s
+2026-04-23T17:58:07.7292180Z Receiving objects:  21% (16913/80534), 7.16 MiB | 6.18 MiB/s
+2026-04-23T17:58:07.7326660Z Receiving objects:  22% (17718/80534), 7.16 MiB | 6.18 MiB/s
+2026-04-23T17:58:07.7380610Z Receiving objects:  23% (18523/80534), 7.16 MiB | 6.18 MiB/s
+2026-04-23T17:58:07.7480720Z Receiving objects:  24% (19329/80534), 10.95 MiB | 6.32 MiB/s
+2026-04-23T17:58:07.7534860Z Receiving objects:  25% (20134/80534), 10.95 MiB | 6.32 MiB/s
+2026-04-23T17:58:07.7592270Z Receiving objects:  26% (20939/80534), 10.95 MiB | 6.32 MiB/s
+2026-04-23T17:58:07.7635580Z Receiving objects:  27% (21745/80534), 10.95 MiB | 6.32 MiB/s
+2026-04-23T17:58:07.7680450Z Receiving objects:  28% (22550/80534), 10.95 MiB | 6.32 MiB/s
+2026-04-23T17:58:07.7977340Z Receiving objects:  29% (23355/80534), 10.95 MiB | 6.32 MiB/s
+2026-04-23T17:58:07.8134360Z Receiving objects:  30% (24161/80534), 10.95 MiB | 6.32 MiB/s
+2026-04-23T17:58:07.8165960Z Receiving objects:  31% (24966/80534), 10.95 MiB | 6.32 MiB/s
+2026-04-23T17:58:07.8202340Z Receiving objects:  32% (25771/80534), 10.95 MiB | 6.32 MiB/s
+2026-04-23T17:58:07.8269830Z Receiving objects:  33% (26577/80534), 10.95 MiB | 6.32 MiB/s
+2026-04-23T17:58:07.8336610Z Receiving objects:  34% (27382/80534), 10.95 MiB | 6.32 MiB/s
+2026-04-23T17:58:07.8379580Z Receiving objects:  35% (28187/80534), 10.95 MiB | 6.32 MiB/s
+2026-04-23T17:58:07.8534560Z Receiving objects:  35% (28188/80534), 10.95 MiB | 6.32 MiB/s
+2026-04-23T17:58:07.8584750Z Receiving objects:  36% (28993/80534), 10.95 MiB | 6.32 MiB/s
+2026-04-23T17:58:07.8606350Z Receiving objects:  37% (29798/80534), 10.95 MiB | 6.32 MiB/s
+2026-04-23T17:58:07.8640820Z Receiving objects:  38% (30603/80534), 17.32 MiB | 7.76 MiB/s
+2026-04-23T17:58:07.8673160Z Receiving objects:  39% (31409/80534), 17.32 MiB | 7.76 MiB/s
+2026-04-23T17:58:07.8750970Z Receiving objects:  40% (32214/80534), 17.32 MiB | 7.76 MiB/s
+2026-04-23T17:58:07.8796270Z Receiving objects:  41% (33019/80534), 17.32 MiB | 7.76 MiB/s
+2026-04-23T17:58:07.8833460Z Receiving objects:  42% (33825/80534), 17.32 MiB | 7.76 MiB/s
+2026-04-23T17:58:07.8982430Z Receiving objects:  43% (34630/80534), 17.32 MiB | 7.76 MiB/s
+2026-04-23T17:58:07.9989550Z Receiving objects:  44% (35435/80534), 17.32 MiB | 7.76 MiB/s
+2026-04-23T17:58:08.0620230Z Receiving objects:  45% (36241/80534), 17.32 MiB | 7.76 MiB/s
+2026-04-23T17:58:08.0657510Z Receiving objects:  46% (37046/80534), 17.32 MiB | 7.76 MiB/s
+2026-04-23T17:58:08.0699700Z Receiving objects:  47% (37851/80534), 17.32 MiB | 7.76 MiB/s
+2026-04-23T17:58:08.0749080Z Receiving objects:  48% (38657/80534), 25.52 MiB | 9.34 MiB/s
+2026-04-23T17:58:08.0787000Z Receiving objects:  48% (39241/80534), 25.52 MiB | 9.34 MiB/s
+2026-04-23T17:58:08.0929270Z Receiving objects:  49% (39462/80534), 25.52 MiB | 9.34 MiB/s
+2026-04-23T17:58:08.0988280Z Receiving objects:  50% (40267/80534), 30.58 MiB | 9.30 MiB/s
+2026-04-23T17:58:08.1043260Z Receiving objects:  51% (41073/80534), 30.58 MiB | 9.30 MiB/s
+2026-04-23T17:58:08.1205140Z Receiving objects:  52% (41878/80534), 30.58 MiB | 9.30 MiB/s
+2026-04-23T17:58:08.1286110Z Receiving objects:  53% (42684/80534), 30.58 MiB | 9.30 MiB/s
+2026-04-23T17:58:08.1320640Z Receiving objects:  54% (43489/80534), 30.58 MiB | 9.30 MiB/s
+2026-04-23T17:58:08.3299730Z Receiving objects:  55% (44294/80534), 30.58 MiB | 9.30 MiB/s
+2026-04-23T17:58:08.3418570Z Receiving objects:  56% (45100/80534), 30.58 MiB | 9.30 MiB/s
+2026-04-23T17:58:08.3471600Z Receiving objects:  57% (45905/80534), 30.58 MiB | 9.30 MiB/s
+2026-04-23T17:58:08.3570440Z Receiving objects:  58% (46710/80534), 30.58 MiB | 9.30 MiB/s
+2026-04-23T17:58:08.3605020Z Receiving objects:  59% (47516/80534), 30.58 MiB | 9.30 MiB/s
+2026-04-23T17:58:08.3912690Z Receiving objects:  60% (48321/80534), 30.58 MiB | 9.30 MiB/s
+2026-04-23T17:58:08.5969710Z Receiving objects:  61% (49126/80534), 30.58 MiB | 9.30 MiB/s
+2026-04-23T17:58:08.6045660Z Receiving objects:  62% (49932/80534), 35.15 MiB | 9.28 MiB/s
+2026-04-23T17:58:08.6080560Z Receiving objects:  63% (50737/80534), 35.15 MiB | 9.28 MiB/s
+2026-04-23T17:58:08.6229020Z Receiving objects:  64% (51542/80534), 35.15 MiB | 9.28 MiB/s
+2026-04-23T17:58:08.6484220Z Receiving objects:  65% (52348/80534), 35.15 MiB | 9.28 MiB/s
+2026-04-23T17:58:08.6734600Z Receiving objects:  66% (53153/80534), 35.15 MiB | 9.28 MiB/s
+2026-04-23T17:58:08.6900440Z Receiving objects:  67% (53958/80534), 35.15 MiB | 9.28 MiB/s
+2026-04-23T17:58:08.7174530Z Receiving objects:  68% (54764/80534), 35.15 MiB | 9.28 MiB/s
+2026-04-23T17:58:08.7376990Z Receiving objects:  69% (55569/80534), 35.15 MiB | 9.28 MiB/s
+2026-04-23T17:58:08.7632940Z Receiving objects:  69% (55780/80534), 35.15 MiB | 9.28 MiB/s
+2026-04-23T17:58:08.9576110Z Receiving objects:  70% (56374/80534), 35.15 MiB | 9.28 MiB/s
+2026-04-23T17:58:08.9922380Z Receiving objects:  71% (57180/80534), 35.15 MiB | 9.28 MiB/s
+2026-04-23T17:58:09.0060030Z Receiving objects:  72% (57985/80534), 35.15 MiB | 9.28 MiB/s
+2026-04-23T17:58:09.0181330Z Receiving objects:  73% (58790/80534), 35.15 MiB | 9.28 MiB/s
+2026-04-23T17:58:09.2262590Z Receiving objects:  74% (59596/80534), 35.15 MiB | 9.28 MiB/s
+2026-04-23T17:58:09.6985170Z Receiving objects:  75% (60401/80534), 42.13 MiB | 9.82 MiB/s
+2026-04-23T17:58:09.6994100Z Receiving objects:  76% (61206/80534), 48.08 MiB | 10.04 MiB/s
+2026-04-23T17:58:09.7993950Z Receiving objects:  77% (62012/80534), 48.08 MiB | 10.04 MiB/s
+2026-04-23T17:58:09.8485450Z Receiving objects:  78% (62817/80534), 48.08 MiB | 10.04 MiB/s
+2026-04-23T17:58:09.8619990Z Receiving objects:  79% (63622/80534), 48.08 MiB | 10.04 MiB/s
+2026-04-23T17:58:09.9626410Z Receiving objects:  80% (64428/80534), 48.08 MiB | 10.04 MiB/s
+2026-04-23T17:58:10.0071960Z Receiving objects:  81% (65233/80534), 48.08 MiB | 10.04 MiB/s
+2026-04-23T17:58:10.1078080Z Receiving objects:  81% (65326/80534), 48.08 MiB | 10.04 MiB/s
+2026-04-23T17:58:10.1222100Z Receiving objects:  82% (66038/80534), 48.08 MiB | 10.04 MiB/s
+2026-04-23T17:58:10.1403280Z Receiving objects:  83% (66844/80534), 51.72 MiB | 10.79 MiB/s
+2026-04-23T17:58:10.1460320Z Receiving objects:  84% (67649/80534), 51.72 MiB | 10.79 MiB/s
+2026-04-23T17:58:10.1769600Z Receiving objects:  85% (68454/80534), 51.72 MiB | 10.79 MiB/s
+2026-04-23T17:58:10.1798490Z Receiving objects:  86% (69260/80534), 51.72 MiB | 10.79 MiB/s
+2026-04-23T17:58:10.1881140Z Receiving objects:  87% (70065/80534), 51.72 MiB | 10.79 MiB/s
+2026-04-23T17:58:10.1917750Z Receiving objects:  88% (70870/80534), 51.72 MiB | 10.79 MiB/s
+2026-04-23T17:58:10.1992240Z Receiving objects:  89% (71676/80534), 51.72 MiB | 10.79 MiB/s
+2026-04-23T17:58:10.2309220Z Receiving objects:  90% (72481/80534), 51.72 MiB | 10.79 MiB/s
+2026-04-23T17:58:10.2643670Z Receiving objects:  91% (73286/80534), 51.72 MiB | 10.79 MiB/s
+2026-04-23T17:58:10.5725150Z Receiving objects:  92% (74092/80534), 51.72 MiB | 10.79 MiB/s
+2026-04-23T17:58:10.6630830Z Receiving objects:  93% (74897/80534), 55.44 MiB | 10.39 MiB/s
+2026-04-23T17:58:10.7201000Z Receiving objects:  94% (75702/80534), 55.44 MiB | 10.39 MiB/s
+2026-04-23T17:58:10.7390190Z Receiving objects:  95% (76508/80534), 55.44 MiB | 10.39 MiB/s
+2026-04-23T17:58:10.7607090Z Receiving objects:  95% (77063/80534), 55.44 MiB | 10.39 MiB/s
+2026-04-23T17:58:10.7771690Z Receiving objects:  96% (77313/80534), 55.44 MiB | 10.39 MiB/s
+2026-04-23T17:58:10.9778830Z Receiving objects:  97% (78118/80534), 55.44 MiB | 10.39 MiB/s
+2026-04-23T17:58:11.0782790Z Receiving objects:  98% (78924/80534), 55.44 MiB | 10.39 MiB/s
+2026-04-23T17:58:11.1719780Z Receiving objects:  99% (79729/80534), 55.44 MiB | 10.39 MiB/s
+2026-04-23T17:58:11.2014110Z remote: Total 80534 (delta 610), reused 511 (delta 480), pack-reused 79754 (from 6)        
+2026-04-23T17:58:11.2761280Z Receiving objects: 100% (80534/80534), 60.81 MiB | 10.64 MiB/s
+2026-04-23T17:58:11.3056640Z Receiving objects: 100% (80534/80534), 61.06 MiB | 9.48 MiB/s, done.
+2026-04-23T17:58:11.3115980Z Resolving deltas:   0% (0/54883)
+2026-04-23T17:58:11.3185950Z Resolving deltas:   1% (550/54883)
+2026-04-23T17:58:11.3229530Z Resolving deltas:   2% (1098/54883)
+2026-04-23T17:58:11.3282890Z Resolving deltas:   3% (1647/54883)
+2026-04-23T17:58:11.3455250Z Resolving deltas:   4% (2196/54883)
+2026-04-23T17:58:11.3893710Z Resolving deltas:   5% (2745/54883)
+2026-04-23T17:58:11.5038400Z Resolving deltas:   6% (3293/54883)
+2026-04-23T17:58:11.6454130Z Resolving deltas:   7% (3842/54883)
+2026-04-23T17:58:11.8637360Z Resolving deltas:   8% (4391/54883)
+2026-04-23T17:58:12.0452210Z Resolving deltas:   9% (4940/54883)
+2026-04-23T17:58:12.0961080Z Resolving deltas:  10% (5489/54883)
+2026-04-23T17:58:12.2061120Z Resolving deltas:  11% (6038/54883)
+2026-04-23T17:58:12.3309740Z Resolving deltas:  12% (6586/54883)
+2026-04-23T17:58:12.3967700Z Resolving deltas:  12% (7050/54883)
+2026-04-23T17:58:12.7710340Z Resolving deltas:  13% (7135/54883)
+2026-04-23T17:58:13.1853290Z Resolving deltas:  14% (7684/54883)
+2026-04-23T17:58:13.1984690Z Resolving deltas:  15% (8233/54883)
+2026-04-23T17:58:13.2567200Z Resolving deltas:  15% (8511/54883)
+2026-04-23T17:58:13.4652750Z Resolving deltas:  16% (8782/54883)
+2026-04-23T17:58:13.4887800Z Resolving deltas:  17% (9331/54883)
+2026-04-23T17:58:13.5239080Z Resolving deltas:  18% (9879/54883)
+2026-04-23T17:58:13.7603060Z Resolving deltas:  19% (10428/54883)
+2026-04-23T17:58:13.9728070Z Resolving deltas:  20% (10977/54883)
+2026-04-23T17:58:13.9980520Z Resolving deltas:  21% (11526/54883)
+2026-04-23T17:58:14.1207630Z Resolving deltas:  22% (12075/54883)
+2026-04-23T17:58:14.1268320Z Resolving deltas:  23% (12624/54883)
+2026-04-23T17:58:14.1308180Z Resolving deltas:  24% (13172/54883)
+2026-04-23T17:58:14.1566860Z Resolving deltas:  25% (13721/54883)
+2026-04-23T17:58:14.2660360Z Resolving deltas:  26% (14270/54883)
+2026-04-23T17:58:14.3672640Z Resolving deltas:  26% (14578/54883)
+2026-04-23T17:58:14.4680750Z Resolving deltas:  27% (14819/54883)
+2026-04-23T17:58:14.4947440Z Resolving deltas:  28% (15368/54883)
+2026-04-23T17:58:14.4982480Z Resolving deltas:  29% (15917/54883)
+2026-04-23T17:58:14.5247610Z Resolving deltas:  30% (16465/54883)
+2026-04-23T17:58:14.5358890Z Resolving deltas:  31% (17014/54883)
+2026-04-23T17:58:14.5409240Z Resolving deltas:  32% (17563/54883)
+2026-04-23T17:58:14.5810690Z Resolving deltas:  33% (18112/54883)
+2026-04-23T17:58:14.5865160Z Resolving deltas:  34% (18661/54883)
+2026-04-23T17:58:14.5972020Z Resolving deltas:  35% (19210/54883)
+2026-04-23T17:58:14.6058670Z Resolving deltas:  36% (19758/54883)
+2026-04-23T17:58:14.6330050Z Resolving deltas:  37% (20307/54883)
+2026-04-23T17:58:14.8098080Z Resolving deltas:  38% (20856/54883)
+2026-04-23T17:58:14.8162780Z Resolving deltas:  39% (21405/54883)
+2026-04-23T17:58:14.8180120Z Resolving deltas:  40% (21954/54883)
+2026-04-23T17:58:14.8264760Z Resolving deltas:  41% (22503/54883)
+2026-04-23T17:58:14.8329420Z Resolving deltas:  42% (23051/54883)
+2026-04-23T17:58:14.8487600Z Resolving deltas:  43% (23600/54883)
+2026-04-23T17:58:14.8715550Z Resolving deltas:  44% (24149/54883)
+2026-04-23T17:58:14.8891500Z Resolving deltas:  45% (24698/54883)
+2026-04-23T17:58:14.8974360Z Resolving deltas:  46% (25247/54883)
+2026-04-23T17:58:14.9130290Z Resolving deltas:  47% (25796/54883)
+2026-04-23T17:58:15.0673590Z Resolving deltas:  48% (26344/54883)
+2026-04-23T17:58:15.0730770Z Resolving deltas:  49% (26893/54883)
+2026-04-23T17:58:15.0839560Z Resolving deltas:  50% (27442/54883)
+2026-04-23T17:58:15.1005580Z Resolving deltas:  51% (27991/54883)
+2026-04-23T17:58:15.1036970Z Resolving deltas:  52% (28540/54883)
+2026-04-23T17:58:15.1068500Z Resolving deltas:  53% (29088/54883)
+2026-04-23T17:58:15.1108990Z Resolving deltas:  54% (29637/54883)
+2026-04-23T17:58:15.1137860Z Resolving deltas:  55% (30186/54883)
+2026-04-23T17:58:15.1179090Z Resolving deltas:  56% (30735/54883)
+2026-04-23T17:58:15.1397450Z Resolving deltas:  57% (31284/54883)
+2026-04-23T17:58:15.1571580Z Resolving deltas:  58% (31833/54883)
+2026-04-23T17:58:15.2718740Z Resolving deltas:  59% (32381/54883)
+2026-04-23T17:58:15.3719830Z Resolving deltas:  59% (32685/54883)
+2026-04-23T17:58:15.4723670Z Resolving deltas:  60% (32930/54883)
+2026-04-23T17:58:15.5726970Z Resolving deltas:  61% (33479/54883)
+2026-04-23T17:58:15.6729640Z Resolving deltas:  62% (34028/54883)
+2026-04-23T17:58:15.7078350Z Resolving deltas:  63% (34577/54883)
+2026-04-23T17:58:15.7131030Z Resolving deltas:  64% (35126/54883)
+2026-04-23T17:58:15.7146030Z Resolving deltas:  65% (35674/54883)
+2026-04-23T17:58:15.7217420Z Resolving deltas:  66% (36223/54883)
+2026-04-23T17:58:15.7294590Z Resolving deltas:  67% (36772/54883)
+2026-04-23T17:58:15.7385880Z Resolving deltas:  68% (37321/54883)
+2026-04-23T17:58:15.7480590Z Resolving deltas:  69% (37870/54883)
+2026-04-23T17:58:15.7518710Z Resolving deltas:  70% (38419/54883)
+2026-04-23T17:58:15.7554050Z Resolving deltas:  71% (38967/54883)
+2026-04-23T17:58:15.7655850Z Resolving deltas:  72% (39517/54883)
+2026-04-23T17:58:15.7834590Z Resolving deltas:  73% (40065/54883)
+2026-04-23T17:58:15.9410200Z Resolving deltas:  74% (40614/54883)
+2026-04-23T17:58:15.9499850Z Resolving deltas:  75% (41163/54883)
+2026-04-23T17:58:15.9643750Z Resolving deltas:  76% (41712/54883)
+2026-04-23T17:58:15.9863020Z Resolving deltas:  77% (42260/54883)
+2026-04-23T17:58:15.9909220Z Resolving deltas:  78% (42809/54883)
+2026-04-23T17:58:15.9961720Z Resolving deltas:  79% (43359/54883)
+2026-04-23T17:58:15.9999620Z Resolving deltas:  80% (43907/54883)
+2026-04-23T17:58:16.0033540Z Resolving deltas:  81% (44456/54883)
+2026-04-23T17:58:16.0200580Z Resolving deltas:  82% (45005/54883)
+2026-04-23T17:58:16.0424400Z Resolving deltas:  83% (45553/54883)
+2026-04-23T17:58:16.1484340Z Resolving deltas:  84% (46102/54883)
+2026-04-23T17:58:16.1938580Z Resolving deltas:  85% (46651/54883)
+2026-04-23T17:58:16.1989410Z Resolving deltas:  86% (47200/54883)
+2026-04-23T17:58:16.2030490Z Resolving deltas:  87% (47749/54883)
+2026-04-23T17:58:16.2152760Z Resolving deltas:  88% (48298/54883)
+2026-04-23T17:58:16.2221240Z Resolving deltas:  89% (48846/54883)
+2026-04-23T17:58:16.2305210Z Resolving deltas:  90% (49395/54883)
+2026-04-23T17:58:16.2340450Z Resolving deltas:  91% (49944/54883)
+2026-04-23T17:58:16.2373890Z Resolving deltas:  91% (50491/54883)
+2026-04-23T17:58:16.2423540Z Resolving deltas:  92% (50493/54883)
+2026-04-23T17:58:16.2536920Z Resolving deltas:  93% (51042/54883)
+2026-04-23T17:58:16.2573800Z Resolving deltas:  94% (51591/54883)
+2026-04-23T17:58:16.2609220Z Resolving deltas:  95% (52139/54883)
+2026-04-23T17:58:16.2706320Z Resolving deltas:  96% (52689/54883)
+2026-04-23T17:58:16.3984680Z Resolving deltas:  97% (53237/54883)
+2026-04-23T17:58:16.4988040Z Resolving deltas:  98% (53787/54883)
+2026-04-23T17:58:16.5174660Z Resolving deltas:  99% (54335/54883)
+2026-04-23T17:58:16.5201070Z Resolving deltas: 100% (54883/54883)
+2026-04-23T17:58:16.5264650Z Resolving deltas: 100% (54883/54883), done.
+2026-04-23T17:58:17.5208630Z From https://github.com/Azure/azure-iot-sdk-c
+2026-04-23T17:58:17.5243350Z  * [new branch]          SecInfoInSample            -> origin/SecInfoInSample
+2026-04-23T17:58:17.5362920Z  * [new branch]          dane/fixtypo               -> origin/dane/fixtypo
+2026-04-23T17:58:17.5412640Z  * [new branch]          dawalton/cbor              -> origin/dawalton/cbor
+2026-04-23T17:58:17.5463740Z  * [new branch]          dawalton/cbortweak         -> origin/dawalton/cbortweak
+2026-04-23T17:58:17.5663740Z  * [new branch]          ds_version                 -> origin/ds_version
+2026-04-23T17:58:17.5705030Z  * [new branch]          ericwol/prov_lib_so        -> origin/ericwol/prov_lib_so
+2026-04-23T17:58:17.5729070Z  * [new branch]          ewertons/1.3.9+1f4fd95b2   -> origin/ewertons/1.3.9+1f4fd95b2
+2026-04-23T17:58:17.5741410Z  * [new branch]          ewertons/1.9.0+1f4fd95b2   -> origin/ewertons/1.9.0+1f4fd95b2
+2026-04-23T17:58:17.5814020Z  * [new branch]          ewertons/addbatchtelemetrye2etest -> origin/ewertons/addbatchtelemetrye2etest
+2026-04-23T17:58:17.5903130Z  * [new branch]          ewertons/check1esvm        -> origin/ewertons/check1esvm
+2026-04-23T17:58:17.5959960Z  * [new branch]          ewertons/horton-fixes      -> origin/ewertons/horton-fixes
+2026-04-23T17:58:17.6047330Z  * [new branch]          ewertons/new1eswinpool     -> origin/ewertons/new1eswinpool
+2026-04-23T17:58:17.6106100Z  * [new branch]          ewertons/openssl-no-engine -> origin/ewertons/openssl-no-engine
+2026-04-23T17:58:17.6143640Z  * [new branch]          ewertons/pipelinefixes     -> origin/ewertons/pipelinefixes
+2026-04-23T17:58:17.6158250Z  * [new branch]          ewertons/reenableu2b       -> origin/ewertons/reenableu2b
+2026-04-23T17:58:17.6180920Z  * [new branch]          ewertons/testtls           -> origin/ewertons/testtls
+2026-04-23T17:58:17.6223620Z  * [new branch]          ewertons/testtls2          -> origin/ewertons/testtls2
+2026-04-23T17:58:17.6251630Z  * [new branch]          ewertons/tlsioschannel     -> origin/ewertons/tlsioschannel
+2026-04-23T17:58:17.6269570Z  * [new branch]          ewertons/u2b_x509_sample   -> origin/ewertons/u2b_x509_sample
+2026-04-23T17:58:17.6295760Z  * [new branch]          ewertons/upload_to_blob_dps_x509-sample -> origin/ewertons/upload_to_blob_dps_x509-sample
+2026-04-23T17:58:17.6329570Z  * [new branch]          feature/dps-csr-20250701-private-preview -> origin/feature/dps-csr-20250701-private-preview
+2026-04-23T17:58:17.6364440Z  * [new branch]          feature/dps-csr-preview    -> origin/feature/dps-csr-preview
+2026-04-23T17:58:17.6391020Z  * [new branch]          feature/iot_pnp_stage_merge2 -> origin/feature/iot_pnp_stage_merge2
+2026-04-23T17:58:17.6411540Z  * [new branch]          gh-pages                   -> origin/gh-pages
+2026-04-23T17:58:17.6445910Z  * [new branch]          jose/fix_warning_erros     -> origin/jose/fix_warning_erros
+2026-04-23T17:58:17.6482600Z  * [new branch]          jose/removeAuthDataLogging -> origin/jose/removeAuthDataLogging
+2026-04-23T17:58:17.6501850Z  * [new branch]          jose/removeAuthLogging     -> origin/jose/removeAuthLogging
+2026-04-23T17:58:17.6521350Z  * [new branch]          jspaith/warning_experiment -> origin/jspaith/warning_experiment
+2026-04-23T17:58:17.6537920Z  * [new branch]          lts_01_2021                -> origin/lts_01_2021
+2026-04-23T17:58:17.6567430Z  * [new branch]          lts_01_2022                -> origin/lts_01_2022
+2026-04-23T17:58:17.6610820Z  * [new branch]          lts_01_2023                -> origin/lts_01_2023
+2026-04-23T17:58:17.6641630Z  * [new branch]          lts_02                     -> origin/lts_02
+2026-04-23T17:58:17.6704170Z  * [new branch]          lts_03_2024                -> origin/lts_03_2024
+2026-04-23T17:58:17.6791950Z  * [new branch]          lts_03_2025                -> origin/lts_03_2025
+2026-04-23T17:58:17.6821640Z  * [new branch]          lts_07_2021                -> origin/lts_07_2021
+2026-04-23T17:58:17.6858170Z  * [new branch]          lts_07_2022                -> origin/lts_07_2022
+2026-04-23T17:58:17.6872090Z  * [new branch]          lts_08_2023                -> origin/lts_08_2023
+2026-04-23T17:58:17.6895710Z  * [new branch]          lts_08_2024                -> origin/lts_08_2024
+2026-04-23T17:58:17.6922510Z  * [new branch]          main                       -> origin/main
+2026-04-23T17:58:17.6933290Z  * [new branch]          public-preview             -> origin/public-preview
+2026-04-23T17:58:17.6953610Z  * [new branch]          public-preview-DeviceStreaming -> origin/public-preview-DeviceStreaming
+2026-04-23T17:58:17.6990550Z  * [new branch]          public-preview-cert-mgmt   -> origin/public-preview-cert-mgmt
+2026-04-23T17:58:17.7053210Z  * [new branch]          public-preview-ecc         -> origin/public-preview-ecc
+2026-04-23T17:58:17.7126540Z  * [new branch]          subup-202205111027         -> origin/subup-202205111027
+2026-04-23T17:58:17.7140490Z  * [new branch]          tke/enobufs                -> origin/tke/enobufs
+2026-04-23T17:58:17.7160040Z  * [new branch]          uhttp_upload               -> origin/uhttp_upload
+2026-04-23T17:58:17.7188890Z  * [new branch]          vaavva/vsnprintf-fix       -> origin/vaavva/vsnprintf-fix
+2026-04-23T17:58:17.7249370Z  * [new tag]             1.0.0-pre-release-1.0.7-h  -> 1.0.0-pre-release-1.0.7-h
+2026-04-23T17:58:17.7283180Z  * [new tag]             1.0.0-pre-release-1.0.8    -> 1.0.0-pre-release-1.0.8
+2026-04-23T17:58:17.7300500Z  * [new tag]             1.0.0-pre-release-1.0.9    -> 1.0.0-pre-release-1.0.9
+2026-04-23T17:58:17.7331680Z  * [new tag]             1.10.1                     -> 1.10.1
+2026-04-23T17:58:17.7362540Z  * [new tag]             1.11.0                     -> 1.11.0
+2026-04-23T17:58:17.7392040Z  * [new tag]             1.12.0                     -> 1.12.0
+2026-04-23T17:58:17.7430930Z  * [new tag]             1.13.0                     -> 1.13.0
+2026-04-23T17:58:17.7462080Z  * [new tag]             1.14.0                     -> 1.14.0
+2026-04-23T17:58:17.7483120Z  * [new tag]             1.2.1                      -> 1.2.1
+2026-04-23T17:58:17.7495560Z  * [new tag]             1.2.10                     -> 1.2.10
+2026-04-23T17:58:17.7516610Z  * [new tag]             1.2.11                     -> 1.2.11
+2026-04-23T17:58:17.7534980Z  * [new tag]             1.2.12                     -> 1.2.12
+2026-04-23T17:58:17.7560620Z  * [new tag]             1.2.13                     -> 1.2.13
+2026-04-23T17:58:17.7566580Z  * [new tag]             1.2.14                     -> 1.2.14
+2026-04-23T17:58:17.7575290Z  * [new tag]             1.2.2                      -> 1.2.2
+2026-04-23T17:58:17.7584130Z  * [new tag]             1.2.3                      -> 1.2.3
+2026-04-23T17:58:17.7594750Z  * [new tag]             1.2.4                      -> 1.2.4
+2026-04-23T17:58:17.7607490Z  * [new tag]             1.2.5                      -> 1.2.5
+2026-04-23T17:58:17.7614120Z  * [new tag]             1.2.6                      -> 1.2.6
+2026-04-23T17:58:17.7627120Z  * [new tag]             1.2.7                      -> 1.2.7
+2026-04-23T17:58:17.7641600Z  * [new tag]             1.2.8                      -> 1.2.8
+2026-04-23T17:58:17.7651450Z  * [new tag]             1.2.9                      -> 1.2.9
+2026-04-23T17:58:17.7655830Z  * [new tag]             1.3.0                      -> 1.3.0
+2026-04-23T17:58:17.7675660Z  * [new tag]             1.3.1                      -> 1.3.1
+2026-04-23T17:58:17.7684430Z  * [new tag]             1.3.10                     -> 1.3.10
+2026-04-23T17:58:17.7703490Z  * [new tag]             1.3.2                      -> 1.3.2
+2026-04-23T17:58:17.7722710Z  * [new tag]             1.3.3                      -> 1.3.3
+2026-04-23T17:58:17.7734960Z  * [new tag]             1.3.4                      -> 1.3.4
+2026-04-23T17:58:17.7755480Z  * [new tag]             1.3.5                      -> 1.3.5
+2026-04-23T17:58:17.7775210Z  * [new tag]             1.3.6                      -> 1.3.6
+2026-04-23T17:58:17.7794310Z  * [new tag]             1.3.7                      -> 1.3.7
+2026-04-23T17:58:17.7802400Z  * [new tag]             1.3.8                      -> 1.3.8
+2026-04-23T17:58:17.7825630Z  * [new tag]             1.3.9                      -> 1.3.9
+2026-04-23T17:58:17.7830820Z  * [new tag]             1.4.0                      -> 1.4.0
+2026-04-23T17:58:17.7840620Z  * [new tag]             1.4.1                      -> 1.4.1
+2026-04-23T17:58:17.7856420Z  * [new tag]             1.5.0                      -> 1.5.0
+2026-04-23T17:58:17.7871670Z  * [new tag]             1.6.0                      -> 1.6.0
+2026-04-23T17:58:17.7874200Z  * [new tag]             1.7.0                      -> 1.7.0
+2026-04-23T17:58:17.7889720Z  * [new tag]             1.8.0                      -> 1.8.0
+2026-04-23T17:58:17.7894530Z  * [new tag]             1.9.0                      -> 1.9.0
+2026-04-23T17:58:17.7905090Z  * [new tag]             1.9.1                      -> 1.9.1
+2026-04-23T17:58:17.7920040Z  * [new tag]             2015-11-13                 -> 2015-11-13
+2026-04-23T17:58:17.7925250Z  * [new tag]             2015-11-30                 -> 2015-11-30
+2026-04-23T17:58:17.7938450Z  * [new tag]             2015-12-17                 -> 2015-12-17
+2026-04-23T17:58:17.7955810Z  * [new tag]             2016-01-15                 -> 2016-01-15
+2026-04-23T17:58:17.7966450Z  * [new tag]             2016-02-03                 -> 2016-02-03
+2026-04-23T17:58:17.7969560Z  * [new tag]             2016-02-16                 -> 2016-02-16
+2026-04-23T17:58:17.7985850Z  * [new tag]             2016-03-11                 -> 2016-03-11
+2026-04-23T17:58:17.7996610Z  * [new tag]             2016-03-28                 -> 2016-03-28
+2026-04-23T17:58:17.8000830Z  * [new tag]             2016-04-08                 -> 2016-04-08
+2026-04-23T17:58:17.8016500Z  * [new tag]             2016-04-22                 -> 2016-04-22
+2026-04-23T17:58:17.9022410Z  * [new tag]             2016-05-06                 -> 2016-05-06
+2026-04-23T17:58:17.9024080Z  * [new tag]             2016-05-20                 -> 2016-05-20
+2026-04-23T17:58:17.9025580Z  * [new tag]             2016-06-03                 -> 2016-06-03
+2026-04-23T17:58:17.9026930Z  * [new tag]             2016-06-17                 -> 2016-06-17
+2026-04-23T17:58:17.9028350Z  * [new tag]             2016-06-30                 -> 2016-06-30
+2026-04-23T17:58:17.9750280Z  * [new tag]             2016-07-15                 -> 2016-07-15
+2026-04-23T17:58:17.9893020Z  * [new tag]             2016-07-29                 -> 2016-07-29
+2026-04-23T17:58:17.9904180Z  * [new tag]             2016-08-15                 -> 2016-08-15
+2026-04-23T17:58:17.9938370Z  * [new tag]             2016-08-26                 -> 2016-08-26
+2026-04-23T17:58:17.9966280Z  * [new tag]             2016-09-09                 -> 2016-09-09
+2026-04-23T17:58:17.9986110Z  * [new tag]             2016-09-26                 -> 2016-09-26
+2026-04-23T17:58:18.0043240Z  * [new tag]             2016-10-14                 -> 2016-10-14
+2026-04-23T17:58:18.0100310Z  * [new tag]             2016-12-06                 -> 2016-12-06
+2026-04-23T17:58:18.0145440Z  * [new tag]             2017-01-06                 -> 2017-01-06
+2026-04-23T17:58:18.0198520Z  * [new tag]             2017-01-13                 -> 2017-01-13
+2026-04-23T17:58:18.0223150Z  * [new tag]             2017-01-20                 -> 2017-01-20
+2026-04-23T17:58:18.0249830Z  * [new tag]             2017-01-27                 -> 2017-01-27
+2026-04-23T17:58:18.0258910Z  * [new tag]             2017-02-10                 -> 2017-02-10
+2026-04-23T17:58:18.0276890Z  * [new tag]             2017-02-24                 -> 2017-02-24
+2026-04-23T17:58:18.0288500Z  * [new tag]             2017-03-10                 -> 2017-03-10
+2026-04-23T17:58:18.0325170Z  * [new tag]             2017-03-24                 -> 2017-03-24
+2026-04-23T17:58:18.0357130Z  * [new tag]             2017-04-06                 -> 2017-04-06
+2026-04-23T17:58:18.0370290Z  * [new tag]             2017-04-07                 -> 2017-04-07
+2026-04-23T17:58:18.0396620Z  * [new tag]             2017-04-21                 -> 2017-04-21
+2026-04-23T17:58:18.0420540Z  * [new tag]             2017-05-05                 -> 2017-05-05
+2026-04-23T17:58:18.0426080Z  * [new tag]             2017-05-19                 -> 2017-05-19
+2026-04-23T17:58:18.0453790Z  * [new tag]             2017-06-02                 -> 2017-06-02
+2026-04-23T17:58:18.0458510Z  * [new tag]             2017-06-16                 -> 2017-06-16
+2026-04-23T17:58:18.0477780Z  * [new tag]             2017-06-16-test2           -> 2017-06-16-test2
+2026-04-23T17:58:18.0485170Z  * [new tag]             2017-06-30                 -> 2017-06-30
+2026-04-23T17:58:18.0490880Z  * [new tag]             2017-07-14                 -> 2017-07-14
+2026-04-23T17:58:18.0515890Z  * [new tag]             2017-07-28                 -> 2017-07-28
+2026-04-23T17:58:18.0633210Z  * [new tag]             2017-08-11                 -> 2017-08-11
+2026-04-23T17:58:18.0677610Z  * [new tag]             2017-08-25                 -> 2017-08-25
+2026-04-23T17:58:18.0709350Z  * [new tag]             2017-09-08                 -> 2017-09-08
+2026-04-23T17:58:18.0741170Z  * [new tag]             2017-09-25                 -> 2017-09-25
+2026-04-23T17:58:18.0768990Z  * [new tag]             2017-09-25_invalid         -> 2017-09-25_invalid
+2026-04-23T17:58:18.0835430Z  * [new tag]             2017-10-06                 -> 2017-10-06
+2026-04-23T17:58:18.0873060Z  * [new tag]             2017-10-09                 -> 2017-10-09
+2026-04-23T17:58:18.0923040Z  * [new tag]             2017-10-20                 -> 2017-10-20
+2026-04-23T17:58:18.0957170Z  * [new tag]             2017-11-03                 -> 2017-11-03
+2026-04-23T17:58:18.0997590Z  * [new tag]             2017-11-17                 -> 2017-11-17
+2026-04-23T17:58:18.1086280Z  * [new tag]             2017-12-14                 -> 2017-12-14
+2026-04-23T17:58:18.1138420Z  * [new tag]             2018-01-12                 -> 2018-01-12
+2026-04-23T17:58:18.1165390Z  * [new tag]             2018-01-29                 -> 2018-01-29
+2026-04-23T17:58:18.1178110Z  * [new tag]             2018-02-09                 -> 2018-02-09
+2026-04-23T17:58:18.1195900Z  * [new tag]             2018-03-01-temp-pod-1      -> 2018-03-01-temp-pod-1
+2026-04-23T17:58:18.1200000Z  * [new tag]             2018-03-02                 -> 2018-03-02
+2026-04-23T17:58:18.1214990Z  * [new tag]             2018-03-07-temp-pod        -> 2018-03-07-temp-pod
+2026-04-23T17:58:18.1228160Z  * [new tag]             2018-03-16                 -> 2018-03-16
+2026-04-23T17:58:18.1243940Z  * [new tag]             2018-04-02                 -> 2018-04-02
+2026-04-23T17:58:18.1253890Z  * [new tag]             2018-04-13                 -> 2018-04-13
+2026-04-23T17:58:18.1260850Z  * [new tag]             2018-05-04                 -> 2018-05-04
+2026-04-23T17:58:18.1275490Z  * [new tag]             2018-06-08                 -> 2018-06-08
+2026-04-23T17:58:18.1283080Z  * [new tag]             2018-06-15                 -> 2018-06-15
+2026-04-23T17:58:18.1302940Z  * [new tag]             2018-06-26                 -> 2018-06-26
+2026-04-23T17:58:18.1328870Z  * [new tag]             2018-06-27                 -> 2018-06-27
+2026-04-23T17:58:18.1360050Z  * [new tag]             2018-07-03                 -> 2018-07-03
+2026-04-23T17:58:18.1391940Z  * [new tag]             2018-07-11                 -> 2018-07-11
+2026-04-23T17:58:18.1427520Z  * [new tag]             2018-09-11                 -> 2018-09-11
+2026-04-23T17:58:18.1445320Z  * [new tag]             2018-10-03                 -> 2018-10-03
+2026-04-23T17:58:18.1452110Z  * [new tag]             2018-11-20                 -> 2018-11-20
+2026-04-23T17:58:18.1460870Z  * [new tag]             2018-12-13                 -> 2018-12-13
+2026-04-23T17:58:18.1486630Z  * [new tag]             2019-01-22-public-preview  -> 2019-01-22-public-preview
+2026-04-23T17:58:18.1495750Z  * [new tag]             2019-01-31                 -> 2019-01-31
+2026-04-23T17:58:18.1509560Z  * [new tag]             2019-02-11                 -> 2019-02-11
+2026-04-23T17:58:18.1518440Z  * [new tag]             2019-03-18                 -> 2019-03-18
+2026-04-23T17:58:18.1520010Z  * [new tag]             2019-03-18-public-preview  -> 2019-03-18-public-preview
+2026-04-23T17:58:18.1544660Z  * [new tag]             2019-04-11                 -> 2019-04-11
+2026-04-23T17:58:18.1549370Z  * [new tag]             2019-04-11-public-preview  -> 2019-04-11-public-preview
+2026-04-23T17:58:18.1579290Z  * [new tag]             2019-04-30                 -> 2019-04-30
+2026-04-23T17:58:18.1604150Z  * [new tag]             2019-05-16                 -> 2019-05-16
+2026-04-23T17:58:18.1627940Z  * [new tag]             2019-07-01                 -> 2019-07-01
+2026-04-23T17:58:18.1629620Z  * [new tag]             2019-09-23                 -> 2019-09-23
+2026-04-23T17:58:18.1663870Z  * [new tag]             2019-10-07                 -> 2019-10-07
+2026-04-23T17:58:18.1695600Z  * [new tag]             2019-11-08                 -> 2019-11-08
+2026-04-23T17:58:18.1715800Z  * [new tag]             2019-12-11                 -> 2019-12-11
+2026-04-23T17:58:18.1730200Z  * [new tag]             2020-01-22                 -> 2020-01-22
+2026-04-23T17:58:18.1744060Z  * [new tag]             2020-07-17                 -> 2020-07-17
+2026-04-23T17:58:18.1759230Z  * [new tag]             2020-07-19                 -> 2020-07-19
+2026-04-23T17:58:18.1770250Z  * [new tag]             2020-12-09                 -> 2020-12-09
+2026-04-23T17:58:18.1782700Z  * [new tag]             LTS_01_2018_Ref01          -> LTS_01_2018_Ref01
+2026-04-23T17:58:18.1791820Z  * [new tag]             LTS_01_2021_Ref01          -> LTS_01_2021_Ref01
+2026-04-23T17:58:18.1802880Z  * [new tag]             LTS_01_2022_Ref01          -> LTS_01_2022_Ref01
+2026-04-23T17:58:18.1817240Z  * [new tag]             LTS_01_2023_Ref01          -> LTS_01_2023_Ref01
+2026-04-23T17:58:18.1826050Z  * [new tag]             LTS_01_2023_Ref02          -> LTS_01_2023_Ref02
+2026-04-23T17:58:18.1834210Z  * [new tag]             LTS_02_2020_Ref01          -> LTS_02_2020_Ref01
+2026-04-23T17:58:18.1841040Z  * [new tag]             LTS_02_2020_Ref02          -> LTS_02_2020_Ref02
+2026-04-23T17:58:18.1854670Z  * [new tag]             LTS_03_2024                -> LTS_03_2024
+2026-04-23T17:58:18.1898920Z  * [new tag]             LTS_03_2024_Ref02          -> LTS_03_2024_Ref02
+2026-04-23T17:58:18.1924250Z  * [new tag]             LTS_03_2025                -> LTS_03_2025
+2026-04-23T17:58:18.1938680Z  * [new tag]             LTS_07_2019_Ref01          -> LTS_07_2019_Ref01
+2026-04-23T17:58:18.1950800Z  * [new tag]             LTS_07_2020_Ref01          -> LTS_07_2020_Ref01
+2026-04-23T17:58:18.1956030Z  * [new tag]             LTS_07_2020_Ref02          -> LTS_07_2020_Ref02
+2026-04-23T17:58:18.1970160Z  * [new tag]             LTS_07_2021_Ref01          -> LTS_07_2021_Ref01
+2026-04-23T17:58:18.1981300Z  * [new tag]             LTS_07_2022_Ref01          -> LTS_07_2022_Ref01
+2026-04-23T17:58:18.1984520Z  * [new tag]             LTS_07_2022_Ref02          -> LTS_07_2022_Ref02
+2026-04-23T17:58:18.2004610Z  * [new tag]             LTS_08_2023                -> LTS_08_2023
+2026-04-23T17:58:18.2010140Z  * [new tag]             LTS_08_2024                -> LTS_08_2024
+2026-04-23T17:58:18.2018310Z  * [new tag]             public-preview-pnp-2020-06 -> public-preview-pnp-2020-06
+2026-04-23T17:58:18.2040600Z  * [new tag]             release_2017_06_30         -> release_2017_06_30
+2026-04-23T17:58:18.2071220Z  * [new tag]             release_2017_08_25         -> release_2017_08_25
+2026-04-23T17:58:18.2084780Z  * [new tag]             service-cocoapod           -> service-cocoapod
+2026-04-23T17:58:18.2089570Z  * [new tag]             v1.0.0-preview.3           -> v1.0.0-preview.3
+2026-04-23T17:58:18.2103210Z  * [new tag]             v1.0.0-preview.4           -> v1.0.0-preview.4
+2026-04-23T17:58:18.2117440Z  * [new tag]             v20151102                  -> v20151102
+2026-04-23T17:58:18.2356770Z ##[command]git --config-env=http.extraheader=env_var_http.extraheader fetch --force --no-tags --prune --prune-tags --progress --no-recurse-submodules origin   +e370cfcdb75204dc072797df3ce2ced465fcd2ad
+2026-04-23T17:58:18.2900800Z From https://github.com/Azure/azure-iot-sdk-c
+2026-04-23T17:58:18.2933730Z  * branch                e370cfcdb75204dc072797df3ce2ced465fcd2ad -> FETCH_HEAD
+2026-04-23T17:58:18.3572260Z ##[command]git checkout --progress --force e370cfcdb75204dc072797df3ce2ced465fcd2ad
+2026-04-23T17:58:19.5103890Z Updating files:  93% (1024/1099)
+2026-04-23T17:58:19.5174710Z Updating files:  94% (1034/1099)
+2026-04-23T17:58:19.5320460Z Updating files:  95% (1045/1099)
+2026-04-23T17:58:19.5386000Z Updating files:  96% (1056/1099)
+2026-04-23T17:58:19.5478160Z Updating files:  97% (1067/1099)
+2026-04-23T17:58:19.5550420Z Updating files:  98% (1078/1099)
+2026-04-23T17:58:19.8674590Z Updating files:  99% (1089/1099)
+2026-04-23T17:58:19.8744660Z Updating files: 100% (1099/1099)
+2026-04-23T17:58:19.8751310Z Updating files: 100% (1099/1099), done.
+2026-04-23T17:58:19.8811110Z HEAD is now at e370cfcdb Fix CI job failures in hosted pipeline
+2026-04-23T17:58:19.8938690Z ##[command]git submodule sync
+2026-04-23T17:58:20.2811350Z ##[command]git --config-env=http.https://github.com.extraheader=env_var_http.https://github.com.extraheader submodule update --init --force
+2026-04-23T17:58:20.4713750Z Submodule 'azure-c-shared-utility' (https://github.com/Azure/azure-c-shared-utility.git) registered for path 'c-utility'
+2026-04-23T17:58:20.4755210Z Submodule 'deps/azure-c-testrunnerswitcher' (https://github.com/Azure/azure-c-testrunnerswitcher.git) registered for path 'deps/azure-c-testrunnerswitcher'
+2026-04-23T17:58:20.4780960Z Submodule 'deps/azure-ctest' (https://github.com/Azure/azure-ctest.git) registered for path 'deps/azure-ctest'
+2026-04-23T17:58:20.4799880Z Submodule 'deps/azure-macro-utils-c' (https://github.com/Azure/azure-macro-utils-c.git) registered for path 'deps/azure-macro-utils-c'
+2026-04-23T17:58:20.4830360Z Submodule 'deps/parson' (https://github.com/kgabis/parson.git) registered for path 'deps/parson'
+2026-04-23T17:58:20.4878990Z Submodule 'deps/uhttp' (https://github.com/Azure/azure-uhttp-c.git) registered for path 'deps/uhttp'
+2026-04-23T17:58:20.4895800Z Submodule 'deps/umock-c' (https://github.com/Azure/umock-c.git) registered for path 'deps/umock-c'
+2026-04-23T17:58:20.4931430Z Submodule 'provisioning_client/deps/RIoT' (https://github.com/Microsoft/RIoT.git) registered for path 'provisioning_client/deps/RIoT'
+2026-04-23T17:58:20.5038200Z Submodule 'provisioning_client/deps/utpm' (https://github.com/Azure/azure-utpm-c.git) registered for path 'provisioning_client/deps/utpm'
+2026-04-23T17:58:20.5057070Z Submodule 'azure-uamqp-c' (https://github.com/Azure/azure-uamqp-c.git) registered for path 'uamqp'
+2026-04-23T17:58:20.5074150Z Submodule 'azure-umqtt-c' (https://github.com/Azure/azure-umqtt-c.git) registered for path 'umqtt'
+2026-04-23T17:58:20.5344030Z Cloning into '/Users/runner/work/1/s/c-utility'...
+2026-04-23T17:58:23.7835470Z Cloning into '/Users/runner/work/1/s/deps/azure-c-testrunnerswitcher'...
+2026-04-23T17:58:25.2749720Z Cloning into '/Users/runner/work/1/s/deps/azure-ctest'...
+2026-04-23T17:58:27.2385370Z Cloning into '/Users/runner/work/1/s/deps/azure-macro-utils-c'...
+2026-04-23T17:58:28.7357130Z Cloning into '/Users/runner/work/1/s/deps/parson'...
+2026-04-23T17:58:29.7355320Z Cloning into '/Users/runner/work/1/s/deps/uhttp'...
+2026-04-23T17:58:30.7760520Z Cloning into '/Users/runner/work/1/s/deps/umock-c'...
+2026-04-23T17:58:32.5739370Z Cloning into '/Users/runner/work/1/s/provisioning_client/deps/RIoT'...
+2026-04-23T17:58:34.4514270Z Cloning into '/Users/runner/work/1/s/provisioning_client/deps/utpm'...
+2026-04-23T17:58:35.5563960Z Cloning into '/Users/runner/work/1/s/uamqp'...
+2026-04-23T17:58:37.4654830Z Cloning into '/Users/runner/work/1/s/umqtt'...
+2026-04-23T17:58:39.0963740Z Submodule path 'c-utility': checked out 'acbd7a8ae73497311fc5ad30973d4b0459cbcee5'
+2026-04-23T17:58:39.1903260Z Submodule path 'deps/azure-c-testrunnerswitcher': checked out '8734bd6c53c88dd6c0cea8e87d70b9964726484a'
+2026-04-23T17:58:39.3480260Z Submodule path 'deps/azure-ctest': checked out '4aa84c45236ecda21983fb682f542f17d0b21e19'
+2026-04-23T17:58:39.3981050Z Submodule path 'deps/azure-macro-utils-c': checked out '5926caf4e42e98e730e6d03395788205649a3ada'
+2026-04-23T17:58:39.4871650Z Submodule path 'deps/parson': checked out '60c37844d7a1c97547812cac3423d458c73e60f9'
+2026-04-23T17:58:39.5800810Z Submodule path 'deps/uhttp': checked out '01dc7139d3da3141aa2017dff927db1dbbe86e49'
+2026-04-23T17:58:39.7685270Z Submodule path 'deps/umock-c': checked out '504193e65d1c2f6eb50c15357167600a296df7ff'
+2026-04-23T17:58:39.9680400Z Submodule path 'provisioning_client/deps/RIoT': checked out 'f6bebff2f5a68f5bc18d23ed164800db33b7d2a4'
+2026-04-23T17:58:40.0896830Z Submodule path 'provisioning_client/deps/utpm': checked out 'd250abe1d33cb38437d540bf77c80f014f60e472'
+2026-04-23T17:58:40.3947840Z Submodule path 'uamqp': checked out '6bb9accbbc036ed5ef1df7467760762c99a7094b'
+2026-04-23T17:58:40.5271470Z Submodule path 'umqtt': checked out 'd08d530fc3ae3f60d3f750fab6629a5b7839f754'
+2026-04-23T17:58:40.5497900Z ##[section]Finishing: Checkout Azure/azure-iot-sdk-c@ewertons/pipelinefixes to s
+2026-04-23T17:58:40.5652460Z ##[section]Starting: Secure Supply Chain Analysis (auto-injected by policy)
+2026-04-23T17:58:40.5676920Z ==============================================================================
+2026-04-23T17:58:40.5677780Z Task         : Secure Supply Chain Analysis
+2026-04-23T17:58:40.5678380Z Description  : A task to scan for vulnerabilities in your software supply chain. Formerly "NuGet Security Analysis".
+2026-04-23T17:58:40.5679260Z Version      : 0.2.216
+2026-04-23T17:58:40.5679800Z Author       : Microsoft Corporation
+2026-04-23T17:58:40.5680580Z Help         : See https://aka.ms/sscatask for more information.
+2026-04-23T17:58:40.5681100Z ==============================================================================
+2026-04-23T17:58:42.7955500Z Telemetry ID: 24741b46-4c28-4ba0-abaa-b5493a537ff6
+2026-04-23T17:58:42.8107560Z For more information please visit: https://aka.ms/sscatask
+2026-04-23T17:58:43.3814010Z Scanning repository contents at source path: /Users/runner/work/1/s
+2026-04-23T17:58:43.3864160Z > Starting Multifeed Nuget Security Analysis:
+2026-04-23T17:58:43.4316850Z > Starting Multifeed Corext Analysis:
+2026-04-23T17:58:43.4863570Z > Starting Multifeed Python Security Analysis:
+2026-04-23T17:58:43.5411480Z > Starting CFS NuGet Analysis:
+2026-04-23T17:58:43.9414100Z ##[warning]tools/traceabilitytool/traceability_tool/traceabilitytool.csproj - CFS0011: Missing in scope NuGet.config file(s). (https://aka.ms/cfs/nuget)
+2026-04-23T17:58:43.9427190Z > Starting CFS NPM Analysis:
+2026-04-23T17:58:44.0360160Z > Starting CFS Maven Analysis:
+2026-04-23T17:58:44.0924070Z > Starting CFS Cargo Analysis:
+2026-04-23T17:58:44.2409420Z > Starting CFS CoreXT Analysis:
+2026-04-23T17:58:44.3028130Z > Starting CFS CDPx Analysis:
+2026-04-23T17:58:44.3080090Z > Starting Kubernetes Deployment File Analysis:
+2026-04-23T17:58:44.3856960Z > Starting Helm Charts Analysis:
+2026-04-23T17:58:44.5322170Z > Starting Pipeline Configuration Security Analysis:
+2026-04-23T17:58:44.5840630Z Azure Artifacts Configuration Analysis found 1 package configuration file in the repository which do not comply with Microsoft package feed security policies. The specific problems and links to their mitigations are listed above. If you need further assistance, please visit https://aka.ms/cfs/detectors .
+2026-04-23T17:58:45.5531120Z ##[section]Finishing: Secure Supply Chain Analysis (auto-injected by policy)
+2026-04-23T17:58:45.5671840Z ##[section]Starting: Download artifact (test config scripts)
+2026-04-23T17:58:45.5698720Z ==============================================================================
+2026-04-23T17:58:45.5699770Z Task         : Download pipeline artifact
+2026-04-23T17:58:45.5700310Z Description  : Download a named artifact from a pipeline to a local path
+2026-04-23T17:58:45.5701100Z Version      : 1.230.0
+2026-04-23T17:58:45.5701510Z Author       : Microsoft Corporation
+2026-04-23T17:58:45.5702120Z Help         : https://docs.microsoft.com/azure/devops/pipelines/tasks/utility/download-pipeline-artifact
+2026-04-23T17:58:45.5703020Z ==============================================================================
+2026-04-23T17:58:46.1180320Z Download from the specified build: #157565
+2026-04-23T17:58:46.1248520Z Download artifact to: /Users/runner/work/1/test_config_scripts
+2026-04-23T17:58:48.3750510Z Using default max parallelism.
+2026-04-23T17:58:48.3819420Z Max dedup parallelism: 192
+2026-04-23T17:58:48.3849630Z DomainId: 0
+2026-04-23T17:58:48.8237130Z ApplicationInsightsTelemetrySender will correlate events with X-TFS-Session 743f5b1e-d93c-4a83-a659-a4232d1f1be0
+2026-04-23T17:58:48.8351990Z Hashtype: Dedup64K
+2026-04-23T17:58:48.8719470Z DedupManifestArtifactClient will correlate http requests with X-TFS-Session 743f5b1e-d93c-4a83-a659-a4232d1f1be0
+2026-04-23T17:58:48.8749790Z Minimatch patterns: [**]
+2026-04-23T17:59:57.1722290Z Filtered 3 files from the Minimatch filters supplied.
+2026-04-23T17:59:57.1834170Z Downloaded 0.0 MB out of 0.0 MB (0%).
+2026-04-23T17:59:57.6489180Z Downloaded 0.0 MB out of 0.0 MB (100%).
+2026-04-23T17:59:57.6927100Z 
+2026-04-23T17:59:57.7190370Z Download statistics:
+2026-04-23T17:59:57.7216660Z Total Content: 0.0 MB
+2026-04-23T17:59:57.7250230Z Physical Content Downloaded: 0.0 MB
+2026-04-23T17:59:57.9255710Z Compression Saved: 0.0 MB
+2026-04-23T17:59:57.9258100Z Local Caching Saved: 0.0 MB
+2026-04-23T17:59:58.0293880Z Chunks Downloaded: 3
+2026-04-23T17:59:58.1305970Z Nodes Downloaded: 0
+2026-04-23T17:59:58.2314630Z 
+2026-04-23T17:59:58.2426710Z Download completed.
+2026-04-23T17:59:58.2817680Z ApplicationInsightsTelemetrySender correlated 2 events with X-TFS-Session 743f5b1e-d93c-4a83-a659-a4232d1f1be0
+2026-04-23T17:59:58.3230250Z Downloading artifact finished.
+2026-04-23T17:59:58.4283510Z ##[section]Finishing: Download artifact (test config scripts)
+2026-04-23T17:59:58.4503240Z ##[section]Starting: Build
+2026-04-23T17:59:58.4552050Z ==============================================================================
+2026-04-23T17:59:58.4553210Z Task         : Command line
+2026-04-23T17:59:58.4554060Z Description  : Run a command line script using Bash on Linux and macOS and cmd.exe on Windows
+2026-04-23T17:59:58.4554980Z Version      : 2.268.0
+2026-04-23T17:59:58.4555740Z Author       : Microsoft Corporation
+2026-04-23T17:59:58.4556530Z Help         : https://docs.microsoft.com/azure/devops/pipelines/tasks/utility/command-line
+2026-04-23T17:59:58.4557540Z ==============================================================================
+2026-04-23T17:59:59.6582690Z Generating script.
+2026-04-23T17:59:59.6620750Z Script contents:
+2026-04-23T17:59:59.6673990Z exec ./jenkins/osx_gcc_openssl.sh
+2026-04-23T17:59:59.6721450Z ========================== Starting Command Output ===========================
+2026-04-23T17:59:59.7427640Z [command]/bin/bash --noprofile --norc /Users/runner/work/_temp/fe7f305c-a1ad-4605-9394-316ea72816b0.sh
+2026-04-23T17:59:59.9484230Z + set -o errexit
+2026-04-23T18:00:00.0571730Z + set -o nounset
+2026-04-23T18:00:00.0760760Z + set -o pipefail
+2026-04-23T18:00:00.1794210Z + sw_vers
+2026-04-23T18:00:00.2091770Z ProductName:		macOS
+2026-04-23T18:00:00.2424240Z ProductVersion:		14.8.5
+2026-04-23T18:00:00.2819870Z BuildVersion:		23J423
+2026-04-23T18:00:00.2931010Z + gcc --version
+2026-04-23T18:00:27.9147520Z Apple clang version 15.0.0 (clang-1500.3.9.4)
+2026-04-23T18:00:27.9767610Z Target: x86_64-apple-darwin23.6.0
+2026-04-23T18:00:27.9799450Z Thread model: posix
+2026-04-23T18:00:27.9809090Z InstalledDir: /Applications/Xcode_15.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin
+2026-04-23T18:00:27.9824360Z + openssl version
+2026-04-23T18:00:28.2831480Z OpenSSL 1.1.1w  11 Sep 2023
+2026-04-23T18:00:28.3861990Z + curl --version
+2026-04-23T18:00:29.1353340Z curl 8.19.0 (x86_64-apple-darwin23.6.0) libcurl/8.19.0 OpenSSL/3.6.2 zlib/1.2.12 brotli/1.2.0 zstd/1.5.7 AppleIDN libssh2/1.11.1 nghttp2/1.68.1 ngtcp2/1.22.0 nghttp3/1.15.0 mit-krb5/1.7-prerelease OpenLDAP/2.4.28/Apple
+2026-04-23T18:00:29.2386470Z Release-Date: 2026-03-11
+2026-04-23T18:00:29.2401630Z Protocols: dict file ftp ftps gopher gophers http https imap imaps ipfs ipns ldap ldaps mqtt mqtts pop3 pop3s rtsp scp sftp smb smbs smtp smtps telnet tftp ws wss
+2026-04-23T18:00:29.2434360Z Features: alt-svc AppleSecTrust AsynchDNS brotli GSS-API HSTS HTTP2 HTTP3 HTTPS-proxy IDN IPv6 Kerberos Largefile libz NTLM SPNEGO SSL threadsafe TLS-SRP UnixSockets zstd
+2026-04-23T18:00:29.2485520Z +++ dirname /Users/runner/work/1/s/jenkins/osx_gcc_openssl.sh
+2026-04-23T18:00:29.2511380Z ++ cd /Users/runner/work/1/s/jenkins
+2026-04-23T18:00:29.2518070Z ++ pwd
+2026-04-23T18:00:29.2557260Z + script_dir=/Users/runner/work/1/s/jenkins
+2026-04-23T18:00:29.2558400Z ++ cd /Users/runner/work/1/s/jenkins/..
+2026-04-23T18:00:29.2598590Z ++ pwd
+2026-04-23T18:00:29.2648590Z + build_root=/Users/runner/work/1/s
+2026-04-23T18:00:29.2692040Z + build_folder=/Users/runner/work/1/s/cmake
+2026-04-23T18:00:29.2693280Z ++ grep -c '^processor' /proc/cpuinfo
+2026-04-23T18:00:29.2758940Z ++ sysctl -n hw.ncpu
+2026-04-23T18:00:29.2799840Z + CORES=4
+2026-04-23T18:00:29.2819330Z + rm -r -f /Users/runner/work/1/s/cmake
+2026-04-23T18:00:29.3224840Z + mkdir -p /Users/runner/work/1/s/cmake
+2026-04-23T18:00:29.4243020Z + pushd /Users/runner/work/1/s/cmake
+2026-04-23T18:00:29.5160300Z + cmake .. -DOPENSSL_ROOT_DIR:PATH=/usr/local/opt/openssl -Duse_openssl:bool=ON -Drun_unittests:bool=ON
+2026-04-23T18:00:29.6165270Z ~/work/1/s/cmake ~/work/1/s
+2026-04-23T18:00:29.9247720Z CMake Deprecation Warning at CMakeLists.txt:4 (cmake_minimum_required):
+2026-04-23T18:00:29.9952930Z   Compatibility with CMake < 3.10 will be removed from a future version of
+2026-04-23T18:00:30.0038790Z   CMake.
+2026-04-23T18:00:30.0101110Z 
+2026-04-23T18:00:30.0158810Z   Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+2026-04-23T18:00:30.0245350Z   to tell CMake that the project requires at least <min> but has been updated
+2026-04-23T18:00:30.0247820Z   to work with policies introduced by <max> or earlier.
+2026-04-23T18:00:30.0255220Z 
+2026-04-23T18:00:30.0285610Z 
+2026-04-23T18:00:36.7666260Z -- The C compiler identification is AppleClang 15.0.0.15000309
+2026-04-23T18:00:41.1428630Z -- The CXX compiler identification is AppleClang 15.0.0.15000309
+2026-04-23T18:00:41.3227510Z -- Detecting C compiler ABI info
+2026-04-23T18:00:43.7195950Z -- Detecting C compiler ABI info - done
+2026-04-23T18:00:43.7371440Z -- Check for working C compiler: /usr/bin/cc - skipped
+2026-04-23T18:00:43.7398380Z -- Detecting C compile features
+2026-04-23T18:00:43.7418780Z -- Detecting C compile features - done
+2026-04-23T18:00:43.7677740Z -- Detecting CXX compiler ABI info
+2026-04-23T18:00:44.2366590Z -- Detecting CXX compiler ABI info - done
+2026-04-23T18:00:44.2716270Z -- Check for working CXX compiler: /usr/bin/c++ - skipped
+2026-04-23T18:00:44.2727840Z -- Detecting CXX compile features
+2026-04-23T18:00:44.2746730Z -- Detecting CXX compile features - done
+2026-04-23T18:00:44.4073170Z -- IoT Client SDK Version = 1.15.0
+2026-04-23T18:00:44.4081970Z -- Provisioning SDK Version = 1.15.0
+2026-04-23T18:00:44.4115910Z CMake Error at deps/azure-macro-utils-c/CMakeLists.txt:4 (cmake_minimum_required):
+2026-04-23T18:00:44.4144540Z   Compatibility with CMake < 3.5 has been removed from CMake.
+2026-04-23T18:00:44.4164510Z 
+2026-04-23T18:00:44.4175510Z   Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+2026-04-23T18:00:44.4204310Z   to tell CMake that the project requires at least <min> but has been updated
+2026-04-23T18:00:44.4230440Z   to work with policies introduced by <max> or earlier.
+2026-04-23T18:00:44.4257950Z 
+2026-04-23T18:00:44.4285610Z   Or, add -DCMAKE_POLICY_VERSION_MINIMUM=3.5 to try configuring anyway.
+2026-04-23T18:00:44.4286490Z 
+2026-04-23T18:00:44.4315220Z 
+2026-04-23T18:00:44.4328440Z -- Configuring incomplete, errors occurred!
+2026-04-23T18:00:44.4357380Z 
+2026-04-23T18:00:44.4413580Z ##[error]Bash exited with code '1'.
+2026-04-23T18:00:44.4456470Z ##[section]Finishing: Build
+2026-04-23T18:00:44.4576480Z Skipping step due to condition evaluation.
+Evaluating: SucceededNode()
+Result: False
+
+2026-04-23T18:00:44.4681340Z ##[section]Starting: Publish OSX Results
+2026-04-23T18:00:44.4705850Z ==============================================================================
+2026-04-23T18:00:44.4706620Z Task         : Publish Test Results
+2026-04-23T18:00:44.4706980Z Description  : Publish test results to Azure Pipelines
+2026-04-23T18:00:44.4707460Z Version      : 2.273.0
+2026-04-23T18:00:44.4707790Z Author       : Microsoft Corporation
+2026-04-23T18:00:44.4708300Z Help         : https://docs.microsoft.com/azure/devops/pipelines/tasks/test/publish-test-results
+2026-04-23T18:00:44.4708960Z ==============================================================================
+2026-04-23T18:00:49.2729210Z [command]/usr/local/bin/dotnet --version
+2026-04-23T18:00:49.2730900Z 10.0.201
+2026-04-23T18:00:49.2733970Z ##[warning]No test result files matching '[ '**/Test.xml' ]' were found.
+2026-04-23T18:00:49.2829070Z ##[section]Finishing: Publish OSX Results
+2026-04-23T18:00:49.2924030Z Skipping step due to condition evaluation.
+Evaluating: SucceededNode()
+Result: False
+
+2026-04-23T18:00:49.3015680Z ##[section]Starting: Cleanup
+2026-04-23T18:00:49.3031920Z ==============================================================================
+2026-04-23T18:00:49.3032540Z Task         : Command line
+2026-04-23T18:00:49.3032840Z Description  : Run a command line script using Bash on Linux and macOS and cmd.exe on Windows
+2026-04-23T18:00:49.3033210Z Version      : 2.268.0
+2026-04-23T18:00:49.3033450Z Author       : Microsoft Corporation
+2026-04-23T18:00:49.3033720Z Help         : https://docs.microsoft.com/azure/devops/pipelines/tasks/utility/command-line
+2026-04-23T18:00:49.3034200Z ==============================================================================
+2026-04-23T18:00:49.7454870Z Generating script.
+2026-04-23T18:00:49.7470160Z Script contents:
+2026-04-23T18:00:49.7501240Z rm -rf /Users/runner/work/1/*
+2026-04-23T18:00:49.7555660Z ========================== Starting Command Output ===========================
+2026-04-23T18:00:49.7572760Z [command]/bin/bash --noprofile --norc /Users/runner/work/_temp/496605ec-3234-4d93-b94e-3462b97b4dbd.sh
+2026-04-23T18:00:50.9107290Z 
+2026-04-23T18:00:50.9222750Z ##[section]Finishing: Cleanup
+2026-04-23T18:00:50.9344000Z Skipping step due to condition evaluation.
+Evaluating: and(succeeded(), ne(variables['CG_RAN'], 'true'))
+Expanded: and(False, ne(variables['CG_RAN'], 'true'))
+Result: False
+
+2026-04-23T18:00:50.9537620Z ##[section]Starting: Checkout Azure/azure-iot-sdk-c@ewertons/pipelinefixes to s
+2026-04-23T18:00:50.9550840Z ==============================================================================
+2026-04-23T18:00:50.9551570Z Task         : Get sources
+2026-04-23T18:00:50.9551900Z Description  : Get sources from a repository. Supports Git, TfsVC, and SVN repositories.
+2026-04-23T18:00:50.9552320Z Version      : 1.0.0
+2026-04-23T18:00:50.9552550Z Author       : Microsoft
+2026-04-23T18:00:50.9552800Z Help         : [More Information](https://go.microsoft.com/fwlink/?LinkId=798199)
+2026-04-23T18:00:50.9553610Z ==============================================================================
+2026-04-23T18:00:51.5611870Z Cleaning any cached credential from repository: Azure/azure-iot-sdk-c (GitHub)
+2026-04-23T18:00:51.5763230Z ##[section]Finishing: Checkout Azure/azure-iot-sdk-c@ewertons/pipelinefixes to s
+2026-04-23T18:00:51.5813280Z ##[section]Starting: Finalize Job
+2026-04-23T18:00:51.6013310Z Cleaning up task key
+2026-04-23T18:00:51.6015340Z Start cleaning up orphan processes.
+2026-04-23T18:00:52.2323430Z ##[section]Finishing: Finalize Job
+2026-04-23T18:00:52.2390410Z ##[section]Finishing: OSX

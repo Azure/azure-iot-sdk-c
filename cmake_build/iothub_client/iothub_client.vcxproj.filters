@@ -1,0 +1,135 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\code\s3\azure-iot-sdk-c\iothub_client\src\iothub.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\code\s3\azure-iot-sdk-c\iothub_client\src\iothub_client.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\code\s3\azure-iot-sdk-c\iothub_client\src\iothub_client_core.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\code\s3\azure-iot-sdk-c\iothub_client\src\iothub_client_core_ll.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\code\s3\azure-iot-sdk-c\iothub_client\src\iothub_client_diagnostic.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\code\s3\azure-iot-sdk-c\iothub_client\src\iothub_client_ll.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\code\s3\azure-iot-sdk-c\iothub_client\src\iothub_client_properties.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\code\s3\azure-iot-sdk-c\iothub_client\src\iothub_device_client.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\code\s3\azure-iot-sdk-c\iothub_client\src\iothub_device_client_ll.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\code\s3\azure-iot-sdk-c\iothub_client\src\iothub_message.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\code\s3\azure-iot-sdk-c\iothub_client\src\iothub_module_client.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\code\s3\azure-iot-sdk-c\iothub_client\src\iothub_module_client_ll.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\code\s3\azure-iot-sdk-c\iothub_client\src\iothubtransport.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\code\s3\azure-iot-sdk-c\iothub_client\src\version.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\code\s3\azure-iot-sdk-c\iothub_client\src\iothub_client_ll_uploadtoblob.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\code\s3\azure-iot-sdk-c\iothub_client\src\blob.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\code\s3\azure-iot-sdk-c\iothub_client\inc\iothub.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s3\azure-iot-sdk-c\iothub_client\inc\iothub_client_core.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s3\azure-iot-sdk-c\iothub_client\inc\iothub_client_core_ll.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s3\azure-iot-sdk-c\iothub_client\inc\iothub_client.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s3\azure-iot-sdk-c\iothub_client\inc\iothub_client_core_common.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s3\azure-iot-sdk-c\iothub_client\inc\iothub_client_ll.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s3\azure-iot-sdk-c\iothub_client\inc\internal\iothub_client_diagnostic.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s3\azure-iot-sdk-c\iothub_client\inc\iothub_client_properties.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s3\azure-iot-sdk-c\iothub_client\inc\internal\iothub_internal_consts.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s3\azure-iot-sdk-c\iothub_client\inc\iothub_client_options.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s3\azure-iot-sdk-c\iothub_client\inc\internal\iothub_client_private.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s3\azure-iot-sdk-c\iothub_client\inc\iothub_client_version.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s3\azure-iot-sdk-c\iothub_client\inc\iothub_device_client.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s3\azure-iot-sdk-c\iothub_client\inc\iothub_device_client_ll.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s3\azure-iot-sdk-c\iothub_client\inc\iothub_module_client.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s3\azure-iot-sdk-c\iothub_client\inc\iothub_module_client_ll.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s3\azure-iot-sdk-c\iothub_client\inc\iothub_transport_ll.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s3\azure-iot-sdk-c\iothub_client\inc\iothub_message.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s3\azure-iot-sdk-c\iothub_client\inc\internal\iothub_message_private.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s3\azure-iot-sdk-c\iothub_client\inc\internal\iothubtransport.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s3\azure-iot-sdk-c\iothub_client\inc\internal\blob.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s3\azure-iot-sdk-c\iothub_client\inc\internal\iothub_client_ll_uploadtoblob.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s3\azure-iot-sdk-c\iothub_client\inc\internal\iothub_client_hsm_ll.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\code\s3\azure-iot-sdk-c\iothub_client\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{2382409B-4D0D-3D6E-AEFD-097BC53EC9BE}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{3C833C84-7A41-3681-A271-9BA143EF3CCA}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

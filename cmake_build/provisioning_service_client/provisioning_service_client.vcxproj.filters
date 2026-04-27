@@ -1,0 +1,93 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\code\s3\azure-iot-sdk-c\provisioning_service_client\src\provisioning_sc_attestation_mechanism.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\code\s3\azure-iot-sdk-c\provisioning_service_client\src\provisioning_sc_bulk_operation.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\code\s3\azure-iot-sdk-c\provisioning_service_client\src\provisioning_sc_device_capabilities.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\code\s3\azure-iot-sdk-c\provisioning_service_client\src\provisioning_sc_device_registration_state.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\code\s3\azure-iot-sdk-c\provisioning_service_client\src\provisioning_sc_enrollment.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\code\s3\azure-iot-sdk-c\provisioning_service_client\src\provisioning_sc_query.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\code\s3\azure-iot-sdk-c\provisioning_service_client\src\provisioning_sc_shared_helpers.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\code\s3\azure-iot-sdk-c\provisioning_service_client\src\provisioning_sc_tpm_attestation.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\code\s3\azure-iot-sdk-c\provisioning_service_client\src\provisioning_sc_twin.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\code\s3\azure-iot-sdk-c\provisioning_service_client\src\provisioning_sc_x509_attestation.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\code\s3\azure-iot-sdk-c\provisioning_service_client\src\provisioning_service_client.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\code\s3\azure-iot-sdk-c\provisioning_service_client\inc\prov_service_client\provisioning_sc_attestation_mechanism.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s3\azure-iot-sdk-c\provisioning_service_client\inc\prov_service_client\provisioning_sc_bulk_operation.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s3\azure-iot-sdk-c\provisioning_service_client\inc\prov_service_client\provisioning_sc_device_capabilities.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s3\azure-iot-sdk-c\provisioning_service_client\inc\prov_service_client\provisioning_sc_device_registration_state.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s3\azure-iot-sdk-c\provisioning_service_client\inc\prov_service_client\provisioning_sc_enrollment.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s3\azure-iot-sdk-c\provisioning_service_client\inc\prov_service_client\provisioning_sc_json_const.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s3\azure-iot-sdk-c\provisioning_service_client\inc\prov_service_client\provisioning_sc_models.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s3\azure-iot-sdk-c\provisioning_service_client\inc\prov_service_client\provisioning_sc_models_serializer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s3\azure-iot-sdk-c\provisioning_service_client\inc\prov_service_client\provisioning_sc_query.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s3\azure-iot-sdk-c\provisioning_service_client\inc\prov_service_client\provisioning_sc_shared_helpers.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s3\azure-iot-sdk-c\provisioning_service_client\inc\prov_service_client\provisioning_sc_tpm_attestation.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s3\azure-iot-sdk-c\provisioning_service_client\inc\prov_service_client\provisioning_sc_twin.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s3\azure-iot-sdk-c\provisioning_service_client\inc\prov_service_client\provisioning_sc_x509_attestation.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s3\azure-iot-sdk-c\provisioning_service_client\inc\prov_service_client\provisioning_service_client.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\code\s3\azure-iot-sdk-c\provisioning_service_client\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{2382409B-4D0D-3D6E-AEFD-097BC53EC9BE}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{3C833C84-7A41-3681-A271-9BA143EF3CCA}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

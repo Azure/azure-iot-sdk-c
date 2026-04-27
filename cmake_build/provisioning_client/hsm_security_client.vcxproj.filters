@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\code\s3\azure-iot-sdk-c\provisioning_client\adapters\hsm_client_data.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\code\s3\azure-iot-sdk-c\provisioning_client\adapters\hsm_client_x509.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\code\s3\azure-iot-sdk-c\provisioning_client\adapters\hsm_client_tpm.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\code\s3\azure-iot-sdk-c\provisioning_client\adapters\hsm_client_key.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\code\s3\azure-iot-sdk-c\provisioning_client\adapters\hsm_client_data.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s3\azure-iot-sdk-c\provisioning_client\adapters\hsm_client_x509.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s3\azure-iot-sdk-c\provisioning_client\adapters\hsm_client_tpm.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s3\azure-iot-sdk-c\provisioning_client\adapters\hsm_client_key.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\code\s3\azure-iot-sdk-c\provisioning_client\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{2382409B-4D0D-3D6E-AEFD-097BC53EC9BE}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{3C833C84-7A41-3681-A271-9BA143EF3CCA}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

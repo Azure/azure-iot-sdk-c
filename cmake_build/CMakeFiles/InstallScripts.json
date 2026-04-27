@@ -1,0 +1,37 @@
+{
+	"InstallScripts" : 
+	[
+		"C:/code/s3/azure-iot-sdk-c/cmake_build/cmake_install.cmake",
+		"C:/code/s3/azure-iot-sdk-c/cmake_build/deps/c-build-tools/cmake_install.cmake",
+		"C:/code/s3/azure-iot-sdk-c/cmake_build/deps/c-build-tools/build_functions/cmake_install.cmake",
+		"C:/code/s3/azure-iot-sdk-c/cmake_build/deps/c-build-tools/repo_validation/cmake_install.cmake",
+		"C:/code/s3/azure-iot-sdk-c/cmake_build/deps/c-build-tools/traceabilitytool/cmake_install.cmake",
+		"C:/code/s3/azure-iot-sdk-c/cmake_build/deps/c-build-tools/reals_check/cmake_install.cmake",
+		"C:/code/s3/azure-iot-sdk-c/cmake_build/deps/c-build-tools/sarif_results_checker/cmake_install.cmake",
+		"C:/code/s3/azure-iot-sdk-c/cmake_build/deps/cmake_install.cmake",
+		"C:/code/s3/azure-iot-sdk-c/cmake_build/deps/macro-utils-c/cmake_install.cmake",
+		"C:/code/s3/azure-iot-sdk-c/cmake_build/deps/c-logging/cmake_install.cmake",
+		"C:/code/s3/azure-iot-sdk-c/cmake_build/deps/c-logging/v2/cmake_install.cmake",
+		"C:/code/s3/azure-iot-sdk-c/cmake_build/deps/c-logging/v2/tests/cmake_install.cmake",
+		"C:/code/s3/azure-iot-sdk-c/cmake_build/deps/umock-c/cmake_install.cmake",
+		"C:/code/s3/azure-iot-sdk-c/cmake_build/deps/parson/cmake_install.cmake",
+		"C:/code/s3/azure-iot-sdk-c/cmake_build/c-utility/cmake_install.cmake",
+		"C:/code/s3/azure-iot-sdk-c/cmake_build/uamqp/cmake_install.cmake",
+		"C:/code/s3/azure-iot-sdk-c/cmake_build/uamqp/deps/ctest/cmake_install.cmake",
+		"C:/code/s3/azure-iot-sdk-c/cmake_build/uamqp/deps/c-testrunnerswitcher/cmake_install.cmake",
+		"C:/code/s3/azure-iot-sdk-c/cmake_build/uamqp/deps/c-testrunnerswitcher/build_functions/cmake_install.cmake",
+		"C:/code/s3/azure-iot-sdk-c/cmake_build/uamqp/deps/c-testrunnerswitcher/test_projects/cmake_install.cmake",
+		"C:/code/s3/azure-iot-sdk-c/cmake_build/umqtt/cmake_install.cmake",
+		"C:/code/s3/azure-iot-sdk-c/cmake_build/deps/uhttp/cmake_install.cmake",
+		"C:/code/s3/azure-iot-sdk-c/cmake_build/iothub_service_client/cmake_install.cmake",
+		"C:/code/s3/azure-iot-sdk-c/cmake_build/provisioning_service_client/cmake_install.cmake",
+		"C:/code/s3/azure-iot-sdk-c/cmake_build/provisioning_client/cmake_install.cmake",
+		"C:/code/s3/azure-iot-sdk-c/cmake_build/provisioning_client/deps/cmake_install.cmake",
+		"C:/code/s3/azure-iot-sdk-c/cmake_build/provisioning_client/deps/utpm/cmake_install.cmake",
+		"C:/code/s3/azure-iot-sdk-c/cmake_build/provisioning_client/tests/cmake_install.cmake",
+		"C:/code/s3/azure-iot-sdk-c/cmake_build/iothub_client/cmake_install.cmake",
+		"C:/code/s3/azure-iot-sdk-c/cmake_build/iothub_client/tests/cmake_install.cmake",
+		"C:/code/s3/azure-iot-sdk-c/cmake_build/serializer/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

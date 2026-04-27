@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{CAE07175-D007-4FC3-BFE8-47B392814159}</ProjectGuid>
+    <RootNamespace>CompilerIdCSharp</RootNamespace>
+    <Keyword>Win32Proj</Keyword>
+    
+    
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    
+    
+    <WindowsTargetPlatformVersion>10.0.26100.0</WindowsTargetPlatformVersion>
+    
+  </PropertyGroup>
+  <PropertyGroup>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <!-- ============================================================ -->
+  <!-- ==                set preprocessor definitions            == -->
+  <!-- ============================================================ -->
+  <PropertyGroup>
+    <DefineConstants></DefineConstants>
+    <UnknownValue>Unknown</UnknownValue>
+  </PropertyGroup>
+  <!-- Platform -->
+  <PropertyGroup Condition="'$(Platform)'!=''">
+    <DefineConstants>$(DefineConstants);Platform$(Platform)</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Platform)'==''">
+    <DefineConstants>$(DefineConstants);Platform$(UnknownValue)</DefineConstants>
+  </PropertyGroup>
+  <!-- PlatformToolset -->
+  <PropertyGroup Condition="'$(PlatformToolset)'!=''">
+    <DefineConstants>$(DefineConstants);PlatformToolset$(PlatformToolset)</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(PlatformToolset)'==''">
+    <DefineConstants>$(DefineConstants);PlatformToolset$(UnknownValue)</DefineConstants>
+  </PropertyGroup>
+  <!-- ============================================================ -->
+  <PropertyGroup>
+    <OutputPath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\</OutputPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="CMakeCSharpCompilerId.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>if not "$(RoslynTargetsPath)"=="" if exist "$(RoslynTargetsPath)\csc.exe" set _CSC=$(RoslynTargetsPath)
+if exist "$(MSBuildToolsPath)\csc.exe" set _CSC=$(MSBuildToolsPath)
+if "%_CSC%"=="" exit -1
+%40echo CMAKE_CSharp_COMPILER=%_CSC%\csc.exe</PostBuildEvent>
+  </PropertyGroup>
+</Project>

@@ -1,0 +1,3 @@
+# CMake generation dependency list for this directory.
+C:/Program Files/CMake/share/cmake-4.0/Modules/GNUInstallDirs.cmake
+C:/code/s3/azure-iot-sdk-c/deps/parson/CMakeLists.txt

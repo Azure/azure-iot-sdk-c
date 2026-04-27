@@ -1,0 +1,159 @@
+2026-04-23T21:47:17.1884547Z ##[section]Starting: Prepare job checksubmodule
+2026-04-23T21:47:17.2217639Z Variables:
+2026-04-23T21:47:17.2217639Z   AZ3166_USER: $[ variablegroups.devicelab-c-sdk.AZ3166_USER ]
+2026-04-23T21:47:17.2217639Z   DEVKIT_MBEDOS5_GETSTARTED_USER: $[ variablegroups.devicelab-c-sdk.DEVKIT_MBEDOS5_GETSTARTED_USER ]
+2026-04-23T21:47:17.2217639Z   DEVKIT_SDK_USER: $[ variablegroups.devicelab-c-sdk.DEVKIT_SDK_USER ]
+2026-04-23T21:47:17.2217639Z   DEVKIT_USER: $[ variablegroups.devicelab-c-sdk.DEVKIT_USER ]
+2026-04-23T21:47:17.2217639Z   ESP32_PORT: $[ variablegroups.devicelab-c-sdk.ESP32_PORT ]
+2026-04-23T21:47:17.2217639Z   ESP8266_PORT: $[ variablegroups.devicelab-c-sdk.ESP8266_PORT ]
+2026-04-23T21:47:17.2217639Z   MBED_IOT_DEVKIT_SDK_USER: $[ variablegroups.devicelab-c-sdk.MBED_IOT_DEVKIT_SDK_USER ]
+2026-04-23T21:47:17.2217639Z   MBED_USER: $[ variablegroups.devicelab-c-sdk.MBED_USER ]
+2026-04-23T21:47:17.2217639Z   MXCHIP_NIGHTLY_FILE_DESCRIPTOR: $[ variablegroups.devicelab-c-sdk.MXCHIP_NIGHTLY_FILE_DESCRIPTOR ]
+2026-04-23T21:47:17.2217639Z   MXCHIP_NIGHTLY_PORT: $[ variablegroups.devicelab-c-sdk.MXCHIP_NIGHTLY_PORT ]
+2026-04-23T21:47:17.2217639Z   MXCHIP_PORT: $[ variablegroups.devicelab-c-sdk.MXCHIP_PORT ]
+2026-04-23T21:47:17.2217639Z   MXCHIP_REPO_SOURCE_BRANCH: $[ variablegroups.devicelab-c-sdk.MXCHIP_REPO_SOURCE_BRANCH ]
+2026-04-23T21:47:17.2217639Z   MXCHIP_TO_FLASH: $[ variablegroups.devicelab-c-sdk.MXCHIP_TO_FLASH ]
+2026-04-23T21:47:17.2217639Z   MXCHIPAGENTPOOL: $[ variablegroups.devicelab-c-sdk.MXCHIPAGENTPOOL ]
+2026-04-23T21:47:17.2217639Z   ONEOFF_TEST: $[ variablegroups.devicelab-c-sdk.ONEOFF_TEST ]
+2026-04-23T21:47:17.2217639Z   RASPI_PORT: $[ variablegroups.devicelab-c-sdk.RASPI_PORT ]
+2026-04-23T21:47:17.2217639Z   RASPI_SERIAL_TASK: $[ variablegroups.devicelab-c-sdk.RASPI_SERIAL_TASK ]
+2026-04-23T21:47:17.2217639Z   RASPI_USER: $[ variablegroups.devicelab-c-sdk.RASPI_USER ]
+2026-04-23T21:47:17.2217639Z   RESET_RASPI: $[ variablegroups.devicelab-c-sdk.RESET_RASPI ]
+2026-04-23T21:47:17.2217639Z   SERIAL_TASK: $[ variablegroups.devicelab-c-sdk.SERIAL_TASK ]
+2026-04-23T21:47:17.2217639Z   WIFI_SSID: $[ variablegroups.devicelab-c-sdk.WIFI_SSID ]
+2026-04-23T21:47:17.2217639Z   X86_ESP32_PORT: $[ variablegroups.devicelab-c-sdk.X86_ESP32_PORT ]
+2026-04-23T21:47:17.2217639Z   X86_ESP8266_PORT: $[ variablegroups.devicelab-c-sdk.X86_ESP8266_PORT ]
+2026-04-23T21:47:17.2217639Z ContinueOnError: False
+2026-04-23T21:47:17.2217639Z TimeoutInMinutes: 60
+2026-04-23T21:47:17.2217639Z CancelTimeoutInMinutes: 5
+2026-04-23T21:47:17.2217639Z Expand:
+2026-04-23T21:47:17.2217639Z   MaxConcurrency: 0
+2026-04-23T21:47:17.2297017Z   ########## System Pipeline Decorator(s) ##########
+
+2026-04-23T21:47:17.2297017Z   Begin evaluating template 'system-pre-steps.yml'
+Evaluating: eq('true', variables['system.debugContext'])
+Expanded: eq('true', Null)
+Result: False
+Evaluating: resources['repositories']['self']
+Expanded: Object
+Result: True
+Evaluating: not(containsValue(job['steps']['*']['task']['id'], '6d15af64-176c-496d-b583-fd2ae21d4df4'))
+Expanded: not(containsValue(Object, '6d15af64-176c-496d-b583-fd2ae21d4df4'))
+Result: False
+Finished evaluating template 'system-pre-steps.yml'
+********************************************************************************
+Template and static variable resolution complete. Final runtime YAML document:
+steps: []
+
+
+2026-04-23T21:47:17.2460841Z   ########## 1esblue.build-security-monitoring.autoinject-task ##########
+
+2026-04-23T21:47:17.2460841Z   Begin evaluating template 'build-security-monitoring-pipeline-decorator.yml@'
+Evaluating: or(eq(variables['BUILDSECMON_OPT_IN'], 'true'), eq(variables['EOCompliance-mac'], 'true'))
+Expanded: or(eq(Null, 'true'), eq(Null, 'true'))
+Result: False
+Finished evaluating template 'build-security-monitoring-pipeline-decorator.yml@'
+********************************************************************************
+Template and static variable resolution complete. Final runtime YAML document:
+steps: []
+
+
+2026-04-23T21:47:17.2630440Z   ########## asg-cloudtest.1es-resource-management-enforcement.1es-hosted-pool-enforcement-decorator ##########
+
+2026-04-23T21:47:17.2630440Z   Begin evaluating template 'hosted-pool-decorator.yml@'
+Finished evaluating template 'hosted-pool-decorator.yml@'
+********************************************************************************
+Template and static variable resolution complete. Final runtime YAML document:
+steps:
+- task: 1ESHostedPoolValidation@1
+  displayName: 'Agent Pool Validation'
+
+
+2026-04-23T21:47:17.2786111Z   ########## ms.advancedsecurity-tasks.dependency-scanning-decorator ##########
+
+2026-04-23T21:47:17.2786111Z   Begin evaluating template 'assets/dependency-scanning-injection-decorator.yml@'
+Evaluating: and(or(eq(resources['repositories']['self']['ref'], resources['repositories']['self']['defaultBranch']), and(eq(variables['build.reason'], 'PullRequest'), eq(variables['system.pullrequest.targetbranch'], resources['repositories']['self']['defaultBranch']))), or(eq(resources['repositories']['__designer_repo']['ref'], resources['repositories']['__designer_repo']['defaultBranch']), and(eq(variables['build.reason'], 'PullRequest'), eq(variables['system.pullrequest.targetbranch'], resources['repositories']['__designer_repo']['defaultBranch']))), or(eq(resources['repositories']['self']['type'], 'Git'), eq(resources['repositories']['__designer_repo']['type'], 'Git')), eq(variables['build.advancedSecurityEnabled'], 'true'), eq(variables['build.dependencyScanningInjectionEnabled'], 'true'))
+Expanded: and(or(eq('refs/heads/ewertons/pipelinefixes', 'refs/heads/main'), and(eq('Manual', 'PullRequest'), eq(variables['system.pullrequest.targetbranch'], resources['repositories']['self']['defaultBranch']))), or(eq(resources['repositories']['__designer_repo']['ref'], resources['repositories']['__designer_repo']['defaultBranch']), and(eq(variables['build.reason'], 'PullRequest'), eq(variables['system.pullrequest.targetbranch'], resources['repositories']['__designer_repo']['defaultBranch']))), or(eq(resources['repositories']['self']['type'], 'Git'), eq(resources['repositories']['__designer_repo']['type'], 'Git')), eq(variables['build.advancedSecurityEnabled'], 'true'), eq(variables['build.dependencyScanningInjectionEnabled'], 'true'))
+Result: False
+Finished evaluating template 'assets/dependency-scanning-injection-decorator.yml@'
+********************************************************************************
+Template and static variable resolution complete. Final runtime YAML document:
+steps: []
+
+
+2026-04-23T21:47:17.2943058Z   Validating expression syntax: <and(succeeded(), ne(variables['CG_RAN'], 'true'))>
+2026-04-23T21:47:17.2943058Z   ########## ms.vss-governance-buildtask.governance-required-task ##########
+
+2026-04-23T21:47:17.2943058Z   Begin evaluating template 'component-governance-pipeline-decorator.yml@'
+Evaluating: not(or(containsValue(job['steps']['*']['task']['id'], 'a9b6c098-b7d0-4298-9ccd-b850cb24b52c'), containsValue(job['steps']['*']['task']['id'], 'd6dfb520-78f6-433a-aadb-fbd684bb1213')))
+Expanded: not(or(containsValue(Object, 'a9b6c098-b7d0-4298-9ccd-b850cb24b52c'), containsValue(Object, 'd6dfb520-78f6-433a-aadb-fbd684bb1213')))
+Result: True
+Evaluating: and(eq(resources['repositories']['self']['ref'], resources['repositories']['self']['defaultBranch']), eq(resources['repositories']['__designer_repo']['ref'], resources['repositories']['__designer_repo']['defaultBranch']), or(eq(resources['repositories']['self']['type'], 'Git'), eq(resources['repositories']['__designer_repo']['type'], 'Git'), eq(resources['repositories']['self']['type'], 'Github'), eq(resources['repositories']['__designer_repo']['type'], 'Github'), eq(resources['repositories']['self']['type'], 'GitHubEnterprise'), eq(resources['repositories']['__designer_repo']['type'], 'GitHubEnterprise')), ne(variables['PREVENT_RUNNING_CG'], 'true'), ne(variables['skipComponentGovernanceDetection'], 'true'))
+Expanded: and(eq('refs/heads/ewertons/pipelinefixes', 'refs/heads/main'), eq(resources['repositories']['__designer_repo']['ref'], resources['repositories']['__designer_repo']['defaultBranch']), or(eq(resources['repositories']['self']['type'], 'Git'), eq(resources['repositories']['__designer_repo']['type'], 'Git'), eq(resources['repositories']['self']['type'], 'Github'), eq(resources['repositories']['__designer_repo']['type'], 'Github'), eq(resources['repositories']['self']['type'], 'GitHubEnterprise'), eq(resources['repositories']['__designer_repo']['type'], 'GitHubEnterprise')), ne(variables['PREVENT_RUNNING_CG'], 'true'), ne(variables['skipComponentGovernanceDetection'], 'true'))
+Result: False
+Evaluating: resources['repositories']['self']['defaultBranch']
+Expanded: 'refs/heads/main'
+Result: True
+Evaluating: resources['repositories']['self']['defaultBranch']
+Result: 'refs/heads/main'
+Finished evaluating template 'component-governance-pipeline-decorator.yml@'
+********************************************************************************
+Template and static variable resolution complete. Final runtime YAML document:
+steps:
+- task: ComponentGovernanceComponentDetection@0
+  displayName: 'Component Detection (auto-injected by policy)'
+  name: 'cg_auto_inject'
+  inputs:
+    sourceScanPath: $(Agent.BuildDirectory)
+    autoInjected: true
+    legacyInjection: False
+    defaultBranch: refs/heads/main
+  condition: and(succeeded(), ne(variables['CG_RAN'], 'true'))
+  timeoutInMinutes: 12
+  continueOnError: false
+
+
+2026-04-23T21:47:17.3101109Z   ########## MS-CST-E.codeql-3000-release.finalize-decorator ##########
+
+2026-04-23T21:47:17.3101109Z   Begin evaluating template 'FinalizeDecorator.yml@'
+Evaluating: and(eq(resources['repositories']['self']['ref'], resources['repositories']['self']['defaultBranch']), eq(resources['repositories']['__designer_repo']['ref'], resources['repositories']['__designer_repo']['defaultBranch']), not(containsValue(job['steps']['*']['task']['id'], 'de37a6c9-1971-45e4-9281-d2e346187683')), ne(variables['Codeql.SkipTaskAutoInjection'], 'true'))
+Expanded: and(eq('refs/heads/ewertons/pipelinefixes', 'refs/heads/main'), eq(resources['repositories']['__designer_repo']['ref'], resources['repositories']['__designer_repo']['defaultBranch']), not(containsValue(job['steps']['*']['task']['id'], 'de37a6c9-1971-45e4-9281-d2e346187683')), ne(variables['Codeql.SkipTaskAutoInjection'], 'true'))
+Result: False
+Finished evaluating template 'FinalizeDecorator.yml@'
+********************************************************************************
+Template and static variable resolution complete. Final runtime YAML document:
+steps: []
+
+
+2026-04-23T21:47:17.3490652Z   Validating expression syntax: <succeeded()>
+2026-04-23T21:47:17.3490652Z   ########## ms.nuget-security-analysis.nuget-security-analysis-required-task ##########
+
+2026-04-23T21:47:17.3490652Z   Begin evaluating template 'nuget-security-analysis-pipeline-decorator.yml@'
+Evaluating: and(eq(variables['SYSTEM.JOBPARALLELISMTAG'], 'Private'), or(eq(resources['repositories']['self']['type'], 'Git'), eq(resources['repositories']['__designer_repo']['type'], 'Git'), eq(resources['repositories']['self']['type'], 'Github'), eq(resources['repositories']['__designer_repo']['type'], 'Github'), eq(resources['repositories']['self']['type'], 'GitHubEnterprise'), eq(resources['repositories']['__designer_repo']['type'], 'GitHubEnterprise')), ne(variables['skipNugetSecurityAnalysis'], 'true'))
+Expanded: and(eq('Private', 'Private'), or(eq('GitHub', 'Git'), eq(Null, 'Git'), eq('GitHub', 'Github'), eq(resources['repositories']['__designer_repo']['type'], 'Github'), eq(resources['repositories']['self']['type'], 'GitHubEnterprise'), eq(resources['repositories']['__designer_repo']['type'], 'GitHubEnterprise')), ne(Null, 'true'))
+Result: True
+Finished evaluating template 'nuget-security-analysis-pipeline-decorator.yml@'
+********************************************************************************
+Template and static variable resolution complete. Final runtime YAML document:
+steps:
+- task: nuget-security-analysis@0
+  displayName: 'Secure Supply Chain Analysis (auto-injected by policy)'
+  name: 'nuget_security_analysis_auto_inject'
+  condition: succeeded()
+  timeoutInMinutes: 5
+
+
+2026-04-23T21:47:17.3647329Z   ########## MS-CST-E.codeql-3000-release.init-decorator ##########
+
+2026-04-23T21:47:17.3647329Z   Begin evaluating template 'InitDecorator.yml@'
+Evaluating: and(eq(resources['repositories']['self']['ref'], resources['repositories']['self']['defaultBranch']), eq(resources['repositories']['__designer_repo']['ref'], resources['repositories']['__designer_repo']['defaultBranch']), not(containsValue(job['steps']['*']['task']['id'], 'c450a110-caea-4ea9-8299-297eecc70633')), ne(variables['Codeql.SkipTaskAutoInjection'], 'true'))
+Expanded: and(eq('refs/heads/ewertons/pipelinefixes', 'refs/heads/main'), eq(resources['repositories']['__designer_repo']['ref'], resources['repositories']['__designer_repo']['defaultBranch']), not(containsValue(job['steps']['*']['task']['id'], 'c450a110-caea-4ea9-8299-297eecc70633')), ne(variables['Codeql.SkipTaskAutoInjection'], 'true'))
+Result: False
+Finished evaluating template 'InitDecorator.yml@'
+********************************************************************************
+Template and static variable resolution complete. Final runtime YAML document:
+steps: []
+
+
+2026-04-23T21:47:17.3647329Z   MaxConcurrency: 0
+2026-04-23T21:47:17.3696865Z ##[section]Finishing: Prepare job checksubmodule

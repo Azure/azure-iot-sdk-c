@@ -1,0 +1,96 @@
+2026-04-24T05:42:13.4511218Z ##[section]Starting: Create Azure Resources and Test Config
+2026-04-24T05:42:13.4521640Z ==============================================================================
+2026-04-24T05:42:13.4522109Z Task         : Azure CLI
+2026-04-24T05:42:13.4522523Z Description  : Run Azure CLI commands against an Azure subscription in a PowerShell Core/Shell script when running on Linux agent or PowerShell/PowerShell Core/Batch script when running on Windows agent.
+2026-04-24T05:42:13.4523040Z Version      : 2.272.3
+2026-04-24T05:42:13.4523427Z Author       : Microsoft Corporation
+2026-04-24T05:42:13.4523806Z Help         : https://docs.microsoft.com/azure/devops/pipelines/tasks/deploy/azure-cli
+2026-04-24T05:42:13.4524237Z ==============================================================================
+2026-04-24T05:42:13.8157827Z [command]C:\Windows\system32\cmd.exe /D /S /C ""C:\Program Files\Microsoft SDKs\Azure\CLI2\wbin\az.cmd" version"
+2026-04-24T05:42:16.8750009Z {
+2026-04-24T05:42:16.8755573Z   "azure-cli": "2.85.0",
+2026-04-24T05:42:16.8920249Z   "azure-cli-core": "2.85.0",
+2026-04-24T05:42:16.8944714Z   "azure-cli-telemetry": "1.1.0",
+2026-04-24T05:42:16.9042964Z   "extensions": {
+2026-04-24T05:42:16.9072902Z     "azure-devops": "1.0.2"
+2026-04-24T05:42:16.9088834Z   }
+2026-04-24T05:42:16.9095086Z }
+2026-04-24T05:42:16.9099517Z Setting AZURE_CONFIG_DIR env variable to: D:\a\_temp\.azclitask
+2026-04-24T05:42:16.9100870Z Setting active cloud to: AzureCloud
+2026-04-24T05:42:16.9101929Z [command]C:\Windows\system32\cmd.exe /D /S /C ""C:\Program Files\Microsoft SDKs\Azure\CLI2\wbin\az.cmd" cloud set -n AzureCloud"
+2026-04-24T05:42:21.7742431Z [command]C:\Windows\system32\cmd.exe /D /S /C ""C:\Program Files\Microsoft SDKs\Azure\CLI2\wbin\az.cmd" login --service-principal -u *** --tenant 72f988bf-86f1-41af-91ab-2d7cd011db47 --allow-no-subscriptions --federated-token ***
+2026-04-24T05:42:24.4713994Z [
+2026-04-24T05:42:24.4738656Z   {
+2026-04-24T05:42:24.4740356Z     "cloudName": "AzureCloud",
+2026-04-24T05:42:24.4751185Z     "homeTenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47",
+2026-04-24T05:42:24.4767252Z     "id": "db2f889d-dd6c-4269-8d41-a38efcdace46",
+2026-04-24T05:42:24.4911778Z     "isDefault": true,
+2026-04-24T05:42:24.4935203Z     "managedByTenants": [],
+2026-04-24T05:42:24.5328008Z     "name": "aziotclb - Build System subscription",
+2026-04-24T05:42:24.5479890Z     "state": "Enabled",
+2026-04-24T05:42:24.5712165Z     "tenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47",
+2026-04-24T05:42:24.6043329Z     "user": {
+2026-04-24T05:42:24.6050997Z       "name": "***",
+2026-04-24T05:42:24.6351123Z       "type": "servicePrincipal"
+2026-04-24T05:42:24.6354432Z     }
+2026-04-24T05:42:24.6355623Z   }
+2026-04-24T05:42:24.6366939Z ]
+2026-04-24T05:42:24.6377213Z [command]C:\Windows\system32\cmd.exe /D /S /C ""C:\Program Files\Microsoft SDKs\Azure\CLI2\wbin\az.cmd" account set --subscription db2f889d-dd6c-4269-8d41-a38efcdace46"
+2026-04-24T05:42:25.3964305Z [command]C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Unrestricted -Command ". 'D:\a\_temp\azureclitaskscript1777009333792.ps1'"
+2026-04-24T05:42:25.8196511Z 
+2026-04-24T05:42:25.8208366Z Name                           Value                                                                                   
+2026-04-24T05:42:25.8211620Z ----                           -----                                                                                   
+2026-04-24T05:42:25.8214756Z PSVersion                      5.1.26100.32522                                                                         
+2026-04-24T05:42:25.8218152Z PSEdition                      Desktop                                                                                 
+2026-04-24T05:42:25.8221397Z PSCompatibleVersions           {1.0, 2.0, 3.0, 4.0...}                                                                 
+2026-04-24T05:42:25.8224273Z BuildVersion                   10.0.26100.32522                                                                        
+2026-04-24T05:42:25.8229711Z CLRVersion                     4.0.30319.42000                                                                         
+2026-04-24T05:42:25.8235940Z WSManStackVersion              3.0                                                                                     
+2026-04-24T05:42:25.8290432Z PSRemotingProtocolVersion      2.3                                                                                     
+2026-04-24T05:42:25.8298294Z SerializationVersion           1.1.0.1                                                                                 
+2026-04-24T05:42:26.7441520Z Already logged in to Azure.
+2026-04-24T05:42:27.9961688Z Installing Azure IoT extension.
+2026-04-24T05:42:51.1754270Z Creating Azure resource group (rg-848eb412011340709efb91ac4950ddab; CreatedBy=*** AzureDevOpsRunUrl=https://dev.azure.com/azure-iot-sdks/azure-iot-sdks/_build/results?buildId=157601 CreatedOn=2026-04-24T05:42:51.1471775+00:00)
+2026-04-24T05:42:53.5180973Z Creating Azure IoT Hub (iothub-25773bbdbd9b4e60a677aa88a1eb6c2d).
+2026-04-24T05:42:55.0144281Z WARNING: The behavior of this command has been altered by the following extension: azure-iot
+2026-04-24T05:45:22.9384143Z Creating Azure Device Provisioning Service (dps-75a21b87520b41d28e7d6dfa3875c491).
+2026-04-24T05:45:23.8912344Z WARNING: The behavior of this command has been altered by the following extension: azure-iot
+2026-04-24T05:45:57.5592776Z Linking Azure IoT Hub (iothub-25773bbdbd9b4e60a677aa88a1eb6c2d) to Azure Device Provisioning service (dps-75a21b87520b41d28e7d6dfa3875c491)
+2026-04-24T05:45:58.4602776Z WARNING: The behavior of this command has been altered by the following extension: azure-iot
+2026-04-24T05:46:42.3280661Z Creating DPS Root Certificate
+2026-04-24T05:46:42.3483612Z Running Add-DpsCertificate(Azure-IoT-Test-Certificate-b818562e-20ca-4c99-8ab7-07c94f3bfe9f)
+2026-04-24T05:46:42.6862531Z Running New-Certificate(CN=Azure IoT Test Certificate b818562e-20ca-4c99-8ab7-07c94f3bfe9f)
+2026-04-24T05:46:44.5399113Z Exporting certificate to C:\Users\VssAdministrator\AppData\Local\Temp\tmpF143.tmp
+2026-04-24T05:46:45.5515377Z WARNING: The behavior of this command has been altered by the following extension: azure-iot
+2026-04-24T05:46:49.9524245Z WARNING: The behavior of this command has been altered by the following extension: azure-iot
+2026-04-24T05:46:52.4738822Z WARNING: The behavior of this command has been altered by the following extension: azure-iot
+2026-04-24T05:46:54.0922926Z Running New-Certificate(CN=531EBDBF78BAC34A035B353AD0DE0928535546BE52FD57AB)
+2026-04-24T05:46:54.6780620Z Exporting certificate to C:\Users\VssAdministrator\AppData\Local\Temp\tmp1EEC.tmp
+2026-04-24T05:46:55.5177548Z WARNING: The behavior of this command has been altered by the following extension: azure-iot
+2026-04-24T05:46:58.4883045Z WARNING: The behavior of this command has been altered by the following extension: azure-iot
+2026-04-24T05:47:00.5351083Z Running New-Certificate(C=US, ST=Washington, L=Redmond, O=Company, OU=Org, CN=www.company.com)
+2026-04-24T05:47:01.0685431Z Running New-Certificate(C=US, ST=Washington, L=Redmond, O=Company, OU=Org, CN=www.company.com)
+2026-04-24T05:47:01.0796257Z Creating Azure IoT Hub x509 thumbprint device (x509tp-353c3dbb430a495c840975ae59d785ad)
+2026-04-24T05:47:07.4266863Z Creating Azure DPS x509 individual enrollment (test-enrollment-x509-0; ; ; ; 365.00:00:00).
+2026-04-24T05:47:07.5057842Z Running New-Certificate(CN=test-enrollment-x509-0)
+2026-04-24T05:47:07.9892013Z Exporting certificate to C:\Users\VssAdministrator\AppData\Local\Temp\tmp554F.tmp
+2026-04-24T05:47:11.0164312Z Creating Azure Storage account (stoacc8da84183ca5b41948b)
+2026-04-24T05:47:13.0667877Z WARNING: The --min-tls-version argument values TLS1_0 and TLS1_1 have been retired on 2026/02/03 and will be removed on 2026/03/03.
+2026-04-24T05:47:34.1083595Z Creating Azure Storage container (iothubuploads on stoacc8da84183ca5b41948b)
+2026-04-24T05:47:36.6872389Z Getting Azure Storage account connection string
+2026-04-24T05:47:38.9784421Z Updating Azure IoT Hub file upload settings
+2026-04-24T05:47:40.0781647Z WARNING: The behavior of this command has been altered by the following extension: azure-iot
+2026-04-24T05:48:17.4737136Z Getting IoT Hub Connection String
+2026-04-24T05:48:20.3920864Z Getting IoT Hub's Event Hub Connection String
+2026-04-24T05:48:23.2652456Z Getting IoT Hub's Event Hub Consumer Groups
+2026-04-24T05:48:24.2633435Z WARNING: The behavior of this command has been altered by the following extension: azure-iot
+2026-04-24T05:48:26.0587891Z Getting DPS Connection String
+2026-04-24T05:48:28.8746889Z End-to-End test configuration written to test_config/set_e2e_test_env_vars.sh
+2026-04-24T05:48:28.8748024Z test_config/set_e2e_test_env_vars.sh
+2026-04-24T05:48:28.8748750Z End-to-End test configuration written to test_config/Set-E2ETestEnvVars.ps1
+2026-04-24T05:48:28.8749430Z test_config/Set-E2ETestEnvVars.ps1
+2026-04-24T05:48:28.8751709Z 
+2026-04-24T05:48:28.8752574Z 
+2026-04-24T05:48:28.9053549Z 
+2026-04-24T05:48:28.9326492Z [command]C:\Windows\system32\cmd.exe /D /S /C ""C:\Program Files\Microsoft SDKs\Azure\CLI2\wbin\az.cmd" account clear"
+2026-04-24T05:48:30.7364396Z ##[section]Finishing: Create Azure Resources and Test Config
