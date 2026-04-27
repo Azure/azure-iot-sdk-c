@@ -22,6 +22,9 @@
 #include "azure_c_shared_utility/strings.h"
 #include "azure_c_shared_utility/uniqueid.h"
 #include "azure_c_shared_utility/azure_base64.h"
+#include "azure_c_shared_utility/hmacsha256.h"
+
+#include "parson.h"
 
 #include "azure_prov_client/prov_device_ll_client.h"
 #include "azure_prov_client/prov_security_factory.h"
@@ -372,4 +375,183 @@ void send_dps_test_registration_with_retry(const char* global_uri, const char* s
             send_dps_test_registration(global_uri, scope_id, protocol, g_enable_tracing), 
             "Failure during device provisioning");
     }
+}
+
+// ============================================================================
+// CSR test helpers
+// ============================================================================
+
+char* csr_e2e_base64_der_to_pem_certificate(const char* base64_der)
+{
+    if (base64_der == NULL)
+    {
+        return NULL;
+    }
+
+    size_t b64_len = strlen(base64_der);
+    size_t num_lines = (b64_len + 63) / 64;
+    // header(28) + b64 + one LF per line + footer(26) + trailing LF + NUL
+    size_t pem_size = 28 + b64_len + num_lines + 26 + 1;
+
+    char* pem = (char*)calloc(1, pem_size);
+    if (pem == NULL)
+    {
+        LogError("OOM allocating PEM buffer");
+        return NULL;
+    }
+
+    char* p = pem;
+    int n = sprintf(p, "-----BEGIN CERTIFICATE-----\n");
+    if (n < 0) { free(pem); return NULL; }
+    p += n;
+
+    for (size_t i = 0; i < b64_len; i += 64)
+    {
+        size_t chunk = (b64_len - i < 64) ? b64_len - i : 64;
+        memcpy(p, base64_der + i, chunk);
+        p += chunk;
+        *p++ = '\n';
+    }
+
+    (void)sprintf(p, "-----END CERTIFICATE-----\n");
+    return pem;
+}
+
+char* csr_e2e_parse_hub_csr_response(const char* response_json, size_t* cert_count)
+{
+    if (response_json == NULL || cert_count == NULL)
+    {
+        return NULL;
+    }
+    *cert_count = 0;
+
+    char* result = NULL;
+    char** pem_certs = NULL;
+    size_t count = 0;
+    bool ok = false;
+
+    JSON_Value* root_value = json_parse_string(response_json);
+    JSON_Object* root_obj = (root_value != NULL) ? json_value_get_object(root_value) : NULL;
+    JSON_Array* certs_array = (root_obj != NULL) ? json_object_get_array(root_obj, "certificates") : NULL;
+
+    if (certs_array == NULL)
+    {
+        LogError("CSR response missing 'certificates' array");
+        goto done;
+    }
+
+    count = json_array_get_count(certs_array);
+    if (count == 0)
+    {
+        LogError("CSR response certificates array is empty");
+        goto done;
+    }
+
+    pem_certs = (char**)calloc(count, sizeof(char*));
+    if (pem_certs == NULL)
+    {
+        LogError("OOM pem_certs");
+        goto done;
+    }
+
+    size_t total_size = 0;
+    bool converted_all = true;
+    for (size_t i = 0; i < count; i++)
+    {
+        const char* b64 = json_array_get_string(certs_array, i);
+        if (b64 == NULL || (pem_certs[i] = csr_e2e_base64_der_to_pem_certificate(b64)) == NULL)
+        {
+            converted_all = false;
+            break;
+        }
+        total_size += strlen(pem_certs[i]);
+    }
+
+    if (!converted_all)
+    {
+        LogError("Failed to convert one or more certificates to PEM");
+        goto done;
+    }
+
+    result = (char*)calloc(1, total_size + 1);
+    if (result == NULL)
+    {
+        LogError("OOM cert chain");
+        goto done;
+    }
+
+    {
+        char* p = result;
+        for (size_t i = 0; i < count; i++)
+        {
+            size_t len = strlen(pem_certs[i]);
+            memcpy(p, pem_certs[i], len);
+            p += len;
+        }
+    }
+
+    *cert_count = count;
+    ok = true;
+
+done:
+    if (pem_certs != NULL)
+    {
+        for (size_t i = 0; i < count; i++) free(pem_certs[i]);
+        free(pem_certs);
+    }
+    if (root_value != NULL) json_value_free(root_value);
+    if (!ok)
+    {
+        free(result);
+        result = NULL;
+    }
+    return result;
+}
+
+char* csr_e2e_derive_device_symmetric_key(const char* group_key, const char* registration_id)
+{
+    if (group_key == NULL || registration_id == NULL)
+    {
+        return NULL;
+    }
+
+    char* result = NULL;
+    BUFFER_HANDLE decoded_key = Azure_Base64_Decode(group_key);
+    BUFFER_HANDLE hash = NULL;
+    STRING_HANDLE derived_b64 = NULL;
+
+    if (decoded_key == NULL)
+    {
+        LogError("Failed to base64-decode group key");
+        goto done;
+    }
+    if ((hash = BUFFER_new()) == NULL)
+    {
+        LogError("OOM HMAC hash buffer");
+        goto done;
+    }
+    if (HMACSHA256_ComputeHash(
+            BUFFER_u_char(decoded_key), BUFFER_length(decoded_key),
+            (const unsigned char*)registration_id, strlen(registration_id),
+            hash) != HMACSHA256_OK)
+    {
+        LogError("HMAC-SHA256 failed");
+        goto done;
+    }
+    if ((derived_b64 = Azure_Base64_Encode(hash)) == NULL)
+    {
+        LogError("Base64 encode of derived key failed");
+        goto done;
+    }
+    if (mallocAndStrcpy_s(&result, STRING_c_str(derived_b64)) != 0)
+    {
+        LogError("mallocAndStrcpy_s failed");
+        result = NULL;
+    }
+
+done:
+    if (derived_b64 != NULL) STRING_delete(derived_b64);
+    if (hash != NULL) BUFFER_delete(hash);
+    if (decoded_key != NULL) BUFFER_delete(decoded_key);
+    return result;
 }

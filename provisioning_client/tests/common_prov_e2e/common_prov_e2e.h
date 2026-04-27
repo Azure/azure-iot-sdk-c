@@ -60,6 +60,23 @@ extern int construct_device_id(const char* prefix, char** device_name);
 extern void send_dps_test_registration_with_retry(const char* global_uri, const char* scope_id, PROV_DEVICE_TRANSPORT_PROVIDER_FUNCTION protocol, bool use_tracing);
 extern char* convert_base64_to_string(const char* base64_cert);
 
+// CSR test helpers (platform-agnostic; rely on azure_base64 + parson + c-utility
+// csr_gen abstraction for any crypto so no native-SSL symbols leak into tests).
+
+// Convert a base64(DER) certificate into a single PEM-armored cert string.
+// Returns a malloc'd NUL-terminated string on success, NULL on failure.
+extern char* csr_e2e_base64_der_to_pem_certificate(const char* base64_der);
+
+// Parse IoT Hub CSR response JSON of the form {"certificates":["b64","b64",...]}.
+// Returns a concatenated PEM certificate chain (malloc'd) and writes the count
+// to *cert_count. On failure (or empty array) returns NULL.
+extern char* csr_e2e_parse_hub_csr_response(const char* response_json, size_t* cert_count);
+
+// Derive a per-device symmetric key from a group primary key using HMAC-SHA256:
+//   derived = Base64(HMAC-SHA256(Base64Decode(group_key), registration_id)).
+// Returns a malloc'd NUL-terminated base64 string; NULL on failure.
+extern char* csr_e2e_derive_device_symmetric_key(const char* group_key, const char* registration_id);
+
 extern const int TEST_PROV_RANDOMIZED_BACK_OFF_SEC;
 
 #ifdef __cplusplus

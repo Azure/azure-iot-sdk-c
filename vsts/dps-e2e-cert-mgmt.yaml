@@ -1,0 +1,224 @@
+# Copyright (c) Microsoft. All rights reserved.
+# Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+# CSR (Certificate Signing Request) E2E pipeline for Azure IoT C SDK.
+# Provisions Azure resources with ADR (Auto Device Registration) enabled,
+# builds the C SDK, and runs the prov_x509_csr_client_e2e test.
+
+name: $(BuildID)_$(BuildDefinitionName)_$(SourceBranchName)_$(Date:yyyyMMdd)$(Rev:.r)
+
+trigger: none
+
+pr:
+  branches:
+    include:
+      - main
+      - feature/*
+
+variables:
+  runCodesignValidationInjection: false
+
+parameters:
+  - name: azureLocation
+    type: string
+    displayName: 'Azure region for resource provisioning'
+    default: 'centraluseuap'
+  - name: reuseResourceGroup
+    type: string
+    displayName: 'Reuse existing resource group name (leave as "new" to provision fresh resources)'
+    default: 'new'
+  - name: reuseBuildId
+    type: string
+    displayName: 'Build ID of previous run to download env vars artifact from (required when reuseResourceGroup is not "new")'
+    default: '0'
+
+stages:
+# ---------------------------------------------------------------------------
+# Stage 1: Setup — provision Azure resources with ADR/cert management enabled
+# ---------------------------------------------------------------------------
+- stage: setup
+  displayName: 'Setup Azure Resources'
+  condition: eq('${{ parameters.reuseResourceGroup }}', 'new')
+  jobs:
+  - job: provision
+    displayName: 'Provision DPS + IoT Hub with cert management'
+    pool:
+      vmImage: 'windows-latest'
+    steps:
+    - checkout: self
+      fetchDepth: 1
+      sparseCheckoutDirectories: testtools/scripts
+
+    - task: AzureCLI@2
+      displayName: 'Provision resources and generate env var script'
+      inputs:
+        azureSubscription: 'iot hub sdk service connection'
+        scriptType: ps
+        scriptLocation: inlineScript
+        inlineScript: |
+          Invoke-WebRequest -Uri https://raw.githubusercontent.com/Azure/azure-iot-sdk-c/refs/heads/ewertons/pipelinefixes/testtools/scripts/Azure.Iot.Sdk.Test.psm1 -OutFile ./Azure.Iot.Sdk.Test.psm1
+          Import-Module ./Azure.Iot.Sdk.Test.psm1
+
+          New-Item -ItemType Directory -Path "test_config" -Force | Out-Null
+
+          $ResourceGroupName = New-AzureResourceGroupName
+          $ResourceGroupName = "$ResourceGroupName-c-sdk-e2e"
+
+          # Write RG name early so cleanup can find it even if later steps fail
+          Set-Content -Path "test_config/resource_group_name.txt" -Value $ResourceGroupName
+
+          $TestEnvInfo = New-AzIotTestEnvironment `
+              -AzureLocation '${{ parameters.azureLocation }}' `
+              -ResourceGroup $ResourceGroupName `
+              -EnableCertificateManagement `
+              -EnableFileUpload `
+              -DpsX509IndividualEnrollments 1 `
+              -DpsSymmKeyGroupEnrollmentDevices 1 `
+              -IotHubX509ThumbprintDevices 1
+
+          New-AzIotCSDKE2ETestConfig `
+              -TestEnvInfo $TestEnvInfo `
+              -Target bash `
+              -OutFile test_config/set_e2e_test_env_vars.sh
+
+          Write-Host "##vso[task.setvariable variable=RESOURCE_GROUP_NAME;isOutput=true]$($TestEnvInfo.ResourceGroupName)"
+      name: provisionStep
+
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish test config artifact'
+      condition: always()
+      inputs:
+        PathtoPublish: 'test_config'
+        ArtifactName: 'test_config_scripts'
+
+# ---------------------------------------------------------------------------
+# Stage 2: Build & Test — build C SDK on Linux and run CSR E2E test
+# ---------------------------------------------------------------------------
+- stage: build_and_tests
+  displayName: 'Build & CSR E2E Test'
+  dependsOn: setup
+  condition: not(failed('setup'))
+  jobs:
+  - job: linux_csr_e2e
+    displayName: 'Linux CSR E2E (Ubuntu 22.04)'
+    timeoutInMinutes: 60
+    pool:
+      vmImage: 'ubuntu-22.04'
+    steps:
+    - checkout: self
+      submodules: recursive
+
+    - script: |
+        sudo apt-get update
+        sudo apt-get install -y cmake gcc g++ make libssl-dev uuid-dev libcurl4-openssl-dev
+      displayName: 'Install build dependencies'
+
+    # When reusing existing resources, download env vars from a previous build
+    - task: DownloadBuildArtifacts@1
+      displayName: 'Download test config from previous build'
+      condition: ne('${{ parameters.reuseResourceGroup }}', 'new')
+      inputs:
+        buildType: 'specific'
+        project: '$(System.TeamProjectId)'
+        pipeline: '$(System.DefinitionId)'
+        buildVersionToDownload: 'specific'
+        buildId: '${{ parameters.reuseBuildId }}'
+        downloadType: 'single'
+        artifactName: 'test_config_scripts'
+        downloadPath: '$(System.ArtifactsDirectory)'
+
+    # When using fresh resources from setup stage, download the artifact
+    - task: DownloadBuildArtifacts@1
+      displayName: 'Download test config'
+      condition: eq('${{ parameters.reuseResourceGroup }}', 'new')
+      inputs:
+        buildType: 'current'
+        downloadType: 'single'
+        artifactName: 'test_config_scripts'
+        downloadPath: '$(System.ArtifactsDirectory)'
+
+    - script: |
+        mkdir -p cmake && cd cmake
+        cmake .. \
+          -Drun_e2e_tests:BOOL=ON \
+          -Duse_prov_client:BOOL=ON \
+          -Dhsm_type_x509:BOOL=ON \
+          -Dhsm_type_symm_key:BOOL=ON \
+          -Duse_mqtt:BOOL=ON \
+          -Duse_amqp:BOOL=ON \
+          -Duse_http:BOOL=ON
+        cmake --build . --parallel $(nproc)
+      displayName: 'Build C SDK'
+      workingDirectory: '$(Build.SourcesDirectory)'
+
+    - script: |
+        sed -i 's/\r$//' $(System.ArtifactsDirectory)/test_config_scripts/set_e2e_test_env_vars.sh
+        source $(System.ArtifactsDirectory)/test_config_scripts/set_e2e_test_env_vars.sh
+        cd cmake
+        stdbuf -oL ctest -T test --no-compress-output -R "dps_(x509|symkey)_csr_" -VV --timeout 300 2>&1 || true
+        echo "--- Last 200 lines of LastTest.log ---"
+        tail -200 Testing/Temporary/LastTest.log 2>/dev/null || true
+      displayName: 'Run CSR E2E test'
+      workingDirectory: '$(Build.SourcesDirectory)'
+
+    - task: PublishTestResults@2
+      displayName: 'Publish CSR E2E test results'
+      inputs:
+        testRunner: CTest
+        testResultsFiles: '**/Test.xml'
+        mergeTestResults: true
+        testRunTitle: 'linux_csr_e2e'
+      condition: succeededOrFailed()
+
+# ---------------------------------------------------------------------------
+# Stage 3: Cleanup — delete provisioned Azure resource group
+# ---------------------------------------------------------------------------
+- stage: cleanup
+  displayName: 'Cleanup Azure Resources'
+  dependsOn:
+    - setup
+    - build_and_tests
+  condition: and(always(), eq('${{ parameters.reuseResourceGroup }}', 'new'))
+  jobs:
+  - job: delete_resources
+    displayName: 'Delete resource group'
+    condition: always()
+    pool:
+      vmImage: 'ubuntu-22.04'
+    steps:
+    - checkout: none
+
+    - task: DownloadBuildArtifacts@1
+      displayName: 'Download test config'
+      condition: always()
+      inputs:
+        buildType: 'current'
+        downloadType: 'single'
+        artifactName: 'test_config_scripts'
+        downloadPath: '$(System.ArtifactsDirectory)'
+
+    - task: AzureCLI@2
+      displayName: 'Delete resource group'
+      condition: always()
+      inputs:
+        azureSubscription: 'iot hub sdk service connection'
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+          RG_NAME=$(cat "$(System.ArtifactsDirectory)/test_config_scripts/resource_group_name.txt" 2>/dev/null | tr -d '\r\n')
+          if [ -z "$RG_NAME" ]; then
+            echo "##[warning]Resource group name not found or empty — nothing to clean up"
+            exit 0
+          fi
+          echo "Deleting resource group: $RG_NAME"
+          az group delete --name "$RG_NAME" --yes --no-wait 2>/dev/null || true
+          SECONDS=0
+          while az group exists --name "$RG_NAME" -o tsv 2>/dev/null | grep -qi true; do
+            if [ $SECONDS -ge 600 ]; then
+              echo "##[warning]Resource group still exists after 600s — giving up"
+              exit 0
+            fi
+            echo "Waiting for deletion... (${SECONDS}s)"
+            sleep 15
+          done
+          echo "Resource group deleted (${SECONDS}s)"

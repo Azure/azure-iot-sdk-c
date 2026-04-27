@@ -211,3 +211,4 @@ build_all/windows/nuget.exe
 # Doc stage output
 /doc-stage
 /cmake2
+build_all

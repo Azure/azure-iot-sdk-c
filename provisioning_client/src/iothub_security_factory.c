@@ -101,6 +101,7 @@ void iothub_security_deinit()
         g_symm_key_reg_name = NULL;
     }
     deinitialize_hsm_system();
+    g_security_type = IOTHUB_SECURITY_TYPE_UNKNOWN;
     if (prov_dev_get_symmetric_key() != NULL || prov_dev_get_symm_registration_name() != NULL)
     {
         prov_dev_security_deinit();

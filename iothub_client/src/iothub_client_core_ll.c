@@ -1336,6 +1336,13 @@ static void IoTHubClientCore_LL_CsrComplete(uint32_t item_id, int status_code, c
                         DList_RemoveEntryList(client_item);
                         csr_request_data_destroy(csr_data);
                     }
+                    else if (status_code == 202)
+                    {
+                        // Intermediate "accepted" response — keep the request in the queue
+                        // and signal IOTHUB_CLIENT_CONFIRMATION_ACCEPTED so the convenience layer
+                        // knows not to free the callback context yet.
+                        csr_data->callback(IOTHUB_CLIENT_CONFIRMATION_ACCEPTED, status_code, response_payload, csr_data->context);
+                    }
                     else if (status_code >= 400)
                     {
                         csr_data->callback(IOTHUB_CLIENT_CONFIRMATION_ERROR, status_code, response_payload, csr_data->context);
@@ -1344,8 +1351,7 @@ static void IoTHubClientCore_LL_CsrComplete(uint32_t item_id, int status_code, c
                     }
                     else
                     {
-                        // For any other status code, we don't remove the request from the list as we are not sure if the request was processed or not,
-                        // so we let it time out eventually and report failure at that time if it does time out.
+                        // Unexpected status code — invoke callback and let the request expire naturally via timeout
                         csr_data->callback(IOTHUB_CLIENT_CONFIRMATION_OK, status_code, response_payload, csr_data->context);
                     }
                 }

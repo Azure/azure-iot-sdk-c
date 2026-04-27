@@ -103,6 +103,7 @@ void prov_dev_security_deinit(void)
         g_symm_key_reg_name = NULL;
     }
     deinitialize_hsm_system();
+    g_device_hsm_type = SECURE_DEVICE_TYPE_UNKNOWN;
     if (iothub_security_get_symmetric_key() != NULL || iothub_security_get_symm_registration_name() != NULL)
     {
         // Clear out iothub info
