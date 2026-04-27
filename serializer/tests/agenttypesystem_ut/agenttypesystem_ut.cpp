@@ -3919,7 +3919,7 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             AGENT_DATA_TYPE ag;
             (void)Create_EDM_BOOLEAN_from_int(&ag, ~0);
 
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .SetReturn(1);
 
             ///act
@@ -3940,7 +3940,7 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             AGENT_DATA_TYPE ag;
             (void)Create_EDM_BOOLEAN_from_int(&ag, 0);
 
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .SetReturn(1);
 
             ///act
@@ -4024,7 +4024,7 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             AGENT_DATA_TYPE ag;
             (void)Create_AGENT_DATA_TYPE_from_UINT8(&ag, 255);
 
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .SetReturn(1);
 
             ///act
@@ -4100,7 +4100,7 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             someDateTimeOffset.timeZoneMinute = 0;
             (void)Create_AGENT_DATA_TYPE_from_EDM_DATE_TIME_OFFSET(&ag, someDateTimeOffset);
 
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .SetReturn(1);
             ///act
             auto res = AgentDataTypes_ToString(global_bufferTemp, &ag);
@@ -4131,7 +4131,7 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             (void)Create_AGENT_DATA_TYPE_from_EDM_DATE_TIME_OFFSET(&ag, someDateTimeOffset);
             (*mocks).ResetAllCalls();
 
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .SetReturn(1);
 
             ///act
@@ -4250,7 +4250,7 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
         TEST_FUNCTION(AgentDataTypes_ToString_DOUBLE_with_SignallingNan_insuficient_buffer_fails)
         {
             ///arrange
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .SetReturn(1);
             ///act 
             auto res = AgentDataTypes_ToString(global_bufferTemp, &agDoubleSignalingNaN);
@@ -4274,7 +4274,7 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
         TEST_FUNCTION(AgentDataTypes_ToString_DOUBLE_with_QuietNan_insuficient_buffer_fails)
         {
             ///arrange
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .SetReturn(1);
             ///act 
             auto res = AgentDataTypes_ToString(global_bufferTemp, &agDoubleQuietNaN);
@@ -4298,7 +4298,7 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
         TEST_FUNCTION(AgentDataTypes_ToString_DOUBLE_with_minusInf_insuficient_buffer_fails)
         {
             ///arrange
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .SetReturn(1);
 
             ///act 
@@ -4323,7 +4323,7 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
         TEST_FUNCTION(AgentDataTypes_ToString_DOUBLE_with_plusInf_insuficient_buffer_fails)
         {
             ///arrange
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .SetReturn(1);
             ///act 
             auto res = AgentDataTypes_ToString(global_bufferTemp, &agDoublePlusInf);
@@ -4461,7 +4461,7 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
         TEST_FUNCTION(AgentDataTypes_ToString_FLOAT_with_SignallingNan_insuficient_buffer_fails)
         {
             ///arrange
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .SetReturn(1);
 
             ///act 
@@ -4486,7 +4486,7 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
         TEST_FUNCTION(AgentDataTypes_ToString_FLOAT_with_QuietNan_insuficient_buffer_fails)
         {
             ///arrange
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .SetReturn(1);
 
             ///act 
@@ -4512,7 +4512,7 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
         TEST_FUNCTION(AgentDataTypes_ToString_FLOAT_with_minusInf_insuficient_buffer_fails)
         {
             ///arrange
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .SetReturn(1);
 
             ///act 
@@ -4539,7 +4539,7 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
         TEST_FUNCTION(AgentDataTypes_ToString_FLOAT_with_plusInf_insuficient_buffer_fails)
         {
             ///arrange
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .SetReturn(1);
 
             ///act 
@@ -5340,20 +5340,20 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
                 TEST_TYPENAME_GEOLOCATION_MEMBERVALUES);
 
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_Create(IGNORED_ARG, IGNORED_ARG))
                 .IgnoreArgument(1)
                 .IgnoreArgument(2)
                 .SetReturn(MULTITREE_HANDLE_VALID);
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_AddLeaf(MULTITREE_HANDLE_VALID, TEST_TYPENAME_GEOLOCATION_MEMBER1_NAME, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_AddLeaf(MULTITREE_HANDLE_VALID, TEST_TYPENAME_GEOLOCATION_MEMBER1_NAME, IGNORED_ARG))
                 .IgnoreArgument(3)
                 .SetReturn(MULTITREE_OK);
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_AddLeaf(MULTITREE_HANDLE_VALID, TEST_TYPENAME_GEOLOCATION_MEMBER2_NAME, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_AddLeaf(MULTITREE_HANDLE_VALID, TEST_TYPENAME_GEOLOCATION_MEMBER2_NAME, IGNORED_ARG))
                 .IgnoreArgument(3)
                 .SetReturn(MULTITREE_OK);
 
-            STRICT_EXPECTED_CALL((*mocks), JSONEncoder_EncodeTree(MULTITREE_HANDLE_VALID, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), JSONEncoder_EncodeTree(MULTITREE_HANDLE_VALID, IGNORED_ARG, IGNORED_ARG))
                 .IgnoreArgument(2)
                 .IgnoreArgument(3)
                 .SetReturn(JSON_ENCODER_OK);
@@ -5382,7 +5382,7 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
                 TEST_TYPENAME_GEOLOCATION_MEMBERVALUES);
 
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_Create(IGNORED_ARG, IGNORED_ARG))
                 .IgnoreArgument(1)
                 .IgnoreArgument(2)
                 .SetReturn((MULTITREE_HANDLE)(NULL));
@@ -5409,12 +5409,12 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
                 TEST_TYPENAME_GEOLOCATION_MEMBERNAMES,
                 TEST_TYPENAME_GEOLOCATION_MEMBERVALUES);
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_Create(IGNORED_ARG, IGNORED_ARG))
                 .IgnoreArgument(1)
                 .IgnoreArgument(2)
                 .SetReturn(MULTITREE_HANDLE_VALID);
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_AddLeaf(MULTITREE_HANDLE_VALID, TEST_TYPENAME_GEOLOCATION_MEMBER1_NAME, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_AddLeaf(MULTITREE_HANDLE_VALID, TEST_TYPENAME_GEOLOCATION_MEMBER1_NAME, IGNORED_ARG))
                 .IgnoreArgument(3)
                 .SetReturn(MULTITREE_ERROR);
 
@@ -5443,16 +5443,16 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
                 TEST_TYPENAME_GEOLOCATION_MEMBERVALUES);
 
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_Create(IGNORED_ARG, IGNORED_ARG))
                 .IgnoreArgument(1)
                 .IgnoreArgument(2)
                 .SetReturn(MULTITREE_HANDLE_VALID);
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_AddLeaf(MULTITREE_HANDLE_VALID, TEST_TYPENAME_GEOLOCATION_MEMBER1_NAME, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_AddLeaf(MULTITREE_HANDLE_VALID, TEST_TYPENAME_GEOLOCATION_MEMBER1_NAME, IGNORED_ARG))
                 .IgnoreArgument(3)
                 .SetReturn(MULTITREE_OK);
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_AddLeaf(MULTITREE_HANDLE_VALID, TEST_TYPENAME_GEOLOCATION_MEMBER2_NAME, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_AddLeaf(MULTITREE_HANDLE_VALID, TEST_TYPENAME_GEOLOCATION_MEMBER2_NAME, IGNORED_ARG))
                 .IgnoreArgument(3)
                 .SetReturn(MULTITREE_ERROR);
 
@@ -5483,20 +5483,20 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
                 TEST_TYPENAME_GEOLOCATION_MEMBERVALUES);
 
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_Create(IGNORED_ARG, IGNORED_ARG))
                 .IgnoreArgument(1)
                 .IgnoreArgument(2)
                 .SetReturn(MULTITREE_HANDLE_VALID);
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_AddLeaf(MULTITREE_HANDLE_VALID, TEST_TYPENAME_GEOLOCATION_MEMBER1_NAME, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_AddLeaf(MULTITREE_HANDLE_VALID, TEST_TYPENAME_GEOLOCATION_MEMBER1_NAME, IGNORED_ARG))
                 .IgnoreArgument(3)
                 .SetReturn(MULTITREE_OK);
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_AddLeaf(MULTITREE_HANDLE_VALID, TEST_TYPENAME_GEOLOCATION_MEMBER2_NAME, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_AddLeaf(MULTITREE_HANDLE_VALID, TEST_TYPENAME_GEOLOCATION_MEMBER2_NAME, IGNORED_ARG))
                 .IgnoreArgument(3)
                 .SetReturn(MULTITREE_OK);
 
-            STRICT_EXPECTED_CALL((*mocks), JSONEncoder_EncodeTree(MULTITREE_HANDLE_VALID, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), JSONEncoder_EncodeTree(MULTITREE_HANDLE_VALID, IGNORED_ARG, IGNORED_ARG))
                 .IgnoreArgument(2)
                 .IgnoreArgument(3)
                 .SetReturn(JSON_ENCODER_ERROR);
@@ -5518,7 +5518,7 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ///arrange
             /*we are just going to use truck1... because*/
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_Create(IGNORED_ARG, IGNORED_ARG))
                 .IgnoreArgument(1)
                 .IgnoreArgument(2)
                 ;
@@ -5535,13 +5535,13 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ///arrange
             /*we are just going to use truck1... because*/
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_Create(IGNORED_ARG, IGNORED_ARG))
                 .IgnoreArgument(1)
                 .IgnoreArgument(2)
                 .SetReturn(MULTITREE_HANDLE_VALID)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_AddLeaf(MULTITREE_HANDLE_VALID, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_AddLeaf(MULTITREE_HANDLE_VALID, IGNORED_ARG, IGNORED_ARG))
                 .IgnoreArgument(2)
                 .IgnoreArgument(3)
                 .SetReturn(MULTITREE_ERROR)
@@ -5562,7 +5562,7 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             /*we are just going to use truck1... because*/
             size_t nSuccessAdds = 1;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_Create(IGNORED_ARG, IGNORED_ARG))
                 .IgnoreArgument(1)
                 .IgnoreArgument(2)
                 .SetReturn(MULTITREE_HANDLE_VALID)
@@ -5570,14 +5570,14 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
 
             for (size_t i = 0; i < nSuccessAdds; i++)
             {
-                STRICT_EXPECTED_CALL((*mocks), MultiTree_AddLeaf(MULTITREE_HANDLE_VALID, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+                STRICT_EXPECTED_CALL((*mocks), MultiTree_AddLeaf(MULTITREE_HANDLE_VALID, IGNORED_ARG, IGNORED_ARG))
                     .IgnoreArgument(2)
                     .IgnoreArgument(3)
                     .SetReturn(MULTITREE_OK)
                     ;
             }
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_AddLeaf(MULTITREE_HANDLE_VALID, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_AddLeaf(MULTITREE_HANDLE_VALID, IGNORED_ARG, IGNORED_ARG))
                 .IgnoreArgument(2)
                 .IgnoreArgument(3)
                 .SetReturn(MULTITREE_ERROR)
@@ -5597,7 +5597,7 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             /*we are just going to use truck1... because*/
             size_t nSuccessAdds = 2;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_Create(IGNORED_ARG, IGNORED_ARG))
                 .IgnoreArgument(1)
                 .IgnoreArgument(2)
                 .SetReturn(MULTITREE_HANDLE_VALID)
@@ -5605,14 +5605,14 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
 
             for (size_t i = 0; i < nSuccessAdds; i++)
             {
-                STRICT_EXPECTED_CALL((*mocks), MultiTree_AddLeaf(MULTITREE_HANDLE_VALID, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+                STRICT_EXPECTED_CALL((*mocks), MultiTree_AddLeaf(MULTITREE_HANDLE_VALID, IGNORED_ARG, IGNORED_ARG))
                     .IgnoreArgument(2)
                     .IgnoreArgument(3)
                     .SetReturn(MULTITREE_OK)
                     ;
             }
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_AddLeaf(MULTITREE_HANDLE_VALID, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_AddLeaf(MULTITREE_HANDLE_VALID, IGNORED_ARG, IGNORED_ARG))
                 .IgnoreArgument(2)
                 .IgnoreArgument(3)
                 .SetReturn(MULTITREE_ERROR)
@@ -5633,7 +5633,7 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             /*we are just going to use truck1... because*/
             size_t nSuccessAdds = 3;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_Create(IGNORED_ARG, IGNORED_ARG))
                 .IgnoreArgument(1)
                 .IgnoreArgument(2)
                 .SetReturn(MULTITREE_HANDLE_VALID)
@@ -5641,14 +5641,14 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
 
             for (size_t i = 0; i < nSuccessAdds; i++)
             {
-                STRICT_EXPECTED_CALL((*mocks), MultiTree_AddLeaf(MULTITREE_HANDLE_VALID, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+                STRICT_EXPECTED_CALL((*mocks), MultiTree_AddLeaf(MULTITREE_HANDLE_VALID, IGNORED_ARG, IGNORED_ARG))
                     .IgnoreArgument(2)
                     .IgnoreArgument(3)
                     .SetReturn(MULTITREE_OK)
                     ;
             }
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_AddLeaf(MULTITREE_HANDLE_VALID, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_AddLeaf(MULTITREE_HANDLE_VALID, IGNORED_ARG, IGNORED_ARG))
                 .IgnoreArgument(2)
                 .IgnoreArgument(3)
                 .SetReturn(MULTITREE_ERROR)
@@ -5669,7 +5669,7 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             /*we are just going to use truck1... because*/
             size_t nSuccessAdds = 4;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_Create(IGNORED_ARG, IGNORED_ARG))
                 .IgnoreArgument(1)
                 .IgnoreArgument(2)
                 .SetReturn(MULTITREE_HANDLE_VALID)
@@ -5677,14 +5677,14 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
 
             for (size_t i = 0; i < nSuccessAdds; i++)
             {
-                STRICT_EXPECTED_CALL((*mocks), MultiTree_AddLeaf(MULTITREE_HANDLE_VALID, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+                STRICT_EXPECTED_CALL((*mocks), MultiTree_AddLeaf(MULTITREE_HANDLE_VALID, IGNORED_ARG, IGNORED_ARG))
                     .IgnoreArgument(2)
                     .IgnoreArgument(3)
                     .SetReturn(MULTITREE_OK)
                     ;
             }
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_AddLeaf(MULTITREE_HANDLE_VALID, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_AddLeaf(MULTITREE_HANDLE_VALID, IGNORED_ARG, IGNORED_ARG))
                 .IgnoreArgument(2)
                 .IgnoreArgument(3)
                 .SetReturn(MULTITREE_ERROR)
@@ -5705,7 +5705,7 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
 
             size_t nSuccessAdds = 5;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_Create(IGNORED_ARG, IGNORED_ARG))
                 .IgnoreArgument(1)
                 .IgnoreArgument(2)
                 .SetReturn(MULTITREE_HANDLE_VALID)
@@ -5713,14 +5713,14 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
 
             for (size_t i = 0; i < nSuccessAdds; i++)
             {
-                STRICT_EXPECTED_CALL((*mocks), MultiTree_AddLeaf(MULTITREE_HANDLE_VALID, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+                STRICT_EXPECTED_CALL((*mocks), MultiTree_AddLeaf(MULTITREE_HANDLE_VALID, IGNORED_ARG, IGNORED_ARG))
                     .IgnoreArgument(2)
                     .IgnoreArgument(3)
                     .SetReturn(MULTITREE_OK)
                     ;
             }
 
-            STRICT_EXPECTED_CALL((*mocks), JSONEncoder_EncodeTree(MULTITREE_HANDLE_VALID, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), JSONEncoder_EncodeTree(MULTITREE_HANDLE_VALID, IGNORED_ARG, IGNORED_ARG))
                 .IgnoreArgument(2)
                 .IgnoreArgument(3)
                 .SetReturn(JSON_ENCODER_ERROR)
@@ -8066,7 +8066,7 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             (void)Create_EDM_DECIMAL_from_charz(&ag, "3.14");
 
             whenShallSTRING_concat_with_STRING_fail = 1;
-            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
                 .SetReturn(1);
 
             ///act
@@ -8120,7 +8120,7 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             (void)Create_EDM_DECIMAL_from_charz(&src, "+3.67");
             
             whenShallSTRING_clone_fail = 1;
-            STRICT_EXPECTED_CALL((*mocks), STRING_clone(IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), STRING_clone(IGNORED_ARG))
                 .IgnoreArgument(1);
 
             ///act
@@ -12620,7 +12620,7 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
                     ///act
                     auto res1 = Create_AGENT_DATA_TYPE_from_EDM_BINARY(&ag, testVector[i].inputData);
 
-                    EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+                    EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                         .SetReturn(1);
                     auto res2 = AgentDataTypes_ToString(global_bufferTemp,  &ag); /*notice here the missing buffer size*/
 

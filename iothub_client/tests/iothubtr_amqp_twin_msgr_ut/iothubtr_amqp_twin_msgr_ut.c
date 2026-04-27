@@ -30,7 +30,7 @@ void real_free(void* ptr)
 
 #include "testrunnerswitcher.h"
 #include "azure_c_shared_utility/optimize_size.h"
-#include "azure_macro_utils/macro_utils.h"
+#include "macro_utils/macro_utils.h"
 #include "umock_c/umock_c.h"
 #include "umock_c/umocktypes_charptr.h"
 #include "umock_c/umocktypes_bool.h"
@@ -466,16 +466,16 @@ static void on_twin_get_completed_callback(TWIN_UPDATE_TYPE update_type, const c
 
 static void set_generate_unique_id_expected_calls()
 {
-    STRICT_EXPECTED_CALL(calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(UniqueId_Generate(IGNORED_PTR_ARG, UNIQUE_ID_BUFFER_SIZE));
+    STRICT_EXPECTED_CALL(calloc(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(UniqueId_Generate(IGNORED_ARG, UNIQUE_ID_BUFFER_SIZE));
 }
 
 static void set_generate_twin_correlation_id_expected_calls()
 {
     set_generate_unique_id_expected_calls();
-    STRICT_EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(malloc(IGNORED_ARG));
     // sprintf
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 }
 
 static void set_create_link_attach_properties_expected_calls(TWIN_MESSENGER_CONFIG* config)
@@ -484,9 +484,9 @@ static void set_create_link_attach_properties_expected_calls(TWIN_MESSENGER_CONF
     STRICT_EXPECTED_CALL(Map_Create(NULL)).SetReturn(TEST_ATTACH_PROPERTIES);
     set_generate_twin_correlation_id_expected_calls();
     STRICT_EXPECTED_CALL(Map_Add(TEST_ATTACH_PROPERTIES, CLIENT_VERSION_PROPERTY_NAME, TEST_CLIENT_VERSION_STR));
-    STRICT_EXPECTED_CALL(Map_Add(TEST_ATTACH_PROPERTIES, TWIN_CORRELATION_ID_PROPERTY_NAME, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Map_Add(TEST_ATTACH_PROPERTIES, TWIN_CORRELATION_ID_PROPERTY_NAME, IGNORED_ARG));
     STRICT_EXPECTED_CALL(Map_Add(TEST_ATTACH_PROPERTIES, TWIN_API_VERSION_PROPERTY_NAME, IOTHUB_API_VERSION));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 }
 
 static void set_destroy_link_attach_properties_expected_calls()
@@ -496,40 +496,40 @@ static void set_destroy_link_attach_properties_expected_calls()
 
 static void set_expected_calls_for_twin_messenger_create(TWIN_MESSENGER_CONFIG* config)
 {
-    STRICT_EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, config->device_id))
+    STRICT_EXPECTED_CALL(malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, config->device_id))
         .CopyOutArgumentBuffer(1, &config->device_id, sizeof(config->device_id));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, config->iothub_host_fqdn))
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, config->iothub_host_fqdn))
         .CopyOutArgumentBuffer(1, &config->iothub_host_fqdn, sizeof(config->iothub_host_fqdn));
     STRICT_EXPECTED_CALL(singlylinkedlist_create());
     STRICT_EXPECTED_CALL(singlylinkedlist_create());
 
     set_create_link_attach_properties_expected_calls(config);
 
-    STRICT_EXPECTED_CALL(amqp_messenger_create(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(amqp_messenger_subscribe_for_messages(TEST_AMQP_MESSENGER_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(amqp_messenger_create(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(amqp_messenger_subscribe_for_messages(TEST_AMQP_MESSENGER_HANDLE, IGNORED_ARG, IGNORED_ARG));
 
     set_destroy_link_attach_properties_expected_calls();
 }
 
 static void set_twin_messenger_report_state_async_expected_calls(CONSTBUFFER_HANDLE report, time_t current_time)
 {
-    STRICT_EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(malloc(IGNORED_ARG));
     STRICT_EXPECTED_CALL(CONSTBUFFER_IncRef(report));
     STRICT_EXPECTED_CALL(get_time(NULL))
         .SetReturn(current_time);
-    STRICT_EXPECTED_CALL(singlylinkedlist_add(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_add(IGNORED_ARG, IGNORED_ARG));
 }
 
 static void set_twin_messenger_start_expected_calls()
 {
-    STRICT_EXPECTED_CALL(amqp_messenger_set_option(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(amqp_messenger_start(IGNORED_PTR_ARG, TEST_SESSION_HANDLE));
+    STRICT_EXPECTED_CALL(amqp_messenger_set_option(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(amqp_messenger_start(IGNORED_ARG, TEST_SESSION_HANDLE));
 }
 
 static void set_twin_messenger_stop_expected_calls()
 {
-    STRICT_EXPECTED_CALL(amqp_messenger_stop(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(amqp_messenger_stop(IGNORED_ARG));
 }
 
 static void set_twin_messenger_retrieve_options_expected_calls()
@@ -542,39 +542,39 @@ static void set_process_timeouts_expected_calls(time_t current_time, size_t numb
     size_t i;
 
     STRICT_EXPECTED_CALL(get_time(NULL)).SetReturn(current_time);
-    STRICT_EXPECTED_CALL(singlylinkedlist_remove_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_remove_if(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
 
     for (i = 0; i < number_of_expired_pending_patches; i++)
     {
-        STRICT_EXPECTED_CALL(get_difftime(current_time, IGNORED_NUM_ARG)).SetReturn(10000000); // Simulate it's expired for sure.
-        STRICT_EXPECTED_CALL(CONSTBUFFER_DecRef(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(get_difftime(current_time, IGNORED_ARG)).SetReturn(10000000); // Simulate it's expired for sure.
+        STRICT_EXPECTED_CALL(CONSTBUFFER_DecRef(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(free(IGNORED_ARG));
     }
 
     if (number_of_pending_patches > number_of_expired_pending_patches)
     {
-        STRICT_EXPECTED_CALL(get_difftime(current_time, IGNORED_NUM_ARG)).SetReturn(0); // Simulate it's not expired.
+        STRICT_EXPECTED_CALL(get_difftime(current_time, IGNORED_ARG)).SetReturn(0); // Simulate it's not expired.
     }
 
 
-    STRICT_EXPECTED_CALL(singlylinkedlist_remove_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_remove_if(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
 
     for (i = 0; i < number_of_expired_pending_operations; i++)
     {
-        STRICT_EXPECTED_CALL(get_difftime(current_time, IGNORED_NUM_ARG)).SetReturn(10000000); // Simulate it's expired for sure.
-        STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG)); // correlation id
-        STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(get_difftime(current_time, IGNORED_ARG)).SetReturn(10000000); // Simulate it's expired for sure.
+        STRICT_EXPECTED_CALL(free(IGNORED_ARG)); // correlation id
+        STRICT_EXPECTED_CALL(free(IGNORED_ARG));
     }
 
     if (number_of_pending_operations > number_of_expired_pending_operations)
     {
-        STRICT_EXPECTED_CALL(get_difftime(current_time, IGNORED_NUM_ARG)).SetReturn(0); // Simulate it's not expired.
+        STRICT_EXPECTED_CALL(get_difftime(current_time, IGNORED_ARG)).SetReturn(0); // Simulate it's not expired.
     }
 }
 
 static void set_create_twin_operation_context_expected_calls()
 {
-    STRICT_EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(malloc(IGNORED_ARG));
     set_generate_unique_id_expected_calls();
 }
 
@@ -592,27 +592,27 @@ static void set_add_map_item_expected_calls(const char* name, const char* value)
         STRICT_EXPECTED_CALL(amqpvalue_create_string(value));
     }
 
-    STRICT_EXPECTED_CALL(amqpvalue_set_map_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(amqpvalue_set_map_value(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_ARG));
 }
 
 static void set_add_amqp_message_annotation_expected_calls()
 {
-    STRICT_EXPECTED_CALL(amqpvalue_create_message_annotations(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(message_set_message_annotations(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(amqpvalue_create_message_annotations(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(message_set_message_annotations(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_ARG));
 }
 
 static void set_set_message_correlation_id_expected_calls()
 {
-    STRICT_EXPECTED_CALL(message_get_properties(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(message_get_properties(IGNORED_ARG, IGNORED_ARG));
     STRICT_EXPECTED_CALL(properties_create());
-    STRICT_EXPECTED_CALL(amqpvalue_create_string(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(properties_set_correlation_id(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(message_set_properties(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(properties_destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(amqpvalue_create_string(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(properties_set_correlation_id(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(message_set_properties(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(properties_destroy(IGNORED_ARG));
 }
 
 static void set_create_amqp_message_for_twin_operation_expected_calls(TWIN_OPERATION_TYPE twin_op_type)
@@ -652,23 +652,23 @@ static void set_create_amqp_message_for_twin_operation_expected_calls(TWIN_OPERA
 
     if (twin_op_type == TWIN_OPERATION_TYPE_PATCH)
     {
-        STRICT_EXPECTED_CALL(CONSTBUFFER_GetContent(IGNORED_PTR_ARG)).SetReturn(&TEST_CONSTBUFFER);
+        STRICT_EXPECTED_CALL(CONSTBUFFER_GetContent(IGNORED_ARG)).SetReturn(&TEST_CONSTBUFFER);
     }
 
     BINARY_DATA data;
     data.bytes = NULL;
     data.length = 0;
-    STRICT_EXPECTED_CALL(message_add_body_amqp_data(IGNORED_PTR_ARG, data))
+    STRICT_EXPECTED_CALL(message_add_body_amqp_data(IGNORED_ARG, data))
         .IgnoreArgument_amqp_data();
-    STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_ARG));
 }
 
 static void set_send_twin_operation_request_expected_calls(time_t current_time, TWIN_OPERATION_TYPE op_type)
 {
     set_create_amqp_message_for_twin_operation_expected_calls(op_type);
-    STRICT_EXPECTED_CALL(get_time(IGNORED_PTR_ARG)).SetReturn(current_time);
-    STRICT_EXPECTED_CALL(amqp_messenger_send_async(TEST_AMQP_MESSENGER_HANDLE, TEST_MESSAGE_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(message_destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(get_time(IGNORED_ARG)).SetReturn(current_time);
+    STRICT_EXPECTED_CALL(amqp_messenger_send_async(TEST_AMQP_MESSENGER_HANDLE, TEST_MESSAGE_HANDLE, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(message_destroy(IGNORED_ARG));
 }
 
 static void set_twin_messenger_do_work_expected_calls(DOWORK_TEST_PROFILE* dwtp)
@@ -676,18 +676,18 @@ static void set_twin_messenger_do_work_expected_calls(DOWORK_TEST_PROFILE* dwtp)
     if (dwtp->current_state == TWIN_MESSENGER_STATE_STARTED)
     {
         // This block is related to sending patches:
-        STRICT_EXPECTED_CALL(singlylinkedlist_remove_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(singlylinkedlist_remove_if(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
 
         while (dwtp->number_of_pending_patches > 0)
         {
             set_create_twin_operation_context_expected_calls();
 
-            STRICT_EXPECTED_CALL(singlylinkedlist_add(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(singlylinkedlist_add(IGNORED_ARG, IGNORED_ARG));
 
             set_send_twin_operation_request_expected_calls(dwtp->current_time, TWIN_OPERATION_TYPE_PATCH);
 
-            STRICT_EXPECTED_CALL(CONSTBUFFER_DecRef(IGNORED_PTR_ARG));
-            STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(CONSTBUFFER_DecRef(IGNORED_ARG));
+            STRICT_EXPECTED_CALL(free(IGNORED_ARG));
 
             dwtp->number_of_pending_patches--;
             dwtp->number_of_pending_operations++;
@@ -696,9 +696,9 @@ static void set_twin_messenger_do_work_expected_calls(DOWORK_TEST_PROFILE* dwtp)
         // This one is for receiving updates:
         if (dwtp->subscription_state == TWIN_SUBSCRIPTION_STATE_GET_COMPLETE_PROPERTIES)
         {
-            STRICT_EXPECTED_CALL(malloc(IGNORED_NUM_ARG)); // creating context.
+            STRICT_EXPECTED_CALL(malloc(IGNORED_ARG)); // creating context.
             set_generate_unique_id_expected_calls();
-            STRICT_EXPECTED_CALL(singlylinkedlist_add(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(singlylinkedlist_add(IGNORED_ARG, IGNORED_ARG));
             set_send_twin_operation_request_expected_calls(dwtp->current_time, TWIN_OPERATION_TYPE_GET);
         }
     }
@@ -1307,8 +1307,8 @@ TEST_FUNCTION(twin_msgr_get_send_status_IDLE_success)
     TWIN_MESSENGER_SEND_STATUS send_status;
 
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(singlylinkedlist_find(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_find(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
 
     // act
     int result = twin_messenger_get_send_status(handle, &send_status);
@@ -1332,7 +1332,7 @@ TEST_FUNCTION(twin_msgr_get_send_status_BUSY_pending_success)
     send_one_report_patch(handle, g_initial_time);
 
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_ARG));
 
     // act
     int result = twin_messenger_get_send_status(handle, &send_status);
@@ -1362,10 +1362,10 @@ TEST_FUNCTION(twin_msgr_get_send_status_BUSY_in_progress_success)
     crank_twin_messenger_do_work(handle, config, &dwtp);
 
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(singlylinkedlist_find(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_find(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_ARG));
 
     // act
     int result = twin_messenger_get_send_status(handle, &send_status);
@@ -1630,12 +1630,12 @@ TEST_FUNCTION(twin_messenger_get_twin_async_success)
 
     umock_c_reset_all_calls();
     set_create_twin_operation_context_expected_calls();
-    STRICT_EXPECTED_CALL(singlylinkedlist_add(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_add(IGNORED_ARG, IGNORED_ARG));
 
     set_create_amqp_message_for_twin_operation_expected_calls(TWIN_OPERATION_TYPE_GET);
-    STRICT_EXPECTED_CALL(get_time(IGNORED_PTR_ARG)).SetReturn(g_initial_time);
-    STRICT_EXPECTED_CALL(amqp_messenger_send_async(TEST_AMQP_MESSENGER_HANDLE, TEST_MESSAGE_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(message_destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(get_time(IGNORED_ARG)).SetReturn(g_initial_time);
+    STRICT_EXPECTED_CALL(amqp_messenger_send_async(TEST_AMQP_MESSENGER_HANDLE, TEST_MESSAGE_HANDLE, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(message_destroy(IGNORED_ARG));
 
     // act
     int result = twin_messenger_get_twin_async(handle, on_twin_get_completed_callback, (void*)0x4567);
@@ -1693,12 +1693,12 @@ TEST_FUNCTION(twin_messenger_get_twin_async_failure_checks)
 
     umock_c_reset_all_calls();
     set_create_twin_operation_context_expected_calls(); // 0 - 2
-    STRICT_EXPECTED_CALL(singlylinkedlist_add(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_add(IGNORED_ARG, IGNORED_ARG));
 
     set_create_amqp_message_for_twin_operation_expected_calls(TWIN_OPERATION_TYPE_GET);
-    STRICT_EXPECTED_CALL(get_time(IGNORED_PTR_ARG)).SetReturn(g_initial_time);
-    STRICT_EXPECTED_CALL(amqp_messenger_send_async(TEST_AMQP_MESSENGER_HANDLE, TEST_MESSAGE_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(message_destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(get_time(IGNORED_ARG)).SetReturn(g_initial_time);
+    STRICT_EXPECTED_CALL(amqp_messenger_send_async(TEST_AMQP_MESSENGER_HANDLE, TEST_MESSAGE_HANDLE, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(message_destroy(IGNORED_ARG));
     umock_c_negative_tests_snapshot();
 
     size_t count = umock_c_negative_tests_call_count();

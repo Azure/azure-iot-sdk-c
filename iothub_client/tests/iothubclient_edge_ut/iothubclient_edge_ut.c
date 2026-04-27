@@ -15,7 +15,7 @@
 #endif
 
 #include "testrunnerswitcher.h"
-#include "azure_macro_utils/macro_utils.h"
+#include "macro_utils/macro_utils.h"
 
 #include "umock_c/umock_c.h"
 #include "umock_c/umock_c_negative_tests.h"
@@ -257,44 +257,44 @@ static IOTHUB_CLIENT_EDGE_HANDLE create_module_client_method_handle()
 
 static void createMethodPayloadExpectedCalls()
 {
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));   //cannot fail
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));   //cannot fail
 }
 
 static void sendHttpRequestMethodExpectedCallsWithStatusCode(int statusCode)
 {
     my_HTTPAPIEX_ExecuteRequest_statusCode = statusCode;
 
-    STRICT_EXPECTED_CALL(environment_get_variable(IGNORED_PTR_ARG)).CallCannotFail();
+    STRICT_EXPECTED_CALL(environment_get_variable(IGNORED_ARG)).CallCannotFail();
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(UniqueId_Generate(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));    //cannot fail
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(UniqueId_Generate(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));    //cannot fail
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_SasToken(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));   //cannot fail
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));   //cannot fail
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));    //cannot fail
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_SasToken(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));   //cannot fail
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));   //cannot fail
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));    //cannot fail
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(HTTPAPIEX_Create(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_TrustBundle(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(HTTPAPIEX_SetOption(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(HTTPAPIEX_ExecuteRequest(IGNORED_PTR_ARG, HTTPAPI_REQUEST_POST, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, NULL, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG));    //cannot fail
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));       //cannot fail
-    STRICT_EXPECTED_CALL(HTTPAPIEX_Destroy(IGNORED_PTR_ARG));   //cannot fail
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));        //cannot fail
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(HTTPAPIEX_Create(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_TrustBundle(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(HTTPAPIEX_SetOption(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(HTTPAPIEX_ExecuteRequest(IGNORED_ARG, HTTPAPI_REQUEST_POST, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, NULL, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG));    //cannot fail
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));       //cannot fail
+    STRICT_EXPECTED_CALL(HTTPAPIEX_Destroy(IGNORED_ARG));   //cannot fail
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));        //cannot fail
 }
 
 static void sendHttpRequestMethodExpectedCalls()
@@ -304,18 +304,18 @@ static void sendHttpRequestMethodExpectedCalls()
 
 static void parseResponseJsonExpectedCalls()
 {
-    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG)).CallCannotFail();       //cannot fail (returns length 0)
-    STRICT_EXPECTED_CALL(STRING_from_byte_array(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_parse_string(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_object_get_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_object_get_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_serialize_to_string(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_value_get_number(IGNORED_PTR_ARG)).CallCannotFail();   //cannot fail (returns -1, which isn't strictly failure)
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));           //cannot fail
-    STRICT_EXPECTED_CALL(json_value_free(IGNORED_PTR_ARG));         //cannot fail
+    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_ARG)).CallCannotFail();       //cannot fail (returns length 0)
+    STRICT_EXPECTED_CALL(STRING_from_byte_array(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_parse_string(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_object_get_value(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_object_get_value(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_serialize_to_string(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_value_get_number(IGNORED_ARG)).CallCannotFail();   //cannot fail (returns -1, which isn't strictly failure)
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));           //cannot fail
+    STRICT_EXPECTED_CALL(json_value_free(IGNORED_ARG));         //cannot fail
 }
 
 BEGIN_TEST_SUITE(iothubclient_edge_ut)
@@ -481,10 +481,10 @@ TEST_FUNCTION(IoTHubClient_EdgeHandle_Create_SUCCESS)
     config.deviceId = TEST_DEVICE_ID;
     config.protocolGatewayHostName = TEST_GATEWAY_HOST_NAME;
 
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
 
     //act
     IOTHUB_CLIENT_EDGE_HANDLE handle = IoTHubClient_EdgeHandle_Create(&config, TEST_AUTHORIZATION_HANDLE, TEST_MODULE_ID);
@@ -507,10 +507,10 @@ TEST_FUNCTION(IoTHubClient_EdgeHandle_Create_FAIL)
     config.deviceId = TEST_DEVICE_ID;
     config.protocolGatewayHostName = TEST_GATEWAY_HOST_NAME;
 
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
 
     umock_c_negative_tests_snapshot();
 
@@ -558,10 +558,10 @@ TEST_FUNCTION(IoTHubClient_EdgeHandle_Destroy_SUCCESS)
 
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
     //act
     IoTHubClient_EdgeHandle_Destroy(handle);
@@ -726,8 +726,8 @@ TEST_FUNCTION(IoTHubClient_Edge_DeviceMethodInvoke_SUCCESS)
     STRICT_EXPECTED_CALL(BUFFER_new());
     sendHttpRequestMethodExpectedCalls();
     parseResponseJsonExpectedCalls();
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));   //cannot fail
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));   //cannot fail
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG));   //cannot fail
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG));   //cannot fail
 
     //act
     IOTHUB_CLIENT_RESULT result = IoTHubClient_Edge_DeviceMethodInvoke(handle, TEST_DEVICE_ID2, TEST_METHOD_NAME, TEST_METHOD_PAYLOAD, TEST_TIMEOUT, &responseStatus, &responsePayload, &responsePayloadSize);
@@ -757,8 +757,8 @@ TEST_FUNCTION(IoTHubClient_Edge_DeviceMethodInvoke_2xx_SUCCESS)
         STRICT_EXPECTED_CALL(BUFFER_new());
         sendHttpRequestMethodExpectedCallsWithStatusCode(statusCode);
         parseResponseJsonExpectedCalls();
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));   //cannot fail
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));   //cannot fail
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG));   //cannot fail
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG));   //cannot fail
 
         //act
         IOTHUB_CLIENT_RESULT result = IoTHubClient_Edge_DeviceMethodInvoke(handle, TEST_DEVICE_ID2, TEST_METHOD_NAME, TEST_METHOD_PAYLOAD, TEST_TIMEOUT, &responseStatus, &responsePayload, &responsePayloadSize);
@@ -791,8 +791,8 @@ TEST_FUNCTION(IoTHubClient_Edge_DeviceMethodInvoke_FAIL)
     STRICT_EXPECTED_CALL(BUFFER_new());
     sendHttpRequestMethodExpectedCalls();
     parseResponseJsonExpectedCalls();
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG));
 
     umock_c_negative_tests_snapshot();
 
@@ -994,8 +994,8 @@ TEST_FUNCTION(IoTHubClient_Edge_ModuleMethodInvoke_SUCCESS)
     STRICT_EXPECTED_CALL(BUFFER_new());
     sendHttpRequestMethodExpectedCalls();
     parseResponseJsonExpectedCalls();
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));   //cannot fail
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));   //cannot fail
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG));   //cannot fail
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG));   //cannot fail
 
     //act
     IOTHUB_CLIENT_RESULT result = IoTHubClient_Edge_ModuleMethodInvoke(handle, TEST_DEVICE_ID2, TEST_MODULE_ID2, TEST_METHOD_NAME, TEST_METHOD_PAYLOAD, TEST_TIMEOUT, &responseStatus, &responsePayload, &responsePayloadSize);
@@ -1026,8 +1026,8 @@ TEST_FUNCTION(IoTHubClient_Edge_ModuleMethodInvoke_FAIL)
     STRICT_EXPECTED_CALL(BUFFER_new());
     sendHttpRequestMethodExpectedCalls();
     parseResponseJsonExpectedCalls();
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));   //cannot fail
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));   //cannot fail
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG));   //cannot fail
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG));   //cannot fail
 
     umock_c_negative_tests_snapshot();
 

@@ -6,7 +6,7 @@
 
 typedef struct METHODRETURN_HANDLE_DATA_TAG* METHODRETURN_HANDLE;
 
-#include "azure_macro_utils/macro_utils.h"
+#include "macro_utils/macro_utils.h"
 
 typedef struct METHODRETURN_DATA_TAG
 {

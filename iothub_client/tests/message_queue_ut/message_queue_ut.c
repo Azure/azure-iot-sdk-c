@@ -225,42 +225,42 @@ static MESSAGE_QUEUE_CONFIG* get_message_queue_config()
 
 static void set_message_queue_create_expected_calls()
 {
-    STRICT_EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(malloc(IGNORED_ARG));
     STRICT_EXPECTED_CALL(singlylinkedlist_create());
     STRICT_EXPECTED_CALL(singlylinkedlist_create());
 }
 
 static void set_dequeue_message_and_fire_callback_expected_calls()
 {
-    STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(singlylinkedlist_remove(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_remove(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(free(IGNORED_ARG));
 }
 
 static void set_retry_sending_message_expected_calls()
 {
-    STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(singlylinkedlist_remove(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(singlylinkedlist_add(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_remove(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_add(IGNORED_ARG, IGNORED_ARG));
 }
 
 static void set_on_message_processing_completed_callback_expected_calls(int number_of_messages, int message_order_in_list, bool should_retry)
 {
     int i;
 
-    STRICT_EXPECTED_CALL(singlylinkedlist_find(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_find(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
 
     for (i = 0; i < number_of_messages; i++)
     {
         // Invoked by singlylinkedlist_find.
-        STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_ARG));
 
         if (i == message_order_in_list) break;
     }
 
     if (i == message_order_in_list)
     {
-        STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_ARG));
 
         if (should_retry)
         {
@@ -277,20 +277,20 @@ static void set_message_queue_remove_all_expected_calls(size_t number_of_message
 {
     size_t i;
 
-    STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_ARG));
 
     for (i = 0; i < number_of_messages_pending; i++)
     {
         set_dequeue_message_and_fire_callback_expected_calls();
-        STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_ARG));
     }
 
-    STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_ARG));
 
     for (i = 0; i < number_of_messages_in_progress; i++)
     {
         set_dequeue_message_and_fire_callback_expected_calls();
-        STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_ARG));
     }
 }
 
@@ -298,16 +298,16 @@ static void set_message_queue_destroy_expected_calls(size_t number_of_messages_p
 {
     set_message_queue_remove_all_expected_calls(number_of_messages_pending, number_of_messages_in_progress);
 
-    STRICT_EXPECTED_CALL(singlylinkedlist_destroy(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(singlylinkedlist_destroy(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_destroy(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_destroy(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(free(IGNORED_ARG));
 }
 
 static void set_message_queue_add_expected_calls(time_t current_time)
 {
-    STRICT_EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(malloc(IGNORED_ARG));
     STRICT_EXPECTED_CALL(get_time(NULL)).SetReturn(current_time);
-    STRICT_EXPECTED_CALL(singlylinkedlist_add(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_add(IGNORED_ARG, IGNORED_ARG));
 }
 
 static void add_messages(MESSAGE_QUEUE_HANDLE mq, size_t number_of_messages, time_t current_time)
@@ -348,38 +348,38 @@ static void set_process_timeouts_expected_calls(MESSAGE_QUEUE_HANDLE mq, time_t 
         size_t i, j;
 
         // pending messages, max queued time
-        STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_ARG));
 
         for (i = 0, j = 0; i < number_of_messages_pending; i++)
         {
-            STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG));
-            STRICT_EXPECTED_CALL(singlylinkedlist_get_next_item(IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_ARG));
+            STRICT_EXPECTED_CALL(singlylinkedlist_get_next_item(IGNORED_ARG));
 
             if (j < expiration_profile->expired_pending_messages_size && i == expiration_profile->expired_pending_messages[j])
             {
-                STRICT_EXPECTED_CALL(get_difftime(IGNORED_NUM_ARG, IGNORED_NUM_ARG)).SetReturn(expiration_profile->max_message_enqueued_time_secs + 1);
+                STRICT_EXPECTED_CALL(get_difftime(IGNORED_ARG, IGNORED_ARG)).SetReturn(expiration_profile->max_message_enqueued_time_secs + 1);
                 set_dequeue_message_and_fire_callback_expected_calls();
                 number_of_messages_pending--;
                 j++;
             }
             else
             {
-                STRICT_EXPECTED_CALL(get_difftime(IGNORED_NUM_ARG, IGNORED_NUM_ARG)).SetReturn(0);
+                STRICT_EXPECTED_CALL(get_difftime(IGNORED_ARG, IGNORED_ARG)).SetReturn(0);
                 break;
             }
         }
 
         // in progress messages, max queued time
-        STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_ARG));
 
         for (i = 0, j = 0; i < number_of_messages_in_progress; i++)
         {
-            STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG));
-            STRICT_EXPECTED_CALL(singlylinkedlist_get_next_item(IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_ARG));
+            STRICT_EXPECTED_CALL(singlylinkedlist_get_next_item(IGNORED_ARG));
 
             if (j < expiration_profile->expired_enqueued_in_progress_messages_size && i == expiration_profile->expired_enqueued_in_progress_messages[j])
             {
-                STRICT_EXPECTED_CALL(get_difftime(IGNORED_NUM_ARG, IGNORED_NUM_ARG)).SetReturn(expiration_profile->max_message_enqueued_time_secs + 1);
+                STRICT_EXPECTED_CALL(get_difftime(IGNORED_ARG, IGNORED_ARG)).SetReturn(expiration_profile->max_message_enqueued_time_secs + 1);
                 set_dequeue_message_and_fire_callback_expected_calls();
                 //set_dequeue_message_and_fire_callback_expected_calls(number_of_messages_in_progress, expiration_profile->expired_enqueued_in_progress_messages[j] - i, false);
                 number_of_messages_in_progress--;
@@ -387,7 +387,7 @@ static void set_process_timeouts_expected_calls(MESSAGE_QUEUE_HANDLE mq, time_t 
             }
             else
             {
-                STRICT_EXPECTED_CALL(get_difftime(IGNORED_NUM_ARG, IGNORED_NUM_ARG)).SetReturn(0);
+                STRICT_EXPECTED_CALL(get_difftime(IGNORED_ARG, IGNORED_ARG)).SetReturn(0);
             }
         }
     }
@@ -397,23 +397,23 @@ static void set_process_timeouts_expected_calls(MESSAGE_QUEUE_HANDLE mq, time_t 
         size_t i, j;
 
         // in progress messages, max in progress time
-        STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_ARG));
 
         for (i = 0, j = 0; i < number_of_messages_in_progress; i++)
         {
-            STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG));
-            STRICT_EXPECTED_CALL(singlylinkedlist_get_next_item(IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_ARG));
+            STRICT_EXPECTED_CALL(singlylinkedlist_get_next_item(IGNORED_ARG));
 
             if (j < expiration_profile->expired_in_progress_messages_size && i == expiration_profile->expired_in_progress_messages[j])
             {
-                STRICT_EXPECTED_CALL(get_difftime(IGNORED_NUM_ARG, IGNORED_NUM_ARG)).SetReturn(expiration_profile->max_message_processing_time_secs + 1);
+                STRICT_EXPECTED_CALL(get_difftime(IGNORED_ARG, IGNORED_ARG)).SetReturn(expiration_profile->max_message_processing_time_secs + 1);
                 set_dequeue_message_and_fire_callback_expected_calls();
                 number_of_messages_in_progress--;
                 j++;
             }
             else
             {
-                STRICT_EXPECTED_CALL(get_difftime(IGNORED_NUM_ARG, IGNORED_NUM_ARG)).SetReturn(0);
+                STRICT_EXPECTED_CALL(get_difftime(IGNORED_ARG, IGNORED_ARG)).SetReturn(0);
                 break;
             }
         }
@@ -423,18 +423,18 @@ static void set_process_timeouts_expected_calls(MESSAGE_QUEUE_HANDLE mq, time_t 
 static void set_process_pending_messages_calls(MESSAGE_QUEUE_HANDLE mq, time_t current_time, size_t number_of_messages_pending)
 {
     (void)mq;
-    STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_ARG));
 
     size_t i;
 
     for (i = 0; i < number_of_messages_pending; i++)
     {
-        STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(singlylinkedlist_remove(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(singlylinkedlist_remove(IGNORED_ARG, IGNORED_ARG));
         STRICT_EXPECTED_CALL(get_time(NULL)).SetReturn(current_time);
-        STRICT_EXPECTED_CALL(singlylinkedlist_add(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(singlylinkedlist_add(IGNORED_ARG, IGNORED_ARG));
 
-        STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_ARG));
     }
 }
 
@@ -464,20 +464,20 @@ static void set_message_queue_is_empty_expected_calls(size_t number_of_messages_
 {
     (void)number_of_messages_in_progress;
 
-    STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_ARG));
 
     if (number_of_messages_pending == 0) // this statement will only be evaluated if the first boolean check (in code) succeeds.
     {
-        STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_ARG));
     }
 }
 
 static void set_message_queue_retrieve_options_expected_calls()
 {
-    STRICT_EXPECTED_CALL(OptionHandler_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(OptionHandler_AddOption(TEST_OPTIONHANDLER_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(OptionHandler_AddOption(TEST_OPTIONHANDLER_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(OptionHandler_AddOption(TEST_OPTIONHANDLER_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(OptionHandler_Create(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(OptionHandler_AddOption(TEST_OPTIONHANDLER_HANDLE, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(OptionHandler_AddOption(TEST_OPTIONHANDLER_HANDLE, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(OptionHandler_AddOption(TEST_OPTIONHANDLER_HANDLE, IGNORED_ARG, IGNORED_ARG));
 }
 
 static void reset_test_data()
@@ -1275,8 +1275,8 @@ TEST_FUNCTION(on_message_processing_completed_callback_INVALID_message)
     crank_message_queue(mq, TEST_current_time, 1, 0, NULL);
 
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(singlylinkedlist_find(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_find(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_ARG));
 
     // act
     TEST_on_process_message_callback_on_process_message_completed_callback(mq, 12345, MESSAGE_QUEUE_SUCCESS, TEST_REASON);
@@ -1544,16 +1544,16 @@ TEST_FUNCTION(message_queue_move_all_back_to_pending_with_in_progress_and_pendin
     umock_c_reset_all_calls();
     for (int i = 0; i < 2; i++)
     {
-        STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_ARG));
         set_retry_sending_message_expected_calls();
     }
-    STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_ARG));
     for (int i = 0; i < 4; i++)
     {
-        STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_ARG));
         set_retry_sending_message_expected_calls();
     }
-    STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_ARG));
 
     // act
     int result = message_queue_move_all_back_to_pending(mq);
@@ -1575,13 +1575,13 @@ TEST_FUNCTION(message_queue_move_all_back_to_pending_with_only_in_progress_succe
     crank_message_queue(mq, TEST_current_time, 1, 0, NULL);
 
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_ARG));
     for (int i = 0; i < 2; i++)
     {
-        STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_ARG));
         set_retry_sending_message_expected_calls();
     }
-    STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_ARG));
 
     // act
     int result = message_queue_move_all_back_to_pending(mq);
@@ -1604,16 +1604,16 @@ TEST_FUNCTION(message_queue_move_all_back_to_pending_with_only_pending_succeed)
     umock_c_reset_all_calls();
     for (int i = 0; i < 2; i++)
     {
-        STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_ARG));
         set_retry_sending_message_expected_calls();
     }
-    STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_ARG));
     for (int i = 0; i < 2; i++)
     {
-        STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_ARG));
         set_retry_sending_message_expected_calls();
     }
-    STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_ARG));
 
     // act
     int result = message_queue_move_all_back_to_pending(mq);
@@ -1650,21 +1650,21 @@ TEST_FUNCTION(message_queue_move_all_back_to_pending_move_pending_failed)
     add_messages(mq, 2, TEST_current_time);
 
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(singlylinkedlist_remove(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(1);
+    STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_remove(IGNORED_ARG, IGNORED_ARG)).SetReturn(1);
     for (int i = 0; i < 2; i++)
     {
-        STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_ARG));
         set_dequeue_message_and_fire_callback_expected_calls();
     }
-    STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_ARG));
     for (int i = 0; i < 2; i++)
     {
-        STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_ARG));
         set_dequeue_message_and_fire_callback_expected_calls();
     }
-    STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_ARG));
 
     // act
     int result = message_queue_move_all_back_to_pending(mq);
@@ -1689,20 +1689,20 @@ TEST_FUNCTION(message_queue_move_all_back_to_pending_move_in_progress_failed)
     umock_c_reset_all_calls();
     for (int i = 0; i < 2; i++)
     {
-        STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_ARG));
         set_retry_sending_message_expected_calls();
     }
-    STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(singlylinkedlist_remove(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(1);
+    STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_remove(IGNORED_ARG, IGNORED_ARG)).SetReturn(1);
     for (int i = 0; i < 4; i++)
     {
-        STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_ARG));
         set_dequeue_message_and_fire_callback_expected_calls();
     }
-    STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_ARG));
 
     // act
     int result = message_queue_move_all_back_to_pending(mq);

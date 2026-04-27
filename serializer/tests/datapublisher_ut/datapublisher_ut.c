@@ -226,7 +226,7 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
     TEST_FUNCTION(DataPublisher_Create_With_Valid_Arguments_Yields_A_non_NULL_Handle)
     {
         // arrange
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
             .IgnoreArgument_size();
         STRICT_EXPECTED_CALL(DataMarshaller_Create(TEST_MODEL_HANDLE, true));
 
@@ -244,7 +244,7 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
     TEST_FUNCTION(DataPublisher_Create_Passes_includePropertyPath_To_DataMarshaller_Create)
     {
         // arrange
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
             .IgnoreArgument_size();
         STRICT_EXPECTED_CALL(DataMarshaller_Create(TEST_MODEL_HANDLE, false));
 
@@ -262,11 +262,11 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
     TEST_FUNCTION(DataPublisher_Create_2_Instances_Yields_Different_Handles)
     {
         // arrange
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
             .IgnoreArgument_size();
         STRICT_EXPECTED_CALL(DataMarshaller_Create(TEST_MODEL_HANDLE, true));
 
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
             .IgnoreArgument_size();
         STRICT_EXPECTED_CALL(DataMarshaller_Create(TEST_MODEL_HANDLE, true));
 
@@ -290,11 +290,11 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
     TEST_FUNCTION(DataPublisher_When_DataMarshaller_Create_Fails_DataPublisher_Create_Returns_NULL)
     {
         // arrange
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
             .IgnoreArgument_size();
         STRICT_EXPECTED_CALL(DataMarshaller_Create(TEST_MODEL_HANDLE, true))
             .SetReturn((DATA_MARSHALLER_HANDLE)NULL);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument_ptr();
 
         // act
@@ -312,9 +312,9 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
         // arrange
         DATA_PUBLISHER_HANDLE handle = DataPublisher_Create(TEST_SCHEMA_MODEL_TYPE_HANDLE, true);
         umock_c_reset_all_calls();
-        STRICT_EXPECTED_CALL(DataMarshaller_Destroy(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(DataMarshaller_Destroy(IGNORED_ARG))
             .IgnoreArgument_dataMarshallerHandle();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument_ptr();
 
         // act
@@ -345,8 +345,7 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
         size_t destinationSize;
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG))
-            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_ARG, IGNORED_ARG));
 
         // act
         TRANSACTION_HANDLE result = DataPublisher_StartTransaction(handle);
@@ -429,14 +428,13 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
         TRANSACTION_HANDLE transaction = DataPublisher_StartTransaction(handle);
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, PropertyPath))
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, PropertyPath))
             .IgnoreArgument_destination();
         STRICT_EXPECTED_CALL(Schema_ModelPropertyByPathExists(TEST_MODEL_HANDLE, PropertyPath));
-        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG))
-            .IgnoreAllArguments();
-        STRICT_EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE(IGNORED_PTR_ARG, &data))
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE(IGNORED_ARG, &data))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_realloc(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(gballoc_realloc(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_ptr()
             .IgnoreArgument_size();
 
@@ -459,11 +457,11 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
         TRANSACTION_HANDLE transaction = DataPublisher_StartTransaction(handle);
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, PropertyPath))
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, PropertyPath))
             .IgnoreArgument_destination();
         STRICT_EXPECTED_CALL(Schema_ModelPropertyByPathExists(TEST_MODEL_HANDLE, PropertyPath))
             .SetReturn(false);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument_ptr();
 
         // act
@@ -485,17 +483,16 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
         TRANSACTION_HANDLE transaction = DataPublisher_StartTransaction(handle);
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, PropertyPath))
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, PropertyPath))
             .IgnoreArgument_destination();
         STRICT_EXPECTED_CALL(Schema_ModelPropertyByPathExists(TEST_MODEL_HANDLE, PropertyPath));
-        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG))
-            .IgnoreAllArguments();
-        STRICT_EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE(IGNORED_PTR_ARG, &data))
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE(IGNORED_ARG, &data))
             .IgnoreArgument(1)
             .SetReturn(AGENT_DATA_TYPES_ERROR);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument_ptr();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument_ptr();
 
         // act
@@ -532,20 +529,20 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
 
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(DataMarshaller_SendData(IGNORED_PTR_ARG, 1, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(DataMarshaller_SendData(IGNORED_ARG, 1, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_dataMarshallerHandle()
             .IgnoreArgument_values()
             .IgnoreArgument(4)
             .IgnoreArgument(5);
-        STRICT_EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_ARG))
             .IgnoreArgument_agentData();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument_ptr();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument_ptr();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument_ptr();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument_ptr();
 
         // act
@@ -626,9 +623,9 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
         TRANSACTION_HANDLE transaction = DataPublisher_StartTransaction(handle);
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument_ptr();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument_ptr();
 
         // act
@@ -656,19 +653,19 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
 
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(DataMarshaller_SendData(IGNORED_PTR_ARG, 1, &value, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(DataMarshaller_SendData(IGNORED_ARG, 1, &value, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_dataMarshallerHandle()
             .IgnoreArgument_values()
             .IgnoreArgument(4)
             .IgnoreArgument(5);
-        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument_ptr();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument_ptr();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument_ptr();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument_ptr();
 
         // act
@@ -695,20 +692,20 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
         value.Value = &data;
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(DataMarshaller_SendData(IGNORED_PTR_ARG, 1, &value, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(DataMarshaller_SendData(IGNORED_ARG, 1, &value, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_dataMarshallerHandle()
             .IgnoreArgument_values()
             .IgnoreArgument(4)
             .IgnoreArgument(5)
             .SetReturn(DATA_MARSHALLER_ERROR);
-        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument_ptr();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument_ptr();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument_ptr();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument_ptr();
 
         // act
@@ -744,17 +741,17 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
         (void)DataPublisher_PublishTransacted(transaction, PropertyPath, &data2);
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(DataMarshaller_SendData(IGNORED_PTR_ARG, 1, IGNORED_PTR_ARG, &destination, &destinationSize))
+        STRICT_EXPECTED_CALL(DataMarshaller_SendData(IGNORED_ARG, 1, IGNORED_ARG, &destination, &destinationSize))
             .IgnoreArgument_dataMarshallerHandle()
             .IgnoreArgument_values();
-        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument_ptr();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument_ptr();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument_ptr();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument_ptr();
 
         // act
@@ -784,22 +781,22 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
         (void)DataPublisher_PublishTransacted(transaction, PropertyPath_2, &data2);
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(DataMarshaller_SendData(IGNORED_PTR_ARG, 2, IGNORED_PTR_ARG, &destination, &destinationSize))
+        STRICT_EXPECTED_CALL(DataMarshaller_SendData(IGNORED_ARG, 2, IGNORED_ARG, &destination, &destinationSize))
             .IgnoreArgument_dataMarshallerHandle()
             .IgnoreArgument_values();
-        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument_ptr();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument_ptr();
-        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument_ptr();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument_ptr();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument_ptr();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument_ptr();
 
         // act
@@ -832,28 +829,28 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
         (void)DataPublisher_PublishTransacted(transaction, PropertyPath, &data);
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, PropertyPath_2))
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, PropertyPath_2))
             .IgnoreArgument_destination();
         STRICT_EXPECTED_CALL(Schema_ModelPropertyByPathExists(TEST_MODEL_HANDLE, PropertyPath_2))
             .SetReturn(false);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument_ptr();
 
-        STRICT_EXPECTED_CALL(DataMarshaller_SendData(IGNORED_PTR_ARG, 1, &value, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(DataMarshaller_SendData(IGNORED_ARG, 1, &value, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_dataMarshallerHandle()
             .IgnoreArgument_values()
             .IgnoreArgument(4)
             .IgnoreArgument(5);
         (void)DataPublisher_PublishTransacted(transaction, PropertyPath_2, &data2);
 
-        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument_ptr();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument_ptr();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument_ptr();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument_ptr();
         // act
         DATA_PUBLISHER_RESULT result = DataPublisher_EndTransaction(transaction, &destination, &destinationSize);
@@ -876,20 +873,20 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
         DATA_PUBLISHER_RESULT result = DataPublisher_PublishTransacted(transaction, PropertyPath, &data);
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(DataMarshaller_SendData(IGNORED_PTR_ARG, 1, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(DataMarshaller_SendData(IGNORED_ARG, 1, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_dataMarshallerHandle()
             .IgnoreArgument_values()
             .IgnoreArgument(4)
             .IgnoreArgument(5);
 
-        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument_ptr();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument_ptr();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument_ptr();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument_ptr();
 
         // act
@@ -913,14 +910,14 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
         (void)DataPublisher_PublishTransacted(transaction, PropertyPath, &data);
         umock_c_reset_all_calls();
 
-        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument_ptr();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument_ptr();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument_ptr();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument_ptr();
 
         // act
@@ -954,14 +951,14 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
         (void)DataPublisher_PublishTransacted(transaction, PropertyPath, &data);
         umock_c_reset_all_calls();
 
-        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument_ptr();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument_ptr();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument_ptr();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument_ptr();
 
         // act
@@ -1015,7 +1012,7 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
 
     void DataPublisher_CreateTransaction_ReportedProperties_inert_path(void)
     {
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
             .IgnoreArgument_size();
         STRICT_EXPECTED_CALL(VECTOR_create(sizeof(void*)));
     }
@@ -1133,17 +1130,17 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
     void DataPublisher_PublishTransacted_ReportedProperty_new_property_inert_path(const char* reportedPropertyPath, AGENT_DATA_TYPE* ag)
     {
         STRICT_EXPECTED_CALL(Schema_ModelReportedPropertyByPathExists(TEST_SCHEMA_MODEL_TYPE_HANDLE, reportedPropertyPath));
-        STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, reportedPropertyPath))
+        STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_ARG, IGNORED_ARG, reportedPropertyPath))
             .IgnoreArgument_handle()
             .IgnoreArgument_pred();
         STRICT_EXPECTED_CALL(gballoc_malloc(sizeof(DATA_MARSHALLER_VALUE)));
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, reportedPropertyPath))
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, reportedPropertyPath))
             .IgnoreArgument_destination();
-        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, sizeof(AGENT_DATA_TYPE)))
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_ARG, sizeof(AGENT_DATA_TYPE)))
             .IgnoreArgument_nmemb();
-        STRICT_EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE(IGNORED_PTR_ARG, ag))
+        STRICT_EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE(IGNORED_ARG, ag))
             .IgnoreArgument_dest();
-        STRICT_EXPECTED_CALL(VECTOR_push_back(IGNORED_PTR_ARG, IGNORED_PTR_ARG, 1))
+        STRICT_EXPECTED_CALL(VECTOR_push_back(IGNORED_ARG, IGNORED_ARG, 1))
             .IgnoreArgument_elements()
             .IgnoreArgument_handle();
     }
@@ -1229,17 +1226,17 @@ next_fail:;
     void DataPublisher_PublishTransacted_ReportedProperty_new_property_after_property_inert_path(const char* reportedPropertyPath, AGENT_DATA_TYPE* ag)
     {
         STRICT_EXPECTED_CALL(Schema_ModelReportedPropertyByPathExists(TEST_SCHEMA_MODEL_TYPE_HANDLE, reportedPropertyPath));
-        STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, reportedPropertyPath))
+        STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_ARG, IGNORED_ARG, reportedPropertyPath))
             .IgnoreArgument_handle()
             .IgnoreArgument_pred();
         STRICT_EXPECTED_CALL(gballoc_malloc(sizeof(DATA_MARSHALLER_VALUE)));
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, reportedPropertyPath))
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, reportedPropertyPath))
             .IgnoreArgument_destination();
-        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, sizeof(AGENT_DATA_TYPE)))
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_ARG, sizeof(AGENT_DATA_TYPE)))
             .IgnoreArgument_nmemb();
-        STRICT_EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE(IGNORED_PTR_ARG, ag))
+        STRICT_EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE(IGNORED_ARG, ag))
             .IgnoreArgument_dest();
-        STRICT_EXPECTED_CALL(VECTOR_push_back(IGNORED_PTR_ARG, IGNORED_PTR_ARG, 1))
+        STRICT_EXPECTED_CALL(VECTOR_push_back(IGNORED_ARG, IGNORED_ARG, 1))
             .IgnoreArgument_elements()
             .IgnoreArgument_handle();
     }
@@ -1326,16 +1323,16 @@ next_fail:;
     void DataPublisher_PublishTransacted_ReportedProperty_same_reportedPropertyPath_updates_property_inert_path(const char* reportedPropertyPath, AGENT_DATA_TYPE* ag)
     {
         STRICT_EXPECTED_CALL(Schema_ModelReportedPropertyByPathExists(TEST_SCHEMA_MODEL_TYPE_HANDLE, reportedPropertyPath));
-        STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, reportedPropertyPath))
+        STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_ARG, IGNORED_ARG, reportedPropertyPath))
             .IgnoreArgument_handle()
             .IgnoreArgument_pred();
-        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, sizeof(AGENT_DATA_TYPE)))
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_ARG, sizeof(AGENT_DATA_TYPE)))
             .IgnoreArgument_nmemb();
-        STRICT_EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE(IGNORED_PTR_ARG, ag))
+        STRICT_EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE(IGNORED_ARG, ag))
             .IgnoreArgument_dest();
-        STRICT_EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_ARG))
             .IgnoreArgument_agentData();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument_ptr();
     }
 
@@ -1494,7 +1491,7 @@ next_fail:;
         size_t destinationSize;
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(VECTOR_size(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(VECTOR_size(IGNORED_ARG))
             .IgnoreArgument_handle();
 
         ///act
@@ -1523,9 +1520,9 @@ next_fail:;
         size_t destinationSize;
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(VECTOR_size(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(VECTOR_size(IGNORED_ARG))
             .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(DataMarshaller_SendData_ReportedProperties(IGNORED_PTR_ARG, IGNORED_PTR_ARG, &destination, &destinationSize))
+        STRICT_EXPECTED_CALL(DataMarshaller_SendData_ReportedProperties(IGNORED_ARG, IGNORED_ARG, &destination, &destinationSize))
             .IgnoreArgument_dataMarshallerHandle()
             .IgnoreArgument_values();
 
@@ -1555,9 +1552,9 @@ next_fail:;
         size_t destinationSize;
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(VECTOR_size(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(VECTOR_size(IGNORED_ARG))
             .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(DataMarshaller_SendData_ReportedProperties(IGNORED_PTR_ARG, IGNORED_PTR_ARG, &destination, &destinationSize))
+        STRICT_EXPECTED_CALL(DataMarshaller_SendData_ReportedProperties(IGNORED_ARG, IGNORED_ARG, &destination, &destinationSize))
             .IgnoreArgument_dataMarshallerHandle()
             .IgnoreArgument_values()
             .SetReturn(DATA_MARSHALLER_ERROR);
@@ -1594,11 +1591,11 @@ next_fail:;
         REPORTED_PROPERTIES_TRANSACTION_HANDLE handle = DataPublisher_CreateTransaction_ReportedProperties(dataPublisherHandle);
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(VECTOR_size(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(VECTOR_size(IGNORED_ARG))
             .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(VECTOR_destroy(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(VECTOR_destroy(IGNORED_ARG))
             .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument_ptr();
 
         ///act
@@ -1623,25 +1620,25 @@ next_fail:;
         (void)DataPublisher_PublishTransacted_ReportedProperty(handle, "AAA", &ag1);
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(VECTOR_size(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(VECTOR_size(IGNORED_ARG))
             .IgnoreArgument_handle();
         for (size_t i = 0;i < 1;i++)
         {
-            STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_PTR_ARG, i))
+            STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_ARG, i))
                 .IgnoreArgument_handle();
-            STRICT_EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_ARG))
                 .IgnoreArgument_agentData();
-            STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
                 .IgnoreArgument_ptr();
-            STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
                 .IgnoreArgument_ptr();
-            STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
                 .IgnoreArgument_ptr();
         }
 
-        STRICT_EXPECTED_CALL(VECTOR_destroy(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(VECTOR_destroy(IGNORED_ARG))
             .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument_ptr();
 
         ///act
@@ -1671,24 +1668,24 @@ next_fail:;
         (void)DataPublisher_PublishTransacted_ReportedProperty(handle, "ZZZ", &ag2);
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(VECTOR_size(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(VECTOR_size(IGNORED_ARG))
             .IgnoreArgument_handle();
         for (size_t i = 0;i < 2;i++)
         {
-            STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_PTR_ARG, i))
+            STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_ARG, i))
                 .IgnoreArgument_handle();
-            STRICT_EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_ARG))
                 .IgnoreArgument_agentData();
-            STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
                 .IgnoreArgument_ptr();
-            STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
                 .IgnoreArgument_ptr();
-            STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
                 .IgnoreArgument_ptr();
         }
-        STRICT_EXPECTED_CALL(VECTOR_destroy(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(VECTOR_destroy(IGNORED_ARG))
             .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument_ptr();
 
         ///act

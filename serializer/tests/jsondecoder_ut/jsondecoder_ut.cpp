@@ -91,7 +91,7 @@ TEST_FUNCTION(JSONDecoder_With_A_Space_As_json_argument_Fails)
     CJSONDecoderMocks mocks;
     MULTITREE_HANDLE multiTree;
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
     STRICT_EXPECTED_CALL(mocks, MultiTree_Destroy(TestMultiTreeHandle));
 
     char jsonString[] = " ";
@@ -122,7 +122,7 @@ TEST_FUNCTION(JSONDecoder_When_The_JSON_Starts_With_An_Unexpected_Character_Fail
     CJSONDecoderMocks mocks;
     MULTITREE_HANDLE multiTree;
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
     STRICT_EXPECTED_CALL(mocks, MultiTree_Destroy(TestMultiTreeHandle));
 
     char jsonString[] = "a";
@@ -139,7 +139,7 @@ TEST_FUNCTION(JSONDecoder_When_The_JSON_Is_Made_Of_Only_A_Left_Square_Bracket_De
     CJSONDecoderMocks mocks;
     MULTITREE_HANDLE multiTree;
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
     STRICT_EXPECTED_CALL(mocks, MultiTree_Destroy(TestMultiTreeHandle));
 
     char jsonString[] = "[";
@@ -156,7 +156,7 @@ TEST_FUNCTION(JSONDecoder_When_The_JSON_Is_Made_Of_Only_A_Left_Curly_Brace_Decod
     CJSONDecoderMocks mocks;
     MULTITREE_HANDLE multiTree;
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
     STRICT_EXPECTED_CALL(mocks, MultiTree_Destroy(TestMultiTreeHandle));
     char jsonString[] = "{";
 
@@ -173,7 +173,7 @@ TEST_FUNCTION(JSONDecoder_When_The_JSON_Is_Made_Of_Only_A_Right_Square_Bracket_D
     CJSONDecoderMocks mocks;
     MULTITREE_HANDLE multiTree;
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
     STRICT_EXPECTED_CALL(mocks, MultiTree_Destroy(TestMultiTreeHandle));
     char jsonString[] = "]";
     ///act
@@ -189,7 +189,7 @@ TEST_FUNCTION(JSONDecoder_When_The_JSON_Is_Made_Of_Only_A_Right_Curly_Brace_Deco
     CJSONDecoderMocks mocks;
     MULTITREE_HANDLE multiTree;
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
     STRICT_EXPECTED_CALL(mocks, MultiTree_Destroy(TestMultiTreeHandle));
     char jsonString[] = "}";
     ///act
@@ -205,7 +205,7 @@ TEST_FUNCTION(JSONDecoder_When_The_JSON_Is_Made_Of_Only_A_Colon_Decoding_Fails)
     CJSONDecoderMocks mocks;
     MULTITREE_HANDLE multiTree;
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
     STRICT_EXPECTED_CALL(mocks, MultiTree_Destroy(TestMultiTreeHandle));
     char jsonString[] = ":";
     ///act
@@ -221,7 +221,7 @@ TEST_FUNCTION(JSONDecoder_When_The_JSON_Is_Made_Of_Only_A_Comma_Decoding_Fails)
     CJSONDecoderMocks mocks;
     MULTITREE_HANDLE multiTree;
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
     STRICT_EXPECTED_CALL(mocks, MultiTree_Destroy(TestMultiTreeHandle));
     char jsonString[] = ",";
     ///act
@@ -237,7 +237,7 @@ TEST_FUNCTION(JSONDecoder_When_The_JSON_Is_An_Empty_Object_Decoding_Succeeds)
     CJSONDecoderMocks mocks;
     MULTITREE_HANDLE multiTree;
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
     char jsonString[] = "{}";
     ///act
     JSON_DECODER_RESULT result = JSONDecoder_JSON_To_MultiTree(jsonString, &multiTree);
@@ -252,7 +252,7 @@ TEST_FUNCTION(JSONDecoder_When_The_JSON_Is_An_Empty_Object_Followed_By_Another_O
     CJSONDecoderMocks mocks;
     MULTITREE_HANDLE multiTree;
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
     STRICT_EXPECTED_CALL(mocks, MultiTree_Destroy(TestMultiTreeHandle));
     char jsonString[] = "{}{";
     ///act
@@ -268,7 +268,7 @@ TEST_FUNCTION(JSONDecoder_When_The_JSON_Is_Made_Of_2_Empty_Objects_At_Root_Decod
     CJSONDecoderMocks mocks;
     MULTITREE_HANDLE multiTree;
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
     STRICT_EXPECTED_CALL(mocks, MultiTree_Destroy(TestMultiTreeHandle));
     char jsonString[] = "{}{}";
     ///act
@@ -286,8 +286,8 @@ TEST_FUNCTION(JSONDecoder_When_The_JSON_Is_Made_Of_An_Object_With_One_Element_De
     char json[] = "{\"member1\":\"a\"}";
     void* memberValue = strstr(json, "\"a\"");
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "member1", IGNORED_PTR_ARG)).CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "member1", IGNORED_ARG)).CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
     STRICT_EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle1, memberValue));
 
     ///act
@@ -306,11 +306,11 @@ TEST_FUNCTION(JSONDecoder_When_The_JSON_Is_Made_Of_An_Object_With_2_Elements_Dec
     void* member1Value = strstr(json, "\"a\"");
     void* member2Value = strstr(json, "\"b\"");
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "member1", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "member1", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
     STRICT_EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle1, member1Value));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "member2", IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "member2", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle2, sizeof(TestChildHandle2));
     STRICT_EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle2, member2Value));
 
@@ -328,7 +328,7 @@ TEST_FUNCTION(JSONDecoder_When_The_JSON_Ends_After_The_Member_Name_Quote_Decodin
     MULTITREE_HANDLE multiTree;
     char json[] = "{\"";
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
     STRICT_EXPECTED_CALL(mocks, MultiTree_Destroy(TestMultiTreeHandle));
 
     ///act
@@ -345,7 +345,7 @@ TEST_FUNCTION(JSONDecoder_When_The_JSON_Ends_After_The_First_Char_Of_The_Member_
     MULTITREE_HANDLE multiTree;
     char json[] = "{\"m";
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
     STRICT_EXPECTED_CALL(mocks, MultiTree_Destroy(TestMultiTreeHandle));
 
     ///act
@@ -362,7 +362,7 @@ TEST_FUNCTION(JSONDecoder_When_The_JSON_Ends_After_The_Ending_Quote_Of_The_Membe
     MULTITREE_HANDLE multiTree;
     char json[] = "{\"m\"";
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
     STRICT_EXPECTED_CALL(mocks, MultiTree_Destroy(TestMultiTreeHandle));
 
     ///act
@@ -379,8 +379,8 @@ TEST_FUNCTION(JSONDecoder_When_The_JSON_Ends_After_The_Colon_Decoding_Fails)
     MULTITREE_HANDLE multiTree;
     char json[] = "{\"m\":";
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, IGNORED_ARG, IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
     STRICT_EXPECTED_CALL(mocks, MultiTree_Destroy(TestMultiTreeHandle));
 
@@ -398,8 +398,8 @@ TEST_FUNCTION(JSONDecoder_When_The_JSON_Ends_After_The_Begining_Value_Quote_Deco
     MULTITREE_HANDLE multiTree;
     char json[] = "{\"member1\":\"";
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, IGNORED_ARG, IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
     STRICT_EXPECTED_CALL(mocks, MultiTree_Destroy(TestMultiTreeHandle));
 
@@ -417,8 +417,8 @@ TEST_FUNCTION(JSONDecoder_When_The_JSON_Ends_In_The_Middle_Of_A_String_Value_Dec
     MULTITREE_HANDLE multiTree;
     char json[] = "{\"member1\":\"a";
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, IGNORED_ARG, IGNORED_ARG)).CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
     STRICT_EXPECTED_CALL(mocks, MultiTree_Destroy(TestMultiTreeHandle));
 
     ///act
@@ -435,9 +435,9 @@ TEST_FUNCTION(JSONDecoder_When_The_JSON_Ends_After_The_Ending_Quote_Of_A_Value_D
     MULTITREE_HANDLE multiTree;
     char json[] = "{\"member1\":\"a\"";
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
-    EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle1, IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, IGNORED_ARG, IGNORED_ARG)).CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
+    EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle1, IGNORED_ARG));
     STRICT_EXPECTED_CALL(mocks, MultiTree_Destroy(TestMultiTreeHandle));
 
     ///act
@@ -454,9 +454,9 @@ TEST_FUNCTION(JSONDecoder_When_The_JSON_Ends_After_A_Comma_Decoding_Fails)
     MULTITREE_HANDLE multiTree;
     char json[] = "{\"member1\":\"a\",";
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
-    EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle1, IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, IGNORED_ARG, IGNORED_ARG)).CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
+    EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle1, IGNORED_ARG));
     STRICT_EXPECTED_CALL(mocks, MultiTree_Destroy(TestMultiTreeHandle));
 
     ///act
@@ -473,7 +473,7 @@ TEST_FUNCTION(JSONDecoder_When_The_Starting_Quote_Of_The_Name_Is_Missing_Decodin
     MULTITREE_HANDLE multiTree;
     char json[] = "{member1\":\"a\"}";
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
     STRICT_EXPECTED_CALL(mocks, MultiTree_Destroy(TestMultiTreeHandle));
 
     ///act
@@ -490,7 +490,7 @@ TEST_FUNCTION(JSONDecoder_When_The_Ending_Quote_Of_The_Name_Is_Missing_Decoding_
     MULTITREE_HANDLE multiTree;
     char json[] = "{\"member1:\"a\"}";
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
     STRICT_EXPECTED_CALL(mocks, MultiTree_Destroy(TestMultiTreeHandle));
 
     ///act
@@ -507,7 +507,7 @@ TEST_FUNCTION(JSONDecoder_When_The_Colon_Is_Missing_In_A_Name_Value_Pair_Decodin
     MULTITREE_HANDLE multiTree;
     char json[] = "{\"member1\"\"a\"}";
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
     STRICT_EXPECTED_CALL(mocks, MultiTree_Destroy(TestMultiTreeHandle));
 
     ///act
@@ -524,8 +524,8 @@ TEST_FUNCTION(JSONDecoder_When_The_Starting_Quote_Of_A_String_Value_Is_Missing_D
     MULTITREE_HANDLE multiTree;
     char json[] = "{\"member1\":a\"}";
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, IGNORED_ARG, IGNORED_ARG)).CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
     STRICT_EXPECTED_CALL(mocks, MultiTree_Destroy(TestMultiTreeHandle));
 
     ///act
@@ -542,8 +542,8 @@ TEST_FUNCTION(JSONDecoder_When_The_Ending_Quote_Of_A_String_Value_Is_Missing_Dec
     MULTITREE_HANDLE multiTree;
     char json[] = "{\"member1\":a\"}";
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, IGNORED_ARG, IGNORED_ARG)).CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
     STRICT_EXPECTED_CALL(mocks, MultiTree_Destroy(TestMultiTreeHandle));
 
     ///act
@@ -560,9 +560,9 @@ TEST_FUNCTION(JSONDecoder_When_The_Comma_Separator_Is_Missing_Decoding_Fails)
     MULTITREE_HANDLE multiTree;
     char json[] = "{\"member1\":\"a\"\"member2\":\"b\"}";
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
-    EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle1, IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, IGNORED_ARG, IGNORED_ARG)).CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
+    EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle1, IGNORED_ARG));
     STRICT_EXPECTED_CALL(mocks, MultiTree_Destroy(TestMultiTreeHandle));
 
     ///act
@@ -579,8 +579,8 @@ TEST_FUNCTION(JSONDecoder_When_The_AddChild_Fails_Decoding_Fails)
     MULTITREE_HANDLE multiTree;
     char json[] = "{\"member1\":\"a\",\"member1\":\"b\"}";
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(MULTITREE_INVALID_ARG);
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, IGNORED_ARG, IGNORED_ARG)).SetReturn(MULTITREE_INVALID_ARG);
     STRICT_EXPECTED_CALL(mocks, MultiTree_Destroy(TestMultiTreeHandle));
 
     ///act
@@ -597,7 +597,7 @@ TEST_FUNCTION(JSONDecoder_When_The_JSON_Contains_An_Empty_Array_Decoding_Succeed
     MULTITREE_HANDLE multiTree;
     char json[] = "[]";
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
 
     ///act
     JSON_DECODER_RESULT result = JSONDecoder_JSON_To_MultiTree(json, &multiTree);
@@ -613,7 +613,7 @@ TEST_FUNCTION(JSONDecoder_When_The_JSON_Contains_Only_The_Opening_Array_Square_B
     MULTITREE_HANDLE multiTree;
     char json[] = "[";
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
     STRICT_EXPECTED_CALL(mocks, MultiTree_Destroy(TestMultiTreeHandle));
 
     ///act
@@ -630,7 +630,7 @@ TEST_FUNCTION(JSONDecoder_When_The_JSON_Contains_Only_The_Closing_Array_Square_B
     MULTITREE_HANDLE multiTree;
     char json[] = "]";
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
     STRICT_EXPECTED_CALL(mocks, MultiTree_Destroy(TestMultiTreeHandle));
 
     ///act
@@ -648,8 +648,8 @@ TEST_FUNCTION(JSONDecoder_When_The_JSON_Contains_One_String_Value_Decoding_Succe
     char json[] = "[\"a\"]";
     void* value1Ptr = &json[1];
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
     STRICT_EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle1, value1Ptr));
 
@@ -669,11 +669,11 @@ TEST_FUNCTION(JSONDecoder_When_The_JSON_Contains_An_Array_With_2_String_Values_D
     void* value1Ptr = &json[1];
     void* value2Ptr = &json[5];
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
     STRICT_EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle1, value1Ptr));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "1", IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "1", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle2, sizeof(TestChildHandle2));
     STRICT_EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle2, value2Ptr));
 
@@ -691,8 +691,8 @@ TEST_FUNCTION(JSONDecoder_When_The_JSON_Ends_After_The_Begginning_Quote_Of_The_A
     MULTITREE_HANDLE multiTree;
     char json[] = "[\"";
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
     STRICT_EXPECTED_CALL(mocks, MultiTree_Destroy(TestMultiTreeHandle));
 
@@ -710,8 +710,8 @@ TEST_FUNCTION(JSONDecoder_When_The_JSON_Ends_In_The_Middle_Of_The_Array_First_St
     MULTITREE_HANDLE multiTree;
     char json[] = "[\"a";
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
     STRICT_EXPECTED_CALL(mocks, MultiTree_Destroy(TestMultiTreeHandle));
 
@@ -730,8 +730,8 @@ TEST_FUNCTION(JSONDecoder_When_The_JSON_Ends_After_The_Ending_Quote_Of_The_Array
     char json[] = "[\"a\"";
     void* value1Ptr = &json[1];
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
     STRICT_EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle1, value1Ptr));
     STRICT_EXPECTED_CALL(mocks, MultiTree_Destroy(TestMultiTreeHandle));
@@ -751,11 +751,11 @@ TEST_FUNCTION(JSONDecoder_When_The_JSON_Ends_After_The_Comma_Of_The_Array_Decodi
     char json[] = "[\"a\",";
     void* value1Ptr = &json[1];
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
     STRICT_EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle1, value1Ptr));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "1", IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "1", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle2, sizeof(TestChildHandle2));
     STRICT_EXPECTED_CALL(mocks, MultiTree_Destroy(TestMultiTreeHandle));
 
@@ -774,8 +774,8 @@ TEST_FUNCTION(JSONDecoder_When_The_JSON_Contains_An_Array_With_A_false_value_Dec
     char json[] = "[false]";
     void* value1Ptr = &json[1];
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
     STRICT_EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle1, value1Ptr));
 
@@ -794,8 +794,8 @@ TEST_FUNCTION(JSONDecoder_When_The_JSON_Contains_An_Array_With_A_true_value_Deco
     char json[] = "[true]";
     void* value1Ptr = &json[1];
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
     STRICT_EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle1, value1Ptr));
 
@@ -814,8 +814,8 @@ TEST_FUNCTION(JSONDecoder_When_The_JSON_Contains_An_Array_With_A_null_value_Deco
     char json[] = "[null]";
     void* value1Ptr = &json[1];
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
     STRICT_EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle1, value1Ptr));
 
@@ -833,8 +833,8 @@ TEST_FUNCTION(JSONDecoder_When_The_JSON_Contains_An_Array_With_A_false_But_Not_A
     MULTITREE_HANDLE multiTree;
     char json[] = "[fAlse]";
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
     STRICT_EXPECTED_CALL(mocks, MultiTree_Destroy(TestMultiTreeHandle));
 
@@ -852,8 +852,8 @@ TEST_FUNCTION(JSONDecoder_When_The_JSON_Contains_An_Array_With_A_true_But_Not_Al
     MULTITREE_HANDLE multiTree;
     char json[] = "[trUe]";
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
     STRICT_EXPECTED_CALL(mocks, MultiTree_Destroy(TestMultiTreeHandle));
 
@@ -871,8 +871,8 @@ TEST_FUNCTION(JSONDecoder_When_The_JSON_Contains_An_Array_With_A_null_But_Not_Al
     MULTITREE_HANDLE multiTree;
     char json[] = "[Null]";
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
     STRICT_EXPECTED_CALL(mocks, MultiTree_Destroy(TestMultiTreeHandle));
 
@@ -891,8 +891,8 @@ TEST_FUNCTION(JSONDecoder_When_The_JSON_Contains_An_Array_With_A_Literal_Name_Th
     MULTITREE_HANDLE multiTree;
     char json[] = "[hagauaga]";
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
     STRICT_EXPECTED_CALL(mocks, MultiTree_Destroy(TestMultiTreeHandle));
 
@@ -911,8 +911,8 @@ TEST_FUNCTION(JSONDecoder_Space_Before_Array_Begin_Is_Allowed_And_Decoding_Succe
     char json[] = " [true]";
     void* value1Ptr = &json[2];
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
     STRICT_EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle1, value1Ptr));
 
@@ -931,8 +931,8 @@ TEST_FUNCTION(JSONDecoder_CR_Before_Array_Begin_Is_Allowed_And_Decoding_Succeeds
     char json[] = "\r[true]";
     void* value1Ptr = &json[2];
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
     STRICT_EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle1, value1Ptr));
 
@@ -951,8 +951,8 @@ TEST_FUNCTION(JSONDecoder_NL_Before_Array_Begin_Is_Allowed_And_Decoding_Succeeds
     char json[] = "\n[true]";
     void* value1Ptr = &json[2];
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
     STRICT_EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle1, value1Ptr));
 
@@ -971,8 +971,8 @@ TEST_FUNCTION(JSONDecoder_Tab_Before_Array_Begin_Is_Allowed_And_Decoding_Succeed
     char json[] = "\t[true]";
     void* value1Ptr = &json[2];
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
     STRICT_EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle1, value1Ptr));
 
@@ -991,8 +991,8 @@ TEST_FUNCTION(JSONDecoder_Multiple_Whitespaces_Before_Array_Begin_Is_Allowed_And
     char json[] = " \t\r\n[true]";
     void* value1Ptr = &json[5];
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
     STRICT_EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle1, value1Ptr));
 
@@ -1011,8 +1011,8 @@ TEST_FUNCTION(JSONDecoder_Space_After_Array_Begin_Is_Allowed_And_Decoding_Succee
     char json[] = "[ true]";
     void* value1Ptr = &json[2];
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
     STRICT_EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle1, value1Ptr));
 
@@ -1031,8 +1031,8 @@ TEST_FUNCTION(JSONDecoder_CR_After_Array_Begin_Is_Allowed_And_Decoding_Succeeds)
     char json[] = "[\rtrue]";
     void* value1Ptr = &json[2];
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
     STRICT_EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle1, value1Ptr));
 
@@ -1051,8 +1051,8 @@ TEST_FUNCTION(JSONDecoder_NL_After_Array_Begin_Is_Allowed_And_Decoding_Succeeds)
     char json[] = "[\ntrue]";
     void* value1Ptr = &json[2];
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
     STRICT_EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle1, value1Ptr));
 
@@ -1071,8 +1071,8 @@ TEST_FUNCTION(JSONDecoder_Tab_After_Array_Begin_Is_Allowed_And_Decoding_Succeeds
     char json[] = "[\ttrue]";
     void* value1Ptr = &json[2];
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
     STRICT_EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle1, value1Ptr));
 
@@ -1091,8 +1091,8 @@ TEST_FUNCTION(JSONDecoder_Multiple_Whitespaces_After_Array_Begin_Is_Allowed_And_
     char json[] = "[ \t\r\ntrue]";
     void* value1Ptr = &json[5];
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
     STRICT_EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle1, value1Ptr));
 
@@ -1111,8 +1111,8 @@ TEST_FUNCTION(JSONDecoder_Multiple_Whitespaces_Before_Array_End_Is_Allowed_And_D
     char json[] = "[true \t\r\n]";
     void* value1Ptr = &json[1];
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
     STRICT_EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle1, value1Ptr));
 
@@ -1131,8 +1131,8 @@ TEST_FUNCTION(JSONDecoder_Multiple_Whitespaces_After_Array_End_Is_Allowed_And_De
     char json[] = "[true] \t\r\n";
     void* value1Ptr = &json[1];
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
     STRICT_EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle1, value1Ptr));
 
@@ -1152,11 +1152,11 @@ TEST_FUNCTION(JSONDecoder_Multiple_Whitespaces_Before_Comma_In_Array_Is_Allowed_
     void* value1Ptr = &json[1];
     void* value2Ptr = &json[10];
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
     STRICT_EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle1, value1Ptr));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "1", IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "1", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle2, sizeof(TestChildHandle2));
     STRICT_EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle2, value2Ptr));
 
@@ -1176,11 +1176,11 @@ TEST_FUNCTION(JSONDecoder_Multiple_Whitespaces_After_Comma_In_Array_Is_Allowed_A
     void* value1Ptr = &json[1];
     void* value2Ptr = &json[10];
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
     STRICT_EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle1, value1Ptr));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "1", IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "1", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle2, sizeof(TestChildHandle2));
     STRICT_EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle2, value2Ptr));
 
@@ -1199,8 +1199,8 @@ TEST_FUNCTION(JSONDecoder_Multiple_Whitespaces_Before_Object_Begin_Is_Allowed_An
     char json[] = " \t\r\n{\"a\":true}";
     void* value1Ptr = &json[9];
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "a", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "a", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
     STRICT_EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle1, value1Ptr));
 
@@ -1219,8 +1219,8 @@ TEST_FUNCTION(JSONDecoder_Multiple_Whitespaces_After_Object_Begin_Is_Allowed_And
     char json[] = "{ \t\r\n\"a\":true}";
     void* value1Ptr = &json[9];
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "a", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "a", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
     STRICT_EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle1, value1Ptr));
 
@@ -1239,8 +1239,8 @@ TEST_FUNCTION(JSONDecoder_Multiple_Whitespaces_Before_Object_End_Is_Allowed_And_
     char json[] = "{\"a\":true \t\r\n}";
     void* value1Ptr = &json[5];
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "a", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "a", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
     STRICT_EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle1, value1Ptr));
 
@@ -1259,8 +1259,8 @@ TEST_FUNCTION(JSONDecoder_Multiple_Whitespaces_After_Object_End_Is_Allowed_And_D
     char json[] = "{\"a\":true} \t\r\n";
     void* value1Ptr = &json[5];
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "a", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "a", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
     STRICT_EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle1, value1Ptr));
 
@@ -1279,8 +1279,8 @@ TEST_FUNCTION(JSONDecoder_Multiple_Whitespaces_Before_Colon_Is_Allowed_And_Decod
     char json[] = "{\"a\" \t\r\n:true}";
     void* value1Ptr = &json[9];
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "a", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "a", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
     STRICT_EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle1, value1Ptr));
 
@@ -1299,8 +1299,8 @@ TEST_FUNCTION(JSONDecoder_Multiple_Whitespaces_After_Colon_Is_Allowed_And_Decodi
     char json[] = "{\"a\": \t\r\ntrue}";
     void* value1Ptr = &json[9];
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "a", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "a", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
     STRICT_EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle1, value1Ptr));
 
@@ -1320,11 +1320,11 @@ TEST_FUNCTION(JSONDecoder_Multiple_Whitespaces_Before_Comma_In_Object_Is_Allowed
     void* value1Ptr = &json[5];
     void* value2Ptr = &json[18];
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "a", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "a", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
     STRICT_EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle1, value1Ptr));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "b", IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "b", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle2, sizeof(TestChildHandle2));
     STRICT_EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle2, value2Ptr));
 
@@ -1344,11 +1344,11 @@ TEST_FUNCTION(JSONDecoder_Multiple_Whitespaces_After_Comma_In_Object_Is_Allowed_
     void* value1Ptr = &json[5];
     void* value2Ptr = &json[18];
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "a", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "a", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
     STRICT_EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle1, value1Ptr));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "b", IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "b", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle2, sizeof(TestChildHandle2));
     STRICT_EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle2, value2Ptr));
 
@@ -1366,8 +1366,8 @@ TEST_FUNCTION(JSONDecoder_Nested_Array_Are_Allowed_And_Decoding_Succeeds)
     MULTITREE_HANDLE multiTree;
     char json[] = "[[]]";
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
 
     ///act
@@ -1384,8 +1384,8 @@ TEST_FUNCTION(JSONDecoder_Spaces_Before_Nested_Array_Are_Allowed_And_Decoding_Su
     MULTITREE_HANDLE multiTree;
     char json[] = "[ \t\r\n[]]";
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
 
     ///act
@@ -1402,8 +1402,8 @@ TEST_FUNCTION(JSONDecoder_Spaces_In_Nested_Array_Are_Allowed_And_Decoding_Succee
     MULTITREE_HANDLE multiTree;
     char json[] = "[[ \t\r\n]]";
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
 
     ///act
@@ -1420,8 +1420,8 @@ TEST_FUNCTION(JSONDecoder_Spaces_After_Nested_Array_Are_Allowed_And_Decoding_Suc
     MULTITREE_HANDLE multiTree;
     char json[] = "[[ \t\r\n]]";
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
 
     ///act
@@ -1438,8 +1438,8 @@ TEST_FUNCTION(JSONDecoder_Object_In_Array_Is_Allowed_And_Decoding_Succeeds)
     MULTITREE_HANDLE multiTree;
     char json[] = "[{}]";
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
 
     ///act
@@ -1456,8 +1456,8 @@ TEST_FUNCTION(JSONDecoder_Spaces_Before_Object_In_Array_Are_Allowed_And_Decoding
     MULTITREE_HANDLE multiTree;
     char json[] = "[ \t\r\n{}]";
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
 
     ///act
@@ -1474,8 +1474,8 @@ TEST_FUNCTION(JSONDecoder_Spaces_In_Object_In_Array_Are_Allowed_And_Decoding_Suc
     MULTITREE_HANDLE multiTree;
     char json[] = "[{ \t\r\n}]";
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
 
     ///act
@@ -1492,8 +1492,8 @@ TEST_FUNCTION(JSONDecoder_Spaces_After_Object_In_Array_Are_Allowed_And_Decoding_
     MULTITREE_HANDLE multiTree;
     char json[] = "[{} \t\r\n]";
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
 
     ///act
@@ -1511,10 +1511,10 @@ TEST_FUNCTION(JSONDecoder_Value_In_Object_In_Array_Are_Allowed_And_Decoding_Succ
     char json[] = "[{\"member1\":\"a\"}]";
     void* value1Ptr = &json[12];
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestChildHandle1, "member1", IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestChildHandle1, "member1", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle2, sizeof(TestChildHandle2));
     STRICT_EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle2, value1Ptr));
 
@@ -1533,10 +1533,10 @@ TEST_FUNCTION(JSONDecoder_Spaces_Before_Member_Name_In_Object_In_Array_Are_Allow
     char json[] = "[{ \r\n\t\"member1\":\"a\"}]";
     void* value1Ptr = &json[16];
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestChildHandle1, "member1", IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestChildHandle1, "member1", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle2, sizeof(TestChildHandle2));
     STRICT_EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle2, value1Ptr));
 
@@ -1555,10 +1555,10 @@ TEST_FUNCTION(JSONDecoder_Spaces_Before_Colon_In_Object_In_Array_Are_Allowed_And
     char json[] = "[{\"member1\" \r\n\t:\"a\"}]";
     void* value1Ptr = &json[16];
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestChildHandle1, "member1", IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestChildHandle1, "member1", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle2, sizeof(TestChildHandle2));
     STRICT_EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle2, value1Ptr));
 
@@ -1577,10 +1577,10 @@ TEST_FUNCTION(JSONDecoder_Spaces_After_Colon_In_Object_In_Array_Are_Allowed_And_
     char json[] = "[{\"member1\": \r\n\t\"a\"}]";
     void* value1Ptr = &json[16];
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestChildHandle1, "member1", IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestChildHandle1, "member1", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle2, sizeof(TestChildHandle2));
     STRICT_EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle2, value1Ptr));
 
@@ -1599,10 +1599,10 @@ TEST_FUNCTION(JSONDecoder_Spaces_After_Value_In_Object_In_Array_Are_Allowed_And_
     char json[] = "[{\"member1\":\"a\" \r\n\t}]";
     void* value1Ptr = &json[12];
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestChildHandle1, "member1", IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestChildHandle1, "member1", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle2, sizeof(TestChildHandle2));
     STRICT_EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle2, value1Ptr));
 
@@ -1622,13 +1622,13 @@ TEST_FUNCTION(JSONDecoder_Spaces_Before_Comma_In_Object_In_Array_Are_Allowed_And
     void* value1Ptr = &json[12];
     void* value2Ptr = &json[30];
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestChildHandle1, "member1", IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestChildHandle1, "member1", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle2, sizeof(TestChildHandle2));
     STRICT_EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle2, value1Ptr));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestChildHandle1, "member2", IGNORED_PTR_ARG)
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestChildHandle1, "member2", IGNORED_ARG)
         .CopyOutArgumentBuffer(3, &TestChildHandle3, sizeof(TestChildHandle3)));
     STRICT_EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle3, value2Ptr));
 
@@ -1648,13 +1648,13 @@ TEST_FUNCTION(JSONDecoder_Spaces_After_Comma_In_Object_In_Array_Are_Allowed_And_
     void* value1Ptr = &json[12];
     void* value2Ptr = &json[30];
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestChildHandle1, "member1", IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestChildHandle1, "member1", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle2, sizeof(TestChildHandle2));
     STRICT_EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle2, value1Ptr));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestChildHandle1, "member2", IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestChildHandle1, "member2", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle3, sizeof(TestChildHandle3));
     STRICT_EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle3, value2Ptr));
 
@@ -1673,10 +1673,10 @@ TEST_FUNCTION(JSONDecoder_Spaces_Before_Value_In_Array_In_Array_Are_Allowed_And_
     char json[] = "[[ \r\n\t\"a\"]]";
     void* value1Ptr = &json[6];
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestChildHandle1, "0", IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestChildHandle1, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle2, sizeof(TestChildHandle2));
     STRICT_EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle2, value1Ptr));
 
@@ -1695,10 +1695,10 @@ TEST_FUNCTION(JSONDecoder_Spaces_After_Value_In_Array_In_Array_Are_Allowed_And_D
     char json[] = "[[\"a\" \r\n\t]]";
     void* value1Ptr = &json[2];
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestChildHandle1, "0", IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestChildHandle1, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle2, sizeof(TestChildHandle2));
     STRICT_EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle2, value1Ptr));
 
@@ -1718,13 +1718,13 @@ TEST_FUNCTION(JSONDecoder_Spaces_Before_Comma_In_Array_In_Array_Are_Allowed_And_
     void* value1Ptr = &json[2];
     void* value2Ptr = &json[10];
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestChildHandle1, "0", IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestChildHandle1, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle2, sizeof(TestChildHandle2));
     STRICT_EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle2, value1Ptr));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestChildHandle1, "1", IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestChildHandle1, "1", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle3, sizeof(TestChildHandle3));
     STRICT_EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle3, value2Ptr));
 
@@ -1743,8 +1743,8 @@ TEST_FUNCTION(JSONDecoder_Number_Without_Sign_Is_Decoded_Succesfully)
     char json[] = "[1]";
     void* value1Ptr = &json[1];
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
     STRICT_EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle1, value1Ptr));
 
@@ -1763,8 +1763,8 @@ TEST_FUNCTION(JSONDecoder_Number_Made_Out_Of_Several_Digits_Without_Sign_Is_Deco
     char json[] = "[4242]";
     void* value1Ptr = &json[1];
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
     STRICT_EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle1, value1Ptr));
 
@@ -1783,8 +1783,8 @@ TEST_FUNCTION(JSONDecoder_Number_With_Minus_Sign_Is_Decoded_Succesfully)
     char json[] = "[-4242]";
     void* value1Ptr = &json[1];
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
     STRICT_EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle1, value1Ptr));
 
@@ -1802,8 +1802,8 @@ TEST_FUNCTION(JSONDecoder_Number_With_2_Minus_Sign_Fails)
     MULTITREE_HANDLE multiTree;
     char json[] = "[--4242]";
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
     EXPECTED_CALL(mocks, MultiTree_Destroy(TestMultiTreeHandle));
 
@@ -1822,8 +1822,8 @@ TEST_FUNCTION(JSONDecoder_Minus_In_The_Middle_Of_Number_Fails)
     char json[] = "[42-42]";
     void* value1Ptr = &json[1];
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
     STRICT_EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle1, value1Ptr));
     EXPECTED_CALL(mocks, MultiTree_Destroy(TestMultiTreeHandle));
@@ -1842,8 +1842,8 @@ TEST_FUNCTION(JSONDecoder_Fraction_Part_Without_Integer_Fails)
     MULTITREE_HANDLE multiTree;
     char json[] = "[.1]";
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
     EXPECTED_CALL(mocks, MultiTree_Destroy(TestMultiTreeHandle));
 
@@ -1861,8 +1861,8 @@ TEST_FUNCTION(JSONDecoder_No_Fraction_Part_Digits_Fails)
     MULTITREE_HANDLE multiTree;
     char json[] = "[1.]";
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
     EXPECTED_CALL(mocks, MultiTree_Destroy(TestMultiTreeHandle));
 
@@ -1881,8 +1881,8 @@ TEST_FUNCTION(JSONDecoder_Integer_With_Fraction_Part_Succeeds)
     char json[] = "[1.1]";
     void* value1Ptr = &json[1];
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
     STRICT_EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle1, value1Ptr));
 
@@ -1901,8 +1901,8 @@ TEST_FUNCTION(JSONDecoder_Integer_With_e_And_Following_Digits_Succeeds)
     char json[] = "[1e1]";
     void* value1Ptr = &json[1];
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
     STRICT_EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle1, value1Ptr));
 
@@ -1921,8 +1921,8 @@ TEST_FUNCTION(JSONDecoder_Integer_With_e_And_2_Digits_Succeeds)
     char json[] = "[1e42]";
     void* value1Ptr = &json[1];
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
     STRICT_EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle1, value1Ptr));
 
@@ -1941,8 +1941,8 @@ TEST_FUNCTION(JSONDecoder_Integer_With_e_And_Minus_And_2_Digits_Succeeds)
     char json[] = "[1e-42]";
     void* value1Ptr = &json[1];
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
     STRICT_EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle1, value1Ptr));
 
@@ -1961,8 +1961,8 @@ TEST_FUNCTION(JSONDecoder_Integer_With_e_And_Plux_And_2_Digits_Succeeds)
     char json[] = "[1e+42]";
     void* value1Ptr = &json[1];
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
     STRICT_EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle1, value1Ptr));
 
@@ -1981,8 +1981,8 @@ TEST_FUNCTION(JSONDecoder_Integer_With_E_And_Following_Digits_Succeeds)
     char json[] = "[1E1]";
     void* value1Ptr = &json[1];
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
     STRICT_EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle1, value1Ptr));
 
@@ -2001,8 +2001,8 @@ TEST_FUNCTION(JSONDecoder_Integer_With_E_And_2_Digits_Succeeds)
     char json[] = "[1E42]";
     void* value1Ptr = &json[1];
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
     STRICT_EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle1, value1Ptr));
 
@@ -2021,8 +2021,8 @@ TEST_FUNCTION(JSONDecoder_Integer_With_E_And_Minus_And_2_Digits_Succeeds)
     char json[] = "[1E-42]";
     void* value1Ptr = &json[1];
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
     STRICT_EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle1, value1Ptr));
 
@@ -2041,8 +2041,8 @@ TEST_FUNCTION(JSONDecoder_Integer_With_E_And_Plux_And_2_Digits_Succeeds)
     char json[] = "[1E+42]";
     void* value1Ptr = &json[1];
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
     STRICT_EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle1, value1Ptr));
 
@@ -2060,8 +2060,8 @@ TEST_FUNCTION(JSONDecoder_Integer_With_e_With_No_Digits_Fails)
     MULTITREE_HANDLE multiTree;
     char json[] = "[1e]";
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
     EXPECTED_CALL(mocks, MultiTree_Destroy(TestMultiTreeHandle));
 
@@ -2079,8 +2079,8 @@ TEST_FUNCTION(JSONDecoder_Integer_With_E_With_No_Digits_Fails)
     MULTITREE_HANDLE multiTree;
     char json[] = "[1E]";
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
     EXPECTED_CALL(mocks, MultiTree_Destroy(TestMultiTreeHandle));
 
@@ -2098,8 +2098,8 @@ TEST_FUNCTION(JSONDecoder_Integer_With_e_Sign_And_With_No_Digits_Fails)
     MULTITREE_HANDLE multiTree;
     char json[] = "[1e-]";
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
     EXPECTED_CALL(mocks, MultiTree_Destroy(TestMultiTreeHandle));
 
@@ -2117,8 +2117,8 @@ TEST_FUNCTION(JSONDecoder_Integer_With_E_Sign_And_With_No_Digits_Fails)
     MULTITREE_HANDLE multiTree;
     char json[] = "[1E-]";
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
     EXPECTED_CALL(mocks, MultiTree_Destroy(TestMultiTreeHandle));
 
@@ -2136,8 +2136,8 @@ TEST_FUNCTION(JSONDecoder_Integer_With_A_Leading_Zero_Fails)
     MULTITREE_HANDLE multiTree;
     char json[] = "[01]";
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
     EXPECTED_CALL(mocks, MultiTree_Destroy(TestMultiTreeHandle));
 
@@ -2155,8 +2155,8 @@ TEST_FUNCTION(JSONDecoder_Integer_With_2_Leading_Zero_Fails)
     MULTITREE_HANDLE multiTree;
     char json[] = "[001]";
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
     EXPECTED_CALL(mocks, MultiTree_Destroy(TestMultiTreeHandle));
 
@@ -2175,8 +2175,8 @@ TEST_FUNCTION(JSONDecoder_Integer_With_The_Value_0_Succeeds)
     char json[] = "[0]";
     void* value1Ptr = &json[1];
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
     STRICT_EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle1, value1Ptr));
 
@@ -2195,8 +2195,8 @@ TEST_FUNCTION(JSONDecoder_Integer_With_The_Value_101_Succeeds)
     char json[] = "[101]";
     void* value1Ptr = &json[1];
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
     STRICT_EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle1, value1Ptr));
 
@@ -2214,8 +2214,8 @@ TEST_FUNCTION(JSONDecoder_Integer_With_A_Hex_Number_Fails)
     MULTITREE_HANDLE multiTree;
     char json[] = "[FF]";
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
     EXPECTED_CALL(mocks, MultiTree_Destroy(TestMultiTreeHandle));
 
@@ -2233,10 +2233,10 @@ TEST_FUNCTION(JSONDecoder_Decoding_falseahbjkfsdhjkfhks_Fails)
     MULTITREE_HANDLE multiTree;
     char json[] = "[falseahbjkfsdhjkfhks]";
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
-    EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle1, IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle1, IGNORED_ARG));
     EXPECTED_CALL(mocks, MultiTree_Destroy(TestMultiTreeHandle));
 
     ///act
@@ -2253,10 +2253,10 @@ TEST_FUNCTION(JSONDecoder_Decoding_falsetrue_Fails)
     MULTITREE_HANDLE multiTree;
     char json[] = "[falsetrue]";
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
-    EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle1, IGNORED_PTR_ARG));
+    EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle1, IGNORED_ARG));
     EXPECTED_CALL(mocks, MultiTree_Destroy(TestMultiTreeHandle));
 
     ///act
@@ -2273,8 +2273,8 @@ void TestSpecialCharacter_Success(char* json)
     MULTITREE_HANDLE multiTree;
     void* value1Ptr = &json[1];
 
-    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_PTR_ARG))
+    EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mocks, MultiTree_AddChild(TestMultiTreeHandle, "0", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TestChildHandle1, sizeof(TestChildHandle1));
     STRICT_EXPECTED_CALL(mocks, MultiTree_SetValue(TestChildHandle1, value1Ptr));
 

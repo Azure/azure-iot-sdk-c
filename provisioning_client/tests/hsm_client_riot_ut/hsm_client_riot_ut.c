@@ -30,7 +30,7 @@ static void my_gballoc_free(void* ptr)
 #include "umock_c/umocktypes_charptr.h"
 #include "umock_c/umocktypes_stdint.h"
 #include "umock_c/umock_c_negative_tests.h"
-#include "azure_macro_utils/macro_utils.h"
+#include "macro_utils/macro_utils.h"
 
 #include "RIoT.h"
 #include "RiotCrypt.h"
@@ -462,14 +462,14 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
     {
         // Expected calls preceeded by a commented number are members of calls_cannot_fail[] array
         // These calls are skipped in negative/fail testing
-        STRICT_EXPECTED_CALL(DERInitContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG)); // 0
-        STRICT_EXPECTED_CALL(X509GetAliasCertTBS(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(RiotCrypt_Sign(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(X509MakeDeviceCert(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(DERtoPEM(IGNORED_PTR_ARG, CERT_TYPE, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(mbedtls_mpi_free(IGNORED_PTR_ARG)); // 6
-        STRICT_EXPECTED_CALL(mbedtls_mpi_free(IGNORED_PTR_ARG)); // 7
+        STRICT_EXPECTED_CALL(DERInitContext(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG)); // 0
+        STRICT_EXPECTED_CALL(X509GetAliasCertTBS(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(RiotCrypt_Sign(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(X509MakeDeviceCert(IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(DERtoPEM(IGNORED_ARG, CERT_TYPE, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(mbedtls_mpi_free(IGNORED_ARG)); // 6
+        STRICT_EXPECTED_CALL(mbedtls_mpi_free(IGNORED_ARG)); // 7
     }
 
     static void hsm_client_riot_create_mock(bool device_signed)
@@ -479,67 +479,67 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
 
         // Expected calls preceeded by a commented number are members of calls_cannot_fail[] array
         // These calls are skipped in negative/fail testing
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(RiotCrypt_Hash(IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(RiotCrypt_DeriveEccKey(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(RiotCrypt_Hash2(IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(RiotCrypt_DeriveEccKey(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(DERInitContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG)); // 5
-        STRICT_EXPECTED_CALL(X509GetDEREccPub(IGNORED_PTR_ARG, pub))
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(RiotCrypt_Hash(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(RiotCrypt_DeriveEccKey(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(RiotCrypt_Hash2(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(RiotCrypt_DeriveEccKey(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(DERInitContext(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG)); // 5
+        STRICT_EXPECTED_CALL(X509GetDEREccPub(IGNORED_ARG, pub))
             .IgnoreArgument_Pub();
-        STRICT_EXPECTED_CALL(DERtoPEM(IGNORED_PTR_ARG, PUBLICKEY_TYPE, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(DERtoPEM(IGNORED_ARG, PUBLICKEY_TYPE, IGNORED_ARG, IGNORED_ARG));
 
-        STRICT_EXPECTED_CALL(DERInitContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG)); // 8
-        STRICT_EXPECTED_CALL(X509GetDEREcc(IGNORED_PTR_ARG, pub, pri))
+        STRICT_EXPECTED_CALL(DERInitContext(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG)); // 8
+        STRICT_EXPECTED_CALL(X509GetDEREcc(IGNORED_ARG, pub, pri))
             .IgnoreArgument_Pub()
             .IgnoreArgument_Priv();
-        STRICT_EXPECTED_CALL(DERtoPEM(IGNORED_PTR_ARG, ECC_PRIVATEKEY_TYPE, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(DERtoPEM(IGNORED_ARG, ECC_PRIVATEKEY_TYPE, IGNORED_ARG, IGNORED_ARG));
 
-        STRICT_EXPECTED_CALL(DERInitContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG)); // 11
-        STRICT_EXPECTED_CALL(X509GetAliasCertTBS(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(RiotCrypt_Sign(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(X509MakeAliasCert(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(DERtoPEM(IGNORED_PTR_ARG, CERT_TYPE, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(DERInitContext(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG)); // 11
+        STRICT_EXPECTED_CALL(X509GetAliasCertTBS(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(RiotCrypt_Sign(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(X509MakeAliasCert(IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(DERtoPEM(IGNORED_ARG, CERT_TYPE, IGNORED_ARG, IGNORED_ARG));
 
         if (device_signed)
         {
-            STRICT_EXPECTED_CALL(DERInitContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG)); // 16
-            STRICT_EXPECTED_CALL(X509GetDeviceCertTBS(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-            STRICT_EXPECTED_CALL(RiotCrypt_Sign(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG));
-            STRICT_EXPECTED_CALL(X509MakeDeviceCert(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-            STRICT_EXPECTED_CALL(DERtoPEM(IGNORED_PTR_ARG, CERT_TYPE, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+            STRICT_EXPECTED_CALL(DERInitContext(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG)); // 16
+            STRICT_EXPECTED_CALL(X509GetDeviceCertTBS(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+            STRICT_EXPECTED_CALL(RiotCrypt_Sign(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+            STRICT_EXPECTED_CALL(X509MakeDeviceCert(IGNORED_ARG, IGNORED_ARG));
+            STRICT_EXPECTED_CALL(DERtoPEM(IGNORED_ARG, CERT_TYPE, IGNORED_ARG, IGNORED_ARG));
         }
         else
         {
-            STRICT_EXPECTED_CALL(DERInitContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG)); // 17
-            STRICT_EXPECTED_CALL(DERInitContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG)); // 18
+            STRICT_EXPECTED_CALL(DERInitContext(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG)); // 17
+            STRICT_EXPECTED_CALL(DERInitContext(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG)); // 18
             // Generate the CA_Root using the development key
-            STRICT_EXPECTED_CALL(mbedtls_mpi_read_binary(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG)); // 19
-            STRICT_EXPECTED_CALL(mbedtls_mpi_read_binary(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG)); // 20
-            STRICT_EXPECTED_CALL(mbedtls_mpi_lset(IGNORED_PTR_ARG, IGNORED_NUM_ARG));                         // 21
-            STRICT_EXPECTED_CALL(mbedtls_mpi_read_binary(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG)); // 22
+            STRICT_EXPECTED_CALL(mbedtls_mpi_read_binary(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG)); // 19
+            STRICT_EXPECTED_CALL(mbedtls_mpi_read_binary(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG)); // 20
+            STRICT_EXPECTED_CALL(mbedtls_mpi_lset(IGNORED_ARG, IGNORED_ARG));                         // 21
+            STRICT_EXPECTED_CALL(mbedtls_mpi_read_binary(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG)); // 22
 
-            STRICT_EXPECTED_CALL(X509GetRootCertTBS(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-            STRICT_EXPECTED_CALL(RiotCrypt_Sign(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(X509GetRootCertTBS(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+            STRICT_EXPECTED_CALL(RiotCrypt_Sign(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
 
-            STRICT_EXPECTED_CALL(X509MakeRootCert(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-            STRICT_EXPECTED_CALL(DERtoPEM(IGNORED_PTR_ARG, CERT_TYPE, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-            STRICT_EXPECTED_CALL(X509GetDEREcc(IGNORED_PTR_ARG, pub, pri))
+            STRICT_EXPECTED_CALL(X509MakeRootCert(IGNORED_ARG, IGNORED_ARG));
+            STRICT_EXPECTED_CALL(DERtoPEM(IGNORED_ARG, CERT_TYPE, IGNORED_ARG, IGNORED_ARG));
+            STRICT_EXPECTED_CALL(X509GetDEREcc(IGNORED_ARG, pub, pri))
                 .IgnoreArgument_Pub()
                 .IgnoreArgument_Priv();
-            STRICT_EXPECTED_CALL(DERtoPEM(IGNORED_PTR_ARG, ECC_PRIVATEKEY_TYPE, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+            STRICT_EXPECTED_CALL(DERtoPEM(IGNORED_ARG, ECC_PRIVATEKEY_TYPE, IGNORED_ARG, IGNORED_ARG));
         }
 
         // Produce root-signed device cert
-        STRICT_EXPECTED_CALL(DERInitContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG)); // 28
-        STRICT_EXPECTED_CALL(X509GetDeviceCertTBS(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(RiotCrypt_Sign(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(X509MakeDeviceCert(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(DERtoPEM(IGNORED_PTR_ARG, CERT_TYPE, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(DERInitContext(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG)); // 28
+        STRICT_EXPECTED_CALL(X509GetDeviceCertTBS(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(RiotCrypt_Sign(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(X509MakeDeviceCert(IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(DERtoPEM(IGNORED_ARG, CERT_TYPE, IGNORED_ARG, IGNORED_ARG));
 
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(mbedtls_mpi_free(IGNORED_PTR_ARG)); // 34
-        STRICT_EXPECTED_CALL(mbedtls_mpi_free(IGNORED_PTR_ARG)); // 35
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(mbedtls_mpi_free(IGNORED_ARG)); // 34
+        STRICT_EXPECTED_CALL(mbedtls_mpi_free(IGNORED_ARG)); // 35
     }
 
     TEST_FUNCTION(hsm_client_riot_create_succeed)
@@ -612,16 +612,16 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
         HSM_CLIENT_HANDLE sec_handle = hsm_client_riot_create();
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
-        STRICT_EXPECTED_CALL(mbedtls_ecp_point_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(mbedtls_mpi_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(mbedtls_ecp_point_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(mbedtls_mpi_free(IGNORED_ARG));
 
-        STRICT_EXPECTED_CALL(mbedtls_ecp_point_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(mbedtls_mpi_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(mbedtls_ecp_point_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(mbedtls_mpi_free(IGNORED_ARG));
 
-        STRICT_EXPECTED_CALL(mbedtls_ecp_point_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(mbedtls_mpi_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(mbedtls_ecp_point_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(mbedtls_mpi_free(IGNORED_ARG));
 
         STRICT_EXPECTED_CALL(gballoc_free(sec_handle));
 
@@ -670,7 +670,7 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
         HSM_CLIENT_HANDLE sec_handle = hsm_client_riot_create();
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)).SetReturn(NULL);
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG)).SetReturn(NULL);
 
         //act
         char* value = hsm_client_riot_get_certificate(sec_handle);
@@ -690,7 +690,7 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
         HSM_CLIENT_HANDLE sec_handle = hsm_client_riot_create();
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
 
         //act
         char* value = hsm_client_riot_get_certificate(sec_handle);
@@ -726,7 +726,7 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
         HSM_CLIENT_HANDLE sec_handle = hsm_client_riot_create();
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)).SetReturn(NULL);
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG)).SetReturn(NULL);
 
         //act
         char* value = hsm_client_riot_get_alias_key(sec_handle);
@@ -746,7 +746,7 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
         HSM_CLIENT_HANDLE sec_handle = hsm_client_riot_create();
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
 
         //act
         char* value = hsm_client_riot_get_alias_key(sec_handle);
@@ -783,7 +783,7 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
         HSM_CLIENT_HANDLE sec_handle = hsm_client_riot_create();
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)).SetReturn(NULL);
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG)).SetReturn(NULL);
 
         //act
         char* value = hsm_client_riot_get_signer_cert(sec_handle);
@@ -803,7 +803,7 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
         HSM_CLIENT_HANDLE sec_handle = hsm_client_riot_create();
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
 
         //act
         char* value = hsm_client_riot_get_signer_cert(sec_handle);
@@ -840,7 +840,7 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
         HSM_CLIENT_HANDLE sec_handle = hsm_client_riot_create();
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
 
         //act
         char* value = hsm_client_riot_get_root_cert(sec_handle);
@@ -877,7 +877,7 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
         HSM_CLIENT_HANDLE sec_handle = hsm_client_riot_create();
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(1);
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG)).SetReturn(1);
 
         //act
         char* value = hsm_client_riot_get_common_name(sec_handle);
@@ -897,7 +897,7 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
         HSM_CLIENT_HANDLE sec_handle = hsm_client_riot_create();
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
 
         //act
         char* value = hsm_client_riot_get_common_name(sec_handle);

@@ -20,7 +20,7 @@ static void real_free(void* ptr)
 }
 
 #include "testrunnerswitcher.h"
-#include "azure_macro_utils/macro_utils.h"
+#include "macro_utils/macro_utils.h"
 #include "umock_c/umock_c.h"
 #include "umock_c/umock_c_negative_tests.h"
 
@@ -209,30 +209,30 @@ static void expected_calls_x509CertificateInfo_free(bool is_processed)
 {
     if (is_processed)
     {
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
     }
 }
 
 static void expected_calls_x509CAReferences_free(bool has_secondary_ref)
 {
     (void)has_secondary_ref;
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 }
 
 static void expected_calls_x509CertificateWithInfo_free(bool is_processed)
 {
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
     expected_calls_x509CertificateInfo_free(is_processed);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 }
 
 static void expected_calls_x509Certificates_free(bool has_secondary_cert, bool is_processed)
@@ -242,7 +242,7 @@ static void expected_calls_x509Certificates_free(bool has_secondary_cert, bool i
     {
         expected_calls_x509CertificateWithInfo_free(is_processed);
     }
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 }
 
 static void expected_calls_x509Attestation_destroy(X509_CERTIFICATE_TYPE cert_type, bool has_secondary_cert, bool is_processed)
@@ -255,31 +255,31 @@ static void expected_calls_x509Attestation_destroy(X509_CERTIFICATE_TYPE cert_ty
     {
         expected_calls_x509CAReferences_free(has_secondary_cert);
     }
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 }
 
 static void expected_calls_x509CAReferences_create(const char* primary_ref, const char* secondary_ref)
 {
     (void)primary_ref;
     (void)secondary_ref;
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
     if (secondary_ref != NULL)
     {
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
     }
 }
 
 static void expected_calls_x509CertificateWithInfo_create(const char* cert)
 {
     (void)cert;
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
 }
 
 static void expected_calls_x509Certificates_create(const char* primary_cert, const char* secondary_cert)
 {
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
     expected_calls_x509CertificateWithInfo_create(primary_cert);
     if (secondary_cert != NULL)
     {
@@ -289,10 +289,10 @@ static void expected_calls_x509Certificates_create(const char* primary_cert, con
 
 static void expected_calls_convert_cert_to_b64(const char* in, const char* out)
 {
-    STRICT_EXPECTED_CALL(Azure_Base64_Encode_Bytes((const unsigned char*)in, IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(out);
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Azure_Base64_Encode_Bytes((const unsigned char*)in, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).SetReturn(out);
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
 }
 
 static void expected_calls_x509Attestation_create(X509_CERTIFICATE_TYPE cert_type, const char* primary_cert, const char* secondary_cert)
@@ -304,7 +304,7 @@ static void expected_calls_x509Attestation_create(X509_CERTIFICATE_TYPE cert_typ
         expected_calls_convert_cert_to_b64(secondary_cert, DUMMY_CERT2_64);
         secondary_cert = DUMMY_CERT2_64;
     }
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
     if (cert_type == X509_CERTIFICATE_TYPE_CLIENT || cert_type == X509_CERTIFICATE_TYPE_SIGNING)
     {
         expected_calls_x509Certificates_create(primary_cert, secondary_cert);
@@ -313,108 +313,108 @@ static void expected_calls_x509Attestation_create(X509_CERTIFICATE_TYPE cert_typ
     {
         expected_calls_x509CAReferences_create(primary_cert, secondary_cert);
     }
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 }
 
 static void expected_calls_x509CertificateInfo_fromJson() //7 - 27
 {
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(DUMMY_SUBJECT_NAME); //can't fail for test purpose
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(DUMMY_SHA1_THUMBPRINT); //can't fail for test purpose
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(DUMMY_SHA256_THUMBPRINT); //can't fail for test purpose
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(DUMMY_ISSUER_NAME); //can't fail for test purpose
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(DUMMY_NOT_BEFORE_UTC); //can't fail for test purpose
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(DUMMY_NOT_AFTER_UTC); //can't fail for test purpose
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(DUMMY_SERIAL_NUMBER); //can't fail for test purpose
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_object_get_number(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(DUMMY_VERSION); //can't fail for test purpose
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_ARG, IGNORED_ARG)).SetReturn(DUMMY_SUBJECT_NAME); //can't fail for test purpose
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_ARG, IGNORED_ARG)).SetReturn(DUMMY_SHA1_THUMBPRINT); //can't fail for test purpose
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_ARG, IGNORED_ARG)).SetReturn(DUMMY_SHA256_THUMBPRINT); //can't fail for test purpose
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_ARG, IGNORED_ARG)).SetReturn(DUMMY_ISSUER_NAME); //can't fail for test purpose
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_ARG, IGNORED_ARG)).SetReturn(DUMMY_NOT_BEFORE_UTC); //can't fail for test purpose
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_ARG, IGNORED_ARG)).SetReturn(DUMMY_NOT_AFTER_UTC); //can't fail for test purpose
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_ARG, IGNORED_ARG)).SetReturn(DUMMY_SERIAL_NUMBER); //can't fail for test purpose
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_object_get_number(IGNORED_ARG, IGNORED_ARG)).SetReturn(DUMMY_VERSION); //can't fail for test purpose
 } //23 - 43
 
 static void expected_calls_x509CertificateWithInfo_fromJson()
 {
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(NULL); //this shouldn't ever successfully return - certs are only sent, not received
-    STRICT_EXPECTED_CALL(json_object_get_object(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_ARG, IGNORED_ARG)).SetReturn(NULL); //this shouldn't ever successfully return - certs are only sent, not received
+    STRICT_EXPECTED_CALL(json_object_get_object(IGNORED_ARG, IGNORED_ARG));
     expected_calls_x509CertificateInfo_fromJson();
 }
 
 static void expected_calls_x509Certificates_fromJson(bool has_secondary)
 {
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
 
     //first cert
-    STRICT_EXPECTED_CALL(json_object_get_object(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(json_object_get_object(IGNORED_ARG, IGNORED_ARG));
     expected_calls_x509CertificateWithInfo_fromJson();
 
     //secondary cert
     if (has_secondary)
     {
-        STRICT_EXPECTED_CALL(json_object_get_object(IGNORED_PTR_ARG, IGNORED_PTR_ARG)); //optional so can't "fail"
+        STRICT_EXPECTED_CALL(json_object_get_object(IGNORED_ARG, IGNORED_ARG)); //optional so can't "fail"
         expected_calls_x509CertificateWithInfo_fromJson();
     }
     else
     {
-        STRICT_EXPECTED_CALL(json_object_get_object(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(NULL); //optional so can't "fail"
+        STRICT_EXPECTED_CALL(json_object_get_object(IGNORED_ARG, IGNORED_ARG)).SetReturn(NULL); //optional so can't "fail"
     }
 }
 
 static void expected_calls_x509CAReferences_fromJson(bool has_secondary)
 {
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(DUMMY_REF1); //cannot "fail"
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_ARG, IGNORED_ARG)).SetReturn(DUMMY_REF1); //cannot "fail"
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
 
     if (has_secondary)
     {
-        STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(DUMMY_REF2); //cannot "fail"
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_ARG, IGNORED_ARG)).SetReturn(DUMMY_REF2); //cannot "fail"
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
     }
     else
     {
-        STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(NULL); //cannot "fail"
+        STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_ARG, IGNORED_ARG)).SetReturn(NULL); //cannot "fail"
     }
 }
 
 static void expected_calls_x509Attestation_fromJson(X509_CERTIFICATE_TYPE cert_type, bool has_secondary)
 {
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
 
     if (cert_type == X509_CERTIFICATE_TYPE_CLIENT)
     {
-        STRICT_EXPECTED_CALL(json_object_has_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(true); //cannot "fail"
-        STRICT_EXPECTED_CALL(json_object_get_object(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(json_object_has_value(IGNORED_ARG, IGNORED_ARG)).SetReturn(true); //cannot "fail"
+        STRICT_EXPECTED_CALL(json_object_get_object(IGNORED_ARG, IGNORED_ARG));
         expected_calls_x509Certificates_fromJson(has_secondary);
     }
     else
     {
-        STRICT_EXPECTED_CALL(json_object_has_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(false); //cannot "fail"
+        STRICT_EXPECTED_CALL(json_object_has_value(IGNORED_ARG, IGNORED_ARG)).SetReturn(false); //cannot "fail"
 
         if (cert_type == X509_CERTIFICATE_TYPE_SIGNING)
         {
-            STRICT_EXPECTED_CALL(json_object_has_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(true); //cannot "fail"
-            STRICT_EXPECTED_CALL(json_object_get_object(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(json_object_has_value(IGNORED_ARG, IGNORED_ARG)).SetReturn(true); //cannot "fail"
+            STRICT_EXPECTED_CALL(json_object_get_object(IGNORED_ARG, IGNORED_ARG));
             expected_calls_x509Certificates_fromJson(has_secondary);
         }
         else
         {
-            STRICT_EXPECTED_CALL(json_object_has_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(false); //cannot "fail"
+            STRICT_EXPECTED_CALL(json_object_has_value(IGNORED_ARG, IGNORED_ARG)).SetReturn(false); //cannot "fail"
 
             if (cert_type == X509_CERTIFICATE_TYPE_CA_REFERENCES)
             {
-                STRICT_EXPECTED_CALL(json_object_has_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(true); //cannot "fail"
-                STRICT_EXPECTED_CALL(json_object_get_object(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+                STRICT_EXPECTED_CALL(json_object_has_value(IGNORED_ARG, IGNORED_ARG)).SetReturn(true); //cannot "fail"
+                STRICT_EXPECTED_CALL(json_object_get_object(IGNORED_ARG, IGNORED_ARG));
                 expected_calls_x509CAReferences_fromJson(has_secondary);
             }
             else
             {
-                STRICT_EXPECTED_CALL(json_object_has_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(false);
+                STRICT_EXPECTED_CALL(json_object_has_value(IGNORED_ARG, IGNORED_ARG)).SetReturn(false);
                 //x509Attestation_destroy handle this later
             }
         }
@@ -424,63 +424,63 @@ static void expected_calls_x509Attestation_fromJson(X509_CERTIFICATE_TYPE cert_t
 static void expected_calls_x509CAReferences_toJson(bool has_secondary)
 {
     STRICT_EXPECTED_CALL(json_value_init_object());
-    STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
     if (has_secondary)
     {
-        STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
     }
 }
 
 static void expected_calls_x509CertificateInfo_toJson()
 {
     STRICT_EXPECTED_CALL(json_value_init_object());
-    STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_object_set_number(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_object_set_number(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
 }
 
 static void expected_calls_x509CertificateWithInfo_toJson(bool is_processed)
 {
     STRICT_EXPECTED_CALL(json_value_init_object());
-    STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_ARG));
 
     if (is_processed)
     {
         expected_calls_x509CertificateInfo_toJson();
-        STRICT_EXPECTED_CALL(json_object_set_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(json_object_set_value(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
     }
     else
     {
-        STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
     }
 }
 
 static void expected_calls_x509Certificates_toJson(bool has_secondary, bool is_processed)
 {
     STRICT_EXPECTED_CALL(json_value_init_object());
-    STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_ARG));
     expected_calls_x509CertificateWithInfo_toJson(is_processed);
-    STRICT_EXPECTED_CALL(json_object_set_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(json_object_set_value(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
 
     if (has_secondary)
     {
         expected_calls_x509CertificateWithInfo_toJson(is_processed);
-        STRICT_EXPECTED_CALL(json_object_set_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(json_object_set_value(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
     }
 }
 
 static void expected_calls_x509Attestation_toJson(X509_CERTIFICATE_TYPE cert_type, bool has_secondary, bool is_processed)
 {
     STRICT_EXPECTED_CALL(json_value_init_object());
-    STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_ARG));
 
     if (cert_type == X509_CERTIFICATE_TYPE_CLIENT || cert_type == X509_CERTIFICATE_TYPE_SIGNING)
     {
@@ -491,7 +491,7 @@ static void expected_calls_x509Attestation_toJson(X509_CERTIFICATE_TYPE cert_typ
         expected_calls_x509CAReferences_toJson(has_secondary);
     }
 
-    STRICT_EXPECTED_CALL(json_object_set_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(json_object_set_value(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
 }
 
 static X509_ATTESTATION_HANDLE create_dummy_processed_attestation(X509_CERTIFICATE_TYPE cert_type, bool has_secondary_cert)

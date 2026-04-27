@@ -21,7 +21,7 @@ static void my_gballoc_free(void* ptr)
 #include "umock_c/umock_c.h"
 #include "umock_c/umocktypes_charptr.h"
 #include "umock_c/umock_c_negative_tests.h"
-#include "azure_macro_utils/macro_utils.h"
+#include "macro_utils/macro_utils.h"
 
 #define ENABLE_MOCKS
 #include "azure_c_shared_utility/gballoc.h"
@@ -344,29 +344,27 @@ BEGIN_TEST_SUITE(device_auth_emulator_ut)
     static void setup_dev_auth_emulator_get_endorsement_key_mocks(void)
     {
         STRICT_EXPECTED_CALL(BIO_s_mem());
-        STRICT_EXPECTED_CALL(BIO_new(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(BIO_new(IGNORED_ARG))
             .IgnoreArgument_type();
-        STRICT_EXPECTED_CALL(PEM_write_bio_RSA_PUBKEY(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(PEM_write_bio_RSA_PUBKEY(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_bp()
             .IgnoreArgument_x();
-        STRICT_EXPECTED_CALL(BIO_ctrl(IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG))
-            .IgnoreAllArguments();
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(BIO_ctrl(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
             .IgnoreArgument_size();
-        STRICT_EXPECTED_CALL(BIO_read(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG))
-            .IgnoreAllArguments();
-        STRICT_EXPECTED_CALL(BIO_free_all(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(BIO_read(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(BIO_free_all(IGNORED_ARG))
             .IgnoreArgument_bio();
     }
 
     static void setup_dev_auth_emulator_retrieve_data_mocks(void)
     {
-        STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_ARG))
             .IgnoreArgument_handle()
             .SetReturn(TEST_DATA_LEN);
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
             .IgnoreArgument_size();
-        STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG))
             .IgnoreArgument_handle()
             .SetReturn(TEST_DATA);
     }
@@ -374,27 +372,27 @@ BEGIN_TEST_SUITE(device_auth_emulator_ut)
     static void setup_dev_auth_emulator_generate_credentials_mocks(const char* token_scope)
     {
         STRICT_EXPECTED_CALL(STRING_new());
-        STRICT_EXPECTED_CALL(get_time(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(get_time(IGNORED_ARG));
         STRICT_EXPECTED_CALL(STRING_construct(token_scope));
-        STRICT_EXPECTED_CALL(STRING_construct(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_construct(IGNORED_ARG))
             .IgnoreArgument_psz();
-        STRICT_EXPECTED_CALL(SASToken_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(SASToken_Create(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_scope()
             .IgnoreArgument_keyName()
             .IgnoreArgument_expiry()
             .IgnoreArgument_key();
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
             .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_destination()
             .IgnoreArgument_source();
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument_handle();
     }
 
@@ -407,69 +405,67 @@ BEGIN_TEST_SUITE(device_auth_emulator_ut)
     {
         if (json_file_found)
         {
-            STRICT_EXPECTED_CALL(json_parse_file(IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL(json_parse_file(IGNORED_ARG))
                 .IgnoreArgument_string();
-            STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_ARG))
                 .IgnoreArgument_value();
-            STRICT_EXPECTED_CALL(json_object_get_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL(json_object_get_value(IGNORED_ARG, IGNORED_ARG))
                 .IgnoreArgument_name()
                 .IgnoreArgument_object();
-            STRICT_EXPECTED_CALL(json_object_get_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL(json_object_get_value(IGNORED_ARG, IGNORED_ARG))
                 .IgnoreArgument_name()
                 .IgnoreArgument_object();
-            STRICT_EXPECTED_CALL(json_object_get_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL(json_object_get_value(IGNORED_ARG, IGNORED_ARG))
                 .IgnoreArgument_name()
                 .IgnoreArgument_object();
-            STRICT_EXPECTED_CALL(json_object_get_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL(json_object_get_value(IGNORED_ARG, IGNORED_ARG))
                 .IgnoreArgument_name()
                 .IgnoreArgument_object();
-            STRICT_EXPECTED_CALL(json_value_get_string(IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL(json_value_get_string(IGNORED_ARG))
                 .IgnoreArgument_value();
-            STRICT_EXPECTED_CALL(Azure_Base64_Decode(IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL(Azure_Base64_Decode(IGNORED_ARG))
                 .IgnoreArgument_source();
-            STRICT_EXPECTED_CALL(json_value_get_string(IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL(json_value_get_string(IGNORED_ARG))
                 .IgnoreArgument_value();
-            STRICT_EXPECTED_CALL(Azure_Base64_Decode(IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL(Azure_Base64_Decode(IGNORED_ARG))
                 .IgnoreArgument_source();
-            STRICT_EXPECTED_CALL(json_value_get_string(IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL(json_value_get_string(IGNORED_ARG))
                 .IgnoreArgument_value();
-            STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG))
                 .IgnoreArgument_destination()
                 .IgnoreArgument_source();
-            STRICT_EXPECTED_CALL(json_value_get_string(IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL(json_value_get_string(IGNORED_ARG))
                 .IgnoreArgument_value();
-            STRICT_EXPECTED_CALL(Azure_Base64_Decode(IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL(Azure_Base64_Decode(IGNORED_ARG))
                 .IgnoreArgument_source();
 
-            STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG))
                 .IgnoreArgument_handle();
-            STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_ARG))
                 .IgnoreArgument_handle();
-            STRICT_EXPECTED_CALL(BIO_new_mem_buf(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+            STRICT_EXPECTED_CALL(BIO_new_mem_buf(IGNORED_ARG, IGNORED_ARG))
                 .IgnoreArgument_buf()
                 .IgnoreArgument_len();
-            STRICT_EXPECTED_CALL(PEM_read_bio_RSA_PUBKEY(IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG))
-                .IgnoreAllArguments();
+            STRICT_EXPECTED_CALL(PEM_read_bio_RSA_PUBKEY(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
 
-            STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG))
                 .IgnoreArgument_handle();
-            STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_ARG))
                 .IgnoreArgument_handle();
-            STRICT_EXPECTED_CALL(BIO_new_mem_buf(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+            STRICT_EXPECTED_CALL(BIO_new_mem_buf(IGNORED_ARG, IGNORED_ARG))
                 .IgnoreArgument_buf()
                 .IgnoreArgument_len();
-            STRICT_EXPECTED_CALL(PEM_read_bio_RSAPrivateKey(IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG))
-                .IgnoreAllArguments();
+            STRICT_EXPECTED_CALL(PEM_read_bio_RSAPrivateKey(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
 
-            STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
                 .IgnoreArgument_handle();
-            STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
                 .IgnoreArgument_handle();
 
         }
         else
         {
-            STRICT_EXPECTED_CALL(json_parse_file(IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL(json_parse_file(IGNORED_ARG))
                 .IgnoreArgument_string()
                 .SetReturn(NULL);
         }
@@ -478,25 +474,25 @@ BEGIN_TEST_SUITE(device_auth_emulator_ut)
     static void setup_generate_key_mocks(void)
     {
         STRICT_EXPECTED_CALL(BN_new());
-        STRICT_EXPECTED_CALL(BN_set_word(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(BN_set_word(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_a()
             .IgnoreArgument_w();
         STRICT_EXPECTED_CALL(RSA_new());
-        STRICT_EXPECTED_CALL(RSA_generate_key_ex(IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(RSA_generate_key_ex(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_rsa()
             .IgnoreArgument_bits()
             .IgnoreArgument_e()
             .IgnoreArgument_cb();
         STRICT_EXPECTED_CALL(BIO_s_mem());
-        STRICT_EXPECTED_CALL(BIO_new(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(BIO_new(IGNORED_ARG))
             .IgnoreArgument_type();
         STRICT_EXPECTED_CALL(BIO_s_mem());
-        STRICT_EXPECTED_CALL(BIO_new(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(BIO_new(IGNORED_ARG))
             .IgnoreArgument_type();
-        STRICT_EXPECTED_CALL(PEM_write_bio_RSA_PUBKEY(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(PEM_write_bio_RSA_PUBKEY(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_bp()
             .IgnoreArgument_x();
-        STRICT_EXPECTED_CALL(PEM_write_bio_RSAPrivateKey(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(PEM_write_bio_RSAPrivateKey(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_bp()
             .IgnoreArgument_x()
             .IgnoreArgument_enc()
@@ -504,17 +500,17 @@ BEGIN_TEST_SUITE(device_auth_emulator_ut)
             .IgnoreArgument_klen()
             .IgnoreArgument_cb()
             .IgnoreArgument_u();
-        STRICT_EXPECTED_CALL(RSA_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(RSA_free(IGNORED_ARG))
             .IgnoreArgument_rsa_value();
-        STRICT_EXPECTED_CALL(BN_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(BN_free(IGNORED_ARG))
             .IgnoreArgument_bne();
     }
 
     static void setup_dev_auth_emulator_create_mocks(bool use_persist_file)
     {
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
             .IgnoreArgument_size();
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
             .IgnoreArgument_handle();
 
         if (use_persist_file)
@@ -528,7 +524,7 @@ BEGIN_TEST_SUITE(device_auth_emulator_ut)
             setup_persisted_keys_info_mocks();
         }
 
-        STRICT_EXPECTED_CALL(json_value_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(json_value_free(IGNORED_ARG))
             .IgnoreArgument_value();
     }
 
@@ -619,21 +615,21 @@ BEGIN_TEST_SUITE(device_auth_emulator_ut)
         CONCRETE_XDA_HANDLE handle = dev_auth_emulator_create(&test_security_info);
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
             .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(BIO_free_all(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(BIO_free_all(IGNORED_ARG))
             .IgnoreArgument_bio();
-        STRICT_EXPECTED_CALL(BIO_free_all(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(BIO_free_all(IGNORED_ARG))
             .IgnoreArgument_bio();
-        STRICT_EXPECTED_CALL(RSA_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(RSA_free(IGNORED_ARG))
             .IgnoreArgument_rsa_value();
-        STRICT_EXPECTED_CALL(RSA_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(RSA_free(IGNORED_ARG))
             .IgnoreArgument_rsa_value();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument_ptr();
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument_ptr();
 
         //act
@@ -900,9 +896,9 @@ BEGIN_TEST_SUITE(device_auth_emulator_ut)
         CONCRETE_XDA_HANDLE handle = dev_auth_emulator_create(&test_security_info);
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(BUFFER_unbuild(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(BUFFER_unbuild(IGNORED_ARG))
             .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(BUFFER_build(IGNORED_PTR_ARG, TEST_DATA, TEST_DATA_LEN))
+        STRICT_EXPECTED_CALL(BUFFER_build(IGNORED_ARG, TEST_DATA, TEST_DATA_LEN))
             .IgnoreArgument_handle();
 
         //act
@@ -923,8 +919,8 @@ BEGIN_TEST_SUITE(device_auth_emulator_ut)
         int result = dev_auth_emulator_store_data(handle, TEST_DATA, TEST_DATA_LEN);
         umock_c_reset_all_calls();
 
-        EXPECTED_CALL(BUFFER_unbuild(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(BUFFER_build(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+        EXPECTED_CALL(BUFFER_unbuild(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(BUFFER_build(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_handle()
             .IgnoreArgument_source()
             .IgnoreArgument_size();
@@ -949,8 +945,8 @@ BEGIN_TEST_SUITE(device_auth_emulator_ut)
         int negativeTestsInitResult = umock_c_negative_tests_init();
         ASSERT_ARE_EQUAL(int, 0, negativeTestsInitResult);
 
-        EXPECTED_CALL(BUFFER_unbuild(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(BUFFER_build(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+        EXPECTED_CALL(BUFFER_unbuild(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(BUFFER_build(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_handle()
             .IgnoreArgument_source()
             .IgnoreArgument_size();
@@ -1039,11 +1035,11 @@ BEGIN_TEST_SUITE(device_auth_emulator_ut)
     TEST_FUNCTION(dev_auth_emulator_retrieve_data_no_data_success)
     {
         //arrange
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
             .IgnoreArgument_size();
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
             .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(json_parse_file(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(json_parse_file(IGNORED_ARG))
             .IgnoreArgument_string()
             .SetReturn(NULL);
         CONCRETE_XDA_HANDLE handle = dev_auth_emulator_create(&test_security_info);

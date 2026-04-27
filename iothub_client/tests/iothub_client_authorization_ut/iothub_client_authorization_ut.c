@@ -24,7 +24,7 @@ static void my_gballoc_free(void* ptr)
 #include "umock_c/umocktypes_charptr.h"
 #include "umock_c/umocktypes_stdint.h"
 #include "umock_c/umock_c_negative_tests.h"
-#include "azure_macro_utils/macro_utils.h"
+#include "macro_utils/macro_utils.h"
 
 #define ENABLE_MOCKS
 #include "azure_c_shared_utility/gballoc.h"
@@ -216,14 +216,14 @@ TEST_FUNCTION_CLEANUP(method_cleanup)
 #ifdef USE_PROV_MODULE
 static void setup_IoTHubClient_Auth_CreateFromDeviceAuth_mocks(bool module_id, DEVICE_AUTH_TYPE auth_type)
 {
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, DEVICE_ID));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, DEVICE_ID));
     if (module_id)
     {
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, MODULE_ID));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, MODULE_ID));
     }
     STRICT_EXPECTED_CALL(iothub_device_auth_create());
-    STRICT_EXPECTED_CALL(iothub_device_auth_get_type(IGNORED_PTR_ARG)).SetReturn(auth_type);
+    STRICT_EXPECTED_CALL(iothub_device_auth_get_type(IGNORED_ARG)).SetReturn(auth_type);
 }
 #endif
 
@@ -231,38 +231,38 @@ static void setup_IoTHubClient_Auth_Create_mocks(bool device_key, bool module_id
 {
     if (device_key)
     {
-        STRICT_EXPECTED_CALL(Azure_Base64_Decode(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(Azure_Base64_Decode(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG));
     }
 
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, DEVICE_ID));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, DEVICE_ID));
     if (module_id)
     {
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, MODULE_ID));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, MODULE_ID));
     }
     if (device_key)
     {
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, DEVICE_KEY));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, DEVICE_KEY));
     }
 }
 
 static void setup_IoTHubClient_Auth_Get_ConnString_mocks()
 {
     STRICT_EXPECTED_CALL(get_time(NULL));
-    STRICT_EXPECTED_CALL(get_difftime(IGNORED_NUM_ARG, IGNORED_NUM_ARG)).CallCannotFail();
-    STRICT_EXPECTED_CALL(SASToken_CreateString(IGNORED_PTR_ARG, SCOPE_NAME, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(get_difftime(IGNORED_ARG, IGNORED_ARG)).CallCannotFail();
+    STRICT_EXPECTED_CALL(SASToken_CreateString(IGNORED_ARG, SCOPE_NAME, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).CallCannotFail();
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
 }
 
 TEST_FUNCTION(IoTHubClient_Auth_Create_id_NULL_succeed)
 {
     //arrange
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(Azure_Base64_Decode(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Azure_Base64_Decode(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG));
 
     //act
     IOTHUB_AUTHORIZATION_HANDLE handle = IoTHubClient_Auth_Create(DEVICE_KEY, NULL, NULL, NULL);
@@ -296,8 +296,8 @@ TEST_FUNCTION(IoTHubClient_Auth_Create_unknown_status_succeed)
     //arrange
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, DEVICE_ID));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, DEVICE_ID));
 
     //act
     IOTHUB_AUTHORIZATION_HANDLE handle = IoTHubClient_Auth_Create(NULL, DEVICE_ID, NULL, NULL);
@@ -355,9 +355,9 @@ TEST_FUNCTION(IoTHubClient_Auth_Create_with_sas_succeed)
     //arrange
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, DEVICE_ID));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_SAS_TOKEN));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, DEVICE_ID));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_SAS_TOKEN));
 
     //act
     IOTHUB_AUTHORIZATION_HANDLE handle = IoTHubClient_Auth_Create(NULL, DEVICE_ID, TEST_SAS_TOKEN, NULL);
@@ -495,13 +495,13 @@ TEST_FUNCTION(IoTHubClient_Auth_Destroy_succeed)
     umock_c_reset_all_calls();
 
 #ifdef USE_PROV_MODULE
-    STRICT_EXPECTED_CALL(iothub_device_auth_destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(iothub_device_auth_destroy(IGNORED_ARG));
 #endif
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
     //act
     IoTHubClient_Auth_Destroy(handle);
@@ -666,10 +666,10 @@ TEST_FUNCTION(IoTHubClient_Auth_Get_x509_info_fails)
     int negativeTestsInitResult = umock_c_negative_tests_init();
     ASSERT_ARE_EQUAL(int, 0, negativeTestsInitResult);
 
-    STRICT_EXPECTED_CALL(iothub_device_auth_generate_credentials(IGNORED_PTR_ARG, NULL));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(iothub_device_auth_generate_credentials(IGNORED_ARG, NULL));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
     umock_c_negative_tests_snapshot();
 
@@ -701,10 +701,10 @@ TEST_FUNCTION(IoTHubClient_Auth_Get_x509_info_success)
     IOTHUB_AUTHORIZATION_HANDLE handle = IoTHubClient_Auth_CreateFromDeviceAuth(DEVICE_ID, NULL);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(iothub_device_auth_generate_credentials(IGNORED_PTR_ARG, NULL));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(iothub_device_auth_generate_credentials(IGNORED_ARG, NULL));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
     //act
     int result = IoTHubClient_Auth_Get_x509_info(handle, &x509_cert, &x509_key);
@@ -781,12 +781,12 @@ TEST_FUNCTION(IoTHubClient_Auth_Get_ConnString_device_auth_succeed)
     IOTHUB_AUTHORIZATION_HANDLE handle = IoTHubClient_Auth_CreateFromDeviceAuth(DEVICE_ID, NULL);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(get_time(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(get_difftime(IGNORED_NUM_ARG, IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(get_time(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(get_difftime(IGNORED_ARG, IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(iothub_device_auth_generate_credentials(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(iothub_device_auth_generate_credentials(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
     //act
     char* conn_string = IoTHubClient_Auth_Get_SasToken(handle, SCOPE_NAME, TEST_EXPIRY_TIME, NULL);
@@ -807,11 +807,11 @@ TEST_FUNCTION(IoTHubClient_Auth_Get_ConnString_device_auth_large_timeout_succeed
     IoTHubClient_Auth_Set_SasToken_Expiry(handle, UINT64_MAX - TEST_CURRENT_TIME);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(get_time(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(get_difftime(IGNORED_NUM_ARG, IGNORED_NUM_ARG)).SetReturn((double)TEST_CURRENT_TIME).CallCannotFail();
-    STRICT_EXPECTED_CALL(iothub_device_auth_generate_credentials(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(get_time(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(get_difftime(IGNORED_ARG, IGNORED_ARG)).SetReturn((double)TEST_CURRENT_TIME).CallCannotFail();
+    STRICT_EXPECTED_CALL(iothub_device_auth_generate_credentials(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
     //act
     char* conn_string = IoTHubClient_Auth_Get_SasToken(handle, SCOPE_NAME, UINT64_MAX - TEST_CURRENT_TIME, TEST_EXPIRY_TIME_KEYNAME_VALUE);
@@ -832,11 +832,11 @@ TEST_FUNCTION(IoTHubClient_Auth_Get_ConnString_device_auth_max_timeout_succeed)
     IoTHubClient_Auth_Set_SasToken_Expiry(handle, UINT64_MAX);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(get_time(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(get_difftime(IGNORED_NUM_ARG, IGNORED_NUM_ARG)).SetReturn((double)TEST_CURRENT_TIME).CallCannotFail();
-    STRICT_EXPECTED_CALL(iothub_device_auth_generate_credentials(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(get_time(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(get_difftime(IGNORED_ARG, IGNORED_ARG)).SetReturn((double)TEST_CURRENT_TIME).CallCannotFail();
+    STRICT_EXPECTED_CALL(iothub_device_auth_generate_credentials(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
     //act
     char* conn_string = IoTHubClient_Auth_Get_SasToken(handle, SCOPE_NAME, UINT64_MAX, TEST_EXPIRY_TIME_KEYNAME_VALUE);
@@ -879,11 +879,11 @@ TEST_FUNCTION(IoTHubClient_Auth_Get_ConnString_large_timeout_succeed)
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(get_time(NULL));
-    STRICT_EXPECTED_CALL(get_difftime(IGNORED_NUM_ARG, IGNORED_NUM_ARG)).SetReturn((double)TEST_CURRENT_TIME).CallCannotFail();
-    STRICT_EXPECTED_CALL(SASToken_CreateString(IGNORED_PTR_ARG, SCOPE_NAME, IGNORED_PTR_ARG, UINT64_MAX));
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(get_difftime(IGNORED_ARG, IGNORED_ARG)).SetReturn((double)TEST_CURRENT_TIME).CallCannotFail();
+    STRICT_EXPECTED_CALL(SASToken_CreateString(IGNORED_ARG, SCOPE_NAME, IGNORED_ARG, UINT64_MAX));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).CallCannotFail();
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
     
     //act
     char* conn_string = IoTHubClient_Auth_Get_SasToken(handle, SCOPE_NAME, TEST_EXPIRY_TIME, NULL);
@@ -905,11 +905,11 @@ TEST_FUNCTION(IoTHubClient_Auth_Get_ConnString_max_timeout_succeed)
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(get_time(NULL));
-    STRICT_EXPECTED_CALL(get_difftime(IGNORED_NUM_ARG, IGNORED_NUM_ARG)).SetReturn((double)TEST_CURRENT_TIME).CallCannotFail();
-    STRICT_EXPECTED_CALL(SASToken_CreateString(IGNORED_PTR_ARG, SCOPE_NAME, IGNORED_PTR_ARG, UINT64_MAX));
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(get_difftime(IGNORED_ARG, IGNORED_ARG)).SetReturn((double)TEST_CURRENT_TIME).CallCannotFail();
+    STRICT_EXPECTED_CALL(SASToken_CreateString(IGNORED_ARG, SCOPE_NAME, IGNORED_ARG, UINT64_MAX));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).CallCannotFail();
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
 
     //act
     char* conn_string = IoTHubClient_Auth_Get_SasToken(handle, SCOPE_NAME, TEST_EXPIRY_TIME, NULL);

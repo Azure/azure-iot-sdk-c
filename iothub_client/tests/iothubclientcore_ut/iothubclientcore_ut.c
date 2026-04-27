@@ -745,8 +745,8 @@ typedef enum CREATE_IOTHUB_TEST_TYPE_TAG
 
 static void setup_create_iothub_instance(CREATE_IOTHUB_TEST_TYPE create_iothub_test_type) // bool use_ll_create)
 {
-    EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG) );
-    STRICT_EXPECTED_CALL(VECTOR_create(IGNORED_NUM_ARG));
+    EXPECTED_CALL(gballoc_malloc(IGNORED_ARG) );
+    STRICT_EXPECTED_CALL(VECTOR_create(IGNORED_ARG));
     STRICT_EXPECTED_CALL(singlylinkedlist_create());
     STRICT_EXPECTED_CALL(Lock_Init());
 
@@ -775,22 +775,22 @@ static void setup_create_iothub_instance(CREATE_IOTHUB_TEST_TYPE create_iothub_t
 
 static void setup_iothubclient_createwithtransport()
 {
-    EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG) );
-    STRICT_EXPECTED_CALL(VECTOR_create(IGNORED_NUM_ARG));
+    EXPECTED_CALL(gballoc_malloc(IGNORED_ARG) );
+    STRICT_EXPECTED_CALL(VECTOR_create(IGNORED_ARG));
     STRICT_EXPECTED_CALL(singlylinkedlist_create());
 
     STRICT_EXPECTED_CALL(IoTHubTransport_GetLock(TEST_TRANSPORT_HANDLE));
     STRICT_EXPECTED_CALL(IoTHubTransport_GetLLTransport(TEST_TRANSPORT_HANDLE));
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_CreateWithTransport(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG)).CallCannotFail();
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_CreateWithTransport(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG)).CallCannotFail();
 }
 
 #ifdef USE_PROV_MODULE
 static void setup_iothubclient_createwithdeviceauth()
 {
-    EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG) );
-    STRICT_EXPECTED_CALL(VECTOR_create(IGNORED_NUM_ARG));
+    EXPECTED_CALL(gballoc_malloc(IGNORED_ARG) );
+    STRICT_EXPECTED_CALL(VECTOR_create(IGNORED_ARG));
     STRICT_EXPECTED_CALL(singlylinkedlist_create());
     STRICT_EXPECTED_CALL(Lock_Init());
     STRICT_EXPECTED_CALL(IoTHubClientCore_LL_CreateFromDeviceAuth(TEST_IOTHUB_URI, TEST_DEVICE_ID, TEST_TRANSPORT_PROVIDER));
@@ -801,19 +801,19 @@ static void setup_iothubclient_sendeventasync(bool use_threads)
 {
     if (use_threads)
     {
-        EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        EXPECTED_CALL(ThreadAPI_Create(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
     }
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SendEventAsync(IGNORED_PTR_ARG, TEST_MESSAGE_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG)).CallCannotFail();
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SendEventAsync(IGNORED_ARG, TEST_MESSAGE_HANDLE, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG)).CallCannotFail();
 }
 
 static void setup_gargageCollection(void* saved_data, bool can_item_be_collected)
 {
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
     STRICT_EXPECTED_CALL(ThreadAPI_Sleep(1));
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
 
     EXPECTED_CALL(singlylinkedlist_get_head_item(TEST_SLL_HANDLE))
         .SetReturn(TEST_LIST_HANDLE);
@@ -821,23 +821,23 @@ static void setup_gargageCollection(void* saved_data, bool can_item_be_collected
         .SetReturn(saved_data);
     EXPECTED_CALL(singlylinkedlist_get_next_item(TEST_LIST_HANDLE))
         .SetReturn(NULL);
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
 
     if (can_item_be_collected)
     {
-        EXPECTED_CALL(ThreadAPI_Join(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        EXPECTED_CALL(singlylinkedlist_remove(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        EXPECTED_CALL(free(IGNORED_PTR_ARG));
-        EXPECTED_CALL(free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(Lock_Deinit(IGNORED_PTR_ARG));
-        EXPECTED_CALL(free(IGNORED_PTR_ARG));
-        EXPECTED_CALL(free(IGNORED_PTR_ARG));
-        EXPECTED_CALL(free(IGNORED_PTR_ARG));
+        EXPECTED_CALL(ThreadAPI_Join(IGNORED_ARG, IGNORED_ARG));
+        EXPECTED_CALL(singlylinkedlist_remove(IGNORED_ARG, IGNORED_ARG));
+        EXPECTED_CALL(free(IGNORED_ARG));
+        EXPECTED_CALL(free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(Lock_Deinit(IGNORED_ARG));
+        EXPECTED_CALL(free(IGNORED_ARG));
+        EXPECTED_CALL(free(IGNORED_ARG));
+        EXPECTED_CALL(free(IGNORED_ARG));
     }
     else
     {
-        STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
     }
 }
 
@@ -846,34 +846,34 @@ static void setup_IothubClient_Destroy_after_garbage_collection()
 {
     EXPECTED_CALL(singlylinkedlist_get_head_item(TEST_SLL_HANDLE));
     STRICT_EXPECTED_CALL(singlylinkedlist_destroy(TEST_SLL_HANDLE));
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_Destroy(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(VECTOR_size(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(VECTOR_destroy(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Lock_Deinit(IGNORED_PTR_ARG));
-    EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_Destroy(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(VECTOR_size(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(VECTOR_destroy(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Lock_Deinit(IGNORED_ARG));
+    EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 }
 
 #ifndef DONT_USE_UPLOADTOBLOB
 static void setup_iothubclient_uploadtoblobasync()
 {
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)); /*this is creating a HTTPWORKER_THREAD_INFO*/
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG)); /*this is making a copy of the filename*/
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG)); /*this is creating a HTTPWORKER_THREAD_INFO*/
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG)); /*this is making a copy of the filename*/
     STRICT_EXPECTED_CALL(Lock_Init());
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)); /*this is creating a UPLOADTOBLOB_SAVED_DATA*/
-    EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG)); /*this is creating a UPLOADTOBLOB_SAVED_DATA*/
+    EXPECTED_CALL(ThreadAPI_Create(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(singlylinkedlist_add(IGNORED_PTR_ARG, IGNORED_PTR_ARG)); /*this is adding HTTPWORKER_THREAD_INFO to the list of HTTPWORKER_THREAD_INFO's to be cleaned*/
-    EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_add(IGNORED_ARG, IGNORED_ARG)); /*this is adding HTTPWORKER_THREAD_INFO to the list of HTTPWORKER_THREAD_INFO's to be cleaned*/
+    EXPECTED_CALL(ThreadAPI_Create(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(get_time(IGNORED_NUM_ARG)).CallCannotFail();
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_UploadToBlob(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG, 1)); /*this is the thread calling into _LL layer*/
-    STRICT_EXPECTED_CALL(test_file_upload_callback(FILE_UPLOAD_OK, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(get_time(IGNORED_ARG)).CallCannotFail();
+    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_UploadToBlob(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IGNORED_ARG, IGNORED_ARG, 1)); /*this is the thread calling into _LL layer*/
+    STRICT_EXPECTED_CALL(test_file_upload_callback(FILE_UPLOAD_OK, IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
     STRICT_EXPECTED_CALL(ThreadAPI_Exit(0));
 }
 
@@ -882,30 +882,30 @@ static void setup_iothubclient_uploadtoblobasync()
 // Initial time we loop through ScheduleWork, including DoWork and into the always run dispatch_user_callbacks functions.
 static void set_expected_calls_first_ScheduleWork_Thread_loop(size_t expected_callbacks_length)
 {
-    STRICT_EXPECTED_CALL(get_time(IGNORED_NUM_ARG)).CallCannotFail();
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(get_time(IGNORED_ARG)).CallCannotFail();
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
     STRICT_EXPECTED_CALL(IoTHubClientCore_LL_DoWork(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE));
     STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(TEST_SLL_HANDLE));
-    STRICT_EXPECTED_CALL(VECTOR_move(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(VECTOR_size(IGNORED_PTR_ARG)).SetReturn(expected_callbacks_length);
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(VECTOR_move(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(VECTOR_size(IGNORED_ARG)).SetReturn(expected_callbacks_length);
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
 }
 
 // Final time we loop through ScheduleWork_Thread, from return of dispatch_user_callbacks/sleep to exiting out.
 static void set_expected_calls_final_ScheduleWork_Thread_loop()
 {
     STRICT_EXPECTED_CALL(ThreadAPI_Sleep(1));
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
     STRICT_EXPECTED_CALL(ThreadAPI_Exit(0));
 }
 
 static void set_expected_calls_nocallbacks_Schedule_Thread_loop()
 {
     set_expected_calls_first_ScheduleWork_Thread_loop(0);
-    STRICT_EXPECTED_CALL(VECTOR_destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(VECTOR_destroy(IGNORED_ARG));
     set_expected_calls_final_ScheduleWork_Thread_loop();
 }
 
@@ -1293,19 +1293,19 @@ TEST_FUNCTION(IoTHubClientCore_Destroy_succeed)
     umock_c_reset_all_calls();
 
     // signal threads to end
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
 
     // garbage collection
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
     EXPECTED_CALL(singlylinkedlist_get_head_item(TEST_SLL_HANDLE));
     STRICT_EXPECTED_CALL(singlylinkedlist_destroy(TEST_SLL_HANDLE));
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_Destroy(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(VECTOR_size(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(VECTOR_destroy(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Lock_Deinit(IGNORED_PTR_ARG));
-    EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG) );
+    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_Destroy(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(VECTOR_size(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(VECTOR_destroy(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Lock_Deinit(IGNORED_ARG));
+    EXPECTED_CALL(gballoc_free(IGNORED_ARG) );
 
     // act
     IoTHubClientCore_Destroy(iothub_handle);
@@ -1326,26 +1326,26 @@ TEST_FUNCTION(IoTHubClientCore_Destroy_calls_IOTHUB_CLIENT_EVENT_CONFIRMATION_CA
     (void)IoTHubClientCore_SendEventAsync(iothub_handle, (IOTHUB_MESSAGE_HANDLE)0x42, test_event_confirmation_callback, (void*)0x42);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(ThreadAPI_Join(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(ThreadAPI_Join(IGNORED_ARG, IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
     EXPECTED_CALL(singlylinkedlist_get_head_item(TEST_SLL_HANDLE));
     STRICT_EXPECTED_CALL(singlylinkedlist_destroy(TEST_SLL_HANDLE));
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_Destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_Destroy(IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(VECTOR_push_back(IGNORED_PTR_ARG, IGNORED_PTR_ARG, 1));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(VECTOR_push_back(IGNORED_ARG, IGNORED_ARG, 1));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(VECTOR_size(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_PTR_ARG,0));
+    STRICT_EXPECTED_CALL(VECTOR_size(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_ARG,0));
     STRICT_EXPECTED_CALL(test_event_confirmation_callback(IOTHUB_CLIENT_CONFIRMATION_BECAUSE_DESTROY, (void*)0x42));
-    STRICT_EXPECTED_CALL(VECTOR_destroy(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Lock_Deinit(IGNORED_PTR_ARG));
-    EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(VECTOR_destroy(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Lock_Deinit(IGNORED_ARG));
+    EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
 
     // act
@@ -1364,30 +1364,30 @@ TEST_FUNCTION(IoTHubClientCore_Destroy_calls_pending_reported_state_callback_suc
     umock_c_reset_all_calls();
 
     const unsigned char* reported_state = (const unsigned char*)0x1234;
-    EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SendReportedState(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, reported_state, 1, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    EXPECTED_CALL(ThreadAPI_Create(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SendReportedState(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, reported_state, 1, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
     (void)IoTHubClientCore_SendReportedState(iothub_handle, reported_state, 1, test_report_state_callback, NULL);
 
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(VECTOR_push_back(IGNORED_PTR_ARG, IGNORED_PTR_ARG, 1));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(ThreadAPI_Join(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(VECTOR_push_back(IGNORED_ARG, IGNORED_ARG, 1));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(ThreadAPI_Join(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
     EXPECTED_CALL(singlylinkedlist_get_head_item(TEST_SLL_HANDLE));
     STRICT_EXPECTED_CALL(singlylinkedlist_destroy(TEST_SLL_HANDLE));
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_Destroy(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(VECTOR_size(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_PTR_ARG,0));
-    STRICT_EXPECTED_CALL(test_report_state_callback(0, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(VECTOR_destroy(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Lock_Deinit(IGNORED_PTR_ARG));
-    EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_Destroy(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(VECTOR_size(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_ARG,0));
+    STRICT_EXPECTED_CALL(test_report_state_callback(0, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(VECTOR_destroy(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Lock_Deinit(IGNORED_ARG));
+    EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
     // act
     g_reportedStateCallback(0, g_userContextCallback); // Simulating a cb from LL with unsent reported state. 
@@ -1478,8 +1478,8 @@ TEST_FUNCTION(IoTHubClient_SendEventAsync_event_confirm_callback_succeed)
     (void)IoTHubClientCore_SendEventAsync(iothub_handle, TEST_MESSAGE_HANDLE, test_event_confirmation_callback, NULL);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(VECTOR_push_back(IGNORED_PTR_ARG, IGNORED_PTR_ARG, 1));
-    EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG) );
+    STRICT_EXPECTED_CALL(VECTOR_push_back(IGNORED_ARG, IGNORED_ARG, 1));
+    EXPECTED_CALL(gballoc_free(IGNORED_ARG) );
 
     // act
     g_eventConfirmationCallback(IOTHUB_CLIENT_CONFIRMATION_OK, g_userContextCallback);
@@ -1487,9 +1487,9 @@ TEST_FUNCTION(IoTHubClient_SendEventAsync_event_confirm_callback_succeed)
     g_how_thread_loops = 1;
 
     set_expected_calls_first_ScheduleWork_Thread_loop(1);
-    STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_PTR_ARG, 0));
+    STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_ARG, 0));
     STRICT_EXPECTED_CALL(test_event_confirmation_callback(IOTHUB_CLIENT_CONFIRMATION_OK, NULL));
-    STRICT_EXPECTED_CALL(VECTOR_destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(VECTOR_destroy(IGNORED_ARG));
     set_expected_calls_final_ScheduleWork_Thread_loop();
 
     // act
@@ -1521,11 +1521,11 @@ TEST_FUNCTION(IoTHubClient_SendEventAsync_event_confirm_callback_two_events_succ
 
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(VECTOR_push_back(IGNORED_PTR_ARG, IGNORED_PTR_ARG, 1));
-    EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG) );
+    STRICT_EXPECTED_CALL(VECTOR_push_back(IGNORED_ARG, IGNORED_ARG, 1));
+    EXPECTED_CALL(gballoc_free(IGNORED_ARG) );
 
-    STRICT_EXPECTED_CALL(VECTOR_push_back(IGNORED_PTR_ARG, IGNORED_PTR_ARG, 1));
-    EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG) );
+    STRICT_EXPECTED_CALL(VECTOR_push_back(IGNORED_ARG, IGNORED_ARG, 1));
+    EXPECTED_CALL(gballoc_free(IGNORED_ARG) );
 
     // act
     g_eventConfirmationCallback(IOTHUB_CLIENT_CONFIRMATION_OK, userContextCallback1);
@@ -1534,12 +1534,12 @@ TEST_FUNCTION(IoTHubClient_SendEventAsync_event_confirm_callback_two_events_succ
     g_how_thread_loops = 1;
 
     set_expected_calls_first_ScheduleWork_Thread_loop(2);
-    STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_PTR_ARG, 0));
+    STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_ARG, 0));
     STRICT_EXPECTED_CALL(test_event_confirmation_callback(IOTHUB_CLIENT_CONFIRMATION_OK, CALLBACK_CONTEXT));
 
-    STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_PTR_ARG, 1));
+    STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_ARG, 1));
     STRICT_EXPECTED_CALL(test_event_confirmation_callback2(IOTHUB_CLIENT_CONFIRMATION_OK, CALLBACK_CONTEXT2));
-    STRICT_EXPECTED_CALL(VECTOR_destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(VECTOR_destroy(IGNORED_ARG));
     set_expected_calls_final_ScheduleWork_Thread_loop();
 
     // act
@@ -1576,7 +1576,7 @@ TEST_FUNCTION(IoTHubClientCore_GetSendStatus_lock_fail)
 
     IOTHUB_CLIENT_STATUS iothub_status;
 
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG)).SetReturn(LOCK_ERROR);
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG)).SetReturn(LOCK_ERROR);
 
     // act
     IOTHUB_CLIENT_RESULT result = IoTHubClientCore_GetSendStatus(iothub_handle, &iothub_status);
@@ -1597,9 +1597,9 @@ TEST_FUNCTION(IoTHubClientCore_GetSendStatus_succeed)
 
     IOTHUB_CLIENT_STATUS iothub_status;
 
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
     STRICT_EXPECTED_CALL(IoTHubClientCore_LL_GetSendStatus(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, &iothub_status));
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
 
     // act
     IOTHUB_CLIENT_RESULT result = IoTHubClientCore_GetSendStatus(iothub_handle, &iothub_status);
@@ -1632,11 +1632,11 @@ TEST_FUNCTION(IoTHubClientCore_SetMessageCallback_succeed)
     IOTHUB_CLIENT_CORE_HANDLE iothub_handle = IoTHubClientCore_Create(TEST_CLIENT_CONFIG);
     umock_c_reset_all_calls();
 
-    EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SetMessageCallback_Ex(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    EXPECTED_CALL(ThreadAPI_Create(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SetMessageCallback_Ex(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
 
     // act
     IOTHUB_CLIENT_RESULT result = IoTHubClientCore_SetMessageCallback(iothub_handle, test_message_confirmation_callback, NULL);
@@ -1658,11 +1658,11 @@ TEST_FUNCTION(IoTHubClientCore_SetMessageCallback_fail)
     IOTHUB_CLIENT_CORE_HANDLE iothub_handle = IoTHubClientCore_Create(TEST_CLIENT_CONFIG);
     umock_c_reset_all_calls();
 
-    EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SetMessageCallback_Ex(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    EXPECTED_CALL(ThreadAPI_Create(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SetMessageCallback_Ex(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
 
     umock_c_negative_tests_snapshot();
 
@@ -1710,12 +1710,12 @@ TEST_FUNCTION(IoTHubClientCore_SetMessageCallback_fails_if_SetMessageCallback_Ex
     IOTHUB_CLIENT_CORE_HANDLE iothub_handle = IoTHubClientCore_Create(TEST_CLIENT_CONFIG);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SetMessageCallback_Ex(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(IOTHUB_CLIENT_ERROR);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(ThreadAPI_Create(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SetMessageCallback_Ex(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG)).SetReturn(IOTHUB_CLIENT_ERROR);
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
 
     // act
     IOTHUB_CLIENT_RESULT result = IoTHubClientCore_SetMessageCallback(iothub_handle, test_message_confirmation_callback, NULL);
@@ -1748,11 +1748,11 @@ TEST_FUNCTION(IoTHubClientCore_SetConnectionStatusCallback_succeed)
     IOTHUB_CLIENT_CORE_HANDLE iothub_handle = IoTHubClientCore_Create(TEST_CLIENT_CONFIG);
     umock_c_reset_all_calls();
 
-    EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SetConnectionStatusCallback(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    EXPECTED_CALL(ThreadAPI_Create(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SetConnectionStatusCallback(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
 
     // act
     IOTHUB_CLIENT_RESULT result = IoTHubClientCore_SetConnectionStatusCallback(iothub_handle, test_connection_status_callback, NULL);
@@ -1774,11 +1774,11 @@ TEST_FUNCTION(IoTHubClientCore_SetConnectionStatusCallback_fail)
     IOTHUB_CLIENT_CORE_HANDLE iothub_handle = IoTHubClientCore_Create(TEST_CLIENT_CONFIG);
     umock_c_reset_all_calls();
 
-    EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SetConnectionStatusCallback(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    EXPECTED_CALL(ThreadAPI_Create(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SetConnectionStatusCallback(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
 
     umock_c_negative_tests_snapshot();
 
@@ -1844,14 +1844,14 @@ TEST_FUNCTION(IoTHubClientCore_SetRetryPolicy_succeed)
 
     IOTHUB_CLIENT_RETRY_POLICY retry_policy = IOTHUB_CLIENT_RETRY_RANDOM;
 
-    EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SetRetryPolicy(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, retry_policy, IGNORED_NUM_ARG))
+    EXPECTED_CALL(ThreadAPI_Create(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SetRetryPolicy(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, retry_policy, IGNORED_ARG))
         .IgnoreArgument(2);
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
 
     // act
-    IOTHUB_CLIENT_RESULT result = IoTHubClientCore_SetRetryPolicy(iothub_handle, retry_policy, IGNORED_NUM_ARG);
+    IOTHUB_CLIENT_RESULT result = IoTHubClientCore_SetRetryPolicy(iothub_handle, retry_policy, IGNORED_ARG);
 
     // assert
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
@@ -1886,10 +1886,10 @@ TEST_FUNCTION(IoTHubClientCore_GetRetryPolicy_succeed)
     IOTHUB_CLIENT_RETRY_POLICY retry_policy;
     size_t retry_in_seconds;
 
-    EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
+    EXPECTED_CALL(ThreadAPI_Create(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
     STRICT_EXPECTED_CALL(IoTHubClientCore_LL_GetRetryPolicy(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, &retry_policy, &retry_in_seconds));
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
 
     // act
     IOTHUB_CLIENT_RESULT result = IoTHubClientCore_GetRetryPolicy(iothub_handle, &retry_policy, &retry_in_seconds);
@@ -1914,7 +1914,7 @@ TEST_FUNCTION(IoTHubClientCore_GetRetryPolicy_fail)
     IOTHUB_CLIENT_RETRY_POLICY retry_policy;
     size_t retry_in_seconds;
 
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
     STRICT_EXPECTED_CALL(IoTHubClientCore_LL_GetRetryPolicy(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, &retry_policy, &retry_in_seconds));
 
     umock_c_negative_tests_snapshot();
@@ -1962,9 +1962,9 @@ TEST_FUNCTION(IoTHubClientCore_GetLastMessageReceiveTime_succeed)
 
     time_t recv_time;
 
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
     STRICT_EXPECTED_CALL(IoTHubClientCore_LL_GetLastMessageReceiveTime(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, &recv_time));
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
 
     // act
     IOTHUB_CLIENT_RESULT result = IoTHubClientCore_GetLastMessageReceiveTime(iothub_handle, &recv_time);
@@ -1988,9 +1988,9 @@ TEST_FUNCTION(IoTHubClientCore_GetLastMessageReceiveTime_failed)
 
     time_t recv_time;
 
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
     STRICT_EXPECTED_CALL(IoTHubClientCore_LL_GetLastMessageReceiveTime(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, &recv_time));
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG)).CallCannotFail();
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG)).CallCannotFail();
 
     umock_c_negative_tests_snapshot();
 
@@ -2080,9 +2080,9 @@ TEST_FUNCTION(IoTHubClientCore_SetOption_succeed)
     const char* option_name = "option_name";
     const void* option_value = (void*)0x0123;
 
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
     STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SetOption(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, option_name, option_value));
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
 
     // act
     IOTHUB_CLIENT_RESULT result = IoTHubClientCore_SetOption(iothub_handle, option_name, option_value);
@@ -2105,8 +2105,8 @@ TEST_FUNCTION(IoTHubClientCore_SetOption_DO_WORK_FREQUENCY_IN_MS_succeed)
     tickcounter_ms_t tickcounter_value = 100;
     const void* option_value = (void*) &tickcounter_value;
 
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
 
     // act
     IOTHUB_CLIENT_RESULT result = IoTHubClientCore_SetOption(iothub_handle, option_name, option_value);
@@ -2131,10 +2131,10 @@ TEST_FUNCTION(IoTHubClientCore_SetOption_DO_WORK_FREQUENCY_IN_MS_value_limits_fa
     tickcounter_ms_t tickcounter_value_high = 200;
     const void* option_value_high = (void*) &tickcounter_value_high;
 
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
 
     // act
     IOTHUB_CLIENT_RESULT result_low = IoTHubClientCore_SetOption(iothub_handle, option_name, option_value_low);
@@ -2163,11 +2163,11 @@ TEST_FUNCTION(IoTHubClientCore_SetOption_DO_WORK_FREQUENCY_IN_MS_and_MESSAGE_TIM
     tickcounter_ms_t timeout = 20; // arbitrary; just lower than frequency
     // const void* option_value = (void*) &frequency;
 
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
     STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SetOption(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, timeout_option, &timeout));
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
 
     // act
     IOTHUB_CLIENT_RESULT timeout_result = IoTHubClientCore_SetOption(iothub_handle, timeout_option, &timeout);
@@ -2198,15 +2198,15 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_DO_WORK_FREQ_IN_MS_success)
     umock_c_reset_all_calls();
     g_how_thread_loops = 1;
 
-    STRICT_EXPECTED_CALL(get_time(IGNORED_NUM_ARG)).CallCannotFail();
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(get_time(IGNORED_ARG)).CallCannotFail();
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
     STRICT_EXPECTED_CALL(IoTHubClientCore_LL_DoWork(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE));
     STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(TEST_SLL_HANDLE));
-    STRICT_EXPECTED_CALL(VECTOR_move(IGNORED_PTR_ARG)).SetReturn(NULL);
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(VECTOR_move(IGNORED_ARG)).SetReturn(NULL);
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
     STRICT_EXPECTED_CALL(ThreadAPI_Sleep(57));
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
     STRICT_EXPECTED_CALL(ThreadAPI_Exit(0));
 
     // act
@@ -2233,9 +2233,9 @@ TEST_FUNCTION(IoTHubClientCore_SetOption_fail)
     const char* option_name = "option_name";
     const void* option_value = (void*)0x0123;
 
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
     STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SetOption(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, option_name, option_value));
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG)).CallCannotFail();
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG)).CallCannotFail();
 
     umock_c_negative_tests_snapshot();
 
@@ -2282,11 +2282,11 @@ TEST_FUNCTION(IoTHubClientCore_SetDeviceTwinCallback_succeed)
     IOTHUB_CLIENT_CORE_HANDLE iothub_handle = IoTHubClientCore_Create(TEST_CLIENT_CONFIG);
     umock_c_reset_all_calls();
 
-    EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SetDeviceTwinCallback(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    EXPECTED_CALL(ThreadAPI_Create(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SetDeviceTwinCallback(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
 
     // act
     IOTHUB_CLIENT_RESULT result = IoTHubClientCore_SetDeviceTwinCallback(iothub_handle, test_device_twin_callback, NULL);
@@ -2308,10 +2308,10 @@ TEST_FUNCTION(IoTHubClientCore_SetDeviceTwinCallback_fail)
     int negativeTestsInitResult = umock_c_negative_tests_init();
     ASSERT_ARE_EQUAL(int, 0, negativeTestsInitResult);
 
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SetDeviceTwinCallback(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG)).CallCannotFail();
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SetDeviceTwinCallback(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG)).CallCannotFail();
 
     umock_c_negative_tests_snapshot();
 
@@ -2345,7 +2345,7 @@ TEST_FUNCTION(IoTHubClientCore_SetDeviceTwinCallback_device_twin_callback_succee
     (void)IoTHubClientCore_SetDeviceTwinCallback(iothub_handle, test_device_twin_callback, NULL);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(VECTOR_push_back(IGNORED_PTR_ARG, IGNORED_PTR_ARG, 1));
+    STRICT_EXPECTED_CALL(VECTOR_push_back(IGNORED_ARG, IGNORED_ARG, 1));
 
     // act
     g_deviceTwinCallback(DEVICE_TWIN_UPDATE_COMPLETE, NULL, 0, g_userContextCallback);
@@ -2380,11 +2380,11 @@ TEST_FUNCTION(IoTHubClientCore_SendReportedState_succeed)
 
     const unsigned char* reported_state = (const unsigned char*)0x1234;
 
-    EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SendReportedState(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, reported_state, 1, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    EXPECTED_CALL(ThreadAPI_Create(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SendReportedState(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, reported_state, 1, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
 
     // act
     IOTHUB_CLIENT_RESULT result = IoTHubClientCore_SendReportedState(iothub_handle, reported_state, 1, test_report_state_callback, NULL);
@@ -2409,10 +2409,10 @@ TEST_FUNCTION(IoTHubClientCore_SendReportedState_fail)
 
     const unsigned char* reported_state = (const unsigned char*)0x1234;
 
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SendReportedState(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, reported_state, 1, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG)).CallCannotFail();
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SendReportedState(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, reported_state, 1, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG)).CallCannotFail();
 
     umock_c_negative_tests_snapshot();
 
@@ -2447,8 +2447,8 @@ TEST_FUNCTION(IoTHubClientCore_SendReportedState_report_state_callback_succeed)
     IOTHUB_CLIENT_RESULT result = IoTHubClientCore_SendReportedState(iothub_handle, reported_state, 1, test_report_state_callback, NULL);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(VECTOR_push_back(IGNORED_PTR_ARG, IGNORED_PTR_ARG, 1));
-    EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG) );
+    STRICT_EXPECTED_CALL(VECTOR_push_back(IGNORED_ARG, IGNORED_ARG, 1));
+    EXPECTED_CALL(gballoc_free(IGNORED_ARG) );
 
     // act
     g_reportedStateCallback(REPORTED_STATE_STATUS_CODE, g_userContextCallback);
@@ -2467,11 +2467,11 @@ TEST_FUNCTION(IoTHubClientCore_GetTwinAsync_succeed)
     IOTHUB_CLIENT_CORE_HANDLE iothub_handle = IoTHubClientCore_Create(TEST_CLIENT_CONFIG);
 
     umock_c_reset_all_calls();
-    EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_GetTwinAsync(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    EXPECTED_CALL(ThreadAPI_Create(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_GetTwinAsync(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
 
     // act
     IOTHUB_CLIENT_RESULT result = IoTHubClientCore_GetTwinAsync(iothub_handle, test_device_twin_callback, NULL);
@@ -2526,10 +2526,10 @@ TEST_FUNCTION(IoTHubClientCore_GetTwinAsync_fail)
     IOTHUB_CLIENT_CORE_HANDLE iothub_handle = IoTHubClientCore_Create(TEST_CLIENT_CONFIG);
 
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_GetTwinAsync(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG)).CallCannotFail();
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_GetTwinAsync(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG)).CallCannotFail();
     umock_c_negative_tests_snapshot();
 
     // act
@@ -2564,7 +2564,7 @@ TEST_FUNCTION(IoTHubClientCore_GetTwinAsync_startWorkerThread_fail)
     IOTHUB_CLIENT_CORE_HANDLE iothub_handle = IoTHubClientCore_Create(TEST_CLIENT_CONFIG);
 
     umock_c_reset_all_calls();
-    EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    EXPECTED_CALL(ThreadAPI_Create(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
     umock_c_negative_tests_snapshot();
 
     // act
@@ -2610,8 +2610,8 @@ TEST_FUNCTION(IoTHubClientCore_SetDeviceMethodCallback_already_subscribed_to_com
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
 
     result = IoTHubClientCore_SetDeviceMethodCallback(iothub_handle, test_method_callback, NULL);
 
@@ -2629,11 +2629,11 @@ TEST_FUNCTION(IoTHubClientCore_SetDeviceMethodCallback_succeed)
     IOTHUB_CLIENT_CORE_HANDLE iothub_handle = IoTHubClientCore_Create(TEST_CLIENT_CONFIG);
     umock_c_reset_all_calls();
 
-    EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
-    EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SetDeviceMethodCallback_Ex(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    EXPECTED_CALL(ThreadAPI_Create(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
+    EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SetDeviceMethodCallback_Ex(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
 
     // act
     IOTHUB_CLIENT_RESULT result = IoTHubClientCore_SetDeviceMethodCallback(iothub_handle, test_method_callback, NULL);
@@ -2656,11 +2656,11 @@ TEST_FUNCTION(IoTHubClientCore_SetDeviceMethodCallback_fail)
     ASSERT_ARE_EQUAL(int, 0, negativeTestsInitResult);
 
     umock_c_reset_all_calls();
-    EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
-    EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SetDeviceMethodCallback_Ex(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    EXPECTED_CALL(ThreadAPI_Create(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
+    EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SetDeviceMethodCallback_Ex(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
     umock_c_negative_tests_snapshot();
 
     // act
@@ -2716,8 +2716,8 @@ TEST_FUNCTION(IoTHubClientCore_SetDeviceMethodCallback_Ex_already_subscribed_to_
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
 
     result = IoTHubClientCore_SetDeviceMethodCallback_Ex(iothub_handle, test_incoming_method_callback, NULL);
 
@@ -2735,11 +2735,11 @@ TEST_FUNCTION(IoTHubClientCore_SetDeviceMethodCallback_Ex_succeed)
     IOTHUB_CLIENT_CORE_HANDLE iothub_handle = IoTHubClientCore_Create(TEST_CLIENT_CONFIG);
     umock_c_reset_all_calls();
 
-    EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
-    EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SetDeviceMethodCallback_Ex(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    EXPECTED_CALL(ThreadAPI_Create(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
+    EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SetDeviceMethodCallback_Ex(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
 
     // act
     IOTHUB_CLIENT_RESULT result = IoTHubClientCore_SetDeviceMethodCallback_Ex(iothub_handle, test_incoming_method_callback, NULL);
@@ -2758,11 +2758,11 @@ TEST_FUNCTION(IoTHubClientCore_SetDeviceMethodCallback_Ex_NonNULL_callback_succe
     IOTHUB_CLIENT_CORE_HANDLE iothub_handle = IoTHubClientCore_Create(TEST_CLIENT_CONFIG);
     umock_c_reset_all_calls();
 
-    EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
-    EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SetDeviceMethodCallback_Ex(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    EXPECTED_CALL(ThreadAPI_Create(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
+    EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SetDeviceMethodCallback_Ex(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
 
     // act
     IOTHUB_CLIENT_RESULT result = IoTHubClientCore_SetDeviceMethodCallback_Ex(iothub_handle, test_incoming_method_callback, CALLBACK_CONTEXT);
@@ -2782,9 +2782,9 @@ TEST_FUNCTION(IoTHubClient_call_inbound_device_callback_succeed)
     (void)IoTHubClientCore_SetDeviceMethodCallback_Ex(iothub_handle, test_incoming_method_callback, NULL);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(STRING_construct(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(VECTOR_push_back(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(STRING_construct(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(VECTOR_push_back(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
 
     // act
     ASSERT_IS_NOT_NULL(g_inboundDeviceCallback);
@@ -2823,10 +2823,10 @@ TEST_FUNCTION(IoTHubClientCore_SetDeviceMethodCallback_Ex_remove_succeed)
     IOTHUB_CLIENT_CORE_HANDLE iothub_handle = IoTHubClientCore_Create(TEST_CLIENT_CONFIG);
     umock_c_reset_all_calls();
 
-    EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SetDeviceMethodCallback_Ex(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    EXPECTED_CALL(ThreadAPI_Create(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SetDeviceMethodCallback_Ex(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
 
     // act
     IOTHUB_CLIENT_RESULT result = IoTHubClientCore_SetDeviceMethodCallback_Ex(iothub_handle, NULL, NULL);
@@ -2861,8 +2861,8 @@ TEST_FUNCTION(IoTHubClientCore_SubscribeToCommands_already_subscribed_to_method_
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
 
     result = IoTHubClientCore_SubscribeToCommands(iothub_handle, test_command_callback, NULL);
 
@@ -2883,8 +2883,8 @@ TEST_FUNCTION(IoTHubClientCore_SubscribeToCommands_already_subscribed_to_method_
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
 
     result = IoTHubClientCore_SubscribeToCommands(iothub_handle, test_command_callback, NULL);
 
@@ -2902,11 +2902,11 @@ TEST_FUNCTION(IoTHubClientCore_SubscribeToCommands_succeed)
     IOTHUB_CLIENT_CORE_HANDLE iothub_handle = IoTHubClientCore_Create(TEST_CLIENT_CONFIG);
     umock_c_reset_all_calls();
 
-    EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SetDeviceMethodCallback_Ex(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    EXPECTED_CALL(ThreadAPI_Create(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SetDeviceMethodCallback_Ex(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
 
     // act
     IOTHUB_CLIENT_RESULT result = IoTHubClientCore_SubscribeToCommands(iothub_handle, test_command_callback, NULL);
@@ -2928,11 +2928,11 @@ TEST_FUNCTION(IoTHubClientCore_SubscribeToCommands_fail)
     ASSERT_ARE_EQUAL(int, 0, negativeTestsInitResult);
 
     umock_c_reset_all_calls();
-    EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
-    EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SetDeviceMethodCallback_Ex(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    EXPECTED_CALL(ThreadAPI_Create(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
+    EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SetDeviceMethodCallback_Ex(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
     umock_c_negative_tests_snapshot();
 
     // act
@@ -2974,9 +2974,9 @@ TEST_FUNCTION(IoTHubClient_call_inbound_command_with_component_succeed)
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, clientResult);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(STRING_construct(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(VECTOR_push_back(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(STRING_construct(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(VECTOR_push_back(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
 
     g_currentTestComponentName = TEST_COMPONENT_NAME;
 
@@ -2999,9 +2999,9 @@ TEST_FUNCTION(IoTHubClient_call_inbound_command_no_component_succeed)
     (void)IoTHubClientCore_SubscribeToCommands(iothub_handle, test_command_callback, NULL);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(STRING_construct(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(VECTOR_push_back(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(STRING_construct(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(VECTOR_push_back(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
 
     // act
     ASSERT_IS_NOT_NULL(g_inboundDeviceCallback);
@@ -3041,10 +3041,10 @@ TEST_FUNCTION(IoTHubClientCore_SubscribeToCommands_remove_succeed)
     IOTHUB_CLIENT_CORE_HANDLE iothub_handle = IoTHubClientCore_Create(TEST_CLIENT_CONFIG);
     umock_c_reset_all_calls();
 
-    EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SetDeviceMethodCallback_Ex(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    EXPECTED_CALL(ThreadAPI_Create(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SetDeviceMethodCallback_Ex(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
 
     // act
     IOTHUB_CLIENT_RESULT result = IoTHubClientCore_SubscribeToCommands(iothub_handle, NULL, NULL);
@@ -3077,9 +3077,9 @@ TEST_FUNCTION(IoTHubClientCore_DeviceMethodResponse_succeed)
     IOTHUB_CLIENT_CORE_HANDLE iothub_handle = IoTHubClientCore_Create(TEST_CLIENT_CONFIG);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
     STRICT_EXPECTED_CALL(IoTHubClientCore_LL_DeviceMethodResponse(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_METHOD_ID, TEST_DEVICE_METHOD_RESPONSE, TEST_DEVICE_RESP_LENGTH, REPORTED_STATE_STATUS_CODE));
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
 
     // act
     IOTHUB_CLIENT_RESULT result = IoTHubClientCore_DeviceMethodResponse(iothub_handle, TEST_METHOD_ID, TEST_DEVICE_METHOD_RESPONSE, TEST_DEVICE_RESP_LENGTH, REPORTED_STATE_STATUS_CODE);
@@ -3101,7 +3101,7 @@ TEST_FUNCTION(IoTHubClientCore_DeviceMethodResponse_fail)
     int negativeTestsInitResult = umock_c_negative_tests_init();
     ASSERT_ARE_EQUAL(int, 0, negativeTestsInitResult);
 
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
     STRICT_EXPECTED_CALL(IoTHubClientCore_LL_DeviceMethodResponse(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, TEST_METHOD_ID, TEST_DEVICE_METHOD_RESPONSE, TEST_DEVICE_RESP_LENGTH, REPORTED_STATE_STATUS_CODE));
 
     umock_c_negative_tests_snapshot();
@@ -3195,12 +3195,12 @@ TEST_FUNCTION(IoTHubClientCore_UploadToBlobAsync_succeeds)
 
     // cleanup
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
 
-    EXPECTED_CALL(ThreadAPI_Join(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    EXPECTED_CALL(ThreadAPI_Join(IGNORED_ARG, IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
     EXPECTED_CALL(singlylinkedlist_get_head_item(TEST_SLL_HANDLE))
         .SetReturn(TEST_LIST_HANDLE);
 
@@ -3212,16 +3212,16 @@ TEST_FUNCTION(IoTHubClientCore_UploadToBlobAsync_succeeds)
 
 static void set_expected_calls_for_freeUploadToBlobThreadInfo()
 {
-    STRICT_EXPECTED_CALL(Lock_Deinit(IGNORED_PTR_ARG));
-    EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Lock_Deinit(IGNORED_ARG));
+    EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 }
 
 static void set_expected_calls_for_allocateUploadToBlob()
 {
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
     STRICT_EXPECTED_CALL(Lock_Init());
 }
 
@@ -3287,26 +3287,26 @@ static void IoTHubClientCore_UploadMultipleBlocksToBlobAsync_succeeds_Impl(bool 
     umock_c_reset_all_calls();
 
     set_expected_calls_for_allocateUploadToBlob();
-    STRICT_EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(ThreadAPI_Create(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(singlylinkedlist_add(IGNORED_PTR_ARG, IGNORED_PTR_ARG)); /*this is adding HTTPWORKER_THREAD_INFO to the list of HTTPWORKER_THREAD_INFO's to be cleaned*/
-    STRICT_EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_add(IGNORED_ARG, IGNORED_ARG)); /*this is adding HTTPWORKER_THREAD_INFO to the list of HTTPWORKER_THREAD_INFO's to be cleaned*/
+    STRICT_EXPECTED_CALL(ThreadAPI_Create(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(get_time(IGNORED_NUM_ARG)).CallCannotFail();
+    STRICT_EXPECTED_CALL(get_time(IGNORED_ARG)).CallCannotFail();
 
     /* thread uploading function */
     if (exCall)
     {
-        STRICT_EXPECTED_CALL(IoTHubClientCore_LL_UploadMultipleBlocksToBlobEx(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(IoTHubClientCore_LL_UploadMultipleBlocksToBlobEx(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
     }
     else
     {
-        STRICT_EXPECTED_CALL(IoTHubClientCore_LL_UploadMultipleBlocksToBlob(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(IoTHubClientCore_LL_UploadMultipleBlocksToBlob(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
     }
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
     STRICT_EXPECTED_CALL(ThreadAPI_Exit(0));
 
     ///act
@@ -3327,12 +3327,12 @@ static void IoTHubClientCore_UploadMultipleBlocksToBlobAsync_succeeds_Impl(bool 
 
     ///cleanup
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
 
-    EXPECTED_CALL(ThreadAPI_Join(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    EXPECTED_CALL(ThreadAPI_Join(IGNORED_ARG, IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
     EXPECTED_CALL(singlylinkedlist_get_head_item(TEST_SLL_HANDLE))
         .SetReturn(TEST_LIST_HANDLE);
 
@@ -3362,15 +3362,15 @@ static void IoTHubClientCore_UploadMultipleBlocksToBlobAsync_fails_when_ThreadAP
     umock_c_reset_all_calls();
 
     set_expected_calls_for_allocateUploadToBlob();
-    STRICT_EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(ThreadAPI_Create(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(singlylinkedlist_add(IGNORED_PTR_ARG, IGNORED_PTR_ARG)); /*this is adding HTTPWORKER_THREAD_INFO to the list of HTTPWORKER_THREAD_INFO's to be cleaned*/
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_add(IGNORED_ARG, IGNORED_ARG)); /*this is adding HTTPWORKER_THREAD_INFO to the list of HTTPWORKER_THREAD_INFO's to be cleaned*/
 
-    STRICT_EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(ThreadAPI_Create(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
         .SetReturn(THREADAPI_ERROR);
-    STRICT_EXPECTED_CALL(singlylinkedlist_remove(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_remove(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
     set_expected_calls_for_freeUploadToBlobThreadInfo();
 
     ///act
@@ -3411,8 +3411,8 @@ static void IoTHubClientCore_UploadMultipleBlocksToBlobAsync_fails_when_strcpy_f
     TEST_GETDATA_CALLBACK_ARGS context = { 0 };
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG))
         .SetReturn(1);
     set_expected_calls_for_freeUploadToBlobThreadInfo();
 
@@ -3454,7 +3454,7 @@ static void IoTHubClientCore_UploadMultipleBlocksToBlobAsync_fails_when_malloc_f
     TEST_GETDATA_CALLBACK_ARGS context = { 0 };
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .SetReturn(NULL);
 
     ///act
@@ -3496,19 +3496,19 @@ TEST_FUNCTION(IoTHubClientCore_UploadMultipleBlocksToBlobAsync_callback_invoked_
     umock_c_reset_all_calls();
 
     set_expected_calls_for_allocateUploadToBlob();
-    STRICT_EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(ThreadAPI_Create(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(singlylinkedlist_add(IGNORED_PTR_ARG, IGNORED_PTR_ARG)); /*this is adding HTTPWORKER_THREAD_INFO to the list of HTTPWORKER_THREAD_INFO's to be cleaned*/
-    STRICT_EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_add(IGNORED_ARG, IGNORED_ARG)); /*this is adding HTTPWORKER_THREAD_INFO to the list of HTTPWORKER_THREAD_INFO's to be cleaned*/
+    STRICT_EXPECTED_CALL(ThreadAPI_Create(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(get_time(IGNORED_NUM_ARG)).CallCannotFail();
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_UploadMultipleBlocksToBlob(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(get_time(IGNORED_ARG)).CallCannotFail();
+    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_UploadMultipleBlocksToBlob(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
         .SetReturn(IOTHUB_CLIENT_ERROR);
 
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
     STRICT_EXPECTED_CALL(ThreadAPI_Exit(0));
 
     ///act
@@ -3523,12 +3523,12 @@ TEST_FUNCTION(IoTHubClientCore_UploadMultipleBlocksToBlobAsync_callback_invoked_
 
     ///cleanup
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
 
-    EXPECTED_CALL(ThreadAPI_Join(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    EXPECTED_CALL(ThreadAPI_Join(IGNORED_ARG, IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
     EXPECTED_CALL(singlylinkedlist_get_head_item(TEST_SLL_HANDLE))
         .SetReturn(TEST_LIST_HANDLE);
 
@@ -3546,19 +3546,19 @@ TEST_FUNCTION(IoTHubClientCore_UploadMultipleBlocksToBlobAsync_callbackEx_invoke
     umock_c_reset_all_calls();
 
     set_expected_calls_for_allocateUploadToBlob();
-    STRICT_EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(ThreadAPI_Create(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(singlylinkedlist_add(IGNORED_PTR_ARG, IGNORED_PTR_ARG)); /*this is adding HTTPWORKER_THREAD_INFO to the list of HTTPWORKER_THREAD_INFO's to be cleaned*/
-    STRICT_EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_add(IGNORED_ARG, IGNORED_ARG)); /*this is adding HTTPWORKER_THREAD_INFO to the list of HTTPWORKER_THREAD_INFO's to be cleaned*/
+    STRICT_EXPECTED_CALL(ThreadAPI_Create(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(get_time(IGNORED_NUM_ARG)).CallCannotFail();
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_UploadMultipleBlocksToBlobEx(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(get_time(IGNORED_ARG)).CallCannotFail();
+    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_UploadMultipleBlocksToBlobEx(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
         .SetReturn(IOTHUB_CLIENT_ERROR);
 
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
     STRICT_EXPECTED_CALL(ThreadAPI_Exit(0));
 
     ///act
@@ -3573,12 +3573,12 @@ TEST_FUNCTION(IoTHubClientCore_UploadMultipleBlocksToBlobAsync_callbackEx_invoke
 
     ///cleanup
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
 
-    EXPECTED_CALL(ThreadAPI_Join(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    EXPECTED_CALL(ThreadAPI_Join(IGNORED_ARG, IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
     EXPECTED_CALL(singlylinkedlist_get_head_item(TEST_SLL_HANDLE))
         .SetReturn(TEST_LIST_HANDLE);
 
@@ -3598,15 +3598,15 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_method_callback_VECTOR_move_FAILS
     umock_c_reset_all_calls();
     g_how_thread_loops = 1;
 
-    STRICT_EXPECTED_CALL(get_time(IGNORED_NUM_ARG)).CallCannotFail();
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(get_time(IGNORED_ARG)).CallCannotFail();
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
     STRICT_EXPECTED_CALL(IoTHubClientCore_LL_DoWork(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE));
     STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(TEST_SLL_HANDLE));
-    STRICT_EXPECTED_CALL(VECTOR_move(IGNORED_PTR_ARG)).SetReturn(NULL);
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(VECTOR_move(IGNORED_ARG)).SetReturn(NULL);
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
     STRICT_EXPECTED_CALL(ThreadAPI_Sleep(1));
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
     STRICT_EXPECTED_CALL(ThreadAPI_Exit(0));
 
     // act
@@ -3625,7 +3625,7 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_method_callback_STRING_construct_
     (void)IoTHubClientCore_SetDeviceMethodCallback(iothub_handle, test_method_callback, CALLBACK_CONTEXT);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(STRING_construct(IGNORED_PTR_ARG)).SetReturn(NULL);
+    STRICT_EXPECTED_CALL(STRING_construct(IGNORED_ARG)).SetReturn(NULL);
     (void)g_inboundDeviceCallback(TEST_METHOD_NAME, TEST_DEVICE_METHOD_RESPONSE, TEST_DEVICE_RESP_LENGTH, TEST_METHOD_ID, g_userContextCallback);
     g_how_thread_loops = 1;
 
@@ -3647,9 +3647,9 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_method_callback_BUFFER_create_FAI
     (void)IoTHubClientCore_SetDeviceMethodCallback(iothub_handle, test_method_callback, CALLBACK_CONTEXT);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(STRING_construct(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_PTR_ARG, IGNORED_NUM_ARG)).SetReturn(NULL);
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_construct(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_ARG, IGNORED_ARG)).SetReturn(NULL);
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
 
     (void)g_inboundDeviceCallback(TEST_METHOD_NAME, TEST_DEVICE_METHOD_RESPONSE, TEST_DEVICE_RESP_LENGTH, TEST_METHOD_ID, g_userContextCallback);
     g_how_thread_loops = 1;
@@ -3672,11 +3672,11 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_method_callback_VECTOR_push_back_
     (void)IoTHubClientCore_SetDeviceMethodCallback(iothub_handle, test_method_callback, CALLBACK_CONTEXT);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(STRING_construct(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(VECTOR_push_back(IGNORED_PTR_ARG, IGNORED_PTR_ARG, 1)).SetReturn(MU_FAILURE);
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_construct(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(VECTOR_push_back(IGNORED_ARG, IGNORED_ARG, 1)).SetReturn(MU_FAILURE);
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG));
 
     (void)g_inboundDeviceCallback(TEST_METHOD_NAME, TEST_DEVICE_METHOD_RESPONSE, TEST_DEVICE_RESP_LENGTH, TEST_METHOD_ID, g_userContextCallback);
     g_how_thread_loops = 1;
@@ -3725,18 +3725,18 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_method_callback_DMR_Fails)
     g_how_thread_loops = 1;
 
     set_expected_calls_first_ScheduleWork_Thread_loop(1);
-    STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_PTR_ARG, 0));
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(my_DeviceMethodCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG, 0, IGNORED_PTR_ARG, IGNORED_NUM_ARG, CALLBACK_CONTEXT));
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_DeviceMethodResponse(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_NUM_ARG)).SetReturn(IOTHUB_CLIENT_ERROR);
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(VECTOR_destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_ARG, 0));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(my_DeviceMethodCallback(IGNORED_ARG, IGNORED_ARG, 0, IGNORED_ARG, IGNORED_ARG, CALLBACK_CONTEXT));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_DeviceMethodResponse(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG)).SetReturn(IOTHUB_CLIENT_ERROR);
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(VECTOR_destroy(IGNORED_ARG));
     set_expected_calls_final_ScheduleWork_Thread_loop();
 
     // act
@@ -3760,18 +3760,18 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_method_callback_succeed)
     g_how_thread_loops = 1;
 
     set_expected_calls_first_ScheduleWork_Thread_loop(1);
-    STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_PTR_ARG, 0));
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(my_DeviceMethodCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG, 0, IGNORED_PTR_ARG, IGNORED_NUM_ARG, CALLBACK_CONTEXT));
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_DeviceMethodResponse(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(VECTOR_destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_ARG, 0));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(my_DeviceMethodCallback(IGNORED_ARG, IGNORED_ARG, 0, IGNORED_ARG, IGNORED_ARG, CALLBACK_CONTEXT));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_DeviceMethodResponse(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(VECTOR_destroy(IGNORED_ARG));
     set_expected_calls_final_ScheduleWork_Thread_loop();
 
     // act
@@ -3801,16 +3801,16 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_repeated_method_callback_succeed)
 
     for (size_t ii = 0; ii < method_calls_repeat; ++ii)
     {
-        STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_PTR_ARG, ii));
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(test_incoming_method_callback(IGNORED_PTR_ARG, IGNORED_PTR_ARG, 0, TEST_METHOD_ID, CALLBACK_CONTEXT));
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_ARG, ii));
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(test_incoming_method_callback(IGNORED_ARG, IGNORED_ARG, 0, TEST_METHOD_ID, CALLBACK_CONTEXT));
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
     }
 
-    STRICT_EXPECTED_CALL(VECTOR_destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(VECTOR_destroy(IGNORED_ARG));
     set_expected_calls_final_ScheduleWork_Thread_loop();
 
     // act
@@ -3830,7 +3830,7 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_incoming_method_callback_STRING_c
     (void)IoTHubClientCore_SetDeviceMethodCallback_Ex(iothub_handle, test_incoming_method_callback, CALLBACK_CONTEXT);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(STRING_construct(IGNORED_PTR_ARG)).SetReturn(NULL);
+    STRICT_EXPECTED_CALL(STRING_construct(IGNORED_ARG)).SetReturn(NULL);
     (void)g_inboundDeviceCallback(TEST_METHOD_NAME, TEST_DEVICE_METHOD_RESPONSE, TEST_DEVICE_RESP_LENGTH, TEST_METHOD_ID, g_userContextCallback);
     g_how_thread_loops = 1;
 
@@ -3852,9 +3852,9 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_incoming_method_callback_BUFFER_c
     (void)IoTHubClientCore_SetDeviceMethodCallback_Ex(iothub_handle, test_incoming_method_callback, CALLBACK_CONTEXT);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(STRING_construct(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_PTR_ARG, IGNORED_NUM_ARG)).SetReturn(NULL);
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_construct(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_ARG, IGNORED_ARG)).SetReturn(NULL);
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
 
     (void)g_inboundDeviceCallback(TEST_METHOD_NAME, TEST_DEVICE_METHOD_RESPONSE, TEST_DEVICE_RESP_LENGTH, TEST_METHOD_ID, g_userContextCallback);
     g_how_thread_loops = 1;
@@ -3878,11 +3878,11 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_incoming_method_callback_VECTOR_p
     (void)IoTHubClientCore_SetDeviceMethodCallback_Ex(iothub_handle, test_incoming_method_callback, CALLBACK_CONTEXT);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(STRING_construct(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(VECTOR_push_back(IGNORED_PTR_ARG, IGNORED_PTR_ARG, 1)).SetReturn(MU_FAILURE);
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_construct(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(VECTOR_push_back(IGNORED_ARG, IGNORED_ARG, 1)).SetReturn(MU_FAILURE);
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG));
 
     (void)g_inboundDeviceCallback(TEST_METHOD_NAME, TEST_DEVICE_METHOD_RESPONSE, TEST_DEVICE_RESP_LENGTH, TEST_METHOD_ID, g_userContextCallback);
     g_how_thread_loops = 1;
@@ -3909,8 +3909,8 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_incoming_method_callback_NULL_CON
     g_how_thread_loops = 1;
 
     set_expected_calls_first_ScheduleWork_Thread_loop(1);
-    STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_PTR_ARG, 0));
-    STRICT_EXPECTED_CALL(VECTOR_destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_ARG, 0));
+    STRICT_EXPECTED_CALL(VECTOR_destroy(IGNORED_ARG));
     set_expected_calls_final_ScheduleWork_Thread_loop();
 
     // act
@@ -3934,14 +3934,14 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_incoming_method_callback_succeed)
     g_how_thread_loops = 1;
 
     set_expected_calls_first_ScheduleWork_Thread_loop(1);
-    STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_PTR_ARG, 0));
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(test_incoming_method_callback(IGNORED_PTR_ARG, IGNORED_PTR_ARG, 0, TEST_METHOD_ID, CALLBACK_CONTEXT));
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(VECTOR_destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_ARG, 0));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(test_incoming_method_callback(IGNORED_ARG, IGNORED_ARG, 0, TEST_METHOD_ID, CALLBACK_CONTEXT));
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(VECTOR_destroy(IGNORED_ARG));
     set_expected_calls_final_ScheduleWork_Thread_loop();
 
     // act
@@ -3971,16 +3971,16 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_repeated_incoming_method_callback
 
     for (size_t ii = 0; ii < method_calls_repeat; ++ii)
     {
-        STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_PTR_ARG, ii));
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(test_incoming_method_callback(IGNORED_PTR_ARG, IGNORED_PTR_ARG, 0, TEST_METHOD_ID, CALLBACK_CONTEXT));
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_ARG, ii));
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(test_incoming_method_callback(IGNORED_ARG, IGNORED_ARG, 0, TEST_METHOD_ID, CALLBACK_CONTEXT));
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
     }
 
-    STRICT_EXPECTED_CALL(VECTOR_destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(VECTOR_destroy(IGNORED_ARG));
     set_expected_calls_final_ScheduleWork_Thread_loop();
 
     // act
@@ -4010,23 +4010,23 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_repeated_command_callback_succeed
 
     for (size_t ii = 0; ii < command_calls_repeat; ++ii)
     {
-        STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_PTR_ARG, ii));
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG)).SetReturn((unsigned char*)TEST_COMMAND_PAYLOAD);
-        STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG)).SetReturn(TEST_COMMAND_PAYLOAD_LENGTH);
-        STRICT_EXPECTED_CALL(IoTHubClientCore_LL_ParseMethodToCommand(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_ARG, ii));
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG)).SetReturn((unsigned char*)TEST_COMMAND_PAYLOAD);
+        STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_ARG)).SetReturn(TEST_COMMAND_PAYLOAD_LENGTH);
+        STRICT_EXPECTED_CALL(IoTHubClientCore_LL_ParseMethodToCommand(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .CopyOutArgumentBuffer_command_name(&TEST_METHOD_NAME, sizeof(const char *));
-        STRICT_EXPECTED_CALL(test_command_callback(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(IoTHubClientCore_LL_DeviceMethodResponse(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(test_command_callback(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(IoTHubClientCore_LL_DeviceMethodResponse(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
     }
 
-    STRICT_EXPECTED_CALL(VECTOR_destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(VECTOR_destroy(IGNORED_ARG));
     set_expected_calls_final_ScheduleWork_Thread_loop();
 
     // act
@@ -4045,7 +4045,7 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_incoming_command_callback_STRING_
     (void)IoTHubClientCore_SubscribeToCommands(iothub_handle, test_command_callback, CALLBACK_CONTEXT);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(STRING_construct(IGNORED_PTR_ARG)).SetReturn(NULL);
+    STRICT_EXPECTED_CALL(STRING_construct(IGNORED_ARG)).SetReturn(NULL);
     (void)g_inboundDeviceCallback(TEST_METHOD_NAME, TEST_DEVICE_METHOD_RESPONSE, TEST_DEVICE_RESP_LENGTH, TEST_COMMAND_ID, g_userContextCallback);
     g_how_thread_loops = 1;
 
@@ -4067,9 +4067,9 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_incoming_command_callback_BUFFER_
     (void)IoTHubClientCore_SubscribeToCommands(iothub_handle, test_command_callback, CALLBACK_CONTEXT);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(STRING_construct(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_PTR_ARG, IGNORED_NUM_ARG)).SetReturn(NULL);
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_construct(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_ARG, IGNORED_ARG)).SetReturn(NULL);
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
 
     (void)g_inboundDeviceCallback(TEST_METHOD_NAME, TEST_DEVICE_METHOD_RESPONSE, TEST_DEVICE_RESP_LENGTH, TEST_COMMAND_ID, g_userContextCallback);
     g_how_thread_loops = 1;
@@ -4092,11 +4092,11 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_incoming_command_callback_VECTOR_
     (void)IoTHubClientCore_SubscribeToCommands(iothub_handle, test_command_callback, CALLBACK_CONTEXT);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(STRING_construct(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(VECTOR_push_back(IGNORED_PTR_ARG, IGNORED_PTR_ARG, 1)).SetReturn(MU_FAILURE);
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_construct(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(VECTOR_push_back(IGNORED_ARG, IGNORED_ARG, 1)).SetReturn(MU_FAILURE);
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG));
 
     (void)g_inboundDeviceCallback(TEST_METHOD_NAME, TEST_DEVICE_METHOD_RESPONSE, TEST_DEVICE_RESP_LENGTH, TEST_COMMAND_ID, g_userContextCallback);
     g_how_thread_loops = 1;
@@ -4123,8 +4123,8 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_incoming_command_callback_NULL_CO
     g_how_thread_loops = 1;
 
     set_expected_calls_first_ScheduleWork_Thread_loop(1);
-    STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_PTR_ARG, 0));
-    STRICT_EXPECTED_CALL(VECTOR_destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_ARG, 0));
+    STRICT_EXPECTED_CALL(VECTOR_destroy(IGNORED_ARG));
     set_expected_calls_final_ScheduleWork_Thread_loop();
 
     // act
@@ -4148,21 +4148,21 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_incoming_command_callback_succeed
     g_how_thread_loops = 1;
 
     set_expected_calls_first_ScheduleWork_Thread_loop(1);
-    STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_PTR_ARG, 0));
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG)).SetReturn((unsigned char*)TEST_COMMAND_PAYLOAD);
-    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG)).SetReturn(TEST_COMMAND_PAYLOAD_LENGTH);
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_ParseMethodToCommand(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_ARG, 0));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG)).SetReturn((unsigned char*)TEST_COMMAND_PAYLOAD);
+    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_ARG)).SetReturn(TEST_COMMAND_PAYLOAD_LENGTH);
+    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_ParseMethodToCommand(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
         .CopyOutArgumentBuffer_command_name(&TEST_METHOD_NAME, sizeof(const char *));
-    STRICT_EXPECTED_CALL(test_command_callback(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_DeviceMethodResponse(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));   
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(VECTOR_destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(test_command_callback(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_DeviceMethodResponse(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));   
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(VECTOR_destroy(IGNORED_ARG));
     set_expected_calls_final_ScheduleWork_Thread_loop();
 
     // act
@@ -4193,22 +4193,22 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_incoming_command_with_component_c
     strcpy(componentName, TEST_COMPONENT_NAME);
 
     set_expected_calls_first_ScheduleWork_Thread_loop(1);
-    STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_PTR_ARG, 0));
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG)).SetReturn((unsigned char*)TEST_COMMAND_PAYLOAD);
-    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG)).SetReturn(TEST_COMMAND_PAYLOAD_LENGTH);
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_ParseMethodToCommand(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_ARG, 0));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG)).SetReturn((unsigned char*)TEST_COMMAND_PAYLOAD);
+    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_ARG)).SetReturn(TEST_COMMAND_PAYLOAD_LENGTH);
+    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_ParseMethodToCommand(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
         .CopyOutArgumentBuffer_component_name(&componentName, sizeof(char *))
         .CopyOutArgumentBuffer_command_name(&TEST_METHOD_NAME, sizeof(const char *));
-    STRICT_EXPECTED_CALL(test_command_callback(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_DeviceMethodResponse(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));   
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(VECTOR_destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(test_command_callback(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_DeviceMethodResponse(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));   
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(VECTOR_destroy(IGNORED_ARG));
     set_expected_calls_final_ScheduleWork_Thread_loop();
 
     // act
@@ -4239,23 +4239,23 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_repeated_incoming_command_callbac
 
     for (size_t ii = 0; ii < command_calls_repeat; ++ii)
     {
-        STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_PTR_ARG, ii));
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG)).SetReturn((unsigned char*)TEST_COMMAND_PAYLOAD);
-        STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG)).SetReturn(TEST_COMMAND_PAYLOAD_LENGTH);
-        STRICT_EXPECTED_CALL(IoTHubClientCore_LL_ParseMethodToCommand(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_ARG, ii));
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG)).SetReturn((unsigned char*)TEST_COMMAND_PAYLOAD);
+        STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_ARG)).SetReturn(TEST_COMMAND_PAYLOAD_LENGTH);
+        STRICT_EXPECTED_CALL(IoTHubClientCore_LL_ParseMethodToCommand(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .CopyOutArgumentBuffer_command_name(&TEST_METHOD_NAME, sizeof(const char *));
-        STRICT_EXPECTED_CALL(test_command_callback(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(IoTHubClientCore_LL_DeviceMethodResponse(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(test_command_callback(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(IoTHubClientCore_LL_DeviceMethodResponse(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
     }
 
-    STRICT_EXPECTED_CALL(VECTOR_destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(VECTOR_destroy(IGNORED_ARG));
     set_expected_calls_final_ScheduleWork_Thread_loop();
 
     // act
@@ -4280,10 +4280,10 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_device_twin_succeed)
     g_how_thread_loops = 1;
 
     set_expected_calls_first_ScheduleWork_Thread_loop(1);
-    STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_PTR_ARG, 0));
+    STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_ARG, 0));
     STRICT_EXPECTED_CALL(test_device_twin_callback(DEVICE_TWIN_UPDATE_COMPLETE, NULL, 0, NULL));
 
-    STRICT_EXPECTED_CALL(VECTOR_destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(VECTOR_destroy(IGNORED_ARG));
     set_expected_calls_final_ScheduleWork_Thread_loop();
 
     // act
@@ -4309,10 +4309,10 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_event_confirm_succeed)
 
     set_expected_calls_first_ScheduleWork_Thread_loop(1);
 
-    STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_PTR_ARG, 0));
+    STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_ARG, 0));
     STRICT_EXPECTED_CALL(test_event_confirmation_callback(IOTHUB_CLIENT_CONFIRMATION_OK, NULL));
 
-    STRICT_EXPECTED_CALL(VECTOR_destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(VECTOR_destroy(IGNORED_ARG));
     set_expected_calls_final_ScheduleWork_Thread_loop();
 
     // act
@@ -4338,10 +4338,10 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_reported_state_succeed)
     g_how_thread_loops = 1;
 
     set_expected_calls_first_ScheduleWork_Thread_loop(1);
-    STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_PTR_ARG, 0));
+    STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_ARG, 0));
     STRICT_EXPECTED_CALL(test_report_state_callback(REPORTED_STATE_STATUS_CODE, NULL));
 
-    STRICT_EXPECTED_CALL(VECTOR_destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(VECTOR_destroy(IGNORED_ARG));
     set_expected_calls_final_ScheduleWork_Thread_loop();
 
     // act
@@ -4377,13 +4377,13 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_reported_state_two_callbacks_succ
     g_how_thread_loops = 1;
 
     set_expected_calls_first_ScheduleWork_Thread_loop(2);
-    STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_PTR_ARG, 0));
+    STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_ARG, 0));
     STRICT_EXPECTED_CALL(test_report_state_callback(REPORTED_STATE_STATUS_CODE, CALLBACK_CONTEXT));
 
-    STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_PTR_ARG, 1));
+    STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_ARG, 1));
     STRICT_EXPECTED_CALL(test_report_state_callback2(REPORTED_STATE_STATUS_CODE, CALLBACK_CONTEXT2));
 
-    STRICT_EXPECTED_CALL(VECTOR_destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(VECTOR_destroy(IGNORED_ARG));
     set_expected_calls_final_ScheduleWork_Thread_loop();
 
     // act
@@ -4410,10 +4410,10 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_message_callback_LOCK_Fails)
     g_how_thread_loops = 1;
 
     set_expected_calls_first_ScheduleWork_Thread_loop(1);
-    STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_PTR_ARG, 0));
+    STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_ARG, 0));
     STRICT_EXPECTED_CALL(test_message_confirmation_callback(NULL, NULL));
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG)).SetReturn(LOCK_ERROR);
-    STRICT_EXPECTED_CALL(VECTOR_destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG)).SetReturn(LOCK_ERROR);
+    STRICT_EXPECTED_CALL(VECTOR_destroy(IGNORED_ARG));
     set_expected_calls_final_ScheduleWork_Thread_loop();
 
     // act
@@ -4440,12 +4440,12 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_message_callback_SMD_Fails)
     g_how_thread_loops = 1;
 
     set_expected_calls_first_ScheduleWork_Thread_loop(1);
-    STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_PTR_ARG, 0));
+    STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_ARG, 0));
     STRICT_EXPECTED_CALL(test_message_confirmation_callback(NULL, NULL));
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SendMessageDisposition(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IOTHUBMESSAGE_ACCEPTED)).SetReturn(IOTHUB_CLIENT_ERROR);
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(VECTOR_destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SendMessageDisposition(IGNORED_ARG, IGNORED_ARG, IOTHUBMESSAGE_ACCEPTED)).SetReturn(IOTHUB_CLIENT_ERROR);
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(VECTOR_destroy(IGNORED_ARG));
     set_expected_calls_final_ScheduleWork_Thread_loop();
 
     // act
@@ -4472,12 +4472,12 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_message_callback_succeed)
     g_how_thread_loops = 1;
 
     set_expected_calls_first_ScheduleWork_Thread_loop(1);
-    STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_PTR_ARG, 0));
+    STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_ARG, 0));
     STRICT_EXPECTED_CALL(test_message_confirmation_callback(NULL, NULL));
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SendMessageDisposition(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IOTHUBMESSAGE_ACCEPTED));
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(VECTOR_destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SendMessageDisposition(IGNORED_ARG, IGNORED_ARG, IOTHUBMESSAGE_ACCEPTED));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(VECTOR_destroy(IGNORED_ARG));
     set_expected_calls_final_ScheduleWork_Thread_loop();
 
 
@@ -4547,7 +4547,7 @@ TEST_FUNCTION(IoTHubClient_SendEventToOutputAsync_succeed)
     IOTHUB_CLIENT_CORE_HANDLE iothub_handle = IoTHubClientCore_Create(TEST_CLIENT_CONFIG);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_SetOutputName(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubMessage_SetOutputName(IGNORED_ARG, IGNORED_ARG));
     setup_iothubclient_sendeventasync(true);
 
     // act
@@ -4570,7 +4570,7 @@ TEST_FUNCTION(IoTHubClientCore_SendEventToOutputAsync_fail)
     int negativeTestsInitResult = umock_c_negative_tests_init();
     ASSERT_ARE_EQUAL(int, 0, negativeTestsInitResult);
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_SetOutputName(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubMessage_SetOutputName(IGNORED_ARG, IGNORED_ARG));
     setup_iothubclient_sendeventasync(true);
 
     umock_c_negative_tests_snapshot();
@@ -4618,11 +4618,11 @@ static void setup_IoTHubClientCore_SetInputMessageCallback(bool use_threads)
 {
     if (use_threads)
     {
-        STRICT_EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(ThreadAPI_Create(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
     }
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SetInputMessageCallbackEx(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SetInputMessageCallbackEx(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
 }
 
 TEST_FUNCTION(IoTHubClientCore_SetInputMessageCallback_succeed)
@@ -4754,26 +4754,26 @@ static void set_expected_calls_for_IotHubClientCore_GenericMethodInvoke(METHOD_I
 {
     current_method_invoke_test = testTarget;
 
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)); /*this is creating a HTTPWORKER_THREAD_INFO*/
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_DEVICE_ID));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG)); /*this is creating a HTTPWORKER_THREAD_INFO*/
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_DEVICE_ID));
     if (testTarget == METHOD_INVOKE_TEST_TARGET_MODULE)
     {
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_MODULE_ID));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_MODULE_ID));
     }
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_METHOD_NAME));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_METHOD_PAYLOAD));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_METHOD_NAME));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_METHOD_PAYLOAD));
 
     STRICT_EXPECTED_CALL(Lock_Init());
 
     if (testThreadType == METHOD_INVOKE_TEST_MOCK_CREATE_THREAD)
     {
-        EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        EXPECTED_CALL(ThreadAPI_Create(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
     }
 
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(singlylinkedlist_add(IGNORED_PTR_ARG, IGNORED_PTR_ARG)); /*this is adding HTTPWORKER_THREAD_INFO to the list of HTTPWORKER_THREAD_INFO's to be cleaned*/
-    EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_add(IGNORED_ARG, IGNORED_ARG)); /*this is adding HTTPWORKER_THREAD_INFO to the list of HTTPWORKER_THREAD_INFO's to be cleaned*/
+    EXPECTED_CALL(ThreadAPI_Create(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
 }
 
 static void set_expected_calls_For_MethodInvokeThread()
@@ -4785,18 +4785,18 @@ static void set_expected_calls_For_MethodInvokeThread()
     unsigned char* responseData = (unsigned char* )my_gballoc_malloc(1);
     ASSERT_IS_NOT_NULL(responseData, "failed allocating responseData");
 
-    STRICT_EXPECTED_CALL(get_time(IGNORED_NUM_ARG)).CallCannotFail();
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_GenericMethodInvoke(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG,
-                                                                 IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(get_time(IGNORED_ARG)).CallCannotFail();
+    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_GenericMethodInvoke(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IGNORED_ARG, IGNORED_ARG,
+                                                                 IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
                             .CopyOutArgumentBuffer(7, &responseStatus, sizeof(responseStatus))
                             .CopyOutArgumentBuffer(8, &responseData, sizeof(responseData))
                             .CopyOutArgumentBuffer(9, &responseSize, sizeof(responseSize))
                             ;
     STRICT_EXPECTED_CALL(test_method_invoke_callback(IOTHUB_CLIENT_OK, responseStatus, responseData, responseSize, CALLBACK_CONTEXT));
 
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
     STRICT_EXPECTED_CALL(ThreadAPI_Exit(0));
 }
 
@@ -4823,12 +4823,12 @@ static void IoTHubClientCore_GenericMethodInvoke_Impl(METHOD_INVOKE_TEST_TARGET 
 
     // cleanup
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
 
-    EXPECTED_CALL(ThreadAPI_Join(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    EXPECTED_CALL(ThreadAPI_Join(IGNORED_ARG, IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
     EXPECTED_CALL(singlylinkedlist_get_head_item(TEST_SLL_HANDLE))
         .SetReturn(TEST_LIST_HANDLE);
 
@@ -4995,11 +4995,11 @@ TEST_FUNCTION(IoTHubClientCore_SendMessageDisposition_succeed)
         umock_c_reset_all_calls();
         if (index == 0)
         {
-            STRICT_EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(ThreadAPI_Create(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
         }
-        STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SendMessageDisposition(IGNORED_PTR_ARG, TEST_MESSAGE_HANDLE, disposition_option[index]));    
-        STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SendMessageDisposition(IGNORED_ARG, TEST_MESSAGE_HANDLE, disposition_option[index]));    
+        STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
 
         // act
         IOTHUB_CLIENT_RESULT result = IoTHubClientCore_SendMessageDisposition(iothub_handle, TEST_MESSAGE_HANDLE, disposition_option[index]);
@@ -5022,10 +5022,10 @@ TEST_FUNCTION(IoTHubClientCore_SendMessageDisposition_negative_test_fails)
     IOTHUB_CLIENT_CORE_HANDLE iothub_handle = IoTHubClientCore_Create(TEST_CLIENT_CONFIG);
 
     umock_c_reset_all_calls();
-    // STRICT_EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SendMessageDisposition(IGNORED_PTR_ARG, TEST_MESSAGE_HANDLE, IOTHUBMESSAGE_ACCEPTED));    
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG))
+    // STRICT_EXPECTED_CALL(ThreadAPI_Create(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SendMessageDisposition(IGNORED_ARG, TEST_MESSAGE_HANDLE, IOTHUBMESSAGE_ACCEPTED));    
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG))
         .CallCannotFail();
     umock_c_negative_tests_snapshot();
 

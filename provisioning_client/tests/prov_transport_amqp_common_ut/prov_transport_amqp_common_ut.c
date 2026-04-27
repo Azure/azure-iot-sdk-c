@@ -37,7 +37,7 @@ static void my_gballoc_free(void* ptr)
 #include "umock_c/umocktypes_stdint.h"
 #include "umock_c/umocktypes_bool.h"
 #include "umock_c/umock_c_negative_tests.h"
-#include "azure_macro_utils/macro_utils.h"
+#include "macro_utils/macro_utils.h"
 
 #define ENABLE_MOCKS
 #include "azure_c_shared_utility/xio.h"
@@ -726,52 +726,52 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
     {
         if (no_app_properties)
         {
-            STRICT_EXPECTED_CALL(message_get_application_properties(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(message_get_application_properties(IGNORED_ARG, IGNORED_ARG));
         }
         else
         {
             uint32_t retry_after_count = 1;
             const char* retry_after_string = "retry-after";
-            STRICT_EXPECTED_CALL(message_get_application_properties(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL(message_get_application_properties(IGNORED_ARG, IGNORED_ARG))
                 .CopyOutArgumentBuffer_application_properties(&TEST_APP_PROPERTIES, sizeof(TEST_APP_PROPERTIES));
-            STRICT_EXPECTED_CALL(amqpvalue_get_inplace_described_value(IGNORED_PTR_ARG));
-            STRICT_EXPECTED_CALL(amqpvalue_get_map_pair_count(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CopyOutArgumentBuffer_pair_count(&retry_after_count, sizeof(uint32_t));
-            STRICT_EXPECTED_CALL(amqpvalue_get_map_key_value_pair(IGNORED_PTR_ARG, 0, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-            STRICT_EXPECTED_CALL(amqpvalue_get_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CopyOutArgumentBuffer_string_value(&retry_after_string, sizeof(char*));
-            STRICT_EXPECTED_CALL(amqpvalue_get_type(IGNORED_PTR_ARG)).SetReturn(type).CallCannotFail();
+            STRICT_EXPECTED_CALL(amqpvalue_get_inplace_described_value(IGNORED_ARG));
+            STRICT_EXPECTED_CALL(amqpvalue_get_map_pair_count(IGNORED_ARG, IGNORED_ARG)).CopyOutArgumentBuffer_pair_count(&retry_after_count, sizeof(uint32_t));
+            STRICT_EXPECTED_CALL(amqpvalue_get_map_key_value_pair(IGNORED_ARG, 0, IGNORED_ARG, IGNORED_ARG));
+            STRICT_EXPECTED_CALL(amqpvalue_get_string(IGNORED_ARG, IGNORED_ARG)).CopyOutArgumentBuffer_string_value(&retry_after_string, sizeof(char*));
+            STRICT_EXPECTED_CALL(amqpvalue_get_type(IGNORED_ARG)).SetReturn(type).CallCannotFail();
             if (type == AMQP_TYPE_INT)
             {
                 int32_t retry_after_value = 2;
-                STRICT_EXPECTED_CALL(amqpvalue_get_int(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CopyOutArgumentBuffer_int_value(&retry_after_value, sizeof(int32_t));
+                STRICT_EXPECTED_CALL(amqpvalue_get_int(IGNORED_ARG, IGNORED_ARG)).CopyOutArgumentBuffer_int_value(&retry_after_value, sizeof(int32_t));
             }
             else
             {
                 char* retry_after_value = "2";
-                STRICT_EXPECTED_CALL(amqpvalue_get_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CopyOutArgumentBuffer_string_value(&retry_after_value, sizeof(char*));
+                STRICT_EXPECTED_CALL(amqpvalue_get_string(IGNORED_ARG, IGNORED_ARG)).CopyOutArgumentBuffer_string_value(&retry_after_value, sizeof(char*));
             }
 
-            STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_NUM_ARG));
-            STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_NUM_ARG));
-            STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_NUM_ARG));
+            STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_ARG));
+            STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_ARG));
+            STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_ARG));
         }
     }
 
     static void setup_retrieve_amqp_property_mocks(const char* string_value)
     {
-        STRICT_EXPECTED_CALL(amqpvalue_create_string(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(amqpvalue_get_map_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(amqpvalue_get_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(amqpvalue_create_string(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(amqpvalue_get_map_value(IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(amqpvalue_get_string(IGNORED_ARG, IGNORED_ARG))
             .CopyOutArgumentBuffer_string_value(&string_value, sizeof(char*));
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_ARG));
     }
 
     static void setup_on_message_recv_callback_mocks(bool no_app_properties, AMQP_TYPE type)
     {
-        STRICT_EXPECTED_CALL(message_get_body_type(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(message_get_body_amqp_data_in_place(IGNORED_PTR_ARG, 0, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(message_get_body_type(IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(message_get_body_amqp_data_in_place(IGNORED_ARG, 0, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
         setup_retry_after_mocks(no_app_properties, type);
         STRICT_EXPECTED_CALL(messaging_delivery_accepted());
     }
@@ -784,98 +784,98 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
 
         STRICT_EXPECTED_CALL(message_create());
 
-        STRICT_EXPECTED_CALL(Azure_Base64_Encode(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(Azure_Base64_Encode(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(on_transport_create_json_payload(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(Azure_Base64_Encode(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(Azure_Base64_Encode(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(on_transport_create_json_payload(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
 
         STRICT_EXPECTED_CALL(amqpvalue_create_map());
-        STRICT_EXPECTED_CALL(message_add_body_amqp_data(IGNORED_PTR_ARG, binary_data)).IgnoreArgument_amqp_data();
+        STRICT_EXPECTED_CALL(message_add_body_amqp_data(IGNORED_ARG, binary_data)).IgnoreArgument_amqp_data();
 
-        STRICT_EXPECTED_CALL(amqpvalue_create_string(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(amqpvalue_create_string(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(amqpvalue_set_map_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(amqpvalue_create_string(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(amqpvalue_create_string(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(amqpvalue_set_map_value(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_ARG));
 
         if (operation_id)
         {
-            STRICT_EXPECTED_CALL(amqpvalue_create_string(IGNORED_PTR_ARG));
-            STRICT_EXPECTED_CALL(amqpvalue_create_string(IGNORED_PTR_ARG));
-            STRICT_EXPECTED_CALL(amqpvalue_set_map_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-            STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG));
-            STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(amqpvalue_create_string(IGNORED_ARG));
+            STRICT_EXPECTED_CALL(amqpvalue_create_string(IGNORED_ARG));
+            STRICT_EXPECTED_CALL(amqpvalue_set_map_value(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+            STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_ARG));
+            STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_ARG));
         }
-        STRICT_EXPECTED_CALL(message_set_application_properties(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(messagesender_send_async(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, 0));
-        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(message_destroy(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(message_set_application_properties(IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(messagesender_send_async(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, 0));
+        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(message_destroy(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
     }
 
     static void setup_create_sender_link_mocks(void)
     {
-        STRICT_EXPECTED_CALL(messaging_create_source(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(messaging_create_target(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(link_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, role_sender, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(messaging_create_source(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(messaging_create_target(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(link_create(IGNORED_ARG, IGNORED_ARG, role_sender, IGNORED_ARG, IGNORED_ARG));
 
         STRICT_EXPECTED_CALL(amqpvalue_create_map());
-        STRICT_EXPECTED_CALL(amqpvalue_create_symbol(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(amqpvalue_create_string(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(amqpvalue_set_map_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(link_set_attach_properties(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(amqpvalue_create_symbol(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(amqpvalue_create_string(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(amqpvalue_set_map_value(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(link_set_attach_properties(IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_ARG));
 
-        STRICT_EXPECTED_CALL(link_set_max_message_size(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(messagesender_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(messagesender_open(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(link_set_max_message_size(IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(messagesender_create(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(messagesender_open(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
     }
 
     static void setup_create_receiver_link_mocks(void)
     {
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(messaging_create_source(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(messaging_create_target(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(link_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, role_receiver, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(link_set_rcv_settle_mode(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(messaging_create_source(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(messaging_create_target(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(link_create(IGNORED_ARG, IGNORED_ARG, role_receiver, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(link_set_rcv_settle_mode(IGNORED_ARG, IGNORED_ARG));
 
         STRICT_EXPECTED_CALL(amqpvalue_create_map());
-        STRICT_EXPECTED_CALL(amqpvalue_create_symbol(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(amqpvalue_create_string(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(amqpvalue_set_map_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(link_set_attach_properties(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(amqpvalue_create_symbol(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(amqpvalue_create_string(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(amqpvalue_set_map_value(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(link_set_attach_properties(IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_ARG));
 
-        STRICT_EXPECTED_CALL(link_set_max_message_size(IGNORED_PTR_ARG, IGNORED_NUM_ARG)); //13
-        STRICT_EXPECTED_CALL(messagereceiver_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(messagereceiver_open(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG)); //18
+        STRICT_EXPECTED_CALL(link_set_max_message_size(IGNORED_ARG, IGNORED_ARG)); //13
+        STRICT_EXPECTED_CALL(messagereceiver_create(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(messagereceiver_open(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG)); //18
     }
 
     static void setup_create_amqp_connection_mocks(bool use_x509)
     {
-        STRICT_EXPECTED_CALL(on_transport_io(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(on_transport_io(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
         if (use_x509)
         {
-            STRICT_EXPECTED_CALL(xio_setoption(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-            STRICT_EXPECTED_CALL(xio_setoption(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(xio_setoption(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+            STRICT_EXPECTED_CALL(xio_setoption(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
         }
-        STRICT_EXPECTED_CALL(connection_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(connection_set_trace(IGNORED_PTR_ARG, false));
+        STRICT_EXPECTED_CALL(connection_create(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(connection_set_trace(IGNORED_ARG, false));
     }
 
     static void setup_create_connection_mocks(bool use_x509)
@@ -883,13 +883,13 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         if (!use_x509)
         {
             STRICT_EXPECTED_CALL(prov_sasltpm_get_interface());
-            STRICT_EXPECTED_CALL(saslmechanism_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(saslmechanism_create(IGNORED_ARG, IGNORED_ARG));
         }
         setup_create_amqp_connection_mocks(use_x509);
 
-        STRICT_EXPECTED_CALL(session_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(session_set_incoming_window(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(session_set_outgoing_window(IGNORED_PTR_ARG, IGNORED_NUM_ARG)); // 7
+        STRICT_EXPECTED_CALL(session_create(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(session_set_incoming_window(IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(session_set_outgoing_window(IGNORED_ARG, IGNORED_ARG)); // 7
 
         setup_create_receiver_link_mocks();
         setup_create_sender_link_mocks(); // 20
@@ -897,19 +897,19 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
 
     static void setup_create_symm_key_connection_mocks(void)
     {
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(on_transport_challenge_callback(NULL, 0, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(on_transport_challenge_callback(NULL, 0, IGNORED_ARG, IGNORED_ARG));
         STRICT_EXPECTED_CALL(saslplain_get_interface());
-        STRICT_EXPECTED_CALL(saslmechanism_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(saslmechanism_create(IGNORED_ARG, IGNORED_ARG));
 
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
         setup_create_amqp_connection_mocks(false);
 
-        STRICT_EXPECTED_CALL(session_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(session_set_incoming_window(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(session_set_outgoing_window(IGNORED_PTR_ARG, IGNORED_NUM_ARG)); // 7
+        STRICT_EXPECTED_CALL(session_create(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(session_set_incoming_window(IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(session_set_outgoing_window(IGNORED_ARG, IGNORED_ARG)); // 7
 
         setup_create_receiver_link_mocks();
         setup_create_sender_link_mocks(); // 20
@@ -917,10 +917,10 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
 
     static void setup_prov_transport_common_amqp_create_mocks(void)
     {
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_URI_VALUE));
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_DPS_API_VALUE));
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_SCOPE_ID_VALUE));
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_URI_VALUE));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_DPS_API_VALUE));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_SCOPE_ID_VALUE));
     }
 
     TEST_FUNCTION(prov_transport_common_amqp_create_uri_NULL_fail)
@@ -1047,20 +1047,20 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         umock_c_reset_all_calls();
 
         //arrange
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
         //act
         prov_transport_common_amqp_destroy(handle);
@@ -1181,10 +1181,10 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         umock_c_reset_all_calls();
 
         //arrange
-        STRICT_EXPECTED_CALL(BUFFER_clone(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(BUFFER_clone(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_REGISTRATION_ID_VALUE));
-        //STRICT_EXPECTED_CALL(on_transport_status_cb(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(BUFFER_clone(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(BUFFER_clone(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_REGISTRATION_ID_VALUE));
+        //STRICT_EXPECTED_CALL(on_transport_status_cb(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, IGNORED_ARG));
 
         //act
         int result = prov_transport_common_amqp_open(handle, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL, on_transport_challenge_callback, NULL);
@@ -1207,9 +1207,9 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         ASSERT_ARE_EQUAL(int, 0, negativeTestsInitResult);
 
         //arrange
-        STRICT_EXPECTED_CALL(BUFFER_clone(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(BUFFER_clone(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(on_transport_status_cb(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, IGNORED_NUM_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(BUFFER_clone(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(BUFFER_clone(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(on_transport_status_cb(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, IGNORED_ARG, IGNORED_ARG));
 
         umock_c_negative_tests_snapshot();
 
@@ -1247,8 +1247,8 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         umock_c_reset_all_calls();
 
         //arrange
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_REGISTRATION_ID_VALUE));
-        //STRICT_EXPECTED_CALL(on_transport_status_cb(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_REGISTRATION_ID_VALUE));
+        //STRICT_EXPECTED_CALL(on_transport_status_cb(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, IGNORED_ARG));
 
         //act
         int result = prov_transport_common_amqp_open(handle, TEST_REGISTRATION_ID_VALUE, NULL, NULL, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL, on_transport_challenge_callback, NULL);
@@ -1286,7 +1286,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         umock_c_reset_all_calls();
 
         //arrange
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_REGISTRATION_ID_VALUE));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_REGISTRATION_ID_VALUE));
 
         //act
         int result = prov_transport_common_amqp_open(handle, TEST_REGISTRATION_ID_VALUE, NULL, NULL, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL, NULL, NULL);
@@ -1337,12 +1337,12 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         umock_c_reset_all_calls();
 
         //arrange
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
-        STRICT_EXPECTED_CALL(xio_destroy(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(xio_destroy(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(xio_destroy(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(xio_destroy(IGNORED_ARG));
 
         //act
         int result = prov_transport_common_amqp_close(handle);
@@ -1516,9 +1516,9 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         umock_c_reset_all_calls();
 
         //arrange
-        STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG)).SetReturn(TEST_DATA_VALUE);
-        STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG)).SetReturn(TEST_DATA_LENGTH);
-        STRICT_EXPECTED_CALL(on_transport_challenge_callback(TEST_DATA_VALUE, TEST_DATA_LENGTH, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG)).SetReturn(TEST_DATA_VALUE);
+        STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_ARG)).SetReturn(TEST_DATA_LENGTH);
+        STRICT_EXPECTED_CALL(on_transport_challenge_callback(TEST_DATA_VALUE, TEST_DATA_LENGTH, IGNORED_ARG, IGNORED_ARG));
 
         //act
         result = g_challenge_cb(TEST_BUFFER_HANDLE_VALUE, g_challenge_context);
@@ -1543,9 +1543,9 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         umock_c_reset_all_calls();
 
         //arrange
-        STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG)).SetReturn(TEST_DATA_VALUE);
-        STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG)).SetReturn(TEST_DATA_LENGTH);
-        STRICT_EXPECTED_CALL(on_transport_challenge_callback(TEST_DATA_VALUE, TEST_DATA_LENGTH, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(NULL);
+        STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG)).SetReturn(TEST_DATA_VALUE);
+        STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_ARG)).SetReturn(TEST_DATA_LENGTH);
+        STRICT_EXPECTED_CALL(on_transport_challenge_callback(TEST_DATA_VALUE, TEST_DATA_LENGTH, IGNORED_ARG, IGNORED_ARG)).SetReturn(NULL);
 
         //act
         result = g_challenge_cb(TEST_BUFFER_HANDLE_VALUE, g_challenge_context);
@@ -1644,7 +1644,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         umock_c_reset_all_calls();
 
         //arrange
-        STRICT_EXPECTED_CALL(connection_dowork(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(connection_dowork(IGNORED_ARG));
 
         //act
         prov_transport_common_amqp_dowork(handle);
@@ -1667,8 +1667,8 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         umock_c_reset_all_calls();
 
         //arrange
-        STRICT_EXPECTED_CALL(connection_dowork(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(on_transport_register_data_cb(PROV_DEVICE_TRANSPORT_RESULT_ERROR, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(connection_dowork(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(on_transport_register_data_cb(PROV_DEVICE_TRANSPORT_RESULT_ERROR, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
 
         //act
         prov_transport_common_amqp_dowork(handle);
@@ -1691,8 +1691,8 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         umock_c_reset_all_calls();
 
         //arrange
-        STRICT_EXPECTED_CALL(connection_dowork(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(on_transport_register_data_cb(PROV_DEVICE_TRANSPORT_RESULT_ERROR, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(connection_dowork(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(on_transport_register_data_cb(PROV_DEVICE_TRANSPORT_RESULT_ERROR, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
 
         //act
         prov_transport_common_amqp_dowork(handle);
@@ -1717,7 +1717,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         umock_c_reset_all_calls();
 
         //arrange
-        STRICT_EXPECTED_CALL(connection_dowork(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(connection_dowork(IGNORED_ARG));
         setup_send_amqp_message_mocks(false);
 
         //act
@@ -1829,7 +1829,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         umock_c_reset_all_calls();
 
         //arrange
-        STRICT_EXPECTED_CALL(connection_dowork(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(connection_dowork(IGNORED_ARG));
         setup_send_amqp_message_mocks(true);
 
         //act
@@ -1857,13 +1857,13 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         umock_c_reset_all_calls();
 
         //arrange
-        STRICT_EXPECTED_CALL(connection_dowork(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(on_transport_json_parse(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(on_transport_register_data_cb(PROV_DEVICE_TRANSPORT_RESULT_OK, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(connection_dowork(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(on_transport_json_parse(IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(on_transport_register_data_cb(PROV_DEVICE_TRANSPORT_RESULT_OK, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
         //act
         prov_transport_common_amqp_dowork(handle);
@@ -1890,7 +1890,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         ASSERT_ARE_EQUAL(int, 0, negativeTestsInitResult);
 
         //arrange
-        STRICT_EXPECTED_CALL(connection_dowork(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(connection_dowork(IGNORED_ARG));
         setup_send_amqp_message_mocks(false);
 
         umock_c_negative_tests_snapshot();
@@ -1992,7 +1992,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         umock_c_reset_all_calls();
 
         //arrange
-        STRICT_EXPECTED_CALL(connection_dowork(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(connection_dowork(IGNORED_ARG));
         STRICT_EXPECTED_CALL(on_transport_register_data_cb(PROV_DEVICE_TRANSPORT_RESULT_ERROR, NULL, NULL, NULL, NULL));
 
         //act
@@ -2139,8 +2139,8 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         umock_c_reset_all_calls();
 
         //arrange
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_X509_CERT_VALUE));
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_PRIVATE_KEY_VALUE));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_X509_CERT_VALUE));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_PRIVATE_KEY_VALUE));
 
         //act
         int result = prov_transport_common_amqp_x509_cert(handle, TEST_X509_CERT_VALUE, TEST_PRIVATE_KEY_VALUE);
@@ -2162,8 +2162,8 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         ASSERT_ARE_EQUAL(int, 0, negativeTestsInitResult);
 
         //arrange
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_X509_CERT_VALUE));
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_PRIVATE_KEY_VALUE));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_X509_CERT_VALUE));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_PRIVATE_KEY_VALUE));
 
         umock_c_negative_tests_snapshot();
 
@@ -2226,7 +2226,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         umock_c_reset_all_calls();
 
         //arrange
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_CERT_VALUE));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_CERT_VALUE));
 
         //act
         int result = prov_transport_common_amqp_set_trusted_cert(handle, TEST_CERT_VALUE);
@@ -2245,7 +2245,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         umock_c_reset_all_calls();
 
         //arrange
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_CERT_VALUE)).SetReturn(__LINE__);
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_CERT_VALUE)).SetReturn(__LINE__);
 
         //act
         int result = prov_transport_common_amqp_set_trusted_cert(handle, TEST_CERT_VALUE);
@@ -2327,9 +2327,9 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         proxy_options.username = TEST_USERNAME_VALUE;
         proxy_options.password = TEST_PASSWORD_VALUE;
 
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, proxy_options.host_address));
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, proxy_options.username));
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, proxy_options.password));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, proxy_options.host_address));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, proxy_options.username));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, proxy_options.password));
 
         //act
         int result = prov_transport_common_amqp_set_proxy(handle, &proxy_options);
@@ -2377,9 +2377,9 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         proxy_options.username = TEST_USERNAME_VALUE;
         proxy_options.password = TEST_PASSWORD_VALUE;
 
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, proxy_options.host_address));
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, proxy_options.username));
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, proxy_options.password));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, proxy_options.host_address));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, proxy_options.username));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, proxy_options.password));
 
         umock_c_negative_tests_snapshot();
 
@@ -2414,7 +2414,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         proxy_options.host_address = TEST_HOST_ADDRESS_VALUE;
         proxy_options.port = 443;
 
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, proxy_options.host_address));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, proxy_options.host_address));
 
         //act
         int result = prov_transport_common_amqp_set_proxy(handle, &proxy_options);
@@ -2440,12 +2440,12 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         umock_c_reset_all_calls();
 
         //arrange
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, proxy_options.host_address));
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, proxy_options.username));
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, proxy_options.password));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, proxy_options.host_address));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, proxy_options.username));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, proxy_options.password));
 
         //act
         int result = prov_transport_common_amqp_set_proxy(handle, &proxy_options);
@@ -2497,9 +2497,9 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         umock_c_reset_all_calls();
 
         //arrange
-        STRICT_EXPECTED_CALL(on_transport_io(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(xio_setoption(IGNORED_PTR_ARG, TEST_XIO_OPTION_NAME, TEST_OPTION_VALUE));
+        STRICT_EXPECTED_CALL(on_transport_io(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(xio_setoption(IGNORED_ARG, TEST_XIO_OPTION_NAME, TEST_OPTION_VALUE));
 
         //act
         int result = prov_transport_common_amqp_set_option(handle, TEST_XIO_OPTION_NAME, TEST_OPTION_VALUE);
@@ -2519,7 +2519,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         umock_c_reset_all_calls();
 
         //arrange
-        STRICT_EXPECTED_CALL(xio_setoption(IGNORED_PTR_ARG, TEST_XIO_OPTION_NAME, TEST_OPTION_VALUE));
+        STRICT_EXPECTED_CALL(xio_setoption(IGNORED_ARG, TEST_XIO_OPTION_NAME, TEST_OPTION_VALUE));
 
         //act
         result = prov_transport_common_amqp_set_option(handle, TEST_XIO_OPTION_NAME, TEST_OPTION_VALUE);
@@ -2539,7 +2539,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         umock_c_reset_all_calls();
 
         //arrange
-        STRICT_EXPECTED_CALL(on_transport_io(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(NULL);
+        STRICT_EXPECTED_CALL(on_transport_io(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG)).SetReturn(NULL);
 
         //act
         int result = prov_transport_common_amqp_set_option(handle, TEST_XIO_OPTION_NAME, TEST_OPTION_VALUE);

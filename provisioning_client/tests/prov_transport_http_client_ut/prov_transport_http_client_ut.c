@@ -25,7 +25,7 @@ static void my_gballoc_free(void* ptr)
 #include "umock_c/umocktypes_stdint.h"
 #include "umock_c/umocktypes_bool.h"
 #include "umock_c/umock_c_negative_tests.h"
-#include "azure_macro_utils/macro_utils.h"
+#include "macro_utils/macro_utils.h"
 
 #define ENABLE_MOCKS
 #include "azure_c_shared_utility/shared_util_options.h"
@@ -492,156 +492,156 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
 
     static void setup_free_allocated_data_mocks(void)
     {
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
     }
 
     static void setup_construct_header_mocks(bool use_sas)
     {
         STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
-        STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
         if (use_sas)
         {
-            STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
         }
     }
 
     static void setup_dps_send_challenge_response_mocks(void)
     {
         setup_construct_header_mocks(true);
-        STRICT_EXPECTED_CALL(URL_EncodeString(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(URL_EncodeString(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(STRING_length(IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(STRING_length(IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(URL_EncodeString(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(URL_EncodeString(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(STRING_length(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(STRING_length(IGNORED_ARG));
 
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
 
-        STRICT_EXPECTED_CALL(Azure_Base64_Encode(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(Azure_Base64_Encode(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(Azure_Base64_Encode(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(Azure_Base64_Encode(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG));
 
-        STRICT_EXPECTED_CALL(on_transport_create_json_payload(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(on_transport_create_json_payload(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
 
-        STRICT_EXPECTED_CALL(uhttp_client_execute_request(IGNORED_PTR_ARG, HTTP_CLIENT_REQUEST_PUT, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(uhttp_client_execute_request(IGNORED_ARG, HTTP_CLIENT_REQUEST_PUT, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG));
     }
 
     static void setup_prov_dev_http_transport_register_device_mocks(void)
     {
         setup_construct_header_mocks(false);
-        STRICT_EXPECTED_CALL(URL_EncodeString(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(STRING_length(IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(uhttp_client_execute_request(IGNORED_PTR_ARG, HTTP_CLIENT_REQUEST_POST, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(URL_EncodeString(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(STRING_length(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(uhttp_client_execute_request(IGNORED_ARG, HTTP_CLIENT_REQUEST_POST, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG));
     }
 
     static void setup_prov_transport_http_create_mocks(void)
     {
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_URI_VALUE));
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_DPS_API_VALUE));
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_SCOPE_ID_VALUE));
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_URI_VALUE));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_DPS_API_VALUE));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_SCOPE_ID_VALUE));
     }
 
     static void setup_prov_dev_http_transport_open_mocks(bool use_tpm)
     {
         if (use_tpm)
         {
-            STRICT_EXPECTED_CALL(BUFFER_clone(IGNORED_NUM_ARG));
-            STRICT_EXPECTED_CALL(BUFFER_clone(IGNORED_NUM_ARG));
+            STRICT_EXPECTED_CALL(BUFFER_clone(IGNORED_ARG));
+            STRICT_EXPECTED_CALL(BUFFER_clone(IGNORED_ARG));
         }
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_REGISTRATION_ID_VALUE));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_REGISTRATION_ID_VALUE));
         STRICT_EXPECTED_CALL(platform_get_default_tlsio());
-        STRICT_EXPECTED_CALL(uhttp_client_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(uhttp_client_set_trace(IGNORED_PTR_ARG, false, true));
+        STRICT_EXPECTED_CALL(uhttp_client_create(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(uhttp_client_set_trace(IGNORED_ARG, false, true));
         if (!use_tpm)
         {
-            STRICT_EXPECTED_CALL(uhttp_client_set_X509_cert(IGNORED_PTR_ARG, true, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(uhttp_client_set_X509_cert(IGNORED_ARG, true, IGNORED_ARG, IGNORED_ARG));
         }
-        STRICT_EXPECTED_CALL(uhttp_client_open(IGNORED_PTR_ARG, IGNORED_PTR_ARG, 443, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(uhttp_client_open(IGNORED_ARG, IGNORED_ARG, 443, IGNORED_ARG, IGNORED_ARG));
     }
 
     static void setup_prov_transport_http_register_device_mocks(void)
     {
         setup_construct_header_mocks(false);
-        STRICT_EXPECTED_CALL(URL_EncodeString(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(uhttp_client_execute_request(IGNORED_PTR_ARG, HTTP_CLIENT_REQUEST_POST, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(URL_EncodeString(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(uhttp_client_execute_request(IGNORED_ARG, HTTP_CLIENT_REQUEST_POST, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
     }
 
     /*static void setup_prov_transport_process_status_reply_mocks(bool status_complete, const char* status_string)
     {
-        STRICT_EXPECTED_CALL(json_parse_string(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(json_object_get_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(json_value_get_string(IGNORED_PTR_ARG)).SetReturn(status_string);
+        STRICT_EXPECTED_CALL(json_parse_string(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(json_object_get_value(IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(json_value_get_string(IGNORED_ARG)).SetReturn(status_string);
         if (status_complete)
         {
-            STRICT_EXPECTED_CALL(json_object_get_object(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-            STRICT_EXPECTED_CALL(json_object_get_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-            STRICT_EXPECTED_CALL(json_object_get_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-            STRICT_EXPECTED_CALL(json_object_get_object(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-            STRICT_EXPECTED_CALL(json_object_get_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-            STRICT_EXPECTED_CALL(json_value_get_string(IGNORED_PTR_ARG)).SetReturn(TEST_URI_VALUE);
-            STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-            STRICT_EXPECTED_CALL(json_value_get_string(IGNORED_PTR_ARG));
-            STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-            STRICT_EXPECTED_CALL(json_value_get_string(IGNORED_PTR_ARG));
-            STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(json_object_get_object(IGNORED_ARG, IGNORED_ARG));
+            STRICT_EXPECTED_CALL(json_object_get_value(IGNORED_ARG, IGNORED_ARG));
+            STRICT_EXPECTED_CALL(json_object_get_value(IGNORED_ARG, IGNORED_ARG));
+            STRICT_EXPECTED_CALL(json_object_get_object(IGNORED_ARG, IGNORED_ARG));
+            STRICT_EXPECTED_CALL(json_object_get_value(IGNORED_ARG, IGNORED_ARG));
+            STRICT_EXPECTED_CALL(json_value_get_string(IGNORED_ARG)).SetReturn(TEST_URI_VALUE);
+            STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+            STRICT_EXPECTED_CALL(json_value_get_string(IGNORED_ARG));
+            STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+            STRICT_EXPECTED_CALL(json_value_get_string(IGNORED_ARG));
+            STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
         }
-        STRICT_EXPECTED_CALL(json_value_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(json_value_free(IGNORED_ARG));
     }*/
 
     static void setup_prov_dev_http_transport_get_op_status_mocks(void)
     {
         setup_construct_header_mocks(true);
-        STRICT_EXPECTED_CALL(URL_EncodeString(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(URL_EncodeString(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(URL_EncodeString(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(STRING_length(IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(STRING_length(IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(STRING_length(IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(uhttp_client_execute_request(IGNORED_PTR_ARG, HTTP_CLIENT_REQUEST_GET, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(URL_EncodeString(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(URL_EncodeString(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(URL_EncodeString(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(STRING_length(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(STRING_length(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(STRING_length(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(uhttp_client_execute_request(IGNORED_ARG, HTTP_CLIENT_REQUEST_GET, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
     }
 
     TEST_FUNCTION(prov_transport_http_create_uri_NULL_fail)
@@ -891,11 +891,11 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
         PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_X509, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_error, NULL);
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_REGISTRATION_ID_VALUE));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_REGISTRATION_ID_VALUE));
         STRICT_EXPECTED_CALL(platform_get_default_tlsio());
-        STRICT_EXPECTED_CALL(uhttp_client_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(uhttp_client_set_trace(IGNORED_PTR_ARG, false, true));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(uhttp_client_create(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(uhttp_client_set_trace(IGNORED_ARG, false, true));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
         //act
         int result = prov_dev_http_transport_open(handle, TEST_REGISTRATION_ID_VALUE, NULL, NULL, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL, on_transport_challenge_callback, NULL);
@@ -992,12 +992,12 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
         (void)prov_dev_http_transport_open(handle, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL, on_transport_challenge_callback, NULL);
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(uhttp_client_close(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(uhttp_client_dowork(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(uhttp_client_destroy(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(uhttp_client_close(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(uhttp_client_dowork(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(uhttp_client_destroy(IGNORED_ARG));
 
         //act
         int result = prov_dev_http_transport_close(handle);
@@ -1076,8 +1076,8 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
         prov_dev_http_transport_dowork(handle);
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(NULL);
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_ARG, IGNORED_ARG)).SetReturn(NULL);
 
         //act
         g_on_http_reply_recv(g_http_execute_ctx, HTTP_CALLBACK_REASON_OK, (const unsigned char*)TEST_JSON_CONTENT, TEST_JSON_CONTENT_LEN, TEST_SUCCESS_STATUS_CODE, TEST_HTTP_HANDLE_VALUE);
@@ -1100,7 +1100,7 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
         prov_dev_http_transport_dowork(handle);
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn("2");
+        STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_ARG, IGNORED_ARG)).SetReturn("2");
 
         //act
         g_on_http_reply_recv(g_http_execute_ctx, HTTP_CALLBACK_REASON_OK, (const unsigned char*)TEST_JSON_CONTENT, TEST_JSON_CONTENT_LEN, TEST_FAILURE_STATUS_CODE, TEST_HTTP_HANDLE_VALUE);
@@ -1123,7 +1123,7 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
         prov_dev_http_transport_dowork(handle);
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn("5");
+        STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_ARG, IGNORED_ARG)).SetReturn("5");
 
         //act
         g_on_http_reply_recv(g_http_execute_ctx, HTTP_CALLBACK_REASON_OK, (const unsigned char*)TEST_JSON_CONTENT, TEST_JSON_CONTENT_LEN, TEST_THROTTLE_STATUS_CODE, TEST_HTTP_HANDLE_VALUE);
@@ -1268,14 +1268,14 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
         g_on_http_reply_recv(g_http_execute_ctx, HTTP_CALLBACK_REASON_OK, (const unsigned char*)TEST_JSON_CONTENT, TEST_JSON_CONTENT_LEN, TEST_SUCCESS_STATUS_CODE, TEST_HTTP_HANDLE_VALUE);
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(uhttp_client_dowork(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(on_transport_json_parse(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(uhttp_client_dowork(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(on_transport_json_parse(IGNORED_ARG, IGNORED_ARG));
         //setup_prov_transport_process_status_reply_mocks(true, TEST_DPS_ASSIGNED_VALUE);
-        STRICT_EXPECTED_CALL(on_transport_register_data_cb(PROV_DEVICE_TRANSPORT_RESULT_OK, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(on_transport_register_data_cb(PROV_DEVICE_TRANSPORT_RESULT_OK, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
         g_target_transport_status = PROV_DEVICE_TRANSPORT_STATUS_ASSIGNED;
 
         //act
@@ -1301,18 +1301,18 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
         g_on_http_reply_recv(g_http_execute_ctx, HTTP_CALLBACK_REASON_OK, (const unsigned char*)TEST_JSON_CONTENT, TEST_JSON_CONTENT_LEN, HTTP_STATUS_CODE_UNAUTHORIZED, TEST_HTTP_HANDLE_VALUE);
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(uhttp_client_dowork(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(on_transport_json_parse(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(on_transport_challenge_callback(IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(uhttp_client_dowork(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(on_transport_json_parse(IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(on_transport_challenge_callback(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
 
         // Send Challege response
         setup_dps_send_challenge_response_mocks();
 
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
         g_target_transport_status = PROV_DEVICE_TRANSPORT_STATUS_UNASSIGNED;
 
         //act
@@ -1338,12 +1338,12 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
         g_on_http_reply_recv(g_http_execute_ctx, HTTP_CALLBACK_REASON_OK, (const unsigned char*)TEST_JSON_CONTENT, TEST_JSON_CONTENT_LEN, TEST_SUCCESS_STATUS_CODE, TEST_HTTP_HANDLE_VALUE);
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(uhttp_client_dowork(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(on_transport_json_parse(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(on_transport_status_cb(PROV_DEVICE_TRANSPORT_STATUS_ASSIGNING, IGNORED_NUM_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(uhttp_client_dowork(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(on_transport_json_parse(IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(on_transport_status_cb(PROV_DEVICE_TRANSPORT_STATUS_ASSIGNING, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
         g_target_transport_status = PROV_DEVICE_TRANSPORT_STATUS_ASSIGNING;
 
         //act
@@ -1368,8 +1368,8 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
         g_on_http_reply_recv(g_http_execute_ctx, HTTP_CALLBACK_REASON_ERROR, NULL, 0, TEST_FAILURE_STATUS_CODE, TEST_HTTP_HANDLE_VALUE);
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(uhttp_client_dowork(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(on_transport_register_data_cb(PROV_DEVICE_TRANSPORT_RESULT_ERROR, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(uhttp_client_dowork(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(on_transport_register_data_cb(PROV_DEVICE_TRANSPORT_RESULT_ERROR, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
 
         //act
         prov_dev_http_transport_dowork(handle);
@@ -1403,7 +1403,7 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
         (void)prov_dev_http_transport_open(handle, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL, on_transport_challenge_callback, NULL);
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(uhttp_client_set_trace(IGNORED_PTR_ARG, true, true));
+        STRICT_EXPECTED_CALL(uhttp_client_set_trace(IGNORED_ARG, true, true));
 
         //act
         int result = prov_dev_http_transport_set_trace(handle, true);
@@ -1455,8 +1455,8 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
         PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_error, NULL);
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
 
         //act
         int result = prov_dev_http_transport_x509_cert(handle, TEST_X509_CERT_VALUE, TEST_PRIVATE_KEY_VALUE);
@@ -1476,7 +1476,7 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
         PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_error, NULL);
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
 
         //act
         int result = prov_dev_http_transport_trusted_cert(handle, TEST_CERT_VALUE);
@@ -1496,7 +1496,7 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
         PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_error, NULL);
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(__LINE__);
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG)).SetReturn(__LINE__);
 
         //act
         int result = prov_dev_http_transport_trusted_cert(handle, TEST_CERT_VALUE);
@@ -1573,7 +1573,7 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
         PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_error, NULL);
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
 
         //act
         proxy_options.host_address = TEST_HOST_ADDRESS_VALUE;
@@ -1596,9 +1596,9 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
         PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_error, NULL);
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
 
         //act
         proxy_options.host_address = TEST_HOST_ADDRESS_VALUE;
@@ -1648,9 +1648,9 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
         int negativeTestsInitResult = umock_c_negative_tests_init();
         ASSERT_ARE_EQUAL(int, 0, negativeTestsInitResult);
 
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
 
         umock_c_negative_tests_snapshot();
 
@@ -1707,8 +1707,8 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
 
         //arrange
         STRICT_EXPECTED_CALL(platform_get_default_tlsio());
-        STRICT_EXPECTED_CALL(uhttp_client_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(uhttp_client_set_option(IGNORED_PTR_ARG, TEST_XIO_OPTION_NAME, TEST_OPTION_VALUE));
+        STRICT_EXPECTED_CALL(uhttp_client_create(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(uhttp_client_set_option(IGNORED_ARG, TEST_XIO_OPTION_NAME, TEST_OPTION_VALUE));
 
         //act
         int result = prov_dev_http_transport_set_option(handle, TEST_XIO_OPTION_NAME, TEST_OPTION_VALUE);
@@ -1728,7 +1728,7 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
         umock_c_reset_all_calls();
 
         //arrange
-        STRICT_EXPECTED_CALL(uhttp_client_set_option(IGNORED_PTR_ARG, TEST_XIO_OPTION_NAME, TEST_OPTION_VALUE));
+        STRICT_EXPECTED_CALL(uhttp_client_set_option(IGNORED_ARG, TEST_XIO_OPTION_NAME, TEST_OPTION_VALUE));
 
         //act
         result = prov_dev_http_transport_set_option(handle, TEST_XIO_OPTION_NAME, TEST_OPTION_VALUE);
@@ -1749,7 +1749,7 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
 
         //arrange
         STRICT_EXPECTED_CALL(platform_get_default_tlsio());
-        STRICT_EXPECTED_CALL(uhttp_client_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(NULL);
+        STRICT_EXPECTED_CALL(uhttp_client_create(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG)).SetReturn(NULL);
 
         //act
         int result = prov_dev_http_transport_set_option(handle, TEST_XIO_OPTION_NAME, TEST_OPTION_VALUE);

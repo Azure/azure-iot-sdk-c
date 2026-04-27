@@ -258,8 +258,9 @@ if(${use_installed_dependencies})
     find_package(parson REQUIRED CONFIG)
 endif()
 
-include_directories(${MACRO_UTILS_INC_FOLDER})
-include_directories(${UMOCK_C_INC_FOLDER})
+include_directories(${CMAKE_CURRENT_LIST_DIR}/deps/macro-utils-c/inc)
+include_directories(${CMAKE_CURRENT_LIST_DIR}/deps/umock-c/inc)
+include_directories(${CMAKE_CURRENT_LIST_DIR}/deps/c-logging/v2/inc)
 
 if(${use_installed_dependencies})
     if (NOT azure_c_shared_utility_FOUND)

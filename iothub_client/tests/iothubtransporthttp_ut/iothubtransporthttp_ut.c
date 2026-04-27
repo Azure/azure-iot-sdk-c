@@ -877,11 +877,11 @@ static MAP_RESULT my_Map_GetInternals(MAP_HANDLE handle, const char*const** keys
 
 static void setupCreateHappyPathAlloc(bool deallocateCreated)
 {
-    STRICT_EXPECTED_CALL(IoTHub_Transport_ValidateCallbacks(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(IoTHub_Transport_ValidateCallbacks(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
     if (deallocateCreated == true)
     {
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
     }
     STRICT_EXPECTED_CALL(HTTPAPIEX_Init());
 }
@@ -889,11 +889,11 @@ static void setupCreateHappyPathAlloc(bool deallocateCreated)
 static void setupCreateHappyPathHostname(bool deallocateCreated)
 {
     STRICT_EXPECTED_CALL(STRING_construct(TEST_IOTHUB_NAME));
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "."));
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, TEST_IOTHUB_SUFFIX));
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, "."));
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, TEST_IOTHUB_SUFFIX));
     if (deallocateCreated == true)
     {
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
     }
 }
 
@@ -902,26 +902,26 @@ static void setupCreateHappyPathGWHostname(bool deallocateCreated)
     STRICT_EXPECTED_CALL(STRING_construct(TEST_IOTHUB_GWHOSTNAME));
     if (deallocateCreated == true)
     {
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
     }
 }
 
 static void setupCreateHappyPathApiExHandle(bool deallocateCreated)
 {
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG));
     STRICT_EXPECTED_CALL(HTTPAPIEX_Create(TEST_IOTHUB_NAME "." TEST_IOTHUB_SUFFIX)).IgnoreArgument(1);
     if (deallocateCreated == true)
     {
-        STRICT_EXPECTED_CALL(HTTPAPIEX_Destroy(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(HTTPAPIEX_Destroy(IGNORED_ARG));
     }
 }
 
 static void setupCreateHappyPathPerDeviceList(bool deallocateCreated)
 {
-    STRICT_EXPECTED_CALL(VECTOR_create(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(VECTOR_create(IGNORED_ARG));
     if (deallocateCreated == true)
     {
-        STRICT_EXPECTED_CALL(VECTOR_destroy(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(VECTOR_destroy(IGNORED_ARG));
     }
 }
 
@@ -935,21 +935,21 @@ static void setupCreateHappyPath(bool deallocateCreated)
 
 static void setupUnregisterOneDevice()
 {
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_Destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_Destroy(IGNORED_ARG));
 }
 static void setupRegisterHappyPathAllocHandle(bool deallocateCreated)
 {
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
     if (deallocateCreated == true)
     {
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
     }
 }
 
@@ -958,7 +958,7 @@ static void setupRegisterHappyPathcreate_deviceId(bool deallocateCreated)
     STRICT_EXPECTED_CALL(STRING_construct(TEST_DEVICE_ID));
     if (deallocateCreated == true)
     {
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
     }
 }
 
@@ -969,7 +969,7 @@ static void setupRegisterHappyPathcreate_deviceKey(bool deallocateCreated, bool 
         STRICT_EXPECTED_CALL(STRING_construct(TEST_DEVICE_KEY));
         if (deallocateCreated == true)
         {
-            STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
         }
     }
 }
@@ -979,7 +979,7 @@ static void setupRegisterHappyPathcreate_deviceSasToken(bool deallocateCreated)
     STRICT_EXPECTED_CALL(STRING_construct(TEST_DEVICE_TOKEN));
     if (deallocateCreated == true)
     {
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
     }
 }
 
@@ -988,28 +988,28 @@ static void setupRegisterHappyPatheventHTTPrelativePath(bool deallocateCreated)
     /*creating eventHTTPrelativePath*/
     STRICT_EXPECTED_CALL(STRING_construct("/devices/"));
     STRICT_EXPECTED_CALL(URL_EncodeString(TEST_DEVICE_ID));
-    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, EVENT_ENDPOINT API_VERSION));
+    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, EVENT_ENDPOINT API_VERSION));
     if (deallocateCreated == true)
     {
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
     }
     /*the url encoded device id*/
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
 }
 
 static void setupRegisterHappyPathmessageHTTPrelativePath(bool deallocateCreated)
 {
     STRICT_EXPECTED_CALL(STRING_construct("/devices/"));
     STRICT_EXPECTED_CALL(URL_EncodeString(TEST_DEVICE_ID));
-    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, MESSAGE_ENDPOINT_HTTP API_VERSION));
+    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, MESSAGE_ENDPOINT_HTTP API_VERSION));
     if (deallocateCreated == true)
     {
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
     }
     /*the url encoded device id*/
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
 }
 
 static void setupRegisterHappyPatheventHTTPrequestHeaders(bool deallocateCreated, bool is_x509_used)
@@ -1017,38 +1017,38 @@ static void setupRegisterHappyPatheventHTTPrequestHeaders(bool deallocateCreated
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
     STRICT_EXPECTED_CALL(STRING_construct("/devices/"));
     STRICT_EXPECTED_CALL(URL_EncodeString(TEST_DEVICE_ID));
-    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, EVENT_ENDPOINT));
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "iothub-to", "/devices/"  TEST_DEVICE_ID  EVENT_ENDPOINT));
+    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, EVENT_ENDPOINT));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "iothub-to", "/devices/"  TEST_DEVICE_ID  EVENT_ENDPOINT));
     if (is_x509_used == false)
     {
-        STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN));
+        STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "Authorization", TEST_BLANK_SAS_TOKEN));
     }
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Accept", "application/json"));
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Connection", "Keep-Alive"));
-    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", TEST_PRODUCT_INFO));
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "Accept", "application/json"));
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "Connection", "Keep-Alive"));
+    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "User-Agent", TEST_PRODUCT_INFO));
     if (deallocateCreated == true)
     {
-        STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG));
     }
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
 }
 
 static void setupRegisterHappyPathmessageHTTPrequestHeaders(bool deallocateCreated, bool is_x509_used)
 {
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
-    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", TEST_PRODUCT_INFO));
+    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "User-Agent", TEST_PRODUCT_INFO));
     if (is_x509_used == false)
     {
-        STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN));
+        STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "Authorization", TEST_BLANK_SAS_TOKEN));
     }
     if (deallocateCreated == true)
     {
-        STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG));
     }
 }
 
@@ -1056,13 +1056,13 @@ static void setupRegisterHappyPathabandonHTTPrelativePathBegin(bool deallocateCr
 {
     STRICT_EXPECTED_CALL(STRING_construct("/devices/"));
     STRICT_EXPECTED_CALL(URL_EncodeString(TEST_DEVICE_ID));
-    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, MESSAGE_ENDPOINT_HTTP_ETAG));
+    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, MESSAGE_ENDPOINT_HTTP_ETAG));
     if (deallocateCreated == true)
     {
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
     }
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
 }
 
 static void setupRegisterHappyPathsasObject(bool deallocateCreated, bool is_x509_used)
@@ -1070,35 +1070,35 @@ static void setupRegisterHappyPathsasObject(bool deallocateCreated, bool is_x509
     if (is_x509_used == false)
     {
         STRICT_EXPECTED_CALL(URL_EncodeString(TEST_DEVICE_ID));
-        STRICT_EXPECTED_CALL(STRING_clone(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "/devices/"));
-        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(STRING_clone(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, "/devices/"));
+        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG));
         STRICT_EXPECTED_CALL(STRING_construct(TEST_DEVICE_KEY));
-        STRICT_EXPECTED_CALL(STRING_empty(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(STRING_empty(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_Create(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
         if (deallocateCreated)
         {
-            STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_Destroy(IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_Destroy(IGNORED_ARG));
         }
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
     }
 }
 
 static void setupRegisterHappyPatheventConfirmations()
 {
-    STRICT_EXPECTED_CALL(DList_InitializeListHead(IGNORED_PTR_ARG)).IgnoreAllArguments();
+    STRICT_EXPECTED_CALL(DList_InitializeListHead(IGNORED_ARG));
 }
 
 static void setupRegisterHappyPathDeviceListAdd()
 {
-    STRICT_EXPECTED_CALL(VECTOR_push_back(IGNORED_PTR_ARG, IGNORED_PTR_ARG, 1));
+    STRICT_EXPECTED_CALL(VECTOR_push_back(IGNORED_ARG, IGNORED_ARG, 1));
 }
 
 static void setupRegisterHappyPathWithSasToken(bool deallocateCreated)
 {
-    STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
     setupRegisterHappyPathAllocHandle(deallocateCreated);
     setupRegisterHappyPathcreate_deviceId(deallocateCreated);
     setupRegisterHappyPathcreate_deviceSasToken(deallocateCreated);
@@ -1113,7 +1113,7 @@ static void setupRegisterHappyPathWithSasToken(bool deallocateCreated)
 
 static void setupRegisterHappyPath(bool deallocateCreated, bool is_x509_used)
 {
-    STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
     setupRegisterHappyPathAllocHandle(deallocateCreated);
     setupRegisterHappyPathcreate_deviceId(deallocateCreated);
     setupRegisterHappyPathcreate_deviceKey(deallocateCreated, is_x509_used);
@@ -1129,13 +1129,13 @@ static void setupRegisterHappyPath(bool deallocateCreated, bool is_x509_used)
 
 static void setupDoWorkLoopOnceForOneDevice()
 {
-    STRICT_EXPECTED_CALL(VECTOR_size(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_PTR_ARG, 0));
+    STRICT_EXPECTED_CALL(VECTOR_size(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_ARG, 0));
 }
 
 static void setupDoWorkLoopForNextDevice(size_t next)
 {
-    STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_PTR_ARG, next));
+    STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_ARG, next));
 }
 
 BEGIN_TEST_SUITE(iothubtransporthttp_ut)
@@ -1596,10 +1596,10 @@ TEST_FUNCTION(IoTHubTransportHttp_Destroy_succeeds_NoRegistered_devices)
     TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));                                             //STRING_HANDLE hostName;
-    STRICT_EXPECTED_CALL(HTTPAPIEX_Destroy(IGNORED_PTR_ARG));                                             //HTTPAPIEX_HANDLE httpApiExHandle;
-    STRICT_EXPECTED_CALL(VECTOR_size(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(VECTOR_destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));                                             //STRING_HANDLE hostName;
+    STRICT_EXPECTED_CALL(HTTPAPIEX_Destroy(IGNORED_ARG));                                             //HTTPAPIEX_HANDLE httpApiExHandle;
+    STRICT_EXPECTED_CALL(VECTOR_size(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(VECTOR_destroy(IGNORED_ARG));
     STRICT_EXPECTED_CALL(gballoc_free(handle));
 
     //act
@@ -1615,16 +1615,16 @@ TEST_FUNCTION(IoTHubTransportHttp_Destroy_succeeds_One_Registered_device)
     IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(HTTPAPIEX_Destroy(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(VECTOR_size(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_PTR_ARG, 0));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(HTTPAPIEX_Destroy(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(VECTOR_size(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_ARG, 0));
     setupUnregisterOneDevice();
     STRICT_EXPECTED_CALL(gballoc_free(devHandle));
 
-    STRICT_EXPECTED_CALL(VECTOR_destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(VECTOR_destroy(IGNORED_ARG));
     STRICT_EXPECTED_CALL(gballoc_free(handle));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
 
     //act
     IoTHubTransportHttp_Destroy(handle);
@@ -1679,8 +1679,8 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_2nd_device_HappyPath_success_fun_time
     umock_c_reset_all_calls();
 
     // find in vector..
-    STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG));
     setupRegisterHappyPathAllocHandle(false);
     setupRegisterHappyPathcreate_deviceId(false);
     setupRegisterHappyPathcreate_deviceKey(false, false);
@@ -1718,9 +1718,9 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_sameDevice_twice_returns_null)
     umock_c_reset_all_calls();
 
     // find in vector.. 2 and 1a
-    STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG));
 
     //act
     IOTHUB_DEVICE_HANDLE devHandle1b = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
@@ -1780,7 +1780,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_deviceFoundInList_fails)
     TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn((void_ptr)0x1);
+    STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG)).SetReturn((void_ptr)0x1);
 
     //act
     IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
@@ -1892,10 +1892,10 @@ TEST_FUNCTION(IoTHubTransportHttp_Unregister_superHappyFunPath)
     IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, devHandle));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_ARG, IGNORED_ARG, devHandle));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
     setupUnregisterOneDevice();
-    STRICT_EXPECTED_CALL(VECTOR_erase(IGNORED_PTR_ARG, IGNORED_PTR_ARG, 1));
+    STRICT_EXPECTED_CALL(VECTOR_erase(IGNORED_ARG, IGNORED_ARG, 1));
     STRICT_EXPECTED_CALL(gballoc_free(devHandle));
 
     //act
@@ -1916,10 +1916,10 @@ TEST_FUNCTION(IoTHubTransportHttp_Unregister_2nd_device_superHappyFunPath)
     IOTHUB_DEVICE_HANDLE devHandle1 = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, devHandle1));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_ARG, IGNORED_ARG, devHandle1));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
     setupUnregisterOneDevice();
-    STRICT_EXPECTED_CALL(VECTOR_erase(IGNORED_PTR_ARG, IGNORED_PTR_ARG, 1));
+    STRICT_EXPECTED_CALL(VECTOR_erase(IGNORED_ARG, IGNORED_ARG, 1));
     STRICT_EXPECTED_CALL(gballoc_free(devHandle1));
 
     //act
@@ -1939,7 +1939,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Unregister_DeviceNotFound_fails)
     IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, devHandle)).SetReturn((void_ptr)NULL);
+    STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_ARG, IGNORED_ARG, devHandle)).SetReturn((void_ptr)NULL);
 
     //act
     IoTHubTransportHttp_Unregister(devHandle);
@@ -1970,7 +1970,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Subscribe_with_non_NULL_parameter_succeeds)
 
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, devHandle));
+    STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_ARG, IGNORED_ARG, devHandle));
 
     //act
     int result = IoTHubTransportHttp_Subscribe(devHandle);
@@ -1991,8 +1991,8 @@ TEST_FUNCTION(IoTHubTransportHttp_Subscribe_2devices_succeeds)
     IOTHUB_DEVICE_HANDLE devHandle2 = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_2, TEST_CONFIG2.waitingToSend);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, devHandle1));
-    STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, devHandle2));
+    STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_ARG, IGNORED_ARG, devHandle1));
+    STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_ARG, IGNORED_ARG, devHandle2));
 
     //act
     int result1 = IoTHubTransportHttp_Subscribe(devHandle1);
@@ -2014,7 +2014,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Subscribe_with_list_find_fails)
     IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, devHandle))
+    STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_ARG, IGNORED_ARG, devHandle))
         .SetReturn((void_ptr)NULL);
 
     //act
@@ -2047,7 +2047,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Unsubscribe_with_non_NULL_parameter_succeeds)
     IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, devHandle));
+    STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_ARG, IGNORED_ARG, devHandle));
 
     //act
     IoTHubTransportHttp_Unsubscribe(devHandle);
@@ -2067,8 +2067,8 @@ TEST_FUNCTION(IoTHubTransportHttp_Unsubscribe_with_2devices_succeeds)
     IOTHUB_DEVICE_HANDLE devHandle2 = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_2, TEST_CONFIG2.waitingToSend);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, devHandle));
-    STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, devHandle2));
+    STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_ARG, IGNORED_ARG, devHandle));
+    STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_ARG, IGNORED_ARG, devHandle2));
 
     //act
     IoTHubTransportHttp_Unsubscribe(devHandle);
@@ -2089,7 +2089,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Unsubscribe_with_device_not_found_does_nothing
 
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, devHandle))
+    STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_ARG, IGNORED_ARG, devHandle))
         .SetFailReturn((void_ptr)NULL);
 
     //act
@@ -2184,9 +2184,9 @@ TEST_FUNCTION(IoTHubTransportHttp_SendMessageDisposition_get_disposition_invalid
     IOTHUB_MESSAGE_HANDLE test_message = (IOTHUB_MESSAGE_HANDLE)my_gballoc_malloc(1);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_GetDispositionContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_GetDispositionContext(IGNORED_ARG, IGNORED_ARG))
         .SetReturn(IOTHUB_MESSAGE_INVALID_ARG);
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG));
 
     //act
     IOTHUB_CLIENT_RESULT result = IoTHubTransportHttp_SendMessageDisposition(devHandle1, test_message, IOTHUBMESSAGE_ACCEPTED);
@@ -2207,8 +2207,8 @@ TEST_FUNCTION(IoTHubTransportHttp_SendMessageDisposition_with_NULL_disposition_i
     IOTHUB_MESSAGE_HANDLE test_message = (IOTHUB_MESSAGE_HANDLE)my_gballoc_malloc(100);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_GetDispositionContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubMessage_GetDispositionContext(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG));
 
     //act
     IOTHUB_CLIENT_RESULT result = IoTHubTransportHttp_SendMessageDisposition(devHandle1, test_message, IOTHUBMESSAGE_ACCEPTED);
@@ -2238,7 +2238,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_no_devices)
     TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(VECTOR_size(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(VECTOR_size(IGNORED_ARG));
 
     /*no message work because DoWork_PullMessage is set to false by create*/
 
@@ -2262,7 +2262,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_all_devices_unregistere
     (void)IoTHubTransportHttp_Unregister(devHandle2);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(VECTOR_size(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(VECTOR_size(IGNORED_ARG));
 
     /*no message work because DoWork_PullMessage is set to false by create*/
 
@@ -2395,71 +2395,71 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 
     STRICT_EXPECTED_CALL(BUFFER_new());
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)); /*because relativePath is a STRING_HANDLE*/
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)); /*because relativePath is a STRING_HANDLE*/
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
         HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
         "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP API_VERSION,    /*const char* relativePath,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
         NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
-        IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
+        IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
+        IGNORED_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
         .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"));
+    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_ARG, "ETag"));
 
-    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_ARG, IGNORED_ARG));
 
     // This is where it fails.
-    STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_NUM_ARG, IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG))
         .CopyOutArgumentBuffer_destination(&real_ETAG, sizeof(&real_ETAG));;
-    STRICT_EXPECTED_CALL(IoTHubMessage_SetDispositionContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_SetDispositionContext(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
         .SetReturn(IOTHUB_MESSAGE_INVALID_ARG);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG));
 
 
-    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_ARG));
     STRICT_EXPECTED_CALL(STRING_construct_n(TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1))
         .ValidateArgumentBuffer(1, TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1);
-    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, IGNORED_ARG));
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
-    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", TEST_PRODUCT_INFO));
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN));
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "If-Match", TEST_ETAG_VALUE));
+    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "User-Agent", TEST_PRODUCT_INFO));
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "Authorization", TEST_BLANK_SAS_TOKEN));
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "If-Match", TEST_ETAG_VALUE));
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)); /*because abandon relativePath is a STRING_HANDLE*/
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)); /*because abandon relativePath is a STRING_HANDLE*/
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
         HTTPAPI_REQUEST_POST,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
         "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP_ETAG TEST_ETAG_VALUE_UNQUOTED "/abandon" API_VERSION,    /*const char* relativePath,*/
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
         NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
+        IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
         NULL,                                               /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         NULL                                                /*BUFFER_HANDLE responseContent))                              */
     ))
         .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode204, sizeof(statusCode204));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG));
 
     //act
     IoTHubTransportHttp_DoWork(handle);
@@ -2492,65 +2492,65 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_asy
 
     STRICT_EXPECTED_CALL(BUFFER_new());
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
         HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
         "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP API_VERSION,    /*const char* relativePath,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
         NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
-        IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
+        IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
+        IGNORED_ARG                                     /*BUFFER_HANDLE responseContent))                              */
     ))
         .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_ARG, "ETag"))
         .SetReturn(TEST_ETAG_VALUE);
 
-    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_ARG, IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_ARG, IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)).SetReturn(NULL);
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_ARG, IGNORED_ARG)).SetReturn(NULL);
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_ARG));
     STRICT_EXPECTED_CALL(STRING_construct_n(TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1))
         .ValidateArgumentBuffer(1, TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1);
-    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "/abandon" API_VERSION));
+    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, "/abandon" API_VERSION));
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
-    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", TEST_PRODUCT_INFO));
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN));
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "If-Match", TEST_ETAG_VALUE));
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)); /*because relativePath is a STRING_HANDLE*/
+    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "User-Agent", TEST_PRODUCT_INFO));
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "Authorization", TEST_BLANK_SAS_TOKEN));
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "If-Match", TEST_ETAG_VALUE));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)); /*because relativePath is a STRING_HANDLE*/
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
         HTTPAPI_REQUEST_POST,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
         "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP_ETAG TEST_ETAG_VALUE_UNQUOTED "/abandon" API_VERSION,    /*const char* relativePath,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
         NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
+        IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
         NULL,                                               /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         NULL                                                /*BUFFER_HANDLE responseContent))                              */
     ))
         .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode204, sizeof(statusCode204));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG));
 
     //act
     IoTHubTransportHttp_DoWork(handle);
@@ -2585,71 +2585,71 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_asy
 
     STRICT_EXPECTED_CALL(BUFFER_new());
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)); /*because relativePath is a STRING_HANDLE*/
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)); /*because relativePath is a STRING_HANDLE*/
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
         HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
         "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP API_VERSION,    /*const char* relativePath,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
         NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
-        IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
+        IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
+        IGNORED_ARG                                     /*BUFFER_HANDLE responseContent))                              */
     ))
         .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_ARG, "ETag"))
         .SetReturn(TEST_ETAG_VALUE);
 
-    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_ARG, IGNORED_ARG));
 
     // This is where it fails.
-    STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_NUM_ARG, IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG))
         .SetReturn(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG));
 
     // And then the message is just abandoned.
-    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_ARG));
     STRICT_EXPECTED_CALL(STRING_construct_n(TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1))
         .ValidateArgumentBuffer(1, TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1);
-    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "/abandon" API_VERSION));
+    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, "/abandon" API_VERSION));
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
-    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", TEST_PRODUCT_INFO));
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
+    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "User-Agent", TEST_PRODUCT_INFO));
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "If-Match", TEST_ETAG_VALUE))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "If-Match", TEST_ETAG_VALUE))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
         HTTPAPI_REQUEST_POST,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
         "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP_ETAG TEST_ETAG_VALUE_UNQUOTED "/abandon" API_VERSION,    /*const char* relativePath,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
         NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
+        IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
         NULL,                                               /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         NULL                                                /*BUFFER_HANDLE responseContent))                              */
     ))
         .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode204, sizeof(statusCode204));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG));
 
     //act
     IoTHubTransportHttp_DoWork(handle);
@@ -2684,97 +2684,95 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_asy
 
     STRICT_EXPECTED_CALL(BUFFER_new());
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
         HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
         "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP API_VERSION,    /*const char* relativePath,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
         NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
-        IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
+        IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
+        IGNORED_ARG                                     /*BUFFER_HANDLE responseContent))                              */
     ))
         .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_ARG, "ETag"))
         .IgnoreArgument(1)
         .SetReturn(TEST_ETAG_VALUE);
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2)
         ;
-    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
 
-    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_ARG))
         .IgnoreArgument(1)
         .SetReturn((IOTHUB_MESSAGE_HANDLE)NULL);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
-        .IgnoreAllArguments();
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
-        .IgnoreAllArguments();
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
     STRICT_EXPECTED_CALL(STRING_construct_n(TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1))
         .ValidateArgumentBuffer(1, TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1);
-    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "/abandon" API_VERSION))
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, "/abandon" API_VERSION))
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
-    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", TEST_STRING_DATA))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "User-Agent", TEST_STRING_DATA))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "If-Match", TEST_ETAG_VALUE))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "If-Match", TEST_ETAG_VALUE))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
         HTTPAPI_REQUEST_POST,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
         "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP_ETAG TEST_ETAG_VALUE_UNQUOTED "/abandon" API_VERSION,    /*const char* relativePath,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
         NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
+        IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
         NULL,                                               /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         NULL                                                /*BUFFER_HANDLE responseContent))                              */
     ))
         .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode204, sizeof(statusCode204));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     //act
@@ -2826,111 +2824,111 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_2device_with_2nd_empty_waiti
 
     STRICT_EXPECTED_CALL(get_time(NULL));
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc()); /*because responseHeadearsHandle: a new instance of HTTP headers*/
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(BUFFER_new());
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
         HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
         "/devices/" TEST_DEVICE_ID2 MESSAGE_ENDPOINT_HTTP API_VERSION,    /*const char* relativePath,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
         NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
-        IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
+        IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
+        IGNORED_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
         .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_ARG, "ETag"))
         .IgnoreArgument(1)
         .SetReturn(TEST_ETAG_VALUE);
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2)
         ;
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
 
     /*this returns "0" so the message needs to be "accepted"*/
     /*this is "accepting"*/
-    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_ARG, IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(STRING_construct_n(TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1))
         .ValidateArgumentBuffer(1, TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1);
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, API_VERSION))
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, API_VERSION))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", TEST_STRING_DATA))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "User-Agent", TEST_STRING_DATA))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "If-Match", TEST_ETAG_VALUE))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "If-Match", TEST_ETAG_VALUE))
         .IgnoreArgument(1);
 
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1); /*because abandon relativePath is a STRING_HANDLE*/
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
         HTTPAPI_REQUEST_DELETE,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
         "/devices/" TEST_DEVICE_ID2 MESSAGE_ENDPOINT_HTTP_ETAG TEST_ETAG_VALUE_UNQUOTED API_VERSION,    /*const char* relativePath,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
         NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
+        IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
         NULL,                                               /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         NULL                                                /*BUFFER_HANDLE responseContent))                              */
         ))
         .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode204, sizeof(statusCode204));
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     //act
@@ -2960,88 +2958,88 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_2devices_2nd_has_1_event_item_as_string
     STRICT_EXPECTED_CALL(DList_IsListEmpty(&waitingToSend));
     STRICT_EXPECTED_CALL(DList_IsListEmpty(&waitingToSend2));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "Content-Type", "application/vnd.microsoft.iothub.json"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_ARG, "Content-Type", "application/vnd.microsoft.iothub.json"))
         .IgnoreArgument(1);
 
     /*starting to prepare the "big" payload*/
     STRICT_EXPECTED_CALL(STRING_construct("["));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
     /*this is first batched payload*/
     {
         STRICT_EXPECTED_CALL(IoTHubMessage_GetContentType(message10.messageHandle));
         STRICT_EXPECTED_CALL(STRING_construct("{\"body\":"));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(IoTHubMessage_GetString(message10.messageHandle));
 
         STRICT_EXPECTED_CALL(STRING_new_JSON(string10));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2);
 
-        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, ",\"base64Encoded\":false")) /*closing the value of the body*/
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, ",\"base64Encoded\":false")) /*closing the value of the body*/
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(IoTHubMessage_Properties(message10.messageHandle));
-        STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_EMPTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_EMPTY, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(2)
             .IgnoreArgument(3)
             .IgnoreArgument(4);
-        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "},")) /* this extra "," is going to be harshly overwritten by a "]"*/
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, "},")) /* this extra "," is going to be harshly overwritten by a "]"*/
             .IgnoreArgument(1);
         /*end of the first batched payload*/
     }
 
     {
         /*adding the first payload to the "big" payload*/
-        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2);
 
         /*closing the "big" payload*/
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(STRING_length(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_length(IGNORED_ARG))
             .IgnoreArgument(1);
     }
 
     /*building the list of messages to be notified if HTTP is fine*/
-    STRICT_EXPECTED_CALL(DList_RemoveHeadList(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(DList_RemoveHeadList(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_PTR_ARG, &(message10.entry)))
+    STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_ARG, &(message10.entry)))
         .IgnoreArgument(1);
 
     {
         /*this is building the HTTP payload... from a STRING_HANDLE (as it comes as "big payload"), into an array of bytes*/
         STRICT_EXPECTED_CALL(BUFFER_new());
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(STRING_length(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_length(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(BUFFER_build(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(BUFFER_build(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2)
             .IgnoreArgument(3);
     }
 
     /*executing HTTP goodies*/
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)) /*because relativePath*/
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)) /*because relativePath*/
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,
         HTTPAPI_REQUEST_POST,                                                           /*HTTPAPI_REQUEST_TYPE requestType,                  */
         "/devices/" TEST_DEVICE_ID2 EVENT_ENDPOINT API_VERSION,                 /*const char* relativePath,                          */
-        IGNORED_PTR_ARG,                                                                /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,      */
-        IGNORED_PTR_ARG,                                                                /*BUFFER_HANDLE requestContent,                      */
-        IGNORED_PTR_ARG,                                                                /*unsigned int* statusCode,                          */
+        IGNORED_ARG,                                                                /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,      */
+        IGNORED_ARG,                                                                /*BUFFER_HANDLE requestContent,                      */
+        IGNORED_ARG,                                                                /*unsigned int* statusCode,                          */
         NULL,                                                                           /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,     */
         NULL                                                                            /*BUFFER_HANDLE responseContent)                     */
         ))
@@ -3050,7 +3048,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_2devices_2nd_has_1_event_item_as_string
 
     /*once the event has been succesfull...*/
 
-    STRICT_EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_PTR_ARG, IOTHUB_CLIENT_CONFIRMATION_OK, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_ARG, IOTHUB_CLIENT_CONFIRMATION_OK, IGNORED_ARG));
 
     ENABLE_BATCHING();
 
@@ -3089,111 +3087,110 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_2devices_2subscriptions_happy_path_succ
     {
         STRICT_EXPECTED_CALL(get_time(NULL));
         STRICT_EXPECTED_CALL(HTTPHeaders_Alloc()); /*because responseHeadearsHandle: a new instance of HTTP headers*/
-        STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
             .IgnoreArgument(1);
 
         STRICT_EXPECTED_CALL(BUFFER_new());
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
         STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-            IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-            IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+            IGNORED_ARG,                                    /*sasObject handle                                             */
+            IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
             "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP API_VERSION,    /*const char* relativePath,                                    */
-            IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+            IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
             NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-            IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
-            IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
-            IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
+            IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
+            IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
+            IGNORED_ARG                                     /*BUFFER_HANDLE responseContent))                              */
             ))
             .IgnoreArgument_requestType()
             .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
-        STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
+        STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_ARG, "ETag"))
             .IgnoreArgument(1)
             .SetReturn(TEST_ETAG_VALUE);
 
-        STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2)
             ;
-        STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2);
 
         /*this returns "0" so the message needs to be "accepted"*/
         /*this is "accepting"*/
-        STRICT_EXPECTED_CALL(STRING_clone(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_clone(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_ARG, IGNORED_ARG));
 
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
 
         STRICT_EXPECTED_CALL(STRING_construct_n(TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1))
             .ValidateArgumentBuffer(1, TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1);
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2);
-        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, API_VERSION))
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, API_VERSION))
             .IgnoreArgument(1);
 
         STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
-        STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", TEST_STRING_DATA))
+        STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "User-Agent", TEST_STRING_DATA))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
+        STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "If-Match", TEST_ETAG_VALUE))
+        STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "If-Match", TEST_ETAG_VALUE))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
             .IgnoreArgument(1); /*because abandon relativePath is a STRING_HANDLE*/
         STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-            IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-            IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+            IGNORED_ARG,                                    /*sasObject handle                                             */
+            IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_DELETE,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
             "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP_ETAG TEST_ETAG_VALUE_UNQUOTED API_VERSION,    /*const char* relativePath,                                    */
-            IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+            IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
             NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-            IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
+            IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
             NULL,                                               /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
             NULL                                                /*BUFFER_HANDLE responseContent))                              */
             ))
             .IgnoreArgument_requestType()
             .CopyOutArgumentBuffer(7, &statusCode204, sizeof(statusCode204));
 
-        STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
     }
 
@@ -3201,111 +3198,110 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_2devices_2subscriptions_happy_path_succ
     {
         STRICT_EXPECTED_CALL(get_time(NULL));
         STRICT_EXPECTED_CALL(HTTPHeaders_Alloc()); /*because responseHeadearsHandle: a new instance of HTTP headers*/
-        STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
             .IgnoreArgument(1);
 
         STRICT_EXPECTED_CALL(BUFFER_new());
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
         STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-            IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-            IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+            IGNORED_ARG,                                    /*sasObject handle                                             */
+            IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
             "/devices/" TEST_DEVICE_ID2 MESSAGE_ENDPOINT_HTTP API_VERSION,    /*const char* relativePath,                                    */
-            IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+            IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
             NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-            IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
-            IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
-            IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
+            IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
+            IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
+            IGNORED_ARG                                     /*BUFFER_HANDLE responseContent))                              */
             ))
             .IgnoreArgument_requestType()
             .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
-        STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
+        STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_ARG, "ETag"))
             .IgnoreArgument(1)
             .SetReturn(TEST_ETAG_VALUE);
 
-        STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2)
             ;
-        STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2);
 
         /*this returns "0" so the message needs to be "accepted"*/
         /*this is "accepting"*/
-        STRICT_EXPECTED_CALL(STRING_clone(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_clone(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_ARG, IGNORED_ARG));
 
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
 
         STRICT_EXPECTED_CALL(STRING_construct_n(TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1))
             .ValidateArgumentBuffer(1, TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1);
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2);
-        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, API_VERSION))
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, API_VERSION))
             .IgnoreArgument(1);
 
         STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
-        STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", TEST_STRING_DATA))
+        STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "User-Agent", TEST_STRING_DATA))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
+        STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "If-Match", TEST_ETAG_VALUE))
+        STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "If-Match", TEST_ETAG_VALUE))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
             .IgnoreArgument(1); /*because abandon relativePath is a STRING_HANDLE*/
         STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-            IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-            IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+            IGNORED_ARG,                                    /*sasObject handle                                             */
+            IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_DELETE,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
             "/devices/" TEST_DEVICE_ID2 MESSAGE_ENDPOINT_HTTP_ETAG TEST_ETAG_VALUE_UNQUOTED API_VERSION,    /*const char* relativePath,                                    */
-            IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+            IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
             NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-            IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
+            IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
             NULL,                                               /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
             NULL                                                /*BUFFER_HANDLE responseContent))                              */
             ))
             .IgnoreArgument_requestType()
             .CopyOutArgumentBuffer(7, &statusCode204, sizeof(statusCode204));
 
-        STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
     }
 
@@ -3339,111 +3335,110 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
     STRICT_EXPECTED_CALL(get_time(NULL))
         .SetReturn((time_t)(-1));
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc()); /*because responseHeadearsHandle: a new instance of HTTP headers*/
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(BUFFER_new());
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
         HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
         "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP API_VERSION,    /*const char* relativePath,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
         NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
-        IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
+        IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
+        IGNORED_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
         .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_ARG, "ETag"))
         .IgnoreArgument(1)
         .SetReturn(TEST_ETAG_VALUE);
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2)
         ;
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
 
     /*this returns "0" so the message needs to be "accepted"*/
     /*this is "accepting"*/
-    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .IgnoreAllArguments();
+    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_ARG, IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(STRING_construct_n(TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1))
         .ValidateArgumentBuffer(1, TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1);
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, API_VERSION))
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, API_VERSION))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", TEST_STRING_DATA))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "User-Agent", TEST_STRING_DATA))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "If-Match", TEST_ETAG_VALUE))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "If-Match", TEST_ETAG_VALUE))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1); /*because abandon relativePath is a STRING_HANDLE*/
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
         HTTPAPI_REQUEST_DELETE,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
         "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP_ETAG TEST_ETAG_VALUE_UNQUOTED API_VERSION,    /*const char* relativePath,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
         NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
+        IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
         NULL,                                               /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         NULL                                                /*BUFFER_HANDLE responseContent))                              */
         ))
         .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode204, sizeof(statusCode204));
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     //act
@@ -3477,111 +3472,110 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         STRICT_EXPECTED_CALL(get_time(NULL))
             .SetReturn((time_t)(-1));
         STRICT_EXPECTED_CALL(HTTPHeaders_Alloc()); /*because responseHeadearsHandle: a new instance of HTTP headers*/
-        STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
             .IgnoreArgument(1);
 
         STRICT_EXPECTED_CALL(BUFFER_new());
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
             .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
         STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-            IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-            IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+            IGNORED_ARG,                                    /*sasObject handle                                             */
+            IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
             "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP API_VERSION,    /*const char* relativePath,                                    */
-            IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+            IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
             NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-            IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
-            IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
-            IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
+            IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
+            IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
+            IGNORED_ARG                                     /*BUFFER_HANDLE responseContent))                              */
             ))
             .IgnoreArgument_requestType()
             .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
-        STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
+        STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_ARG, "ETag"))
             .IgnoreArgument(1)
             .SetReturn(TEST_ETAG_VALUE);
 
-        STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2)
             ;
-        STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2);
 
         /*this returns "0" so the message needs to be "accepted"*/
         /*this is "accepting"*/
-        STRICT_EXPECTED_CALL(STRING_clone(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_clone(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_ARG, IGNORED_ARG));
 
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
 
         STRICT_EXPECTED_CALL(STRING_construct_n(TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1))
             .ValidateArgumentBuffer(1, TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1);
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2);
-        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, API_VERSION))
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, API_VERSION))
             .IgnoreArgument(1);
 
         STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
-        STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", TEST_STRING_DATA))
+        STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "User-Agent", TEST_STRING_DATA))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
+        STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "If-Match", TEST_ETAG_VALUE))
+        STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "If-Match", TEST_ETAG_VALUE))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
             .IgnoreArgument(1); /*because abandon relativePath is a STRING_HANDLE*/
         STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-            IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-            IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+            IGNORED_ARG,                                    /*sasObject handle                                             */
+            IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
             HTTPAPI_REQUEST_DELETE,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
             "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP_ETAG TEST_ETAG_VALUE_UNQUOTED API_VERSION,    /*const char* relativePath,                                    */
-            IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+            IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
             NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-            IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
+            IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
             NULL,                                               /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
             NULL                                                /*BUFFER_HANDLE responseContent))                              */
             ))
             .IgnoreArgument_requestType()
             .CopyOutArgumentBuffer(7, &statusCode204, sizeof(statusCode204));
 
-        STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
     }
 
@@ -3621,111 +3615,110 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 
     STRICT_EXPECTED_CALL(get_time(NULL));
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc()); /*because responseHeadearsHandle: a new instance of HTTP headers*/
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(BUFFER_new());
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
         HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
         "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP API_VERSION,    /*const char* relativePath,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
         NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
-        IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
+        IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
+        IGNORED_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
         .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_ARG, "ETag"))
         .IgnoreArgument(1)
         .SetReturn(TEST_ETAG_VALUE);
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2)
         ;
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
 
     /*this returns "0" so the message needs to be "accepted"*/
     /*this is "accepting"*/
-    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .IgnoreAllArguments();
+    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_ARG, IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(STRING_construct_n(TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1))
         .ValidateArgumentBuffer(1, TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1);
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, API_VERSION))
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, API_VERSION))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", TEST_STRING_DATA))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "User-Agent", TEST_STRING_DATA))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "If-Match", TEST_ETAG_VALUE))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "If-Match", TEST_ETAG_VALUE))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1); /*because abandon relativePath is a STRING_HANDLE*/
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
         HTTPAPI_REQUEST_DELETE,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
         "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP_ETAG TEST_ETAG_VALUE_UNQUOTED API_VERSION,    /*const char* relativePath,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
         NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
+        IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
         NULL,                                               /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         NULL                                                /*BUFFER_HANDLE responseContent))                              */
         ))
         .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode204, sizeof(statusCode204));
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     //act
@@ -3793,111 +3786,110 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
     STRICT_EXPECTED_CALL(get_difftime(TEST_GET_TIME_VALUE + TEST_DEFAULT_GETMINIMUMPOLLINGTIME + 1, TEST_GET_TIME_VALUE));
 
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc()); /*because responseHeadearsHandle: a new instance of HTTP headers*/
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(BUFFER_new());
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
         HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
         "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP API_VERSION,    /*const char* relativePath,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
         NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
-        IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
+        IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
+        IGNORED_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
         .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_ARG, "ETag"))
         .IgnoreArgument(1)
         .SetReturn(TEST_ETAG_VALUE);
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2)
         ;
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
 
     /*this returns "0" so the message needs to be "accepted"*/
     /*this is "accepting"*/
-    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .IgnoreAllArguments();
+    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_ARG, IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(STRING_construct_n(TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1))
         .ValidateArgumentBuffer(1, TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1);
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, API_VERSION))
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, API_VERSION))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", TEST_STRING_DATA))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "User-Agent", TEST_STRING_DATA))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "If-Match", TEST_ETAG_VALUE))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "If-Match", TEST_ETAG_VALUE))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1); /*because abandon relativePath is a STRING_HANDLE*/
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
         HTTPAPI_REQUEST_DELETE,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
         "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP_ETAG TEST_ETAG_VALUE_UNQUOTED API_VERSION,    /*const char* relativePath,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
         NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
+        IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
         NULL,                                               /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         NULL                                                /*BUFFER_HANDLE responseContent))                              */
         ))
         .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode204, sizeof(statusCode204));
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     //act
@@ -3929,110 +3921,109 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 
     STRICT_EXPECTED_CALL(get_time(NULL));
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc()); /*because responseHeadearsHandle: a new instance of HTTP headers*/
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(BUFFER_new());
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
         HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
         "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP API_VERSION,    /*const char* relativePath,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
         NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
-        IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
+        IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
+        IGNORED_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
         .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_ARG, "ETag"))
         .IgnoreArgument(1)
         .SetReturn(TEST_ETAG_VALUE);
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
 
     /*this returns "0" so the message needs to be "accepted"*/
     /*this is "accepting"*/
-    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .IgnoreAllArguments();
+    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_ARG, IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(STRING_construct_n(TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1))
         .ValidateArgumentBuffer(1, TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1);
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, API_VERSION))
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, API_VERSION))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", TEST_STRING_DATA))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "User-Agent", TEST_STRING_DATA))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "If-Match", TEST_ETAG_VALUE))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "If-Match", TEST_ETAG_VALUE))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1); /*because abandon relativePath is a STRING_HANDLE*/
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
         HTTPAPI_REQUEST_DELETE,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
         "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP_ETAG TEST_ETAG_VALUE_UNQUOTED API_VERSION,    /*const char* relativePath,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
         NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
+        IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
         NULL,                                               /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         NULL                                                /*BUFFER_HANDLE responseContent))                              */
         ))
         .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode404, sizeof(statusCode404));
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     //act
@@ -4062,111 +4053,110 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 
     STRICT_EXPECTED_CALL(get_time(NULL));
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc()); /*because responseHeadearsHandle: a new instance of HTTP headers*/
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(BUFFER_new());
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
         HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
         "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP API_VERSION,    /*const char* relativePath,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
         NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
-        IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
+        IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
+        IGNORED_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
         .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_ARG, "ETag"))
         .IgnoreArgument(1)
         .SetReturn(TEST_ETAG_VALUE);
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
 
     /*this returns "0" so the message needs to be "accepted"*/
     /*this is "accepting"*/
-    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .IgnoreAllArguments();
+    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_ARG, IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(STRING_construct_n(TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1))
         .ValidateArgumentBuffer(1, TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1);
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, API_VERSION))
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, API_VERSION))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", TEST_STRING_DATA))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "User-Agent", TEST_STRING_DATA))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "If-Match", TEST_ETAG_VALUE))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "If-Match", TEST_ETAG_VALUE))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1); /*because abandon relativePath is a STRING_HANDLE*/
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
         HTTPAPI_REQUEST_DELETE,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
         "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP_ETAG TEST_ETAG_VALUE_UNQUOTED API_VERSION,    /*const char* relativePath,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
         NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
+        IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
         NULL,                                               /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         NULL                                                /*BUFFER_HANDLE responseContent))                              */
         ))
         .IgnoreArgument_requestType()
         .SetReturn(HTTPAPIEX_ERROR);
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     //act
@@ -4196,96 +4186,95 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 
     STRICT_EXPECTED_CALL(get_time(NULL));
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc()); /*because responseHeadearsHandle: a new instance of HTTP headers*/
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(BUFFER_new());
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
         HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
         "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP API_VERSION,    /*const char* relativePath,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
         NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
-        IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
+        IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
+        IGNORED_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
         .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_ARG, "ETag"))
         .IgnoreArgument(1)
         .SetReturn(TEST_ETAG_VALUE);
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2)
         ;
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
 
     /*this returns "0" so the message needs to be "accepted"*/
     /*this is "accepting"*/
-    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .IgnoreAllArguments();
+    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_ARG, IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(STRING_construct_n(TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1))
         .ValidateArgumentBuffer(1, TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1);
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, API_VERSION))
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, API_VERSION))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", TEST_STRING_DATA))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "User-Agent", TEST_STRING_DATA))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "If-Match", TEST_ETAG_VALUE))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "If-Match", TEST_ETAG_VALUE))
         .IgnoreArgument(1)
         .SetReturn(HTTP_HEADERS_ERROR);
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     //act
@@ -4315,93 +4304,92 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 
     STRICT_EXPECTED_CALL(get_time(NULL));
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc()); /*because responseHeadearsHandle: a new instance of HTTP headers*/
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(BUFFER_new());
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
         HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
         "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP API_VERSION,    /*const char* relativePath,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
         NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
-        IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
+        IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
+        IGNORED_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
         .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_ARG, "ETag"))
         .IgnoreArgument(1)
         .SetReturn(TEST_ETAG_VALUE);
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
 
     /*this returns "0" so the message needs to be "accepted"*/
     /*this is "accepting"*/
-    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .IgnoreAllArguments();
+    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_ARG, IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(STRING_construct_n(TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1))
         .ValidateArgumentBuffer(1, TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1);
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, API_VERSION))
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, API_VERSION))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", TEST_STRING_DATA))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "User-Agent", TEST_STRING_DATA))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
         .IgnoreArgument(1)
         .SetReturn(HTTP_HEADERS_ERROR);
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     //act
@@ -4431,84 +4419,83 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 
     STRICT_EXPECTED_CALL(get_time(NULL));
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc()); /*because responseHeadearsHandle: a new instance of HTTP headers*/
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(BUFFER_new());
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
         HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
         "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP API_VERSION,    /*const char* relativePath,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
         NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
-        IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
+        IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
+        IGNORED_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
         .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_ARG, "ETag"))
         .IgnoreArgument(1)
         .SetReturn(TEST_ETAG_VALUE);
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
 
     /*this returns "0" so the message needs to be "accepted"*/
     /*this is "accepting"*/
-    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .IgnoreAllArguments();
+    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_ARG, IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(STRING_construct_n(TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1))
         .ValidateArgumentBuffer(1, TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1);
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, API_VERSION))
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, API_VERSION))
         .IgnoreArgument(1);
 
     whenShallHTTPHeaders_Alloc_fail = currentHTTPHeaders_Alloc_call + 2;
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     //act
@@ -4538,82 +4525,81 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 
     STRICT_EXPECTED_CALL(get_time(NULL));
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc()); /*because responseHeadearsHandle: a new instance of HTTP headers*/
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(BUFFER_new());
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
         HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
         "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP API_VERSION,    /*const char* relativePath,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
         NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
-        IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
+        IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
+        IGNORED_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
         .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_ARG, "ETag"))
         .IgnoreArgument(1)
         .SetReturn(TEST_ETAG_VALUE);
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
 
     /*this returns "0" so the message needs to be "accepted"*/
     /*this is "accepting"*/
-    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .IgnoreAllArguments();
+    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_ARG, IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(STRING_construct_n(TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1))
         .ValidateArgumentBuffer(1, TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1);
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
     whenShallSTRING_concat_fail = currentSTRING_concat_call + 1;
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, API_VERSION))
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, API_VERSION))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     //act
@@ -4642,80 +4628,79 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 
     STRICT_EXPECTED_CALL(get_time(NULL));
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc()); /*because responseHeadearsHandle: a new instance of HTTP headers*/
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(BUFFER_new());
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
         HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
         "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP API_VERSION,    /*const char* relativePath,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
         NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
-        IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
+        IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
+        IGNORED_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
         .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_ARG, "ETag"))
         .IgnoreArgument(1)
         .SetReturn(TEST_ETAG_VALUE);
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
 
     /*this returns "0" so the message needs to be "accepted"*/
     /*this is "accepting"*/
-    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .IgnoreAllArguments();
+    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_ARG, IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(STRING_construct_n(TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1))
         .ValidateArgumentBuffer(1, TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1);
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
     whenShallSTRING_concat_with_STRING_fail = currentSTRING_concat_with_STRING_call + 1;
-    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     //act
@@ -4745,75 +4730,74 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 
     STRICT_EXPECTED_CALL(get_time(NULL));
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc()); /*because responseHeadearsHandle: a new instance of HTTP headers*/
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(BUFFER_new());
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
         HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
         "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP API_VERSION,    /*const char* relativePath,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
         NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
-        IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
+        IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
+        IGNORED_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
         .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_ARG, "ETag"))
         .IgnoreArgument(1)
         .SetReturn(TEST_ETAG_VALUE);
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
 
     /*this returns "0" so the message needs to be "accepted"*/
     /*this is "accepting"*/
-    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .IgnoreAllArguments();
+    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_ARG, IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     whenShallSTRING_construct_n_fail = currentSTRING_construct_n_call + 1;
     STRICT_EXPECTED_CALL(STRING_construct_n(TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1))
         .ValidateArgumentBuffer(1, TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1);
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     //act
@@ -4843,71 +4827,70 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 
     STRICT_EXPECTED_CALL(get_time(NULL));
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc()); /*because responseHeadearsHandle: a new instance of HTTP headers*/
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(BUFFER_new());
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
         HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
         "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP API_VERSION,    /*const char* relativePath,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
         NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
-        IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
+        IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
+        IGNORED_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
         .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_ARG, "ETag"))
         .IgnoreArgument(1)
         .SetReturn(TEST_ETAG_VALUE);
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .IgnoreAllArguments();
+    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_ARG, IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
 
     /*this returns "0" so the message needs to be "accepted"*/
     /*this is "accepting"*/
     whenShallSTRING_clone_fail = currentSTRING_clone_call + 1;
-    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     //act
@@ -4958,110 +4941,109 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 
     STRICT_EXPECTED_CALL(get_time(NULL));
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc()); /*because responseHeadearsHandle: a new instance of HTTP headers*/
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(BUFFER_new());
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
         HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
         "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP API_VERSION,    /*const char* relativePath,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
         NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
-        IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
+        IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
+        IGNORED_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
         .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_ARG, "ETag"))
         .IgnoreArgument(1)
         .SetReturn(TEST_ETAG_VALUE);
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
 
     /*this is "reject"*/
-    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_ARG))
         .IgnoreArgument(1);
     currentDisposition = IOTHUBMESSAGE_REJECTED;
-    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .IgnoreAllArguments();
+    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_ARG, IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(STRING_construct_n(TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1))
         .ValidateArgumentBuffer(1, TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1);
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, API_VERSION REJECT_QUERY_PARAMETER))
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, API_VERSION REJECT_QUERY_PARAMETER))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", TEST_STRING_DATA))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "User-Agent", TEST_STRING_DATA))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "If-Match", TEST_ETAG_VALUE))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "If-Match", TEST_ETAG_VALUE))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1); /*because abandon relativePath is a STRING_HANDLE*/
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
         HTTPAPI_REQUEST_DELETE,                               /*HTTPAPI_REQUEST_TYPE requestType,                            */
         "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP_ETAG TEST_ETAG_VALUE_UNQUOTED API_VERSION REJECT_QUERY_PARAMETER,    /*const char* relativePath,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
         NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
+        IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
         NULL,                                               /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         NULL                                                /*BUFFER_HANDLE responseContent))                              */
         ))
         .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode204, sizeof(statusCode204));
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     //act
@@ -5091,110 +5073,109 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 
     STRICT_EXPECTED_CALL(get_time(NULL));
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc()); /*because responseHeadearsHandle: a new instance of HTTP headers*/
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(BUFFER_new());
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
         HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
         "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP API_VERSION,    /*const char* relativePath,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
         NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
-        IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
+        IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
+        IGNORED_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
         .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_ARG, "ETag"))
         .IgnoreArgument(1)
         .SetReturn(TEST_ETAG_VALUE);
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
 
     /*this is "reject"*/
-    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_ARG))
         .IgnoreArgument(1);
     currentDisposition = IOTHUBMESSAGE_REJECTED;
-    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .IgnoreAllArguments();
+    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_ARG, IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(STRING_construct_n(TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1))
         .ValidateArgumentBuffer(1, TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1);
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, API_VERSION REJECT_QUERY_PARAMETER))
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, API_VERSION REJECT_QUERY_PARAMETER))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", TEST_STRING_DATA))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "User-Agent", TEST_STRING_DATA))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "If-Match", TEST_ETAG_VALUE))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "If-Match", TEST_ETAG_VALUE))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1); /*because abandon relativePath is a STRING_HANDLE*/
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
         HTTPAPI_REQUEST_DELETE,                               /*HTTPAPI_REQUEST_TYPE requestType,                            */
         "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP_ETAG TEST_ETAG_VALUE_UNQUOTED API_VERSION REJECT_QUERY_PARAMETER,    /*const char* relativePath,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
         NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
+        IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
         NULL,                                               /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         NULL                                                /*BUFFER_HANDLE responseContent))                              */
         ))
         .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode404, sizeof(statusCode404));
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     //act
@@ -5224,99 +5205,98 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 
     STRICT_EXPECTED_CALL(get_time(NULL));
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc()); /*because responseHeadearsHandle: a new instance of HTTP headers*/
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(BUFFER_new());
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
         HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
         "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP API_VERSION,    /*const char* relativePath,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
         NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
-        IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
+        IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
+        IGNORED_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
         .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_ARG, "ETag"))
         .IgnoreArgument(1)
         .SetReturn(TEST_ETAG_VALUE);
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
 
     /*this is "reject"*/
-    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_ARG))
         .IgnoreArgument(1);
     currentDisposition = IOTHUBMESSAGE_REJECTED;
-    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .IgnoreAllArguments();
+    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_ARG, IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(STRING_construct_n(TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1))
         .ValidateArgumentBuffer(1, TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1);
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, API_VERSION REJECT_QUERY_PARAMETER))
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, API_VERSION REJECT_QUERY_PARAMETER))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", TEST_STRING_DATA))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "User-Agent", TEST_STRING_DATA))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "If-Match", TEST_ETAG_VALUE))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "If-Match", TEST_ETAG_VALUE))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1); /*because abandon relativePath is a STRING_HANDLE*/
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
         HTTPAPI_REQUEST_DELETE,                               /*HTTPAPI_REQUEST_TYPE requestType,                            */
         "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP_ETAG TEST_ETAG_VALUE_UNQUOTED API_VERSION REJECT_QUERY_PARAMETER,    /*const char* relativePath,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
         NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
+        IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
         NULL,                                               /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         NULL                                                /*BUFFER_HANDLE responseContent))                              */
         ))
@@ -5324,11 +5304,11 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
         .CopyOutArgumentBuffer(7, &statusCode404, sizeof(statusCode404))
         .SetReturn(HTTPAPIEX_ERROR);
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     //act
@@ -5357,95 +5337,94 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 
     STRICT_EXPECTED_CALL(get_time(NULL));
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc()); /*because responseHeadearsHandle: a new instance of HTTP headers*/
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(BUFFER_new());
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
         HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
         "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP API_VERSION,    /*const char* relativePath,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
         NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
-        IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
+        IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
+        IGNORED_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
         .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_ARG, "ETag"))
         .IgnoreArgument(1)
         .SetReturn(TEST_ETAG_VALUE);
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
 
     /*this is "reject"*/
-    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_ARG))
         .IgnoreArgument(1);
     currentDisposition = IOTHUBMESSAGE_REJECTED;
-    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .IgnoreAllArguments();
+    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_ARG, IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(STRING_construct_n(TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1))
         .ValidateArgumentBuffer(1, TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1);
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, API_VERSION REJECT_QUERY_PARAMETER))
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, API_VERSION REJECT_QUERY_PARAMETER))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", TEST_STRING_DATA))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "User-Agent", TEST_STRING_DATA))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "If-Match", TEST_ETAG_VALUE))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "If-Match", TEST_ETAG_VALUE))
         .IgnoreArgument(1)
         .SetReturn(HTTP_HEADERS_ERROR);
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     //act
@@ -5474,93 +5453,92 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 
     STRICT_EXPECTED_CALL(get_time(NULL));
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc()); /*because responseHeadearsHandle: a new instance of HTTP headers*/
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(BUFFER_new());
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
         HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
         "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP API_VERSION,    /*const char* relativePath,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
         NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
-        IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
+        IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
+        IGNORED_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
         .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_ARG, "ETag"))
         .IgnoreArgument(1)
         .SetReturn(TEST_ETAG_VALUE);
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
 
                                             /*this is "reject"*/
-    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_ARG))
         .IgnoreArgument(1);
     currentDisposition = IOTHUBMESSAGE_REJECTED;
-    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .IgnoreAllArguments();
+    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_ARG, IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(STRING_construct_n(TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1))
         .ValidateArgumentBuffer(1, TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1);
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, API_VERSION REJECT_QUERY_PARAMETER))
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, API_VERSION REJECT_QUERY_PARAMETER))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", TEST_STRING_DATA))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "User-Agent", TEST_STRING_DATA))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
         .IgnoreArgument(1)
         .SetReturn(HTTP_HEADERS_ERROR);
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     //act
@@ -5589,84 +5567,83 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 
     STRICT_EXPECTED_CALL(get_time(NULL));
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc()); /*because responseHeadearsHandle: a new instance of HTTP headers*/
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(BUFFER_new());
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
         HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
         "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP API_VERSION,    /*const char* relativePath,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
         NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
-        IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
+        IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
+        IGNORED_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
         .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_ARG, "ETag"))
         .IgnoreArgument(1)
         .SetReturn(TEST_ETAG_VALUE);
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
 
     /*this is "reject"*/
-    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_ARG))
         .IgnoreArgument(1);
     currentDisposition = IOTHUBMESSAGE_REJECTED;
-    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .IgnoreAllArguments();
+    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_ARG, IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(STRING_construct_n(TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1))
         .ValidateArgumentBuffer(1, TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1);
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, API_VERSION REJECT_QUERY_PARAMETER))
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, API_VERSION REJECT_QUERY_PARAMETER))
         .IgnoreArgument(1);
 
     whenShallHTTPHeaders_Alloc_fail = currentHTTPHeaders_Alloc_call + 2;
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     //act
@@ -5695,82 +5672,81 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 
     STRICT_EXPECTED_CALL(get_time(NULL));
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc()); /*because responseHeadearsHandle: a new instance of HTTP headers*/
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(BUFFER_new());
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
         HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
         "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP API_VERSION,    /*const char* relativePath,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
         NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
-        IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
+        IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
+        IGNORED_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
         .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_ARG, "ETag"))
         .IgnoreArgument(1)
         .SetReturn(TEST_ETAG_VALUE);
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
 
     /*this is "reject"*/
-    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_ARG))
         .IgnoreArgument(1);
     currentDisposition = IOTHUBMESSAGE_REJECTED;
-    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .IgnoreAllArguments();
+    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_ARG, IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(STRING_construct_n(TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1))
         .ValidateArgumentBuffer(1, TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1);
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
     whenShallSTRING_concat_fail = currentSTRING_concat_call + 1;
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, API_VERSION REJECT_QUERY_PARAMETER))
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, API_VERSION REJECT_QUERY_PARAMETER))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     //act
@@ -5799,79 +5775,78 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 
     STRICT_EXPECTED_CALL(get_time(NULL));
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc()); /*because responseHeadearsHandle: a new instance of HTTP headers*/
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(BUFFER_new());
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
         HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
         "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP API_VERSION,    /*const char* relativePath,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
         NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
-        IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
+        IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
+        IGNORED_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
         .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_ARG, "ETag"))
         .IgnoreArgument(1)
         .SetReturn(TEST_ETAG_VALUE);
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
 
     /*this is "reject"*/
-    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .IgnoreAllArguments();
+    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_ARG, IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(STRING_construct_n(TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1))
         .ValidateArgumentBuffer(1, TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1);
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
     whenShallSTRING_concat_with_STRING_fail = currentSTRING_concat_with_STRING_call + 1;
-    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     //act
@@ -5900,74 +5875,73 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 
     STRICT_EXPECTED_CALL(get_time(NULL));
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc()); /*because responseHeadearsHandle: a new instance of HTTP headers*/
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(BUFFER_new());
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
         HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
         "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP API_VERSION,    /*const char* relativePath,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
         NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
-        IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
+        IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
+        IGNORED_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
         .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_ARG, "ETag"))
         .IgnoreArgument(1)
         .SetReturn(TEST_ETAG_VALUE);
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
 
     /*this is "reject"*/
-    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .IgnoreAllArguments();
+    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_ARG, IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     whenShallSTRING_construct_n_fail = currentSTRING_construct_n_call + 1;
     STRICT_EXPECTED_CALL(STRING_construct_n(TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1))
         .ValidateArgumentBuffer(1, TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1);
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     //act
@@ -5996,70 +5970,69 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 
     STRICT_EXPECTED_CALL(get_time(NULL));
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc()); /*because responseHeadearsHandle: a new instance of HTTP headers*/
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(BUFFER_new());
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
         HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
         "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP API_VERSION,    /*const char* relativePath,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
         NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
-        IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
+        IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
+        IGNORED_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
         .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_ARG, "ETag"))
         .IgnoreArgument(1)
         .SetReturn(TEST_ETAG_VALUE);
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .IgnoreAllArguments();
+    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_ARG, IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
 
     /*this is "reject"*/
     whenShallSTRING_clone_fail = currentSTRING_clone_call + 1;
-    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     //act
@@ -6089,81 +6062,81 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 
     STRICT_EXPECTED_CALL(get_time(NULL));
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc()); /*because responseHeadearsHandle: a new instance of HTTP headers*/
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(BUFFER_new());
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
         HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
         "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP API_VERSION,    /*const char* relativePath,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
         NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
-        IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
+        IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
+        IGNORED_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
         .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_ARG, "ETag"))
         .IgnoreArgument(1)
         .SetReturn(TEST_ETAG_VALUE);
 
-    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2)
         .SetReturn((IOTHUB_MESSAGE_HANDLE)NULL);
 
     /*this is "abandon"*/
-    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(STRING_construct_n(TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1))
         .ValidateArgumentBuffer(1, TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1);
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "/abandon" API_VERSION))
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, "/abandon" API_VERSION))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", TEST_STRING_DATA))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "User-Agent", TEST_STRING_DATA))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "If-Match", TEST_ETAG_VALUE))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "If-Match", TEST_ETAG_VALUE))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1); /*because abandon relativePath is a STRING_HANDLE*/
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
         HTTPAPI_REQUEST_POST,                               /*HTTPAPI_REQUEST_TYPE requestType,                            */
         "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP_ETAG TEST_ETAG_VALUE_UNQUOTED "/abandon" API_VERSION,    /*const char* relativePath,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
         NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
+        IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
         NULL,                                               /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         NULL                                                /*BUFFER_HANDLE responseContent))                              */
         ))
@@ -6196,30 +6169,30 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 
     STRICT_EXPECTED_CALL(get_time(NULL));
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc()); /*because responseHeadearsHandle: a new instance of HTTP headers*/
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(BUFFER_new());
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
         HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
         "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP API_VERSION,    /*const char* relativePath,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
         NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
-        IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
+        IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
+        IGNORED_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
         .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_ARG, "ETag"))
         .IgnoreArgument(1)
         .SetReturn((const char*)NULL);
 
@@ -6249,30 +6222,30 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 
     STRICT_EXPECTED_CALL(get_time(NULL));
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc()); /*because responseHeadearsHandle: a new instance of HTTP headers*/
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(BUFFER_new());
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
         HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
         "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP API_VERSION,    /*const char* relativePath,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
         NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
-        IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
+        IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
+        IGNORED_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
         .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_ARG, "ETag"))
         .IgnoreArgument(1)
         .SetReturn("");
 
@@ -6302,30 +6275,30 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 
     STRICT_EXPECTED_CALL(get_time(NULL));
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc()); /*because responseHeadearsHandle: a new instance of HTTP headers*/
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(BUFFER_new());
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
         HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
         "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP API_VERSION,    /*const char* relativePath,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
         NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
-        IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
+        IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
+        IGNORED_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
         .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_ARG, "ETag"))
         .IgnoreArgument(1)
         .SetReturn("a");
 
@@ -6355,30 +6328,30 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 
     STRICT_EXPECTED_CALL(get_time(NULL));
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc()); /*because responseHeadearsHandle: a new instance of HTTP headers*/
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(BUFFER_new());
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
         HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
         "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP API_VERSION,    /*const char* relativePath,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
         NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
-        IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
+        IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
+        IGNORED_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
         .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_ARG, "ETag"))
         .IgnoreArgument(1)
         .SetReturn("\"a");
 
@@ -6408,30 +6381,30 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 
     STRICT_EXPECTED_CALL(get_time(NULL));
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc()); /*because responseHeadearsHandle: a new instance of HTTP headers*/
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(BUFFER_new());
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
         HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
         "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP API_VERSION,    /*const char* relativePath,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
         NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
-        IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
+        IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
+        IGNORED_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
         .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_ARG, "ETag"))
         .IgnoreArgument(1)
         .SetReturn("\"");
 
@@ -6461,30 +6434,30 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 
     STRICT_EXPECTED_CALL(get_time(NULL));
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc()); /*because responseHeadearsHandle: a new instance of HTTP headers*/
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(BUFFER_new());
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
         HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
         "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP API_VERSION,    /*const char* relativePath,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
         NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
-        IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
+        IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
+        IGNORED_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
         .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_ARG, "ETag"))
         .IgnoreArgument(1)
         .SetReturn("\"abcd");
 
@@ -6514,25 +6487,25 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 
     STRICT_EXPECTED_CALL(get_time(NULL));
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc()); /*because responseHeadearsHandle: a new instance of HTTP headers*/
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(BUFFER_new());
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
         HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
         "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP API_VERSION,    /*const char* relativePath,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
         NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
-        IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
+        IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
+        IGNORED_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
         .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode500, sizeof(statusCode500));
@@ -6563,25 +6536,25 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 
     STRICT_EXPECTED_CALL(get_time(NULL));
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc()); /*because responseHeadearsHandle: a new instance of HTTP headers*/
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(BUFFER_new());
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
         HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
         "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP API_VERSION,    /*const char* relativePath,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
         NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
-        IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
+        IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
+        IGNORED_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
         .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200))
@@ -6612,7 +6585,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 
     STRICT_EXPECTED_CALL(get_time(NULL));
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc()); /*because responseHeadearsHandle: a new instance of HTTP headers*/
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     whenShallBUFFER_new_fail = currentBUFFER_new_call + 1;
@@ -6702,92 +6675,92 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_happy_path_succeeds)
 
     STRICT_EXPECTED_CALL(DList_IsListEmpty(&waitingToSend));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "Content-Type", "application/vnd.microsoft.iothub.json"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_ARG, "Content-Type", "application/vnd.microsoft.iothub.json"))
         .IgnoreArgument(1);
 
-    EXPECTED_CALL(STRING_new_with_memory(IGNORED_PTR_ARG));
+    EXPECTED_CALL(STRING_new_with_memory(IGNORED_ARG));
 
     /*starting to prepare the "big" payload*/
     STRICT_EXPECTED_CALL(STRING_construct("["));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
     /*this is first batched payload*/
     {
         STRICT_EXPECTED_CALL(IoTHubMessage_GetContentType(message1.messageHandle));
         STRICT_EXPECTED_CALL(STRING_construct("{\"body\":\""));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(message1.messageHandle, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(message1.messageHandle, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(2)
             .IgnoreArgument(3);
 
         STRICT_EXPECTED_CALL(Azure_Base64_Encode_Bytes(buffer1, buffer1_size));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2);
 
-        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "\"")) /*closing the value of the body*/
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, "\"")) /*closing the value of the body*/
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(IoTHubMessage_Properties(message1.messageHandle));
-        STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_EMPTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_EMPTY, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(2)
             .IgnoreArgument(3)
             .IgnoreArgument(4);
-        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "},")) /* this extra "," is going to be harshly overwritten by a "]"*/
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, "},")) /* this extra "," is going to be harshly overwritten by a "]"*/
             .IgnoreArgument(1);
         /*end of the first batched payload*/
     }
 
     {
         /*adding the first payload to the "big" payload*/
-        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2);
 
         /*closing the "big" payload*/
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(STRING_length(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_length(IGNORED_ARG))
             .IgnoreArgument(1);
     }
 
     /*building the list of messages to be notified if HTTP is fine*/
-    STRICT_EXPECTED_CALL(DList_RemoveHeadList(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(DList_RemoveHeadList(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_PTR_ARG, &(message1.entry)))
+    STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_ARG, &(message1.entry)))
         .IgnoreArgument(1);
 
     {
         /*this is building the HTTP payload... from a STRING_HANDLE (as it comes as "big payload"), into an array of bytes*/
         STRICT_EXPECTED_CALL(BUFFER_new());
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(STRING_length(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_length(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(BUFFER_build(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(BUFFER_build(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2)
             .IgnoreArgument(3);
     }
 
     /*executing HTTP goodies*/
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)) /*because relativePath*/
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)) /*because relativePath*/
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,
         HTTPAPI_REQUEST_POST,                                                           /*HTTPAPI_REQUEST_TYPE requestType,                  */
         "/devices/" TEST_DEVICE_ID EVENT_ENDPOINT API_VERSION,                 /*const char* relativePath,                          */
-        IGNORED_PTR_ARG,                                                                /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,      */
-        IGNORED_PTR_ARG,                                                                /*BUFFER_HANDLE requestContent,                      */
-        IGNORED_PTR_ARG,                                                                /*unsigned int* statusCode,                          */
+        IGNORED_ARG,                                                                /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,      */
+        IGNORED_ARG,                                                                /*BUFFER_HANDLE requestContent,                      */
+        IGNORED_ARG,                                                                /*unsigned int* statusCode,                          */
         NULL,                                                                           /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,     */
         NULL                                                                            /*BUFFER_HANDLE responseContent)                     */
         ))
@@ -6796,7 +6769,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_happy_path_succeeds)
 
     /*once the event has been succesfull...*/
 
-    STRICT_EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_PTR_ARG, IOTHUB_CLIENT_CONFIRMATION_OK, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_ARG, IOTHUB_CLIENT_CONFIRMATION_OK, IGNORED_ARG));
 
     ENABLE_BATCHING();
 
@@ -6824,101 +6797,101 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_items_puts_it_back_when_ht
 
     STRICT_EXPECTED_CALL(DList_IsListEmpty(&waitingToSend));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "Content-Type", "application/vnd.microsoft.iothub.json"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_ARG, "Content-Type", "application/vnd.microsoft.iothub.json"))
         .IgnoreArgument(1);
 
     /*starting to prepare the "big" payload*/
     STRICT_EXPECTED_CALL(STRING_construct("["));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    EXPECTED_CALL(STRING_new_with_memory(IGNORED_PTR_ARG));
+    EXPECTED_CALL(STRING_new_with_memory(IGNORED_ARG));
 
     /*this is first batched payload*/
     {
         STRICT_EXPECTED_CALL(IoTHubMessage_GetContentType(message1.messageHandle));
         STRICT_EXPECTED_CALL(STRING_construct("{\"body\":\""));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(message1.messageHandle, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(message1.messageHandle, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(2)
             .IgnoreArgument(3);
 
         STRICT_EXPECTED_CALL(Azure_Base64_Encode_Bytes(buffer1, buffer1_size));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2);
 
-        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "\"")) /*closing the value of the body*/
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, "\"")) /*closing the value of the body*/
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(IoTHubMessage_Properties(message1.messageHandle));
-        STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_EMPTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_EMPTY, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(2)
             .IgnoreArgument(3)
             .IgnoreArgument(4);
-        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "},")) /* this extra "," is going to be harshly overwritten by a "]"*/
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, "},")) /* this extra "," is going to be harshly overwritten by a "]"*/
             .IgnoreArgument(1);
         /*end of the first batched payload*/
     }
 
     {
         /*adding the first payload to the "big" payload*/
-        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2);
 
         /*closing the "big" payload*/
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(STRING_length(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_length(IGNORED_ARG))
             .IgnoreArgument(1);
     }
 
     /*building the list of messages to be notified if HTTP is fine*/
-    STRICT_EXPECTED_CALL(DList_RemoveHeadList(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(DList_RemoveHeadList(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_PTR_ARG, &(message1.entry)))
+    STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_ARG, &(message1.entry)))
         .IgnoreArgument(1);
 
     {
         /*this is building the HTTP payload... from a STRING_HANDLE (as it comes as "big payload"), into an array of bytes*/
         STRICT_EXPECTED_CALL(BUFFER_new());
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(STRING_length(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_length(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(BUFFER_build(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(BUFFER_build(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2)
             .IgnoreArgument(3);
     }
 
     /*executing HTTP goodies*/
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)) /*because relativePath*/
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)) /*because relativePath*/
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,
         HTTPAPI_REQUEST_POST,                                                           /*HTTPAPI_REQUEST_TYPE requestType,                  */
         "/devices/" TEST_DEVICE_ID EVENT_ENDPOINT API_VERSION,                 /*const char* relativePath,                          */
-        IGNORED_PTR_ARG,                                                                /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,      */
-        IGNORED_PTR_ARG,                                                                /*BUFFER_HANDLE requestContent,                      */
-        IGNORED_PTR_ARG,                                                                /*unsigned int* statusCode,                          */
+        IGNORED_ARG,                                                                /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,      */
+        IGNORED_ARG,                                                                /*BUFFER_HANDLE requestContent,                      */
+        IGNORED_ARG,                                                                /*unsigned int* statusCode,                          */
         NULL,                                                                           /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,     */
         NULL                                                                            /*BUFFER_HANDLE responseContent)                     */
         ))
         .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &httpStatus404, sizeof(httpStatus404));
 
-    STRICT_EXPECTED_CALL(DList_AppendTailList(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreAllArguments();
-    STRICT_EXPECTED_CALL(DList_RemoveEntryList(IGNORED_PTR_ARG)).IgnoreAllArguments();
-    STRICT_EXPECTED_CALL(DList_InitializeListHead(IGNORED_PTR_ARG)).IgnoreAllArguments();
+    STRICT_EXPECTED_CALL(DList_AppendTailList(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(DList_RemoveEntryList(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(DList_InitializeListHead(IGNORED_ARG));
 
     ENABLE_BATCHING();
 
@@ -6946,92 +6919,92 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_items_puts_it_back_when_HT
 
     STRICT_EXPECTED_CALL(DList_IsListEmpty(&waitingToSend));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "Content-Type", "application/vnd.microsoft.iothub.json"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_ARG, "Content-Type", "application/vnd.microsoft.iothub.json"))
         .IgnoreArgument(1);
 
-    EXPECTED_CALL(STRING_new_with_memory(IGNORED_PTR_ARG));
+    EXPECTED_CALL(STRING_new_with_memory(IGNORED_ARG));
 
     /*starting to prepare the "big" payload*/
     STRICT_EXPECTED_CALL(STRING_construct("["));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
     /*this is first batched payload*/
     {
         STRICT_EXPECTED_CALL(IoTHubMessage_GetContentType(message1.messageHandle));
         STRICT_EXPECTED_CALL(STRING_construct("{\"body\":\""));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(message1.messageHandle, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(message1.messageHandle, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(2)
             .IgnoreArgument(3);
 
         STRICT_EXPECTED_CALL(Azure_Base64_Encode_Bytes(buffer1, buffer1_size));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2);
 
-        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "\"")) /*closing the value of the body*/
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, "\"")) /*closing the value of the body*/
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(IoTHubMessage_Properties(message1.messageHandle));
-        STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_EMPTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_EMPTY, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(2)
             .IgnoreArgument(3)
             .IgnoreArgument(4);
-        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "},")) /* this extra "," is going to be harshly overwritten by a "]"*/
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, "},")) /* this extra "," is going to be harshly overwritten by a "]"*/
             .IgnoreArgument(1);
         /*end of the first batched payload*/
     }
 
     {
         /*adding the first payload to the "big" payload*/
-        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2);
 
         /*closing the "big" payload*/
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(STRING_length(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_length(IGNORED_ARG))
             .IgnoreArgument(1);
     }
 
     /*building the list of messages to be notified if HTTP is fine*/
-    STRICT_EXPECTED_CALL(DList_RemoveHeadList(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(DList_RemoveHeadList(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_PTR_ARG, &(message1.entry)))
+    STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_ARG, &(message1.entry)))
         .IgnoreArgument(1);
 
     {
         /*this is building the HTTP payload... from a STRING_HANDLE (as it comes as "big payload"), into an array of bytes*/
         STRICT_EXPECTED_CALL(BUFFER_new());
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(STRING_length(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_length(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(BUFFER_build(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(BUFFER_build(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2)
             .IgnoreArgument(3);
     }
 
     /*executing HTTP goodies*/
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)) /*because relativePath*/
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)) /*because relativePath*/
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,
         HTTPAPI_REQUEST_POST,                                                           /*HTTPAPI_REQUEST_TYPE requestType,                  */
         "/devices/" TEST_DEVICE_ID EVENT_ENDPOINT API_VERSION,                 /*const char* relativePath,                          */
-        IGNORED_PTR_ARG,                                                                /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,      */
-        IGNORED_PTR_ARG,                                                                /*BUFFER_HANDLE requestContent,                      */
-        IGNORED_PTR_ARG,                                                                /*unsigned int* statusCode,                          */
+        IGNORED_ARG,                                                                /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,      */
+        IGNORED_ARG,                                                                /*BUFFER_HANDLE requestContent,                      */
+        IGNORED_ARG,                                                                /*unsigned int* statusCode,                          */
         NULL,                                                                           /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,     */
         NULL                                                                            /*BUFFER_HANDLE responseContent)                     */
         ))
@@ -7039,9 +7012,9 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_items_puts_it_back_when_HT
         .CopyOutArgumentBuffer(7, &httpStatus200, sizeof(httpStatus200))
         .SetReturn(HTTPAPIEX_ERROR);
 
-    STRICT_EXPECTED_CALL(DList_AppendTailList(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreAllArguments();
-    STRICT_EXPECTED_CALL(DList_RemoveEntryList(IGNORED_PTR_ARG)).IgnoreAllArguments();
-    STRICT_EXPECTED_CALL(DList_InitializeListHead(IGNORED_PTR_ARG)).IgnoreAllArguments();
+    STRICT_EXPECTED_CALL(DList_AppendTailList(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(DList_RemoveEntryList(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(DList_InitializeListHead(IGNORED_ARG));
 
     ENABLE_BATCHING();
 
@@ -7069,86 +7042,86 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_items_puts_it_back_when_BU
 
     STRICT_EXPECTED_CALL(DList_IsListEmpty(&waitingToSend));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "Content-Type", "application/vnd.microsoft.iothub.json"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_ARG, "Content-Type", "application/vnd.microsoft.iothub.json"))
         .IgnoreArgument(1);
 
-    EXPECTED_CALL(STRING_new_with_memory(IGNORED_PTR_ARG));
+    EXPECTED_CALL(STRING_new_with_memory(IGNORED_ARG));
 
     /*starting to prepare the "big" payload*/
     STRICT_EXPECTED_CALL(STRING_construct("["));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
     /*this is first batched payload*/
     {
         STRICT_EXPECTED_CALL(IoTHubMessage_GetContentType(message1.messageHandle));
         STRICT_EXPECTED_CALL(STRING_construct("{\"body\":\""));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(message1.messageHandle, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(message1.messageHandle, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(2)
             .IgnoreArgument(3);
 
         STRICT_EXPECTED_CALL(Azure_Base64_Encode_Bytes(buffer1, buffer1_size));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2);
 
-        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "\"")) /*closing the value of the body*/
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, "\"")) /*closing the value of the body*/
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(IoTHubMessage_Properties(message1.messageHandle));
-        STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_EMPTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_EMPTY, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(2)
             .IgnoreArgument(3)
             .IgnoreArgument(4);
-        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "},")) /* this extra "," is going to be harshly overwritten by a "]"*/
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, "},")) /* this extra "," is going to be harshly overwritten by a "]"*/
             .IgnoreArgument(1);
         /*end of the first batched payload*/
     }
 
     {
         /*adding the first payload to the "big" payload*/
-        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2);
 
         /*closing the "big" payload*/
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(STRING_length(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_length(IGNORED_ARG))
             .IgnoreArgument(1);
     }
 
     /*building the list of messages to be notified if HTTP is fine*/
-    STRICT_EXPECTED_CALL(DList_RemoveHeadList(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(DList_RemoveHeadList(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_PTR_ARG, &(message1.entry)))
+    STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_ARG, &(message1.entry)))
         .IgnoreArgument(1);
 
     {
         /*this is building the HTTP payload... from a STRING_HANDLE (as it comes as "big payload"), into an array of bytes*/
         STRICT_EXPECTED_CALL(BUFFER_new());
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(STRING_length(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_length(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
             .IgnoreArgument(1);
         whenShallBUFFER_build_fail = 1;
-        STRICT_EXPECTED_CALL(BUFFER_build(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(BUFFER_build(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2)
             .IgnoreArgument(3)
             .SetReturn(MU_FAILURE);
     }
 
-    STRICT_EXPECTED_CALL(DList_AppendTailList(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreAllArguments();
-    STRICT_EXPECTED_CALL(DList_RemoveEntryList(IGNORED_PTR_ARG)).IgnoreAllArguments();
-    STRICT_EXPECTED_CALL(DList_InitializeListHead(IGNORED_PTR_ARG)).IgnoreAllArguments();
+    STRICT_EXPECTED_CALL(DList_AppendTailList(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(DList_RemoveEntryList(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(DList_InitializeListHead(IGNORED_ARG));
 
     ENABLE_BATCHING();
 
@@ -7176,63 +7149,63 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_items_puts_it_back_when_BU
 
     STRICT_EXPECTED_CALL(DList_IsListEmpty(&waitingToSend));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "Content-Type", "application/vnd.microsoft.iothub.json"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_ARG, "Content-Type", "application/vnd.microsoft.iothub.json"))
         .IgnoreArgument(1);
 
-    EXPECTED_CALL(STRING_new_with_memory(IGNORED_PTR_ARG));
+    EXPECTED_CALL(STRING_new_with_memory(IGNORED_ARG));
 
     /*starting to prepare the "big" payload*/
     STRICT_EXPECTED_CALL(STRING_construct("["));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
     /*this is first batched payload*/
     {
         STRICT_EXPECTED_CALL(IoTHubMessage_GetContentType(message1.messageHandle));
         STRICT_EXPECTED_CALL(STRING_construct("{\"body\":\""));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(message1.messageHandle, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(message1.messageHandle, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(2)
             .IgnoreArgument(3);
 
         STRICT_EXPECTED_CALL(Azure_Base64_Encode_Bytes(buffer1, buffer1_size));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2);
 
-        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "\"")) /*closing the value of the body*/
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, "\"")) /*closing the value of the body*/
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(IoTHubMessage_Properties(message1.messageHandle));
-        STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_EMPTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_EMPTY, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(2)
             .IgnoreArgument(3)
             .IgnoreArgument(4);
-        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "},")) /* this extra "," is going to be harshly overwritten by a "]"*/
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, "},")) /* this extra "," is going to be harshly overwritten by a "]"*/
             .IgnoreArgument(1);
         /*end of the first batched payload*/
     }
 
     {
         /*adding the first payload to the "big" payload*/
-        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2);
 
         /*closing the "big" payload*/
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(STRING_length(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_length(IGNORED_ARG))
             .IgnoreArgument(1);
     }
 
     /*building the list of messages to be notified if HTTP is fine*/
-    STRICT_EXPECTED_CALL(DList_RemoveHeadList(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(DList_RemoveHeadList(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_PTR_ARG, &(message1.entry)))
+    STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_ARG, &(message1.entry)))
         .IgnoreArgument(1);
 
     {
@@ -7241,9 +7214,9 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_items_puts_it_back_when_BU
         STRICT_EXPECTED_CALL(BUFFER_new());
     }
 
-    STRICT_EXPECTED_CALL(DList_AppendTailList(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreAllArguments();
-    STRICT_EXPECTED_CALL(DList_RemoveEntryList(IGNORED_PTR_ARG)).IgnoreAllArguments();
-    STRICT_EXPECTED_CALL(DList_InitializeListHead(IGNORED_PTR_ARG)).IgnoreAllArguments();
+    STRICT_EXPECTED_CALL(DList_AppendTailList(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(DList_RemoveEntryList(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(DList_InitializeListHead(IGNORED_ARG));
 
     ENABLE_BATCHING();
 
@@ -7271,42 +7244,42 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_when_STRING_concat_wi
 
     STRICT_EXPECTED_CALL(DList_IsListEmpty(&waitingToSend));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "Content-Type", "application/vnd.microsoft.iothub.json"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_ARG, "Content-Type", "application/vnd.microsoft.iothub.json"))
         .IgnoreArgument(1);
 
-    EXPECTED_CALL(STRING_new_with_memory(IGNORED_PTR_ARG));
+    EXPECTED_CALL(STRING_new_with_memory(IGNORED_ARG));
 
     /*starting to prepare the "big" payload*/
     STRICT_EXPECTED_CALL(STRING_construct("["));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
     /*this is first batched payload*/
     {
         STRICT_EXPECTED_CALL(IoTHubMessage_GetContentType(message1.messageHandle));
         STRICT_EXPECTED_CALL(STRING_construct("{\"body\":\""));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(message1.messageHandle, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(message1.messageHandle, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(2)
             .IgnoreArgument(3);
 
         STRICT_EXPECTED_CALL(Azure_Base64_Encode_Bytes(buffer1, buffer1_size));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2);
 
-        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "\"")) /*closing the value of the body*/
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, "\"")) /*closing the value of the body*/
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(IoTHubMessage_Properties(message1.messageHandle));
-        STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_EMPTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_EMPTY, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(2)
             .IgnoreArgument(3)
             .IgnoreArgument(4);
-        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "},")) /* this extra "," is going to be harshly overwritten by a "]"*/
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, "},")) /* this extra "," is going to be harshly overwritten by a "]"*/
             .IgnoreArgument(1);
         /*end of the first batched payload*/
     }
@@ -7314,7 +7287,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_when_STRING_concat_wi
     {
         /*adding the first payload to the "big" payload*/
         whenShallSTRING_concat_with_STRING_fail = 7;
-        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2);
     }
@@ -7345,44 +7318,44 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_when_STRING_concat_it
 
     STRICT_EXPECTED_CALL(DList_IsListEmpty(&waitingToSend));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "Content-Type", "application/vnd.microsoft.iothub.json"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_ARG, "Content-Type", "application/vnd.microsoft.iothub.json"))
         .IgnoreArgument(1);
 
-    EXPECTED_CALL(STRING_new_with_memory(IGNORED_PTR_ARG));
+    EXPECTED_CALL(STRING_new_with_memory(IGNORED_ARG));
 
     /*starting to prepare the "big" payload*/
     STRICT_EXPECTED_CALL(STRING_construct("["));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
     /*this is first batched payload*/
     {
         STRICT_EXPECTED_CALL(IoTHubMessage_GetContentType(message1.messageHandle));
         STRICT_EXPECTED_CALL(STRING_construct("{\"body\":\""));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(message1.messageHandle, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(message1.messageHandle, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(2)
             .IgnoreArgument(3);
 
         STRICT_EXPECTED_CALL(Azure_Base64_Encode_Bytes(buffer1, buffer1_size));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2);
 
 
-        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "\"")) /*closing the value of the body*/
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, "\"")) /*closing the value of the body*/
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(IoTHubMessage_Properties(message1.messageHandle));
-        STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_EMPTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_EMPTY, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(2)
             .IgnoreArgument(3)
             .IgnoreArgument(4);
         whenShallSTRING_concat_fail = currentSTRING_concat_call + 2;
-        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "},")) /* this extra "," is going to be harshly overwritten by a "]"*/
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, "},")) /* this extra "," is going to be harshly overwritten by a "]"*/
             .IgnoreArgument(1);
         /*end of the first batched payload*/
     }
@@ -7413,37 +7386,37 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_when_STRING_concat_it
 
     STRICT_EXPECTED_CALL(DList_IsListEmpty(&waitingToSend));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "Content-Type", "application/vnd.microsoft.iothub.json"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_ARG, "Content-Type", "application/vnd.microsoft.iothub.json"))
         .IgnoreArgument(1);
 
-    EXPECTED_CALL(STRING_new_with_memory(IGNORED_PTR_ARG));
+    EXPECTED_CALL(STRING_new_with_memory(IGNORED_ARG));
 
     /*starting to prepare the "big" payload*/
     STRICT_EXPECTED_CALL(STRING_construct("["));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
     /*this is first batched payload*/
     {
         STRICT_EXPECTED_CALL(IoTHubMessage_GetContentType(message1.messageHandle));
         STRICT_EXPECTED_CALL(STRING_construct("{\"body\":\""));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(message1.messageHandle, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(message1.messageHandle, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(2)
             .IgnoreArgument(3);
 
         STRICT_EXPECTED_CALL(Azure_Base64_Encode_Bytes(buffer1, buffer1_size));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2);
 
 
         whenShallSTRING_concat_fail = currentSTRING_concat_call + 1;
-        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "\"")) /*closing the value of the body*/
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, "\"")) /*closing the value of the body*/
             .IgnoreArgument(1);
         /*end of the first batched payload*/
     }
@@ -7474,32 +7447,32 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_when_STRING_concat_wi
 
     STRICT_EXPECTED_CALL(DList_IsListEmpty(&waitingToSend));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "Content-Type", "application/vnd.microsoft.iothub.json"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_ARG, "Content-Type", "application/vnd.microsoft.iothub.json"))
         .IgnoreArgument(1);
 
-    EXPECTED_CALL(STRING_new_with_memory(IGNORED_PTR_ARG));
+    EXPECTED_CALL(STRING_new_with_memory(IGNORED_ARG));
 
     /*starting to prepare the "big" payload*/
     STRICT_EXPECTED_CALL(STRING_construct("["));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
     /*this is first batched payload*/
     {
         STRICT_EXPECTED_CALL(IoTHubMessage_GetContentType(message1.messageHandle));
         STRICT_EXPECTED_CALL(STRING_construct("{\"body\":\""));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(message1.messageHandle, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(message1.messageHandle, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(2)
             .IgnoreArgument(3);
 
         STRICT_EXPECTED_CALL(Azure_Base64_Encode_Bytes(buffer1, buffer1_size));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument(1);
 
         whenShallSTRING_concat_with_STRING_fail = 6;
-        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2);
         /*end of the first batched payload*/
@@ -7531,21 +7504,21 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_when_Azure_Base64_Enc
 
     STRICT_EXPECTED_CALL(DList_IsListEmpty(&waitingToSend));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "Content-Type", "application/vnd.microsoft.iothub.json"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_ARG, "Content-Type", "application/vnd.microsoft.iothub.json"))
         .IgnoreArgument(1);
 
     /*starting to prepare the "big" payload*/
     STRICT_EXPECTED_CALL(STRING_construct("["));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
     /*this is first batched payload*/
     {
         STRICT_EXPECTED_CALL(IoTHubMessage_GetContentType(message1.messageHandle));
         STRICT_EXPECTED_CALL(STRING_construct("{\"body\":\""));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(message1.messageHandle, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(message1.messageHandle, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(2)
             .IgnoreArgument(3);
 
@@ -7580,21 +7553,21 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_when_IoTHubMessage_Ge
 
     STRICT_EXPECTED_CALL(DList_IsListEmpty(&waitingToSend));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "Content-Type", "application/vnd.microsoft.iothub.json"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_ARG, "Content-Type", "application/vnd.microsoft.iothub.json"))
         .IgnoreArgument(1);
 
     /*starting to prepare the "big" payload*/
     STRICT_EXPECTED_CALL(STRING_construct("["));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
     /*this is first batched payload*/
     {
         STRICT_EXPECTED_CALL(IoTHubMessage_GetContentType(message1.messageHandle));
         STRICT_EXPECTED_CALL(STRING_construct("{\"body\":\""));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(message1.messageHandle, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(message1.messageHandle, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(2)
             .IgnoreArgument(3)
             .SetReturn(IOTHUB_MESSAGE_ERROR);
@@ -7628,12 +7601,12 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_when_STRING_construct
 
     STRICT_EXPECTED_CALL(DList_IsListEmpty(&waitingToSend));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "Content-Type", "application/vnd.microsoft.iothub.json"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_ARG, "Content-Type", "application/vnd.microsoft.iothub.json"))
         .IgnoreArgument(1);
 
     /*starting to prepare the "big" payload*/
     STRICT_EXPECTED_CALL(STRING_construct("["));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
     /*this is first batched payload*/
@@ -7670,7 +7643,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_when_STRING_construct
 
     STRICT_EXPECTED_CALL(DList_IsListEmpty(&waitingToSend));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "Content-Type", "application/vnd.microsoft.iothub.json"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_ARG, "Content-Type", "application/vnd.microsoft.iothub.json"))
         .IgnoreArgument(1);
 
     /*starting to prepare the "big" payload*/
@@ -7703,7 +7676,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_when_HTTP_headers_fai
 
     STRICT_EXPECTED_CALL(DList_IsListEmpty(&waitingToSend));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "Content-Type", "application/vnd.microsoft.iothub.json"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_ARG, "Content-Type", "application/vnd.microsoft.iothub.json"))
         .IgnoreArgument(1)
         .SetReturn(HTTP_HEADERS_ERROR);
 
@@ -7733,42 +7706,42 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_bigger_than_256K_path
 
     STRICT_EXPECTED_CALL(DList_IsListEmpty(&waitingToSend));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "Content-Type", "application/vnd.microsoft.iothub.json"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_ARG, "Content-Type", "application/vnd.microsoft.iothub.json"))
         .IgnoreArgument(1);
 
     /*starting to prepare the "big" payload*/
     STRICT_EXPECTED_CALL(STRING_construct("["));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    EXPECTED_CALL(STRING_new_with_memory(IGNORED_PTR_ARG));
+    EXPECTED_CALL(STRING_new_with_memory(IGNORED_ARG));
 
     /*this is first batched payload*/
     {
         STRICT_EXPECTED_CALL(IoTHubMessage_GetContentType(message4.messageHandle));
         STRICT_EXPECTED_CALL(STRING_construct("{\"body\":\""));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(message4.messageHandle, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(message4.messageHandle, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(2)
             .IgnoreArgument(3);
 
         STRICT_EXPECTED_CALL(Azure_Base64_Encode_Bytes(bigBufferOverflow, TEST_BIG_BUFFER_1_OVERFLOW_SIZE));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2);
 
-        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "\"")) /*closing the value of the body*/
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, "\"")) /*closing the value of the body*/
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(IoTHubMessage_Properties(message4.messageHandle));
-        STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_EMPTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_EMPTY, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(2)
             .IgnoreArgument(3)
             .IgnoreArgument(4);
-        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "},")) /* this extra "," is going to be harshly overwritten by a "]"*/
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, "},")) /* this extra "," is going to be harshly overwritten by a "]"*/
             .IgnoreArgument(1);
         /*end of the first batched payload*/
     }
@@ -7776,13 +7749,13 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_bigger_than_256K_path
     {
         /*adding the first payload to the "big" payload*/
         /*building the list of messages to be notified because this is 100% fail (>256K)*/
-        STRICT_EXPECTED_CALL(DList_RemoveHeadList(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(DList_RemoveHeadList(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_PTR_ARG, &(message4.entry)))
+        STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_ARG, &(message4.entry)))
             .IgnoreArgument(1);
     }
 
-    STRICT_EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_PTR_ARG, IOTHUB_CLIENT_CONFIRMATION_ERROR, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_ARG, IOTHUB_CLIENT_CONFIRMATION_ERROR, IGNORED_ARG));
 
     ENABLE_BATCHING();
 
@@ -7811,93 +7784,93 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_almost255_happy_path_
 
     STRICT_EXPECTED_CALL(DList_IsListEmpty(&waitingToSend));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "Content-Type", "application/vnd.microsoft.iothub.json"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_ARG, "Content-Type", "application/vnd.microsoft.iothub.json"))
         .IgnoreArgument(1);
 
     /*starting to prepare the "big" payload*/
     STRICT_EXPECTED_CALL(STRING_construct("["));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
     /*this is first batched payload*/
     {
         STRICT_EXPECTED_CALL(IoTHubMessage_GetContentType(message5.messageHandle));
         STRICT_EXPECTED_CALL(STRING_construct("{\"body\":\""));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(message5.messageHandle, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(message5.messageHandle, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(2)
             .IgnoreArgument(3);
 
         STRICT_EXPECTED_CALL(Azure_Base64_Encode_Bytes(bigBufferFit, TEST_BIG_BUFFER_1_FIT_SIZE));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2);
 
-        EXPECTED_CALL(STRING_new_with_memory(IGNORED_PTR_ARG));
+        EXPECTED_CALL(STRING_new_with_memory(IGNORED_ARG));
 
-        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "\"")) /*closing the value of the body*/
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, "\"")) /*closing the value of the body*/
             .IgnoreArgument(1);
 
         STRICT_EXPECTED_CALL(IoTHubMessage_Properties(message5.messageHandle));
-        STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_EMPTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_EMPTY, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(2)
             .IgnoreArgument(3)
             .IgnoreArgument(4);
-        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "},")) /* this extra "," is going to be harshly overwritten by a "]"*/
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, "},")) /* this extra "," is going to be harshly overwritten by a "]"*/
             .IgnoreArgument(1);
         /*end of the first batched payload*/
     }
 
     {
         /*adding the first payload to the "big" payload*/
-        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2);
 
         /*closing the "big" payload*/
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(STRING_length(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_length(IGNORED_ARG))
             .IgnoreArgument(1);
     }
 
     /*building the list of messages to be notified if HTTP is fine*/
-    STRICT_EXPECTED_CALL(DList_RemoveHeadList(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(DList_RemoveHeadList(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_PTR_ARG, &(message5.entry)))
+    STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_ARG, &(message5.entry)))
         .IgnoreArgument(1);
 
     {
         /*this is building the HTTP payload... from a STRING_HANDLE (as it comes as "big payload"), into an array of bytes*/
         STRICT_EXPECTED_CALL(BUFFER_new());
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(STRING_length(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_length(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(BUFFER_build(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(BUFFER_build(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2)
             .IgnoreArgument(3);
     }
 
     /*executing HTTP goodies*/
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)) /*because relativePath*/
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)) /*because relativePath*/
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,
         HTTPAPI_REQUEST_POST,                                                           /*HTTPAPI_REQUEST_TYPE requestType,                  */
         "/devices/" TEST_DEVICE_ID EVENT_ENDPOINT API_VERSION,                 /*const char* relativePath,                          */
-        IGNORED_PTR_ARG,                                                                /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,      */
-        IGNORED_PTR_ARG,                                                                /*BUFFER_HANDLE requestContent,                      */
-        IGNORED_PTR_ARG,                                                                /*unsigned int* statusCode,                          */
+        IGNORED_ARG,                                                                /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,      */
+        IGNORED_ARG,                                                                /*BUFFER_HANDLE requestContent,                      */
+        IGNORED_ARG,                                                                /*unsigned int* statusCode,                          */
         NULL,                                                                           /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,     */
         NULL                                                                            /*BUFFER_HANDLE responseContent)                     */
         ))
@@ -7906,7 +7879,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_almost255_happy_path_
 
     /*once the event has been succesfull...*/
 
-    STRICT_EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_PTR_ARG, IOTHUB_CLIENT_CONFIRMATION_OK, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_ARG, IOTHUB_CLIENT_CONFIRMATION_OK, IGNORED_ARG));
 
     ENABLE_BATCHING();
 
@@ -7935,50 +7908,50 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items_makes_1_batch_succee
 
     STRICT_EXPECTED_CALL(DList_IsListEmpty(&waitingToSend));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "Content-Type", "application/vnd.microsoft.iothub.json"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_ARG, "Content-Type", "application/vnd.microsoft.iothub.json"))
         .IgnoreArgument(1);
 
-    EXPECTED_CALL(STRING_new_with_memory(IGNORED_PTR_ARG))
+    EXPECTED_CALL(STRING_new_with_memory(IGNORED_ARG))
         .ExpectedAtLeastTimes(2);
 
     /*starting to prepare the "big" payload*/
     STRICT_EXPECTED_CALL(STRING_construct("["));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
     /*this is first batched payload*/
     {
         STRICT_EXPECTED_CALL(IoTHubMessage_GetContentType(message1.messageHandle));
         STRICT_EXPECTED_CALL(STRING_construct("{\"body\":\""));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(message1.messageHandle, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(message1.messageHandle, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(2)
             .IgnoreArgument(3);
 
         STRICT_EXPECTED_CALL(Azure_Base64_Encode_Bytes(buffer1, buffer1_size));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2);
 
-        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "\"")) /*closing the value of the body*/
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, "\"")) /*closing the value of the body*/
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(IoTHubMessage_Properties(message1.messageHandle));
-        STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_EMPTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_EMPTY, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(2)
             .IgnoreArgument(3)
             .IgnoreArgument(4);
-        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "},")) /* this extra "," is going to be harshly overwritten by a "]"*/
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, "},")) /* this extra "," is going to be harshly overwritten by a "]"*/
             .IgnoreArgument(1);
         /*end of the first batched payload*/
     }
 
     {
         /*adding the first payload to the "big" payload*/
-        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2);
     }
@@ -7987,84 +7960,84 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items_makes_1_batch_succee
     {
         STRICT_EXPECTED_CALL(IoTHubMessage_GetContentType(message2.messageHandle));
         STRICT_EXPECTED_CALL(STRING_construct("{\"body\":\""));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(message2.messageHandle, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(message2.messageHandle, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(2)
             .IgnoreArgument(3);
 
         STRICT_EXPECTED_CALL(Azure_Base64_Encode_Bytes(buffer2, buffer2_size));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2);
 
-        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "\"")) /*closing the value of the body*/
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, "\"")) /*closing the value of the body*/
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(IoTHubMessage_Properties(message2.messageHandle));
-        STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_EMPTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_EMPTY, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(2)
             .IgnoreArgument(3)
             .IgnoreArgument(4);
-        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "},")) /* this extra "," is going to be harshly overwritten by a "]"*/
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, "},")) /* this extra "," is going to be harshly overwritten by a "]"*/
             .IgnoreArgument(1);
         /*end of the first batched payload*/
     }
 
     {
         /*adding the second payload to the "big" payload*/
-        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2);
     }
 
     {
         /*closing the "big" payload*/
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(STRING_length(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_length(IGNORED_ARG))
             .IgnoreArgument(1);
     }
 
     /*building the list of messages to be notified if HTTP is fine*/
-    STRICT_EXPECTED_CALL(DList_RemoveHeadList(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(DList_RemoveHeadList(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_PTR_ARG, &(message1.entry)))
+    STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_ARG, &(message1.entry)))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(DList_RemoveHeadList(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(DList_RemoveHeadList(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_PTR_ARG, &(message2.entry)))
+    STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_ARG, &(message2.entry)))
         .IgnoreArgument(1);
 
     {
         /*this is building the HTTP payload... from a STRING_HANDLE (as it comes as "big payload"), into an array of bytes*/
         STRICT_EXPECTED_CALL(BUFFER_new());
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(STRING_length(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_length(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(BUFFER_build(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(BUFFER_build(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2)
             .IgnoreArgument(3);
     }
 
     /*executing HTTP goodies*/
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)) /*because relativePath*/
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)) /*because relativePath*/
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,
         HTTPAPI_REQUEST_POST,                                                           /*HTTPAPI_REQUEST_TYPE requestType,                  */
         "/devices/" TEST_DEVICE_ID EVENT_ENDPOINT API_VERSION,                 /*const char* relativePath,                          */
-        IGNORED_PTR_ARG,                                                                /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,      */
-        IGNORED_PTR_ARG,                                                                /*BUFFER_HANDLE requestContent,                      */
-        IGNORED_PTR_ARG,                                                                /*unsigned int* statusCode,                          */
+        IGNORED_ARG,                                                                /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,      */
+        IGNORED_ARG,                                                                /*BUFFER_HANDLE requestContent,                      */
+        IGNORED_ARG,                                                                /*unsigned int* statusCode,                          */
         NULL,                                                                           /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,     */
         NULL                                                                            /*BUFFER_HANDLE responseContent)                     */
         ))
@@ -8073,7 +8046,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items_makes_1_batch_succee
 
     /*once the event has been succesfull...*/
 
-    STRICT_EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_PTR_ARG, IOTHUB_CLIENT_CONFIRMATION_OK, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_ARG, IOTHUB_CLIENT_CONFIRMATION_OK, IGNORED_ARG))
         .IgnoreArgument(2);
 
     ENABLE_BATCHING();
@@ -8102,49 +8075,49 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items_when_the_second_item
 
     STRICT_EXPECTED_CALL(DList_IsListEmpty(&waitingToSend));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "Content-Type", "application/vnd.microsoft.iothub.json"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_ARG, "Content-Type", "application/vnd.microsoft.iothub.json"))
         .IgnoreArgument(1);
 
     /*starting to prepare the "big" payload*/
     STRICT_EXPECTED_CALL(STRING_construct("["));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    EXPECTED_CALL(STRING_new_with_memory(IGNORED_PTR_ARG))
+    EXPECTED_CALL(STRING_new_with_memory(IGNORED_ARG))
         .ExpectedAtLeastTimes(2);
     /*this is first batched payload*/
     {
         STRICT_EXPECTED_CALL(IoTHubMessage_GetContentType(message1.messageHandle));
         STRICT_EXPECTED_CALL(STRING_construct("{\"body\":\""));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(message1.messageHandle, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(message1.messageHandle, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(2)
             .IgnoreArgument(3);
 
         STRICT_EXPECTED_CALL(Azure_Base64_Encode_Bytes(buffer1, buffer1_size));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2);
 
-        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "\"")) /*closing the value of the body*/
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, "\"")) /*closing the value of the body*/
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(IoTHubMessage_Properties(message1.messageHandle));
-        STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_EMPTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_EMPTY, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(2)
             .IgnoreArgument(3)
             .IgnoreArgument(4);
-        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "},")) /* this extra "," is going to be harshly overwritten by a "]"*/
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, "},")) /* this extra "," is going to be harshly overwritten by a "]"*/
             .IgnoreArgument(1);
         /*end of the first batched payload*/
     }
 
     {
         /*adding the first payload to the "big" payload*/
-        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2);
     }
@@ -8153,74 +8126,74 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items_when_the_second_item
     {
         STRICT_EXPECTED_CALL(IoTHubMessage_GetContentType(message2.messageHandle));
         STRICT_EXPECTED_CALL(STRING_construct("{\"body\":\""));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(message2.messageHandle, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(message2.messageHandle, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(2)
             .IgnoreArgument(3);
 
         STRICT_EXPECTED_CALL(Azure_Base64_Encode_Bytes(buffer2, buffer2_size));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2);
 
-        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "\"")) /*closing the value of the body*/
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, "\"")) /*closing the value of the body*/
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(IoTHubMessage_Properties(message2.messageHandle));
-        STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_EMPTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_EMPTY, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(2)
             .IgnoreArgument(3)
             .IgnoreArgument(4);
         whenShallSTRING_concat_fail = currentSTRING_concat_call + 4;
-        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "},")) /* this extra "," is going to be harshly overwritten by a "]"*/
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, "},")) /* this extra "," is going to be harshly overwritten by a "]"*/
             .IgnoreArgument(1);
         /*end of the second batched payload*/
     }
 
     {
         /*closing the "big" payload*/
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(STRING_length(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_length(IGNORED_ARG))
             .IgnoreArgument(1);
     }
 
     /*building the list of messages to be notified if HTTP is fine*/
-    STRICT_EXPECTED_CALL(DList_RemoveHeadList(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(DList_RemoveHeadList(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_PTR_ARG, &(message1.entry)))
+    STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_ARG, &(message1.entry)))
         .IgnoreArgument(1);
 
     {
         /*this is building the HTTP payload... from a STRING_HANDLE (as it comes as "big payload"), into an array of bytes*/
         STRICT_EXPECTED_CALL(BUFFER_new());
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(STRING_length(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_length(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(BUFFER_build(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(BUFFER_build(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2)
             .IgnoreArgument(3);
     }
 
     /*executing HTTP goodies*/
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)) /*because relativePath*/
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)) /*because relativePath*/
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,
         HTTPAPI_REQUEST_POST,                                                           /*HTTPAPI_REQUEST_TYPE requestType,                  */
         "/devices/" TEST_DEVICE_ID EVENT_ENDPOINT API_VERSION,                 /*const char* relativePath,                          */
-        IGNORED_PTR_ARG,                                                                /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,      */
-        IGNORED_PTR_ARG,                                                                /*BUFFER_HANDLE requestContent,                      */
-        IGNORED_PTR_ARG,                                                                /*unsigned int* statusCode,                          */
+        IGNORED_ARG,                                                                /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,      */
+        IGNORED_ARG,                                                                /*BUFFER_HANDLE requestContent,                      */
+        IGNORED_ARG,                                                                /*unsigned int* statusCode,                          */
         NULL,                                                                           /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,     */
         NULL                                                                            /*BUFFER_HANDLE responseContent)                     */
         ))
@@ -8229,7 +8202,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items_when_the_second_item
 
     /*once the event has been succesfull...*/
 
-    STRICT_EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_PTR_ARG, IOTHUB_CLIENT_CONFIRMATION_OK, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_ARG, IOTHUB_CLIENT_CONFIRMATION_OK, IGNORED_ARG))
         .IgnoreArgument(2);
 
     ENABLE_BATCHING();
@@ -8258,50 +8231,50 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items_when_the_second_item
 
     STRICT_EXPECTED_CALL(DList_IsListEmpty(&waitingToSend));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "Content-Type", "application/vnd.microsoft.iothub.json"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_ARG, "Content-Type", "application/vnd.microsoft.iothub.json"))
         .IgnoreArgument(1);
 
     /*starting to prepare the "big" payload*/
     STRICT_EXPECTED_CALL(STRING_construct("["));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    EXPECTED_CALL(STRING_new_with_memory(IGNORED_PTR_ARG))
+    EXPECTED_CALL(STRING_new_with_memory(IGNORED_ARG))
         .ExpectedAtLeastTimes(2);
 
     /*this is first batched payload*/
     {
         STRICT_EXPECTED_CALL(IoTHubMessage_GetContentType(message1.messageHandle));
         STRICT_EXPECTED_CALL(STRING_construct("{\"body\":\""));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(message1.messageHandle, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(message1.messageHandle, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(2)
             .IgnoreArgument(3);
 
         STRICT_EXPECTED_CALL(Azure_Base64_Encode_Bytes(buffer1, buffer1_size));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2);
 
-        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "\"")) /*closing the value of the body*/
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, "\"")) /*closing the value of the body*/
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(IoTHubMessage_Properties(message1.messageHandle));
-        STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_EMPTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_EMPTY, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(2)
             .IgnoreArgument(3)
             .IgnoreArgument(4);
-        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "},")) /* this extra "," is going to be harshly overwritten by a "]"*/
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, "},")) /* this extra "," is going to be harshly overwritten by a "]"*/
             .IgnoreArgument(1);;
         /*end of the first batched payload*/
     }
 
     {
         /*adding the first payload to the "big" payload*/
-        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2);
     }
@@ -8310,27 +8283,27 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items_when_the_second_item
     {
         STRICT_EXPECTED_CALL(IoTHubMessage_GetContentType(message2.messageHandle));
         STRICT_EXPECTED_CALL(STRING_construct("{\"body\":\""));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(message2.messageHandle, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(message2.messageHandle, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(2)
             .IgnoreArgument(3);
 
         STRICT_EXPECTED_CALL(Azure_Base64_Encode_Bytes(buffer2, buffer2_size));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2);
-        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "\"")) /*closing the value of the body*/
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, "\"")) /*closing the value of the body*/
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(IoTHubMessage_Properties(message2.messageHandle));
-        STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_EMPTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_EMPTY, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(2)
             .IgnoreArgument(3)
             .IgnoreArgument(4);
-        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "},")) /* this extra "," is going to be harshly overwritten by a "]"*/
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, "},")) /* this extra "," is going to be harshly overwritten by a "]"*/
             .IgnoreArgument(1);
         /*end of the second batched payload*/
     }
@@ -8338,52 +8311,52 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items_when_the_second_item
     {
         /*adding the second payload to the "big" payload*/
         whenShallSTRING_concat_with_STRING_fail = currentSTRING_concat_with_STRING_call + 4;
-        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2);
     }
 
     {
         /*closing the "big" payload*/
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(STRING_length(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_length(IGNORED_ARG))
             .IgnoreArgument(1);
     }
 
     /*building the list of messages to be notified if HTTP is fine*/
-    STRICT_EXPECTED_CALL(DList_RemoveHeadList(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(DList_RemoveHeadList(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_PTR_ARG, &(message1.entry)))
+    STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_ARG, &(message1.entry)))
         .IgnoreArgument(1);
 
     {
         /*this is building the HTTP payload... from a STRING_HANDLE (as it comes as "big payload"), into an array of bytes*/
         STRICT_EXPECTED_CALL(BUFFER_new());
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(STRING_length(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_length(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(BUFFER_build(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(BUFFER_build(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2)
             .IgnoreArgument(3);
     }
 
     /*executing HTTP goodies*/
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)) /*because relativePath*/
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)) /*because relativePath*/
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,
         HTTPAPI_REQUEST_POST,                                                           /*HTTPAPI_REQUEST_TYPE requestType,                  */
         "/devices/" TEST_DEVICE_ID EVENT_ENDPOINT API_VERSION,                 /*const char* relativePath,                          */
-        IGNORED_PTR_ARG,                                                                /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,      */
-        IGNORED_PTR_ARG,                                                                /*BUFFER_HANDLE requestContent,                      */
-        IGNORED_PTR_ARG,                                                                /*unsigned int* statusCode,                          */
+        IGNORED_ARG,                                                                /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,      */
+        IGNORED_ARG,                                                                /*BUFFER_HANDLE requestContent,                      */
+        IGNORED_ARG,                                                                /*unsigned int* statusCode,                          */
         NULL,                                                                           /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,     */
         NULL                                                                            /*BUFFER_HANDLE responseContent)                     */
         ))
@@ -8392,7 +8365,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items_when_the_second_item
 
     /*once the event has been succesfull...*/
 
-    STRICT_EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_PTR_ARG, IOTHUB_CLIENT_CONFIRMATION_OK, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_ARG, IOTHUB_CLIENT_CONFIRMATION_OK, IGNORED_ARG));
 
     ENABLE_BATCHING();
 
@@ -8420,50 +8393,50 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items_the_second_one_does_
 
     STRICT_EXPECTED_CALL(DList_IsListEmpty(&waitingToSend));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "Content-Type", "application/vnd.microsoft.iothub.json"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_ARG, "Content-Type", "application/vnd.microsoft.iothub.json"))
         .IgnoreArgument(1);
 
     /*starting to prepare the "big" payload*/
     STRICT_EXPECTED_CALL(STRING_construct("["));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    EXPECTED_CALL(STRING_new_with_memory(IGNORED_PTR_ARG))
+    EXPECTED_CALL(STRING_new_with_memory(IGNORED_ARG))
         .ExpectedAtLeastTimes(2);
 
     /*this is first batched payload*/
     {
         STRICT_EXPECTED_CALL(IoTHubMessage_GetContentType(message1.messageHandle));
         STRICT_EXPECTED_CALL(STRING_construct("{\"body\":\""));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(message1.messageHandle, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(message1.messageHandle, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(2)
             .IgnoreArgument(3);
 
         STRICT_EXPECTED_CALL(Azure_Base64_Encode_Bytes(buffer1, buffer1_size));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2);
 
-        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "\"")) /*closing the value of the body*/
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, "\"")) /*closing the value of the body*/
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(IoTHubMessage_Properties(message1.messageHandle));
-        STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_EMPTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_EMPTY, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(2)
             .IgnoreArgument(3)
             .IgnoreArgument(4);
-        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "},")) /* this extra "," is going to be harshly overwritten by a "]"*/
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, "},")) /* this extra "," is going to be harshly overwritten by a "]"*/
             .IgnoreArgument(1);
         /*end of the first batched payload*/
     }
 
     {
         /*adding the first payload to the "big" payload*/
-        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2);
     }
@@ -8472,28 +8445,28 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items_the_second_one_does_
     {
         STRICT_EXPECTED_CALL(IoTHubMessage_GetContentType(message5.messageHandle));
         STRICT_EXPECTED_CALL(STRING_construct("{\"body\":\""));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(message5.messageHandle, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(message5.messageHandle, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(2)
             .IgnoreArgument(3);
 
         STRICT_EXPECTED_CALL(Azure_Base64_Encode_Bytes(bigBufferFit, TEST_BIG_BUFFER_1_FIT_SIZE));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2);
 
-        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "\"")) /*closing the value of the body*/
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, "\"")) /*closing the value of the body*/
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(IoTHubMessage_Properties(message5.messageHandle));
-        STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_EMPTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_EMPTY, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(2)
             .IgnoreArgument(3)
             .IgnoreArgument(4);
-        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "},")) /* this extra "," is going to be harshly overwritten by a "]"*/
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, "},")) /* this extra "," is going to be harshly overwritten by a "]"*/
             .IgnoreArgument(1);
         /*end of the first batched payload*/
     }
@@ -8504,44 +8477,44 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items_the_second_one_does_
 
     {
         /*closing the "big" payload*/
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(STRING_length(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_length(IGNORED_ARG))
             .IgnoreArgument(1);
     }
 
     /*building the list of messages to be notified if HTTP is fine*/
-    STRICT_EXPECTED_CALL(DList_RemoveHeadList(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(DList_RemoveHeadList(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_PTR_ARG, &(message1.entry)))
+    STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_ARG, &(message1.entry)))
         .IgnoreArgument(1);
     {
         /*this is building the HTTP payload... from a STRING_HANDLE (as it comes as "big payload"), into an array of bytes*/
         STRICT_EXPECTED_CALL(BUFFER_new());
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(STRING_length(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_length(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(BUFFER_build(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(BUFFER_build(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2)
             .IgnoreArgument(3);
     }
 
     /*executing HTTP goodies*/
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)) /*because relativePath*/
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)) /*because relativePath*/
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,
         HTTPAPI_REQUEST_POST,                                                           /*HTTPAPI_REQUEST_TYPE requestType,                  */
         "/devices/" TEST_DEVICE_ID EVENT_ENDPOINT API_VERSION,                 /*const char* relativePath,                          */
-        IGNORED_PTR_ARG,                                                                /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,      */
-        IGNORED_PTR_ARG,                                                                /*BUFFER_HANDLE requestContent,                      */
-        IGNORED_PTR_ARG,                                                                /*unsigned int* statusCode,                          */
+        IGNORED_ARG,                                                                /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,      */
+        IGNORED_ARG,                                                                /*BUFFER_HANDLE requestContent,                      */
+        IGNORED_ARG,                                                                /*unsigned int* statusCode,                          */
         NULL,                                                                           /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,     */
         NULL                                                                            /*BUFFER_HANDLE responseContent)                     */
         ))
@@ -8550,7 +8523,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items_the_second_one_does_
 
     /*once the event has been succesfull...*/
 
-    STRICT_EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_PTR_ARG, IOTHUB_CLIENT_CONFIRMATION_OK, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_ARG, IOTHUB_CLIENT_CONFIRMATION_OK, IGNORED_ARG));
 
     ENABLE_BATCHING();
 
@@ -8619,7 +8592,7 @@ TEST_FUNCTION(IoTHubTransportHttp_GetSendStatus_empty_waitingToSend_and_empty_ev
 
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, devHandle))
+    STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_ARG, IGNORED_ARG, devHandle))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
 
@@ -8654,7 +8627,7 @@ TEST_FUNCTION(IoTHubTransportHttp_GetSendStatus_waitingToSend_not_empty_success)
 
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, devHandle))
+    STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_ARG, IGNORED_ARG, devHandle))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
     STRICT_EXPECTED_CALL(DList_IsListEmpty(&waitingToSend));
@@ -8689,7 +8662,7 @@ TEST_FUNCTION(IoTHubTransportHttp_GetSendStatus_deviceData_is_not_found_fails)
 
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, devHandle))
+    STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_ARG, IGNORED_ARG, devHandle))
         .IgnoreArgument(1)
         .IgnoreArgument(2)
         .SetFailReturn((void_ptr)NULL);
@@ -8714,21 +8687,21 @@ void setupIrrelevantMocksForProperties(CIoTHubTransportHttpMocks *IOTHUB_MESSAGE
     (void)(*mocks);
     STRICT_EXPECTED_CALL((*mocks), DList_IsListEmpty(&waitingToSend));
 
-    STRICT_EXPECTED_CALL((*mocks), HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "Content-Type", "application/vnd.microsoft.iothub.json"))
+    STRICT_EXPECTED_CALL((*mocks), HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_ARG, "Content-Type", "application/vnd.microsoft.iothub.json"))
         .IgnoreArgument(1);
 
     /*starting to prepare the "big" payload*/
     STRICT_EXPECTED_CALL((*mocks), STRING_construct("["));
-    STRICT_EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
     /*this is first batched payload*/
     {
         STRICT_EXPECTED_CALL((*mocks), IoTHubMessage_GetContentType(messageHandle));
         STRICT_EXPECTED_CALL((*mocks), STRING_construct("{\"body\":\""));
-        STRICT_EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL((*mocks), IoTHubMessage_GetByteArray(messageHandle, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL((*mocks), IoTHubMessage_GetByteArray(messageHandle, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(2)
             .IgnoreArgument(3);
 
@@ -8742,46 +8715,46 @@ void setupIrrelevantMocksForProperties(CIoTHubTransportHttpMocks *IOTHUB_MESSAGE
             STRICT_EXPECTED_CALL((*mocks), Azure_Base64_Encode_Bytes(buffer6, buffer6_size));
         }
 
-        STRICT_EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2);
 
-        STRICT_EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, "\"")) /*closing the value of the body*/
+        STRICT_EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, "\"")) /*closing the value of the body*/
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, "},")) /* this extra "," is going to be harshly overwritten by a "]"*/
+        STRICT_EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, "},")) /* this extra "," is going to be harshly overwritten by a "]"*/
             .IgnoreArgument(1);
         /*end of the first batched payload*/
     }
 
     {
         /*adding the first payload to the "big" payload*/
-        STRICT_EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2);
 
         /*closing the "big" payload*/
-        STRICT_EXPECTED_CALL((*mocks), STRING_c_str(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL((*mocks), STRING_c_str(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL((*mocks), STRING_length(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL((*mocks), STRING_length(IGNORED_ARG))
             .IgnoreArgument(1);
     }
 
     /*building the list of messages to be notified if HTTP is fine*/
-    STRICT_EXPECTED_CALL((*mocks), DList_RemoveHeadList(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL((*mocks), DList_RemoveHeadList(IGNORED_ARG))
         .IgnoreArgument(1);
 
     if(messageHandle == TEST_IOTHUB_MESSAGE_HANDLE_11)
     {
-        STRICT_EXPECTED_CALL((*mocks), DList_InsertTailList(IGNORED_PTR_ARG, &(message11.entry)))
+        STRICT_EXPECTED_CALL((*mocks), DList_InsertTailList(IGNORED_ARG, &(message11.entry)))
             .IgnoreArgument(1);
     }
     else
     {
-        STRICT_EXPECTED_CALL((*mocks), DList_InsertTailList(IGNORED_PTR_ARG, &(message6.entry)))
+        STRICT_EXPECTED_CALL((*mocks), DList_InsertTailList(IGNORED_ARG, &(message6.entry)))
             .IgnoreArgument(1);
     }
 
@@ -8789,30 +8762,30 @@ void setupIrrelevantMocksForProperties(CIoTHubTransportHttpMocks *IOTHUB_MESSAGE
     {
         /*this is building the HTTP payload... from a STRING_HANDLE (as it comes as "big payload"), into an array of bytes*/
         STRICT_EXPECTED_CALL((*mocks), BUFFER_new());
-        STRICT_EXPECTED_CALL((*mocks), BUFFER_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL((*mocks), BUFFER_delete(IGNORED_ARG))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL((*mocks), STRING_length(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL((*mocks), STRING_length(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL((*mocks), STRING_c_str(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL((*mocks), STRING_c_str(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL((*mocks), BUFFER_build(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL((*mocks), BUFFER_build(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2)
             .IgnoreArgument(3);
     }
 
     /*executing HTTP goodies*/
-    STRICT_EXPECTED_CALL((*mocks), STRING_c_str(IGNORED_PTR_ARG)) /*because relativePath*/
+    STRICT_EXPECTED_CALL((*mocks), STRING_c_str(IGNORED_ARG)) /*because relativePath*/
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL((*mocks), HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,
         HTTPAPI_REQUEST_POST,                                                           /*HTTPAPI_REQUEST_TYPE requestType,                  */
         "/devices/" TEST_DEVICE_ID EVENT_ENDPOINT API_VERSION,                 /*const char* relativePath,                          */
-        IGNORED_PTR_ARG,                                                                /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,      */
-        IGNORED_PTR_ARG,                                                                /*BUFFER_HANDLE requestContent,                      */
-        IGNORED_PTR_ARG,                                                                /*unsigned int* statusCode,                          */
+        IGNORED_ARG,                                                                /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,      */
+        IGNORED_ARG,                                                                /*BUFFER_HANDLE requestContent,                      */
+        IGNORED_ARG,                                                                /*unsigned int* statusCode,                          */
         NULL,                                                                           /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,     */
         NULL                                                                            /*BUFFER_HANDLE responseContent)                     */
         ))
@@ -8821,7 +8794,7 @@ void setupIrrelevantMocksForProperties(CIoTHubTransportHttpMocks *IOTHUB_MESSAGE
 
     /*once the event has been succesfull...*/
 
-    STRICT_EXPECTED_CALL((*mocks), Transport_SendComplete_Callback(IGNORED_PTR_ARG, IOTHUB_CLIENT_CONFIRMATION_OK, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL((*mocks), Transport_SendComplete_Callback(IGNORED_ARG, IOTHUB_CLIENT_CONFIRMATION_OK, IGNORED_ARG))
         .IgnoreArgument(2);
 }
 
@@ -8840,28 +8813,28 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_items_with_properties_succ
     setupIrrelevantMocksForProperties(&message6.messageHandle);
 
     STRICT_EXPECTED_CALL(IoTHubMessage_Properties(message6.messageHandle));
-    STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_1_PROPERTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_1_PROPERTY, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3)
         .IgnoreArgument(4);
 
-    EXPECTED_CALL(STRING_new_with_memory(IGNORED_PTR_ARG));
+    EXPECTED_CALL(STRING_new_with_memory(IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, ",\"properties\":"))
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, ",\"properties\":"))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "{"))
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, "{"))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "\"iothub-app-"))
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, "\"iothub-app-"))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, TEST_VALUES1[0]))
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, TEST_VALUES1[0]))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "\":\""))
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, "\":\""))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, TEST_KEYS1[0]))
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, TEST_KEYS1[0]))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "\""))
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, "\""))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "}"))
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, "}"))
         .IgnoreArgument(1);
 
     ENABLE_BATCHING();
@@ -8894,28 +8867,28 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_items_with_1_properties_at
     setupIrrelevantMocksForProperties(&message11.messageHandle);
 
     STRICT_EXPECTED_CALL(IoTHubMessage_Properties(message11.messageHandle));
-    STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_1_PROPERTY_A_B, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_1_PROPERTY_A_B, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3)
         .IgnoreArgument(4);
 
-    EXPECTED_CALL(STRING_new_with_memory(IGNORED_PTR_ARG));
+    EXPECTED_CALL(STRING_new_with_memory(IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, ",\"properties\":"))
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, ",\"properties\":"))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "{"))
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, "{"))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "\"iothub-app-"))
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, "\"iothub-app-"))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, TEST_VALUES1_A_B[0]))
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, TEST_VALUES1_A_B[0]))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "\":\""))
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, "\":\""))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, TEST_KEYS1_A_B[0]))
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, TEST_KEYS1_A_B[0]))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "\""))
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, "\""))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "}"))
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, "}"))
         .IgnoreArgument(1);
 
     ENABLE_BATCHING();
@@ -8948,7 +8921,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_items_with_1_properties_pa
 
     setupDoWorkLoopOnceForOneDevice();
 
-    STRICT_EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_PTR_ARG, IOTHUB_CLIENT_CONFIRMATION_ERROR, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_ARG, IOTHUB_CLIENT_CONFIRMATION_ERROR, IGNORED_ARG))
         .IgnoreArgument(2);
 
     //act
@@ -8973,7 +8946,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_items_fails_when_Map_GetIn
 
     setupDoWorkLoopOnceForOneDevice();
 
-    STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_1_PROPERTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_1_PROPERTY, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3)
         .IgnoreArgument(4)
@@ -8998,43 +8971,43 @@ void setupIrrelevantMocksForProperties2(CIoTHubTransportHttpMocks *IOTHUB_MESSAG
     (void)(*mocks);
     STRICT_EXPECTED_CALL((*mocks), DList_IsListEmpty(&waitingToSend));
 
-    STRICT_EXPECTED_CALL((*mocks), HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "Content-Type", "application/vnd.microsoft.iothub.json"))
+    STRICT_EXPECTED_CALL((*mocks), HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_ARG, "Content-Type", "application/vnd.microsoft.iothub.json"))
         .IgnoreArgument(1);
 
     /*starting to prepare the "big" payload*/
     STRICT_EXPECTED_CALL((*mocks), STRING_construct("["));
-    STRICT_EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
     /*this is first batched payload*/
     {
         STRICT_EXPECTED_CALL((*mocks), IoTHubMessage_GetContentType(h1));
         STRICT_EXPECTED_CALL((*mocks), STRING_construct("{\"body\":\""));
-        STRICT_EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL((*mocks), IoTHubMessage_GetByteArray(message6.messageHandle, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL((*mocks), IoTHubMessage_GetByteArray(message6.messageHandle, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(2)
             .IgnoreArgument(3);
 
         STRICT_EXPECTED_CALL((*mocks), Azure_Base64_Encode_Bytes(buffer6, buffer6_size));
-        STRICT_EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2);
 
-        STRICT_EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, "\"")) /*closing the value of the body*/
+        STRICT_EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, "\"")) /*closing the value of the body*/
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, "},")) /* this extra "," is going to be harshly overwritten by a "]"*/
+        STRICT_EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, "},")) /* this extra "," is going to be harshly overwritten by a "]"*/
             .IgnoreArgument(1);
         /*end of the first batched payload*/
     }
 
     {
         /*adding the first payload to the "big" payload*/
-        STRICT_EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2);
     }
@@ -9043,79 +9016,79 @@ void setupIrrelevantMocksForProperties2(CIoTHubTransportHttpMocks *IOTHUB_MESSAG
     {
         STRICT_EXPECTED_CALL((*mocks), IoTHubMessage_GetContentType(h2));
         STRICT_EXPECTED_CALL((*mocks), STRING_construct("{\"body\":\""));
-        STRICT_EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL((*mocks), IoTHubMessage_GetByteArray(message7.messageHandle, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL((*mocks), IoTHubMessage_GetByteArray(message7.messageHandle, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(2)
             .IgnoreArgument(3);
 
         STRICT_EXPECTED_CALL((*mocks), Azure_Base64_Encode_Bytes(buffer7, buffer7_size));
-        STRICT_EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2);
 
-        STRICT_EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, "\"")) /*closing the value of the body*/
+        STRICT_EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, "\"")) /*closing the value of the body*/
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, "},")) /* this extra "," is going to be harshly overwritten by a "]"*/
+        STRICT_EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, "},")) /* this extra "," is going to be harshly overwritten by a "]"*/
             .IgnoreArgument(1);
         /*end of the first batched payload*/
     }
 
     {
         /*adding the second payload to the "big" payload*/
-        STRICT_EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2);
 
         /*closing the "big" payload*/
-        STRICT_EXPECTED_CALL((*mocks), STRING_c_str(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL((*mocks), STRING_c_str(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL((*mocks), STRING_length(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL((*mocks), STRING_length(IGNORED_ARG))
             .IgnoreArgument(1);
     }
 
     /*building the list of messages to be notified if HTTP is fine*/
-    STRICT_EXPECTED_CALL((*mocks), DList_RemoveHeadList(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL((*mocks), DList_RemoveHeadList(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL((*mocks), DList_InsertTailList(IGNORED_PTR_ARG, &(message6.entry)))
+    STRICT_EXPECTED_CALL((*mocks), DList_InsertTailList(IGNORED_ARG, &(message6.entry)))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL((*mocks), DList_RemoveHeadList(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL((*mocks), DList_RemoveHeadList(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL((*mocks), DList_InsertTailList(IGNORED_PTR_ARG, &(message7.entry)))
+    STRICT_EXPECTED_CALL((*mocks), DList_InsertTailList(IGNORED_ARG, &(message7.entry)))
         .IgnoreArgument(1);
 
 
     {
         /*this is building the HTTP payload... from a STRING_HANDLE (as it comes as "big payload"), into an array of bytes*/
         STRICT_EXPECTED_CALL((*mocks), BUFFER_new());
-        STRICT_EXPECTED_CALL((*mocks), BUFFER_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL((*mocks), BUFFER_delete(IGNORED_ARG))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL((*mocks), STRING_length(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL((*mocks), STRING_length(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL((*mocks), STRING_c_str(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL((*mocks), STRING_c_str(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL((*mocks), BUFFER_build(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL((*mocks), BUFFER_build(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2)
             .IgnoreArgument(3);
     }
 
     /*executing HTTP goodies*/
-    STRICT_EXPECTED_CALL((*mocks), STRING_c_str(IGNORED_PTR_ARG)) /*because relativePath*/
+    STRICT_EXPECTED_CALL((*mocks), STRING_c_str(IGNORED_ARG)) /*because relativePath*/
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL((*mocks), HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,
         HTTPAPI_REQUEST_POST,                                                           /*HTTPAPI_REQUEST_TYPE requestType,                  */
         "/devices/" TEST_DEVICE_ID EVENT_ENDPOINT API_VERSION,                 /*const char* relativePath,                          */
-        IGNORED_PTR_ARG,                                                                /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,      */
-        IGNORED_PTR_ARG,                                                                /*BUFFER_HANDLE requestContent,                      */
-        IGNORED_PTR_ARG,                                                                /*unsigned int* statusCode,                          */
+        IGNORED_ARG,                                                                /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,      */
+        IGNORED_ARG,                                                                /*BUFFER_HANDLE requestContent,                      */
+        IGNORED_ARG,                                                                /*unsigned int* statusCode,                          */
         NULL,                                                                           /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,     */
         NULL                                                                            /*BUFFER_HANDLE responseContent)                     */
         ))
@@ -9124,7 +9097,7 @@ void setupIrrelevantMocksForProperties2(CIoTHubTransportHttpMocks *IOTHUB_MESSAG
 
     /*once the event has been succesfull...*/
 
-    STRICT_EXPECTED_CALL((*mocks), Transport_SendComplete_Callback(IGNORED_PTR_ARG, IOTHUB_CLIENT_CONFIRMATION_OK, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL((*mocks), Transport_SendComplete_Callback(IGNORED_ARG, IOTHUB_CLIENT_CONFIRMATION_OK, IGNORED_ARG))
         .IgnoreArgument(2);
 }
 
@@ -9144,67 +9117,67 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_2_event_items_with_properties_succ
     setupIrrelevantMocksForProperties2(&message6.messageHandle, message7.messageHandle);
 
     STRICT_EXPECTED_CALL(IoTHubMessage_Properties(message6.messageHandle));
-    STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_1_PROPERTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_1_PROPERTY, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3)
         .IgnoreArgument(4);
 
-    EXPECTED_CALL(STRING_new_with_memory(IGNORED_PTR_ARG))
+    EXPECTED_CALL(STRING_new_with_memory(IGNORED_ARG))
         .ExpectedAtLeastTimes(2);
 
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, ",\"properties\":"))
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, ",\"properties\":"))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "{")) /*opening of the properties*/
-        .IgnoreArgument(1);
-
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "\"iothub-app-"))
-        .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, TEST_VALUES1[0]))
-        .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "\":\""))
-        .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, TEST_KEYS1[0]))
-        .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "\""))
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, "{")) /*opening of the properties*/
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "}"))/*closing of the properties*/
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, "\"iothub-app-"))
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, TEST_VALUES1[0]))
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, "\":\""))
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, TEST_KEYS1[0]))
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, "\""))
+        .IgnoreArgument(1);
+
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, "}"))/*closing of the properties*/
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(IoTHubMessage_Properties(message7.messageHandle));
-    STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_2_PROPERTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_2_PROPERTY, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3)
         .IgnoreArgument(4);
 
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, ",\"properties\":"))
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, ",\"properties\":"))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "{")) /*opening of the properties*/
-        .IgnoreArgument(1);
-
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "\"iothub-app-"))
-        .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, TEST_VALUES2[0]))
-        .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "\":\""))
-        .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, TEST_KEYS2[0]))
-        .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "\""))
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, "{")) /*opening of the properties*/
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, ",\"iothub-app-"))
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, "\"iothub-app-"))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, TEST_VALUES2[1]))
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, TEST_VALUES2[0]))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "\":\""))
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, "\":\""))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, TEST_KEYS2[1]))
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, TEST_KEYS2[0]))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "\""))
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, "\""))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "}"))/*closing of the properties*/
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, ",\"iothub-app-"))
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, TEST_VALUES2[1]))
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, "\":\""))
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, TEST_KEYS2[1]))
+        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, "\""))
+        .IgnoreArgument(1);
+
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, "}"))/*closing of the properties*/
         .IgnoreArgument(1);
 
     ENABLE_BATCHING();
@@ -9515,110 +9488,109 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 
     STRICT_EXPECTED_CALL(get_time(NULL));
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc()); /*because responseHeadearsHandle: a new instance of HTTP headers*/
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(BUFFER_new());
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
         HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
         "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP API_VERSION,    /*const char* relativePath,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
         NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
-        IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
+        IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
+        IGNORED_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
         .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_ARG, "ETag"))
         .IgnoreArgument(1)
         .SetReturn(TEST_ETAG_VALUE);
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
 
     /*this is "abandon"*/
-    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_ARG))
         .IgnoreArgument(1);
     currentDisposition = IOTHUBMESSAGE_ABANDONED;
-    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .IgnoreAllArguments();
+    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_ARG, IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(STRING_construct_n(TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1))
         .ValidateArgumentBuffer(1, TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1);
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "/abandon" API_VERSION))
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, "/abandon" API_VERSION))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", TEST_STRING_DATA))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "User-Agent", TEST_STRING_DATA))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "If-Match", TEST_ETAG_VALUE))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "If-Match", TEST_ETAG_VALUE))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1); /*because abandon relativePath is a STRING_HANDLE*/
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,
-        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        IGNORED_ARG,
+        IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
         HTTPAPI_REQUEST_POST,                               /*HTTPAPI_REQUEST_TYPE requestType,                            */
         "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP_ETAG TEST_ETAG_VALUE_UNQUOTED "/abandon" API_VERSION,    /*const char* relativePath,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
         NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
+        IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
         NULL,                                               /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         NULL                                                /*BUFFER_HANDLE responseContent))                              */
         ))
         .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode204, sizeof(statusCode204));
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     //act
@@ -9650,125 +9622,124 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 
     STRICT_EXPECTED_CALL(get_time(NULL));
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc()); /*because responseHeadearsHandle: a new instance of HTTP headers*/
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(BUFFER_new());
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,
-        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        IGNORED_ARG,
+        IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
         HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
         "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP API_VERSION,    /*const char* relativePath,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
         NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
-        IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
+        IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
+        IGNORED_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
         .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_ARG, "ETag"))
         .IgnoreArgument(1)
         .SetReturn(TEST_ETAG_VALUE);
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2)
         .SetReturn(TEST_IOTHUB_MESSAGE_HANDLE_8);
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_ARG))
         .IgnoreArgument(1);
     {
         /*this scope is for is properties code*/
 
         HTTPHeaders_GetHeaderCount_writes_to_its_outputs = false;
-        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .CopyOutArgumentBuffer(2, &nHeaders, sizeof(nHeaders));
 
         STRICT_EXPECTED_CALL(IoTHubMessage_Properties(TEST_IOTHUB_MESSAGE_HANDLE_8));
 
-        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeader(IGNORED_PTR_ARG, 0, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeader(IGNORED_ARG, 0, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(3);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(Map_AddOrUpdate(TEST_MAP_3_PROPERTY, "NAME1", "VALUE1"));
     }
 
     /*this returns "0" so the message needs to be "accepted"*/
     /*this is "accepting"*/
-    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .IgnoreAllArguments();
+    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_ARG, IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(STRING_construct_n(TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1))
         .ValidateArgumentBuffer(1, TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1);
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, API_VERSION))
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, API_VERSION))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", TEST_STRING_DATA))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "User-Agent", TEST_STRING_DATA))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "If-Match", TEST_ETAG_VALUE))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "If-Match", TEST_ETAG_VALUE))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1); /*because abandon relativePath is a STRING_HANDLE*/
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,
-        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        IGNORED_ARG,
+        IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
         HTTPAPI_REQUEST_DELETE,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
         "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP_ETAG TEST_ETAG_VALUE_UNQUOTED API_VERSION,    /*const char* relativePath,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
         NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
+        IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
         NULL,                                               /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         NULL                                                /*BUFFER_HANDLE responseContent))                              */
         ))
         .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode204, sizeof(statusCode204));
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     //act
@@ -9800,138 +9771,137 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 
     STRICT_EXPECTED_CALL(get_time(NULL));
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc()); /*because responseHeadearsHandle: a new instance of HTTP headers*/
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(BUFFER_new());
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,
-        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        IGNORED_ARG,
+        IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
         HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
         "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP API_VERSION,    /*const char* relativePath,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
         NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
-        IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
+        IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
+        IGNORED_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
         .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_ARG, "ETag"))
         .IgnoreArgument(1)
         .SetReturn(TEST_ETAG_VALUE);
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2)
         .SetReturn(TEST_IOTHUB_MESSAGE_HANDLE_8);
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_ARG))
         .IgnoreArgument(1);
     {
         /*this scope is for is properties code*/
 
         HTTPHeaders_GetHeaderCount_writes_to_its_outputs = false;
-        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .CopyOutArgumentBuffer(2, &nHeaders, sizeof(nHeaders));
 
         STRICT_EXPECTED_CALL(IoTHubMessage_Properties(TEST_IOTHUB_MESSAGE_HANDLE_8));
 
-        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeader(IGNORED_PTR_ARG, 0, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeader(IGNORED_ARG, 0, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(3);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(Map_AddOrUpdate(TEST_MAP_3_PROPERTY, "NAME1", "VALUE1"));
 
-        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeader(IGNORED_PTR_ARG, 1, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeader(IGNORED_ARG, 1, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(3);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeader(IGNORED_PTR_ARG, 2, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeader(IGNORED_ARG, 2, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(3);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(Map_AddOrUpdate(TEST_MAP_3_PROPERTY, "NAME2", "VALUE2"));
     }
 
     /*this returns "0" so the message needs to be "accepted"*/
     /*this is "accepting"*/
-    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .IgnoreAllArguments();
+    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_ARG, IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(STRING_construct_n(TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1))
         .ValidateArgumentBuffer(1, TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1);
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, API_VERSION))
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, API_VERSION))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", TEST_STRING_DATA))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "User-Agent", TEST_STRING_DATA))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "If-Match", TEST_ETAG_VALUE))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "If-Match", TEST_ETAG_VALUE))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1); /*because abandon relativePath is a STRING_HANDLE*/
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,
-        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        IGNORED_ARG,
+        IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
         HTTPAPI_REQUEST_DELETE,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
         "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP_ETAG TEST_ETAG_VALUE_UNQUOTED API_VERSION,    /*const char* relativePath,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
         NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
+        IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
         NULL,                                               /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         NULL                                                /*BUFFER_HANDLE responseContent))                              */
         ))
         .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode204, sizeof(statusCode204));
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     //act
@@ -9963,114 +9933,114 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 
     STRICT_EXPECTED_CALL(get_time(NULL));
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc()); /*because responseHeadearsHandle: a new instance of HTTP headers*/
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(BUFFER_new());
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,
-        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        IGNORED_ARG,
+        IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
         HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
         "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP API_VERSION,    /*const char* relativePath,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
         NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
-        IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
+        IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
+        IGNORED_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
         .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_ARG, "ETag"))
         .IgnoreArgument(1)
         .SetReturn(TEST_ETAG_VALUE);
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2)
         .SetReturn(TEST_IOTHUB_MESSAGE_HANDLE_8);
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_ARG))
         .IgnoreArgument(1);
     {
         /*this scope is for is properties code*/
 
         HTTPHeaders_GetHeaderCount_writes_to_its_outputs = false;
-        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .CopyOutArgumentBuffer(2, &nHeaders, sizeof(nHeaders));
 
         STRICT_EXPECTED_CALL(IoTHubMessage_Properties(TEST_IOTHUB_MESSAGE_HANDLE_8));
 
-        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeader(IGNORED_PTR_ARG, 0, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeader(IGNORED_ARG, 0, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(3);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(Map_AddOrUpdate(TEST_MAP_3_PROPERTY, "NAME1", "VALUE1"));
 
-        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeader(IGNORED_PTR_ARG, 1, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeader(IGNORED_ARG, 1, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(3);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeader(IGNORED_PTR_ARG, 2, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeader(IGNORED_ARG, 2, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(3);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(Map_AddOrUpdate(TEST_MAP_3_PROPERTY, "NAME2", "VALUE2"))
             .SetReturn(MAP_ERROR);
     }
 
     /*this is "abandon"*/
-    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(STRING_construct_n(TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1))
         .ValidateArgumentBuffer(1, TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1);
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "/abandon" API_VERSION))
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, "/abandon" API_VERSION))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", TEST_STRING_DATA))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "User-Agent", TEST_STRING_DATA))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "If-Match", TEST_ETAG_VALUE))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "If-Match", TEST_ETAG_VALUE))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1); /*because abandon relativePath is a STRING_HANDLE*/
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,
-        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        IGNORED_ARG,
+        IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
         HTTPAPI_REQUEST_POST,                               /*HTTPAPI_REQUEST_TYPE requestType,                            */
         "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP_ETAG TEST_ETAG_VALUE_UNQUOTED "/abandon" API_VERSION,    /*const char* relativePath,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
         NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
+        IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
         NULL,                                               /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         NULL                                                /*BUFFER_HANDLE responseContent))                              */
         ))
@@ -10107,111 +10077,111 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 
     STRICT_EXPECTED_CALL(get_time(NULL));
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc()); /*because responseHeadearsHandle: a new instance of HTTP headers*/
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(BUFFER_new());
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,
-        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        IGNORED_ARG,
+        IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
         HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
         "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP API_VERSION,    /*const char* relativePath,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
         NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
-        IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
+        IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
+        IGNORED_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
         .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_ARG, "ETag"))
         .IgnoreArgument(1)
         .SetReturn(TEST_ETAG_VALUE);
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2)
         .SetReturn(TEST_IOTHUB_MESSAGE_HANDLE_8);
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_ARG))
         .IgnoreArgument(1);
     {
         /*this scope is for is properties code*/
 
         HTTPHeaders_GetHeaderCount_writes_to_its_outputs = false;
-        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .CopyOutArgumentBuffer(2, &nHeaders, sizeof(nHeaders));
 
         STRICT_EXPECTED_CALL(IoTHubMessage_Properties(TEST_IOTHUB_MESSAGE_HANDLE_8));
 
-        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeader(IGNORED_PTR_ARG, 0, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeader(IGNORED_ARG, 0, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(3);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(Map_AddOrUpdate(TEST_MAP_3_PROPERTY, "NAME1", "VALUE1"));
 
-        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeader(IGNORED_PTR_ARG, 1, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeader(IGNORED_ARG, 1, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(3);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
 
         whenShallHTTPHeaders_GetHeader_fail = currentHTTPHeaders_GetHeader_call + 3;
-        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeader(IGNORED_PTR_ARG, 2, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeader(IGNORED_ARG, 2, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(3);
     }
 
     /*this is "abandon"*/
-    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(STRING_construct_n(TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1))
         .ValidateArgumentBuffer(1, TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1);
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "/abandon" API_VERSION))
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, "/abandon" API_VERSION))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", TEST_STRING_DATA))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "User-Agent", TEST_STRING_DATA))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "If-Match", TEST_ETAG_VALUE))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "If-Match", TEST_ETAG_VALUE))
         .IgnoreArgument(1);
 
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1); /*because abandon relativePath is a STRING_HANDLE*/
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,
-        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        IGNORED_ARG,
+        IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
         HTTPAPI_REQUEST_POST,                               /*HTTPAPI_REQUEST_TYPE requestType,                            */
         "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP_ETAG TEST_ETAG_VALUE_UNQUOTED "/abandon" API_VERSION,    /*const char* relativePath,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
         NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
+        IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
         NULL,                                               /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         NULL                                                /*BUFFER_HANDLE responseContent))                              */
         ))
@@ -10247,104 +10217,104 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 
     STRICT_EXPECTED_CALL(get_time(NULL));
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc()); /*because responseHeadearsHandle: a new instance of HTTP headers*/
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(BUFFER_new());
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,
-        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        IGNORED_ARG,
+        IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
         HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
         "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP API_VERSION,    /*const char* relativePath,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
         NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
-        IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
+        IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
+        IGNORED_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
         .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_ARG, "ETag"))
         .IgnoreArgument(1)
         .SetReturn(TEST_ETAG_VALUE);
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2)
         .SetReturn(TEST_IOTHUB_MESSAGE_HANDLE_8);
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_ARG))
         .IgnoreArgument(1);
     {
         /*this scope is for is properties code*/
 
         HTTPHeaders_GetHeaderCount_writes_to_its_outputs = false;
-        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .CopyOutArgumentBuffer(2, &nHeaders, sizeof(nHeaders));
 
         STRICT_EXPECTED_CALL(IoTHubMessage_Properties(TEST_IOTHUB_MESSAGE_HANDLE_8));
 
-        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeader(IGNORED_PTR_ARG, 0, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeader(IGNORED_ARG, 0, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(3);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(Map_AddOrUpdate(TEST_MAP_3_PROPERTY, "NAME1", "VALUE1"));
 
         whenShallHTTPHeaders_GetHeader_fail = currentHTTPHeaders_GetHeader_call + 2;
-        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeader(IGNORED_PTR_ARG, 1, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeader(IGNORED_ARG, 1, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(3);
     }
 
     /*this is "abandon"*/
-    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(STRING_construct_n(TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1))
         .ValidateArgumentBuffer(1, TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1);
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "/abandon" API_VERSION))
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, "/abandon" API_VERSION))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", TEST_STRING_DATA))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "User-Agent", TEST_STRING_DATA))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "If-Match", TEST_ETAG_VALUE))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "If-Match", TEST_ETAG_VALUE))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1); /*because abandon relativePath is a STRING_HANDLE*/
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,
-        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        IGNORED_ARG,
+        IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
         HTTPAPI_REQUEST_POST,                               /*HTTPAPI_REQUEST_TYPE requestType,                            */
         "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP_ETAG TEST_ETAG_VALUE_UNQUOTED "/abandon" API_VERSION,    /*const char* relativePath,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
         NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
+        IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
         NULL,                                               /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         NULL                                                /*BUFFER_HANDLE responseContent))                              */
         ))
@@ -10380,100 +10350,100 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 
     STRICT_EXPECTED_CALL(get_time(NULL));
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc()); /*because responseHeadearsHandle: a new instance of HTTP headers*/
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(BUFFER_new());
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,
-        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        IGNORED_ARG,
+        IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
         HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
         "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP API_VERSION,    /*const char* relativePath,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
         NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
-        IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
+        IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
+        IGNORED_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
         .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_ARG, "ETag"))
         .IgnoreArgument(1)
         .SetReturn(TEST_ETAG_VALUE);
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2)
         .SetReturn(TEST_IOTHUB_MESSAGE_HANDLE_8);
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_ARG))
         .IgnoreArgument(1);
     {
         /*this scope is for is properties code*/
 
         HTTPHeaders_GetHeaderCount_writes_to_its_outputs = false;
-        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .CopyOutArgumentBuffer(2, &nHeaders, sizeof(nHeaders));
 
         STRICT_EXPECTED_CALL(IoTHubMessage_Properties(TEST_IOTHUB_MESSAGE_HANDLE_8));
 
-        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeader(IGNORED_PTR_ARG, 0, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeader(IGNORED_ARG, 0, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(3);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(Map_AddOrUpdate(TEST_MAP_3_PROPERTY, "NAME1", "VALUE1"))
             .SetReturn(MAP_ERROR);
     }
 
     /*this is "abandon"*/
-    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(STRING_construct_n(TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1))
         .ValidateArgumentBuffer(1, TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1);
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "/abandon" API_VERSION))
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, "/abandon" API_VERSION))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", TEST_STRING_DATA))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "User-Agent", TEST_STRING_DATA))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "If-Match", TEST_ETAG_VALUE))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "If-Match", TEST_ETAG_VALUE))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1); /*because abandon relativePath is a STRING_HANDLE*/
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,
-        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        IGNORED_ARG,
+        IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
         HTTPAPI_REQUEST_POST,                               /*HTTPAPI_REQUEST_TYPE requestType,                            */
         "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP_ETAG TEST_ETAG_VALUE_UNQUOTED "/abandon" API_VERSION,    /*const char* relativePath,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
         NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
+        IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
         NULL,                                               /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         NULL                                                /*BUFFER_HANDLE responseContent))                              */
         ))
@@ -10509,91 +10479,91 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_happy_path_with_empty_waitingToSend_and
 
     STRICT_EXPECTED_CALL(get_time(NULL));
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc()); /*because responseHeadearsHandle: a new instance of HTTP headers*/
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(BUFFER_new());
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,
-        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        IGNORED_ARG,
+        IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
         HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
         "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP API_VERSION,    /*const char* relativePath,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
         NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
-        IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
+        IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
+        IGNORED_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
         .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_ARG, "ETag"))
         .IgnoreArgument(1)
         .SetReturn(TEST_ETAG_VALUE);
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2)
         .SetReturn(TEST_IOTHUB_MESSAGE_HANDLE_8);
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_ARG))
         .IgnoreArgument(1);
     {
         /*this scope is for is properties code*/
 
         HTTPHeaders_GetHeaderCount_writes_to_its_outputs = false;
-        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .CopyOutArgumentBuffer(2, &nHeaders, sizeof(nHeaders))
             .SetReturn(HTTP_HEADERS_ERROR);
     }
 
     /*this is "abandon"*/
-    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(STRING_construct_n(TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1))
         .ValidateArgumentBuffer(1, TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1);
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "/abandon" API_VERSION))
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, "/abandon" API_VERSION))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", TEST_STRING_DATA))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "User-Agent", TEST_STRING_DATA))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "If-Match", TEST_ETAG_VALUE))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "If-Match", TEST_ETAG_VALUE))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1); /*because abandon relativePath is a STRING_HANDLE*/
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
         HTTPAPI_REQUEST_POST,                               /*HTTPAPI_REQUEST_TYPE requestType,                            */
         "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP_ETAG TEST_ETAG_VALUE_UNQUOTED "/abandon" API_VERSION,    /*const char* relativePath,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
         NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
+        IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
         NULL,                                               /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         NULL                                                /*BUFFER_HANDLE responseContent))                              */
         ))
@@ -10625,44 +10595,44 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_no_properties_unbatch
     STRICT_EXPECTED_CALL(DList_IsListEmpty(&waitingToSend));
 
     STRICT_EXPECTED_CALL(IoTHubMessage_GetContentType(TEST_IOTHUB_MESSAGE_HANDLE_1));
-    STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(TEST_IOTHUB_MESSAGE_HANDLE_1, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(TEST_IOTHUB_MESSAGE_HANDLE_1, IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3);
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_Clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Clone(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "Content-Type", "application/octet-stream"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_ARG, "Content-Type", "application/octet-stream"))
         .IgnoreArgument(1);
 
     /*no properties, so no more headers*/
     STRICT_EXPECTED_CALL(IoTHubMessage_Properties(TEST_IOTHUB_MESSAGE_HANDLE_1));
-    STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_EMPTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_EMPTY, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3)
         .IgnoreArgument(4);
 
     STRICT_EXPECTED_CALL(BUFFER_new());
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(BUFFER_build(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_build(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2)
         .IgnoreArgument(3);
 
     /*executing HTTP goodies*/
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)) /*because relativePath*/
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)) /*because relativePath*/
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,
         HTTPAPI_REQUEST_POST,                                                           /*HTTPAPI_REQUEST_TYPE requestType,                  */
         "/devices/" TEST_DEVICE_ID EVENT_ENDPOINT API_VERSION,                 /*const char* relativePath,                          */
-        IGNORED_PTR_ARG,                                                                /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,      */
-        IGNORED_PTR_ARG,                                                                /*BUFFER_HANDLE requestContent,                      */
-        IGNORED_PTR_ARG,                                                                /*unsigned int* statusCode,                          */
+        IGNORED_ARG,                                                                /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,      */
+        IGNORED_ARG,                                                                /*BUFFER_HANDLE requestContent,                      */
+        IGNORED_ARG,                                                                /*unsigned int* statusCode,                          */
         NULL,                                                                           /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,     */
         NULL                                                                            /*BUFFER_HANDLE responseContent)                     */
         ))
@@ -10672,15 +10642,15 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_no_properties_unbatch
     /*once the event has been succesfull...*/
 
     /*building the list of messages to be notified if HTTP is fine*/
-    STRICT_EXPECTED_CALL(DList_RemoveHeadList(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(DList_RemoveHeadList(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_PTR_ARG, &(message1.entry)))
+    STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_ARG, &(message1.entry)))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_PTR_ARG, IOTHUB_CLIENT_CONFIRMATION_OK, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_ARG, IOTHUB_CLIENT_CONFIRMATION_OK, IGNORED_ARG))
         .IgnoreArgument(2);
 
-    EXPECTED_CALL(IoTHubMessage_GetMessageId(IGNORED_PTR_ARG));
-    EXPECTED_CALL(IoTHubMessage_GetCorrelationId(IGNORED_PTR_ARG));
+    EXPECTED_CALL(IoTHubMessage_GetMessageId(IGNORED_ARG));
+    EXPECTED_CALL(IoTHubMessage_GetCorrelationId(IGNORED_ARG));
 
     DISABLE_BATCHING();
 
@@ -10712,40 +10682,40 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_no_properties_string_
     STRICT_EXPECTED_CALL(IoTHubMessage_GetContentType(TEST_IOTHUB_MESSAGE_HANDLE_10));
     STRICT_EXPECTED_CALL(IoTHubMessage_GetString(TEST_IOTHUB_MESSAGE_HANDLE_10));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_Clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Clone(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "Content-Type", "application/octet-stream"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_ARG, "Content-Type", "application/octet-stream"))
         .IgnoreArgument(1);
 
     /*no properties, so no more headers*/
     STRICT_EXPECTED_CALL(IoTHubMessage_Properties(TEST_IOTHUB_MESSAGE_HANDLE_10));
-    STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_EMPTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_EMPTY, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3)
         .IgnoreArgument(4);
 
     STRICT_EXPECTED_CALL(BUFFER_new());
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(BUFFER_build(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_build(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2)
         .IgnoreArgument(3);
 
     /*executing HTTP goodies*/
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)) /*because relativePath*/
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)) /*because relativePath*/
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,
         HTTPAPI_REQUEST_POST,                                                           /*HTTPAPI_REQUEST_TYPE requestType,                  */
         "/devices/" TEST_DEVICE_ID EVENT_ENDPOINT API_VERSION,                 /*const char* relativePath,                          */
-        IGNORED_PTR_ARG,                                                                /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,      */
-        IGNORED_PTR_ARG,                                                                /*BUFFER_HANDLE requestContent,                      */
-        IGNORED_PTR_ARG,                                                                /*unsigned int* statusCode,                          */
+        IGNORED_ARG,                                                                /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,      */
+        IGNORED_ARG,                                                                /*BUFFER_HANDLE requestContent,                      */
+        IGNORED_ARG,                                                                /*unsigned int* statusCode,                          */
         NULL,                                                                           /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,     */
         NULL                                                                            /*BUFFER_HANDLE responseContent)                     */
         ))
@@ -10755,15 +10725,15 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_no_properties_string_
     /*once the event has been succesfull...*/
 
     /*building the list of messages to be notified if HTTP is fine*/
-    STRICT_EXPECTED_CALL(DList_RemoveHeadList(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(DList_RemoveHeadList(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_PTR_ARG, &(message10.entry)))
+    STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_ARG, &(message10.entry)))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_PTR_ARG, IOTHUB_CLIENT_CONFIRMATION_OK, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_ARG, IOTHUB_CLIENT_CONFIRMATION_OK, IGNORED_ARG))
         .IgnoreArgument(2);
 
-    EXPECTED_CALL(IoTHubMessage_GetMessageId(IGNORED_PTR_ARG));
-    EXPECTED_CALL(IoTHubMessage_GetCorrelationId(IGNORED_PTR_ARG));
+    EXPECTED_CALL(IoTHubMessage_GetMessageId(IGNORED_ARG));
+    EXPECTED_CALL(IoTHubMessage_GetCorrelationId(IGNORED_ARG));
 
     DISABLE_BATCHING();
 
@@ -10793,56 +10763,56 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_unbatched_happy_path_at_th
     STRICT_EXPECTED_CALL(DList_IsListEmpty(&waitingToSend));
 
     STRICT_EXPECTED_CALL(IoTHubMessage_GetContentType(TEST_IOTHUB_MESSAGE_HANDLE_11));
-    STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(TEST_IOTHUB_MESSAGE_HANDLE_11, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(TEST_IOTHUB_MESSAGE_HANDLE_11, IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3);
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_Clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Clone(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "Content-Type", "application/octet-stream"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_ARG, "Content-Type", "application/octet-stream"))
         .IgnoreArgument(1);
 
     /*1 property*/
     STRICT_EXPECTED_CALL(IoTHubMessage_Properties(TEST_IOTHUB_MESSAGE_HANDLE_11));
-    STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_1_PROPERTY_A_B, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_1_PROPERTY_A_B, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3)
         .IgnoreArgument(4);
 
     STRICT_EXPECTED_CALL(STRING_construct("iothub-app-"));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, TEST_KEYS1_A_B[0]))
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, TEST_KEYS1_A_B[0]))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "iothub-app-a", TEST_VALUES1_A_B[0]))
+    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_ARG, "iothub-app-a", TEST_VALUES1_A_B[0]))
         .IgnoreArgument(1);
 
 
     STRICT_EXPECTED_CALL(BUFFER_new());
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(BUFFER_build(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_build(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2)
         .IgnoreArgument(3);
 
     /*executing HTTP goodies*/
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)) /*because relativePath*/
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)) /*because relativePath*/
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,
         HTTPAPI_REQUEST_POST,                                                           /*HTTPAPI_REQUEST_TYPE requestType,                  */
         "/devices/" TEST_DEVICE_ID EVENT_ENDPOINT API_VERSION,                 /*const char* relativePath,                          */
-        IGNORED_PTR_ARG,                                                                /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,      */
-        IGNORED_PTR_ARG,                                                                /*BUFFER_HANDLE requestContent,                      */
-        IGNORED_PTR_ARG,                                                                /*unsigned int* statusCode,                          */
+        IGNORED_ARG,                                                                /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,      */
+        IGNORED_ARG,                                                                /*BUFFER_HANDLE requestContent,                      */
+        IGNORED_ARG,                                                                /*unsigned int* statusCode,                          */
         NULL,                                                                           /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,     */
         NULL                                                                            /*BUFFER_HANDLE responseContent)                     */
         ))
@@ -10852,15 +10822,15 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_unbatched_happy_path_at_th
     /*once the event has been succesfull...*/
 
     /*building the list of messages to be notified if HTTP is fine*/
-    STRICT_EXPECTED_CALL(DList_RemoveHeadList(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(DList_RemoveHeadList(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_PTR_ARG, &(message11.entry)))
+    STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_ARG, &(message11.entry)))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_PTR_ARG, IOTHUB_CLIENT_CONFIRMATION_OK, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_ARG, IOTHUB_CLIENT_CONFIRMATION_OK, IGNORED_ARG))
         .IgnoreArgument(2);
 
-    EXPECTED_CALL(IoTHubMessage_GetMessageId(IGNORED_PTR_ARG));
-    EXPECTED_CALL(IoTHubMessage_GetCorrelationId(IGNORED_PTR_ARG));
+    EXPECTED_CALL(IoTHubMessage_GetMessageId(IGNORED_ARG));
+    EXPECTED_CALL(IoTHubMessage_GetCorrelationId(IGNORED_ARG));
 
     DISABLE_BATCHING();
 
@@ -10888,7 +10858,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_no_properties_string_
 
     setupDoWorkLoopOnceForOneDevice();
 
-    STRICT_EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_PTR_ARG, IOTHUB_CLIENT_CONFIRMATION_ERROR, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_ARG, IOTHUB_CLIENT_CONFIRMATION_ERROR, IGNORED_ARG))
         .IgnoreArgument(2);
 
     DISABLE_BATCHING();
@@ -10949,55 +10919,55 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
     STRICT_EXPECTED_CALL(DList_IsListEmpty(&waitingToSend));
 
     STRICT_EXPECTED_CALL(IoTHubMessage_GetContentType(TEST_IOTHUB_MESSAGE_HANDLE_6));
-    STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(TEST_IOTHUB_MESSAGE_HANDLE_6, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(TEST_IOTHUB_MESSAGE_HANDLE_6, IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3);
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_Clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Clone(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "Content-Type", "application/octet-stream"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_ARG, "Content-Type", "application/octet-stream"))
         .IgnoreArgument(1);
 
     /*no properties, so no more headers*/
     STRICT_EXPECTED_CALL(IoTHubMessage_Properties(TEST_IOTHUB_MESSAGE_HANDLE_6));
-    STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_1_PROPERTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_1_PROPERTY, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3)
         .IgnoreArgument(4);
 
     /*this is making http headers*/
     STRICT_EXPECTED_CALL(STRING_construct("iothub-app-"));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, TEST_RED_KEY))
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, TEST_RED_KEY))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "iothub-app-" TEST_RED_KEY, TEST_RED_VALUE))
+    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_ARG, "iothub-app-" TEST_RED_KEY, TEST_RED_VALUE))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(BUFFER_new());
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(BUFFER_build(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_build(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2)
         .IgnoreArgument(3);
 
     /*executing HTTP goodies*/
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)) /*because relativePath*/
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)) /*because relativePath*/
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,
         HTTPAPI_REQUEST_POST,                                                           /*HTTPAPI_REQUEST_TYPE requestType,                  */
         "/devices/" TEST_DEVICE_ID EVENT_ENDPOINT API_VERSION,                 /*const char* relativePath,                          */
-        IGNORED_PTR_ARG,                                                                /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,      */
-        IGNORED_PTR_ARG,                                                                /*BUFFER_HANDLE requestContent,                      */
-        IGNORED_PTR_ARG,                                                                /*unsigned int* statusCode,                          */
+        IGNORED_ARG,                                                                /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,      */
+        IGNORED_ARG,                                                                /*BUFFER_HANDLE requestContent,                      */
+        IGNORED_ARG,                                                                /*unsigned int* statusCode,                          */
         NULL,                                                                           /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,     */
         NULL                                                                            /*BUFFER_HANDLE responseContent)                     */
         ))
@@ -11007,15 +10977,15 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
     /*once the event has been succesfull...*/
 
     /*building the list of messages to be notified if HTTP is fine*/
-    STRICT_EXPECTED_CALL(DList_RemoveHeadList(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(DList_RemoveHeadList(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_PTR_ARG, &(message6.entry)))
+    STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_ARG, &(message6.entry)))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_PTR_ARG, IOTHUB_CLIENT_CONFIRMATION_OK, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_ARG, IOTHUB_CLIENT_CONFIRMATION_OK, IGNORED_ARG))
         .IgnoreArgument(2);
 
-    EXPECTED_CALL(IoTHubMessage_GetMessageId(IGNORED_PTR_ARG));
-    EXPECTED_CALL(IoTHubMessage_GetCorrelationId(IGNORED_PTR_ARG));
+    EXPECTED_CALL(IoTHubMessage_GetMessageId(IGNORED_ARG));
+    EXPECTED_CALL(IoTHubMessage_GetCorrelationId(IGNORED_ARG));
 
     DISABLE_BATCHING();
 
@@ -11046,63 +11016,63 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
     STRICT_EXPECTED_CALL(DList_IsListEmpty(&waitingToSend));
 
     STRICT_EXPECTED_CALL(IoTHubMessage_GetContentType(TEST_IOTHUB_MESSAGE_HANDLE_6));
-    STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(TEST_IOTHUB_MESSAGE_HANDLE_6, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(TEST_IOTHUB_MESSAGE_HANDLE_6, IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3);
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_Clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Clone(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "Content-Type", "application/octet-stream"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_ARG, "Content-Type", "application/octet-stream"))
         .IgnoreArgument(1);
 
     /*no properties, so no more headers*/
     STRICT_EXPECTED_CALL(IoTHubMessage_Properties(TEST_IOTHUB_MESSAGE_HANDLE_6));
-    STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_1_PROPERTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_1_PROPERTY, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3)
         .IgnoreArgument(4);
 
     /*this is making http headers*/
     STRICT_EXPECTED_CALL(STRING_construct("iothub-app-"));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, TEST_RED_KEY))
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, TEST_RED_KEY))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "iothub-app-" TEST_RED_KEY, TEST_RED_VALUE))
+    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_ARG, "iothub-app-" TEST_RED_KEY, TEST_RED_VALUE))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(BUFFER_new());
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(BUFFER_build(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_build(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2)
         .IgnoreArgument(3);
 
     /*executing HTTP goodies*/
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)) /*because relativePath*/
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)) /*because relativePath*/
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,
         HTTPAPI_REQUEST_POST,                                                           /*HTTPAPI_REQUEST_TYPE requestType,                  */
         "/devices/" TEST_DEVICE_ID EVENT_ENDPOINT API_VERSION,                 /*const char* relativePath,                          */
-        IGNORED_PTR_ARG,                                                                /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,      */
-        IGNORED_PTR_ARG,                                                                /*BUFFER_HANDLE requestContent,                      */
-        IGNORED_PTR_ARG,                                                                /*unsigned int* statusCode,                          */
+        IGNORED_ARG,                                                                /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,      */
+        IGNORED_ARG,                                                                /*BUFFER_HANDLE requestContent,                      */
+        IGNORED_ARG,                                                                /*unsigned int* statusCode,                          */
         NULL,                                                                           /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,     */
         NULL                                                                            /*BUFFER_HANDLE responseContent)                     */
         ))
         .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &httpStatus404, sizeof(httpStatus404));
 
-    EXPECTED_CALL(IoTHubMessage_GetMessageId(IGNORED_PTR_ARG));
-    EXPECTED_CALL(IoTHubMessage_GetCorrelationId(IGNORED_PTR_ARG));
+    EXPECTED_CALL(IoTHubMessage_GetMessageId(IGNORED_ARG));
+    EXPECTED_CALL(IoTHubMessage_GetCorrelationId(IGNORED_ARG));
 
     DISABLE_BATCHING();
 
@@ -11132,55 +11102,55 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
     STRICT_EXPECTED_CALL(DList_IsListEmpty(&waitingToSend));
 
     STRICT_EXPECTED_CALL(IoTHubMessage_GetContentType(TEST_IOTHUB_MESSAGE_HANDLE_6));
-    STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(TEST_IOTHUB_MESSAGE_HANDLE_6, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(TEST_IOTHUB_MESSAGE_HANDLE_6, IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3);
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_Clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Clone(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "Content-Type", "application/octet-stream"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_ARG, "Content-Type", "application/octet-stream"))
         .IgnoreArgument(1);
 
     /*no properties, so no more headers*/
     STRICT_EXPECTED_CALL(IoTHubMessage_Properties(TEST_IOTHUB_MESSAGE_HANDLE_6));
-    STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_1_PROPERTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_1_PROPERTY, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3)
         .IgnoreArgument(4);
 
     /*this is making http headers*/
     STRICT_EXPECTED_CALL(STRING_construct("iothub-app-"));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, TEST_RED_KEY))
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, TEST_RED_KEY))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "iothub-app-" TEST_RED_KEY, TEST_RED_VALUE))
+    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_ARG, "iothub-app-" TEST_RED_KEY, TEST_RED_VALUE))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(BUFFER_new());
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(BUFFER_build(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_build(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2)
         .IgnoreArgument(3);
 
     /*executing HTTP goodies*/
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)) /*because relativePath*/
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)) /*because relativePath*/
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,
         HTTPAPI_REQUEST_POST,                                                           /*HTTPAPI_REQUEST_TYPE requestType,                  */
         "/devices/" TEST_DEVICE_ID EVENT_ENDPOINT API_VERSION,                 /*const char* relativePath,                          */
-        IGNORED_PTR_ARG,                                                                /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,      */
-        IGNORED_PTR_ARG,                                                                /*BUFFER_HANDLE requestContent,                      */
-        IGNORED_PTR_ARG,                                                                /*unsigned int* statusCode,                          */
+        IGNORED_ARG,                                                                /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,      */
+        IGNORED_ARG,                                                                /*BUFFER_HANDLE requestContent,                      */
+        IGNORED_ARG,                                                                /*unsigned int* statusCode,                          */
         NULL,                                                                           /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,     */
         NULL                                                                            /*BUFFER_HANDLE responseContent)                     */
         ))
@@ -11188,8 +11158,8 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
         .CopyOutArgumentBuffer(7, &httpStatus200, sizeof(httpStatus200))
         .SetReturn(HTTPAPIEX_ERROR);
 
-    EXPECTED_CALL(IoTHubMessage_GetMessageId(IGNORED_PTR_ARG));
-    EXPECTED_CALL(IoTHubMessage_GetCorrelationId(IGNORED_PTR_ARG));
+    EXPECTED_CALL(IoTHubMessage_GetMessageId(IGNORED_ARG));
+    EXPECTED_CALL(IoTHubMessage_GetCorrelationId(IGNORED_ARG));
 
     DISABLE_BATCHING();
 
@@ -11218,48 +11188,48 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
     STRICT_EXPECTED_CALL(DList_IsListEmpty(&waitingToSend));
 
     STRICT_EXPECTED_CALL(IoTHubMessage_GetContentType(TEST_IOTHUB_MESSAGE_HANDLE_6));
-    STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(TEST_IOTHUB_MESSAGE_HANDLE_6, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(TEST_IOTHUB_MESSAGE_HANDLE_6, IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3);
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_Clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Clone(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "Content-Type", "application/octet-stream"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_ARG, "Content-Type", "application/octet-stream"))
         .IgnoreArgument(1);
 
     /*no properties, so no more headers*/
     STRICT_EXPECTED_CALL(IoTHubMessage_Properties(TEST_IOTHUB_MESSAGE_HANDLE_6));
-    STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_1_PROPERTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_1_PROPERTY, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3)
         .IgnoreArgument(4);
 
     /*this is making http headers*/
     STRICT_EXPECTED_CALL(STRING_construct("iothub-app-"));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, TEST_RED_KEY))
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, TEST_RED_KEY))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "iothub-app-" TEST_RED_KEY, TEST_RED_VALUE))
+    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_ARG, "iothub-app-" TEST_RED_KEY, TEST_RED_VALUE))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(BUFFER_new());
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(BUFFER_build(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_build(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2)
         .IgnoreArgument(3)
         .SetReturn(1);
 
-    EXPECTED_CALL(IoTHubMessage_GetMessageId(IGNORED_PTR_ARG));
-    EXPECTED_CALL(IoTHubMessage_GetCorrelationId(IGNORED_PTR_ARG));
+    EXPECTED_CALL(IoTHubMessage_GetMessageId(IGNORED_ARG));
+    EXPECTED_CALL(IoTHubMessage_GetCorrelationId(IGNORED_ARG));
 
     DISABLE_BATCHING();
 
@@ -11288,41 +11258,41 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
     STRICT_EXPECTED_CALL(DList_IsListEmpty(&waitingToSend));
 
     STRICT_EXPECTED_CALL(IoTHubMessage_GetContentType(TEST_IOTHUB_MESSAGE_HANDLE_6));
-    STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(TEST_IOTHUB_MESSAGE_HANDLE_6, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(TEST_IOTHUB_MESSAGE_HANDLE_6, IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3);
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_Clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Clone(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "Content-Type", "application/octet-stream"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_ARG, "Content-Type", "application/octet-stream"))
         .IgnoreArgument(1);
 
     /*no properties, so no more headers*/
     STRICT_EXPECTED_CALL(IoTHubMessage_Properties(TEST_IOTHUB_MESSAGE_HANDLE_6));
-    STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_1_PROPERTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_1_PROPERTY, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3)
         .IgnoreArgument(4);
 
     /*this is making http headers*/
     STRICT_EXPECTED_CALL(STRING_construct("iothub-app-"));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, TEST_RED_KEY))
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, TEST_RED_KEY))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "iothub-app-" TEST_RED_KEY, TEST_RED_VALUE))
+    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_ARG, "iothub-app-" TEST_RED_KEY, TEST_RED_VALUE))
         .IgnoreArgument(1);
 
     whenShallBUFFER_new_fail = currentBUFFER_new_call + 1;
     STRICT_EXPECTED_CALL(BUFFER_new());
 
-    EXPECTED_CALL(IoTHubMessage_GetMessageId(IGNORED_PTR_ARG));
-    EXPECTED_CALL(IoTHubMessage_GetCorrelationId(IGNORED_PTR_ARG));
+    EXPECTED_CALL(IoTHubMessage_GetMessageId(IGNORED_ARG));
+    EXPECTED_CALL(IoTHubMessage_GetCorrelationId(IGNORED_ARG));
 
     DISABLE_BATCHING();
 
@@ -11351,39 +11321,39 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
     STRICT_EXPECTED_CALL(DList_IsListEmpty(&waitingToSend));
 
     STRICT_EXPECTED_CALL(IoTHubMessage_GetContentType(TEST_IOTHUB_MESSAGE_HANDLE_6));
-    STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(TEST_IOTHUB_MESSAGE_HANDLE_6, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(TEST_IOTHUB_MESSAGE_HANDLE_6, IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3);
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_Clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Clone(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "Content-Type", "application/octet-stream"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_ARG, "Content-Type", "application/octet-stream"))
         .IgnoreArgument(1);
 
     /*no properties, so no more headers*/
     STRICT_EXPECTED_CALL(IoTHubMessage_Properties(TEST_IOTHUB_MESSAGE_HANDLE_6));
-    STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_1_PROPERTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_1_PROPERTY, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3)
         .IgnoreArgument(4);
 
     /*this is making http headers*/
     STRICT_EXPECTED_CALL(STRING_construct("iothub-app-"));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, TEST_RED_KEY))
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, TEST_RED_KEY))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "iothub-app-" TEST_RED_KEY, TEST_RED_VALUE))
+    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_ARG, "iothub-app-" TEST_RED_KEY, TEST_RED_VALUE))
         .IgnoreArgument(1)
         .SetReturn(HTTP_HEADERS_ERROR);
 
-    EXPECTED_CALL(IoTHubMessage_GetMessageId(IGNORED_PTR_ARG));
-    EXPECTED_CALL(IoTHubMessage_GetCorrelationId(IGNORED_PTR_ARG));
+    EXPECTED_CALL(IoTHubMessage_GetMessageId(IGNORED_ARG));
+    EXPECTED_CALL(IoTHubMessage_GetCorrelationId(IGNORED_ARG));
 
     DISABLE_BATCHING();
 
@@ -11412,35 +11382,35 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
     STRICT_EXPECTED_CALL(DList_IsListEmpty(&waitingToSend));
 
     STRICT_EXPECTED_CALL(IoTHubMessage_GetContentType(TEST_IOTHUB_MESSAGE_HANDLE_6));
-    STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(TEST_IOTHUB_MESSAGE_HANDLE_6, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(TEST_IOTHUB_MESSAGE_HANDLE_6, IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3);
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_Clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Clone(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "Content-Type", "application/octet-stream"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_ARG, "Content-Type", "application/octet-stream"))
         .IgnoreArgument(1);
 
     /*no properties, so no more headers*/
     STRICT_EXPECTED_CALL(IoTHubMessage_Properties(TEST_IOTHUB_MESSAGE_HANDLE_6));
-    STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_1_PROPERTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_1_PROPERTY, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3)
         .IgnoreArgument(4);
 
     /*this is making http headers*/
     STRICT_EXPECTED_CALL(STRING_construct("iothub-app-"));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, TEST_RED_KEY))
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, TEST_RED_KEY))
         .IgnoreArgument(1)
         .SetReturn(1111); /*unpredictable value which is an error*/
 
-    EXPECTED_CALL(IoTHubMessage_GetMessageId(IGNORED_PTR_ARG));
-    EXPECTED_CALL(IoTHubMessage_GetCorrelationId(IGNORED_PTR_ARG));
+    EXPECTED_CALL(IoTHubMessage_GetMessageId(IGNORED_ARG));
+    EXPECTED_CALL(IoTHubMessage_GetCorrelationId(IGNORED_ARG));
 
     DISABLE_BATCHING();
 
@@ -11469,21 +11439,21 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
     STRICT_EXPECTED_CALL(DList_IsListEmpty(&waitingToSend));
 
     STRICT_EXPECTED_CALL(IoTHubMessage_GetContentType(TEST_IOTHUB_MESSAGE_HANDLE_6));
-    STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(TEST_IOTHUB_MESSAGE_HANDLE_6, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(TEST_IOTHUB_MESSAGE_HANDLE_6, IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3);
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_Clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Clone(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "Content-Type", "application/octet-stream"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_ARG, "Content-Type", "application/octet-stream"))
         .IgnoreArgument(1);
 
     /*no properties, so no more headers*/
     STRICT_EXPECTED_CALL(IoTHubMessage_Properties(TEST_IOTHUB_MESSAGE_HANDLE_6));
-    STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_1_PROPERTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_1_PROPERTY, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3)
         .IgnoreArgument(4);
@@ -11492,8 +11462,8 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
     whenShallSTRING_construct_fail = currentSTRING_construct_call + 1;
     STRICT_EXPECTED_CALL(STRING_construct("iothub-app-"));
 
-    EXPECTED_CALL(IoTHubMessage_GetMessageId(IGNORED_PTR_ARG));
-    EXPECTED_CALL(IoTHubMessage_GetCorrelationId(IGNORED_PTR_ARG));
+    EXPECTED_CALL(IoTHubMessage_GetMessageId(IGNORED_ARG));
+    EXPECTED_CALL(IoTHubMessage_GetCorrelationId(IGNORED_ARG));
 
     DISABLE_BATCHING();
 
@@ -11522,21 +11492,21 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
     STRICT_EXPECTED_CALL(DList_IsListEmpty(&waitingToSend));
 
     STRICT_EXPECTED_CALL(IoTHubMessage_GetContentType(TEST_IOTHUB_MESSAGE_HANDLE_6));
-    STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(TEST_IOTHUB_MESSAGE_HANDLE_6, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(TEST_IOTHUB_MESSAGE_HANDLE_6, IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3);
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_Clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Clone(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "Content-Type", "application/octet-stream"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_ARG, "Content-Type", "application/octet-stream"))
         .IgnoreArgument(1);
 
     /*no properties, so no more headers*/
     STRICT_EXPECTED_CALL(IoTHubMessage_Properties(TEST_IOTHUB_MESSAGE_HANDLE_6));
-    STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_1_PROPERTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_1_PROPERTY, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3)
         .IgnoreArgument(4)
@@ -11569,16 +11539,16 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
     STRICT_EXPECTED_CALL(DList_IsListEmpty(&waitingToSend));
 
     STRICT_EXPECTED_CALL(IoTHubMessage_GetContentType(TEST_IOTHUB_MESSAGE_HANDLE_6));
-    STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(TEST_IOTHUB_MESSAGE_HANDLE_6, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(TEST_IOTHUB_MESSAGE_HANDLE_6, IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3);
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_Clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Clone(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "Content-Type", "application/octet-stream"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_ARG, "Content-Type", "application/octet-stream"))
         .IgnoreArgument(1)
         .SetReturn(HTTP_HEADERS_ERROR);
 
@@ -11609,12 +11579,12 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
     STRICT_EXPECTED_CALL(DList_IsListEmpty(&waitingToSend));
 
     STRICT_EXPECTED_CALL(IoTHubMessage_GetContentType(TEST_IOTHUB_MESSAGE_HANDLE_6));
-    STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(TEST_IOTHUB_MESSAGE_HANDLE_6, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(TEST_IOTHUB_MESSAGE_HANDLE_6, IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3);
 
     whenShallHTTPHeaders_Clone_fail = currentHTTPHeaders_Clone_call + 1;
-    STRICT_EXPECTED_CALL(HTTPHeaders_Clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Clone(IGNORED_ARG))
         .IgnoreArgument(1);
 
     DISABLE_BATCHING();
@@ -11644,7 +11614,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
     STRICT_EXPECTED_CALL(DList_IsListEmpty(&waitingToSend));
 
     STRICT_EXPECTED_CALL(IoTHubMessage_GetContentType(TEST_IOTHUB_MESSAGE_HANDLE_6));
-    STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(TEST_IOTHUB_MESSAGE_HANDLE_6, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(TEST_IOTHUB_MESSAGE_HANDLE_6, IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3)
         .SetReturn(IOTHUB_MESSAGE_ERROR);
@@ -11677,18 +11647,18 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_1_property_unbatched_
     STRICT_EXPECTED_CALL(DList_IsListEmpty(&waitingToSend));
 
     STRICT_EXPECTED_CALL(IoTHubMessage_GetContentType(TEST_IOTHUB_MESSAGE_HANDLE_9));
-    STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(TEST_IOTHUB_MESSAGE_HANDLE_9, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(TEST_IOTHUB_MESSAGE_HANDLE_9, IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3);
 
     /*ooops - over 256K*/
 
     /*building the list of messages to be notified if HTTP is fine*/
-    STRICT_EXPECTED_CALL(DList_RemoveHeadList(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(DList_RemoveHeadList(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_PTR_ARG, &(message9.entry)))
+    STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_ARG, &(message9.entry)))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_PTR_ARG, IOTHUB_CLIENT_CONFIRMATION_ERROR, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_ARG, IOTHUB_CLIENT_CONFIRMATION_ERROR, IGNORED_ARG))
         .IgnoreArgument(2);
 
     DISABLE_BATCHING();
@@ -11717,88 +11687,88 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_as_string_happy_path_
 
     STRICT_EXPECTED_CALL(DList_IsListEmpty(&waitingToSend));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "Content-Type", "application/vnd.microsoft.iothub.json"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_ARG, "Content-Type", "application/vnd.microsoft.iothub.json"))
         .IgnoreArgument(1);
 
     /*starting to prepare the "big" payload*/
     STRICT_EXPECTED_CALL(STRING_construct("["));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
     /*this is first batched payload*/
     {
         STRICT_EXPECTED_CALL(IoTHubMessage_GetContentType(message10.messageHandle));
         STRICT_EXPECTED_CALL(STRING_construct("{\"body\":"));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(IoTHubMessage_GetString(message10.messageHandle));
 
         STRICT_EXPECTED_CALL(STRING_new_JSON(string10));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2);
 
-        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, ",\"base64Encoded\":false")) /*closing the value of the body*/
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, ",\"base64Encoded\":false")) /*closing the value of the body*/
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(IoTHubMessage_Properties(message10.messageHandle));
-        STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_EMPTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_EMPTY, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(2)
             .IgnoreArgument(3)
             .IgnoreArgument(4);
-        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "},")) /* this extra "," is going to be harshly overwritten by a "]"*/
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, "},")) /* this extra "," is going to be harshly overwritten by a "]"*/
             .IgnoreArgument(1);
         /*end of the first batched payload*/
     }
 
     {
         /*adding the first payload to the "big" payload*/
-        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2);
 
         /*closing the "big" payload*/
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(STRING_length(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_length(IGNORED_ARG))
             .IgnoreArgument(1);
     }
 
     /*building the list of messages to be notified if HTTP is fine*/
-    STRICT_EXPECTED_CALL(DList_RemoveHeadList(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(DList_RemoveHeadList(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_PTR_ARG, &(message10.entry)))
+    STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_ARG, &(message10.entry)))
         .IgnoreArgument(1);
 
     {
         /*this is building the HTTP payload... from a STRING_HANDLE (as it comes as "big payload"), into an array of bytes*/
         STRICT_EXPECTED_CALL(BUFFER_new());
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(STRING_length(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_length(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(BUFFER_build(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(BUFFER_build(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2)
             .IgnoreArgument(3);
     }
 
     /*executing HTTP goodies*/
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)) /*because relativePath*/
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)) /*because relativePath*/
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,
         HTTPAPI_REQUEST_POST,                                                           /*HTTPAPI_REQUEST_TYPE requestType,                  */
         "/devices/" TEST_DEVICE_ID EVENT_ENDPOINT API_VERSION,                 /*const char* relativePath,                          */
-        IGNORED_PTR_ARG,                                                                /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,      */
-        IGNORED_PTR_ARG,                                                                /*BUFFER_HANDLE requestContent,                      */
-        IGNORED_PTR_ARG,                                                                /*unsigned int* statusCode,                          */
+        IGNORED_ARG,                                                                /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,      */
+        IGNORED_ARG,                                                                /*BUFFER_HANDLE requestContent,                      */
+        IGNORED_ARG,                                                                /*unsigned int* statusCode,                          */
         NULL,                                                                           /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,     */
         NULL                                                                            /*BUFFER_HANDLE responseContent)                     */
         ))
@@ -11807,7 +11777,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_as_string_happy_path_
 
     /*once the event has been succesfull...*/
 
-    STRICT_EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_PTR_ARG, IOTHUB_CLIENT_CONFIRMATION_OK, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_ARG, IOTHUB_CLIENT_CONFIRMATION_OK, IGNORED_ARG))
         .IgnoreArgument(2);
 
     ENABLE_BATCHING();
@@ -11836,39 +11806,39 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_as_string_when_string
 
     STRICT_EXPECTED_CALL(DList_IsListEmpty(&waitingToSend));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "Content-Type", "application/vnd.microsoft.iothub.json"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_ARG, "Content-Type", "application/vnd.microsoft.iothub.json"))
         .IgnoreArgument(1);
 
     /*starting to prepare the "big" payload*/
     STRICT_EXPECTED_CALL(STRING_construct("["));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
     /*this is first batched payload*/
     {
         STRICT_EXPECTED_CALL(IoTHubMessage_GetContentType(message10.messageHandle));
         STRICT_EXPECTED_CALL(STRING_construct("{\"body\":"));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(IoTHubMessage_GetString(message10.messageHandle));
 
         STRICT_EXPECTED_CALL(STRING_new_JSON(string10));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2);
 
-        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, ",\"base64Encoded\":false")) /*closing the value of the body*/
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, ",\"base64Encoded\":false")) /*closing the value of the body*/
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(IoTHubMessage_Properties(message10.messageHandle));
-        STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_EMPTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_EMPTY, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(2)
             .IgnoreArgument(3)
             .IgnoreArgument(4);
         whenShallSTRING_concat_fail = currentSTRING_concat_call + 2;
-        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "},")) /* this extra "," is going to be harshly overwritten by a "]"*/
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, "},")) /* this extra "," is going to be harshly overwritten by a "]"*/
             .IgnoreArgument(1);
         /*end of the first batched payload*/
     }
@@ -11899,34 +11869,34 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_as_string_when_Map_Ge
 
     STRICT_EXPECTED_CALL(DList_IsListEmpty(&waitingToSend));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "Content-Type", "application/vnd.microsoft.iothub.json"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_ARG, "Content-Type", "application/vnd.microsoft.iothub.json"))
         .IgnoreArgument(1);
 
     /*starting to prepare the "big" payload*/
     STRICT_EXPECTED_CALL(STRING_construct("["));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
     /*this is first batched payload*/
     {
         STRICT_EXPECTED_CALL(IoTHubMessage_GetContentType(message10.messageHandle));
         STRICT_EXPECTED_CALL(STRING_construct("{\"body\":"));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(IoTHubMessage_GetString(message10.messageHandle));
 
         STRICT_EXPECTED_CALL(STRING_new_JSON(string10));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2);
 
-        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, ",\"base64Encoded\":false")) /*closing the value of the body*/
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, ",\"base64Encoded\":false")) /*closing the value of the body*/
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(IoTHubMessage_Properties(message10.messageHandle));
-        STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_EMPTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_EMPTY, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(2)
             .IgnoreArgument(3)
             .IgnoreArgument(4)
@@ -11960,32 +11930,32 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_as_string_when_STRING
 
     STRICT_EXPECTED_CALL(DList_IsListEmpty(&waitingToSend));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "Content-Type", "application/vnd.microsoft.iothub.json"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_ARG, "Content-Type", "application/vnd.microsoft.iothub.json"))
         .IgnoreArgument(1);
 
     /*starting to prepare the "big" payload*/
     STRICT_EXPECTED_CALL(STRING_construct("["));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
     /*this is first batched payload*/
     {
         STRICT_EXPECTED_CALL(IoTHubMessage_GetContentType(message10.messageHandle));
         STRICT_EXPECTED_CALL(STRING_construct("{\"body\":"));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(IoTHubMessage_GetString(message10.messageHandle));
 
         STRICT_EXPECTED_CALL(STRING_new_JSON(string10));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2);
 
         whenShallSTRING_concat_fail = currentSTRING_concat_call + 1;
-        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, ",\"base64Encoded\":false")) /*closing the value of the body*/
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, ",\"base64Encoded\":false")) /*closing the value of the body*/
             .IgnoreArgument(1);
         /*end of the first batched payload*/
     }
@@ -12016,28 +11986,28 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_as_string_when_STRING
 
     STRICT_EXPECTED_CALL(DList_IsListEmpty(&waitingToSend));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "Content-Type", "application/vnd.microsoft.iothub.json"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_ARG, "Content-Type", "application/vnd.microsoft.iothub.json"))
         .IgnoreArgument(1);
 
     /*starting to prepare the "big" payload*/
     STRICT_EXPECTED_CALL(STRING_construct("["));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
     /*this is first batched payload*/
     {
         STRICT_EXPECTED_CALL(IoTHubMessage_GetContentType(message10.messageHandle));
         STRICT_EXPECTED_CALL(STRING_construct("{\"body\":"));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(IoTHubMessage_GetString(message10.messageHandle));
 
         STRICT_EXPECTED_CALL(STRING_new_JSON(string10));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument(1);
 
         whenShallSTRING_concat_with_STRING_fail = currentSTRING_concat_with_STRING_call + 1;
-        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(2);
         /*end of the first batched payload*/
@@ -12069,19 +12039,19 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_as_string_when_STRING
 
     STRICT_EXPECTED_CALL(DList_IsListEmpty(&waitingToSend));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "Content-Type", "application/vnd.microsoft.iothub.json"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_ARG, "Content-Type", "application/vnd.microsoft.iothub.json"))
         .IgnoreArgument(1);
 
     /*starting to prepare the "big" payload*/
     STRICT_EXPECTED_CALL(STRING_construct("["));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
     /*this is first batched payload*/
     {
         STRICT_EXPECTED_CALL(IoTHubMessage_GetContentType(message10.messageHandle));
         STRICT_EXPECTED_CALL(STRING_construct("{\"body\":"));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(IoTHubMessage_GetString(message10.messageHandle));
 
@@ -12117,19 +12087,19 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_as_string_when_IoTHub
 
     STRICT_EXPECTED_CALL(DList_IsListEmpty(&waitingToSend));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "Content-Type", "application/vnd.microsoft.iothub.json"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_ARG, "Content-Type", "application/vnd.microsoft.iothub.json"))
         .IgnoreArgument(1);
 
     /*starting to prepare the "big" payload*/
     STRICT_EXPECTED_CALL(STRING_construct("["));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
     /*this is first batched payload*/
     {
         STRICT_EXPECTED_CALL(IoTHubMessage_GetContentType(message10.messageHandle));
         STRICT_EXPECTED_CALL(STRING_construct("{\"body\":"));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(IoTHubMessage_GetString(message10.messageHandle))
             .SetReturn((const char*)NULL);
@@ -12163,12 +12133,12 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_item_as_string_when_STRING
 
     STRICT_EXPECTED_CALL(DList_IsListEmpty(&waitingToSend));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "Content-Type", "application/vnd.microsoft.iothub.json"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_ARG, "Content-Type", "application/vnd.microsoft.iothub.json"))
         .IgnoreArgument(1);
 
     /*starting to prepare the "big" payload*/
     STRICT_EXPECTED_CALL(STRING_construct("["));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
     /*this is first batched payload*/
@@ -12210,146 +12180,145 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_SetMessageId_SUCCEED)
 
     STRICT_EXPECTED_CALL(get_time(NULL));
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc()); /*because responseHeadearsHandle: a new instance of HTTP headers*/
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(BUFFER_new());
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1); /*because relativePath is a STRING_HANDLE*/
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
         HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
         "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP API_VERSION,    /*const char* relativePath,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
         NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
-        IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
+        IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
+        IGNORED_ARG                                     /*BUFFER_HANDLE responseContent))                              */
         ))
         .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_ARG, "ETag"))
         .IgnoreArgument(1)
         .SetReturn(TEST_ETAG_VALUE);
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2)
         .SetReturn(TEST_IOTHUB_MESSAGE_HANDLE_8);
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_ARG))
         .IgnoreArgument(1);
     {
         /*this scope is for is properties code*/
 
         HTTPHeaders_GetHeaderCount_writes_to_its_outputs = false;
-        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(1)
             .CopyOutArgumentBuffer(2, &nHeaders, sizeof(nHeaders));
 
         STRICT_EXPECTED_CALL(IoTHubMessage_Properties(TEST_IOTHUB_MESSAGE_HANDLE_8));
 
-        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeader(IGNORED_PTR_ARG, 0, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeader(IGNORED_ARG, 0, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(3);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(Map_AddOrUpdate(TEST_MAP_3_PROPERTY, "NAME1", "VALUE1"));
 
-        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeader(IGNORED_PTR_ARG, 1, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeader(IGNORED_ARG, 1, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(3);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeader(IGNORED_PTR_ARG, 2, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeader(IGNORED_ARG, 2, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(3);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(Map_AddOrUpdate(TEST_MAP_3_PROPERTY, "NAME2", "VALUE2"));
 
-        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeader(IGNORED_PTR_ARG, 3, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeader(IGNORED_ARG, 3, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(3);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(IoTHubMessage_SetMessageId(IGNORED_PTR_ARG, "VALUE3"))
+        STRICT_EXPECTED_CALL(IoTHubMessage_SetMessageId(IGNORED_ARG, "VALUE3"))
             .IgnoreArgument(1);
     }
 
     /*this returns "0" so the message needs to be "accepted"*/
     /*this is "accepting"*/
-    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Clone(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .IgnoreAllArguments();
+    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_ARG, IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(STRING_construct_n(TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1))
         .ValidateArgumentBuffer(1, TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1);
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, API_VERSION))
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, API_VERSION))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", TEST_STRING_DATA))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "User-Agent", TEST_STRING_DATA))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "If-Match", TEST_ETAG_VALUE))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "If-Match", TEST_ETAG_VALUE))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1); /*because abandon relativePath is a STRING_HANDLE*/
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
         HTTPAPI_REQUEST_DELETE,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
         "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP_ETAG TEST_ETAG_VALUE_UNQUOTED API_VERSION,    /*const char* relativePath,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
         NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
+        IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
         NULL,                                               /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         NULL                                                /*BUFFER_HANDLE responseContent))                              */
         ))
         .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode204, sizeof(statusCode204));
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     //act
@@ -12380,63 +12349,63 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_SetMessageId_FAILED)
     STRICT_EXPECTED_CALL(get_time(NULL));
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc()); /*because responseHeadearsHandle: a new instance of HTTP headers*/
     STRICT_EXPECTED_CALL(BUFFER_new());
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG));
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
         HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
         "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP API_VERSION,    /*const char* relativePath,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
         NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
-        IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
+        IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
+        IGNORED_ARG                                     /*BUFFER_HANDLE responseContent))                              */
     ))
         .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
-    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_ARG, "ETag"))
         .SetReturn(TEST_ETAG_VALUE);
-    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_ARG, IGNORED_ARG))
         .CopyOutArgumentBuffer(2, &nHeaders, sizeof(nHeaders));
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_Properties(IGNORED_PTR_ARG)).SetReturn(TEST_MAP_3_PROPERTY);
-        //STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Properties(IGNORED_ARG)).SetReturn(TEST_MAP_3_PROPERTY);
+        //STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_ARG, IGNORED_ARG))
         //    .CopyOutArgumentBuffer(2, &nHeaders, sizeof(nHeaders));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_GetHeader(IGNORED_PTR_ARG, 0, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(HTTPHeaders_GetHeader(IGNORED_ARG, 0, IGNORED_ARG));
     STRICT_EXPECTED_CALL(Map_AddOrUpdate(TEST_MAP_3_PROPERTY, "NAME1", "VALUE1"));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(HTTPHeaders_GetHeader(IGNORED_PTR_ARG, 1, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(HTTPHeaders_GetHeader(IGNORED_PTR_ARG, 2, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(HTTPHeaders_GetHeader(IGNORED_ARG, 1, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(HTTPHeaders_GetHeader(IGNORED_ARG, 2, IGNORED_ARG));
 
     STRICT_EXPECTED_CALL(Map_AddOrUpdate(TEST_MAP_3_PROPERTY, "NAME2", "VALUE2"));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(HTTPHeaders_GetHeader(IGNORED_PTR_ARG, 3, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubMessage_SetMessageId(IGNORED_PTR_ARG, "VALUE3"));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(HTTPHeaders_GetHeader(IGNORED_ARG, 3, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubMessage_SetMessageId(IGNORED_ARG, "VALUE3"));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
     /*this is "abandon"*/
 
-    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
-    /*STRICT_EXPECTED_CALL(STRING_clone(IGNORED_PTR_ARG));
+    /*STRICT_EXPECTED_CALL(STRING_clone(IGNORED_ARG));
 
     STRICT_EXPECTED_CALL(STRING_construct_n(TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1))
         .ValidateArgumentBuffer(1, TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1);
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG));
 
-    //STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
-    //STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG));
+    //STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG));
+    //STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG));
     */
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG))
         .IgnoreArgument(1);
     {
         /*this scope is for is properties code*/
@@ -12444,64 +12413,64 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_SetMessageId_FAILED)
         HTTPHeaders_GetHeaderCount_writes_to_its_outputs = false;
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeader(IGNORED_PTR_ARG, 1, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeader(IGNORED_ARG, 1, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(3);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeader(IGNORED_PTR_ARG, 2, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeader(IGNORED_ARG, 2, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(3);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(Map_AddOrUpdate(TEST_MAP_3_PROPERTY, "NAME2", "VALUE2"));
 
-        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeader(IGNORED_PTR_ARG, 3, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeader(IGNORED_ARG, 3, IGNORED_ARG))
             .IgnoreArgument(1)
             .IgnoreArgument(3);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(IoTHubMessage_SetMessageId(IGNORED_PTR_ARG, "VALUE3"))
+        STRICT_EXPECTED_CALL(IoTHubMessage_SetMessageId(IGNORED_ARG, "VALUE3"))
             .IgnoreArgument(1)
             .SetReturn(IOTHUB_MESSAGE_ERROR);
     }
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(STRING_construct_n(TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1))
         .ValidateArgumentBuffer(1, TEST_ETAG_VALUE_UNQUOTED, sizeof(TEST_ETAG_VALUE_UNQUOTED) - 1);
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "/abandon" API_VERSION))
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, "/abandon" API_VERSION))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "User-Agent", TEST_STRING_DATA))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "User-Agent", TEST_STRING_DATA))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "Authorization", TEST_BLANK_SAS_TOKEN))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, "If-Match", TEST_ETAG_VALUE))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, "If-Match", TEST_ETAG_VALUE))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument(1); /*because abandon relativePath is a STRING_HANDLE*/
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,
-        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        IGNORED_ARG,
+        IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
         HTTPAPI_REQUEST_POST,                               /*HTTPAPI_REQUEST_TYPE requestType,                            */
         "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP_ETAG TEST_ETAG_VALUE_UNQUOTED "/abandon" API_VERSION,    /*const char* relativePath,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
         NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
+        IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
         NULL,                                               /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
         NULL                                                /*BUFFER_HANDLE responseContent))                              */
         ))
@@ -12532,56 +12501,56 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_SendSecurityMessage_SUCCEED)
     STRICT_EXPECTED_CALL(DList_IsListEmpty(&waitingToSend));
 
     STRICT_EXPECTED_CALL(IoTHubMessage_GetContentType(TEST_IOTHUB_MESSAGE_HANDLE_6));
-    STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(TEST_IOTHUB_MESSAGE_HANDLE_6, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(TEST_IOTHUB_MESSAGE_HANDLE_6, IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3);
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_Clone(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(HTTPHeaders_Clone(IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "Content-Type", "application/octet-stream"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_ARG, "Content-Type", "application/octet-stream"))
         .IgnoreArgument(1);
 
     /*no properties, so no more headers*/
     STRICT_EXPECTED_CALL(IoTHubMessage_Properties(TEST_IOTHUB_MESSAGE_HANDLE_6));
-    STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_1_PROPERTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_1_PROPERTY, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
     /*this is making http headers*/
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "iothub-app-" TEST_RED_KEY, TEST_RED_VALUE));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_ARG, "iothub-app-" TEST_RED_KEY, TEST_RED_VALUE));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
 
-    EXPECTED_CALL(IoTHubMessage_GetMessageId(IGNORED_PTR_ARG)).SetReturn(TEST_MESSAGE_ID);
-    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "iothub-messageid", TEST_MESSAGE_ID));
-    EXPECTED_CALL(IoTHubMessage_GetCorrelationId(IGNORED_PTR_ARG));
-    EXPECTED_CALL(IoTHubMessage_GetContentTypeSystemProperty(IGNORED_PTR_ARG)).SetReturn(NULL);
-    EXPECTED_CALL(IoTHubMessage_GetContentEncodingSystemProperty(IGNORED_PTR_ARG)).SetReturn(NULL);
+    EXPECTED_CALL(IoTHubMessage_GetMessageId(IGNORED_ARG)).SetReturn(TEST_MESSAGE_ID);
+    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_ARG, "iothub-messageid", TEST_MESSAGE_ID));
+    EXPECTED_CALL(IoTHubMessage_GetCorrelationId(IGNORED_ARG));
+    EXPECTED_CALL(IoTHubMessage_GetContentTypeSystemProperty(IGNORED_ARG)).SetReturn(NULL);
+    EXPECTED_CALL(IoTHubMessage_GetContentEncodingSystemProperty(IGNORED_ARG)).SetReturn(NULL);
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_IsSecurityMessage(IGNORED_PTR_ARG)).SetReturn(true);
+    STRICT_EXPECTED_CALL(IoTHubMessage_IsSecurityMessage(IGNORED_ARG)).SetReturn(true);
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "iothub-interface-id", "urn:azureiot:Security:SecurityAgent:1"));
+    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_ARG, "iothub-interface-id", "urn:azureiot:Security:SecurityAgent:1"));
 
-    STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_ARG, IGNORED_ARG));
 
     /*executing HTTP goodies*/
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG));
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,
         HTTPAPI_REQUEST_POST,                                                           /*HTTPAPI_REQUEST_TYPE requestType,                  */
         "/devices/" TEST_DEVICE_ID EVENT_ENDPOINT API_VERSION,                 /*const char* relativePath,                          */
-        IGNORED_PTR_ARG,                                                                /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,      */
-        IGNORED_PTR_ARG,                                                                /*BUFFER_HANDLE requestContent,                      */
-        IGNORED_PTR_ARG,                                                                /*unsigned int* statusCode,                          */
+        IGNORED_ARG,                                                                /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,      */
+        IGNORED_ARG,                                                                /*BUFFER_HANDLE requestContent,                      */
+        IGNORED_ARG,                                                                /*unsigned int* statusCode,                          */
         NULL,                                                                           /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,     */
         NULL                                                                            /*BUFFER_HANDLE responseContent)                     */
     ))
         .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &httpStatus200, sizeof(httpStatus200));
     /*building the list of messages to be notified if HTTP is fine*/
-    STRICT_EXPECTED_CALL(DList_RemoveHeadList(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_PTR_ARG, &(message6.entry)));
-    STRICT_EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_PTR_ARG, IOTHUB_CLIENT_CONFIRMATION_OK, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(DList_RemoveHeadList(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_ARG, &(message6.entry)));
+    STRICT_EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_ARG, IOTHUB_CLIENT_CONFIRMATION_OK, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG));
 
     //act
     IoTHubTransportHttp_DoWork(handle);
@@ -12618,61 +12587,61 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_SetCustomContentType_SetContentEncoding
 
     STRICT_EXPECTED_CALL(BUFFER_new());
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)); /*because relativePath is a STRING_HANDLE*/
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)); /*because relativePath is a STRING_HANDLE*/
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,                                    /*HTTPAPIEX_HANDLE handle,                                     */
         HTTPAPI_REQUEST_GET,                                /*HTTPAPI_REQUEST_TYPE requestType,                            */
         "/devices/" TEST_DEVICE_ID MESSAGE_ENDPOINT_HTTP API_VERSION,    /*const char* relativePath,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,                */
         NULL,                                               /*BUFFER_HANDLE requestContent,                                */
-        IGNORED_PTR_ARG,                                    /*unsigned int* statusCode,                                    */
-        IGNORED_PTR_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
-        IGNORED_PTR_ARG                                     /*BUFFER_HANDLE responseContent))                              */
+        IGNORED_ARG,                                    /*unsigned int* statusCode,                                    */
+        IGNORED_ARG,                                    /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,               */
+        IGNORED_ARG                                     /*BUFFER_HANDLE responseContent))                              */
     ))
         .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &statusCode200, sizeof(statusCode200));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, "ETag"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_ARG, "ETag"))
         .SetReturn(real_ETAG);
 
-    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_ARG, IGNORED_ARG))
         .SetReturn(TEST_IOTHUB_MESSAGE_HANDLE_8);
 
     {
         /*this scope is for is properties code*/
 
         HTTPHeaders_GetHeaderCount_writes_to_its_outputs = false;
-        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeaderCount(IGNORED_ARG, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &nHeaders, sizeof(nHeaders));
 
         STRICT_EXPECTED_CALL(IoTHubMessage_Properties(TEST_IOTHUB_MESSAGE_HANDLE_8));
 
-        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeader(IGNORED_PTR_ARG, 0, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeader(IGNORED_ARG, 0, IGNORED_ARG));
         STRICT_EXPECTED_CALL(Map_AddOrUpdate(TEST_MAP_3_PROPERTY, "NAME1", "VALUE1"));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
-        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeader(IGNORED_PTR_ARG, 1, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeader(IGNORED_ARG, 1, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
-        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeader(IGNORED_PTR_ARG, 2, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeader(IGNORED_ARG, 2, IGNORED_ARG));
         STRICT_EXPECTED_CALL(Map_AddOrUpdate(TEST_MAP_3_PROPERTY, "NAME2", "VALUE2"));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
-        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeader(IGNORED_PTR_ARG, 3, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(IoTHubMessage_SetMessageId(IGNORED_PTR_ARG, "VALUE3"));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeader(IGNORED_ARG, 3, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(IoTHubMessage_SetMessageId(IGNORED_ARG, "VALUE3"));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
-        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeader(IGNORED_PTR_ARG, 4, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(IoTHubMessage_SetContentTypeSystemProperty(IGNORED_PTR_ARG, "VALUE4"));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeader(IGNORED_ARG, 4, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(IoTHubMessage_SetContentTypeSystemProperty(IGNORED_ARG, "VALUE4"));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
-        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeader(IGNORED_PTR_ARG, 5, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(IoTHubMessage_SetContentEncodingSystemProperty(IGNORED_PTR_ARG, "VALUE5"));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(HTTPHeaders_GetHeader(IGNORED_ARG, 5, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(IoTHubMessage_SetContentEncodingSystemProperty(IGNORED_ARG, "VALUE5"));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
     }
 
     MESSAGE_DISPOSITION_CONTEXT_HANDLE dispositionContextHandle;
@@ -12680,15 +12649,15 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_SetCustomContentType_SetContentEncoding
 
     /*this returns "0" so the message needs to be "accepted"*/
     /*this is "accepting"*/
-    STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_NUM_ARG, IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG))
         .CopyOutArgumentBuffer_destination(&real_ETAG, sizeof(&real_ETAG));
-    STRICT_EXPECTED_CALL(IoTHubMessage_SetDispositionContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_SetDispositionContext(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
         .CaptureArgumentValue_dispositionContext(&dispositionContextHandle)
         .CaptureArgumentValue_dispositionContextDestroyFunction(&dispositionContextDestroyFunction);
-    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG));
 
     //act
     IoTHubTransportHttp_DoWork(handle);
@@ -12719,54 +12688,54 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_GetMessageId_succeeds)
     STRICT_EXPECTED_CALL(DList_IsListEmpty(&waitingToSend));
 
     STRICT_EXPECTED_CALL(IoTHubMessage_GetContentType(TEST_IOTHUB_MESSAGE_HANDLE_6));
-    STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(TEST_IOTHUB_MESSAGE_HANDLE_6, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(TEST_IOTHUB_MESSAGE_HANDLE_6, IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3);
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_Clone(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(HTTPHeaders_Clone(IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "Content-Type", "application/octet-stream"))
+    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_ARG, "Content-Type", "application/octet-stream"))
         .IgnoreArgument(1);
 
     /*no properties, so no more headers*/
     STRICT_EXPECTED_CALL(IoTHubMessage_Properties(TEST_IOTHUB_MESSAGE_HANDLE_6));
-    STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_1_PROPERTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_1_PROPERTY, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
     /*this is making http headers*/
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "iothub-app-" TEST_RED_KEY, TEST_RED_VALUE));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_ARG, "iothub-app-" TEST_RED_KEY, TEST_RED_VALUE));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
 
-    EXPECTED_CALL(IoTHubMessage_GetMessageId(IGNORED_PTR_ARG)).SetReturn(TEST_MESSAGE_ID);
-    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "iothub-messageid", TEST_MESSAGE_ID));
-    EXPECTED_CALL(IoTHubMessage_GetCorrelationId(IGNORED_PTR_ARG));
-    EXPECTED_CALL(IoTHubMessage_GetContentTypeSystemProperty(IGNORED_PTR_ARG)).SetReturn(NULL);
-    EXPECTED_CALL(IoTHubMessage_GetContentEncodingSystemProperty(IGNORED_PTR_ARG)).SetReturn(NULL);
+    EXPECTED_CALL(IoTHubMessage_GetMessageId(IGNORED_ARG)).SetReturn(TEST_MESSAGE_ID);
+    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_ARG, "iothub-messageid", TEST_MESSAGE_ID));
+    EXPECTED_CALL(IoTHubMessage_GetCorrelationId(IGNORED_ARG));
+    EXPECTED_CALL(IoTHubMessage_GetContentTypeSystemProperty(IGNORED_ARG)).SetReturn(NULL);
+    EXPECTED_CALL(IoTHubMessage_GetContentEncodingSystemProperty(IGNORED_ARG)).SetReturn(NULL);
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_IsSecurityMessage(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubMessage_IsSecurityMessage(IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_ARG, IGNORED_ARG));
 
     /*executing HTTP goodies*/
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG));
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,
         HTTPAPI_REQUEST_POST,                                                           /*HTTPAPI_REQUEST_TYPE requestType,                  */
         "/devices/" TEST_DEVICE_ID EVENT_ENDPOINT API_VERSION,                 /*const char* relativePath,                          */
-        IGNORED_PTR_ARG,                                                                /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,      */
-        IGNORED_PTR_ARG,                                                                /*BUFFER_HANDLE requestContent,                      */
-        IGNORED_PTR_ARG,                                                                /*unsigned int* statusCode,                          */
+        IGNORED_ARG,                                                                /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,      */
+        IGNORED_ARG,                                                                /*BUFFER_HANDLE requestContent,                      */
+        IGNORED_ARG,                                                                /*unsigned int* statusCode,                          */
         NULL,                                                                           /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,     */
         NULL                                                                            /*BUFFER_HANDLE responseContent)                     */
     ))
         .IgnoreArgument_requestType()
         .CopyOutArgumentBuffer(7, &httpStatus200, sizeof(httpStatus200));
     /*building the list of messages to be notified if HTTP is fine*/
-    STRICT_EXPECTED_CALL(DList_RemoveHeadList(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_PTR_ARG, &(message6.entry)));
-    STRICT_EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_PTR_ARG, IOTHUB_CLIENT_CONFIRMATION_OK, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(DList_RemoveHeadList(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_ARG, &(message6.entry)));
+    STRICT_EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_ARG, IOTHUB_CLIENT_CONFIRMATION_OK, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG));
 
     //act
     IoTHubTransportHttp_DoWork(handle);
@@ -12792,42 +12761,42 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_GetCorrelationId_succeeds)
 
     STRICT_EXPECTED_CALL(DList_IsListEmpty(&waitingToSend));
     STRICT_EXPECTED_CALL(IoTHubMessage_GetContentType(TEST_IOTHUB_MESSAGE_HANDLE_6));
-    STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(TEST_IOTHUB_MESSAGE_HANDLE_6, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(TEST_IOTHUB_MESSAGE_HANDLE_6, IGNORED_ARG, IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_Clone(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "Content-Type", "application/octet-stream"));
+    STRICT_EXPECTED_CALL(HTTPHeaders_Clone(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_ARG, "Content-Type", "application/octet-stream"));
 
     /*no properties, so no more headers*/
     STRICT_EXPECTED_CALL(IoTHubMessage_Properties(TEST_IOTHUB_MESSAGE_HANDLE_6));
-    STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_1_PROPERTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_1_PROPERTY, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
 
     /*this is making http headers*/
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "iothub-app-" TEST_RED_KEY, TEST_RED_VALUE));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_ARG, "iothub-app-" TEST_RED_KEY, TEST_RED_VALUE));
 
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
 
-    EXPECTED_CALL(IoTHubMessage_GetMessageId(IGNORED_PTR_ARG));
-    EXPECTED_CALL(IoTHubMessage_GetCorrelationId(IGNORED_PTR_ARG)).SetReturn(TEST_MESSAGE_ID);
-    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "iothub-correlationid", TEST_MESSAGE_ID));
-    EXPECTED_CALL(IoTHubMessage_GetContentTypeSystemProperty(IGNORED_PTR_ARG)).SetReturn(NULL);
-    EXPECTED_CALL(IoTHubMessage_GetContentEncodingSystemProperty(IGNORED_PTR_ARG)).SetReturn(NULL);
+    EXPECTED_CALL(IoTHubMessage_GetMessageId(IGNORED_ARG));
+    EXPECTED_CALL(IoTHubMessage_GetCorrelationId(IGNORED_ARG)).SetReturn(TEST_MESSAGE_ID);
+    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_ARG, "iothub-correlationid", TEST_MESSAGE_ID));
+    EXPECTED_CALL(IoTHubMessage_GetContentTypeSystemProperty(IGNORED_ARG)).SetReturn(NULL);
+    EXPECTED_CALL(IoTHubMessage_GetContentEncodingSystemProperty(IGNORED_ARG)).SetReturn(NULL);
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_IsSecurityMessage(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubMessage_IsSecurityMessage(IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_ARG, IGNORED_ARG));
 
     /*executing HTTP goodies*/
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)) /*because relativePath*/
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)) /*because relativePath*/
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,
         HTTPAPI_REQUEST_POST,                                                           /*HTTPAPI_REQUEST_TYPE requestType,                  */
         "/devices/" TEST_DEVICE_ID EVENT_ENDPOINT API_VERSION,                 /*const char* relativePath,                          */
-        IGNORED_PTR_ARG,                                                                /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,      */
-        IGNORED_PTR_ARG,                                                                /*BUFFER_HANDLE requestContent,                      */
-        IGNORED_PTR_ARG,                                                                /*unsigned int* statusCode,                          */
+        IGNORED_ARG,                                                                /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,      */
+        IGNORED_ARG,                                                                /*BUFFER_HANDLE requestContent,                      */
+        IGNORED_ARG,                                                                /*unsigned int* statusCode,                          */
         NULL,                                                                           /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,     */
         NULL                                                                            /*BUFFER_HANDLE responseContent)                     */
         ))
@@ -12837,12 +12806,12 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_GetCorrelationId_succeeds)
     /*once the event has been succesfull...*/
 
     /*building the list of messages to be notified if HTTP is fine*/
-    STRICT_EXPECTED_CALL(DList_RemoveHeadList(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_PTR_ARG, &(message6.entry)));
-    STRICT_EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_PTR_ARG, IOTHUB_CLIENT_CONFIRMATION_OK, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(DList_RemoveHeadList(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_ARG, &(message6.entry)));
+    STRICT_EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_ARG, IOTHUB_CLIENT_CONFIRMATION_OK, IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG));
 
     //act
     IoTHubTransportHttp_DoWork(handle);
@@ -12867,42 +12836,42 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_GetCustomContentType_succeeds)
 
     STRICT_EXPECTED_CALL(DList_IsListEmpty(&waitingToSend));
     STRICT_EXPECTED_CALL(IoTHubMessage_GetContentType(TEST_IOTHUB_MESSAGE_HANDLE_6));
-    STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(TEST_IOTHUB_MESSAGE_HANDLE_6, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(TEST_IOTHUB_MESSAGE_HANDLE_6, IGNORED_ARG, IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_Clone(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "Content-Type", "application/octet-stream"));
+    STRICT_EXPECTED_CALL(HTTPHeaders_Clone(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_ARG, "Content-Type", "application/octet-stream"));
 
     /*no properties, so no more headers*/
     STRICT_EXPECTED_CALL(IoTHubMessage_Properties(TEST_IOTHUB_MESSAGE_HANDLE_6));
-    STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_1_PROPERTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_1_PROPERTY, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
 
     /*this is making http headers*/
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "iothub-app-" TEST_RED_KEY, TEST_RED_VALUE));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_ARG, "iothub-app-" TEST_RED_KEY, TEST_RED_VALUE));
 
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
 
-    EXPECTED_CALL(IoTHubMessage_GetMessageId(IGNORED_PTR_ARG));
-    EXPECTED_CALL(IoTHubMessage_GetCorrelationId(IGNORED_PTR_ARG)).SetReturn(NULL);
-    EXPECTED_CALL(IoTHubMessage_GetContentTypeSystemProperty(IGNORED_PTR_ARG)).SetReturn(TEST_CONTENT_TYPE);
-    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "iothub-contenttype", TEST_CONTENT_TYPE));
-    EXPECTED_CALL(IoTHubMessage_GetContentEncodingSystemProperty(IGNORED_PTR_ARG)).SetReturn(NULL);
+    EXPECTED_CALL(IoTHubMessage_GetMessageId(IGNORED_ARG));
+    EXPECTED_CALL(IoTHubMessage_GetCorrelationId(IGNORED_ARG)).SetReturn(NULL);
+    EXPECTED_CALL(IoTHubMessage_GetContentTypeSystemProperty(IGNORED_ARG)).SetReturn(TEST_CONTENT_TYPE);
+    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_ARG, "iothub-contenttype", TEST_CONTENT_TYPE));
+    EXPECTED_CALL(IoTHubMessage_GetContentEncodingSystemProperty(IGNORED_ARG)).SetReturn(NULL);
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_IsSecurityMessage(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubMessage_IsSecurityMessage(IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_ARG, IGNORED_ARG));
 
     /*executing HTTP goodies*/
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)) /*because relativePath*/
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)) /*because relativePath*/
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,
         HTTPAPI_REQUEST_POST,                                                           /*HTTPAPI_REQUEST_TYPE requestType,                  */
         "/devices/" TEST_DEVICE_ID EVENT_ENDPOINT API_VERSION,                 /*const char* relativePath,                          */
-        IGNORED_PTR_ARG,                                                                /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,      */
-        IGNORED_PTR_ARG,                                                                /*BUFFER_HANDLE requestContent,                      */
-        IGNORED_PTR_ARG,                                                                /*unsigned int* statusCode,                          */
+        IGNORED_ARG,                                                                /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,      */
+        IGNORED_ARG,                                                                /*BUFFER_HANDLE requestContent,                      */
+        IGNORED_ARG,                                                                /*unsigned int* statusCode,                          */
         NULL,                                                                           /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,     */
         NULL                                                                            /*BUFFER_HANDLE responseContent)                     */
     ))
@@ -12912,12 +12881,12 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_GetCustomContentType_succeeds)
     /*once the event has been succesfull...*/
 
     /*building the list of messages to be notified if HTTP is fine*/
-    STRICT_EXPECTED_CALL(DList_RemoveHeadList(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_PTR_ARG, &(message6.entry)));
-    STRICT_EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_PTR_ARG, IOTHUB_CLIENT_CONFIRMATION_OK, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(DList_RemoveHeadList(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_ARG, &(message6.entry)));
+    STRICT_EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_ARG, IOTHUB_CLIENT_CONFIRMATION_OK, IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG));
 
     //act
     IoTHubTransportHttp_DoWork(handle);
@@ -12942,41 +12911,41 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_GetContentEncoding_succeeds)
 
     STRICT_EXPECTED_CALL(DList_IsListEmpty(&waitingToSend));
     STRICT_EXPECTED_CALL(IoTHubMessage_GetContentType(TEST_IOTHUB_MESSAGE_HANDLE_6));
-    STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(TEST_IOTHUB_MESSAGE_HANDLE_6, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(TEST_IOTHUB_MESSAGE_HANDLE_6, IGNORED_ARG, IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_Clone(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "Content-Type", "application/octet-stream"));
+    STRICT_EXPECTED_CALL(HTTPHeaders_Clone(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_ARG, "Content-Type", "application/octet-stream"));
 
     /*no properties, so no more headers*/
     STRICT_EXPECTED_CALL(IoTHubMessage_Properties(TEST_IOTHUB_MESSAGE_HANDLE_6));
-    STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_1_PROPERTY, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_1_PROPERTY, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
 
     /*this is making http headers*/
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "iothub-app-" TEST_RED_KEY, TEST_RED_VALUE));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_ARG, "iothub-app-" TEST_RED_KEY, TEST_RED_VALUE));
 
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
 
-    EXPECTED_CALL(IoTHubMessage_GetMessageId(IGNORED_PTR_ARG));
-    EXPECTED_CALL(IoTHubMessage_GetCorrelationId(IGNORED_PTR_ARG)).SetReturn(NULL);
-    EXPECTED_CALL(IoTHubMessage_GetContentTypeSystemProperty(IGNORED_PTR_ARG)).SetReturn(NULL);
-    EXPECTED_CALL(IoTHubMessage_GetContentEncodingSystemProperty(IGNORED_PTR_ARG)).SetReturn(TEST_CONTENT_ENCODING);
-    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_PTR_ARG, "iothub-contentencoding", TEST_CONTENT_ENCODING));
+    EXPECTED_CALL(IoTHubMessage_GetMessageId(IGNORED_ARG));
+    EXPECTED_CALL(IoTHubMessage_GetCorrelationId(IGNORED_ARG)).SetReturn(NULL);
+    EXPECTED_CALL(IoTHubMessage_GetContentTypeSystemProperty(IGNORED_ARG)).SetReturn(NULL);
+    EXPECTED_CALL(IoTHubMessage_GetContentEncodingSystemProperty(IGNORED_ARG)).SetReturn(TEST_CONTENT_ENCODING);
+    STRICT_EXPECTED_CALL(HTTPHeaders_ReplaceHeaderNameValuePair(IGNORED_ARG, "iothub-contentencoding", TEST_CONTENT_ENCODING));
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_IsSecurityMessage(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubMessage_IsSecurityMessage(IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_ARG, IGNORED_ARG));
 
     /*executing HTTP goodies*/
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)); /*because relativePath*/
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)); /*because relativePath*/
     STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(
-        IGNORED_PTR_ARG,                                    /*sasObject handle                                             */
-        IGNORED_PTR_ARG,
+        IGNORED_ARG,                                    /*sasObject handle                                             */
+        IGNORED_ARG,
         HTTPAPI_REQUEST_POST,                                                           /*HTTPAPI_REQUEST_TYPE requestType,                  */
         "/devices/" TEST_DEVICE_ID EVENT_ENDPOINT API_VERSION,                 /*const char* relativePath,                          */
-        IGNORED_PTR_ARG,                                                                /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,      */
-        IGNORED_PTR_ARG,                                                                /*BUFFER_HANDLE requestContent,                      */
-        IGNORED_PTR_ARG,                                                                /*unsigned int* statusCode,                          */
+        IGNORED_ARG,                                                                /*HTTP_HEADERS_HANDLE requestHttpHeadersHandle,      */
+        IGNORED_ARG,                                                                /*BUFFER_HANDLE requestContent,                      */
+        IGNORED_ARG,                                                                /*unsigned int* statusCode,                          */
         NULL,                                                                           /*HTTP_HEADERS_HANDLE responseHttpHeadersHandle,     */
         NULL                                                                            /*BUFFER_HANDLE responseContent)                     */
     ))
@@ -12986,12 +12955,12 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_GetContentEncoding_succeeds)
     /*once the event has been succesfull...*/
 
     /*building the list of messages to be notified if HTTP is fine*/
-    STRICT_EXPECTED_CALL(DList_RemoveHeadList(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_PTR_ARG, &(message6.entry)));
-    STRICT_EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_PTR_ARG, IOTHUB_CLIENT_CONFIRMATION_OK, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(DList_RemoveHeadList(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_ARG, &(message6.entry)));
+    STRICT_EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_ARG, IOTHUB_CLIENT_CONFIRMATION_OK, IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG));
 
     //act
     IoTHubTransportHttp_DoWork(handle);
@@ -13024,7 +12993,7 @@ TEST_FUNCTION(IoTHubTransportHttp_GetHostname_with_non_NULL_handle_succeeds)
     TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_ARG));
 
     //act
     STRING_HANDLE hostname = IoTHubTransportHttp_GetHostname(handle);

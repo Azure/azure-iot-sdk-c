@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#include "azure_macro_utils/macro_utils.h"
+#include "macro_utils/macro_utils.h"
 #include "testrunnerswitcher.h"
 
 #include "umock_c/umock_c.h"
@@ -269,11 +269,11 @@ BEGIN_TEST_SUITE(serializer_dt_int)
         ///arrange
         (void)SERIALIZER_REGISTER_NAMESPACE(basic15);
 
-        STRICT_EXPECTED_CALL(IoTHubClient_SetDeviceTwinCallback(TEST_IOTHUB_CLIENT_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(IoTHubClient_SetDeviceTwinCallback(TEST_IOTHUB_CLIENT_HANDLE, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_deviceTwinCallback()
             .IgnoreArgument_userContextCallback();
 
-        STRICT_EXPECTED_CALL(IoTHubClient_SetDeviceMethodCallback(TEST_IOTHUB_CLIENT_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(IoTHubClient_SetDeviceMethodCallback(TEST_IOTHUB_CLIENT_HANDLE, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_deviceMethodCallback()
             .IgnoreArgument_userContextCallback();
 
@@ -295,11 +295,11 @@ BEGIN_TEST_SUITE(serializer_dt_int)
         ///arrange
         (void)SERIALIZER_REGISTER_NAMESPACE(basic15);
 
-        STRICT_EXPECTED_CALL(IoTHubClient_LL_SetDeviceTwinCallback(TEST_IOTHUB_CLIENT_LL_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(IoTHubClient_LL_SetDeviceTwinCallback(TEST_IOTHUB_CLIENT_LL_HANDLE, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_deviceTwinCallback()
             .IgnoreArgument_userContextCallback();
 
-        STRICT_EXPECTED_CALL(IoTHubClient_LL_SetDeviceMethodCallback(TEST_IOTHUB_CLIENT_LL_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(IoTHubClient_LL_SetDeviceMethodCallback(TEST_IOTHUB_CLIENT_LL_HANDLE, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_deviceMethodCallback()
             .IgnoreArgument_userContextCallback();
 
@@ -342,11 +342,11 @@ BEGIN_TEST_SUITE(serializer_dt_int)
 
         (void)SERIALIZER_REGISTER_NAMESPACE(basic15);
 
-        STRICT_EXPECTED_CALL(IoTHubClient_SetDeviceTwinCallback(TEST_IOTHUB_CLIENT_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(IoTHubClient_SetDeviceTwinCallback(TEST_IOTHUB_CLIENT_HANDLE, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_deviceTwinCallback()
             .IgnoreArgument_userContextCallback();
 
-        STRICT_EXPECTED_CALL(IoTHubClient_SetDeviceMethodCallback(TEST_IOTHUB_CLIENT_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(IoTHubClient_SetDeviceMethodCallback(TEST_IOTHUB_CLIENT_HANDLE, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_deviceMethodCallback()
             .IgnoreArgument_userContextCallback();
 
@@ -452,11 +452,11 @@ BEGIN_TEST_SUITE(serializer_dt_int)
 
         (void)SERIALIZER_REGISTER_NAMESPACE(basic15);
 
-        STRICT_EXPECTED_CALL(IoTHubClient_LL_SetDeviceTwinCallback(TEST_IOTHUB_CLIENT_LL_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(IoTHubClient_LL_SetDeviceTwinCallback(TEST_IOTHUB_CLIENT_LL_HANDLE, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_deviceTwinCallback()
             .IgnoreArgument_userContextCallback();
 
-        STRICT_EXPECTED_CALL(IoTHubClient_LL_SetDeviceMethodCallback(TEST_IOTHUB_CLIENT_LL_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(IoTHubClient_LL_SetDeviceMethodCallback(TEST_IOTHUB_CLIENT_LL_HANDLE, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_deviceMethodCallback()
             .IgnoreArgument_userContextCallback();
 
@@ -547,11 +547,11 @@ BEGIN_TEST_SUITE(serializer_dt_int)
 
         (void)SERIALIZER_REGISTER_NAMESPACE(basic15);
 
-        STRICT_EXPECTED_CALL(IoTHubClient_SetDeviceTwinCallback(TEST_IOTHUB_CLIENT_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(IoTHubClient_SetDeviceTwinCallback(TEST_IOTHUB_CLIENT_HANDLE, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_deviceTwinCallback()
             .IgnoreArgument_userContextCallback();
 
-        STRICT_EXPECTED_CALL(IoTHubClient_SetDeviceMethodCallback(TEST_IOTHUB_CLIENT_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(IoTHubClient_SetDeviceMethodCallback(TEST_IOTHUB_CLIENT_HANDLE, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_deviceMethodCallback()
             .IgnoreArgument_userContextCallback();
 
@@ -585,11 +585,11 @@ BEGIN_TEST_SUITE(serializer_dt_int)
 
         (void)SERIALIZER_REGISTER_NAMESPACE(basic15);
 
-        STRICT_EXPECTED_CALL(IoTHubClient_LL_SetDeviceTwinCallback(TEST_IOTHUB_CLIENT_LL_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(IoTHubClient_LL_SetDeviceTwinCallback(TEST_IOTHUB_CLIENT_LL_HANDLE, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_deviceTwinCallback()
             .IgnoreArgument_userContextCallback();
 
-        STRICT_EXPECTED_CALL(IoTHubClient_LL_SetDeviceMethodCallback(TEST_IOTHUB_CLIENT_LL_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(IoTHubClient_LL_SetDeviceMethodCallback(TEST_IOTHUB_CLIENT_LL_HANDLE, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_deviceMethodCallback()
             .IgnoreArgument_userContextCallback();
 
@@ -661,7 +661,7 @@ BEGIN_TEST_SUITE(serializer_dt_int)
 
         modelWithData->with_reported_property_int15 = 15;
 
-        STRICT_EXPECTED_CALL(IoTHubClient_SendReportedState(TEST_IOTHUB_CLIENT_HANDLE, IGNORED_PTR_ARG, IGNORED_NUM_ARG, sendReportedStateCallback, (void*)0x44))
+        STRICT_EXPECTED_CALL(IoTHubClient_SendReportedState(TEST_IOTHUB_CLIENT_HANDLE, IGNORED_ARG, IGNORED_ARG, sendReportedStateCallback, (void*)0x44))
             .IgnoreArgument_reportedState()
             .IgnoreArgument_size();
         STRICT_EXPECTED_CALL(sendReportedStateCallback(201, (void*)0x44));
@@ -702,7 +702,7 @@ BEGIN_TEST_SUITE(serializer_dt_int)
 
         modelWithData->with_reported_property_int15 = 15;
 
-        STRICT_EXPECTED_CALL(IoTHubClient_LL_SendReportedState(TEST_IOTHUB_CLIENT_LL_HANDLE, IGNORED_PTR_ARG, IGNORED_NUM_ARG, sendReportedStateCallback, (void*)0x44))
+        STRICT_EXPECTED_CALL(IoTHubClient_LL_SendReportedState(TEST_IOTHUB_CLIENT_LL_HANDLE, IGNORED_ARG, IGNORED_ARG, sendReportedStateCallback, (void*)0x44))
             .IgnoreArgument_reportedState()
             .IgnoreArgument_size();
         STRICT_EXPECTED_CALL(sendReportedStateCallback(201, (void*)0x44));

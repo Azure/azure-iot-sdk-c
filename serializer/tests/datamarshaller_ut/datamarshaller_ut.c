@@ -294,8 +294,7 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
     TEST_FUNCTION(DataMarshaller_Create_succeeds)
     {
         ///arrange
-        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG))
-            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_ARG, IGNORED_ARG));
 
         ///act
         DATA_MARSHALLER_HANDLE res = DataMarshaller_Create(TEST_MODEL_HANDLE, true);
@@ -312,10 +311,8 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
     TEST_FUNCTION(DataMarshaller_Create_Twice_Yields_2_Different_Handles)
     {
         ///arrange
-        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG))
-            .IgnoreAllArguments();
-        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG))
-            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_ARG, IGNORED_ARG));
 
         ///act
         DATA_MARSHALLER_HANDLE handle1 = DataMarshaller_Create(TEST_MODEL_HANDLE, true);
@@ -340,7 +337,7 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
         DATA_MARSHALLER_HANDLE handle = DataMarshaller_Create(TEST_MODEL_HANDLE, true);
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument_ptr();
 
         ///act
@@ -543,7 +540,7 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
 
         DATA_MARSHALLER_VALUE value = { DEFAULT_PROPERTY_NAME, &floatValid };
 
-        EXPECTED_CALL(MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        EXPECTED_CALL(MultiTree_Create(IGNORED_ARG, IGNORED_ARG))
             .SetReturn((MULTITREE_HANDLE)NULL);
 
         ///act
@@ -567,15 +564,15 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
 
         DATA_MARSHALLER_VALUE value = { DEFAULT_PROPERTY_NAME, &floatValid };
 
-        STRICT_EXPECTED_CALL(MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_Create(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_cloneFunction()
             .IgnoreArgument_freeFunction();
 
-        STRICT_EXPECTED_CALL(MultiTree_AddLeaf(IGNORED_PTR_ARG, DEFAULT_PROPERTY_NAME, &floatValid))
+        STRICT_EXPECTED_CALL(MultiTree_AddLeaf(IGNORED_ARG, DEFAULT_PROPERTY_NAME, &floatValid))
             .IgnoreArgument_treeHandle()
             .SetReturn(MULTITREE_ERROR);
 
-        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_ARG))
             .IgnoreArgument_treeHandle();
 
         ///act
@@ -605,15 +602,15 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
         values[1].PropertyPath = DEFAULT_PROPERTY_NAME_2;
         values[1].Value = &floatValid2;
 
-        EXPECTED_CALL(MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        EXPECTED_CALL(MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
 
-        STRICT_EXPECTED_CALL(MultiTree_AddLeaf(IGNORED_PTR_ARG, DEFAULT_PROPERTY_NAME, &floatValid))
+        STRICT_EXPECTED_CALL(MultiTree_AddLeaf(IGNORED_ARG, DEFAULT_PROPERTY_NAME, &floatValid))
             .IgnoreArgument_treeHandle();
-        STRICT_EXPECTED_CALL(MultiTree_AddLeaf(IGNORED_PTR_ARG, DEFAULT_PROPERTY_NAME_2, &floatValid2))
+        STRICT_EXPECTED_CALL(MultiTree_AddLeaf(IGNORED_ARG, DEFAULT_PROPERTY_NAME_2, &floatValid2))
             .IgnoreArgument_treeHandle()
             .SetReturn(MULTITREE_ERROR);
 
-        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_ARG))
             .IgnoreArgument_treeHandle();
 
         ///act
@@ -636,21 +633,21 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
         size_t destinationSize;
         DATA_MARSHALLER_VALUE value = { DEFAULT_PROPERTY_NAME, &floatValid };
 
-        EXPECTED_CALL(MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        EXPECTED_CALL(MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
 
-        STRICT_EXPECTED_CALL(MultiTree_AddLeaf(IGNORED_PTR_ARG, DEFAULT_PROPERTY_NAME, &floatValid))
+        STRICT_EXPECTED_CALL(MultiTree_AddLeaf(IGNORED_ARG, DEFAULT_PROPERTY_NAME, &floatValid))
             .IgnoreArgument_treeHandle();
         STRICT_EXPECTED_CALL(STRING_new());
-        EXPECTED_CALL(JSONEncoder_EncodeTree(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        EXPECTED_CALL(JSONEncoder_EncodeTree(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_treeHandle()
             .IgnoreArgument_destination()
             .IgnoreArgument_toStringFunc()
             .SetReturn(JSON_ENCODER_ERROR);
 
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument_handle();
 
-        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_ARG))
             .IgnoreArgument_treeHandle();
 
         ///act
@@ -675,29 +672,29 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
         DATA_MARSHALLER_VALUE value[] = { { DEFAULT_PROPERTY_NAME, &floatValid }, { DEFAULT_PROPERTY_NAME_2, &structTypeValue } };
         char json_payload[] = "Test";
 
-        EXPECTED_CALL(MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        EXPECTED_CALL(MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
 
-        STRICT_EXPECTED_CALL(MultiTree_AddLeaf(IGNORED_PTR_ARG, DEFAULT_PROPERTY_NAME, &floatValid))
+        STRICT_EXPECTED_CALL(MultiTree_AddLeaf(IGNORED_ARG, DEFAULT_PROPERTY_NAME, &floatValid))
             .IgnoreArgument_treeHandle();
-        STRICT_EXPECTED_CALL(MultiTree_AddLeaf(IGNORED_PTR_ARG, DEFAULT_PROPERTY_NAME_2, &structTypeValue))
+        STRICT_EXPECTED_CALL(MultiTree_AddLeaf(IGNORED_ARG, DEFAULT_PROPERTY_NAME_2, &structTypeValue))
             .IgnoreArgument_treeHandle();
         EXPECTED_CALL(STRING_new());
-        EXPECTED_CALL(JSONEncoder_EncodeTree(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        EXPECTED_CALL(JSONEncoder_EncodeTree(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_treeHandle()
             .IgnoreArgument_destination()
             .IgnoreArgument_toStringFunc();
 
-        EXPECTED_CALL(STRING_length(IGNORED_PTR_ARG))
+        EXPECTED_CALL(STRING_length(IGNORED_ARG))
             .SetReturn(strlen(json_payload));
 
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
             .IgnoreArgument_size();
 
-        EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+        EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
             .SetReturn(json_payload);
 
-        EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG))
+        EXPECTED_CALL(STRING_delete(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_ARG))
             .IgnoreArgument_treeHandle();
 
         ///act
@@ -725,29 +722,29 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
         DATA_MARSHALLER_VALUE value[] = { { DEFAULT_PROPERTY_NAME, &floatValid }, { DEFAULT_PROPERTY_NAME_2, &structTypeValue } };
         char json_payload[] = "Test";
 
-        EXPECTED_CALL(MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        EXPECTED_CALL(MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
 
-        STRICT_EXPECTED_CALL(MultiTree_AddLeaf(IGNORED_PTR_ARG, DEFAULT_PROPERTY_NAME, &floatValid))
+        STRICT_EXPECTED_CALL(MultiTree_AddLeaf(IGNORED_ARG, DEFAULT_PROPERTY_NAME, &floatValid))
             .IgnoreArgument_treeHandle();
-        STRICT_EXPECTED_CALL(MultiTree_AddLeaf(IGNORED_PTR_ARG, DEFAULT_PROPERTY_NAME_2, &structTypeValue))
+        STRICT_EXPECTED_CALL(MultiTree_AddLeaf(IGNORED_ARG, DEFAULT_PROPERTY_NAME_2, &structTypeValue))
             .IgnoreArgument_treeHandle();
         EXPECTED_CALL(STRING_new());
-        EXPECTED_CALL(JSONEncoder_EncodeTree(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        EXPECTED_CALL(JSONEncoder_EncodeTree(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_treeHandle()
             .IgnoreArgument_destination()
             .IgnoreArgument_toStringFunc();
 
-        EXPECTED_CALL(STRING_length(IGNORED_PTR_ARG))
+        EXPECTED_CALL(STRING_length(IGNORED_ARG))
             .SetReturn(strlen(json_payload));
 
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
             .IgnoreArgument_size();
 
-        EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+        EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
             .SetReturn(json_payload);
 
-        EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG))
+        EXPECTED_CALL(STRING_delete(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_ARG))
             .IgnoreArgument_treeHandle();
 
         ///act
@@ -772,29 +769,29 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
         DATA_MARSHALLER_VALUE value[] = { { DEFAULT_PROPERTY_NAME, &floatValid }, { DEFAULT_PROPERTY_NAME_2, &floatValid } };
         char json_payload[] = "Test";
 
-        EXPECTED_CALL(MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        EXPECTED_CALL(MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
 
-        STRICT_EXPECTED_CALL(MultiTree_AddLeaf(IGNORED_PTR_ARG, DEFAULT_PROPERTY_NAME, &floatValid))
+        STRICT_EXPECTED_CALL(MultiTree_AddLeaf(IGNORED_ARG, DEFAULT_PROPERTY_NAME, &floatValid))
             .IgnoreArgument_treeHandle();
-        STRICT_EXPECTED_CALL(MultiTree_AddLeaf(IGNORED_PTR_ARG, DEFAULT_PROPERTY_NAME_2, &floatValid))
+        STRICT_EXPECTED_CALL(MultiTree_AddLeaf(IGNORED_ARG, DEFAULT_PROPERTY_NAME_2, &floatValid))
             .IgnoreArgument_treeHandle();
         EXPECTED_CALL(STRING_new());
-        EXPECTED_CALL(JSONEncoder_EncodeTree(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        EXPECTED_CALL(JSONEncoder_EncodeTree(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_treeHandle()
             .IgnoreArgument_destination()
             .IgnoreArgument_toStringFunc();
 
-        EXPECTED_CALL(STRING_length(IGNORED_PTR_ARG))
+        EXPECTED_CALL(STRING_length(IGNORED_ARG))
             .SetReturn(strlen(json_payload));
 
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
             .IgnoreArgument_size();
 
-        EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+        EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
             .SetReturn(json_payload);
 
-        EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG))
+        EXPECTED_CALL(STRING_delete(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_ARG))
             .IgnoreArgument_treeHandle();
 
         ///act
@@ -819,27 +816,27 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
         DATA_MARSHALLER_VALUE value = { DEFAULT_PROPERTY_NAME, &floatValid };
         char json_payload[] = "Test";
 
-        EXPECTED_CALL(MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        EXPECTED_CALL(MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
 
-        STRICT_EXPECTED_CALL(MultiTree_AddLeaf(IGNORED_PTR_ARG, DEFAULT_PROPERTY_NAME, &floatValid))
+        STRICT_EXPECTED_CALL(MultiTree_AddLeaf(IGNORED_ARG, DEFAULT_PROPERTY_NAME, &floatValid))
             .IgnoreArgument_treeHandle();
         EXPECTED_CALL(STRING_new());
-        EXPECTED_CALL(JSONEncoder_EncodeTree(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        EXPECTED_CALL(JSONEncoder_EncodeTree(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_treeHandle()
             .IgnoreArgument_destination()
             .IgnoreArgument_toStringFunc();
 
-        EXPECTED_CALL(STRING_length(IGNORED_PTR_ARG))
+        EXPECTED_CALL(STRING_length(IGNORED_ARG))
             .SetReturn(strlen(json_payload));
 
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
             .IgnoreArgument_size();
 
-        EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+        EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
             .SetReturn(json_payload);
 
-        EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG))
+        EXPECTED_CALL(STRING_delete(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_ARG))
             .IgnoreArgument_treeHandle();
 
         ///act
@@ -864,28 +861,28 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
         DATA_MARSHALLER_VALUE value = { DEFAULT_PROPERTY_NAME, &structTypeValue2Members };
         char json_payload[] = "Test";
 
-        EXPECTED_CALL(MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        EXPECTED_CALL(MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
 
-        STRICT_EXPECTED_CALL(MultiTree_AddLeaf(IGNORED_PTR_ARG, "x", structTypeValue2Members.value.edmComplexType.fields[0].value))
+        STRICT_EXPECTED_CALL(MultiTree_AddLeaf(IGNORED_ARG, "x", structTypeValue2Members.value.edmComplexType.fields[0].value))
             .IgnoreArgument_treeHandle();
-        STRICT_EXPECTED_CALL(MultiTree_AddLeaf(IGNORED_PTR_ARG, "y", structTypeValue2Members.value.edmComplexType.fields[1].value))
+        STRICT_EXPECTED_CALL(MultiTree_AddLeaf(IGNORED_ARG, "y", structTypeValue2Members.value.edmComplexType.fields[1].value))
             .IgnoreArgument_treeHandle();
         EXPECTED_CALL(STRING_new());
-        EXPECTED_CALL(JSONEncoder_EncodeTree(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        EXPECTED_CALL(JSONEncoder_EncodeTree(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_treeHandle()
             .IgnoreArgument_destination()
             .IgnoreArgument_toStringFunc();
 
-        EXPECTED_CALL(STRING_length(IGNORED_PTR_ARG))
+        EXPECTED_CALL(STRING_length(IGNORED_ARG))
             .SetReturn(strlen(json_payload));
 
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
             .IgnoreArgument_size();
 
-        EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+        EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
             .SetReturn(json_payload);
-        EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG))
+        EXPECTED_CALL(STRING_delete(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_ARG))
             .IgnoreArgument_treeHandle();
 
         ///act
@@ -909,13 +906,13 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
         umock_c_reset_all_calls();
         DATA_MARSHALLER_VALUE value = { DEFAULT_PROPERTY_NAME, &structTypeValue2Members };
 
-        EXPECTED_CALL(MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        EXPECTED_CALL(MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
 
-        STRICT_EXPECTED_CALL(MultiTree_AddLeaf(IGNORED_PTR_ARG, "x", structTypeValue2Members.value.edmComplexType.fields[0].value))
+        STRICT_EXPECTED_CALL(MultiTree_AddLeaf(IGNORED_ARG, "x", structTypeValue2Members.value.edmComplexType.fields[0].value))
             .IgnoreArgument_treeHandle()
             .SetReturn(MULTITREE_ERROR);
 
-        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_ARG))
             .IgnoreArgument_treeHandle();
 
         ///act
@@ -938,15 +935,15 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
         umock_c_reset_all_calls();
         DATA_MARSHALLER_VALUE value = { DEFAULT_PROPERTY_NAME, &structTypeValue2Members };
 
-        EXPECTED_CALL(MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        EXPECTED_CALL(MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
 
-        STRICT_EXPECTED_CALL(MultiTree_AddLeaf(IGNORED_PTR_ARG, "x", structTypeValue2Members.value.edmComplexType.fields[0].value))
+        STRICT_EXPECTED_CALL(MultiTree_AddLeaf(IGNORED_ARG, "x", structTypeValue2Members.value.edmComplexType.fields[0].value))
             .IgnoreArgument_treeHandle();
-        STRICT_EXPECTED_CALL(MultiTree_AddLeaf(IGNORED_PTR_ARG, "y", structTypeValue2Members.value.edmComplexType.fields[1].value))
+        STRICT_EXPECTED_CALL(MultiTree_AddLeaf(IGNORED_ARG, "y", structTypeValue2Members.value.edmComplexType.fields[1].value))
             .IgnoreArgument_treeHandle()
             .SetReturn(MULTITREE_ERROR);
 
-        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_ARG))
             .IgnoreArgument_treeHandle();
 
         ///act
@@ -969,13 +966,13 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
         umock_c_reset_all_calls();
         DATA_MARSHALLER_VALUE value = { DEFAULT_PROPERTY_NAME, &floatValid };
 
-        EXPECTED_CALL(MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        EXPECTED_CALL(MultiTree_Create(IGNORED_ARG, IGNORED_ARG));
 
-        STRICT_EXPECTED_CALL(MultiTree_AddLeaf(IGNORED_PTR_ARG, DEFAULT_PROPERTY_NAME, &floatValid))
+        STRICT_EXPECTED_CALL(MultiTree_AddLeaf(IGNORED_ARG, DEFAULT_PROPERTY_NAME, &floatValid))
             .IgnoreArgument_treeHandle();
         EXPECTED_CALL(STRING_new())
             .SetReturn(NULL);
-        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_ARG))
             .IgnoreArgument_treeHandle();
 
         ///act
@@ -1076,40 +1073,40 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
     void DataMarshaller_SendData_ReportedProperties_inert_path(void)
     {
         STRICT_EXPECTED_CALL(json_value_init_object());
-        STRICT_EXPECTED_CALL(json_object(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(json_object(IGNORED_ARG))
             .IgnoreArgument_value();
 
-        STRICT_EXPECTED_CALL(VECTOR_size(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(VECTOR_size(IGNORED_ARG))
             .IgnoreArgument_handle();
         size_t i;
         for (i = 0;i < 1;i++) /*these is property indexer*/
         {
-            STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_PTR_ARG, i))
+            STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_ARG, i))
                 .IgnoreArgument_handle();
             STRICT_EXPECTED_CALL(STRING_new());
-            STRICT_EXPECTED_CALL(AgentDataTypes_ToString(IGNORED_PTR_ARG, &floatValid))
+            STRICT_EXPECTED_CALL(AgentDataTypes_ToString(IGNORED_ARG, &floatValid))
                 .IgnoreArgument_destination();
-            STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
                 .IgnoreArgument_handle();
-            STRICT_EXPECTED_CALL(json_parse_string(IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL(json_parse_string(IGNORED_ARG))
                 .IgnoreArgument_string();
-            STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, DEFAULT_PROPERTY_NAME))
+            STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, DEFAULT_PROPERTY_NAME))
                 .IgnoreArgument_destination();
 
-            STRICT_EXPECTED_CALL(json_object_dotset_value(IGNORED_PTR_ARG, DEFAULT_PROPERTY_NAME_SLASHES_REPLACED_BY_DOTS, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL(json_object_dotset_value(IGNORED_ARG, DEFAULT_PROPERTY_NAME_SLASHES_REPLACED_BY_DOTS, IGNORED_ARG))
                 .IgnoreArgument_object()
                 .IgnoreArgument_value();
 
-            STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
                 .IgnoreArgument_ptr();
-            STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
                 .IgnoreArgument_handle();
         }
 
-        STRICT_EXPECTED_CALL(json_serialize_to_string_pretty(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(json_serialize_to_string_pretty(IGNORED_ARG))
             .IgnoreArgument_value();
 
-        STRICT_EXPECTED_CALL(json_value_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(json_value_free(IGNORED_ARG))
             .IgnoreArgument_value();
     }
 
@@ -1204,40 +1201,40 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
     void DataMarshaller_SendData_ReportedProperties_of_model_in_model_inert_path(void)
     {
         STRICT_EXPECTED_CALL(json_value_init_object());
-        STRICT_EXPECTED_CALL(json_object(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(json_object(IGNORED_ARG))
             .IgnoreArgument_value();
 
-        STRICT_EXPECTED_CALL(VECTOR_size(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(VECTOR_size(IGNORED_ARG))
             .IgnoreArgument_handle();
         size_t i;
         for (i = 0;i < 1;i++) /*these is property indexer*/
         {
-            STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_PTR_ARG, i))
+            STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_ARG, i))
                 .IgnoreArgument_handle();
             STRICT_EXPECTED_CALL(STRING_new());
-            STRICT_EXPECTED_CALL(AgentDataTypes_ToString(IGNORED_PTR_ARG, &floatValid))
+            STRICT_EXPECTED_CALL(AgentDataTypes_ToString(IGNORED_ARG, &floatValid))
                 .IgnoreArgument_destination();
-            STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
                 .IgnoreArgument_handle();
-            STRICT_EXPECTED_CALL(json_parse_string(IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL(json_parse_string(IGNORED_ARG))
                 .IgnoreArgument_string();
-            STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, DEFAULT_PROPERTY_NAME_LEVEL2))
+            STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, DEFAULT_PROPERTY_NAME_LEVEL2))
                 .IgnoreArgument_destination();
 
-            STRICT_EXPECTED_CALL(json_object_dotset_value(IGNORED_PTR_ARG, DEFAULT_PROPERTY_NAME_LEVEL2_SLASHES_REPLACED_BY_DOTS, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL(json_object_dotset_value(IGNORED_ARG, DEFAULT_PROPERTY_NAME_LEVEL2_SLASHES_REPLACED_BY_DOTS, IGNORED_ARG))
                 .IgnoreArgument_object()
                 .IgnoreArgument_value();
 
-            STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
                 .IgnoreArgument_ptr();
-            STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
                 .IgnoreArgument_handle();
         }
 
-        STRICT_EXPECTED_CALL(json_serialize_to_string_pretty(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(json_serialize_to_string_pretty(IGNORED_ARG))
             .IgnoreArgument_value();
 
-        STRICT_EXPECTED_CALL(json_value_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(json_value_free(IGNORED_ARG))
             .IgnoreArgument_value();
     }
 

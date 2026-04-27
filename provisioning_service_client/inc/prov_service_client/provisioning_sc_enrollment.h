@@ -9,7 +9,7 @@ extern "C" {
 #endif /* __cplusplus */
 
 #include "azure_c_shared_utility/agenttime.h"
-#include "azure_macro_utils/macro_utils.h"
+#include "macro_utils/macro_utils.h"
 #include "umock_c/umock_c_prod.h"
 #include "provisioning_sc_attestation_mechanism.h"
 #include "provisioning_sc_device_registration_state.h"

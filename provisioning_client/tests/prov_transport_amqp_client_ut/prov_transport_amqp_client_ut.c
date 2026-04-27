@@ -23,7 +23,7 @@ static void my_gballoc_free(void* ptr)
 #include "umock_c/umock_c.h"
 #include "umock_c/umocktypes_bool.h"
 #include "umock_c/umock_c_negative_tests.h"
-#include "azure_macro_utils/macro_utils.h"
+#include "macro_utils/macro_utils.h"
 
 #define ENABLE_MOCKS
 #include "azure_prov_client/internal/prov_transport_amqp_common.h"
@@ -215,7 +215,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_client_ut)
     TEST_FUNCTION(prov_transport_amqp_create_succeed)
     {
         //arrange
-        STRICT_EXPECTED_CALL(prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, IGNORED_PTR_ARG, on_transport_error, NULL));
+        STRICT_EXPECTED_CALL(prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, IGNORED_ARG, on_transport_error, NULL));
 
         //act
         PROV_DEVICE_TRANSPORT_HANDLE handle = prov_amqp_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_error, NULL);
@@ -239,10 +239,10 @@ BEGIN_TEST_SUITE(prov_transport_amqp_client_ut)
 
         //arrange
         STRICT_EXPECTED_CALL(platform_get_default_tlsio());
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(xio_create(TEST_INTERFACE_DESC, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(xio_create(TEST_INTERFACE_DESC, IGNORED_ARG));
         STRICT_EXPECTED_CALL(saslclientio_get_interface_description());
-        STRICT_EXPECTED_CALL(xio_create(TEST_INTERFACE_DESC, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(xio_create(TEST_INTERFACE_DESC, IGNORED_ARG));
 
         //act
         dps_io_info = g_transport_io(TEST_URI_VALUE, &sasl_mechanism, NULL);
@@ -264,8 +264,8 @@ BEGIN_TEST_SUITE(prov_transport_amqp_client_ut)
 
         //arrange
         STRICT_EXPECTED_CALL(platform_get_default_tlsio());
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(xio_create(TEST_INTERFACE_DESC, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(xio_create(TEST_INTERFACE_DESC, IGNORED_ARG));
 
         //act
         dps_io_info = g_transport_io(TEST_URI_VALUE, NULL, NULL);
@@ -293,10 +293,10 @@ BEGIN_TEST_SUITE(prov_transport_amqp_client_ut)
 
         //arrange
         STRICT_EXPECTED_CALL(platform_get_default_tlsio());
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(xio_create(TEST_INTERFACE_DESC, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(xio_create(TEST_INTERFACE_DESC, IGNORED_ARG));
         STRICT_EXPECTED_CALL(saslclientio_get_interface_description());
-        STRICT_EXPECTED_CALL(xio_create(TEST_INTERFACE_DESC, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(xio_create(TEST_INTERFACE_DESC, IGNORED_ARG));
 
         umock_c_negative_tests_snapshot();
 
@@ -332,10 +332,10 @@ BEGIN_TEST_SUITE(prov_transport_amqp_client_ut)
         //arrange
         STRICT_EXPECTED_CALL(http_proxy_io_get_interface_description());
         STRICT_EXPECTED_CALL(platform_get_default_tlsio());
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(xio_create(TEST_INTERFACE_DESC, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(xio_create(TEST_INTERFACE_DESC, IGNORED_ARG));
         STRICT_EXPECTED_CALL(saslclientio_get_interface_description());
-        STRICT_EXPECTED_CALL(xio_create(TEST_INTERFACE_DESC, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(xio_create(TEST_INTERFACE_DESC, IGNORED_ARG));
         proxy_info.host_address = TEST_HOST_ADDRESS_VALUE;
         proxy_info.username = TEST_PRIVATE_KEY_VALUE;
         proxy_info.password = TEST_HOST_ADDRESS_VALUE;

@@ -30,7 +30,7 @@ void real_free(void* ptr)
 
 #include "testrunnerswitcher.h"
 #include "azure_c_shared_utility/optimize_size.h"
-#include "azure_macro_utils/macro_utils.h"
+#include "macro_utils/macro_utils.h"
 #include "umock_c/umock_c.h"
 #include "umock_c/umocktypes_charptr.h"
 #include "umock_c/umocktypes_bool.h"
@@ -825,7 +825,7 @@ static LIST_ITEM_HANDLE TEST_singlylinkedlist_get_next_item(LIST_ITEM_HANDLE ite
 
 static void set_expected_calls_for_telemetry_messenger_create(TELEMETRY_MESSENGER_CONFIG* config)
 {
-    EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
+    EXPECTED_CALL(malloc(IGNORED_ARG));
     // memset() - not mocked.
     STRICT_EXPECTED_CALL(STRING_construct(config->device_id)).SetReturn(TEST_DEVICE_ID_STRING_HANDLE);
     if (config->module_id)
@@ -875,11 +875,11 @@ static void set_expected_calls_for_message_receiver_create(bool testing_modules)
     STRICT_EXPECTED_CALL(STRING_c_str(TEST_DEVICE_ID_STRING_HANDLE)).SetReturn(TEST_DEVICE_ID);
 
     // create_link_name()
-    EXPECTED_CALL(calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(UniqueId_Generate(IGNORED_PTR_ARG, UNIQUE_ID_BUFFER_SIZE)).IgnoreArgument_uid();
+    EXPECTED_CALL(calloc(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(UniqueId_Generate(IGNORED_ARG, UNIQUE_ID_BUFFER_SIZE)).IgnoreArgument_uid();
     STRICT_EXPECTED_CALL(STRING_new()).SetReturn(TEST_MESSAGE_RECEIVER_LINK_NAME_STRING_HANDLE);
     // EXPECTED: STRING_sprintf
-    EXPECTED_CALL(free(IGNORED_PTR_ARG));
+    EXPECTED_CALL(free(IGNORED_ARG));
 
     // create_message_receiver_target_name()
     STRICT_EXPECTED_CALL(STRING_new()).SetReturn(TEST_MESSAGE_RECEIVER_TARGET_NAME_STRING_HANDLE);
@@ -901,10 +901,10 @@ static void set_expected_calls_for_message_receiver_create(bool testing_modules)
 
     set_expected_calls_for_attach_device_client_type_to_link(TEST_MESSAGE_RECEIVER_LINK_HANDLE, 0, 0);
 
-    STRICT_EXPECTED_CALL(messagereceiver_create(TEST_MESSAGE_RECEIVER_LINK_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(messagereceiver_create(TEST_MESSAGE_RECEIVER_LINK_HANDLE, IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3);
-    STRICT_EXPECTED_CALL(messagereceiver_open(TEST_MESSAGE_RECEIVER_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(messagereceiver_open(TEST_MESSAGE_RECEIVER_HANDLE, IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3);
 
@@ -925,8 +925,8 @@ static void set_expected_calls_for_message_receiver_destroy()
 
 static void set_expected_calls_for_telemetry_messenger_send_async()
 {
-    EXPECTED_CALL(calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG));
-    EXPECTED_CALL(singlylinkedlist_add(TEST_IN_PROGRESS_LIST, IGNORED_PTR_ARG));
+    EXPECTED_CALL(calloc(IGNORED_ARG, IGNORED_ARG));
+    EXPECTED_CALL(singlylinkedlist_add(TEST_IN_PROGRESS_LIST, IGNORED_ARG));
 }
 
 #define MAXIMUM_TEST_COMPLETE_DATA   20
@@ -1002,11 +1002,11 @@ static void set_expected_calls_for_message_sender_create(bool testing_modules)
     STRICT_EXPECTED_CALL(STRING_c_str(TEST_DEVICE_ID_STRING_HANDLE));
 
     // create_link_name()
-    EXPECTED_CALL(calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(UniqueId_Generate(IGNORED_PTR_ARG, UNIQUE_ID_BUFFER_SIZE)).IgnoreArgument_uid();
+    EXPECTED_CALL(calloc(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(UniqueId_Generate(IGNORED_ARG, UNIQUE_ID_BUFFER_SIZE)).IgnoreArgument_uid();
     STRICT_EXPECTED_CALL(STRING_new()).SetReturn(TEST_EVENT_SENDER_LINK_NAME_STRING_HANDLE);
     // EXPECTED: STRING_sprintf
-    EXPECTED_CALL(free(IGNORED_PTR_ARG));
+    EXPECTED_CALL(free(IGNORED_ARG));
 
     // create_event_sender_source_name()
     STRICT_EXPECTED_CALL(STRING_new()).SetReturn(TEST_EVENT_SENDER_SOURCE_NAME_STRING_HANDLE);
@@ -1026,7 +1026,7 @@ static void set_expected_calls_for_message_sender_create(bool testing_modules)
     // attach_device_client_type_to_link()
     set_expected_calls_for_attach_device_client_type_to_link(TEST_EVENT_SENDER_LINK_HANDLE, 0, 0);
 
-    STRICT_EXPECTED_CALL(messagesender_create(TEST_EVENT_SENDER_LINK_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(messagesender_create(TEST_EVENT_SENDER_LINK_HANDLE, IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3);
     STRICT_EXPECTED_CALL(messagesender_open(TEST_MESSAGE_SENDER_HANDLE));
@@ -1058,15 +1058,15 @@ static void set_expected_calls_for_copy_events_from_in_progress_to_waiting_list(
     int i;
     for (i = 0; i < in_progress_list_length; i++)
     {
-        EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG));
-        EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG));
-        EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG));
-        EXPECTED_CALL(singlylinkedlist_add(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        EXPECTED_CALL(singlylinkedlist_get_next_item(IGNORED_PTR_ARG)).SetReturn(NULL);
-        EXPECTED_CALL(singlylinkedlist_get_next_item(IGNORED_PTR_ARG));
-        EXPECTED_CALL(singlylinkedlist_destroy(IGNORED_PTR_ARG));
-        EXPECTED_CALL(free(IGNORED_PTR_ARG));
-        EXPECTED_CALL(singlylinkedlist_remove(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_ARG));
+        EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_ARG));
+        EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_ARG));
+        EXPECTED_CALL(singlylinkedlist_add(IGNORED_ARG, IGNORED_ARG));
+        EXPECTED_CALL(singlylinkedlist_get_next_item(IGNORED_ARG)).SetReturn(NULL);
+        EXPECTED_CALL(singlylinkedlist_get_next_item(IGNORED_ARG));
+        EXPECTED_CALL(singlylinkedlist_destroy(IGNORED_ARG));
+        EXPECTED_CALL(free(IGNORED_ARG));
+        EXPECTED_CALL(singlylinkedlist_remove(IGNORED_ARG, IGNORED_ARG));
     }
 }
 
@@ -1091,15 +1091,15 @@ static void set_expected_calls_for_telemetry_messenger_stop(int wait_to_send_lis
         int i;
         for (i = 0; i < in_progress_list_length; i++)
         {
-            EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG));
+            EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_ARG));
 
             if (i < (in_progress_list_length - 1))
             {
-                EXPECTED_CALL(singlylinkedlist_get_next_item(IGNORED_PTR_ARG));
+                EXPECTED_CALL(singlylinkedlist_get_next_item(IGNORED_ARG));
             }
             else
             {
-                EXPECTED_CALL(singlylinkedlist_get_next_item(IGNORED_PTR_ARG)).SetReturn(NULL);
+                EXPECTED_CALL(singlylinkedlist_get_next_item(IGNORED_ARG)).SetReturn(NULL);
             }
         }
     }
@@ -1126,9 +1126,9 @@ static void set_expected_calls_for_telemetry_messenger_stop(int wait_to_send_lis
         int i;
         for (i = 0; i < wait_to_send_list_length; i++)
         {
-            EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG));
-            EXPECTED_CALL(singlylinkedlist_add(new_wts_list, IGNORED_PTR_ARG));
-            EXPECTED_CALL(singlylinkedlist_get_next_item(IGNORED_PTR_ARG));
+            EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_ARG));
+            EXPECTED_CALL(singlylinkedlist_add(new_wts_list, IGNORED_ARG));
+            EXPECTED_CALL(singlylinkedlist_get_next_item(IGNORED_ARG));
         }
 
         STRICT_EXPECTED_CALL(singlylinkedlist_create()).SetReturn(new_ip_list);
@@ -1141,20 +1141,20 @@ static void set_expected_calls_for_telemetry_messenger_stop(int wait_to_send_lis
 
 static void set_expected_calls_free_task(int number_callbacks)
 {
-    STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_ARG));
 
     for (int i = 0; i < number_callbacks; i++)
     {
-        STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(singlylinkedlist_remove(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        EXPECTED_CALL(free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(singlylinkedlist_remove(IGNORED_ARG, IGNORED_ARG));
+        EXPECTED_CALL(free(IGNORED_ARG));
 
-        STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_ARG));
     }
 
-    STRICT_EXPECTED_CALL(singlylinkedlist_destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_destroy(IGNORED_ARG));
 
-    EXPECTED_CALL(free(IGNORED_PTR_ARG));
+    EXPECTED_CALL(free(IGNORED_ARG));
 }
 
 static void set_expected_calls_for_on_message_send_complete(int number_callbacks, MESSAGE_SEND_RESULT message_send_result)
@@ -1162,17 +1162,17 @@ static void set_expected_calls_for_on_message_send_complete(int number_callbacks
     if (message_send_result == MESSAGE_SEND_ERROR)
     {
         uint32_t count = 0;
-        STRICT_EXPECTED_CALL(amqpvalue_get_list_item_count(IGNORED_NUM_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(amqpvalue_get_list_item_count(IGNORED_ARG, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &count, sizeof(count))
             .SetReturn(0);
     }
 
-    STRICT_EXPECTED_CALL(singlylinkedlist_foreach(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_foreach(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(singlylinkedlist_find(TEST_IN_PROGRESS_LIST, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(singlylinkedlist_find(TEST_IN_PROGRESS_LIST, IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument_match_context()
         .IgnoreArgument_match_function();
-    STRICT_EXPECTED_CALL(singlylinkedlist_remove(TEST_IN_PROGRESS_LIST, IGNORED_PTR_ARG)).IgnoreArgument_item_handle();
+    STRICT_EXPECTED_CALL(singlylinkedlist_remove(TEST_IN_PROGRESS_LIST, IGNORED_ARG)).IgnoreArgument_item_handle();
 
     set_expected_calls_free_task(number_callbacks);
 }
@@ -1181,18 +1181,18 @@ static void set_expected_calls_for_create_send_pending_events_state()
 {
     // create_send_pending_events_state itself
     STRICT_EXPECTED_CALL(message_create());
-    STRICT_EXPECTED_CALL(message_set_message_format(IGNORED_PTR_ARG, 0x80013700));
+    STRICT_EXPECTED_CALL(message_set_message_format(IGNORED_ARG, 0x80013700));
     // create_task callee
-    STRICT_EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(malloc(IGNORED_ARG));
     STRICT_EXPECTED_CALL(singlylinkedlist_create()).SetReturn(TEST_CALLBACK_LIST1);
-    STRICT_EXPECTED_CALL(singlylinkedlist_add(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_add(IGNORED_ARG, IGNORED_ARG));
 }
 
 static void set_expected_calls_for_send_batched_message_and_reset_state(time_t current_time)
 {
-    STRICT_EXPECTED_CALL(messagesender_send_async(TEST_MESSAGE_SENDER_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(messagesender_send_async(TEST_MESSAGE_SENDER_HANDLE, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
     STRICT_EXPECTED_CALL(get_time(NULL)).SetReturn(current_time);
-    STRICT_EXPECTED_CALL(message_destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(message_destroy(IGNORED_ARG));
 }
 
 BINARY_DATA TEST_amqp_data = { NULL, 100 };
@@ -1428,33 +1428,33 @@ static void set_expected_calls_for_message_do_work_send_pending_events(SEND_PEND
         const int message_create_uamqp_encoding_from_iothub_message_return = (expected_action == SEND_PENDING_EXPECT_CREATE_MESSAGE_FAILURE) ? 1 : 0;
 
         STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(TEST_WAIT_TO_SEND_LIST));
-        STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(singlylinkedlist_remove(TEST_WAIT_TO_SEND_LIST, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(singlylinkedlist_remove(TEST_WAIT_TO_SEND_LIST, IGNORED_ARG));
 
         if (i == 0)
         {
             // Product code factors in AMQP_BATCHING_RESERVE_SIZE bytes and won't go beneath this.
             // Account for this in test here.
             uint64_t peer_max_message_size = test_config->peer_max_message_size + AMQP_BATCHING_RESERVE_SIZE;
-            STRICT_EXPECTED_CALL(link_get_peer_max_message_size(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL(link_get_peer_max_message_size(IGNORED_ARG, IGNORED_ARG))
                 .CopyOutArgumentBuffer(2, &peer_max_message_size, sizeof(peer_max_message_size));
             set_expected_calls_for_create_send_pending_events_state();
         }
 
         TEST_amqp_data.length = test_config->test_events[i].number_bytes_encoded;
 
-        STRICT_EXPECTED_CALL(message_create_uamqp_encoding_from_iothub_message(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(message_create_uamqp_encoding_from_iothub_message(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &TEST_amqp_data, sizeof(TEST_amqp_data)).SetReturn(message_create_uamqp_encoding_from_iothub_message_return);
 
         if ((SEND_PENDING_EXPECT_ERROR_TOO_LARGE == expected_action) || (SEND_PENDING_EXPECT_CREATE_MESSAGE_FAILURE == expected_action))
         {
-            STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(free(IGNORED_ARG));
             continue;
         }
 
         callback_cleanup_needed = true;
 
-        STRICT_EXPECTED_CALL(singlylinkedlist_add(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(singlylinkedlist_add(IGNORED_ARG, IGNORED_ARG));
 
         if (SEND_PENDING_EXPECT_ROLLOVER == expected_action)
         {
@@ -1467,7 +1467,7 @@ static void set_expected_calls_for_message_do_work_send_pending_events(SEND_PEND
             BINARY_DATA binary_data;
             memset(&binary_data, 0, sizeof(binary_data));
 
-            STRICT_EXPECTED_CALL(message_add_body_amqp_data(IGNORED_PTR_ARG, binary_data));
+            STRICT_EXPECTED_CALL(message_add_body_amqp_data(IGNORED_ARG, binary_data));
         }
     }
 
@@ -1481,11 +1481,11 @@ static void set_expected_calls_for_message_do_work_send_pending_events(SEND_PEND
     }
     else
     {
-        STRICT_EXPECTED_CALL(singlylinkedlist_foreach(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(singlylinkedlist_find(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(singlylinkedlist_remove(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(singlylinkedlist_foreach(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(singlylinkedlist_find(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(singlylinkedlist_remove(IGNORED_ARG, IGNORED_ARG));
         set_expected_calls_free_task(callback_cleanup_needed ? 1 : 0);
-        STRICT_EXPECTED_CALL(message_destroy(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(message_destroy(IGNORED_ARG));
     }
 }
 
@@ -1521,13 +1521,13 @@ static void set_expected_calls_for_process_event_send_timeouts(size_t in_progres
 
         for (; in_progress_list_length > 0; in_progress_list_length--)
         {
-            EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG));
+            EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_ARG));
             STRICT_EXPECTED_CALL(get_time(NULL)).SetReturn(current_time);
             EXPECTED_CALL(get_difftime(current_time, send_time)).SetReturn(difftime(current_time, send_time));
-            EXPECTED_CALL(singlylinkedlist_get_next_item(IGNORED_PTR_ARG));
+            EXPECTED_CALL(singlylinkedlist_get_next_item(IGNORED_ARG));
         }
 
-        EXPECTED_CALL(singlylinkedlist_get_next_item(IGNORED_PTR_ARG)).SetReturn(NULL);
+        EXPECTED_CALL(singlylinkedlist_get_next_item(IGNORED_ARG)).SetReturn(NULL);
     }
 }
 
@@ -1575,9 +1575,9 @@ static void set_expected_calls_for_telemetry_messenger_destroy(TELEMETRY_MESSENG
     while (wait_to_send_list_length > 0)
     {
         STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(TEST_WAIT_TO_SEND_LIST));
-        EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(singlylinkedlist_remove(TEST_WAIT_TO_SEND_LIST, IGNORED_PTR_ARG)).IgnoreArgument(2);
-        EXPECTED_CALL(free(IGNORED_PTR_ARG)); // Freeing the SEND_EVENT_TASK instance.
+        EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(singlylinkedlist_remove(TEST_WAIT_TO_SEND_LIST, IGNORED_ARG)).IgnoreArgument(2);
+        EXPECTED_CALL(free(IGNORED_ARG)); // Freeing the SEND_EVENT_TASK instance.
 
         wait_to_send_list_length--;
     }
@@ -1605,27 +1605,27 @@ static int TEST_messagereceiver_get_link_name(MESSAGE_RECEIVER_HANDLE message_re
 static void set_expected_calls_for_create_message_disposition_info()
 {
     STRICT_EXPECTED_CALL(malloc(sizeof(TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO)));
-    STRICT_EXPECTED_CALL(messagereceiver_get_received_message_id(TEST_MESSAGE_RECEIVER_HANDLE, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(messagereceiver_get_received_message_id(TEST_MESSAGE_RECEIVER_HANDLE, IGNORED_ARG))
         .IgnoreArgument(2)
         .CopyOutArgumentBuffer(2, &TEST_DELIVERY_NUMBER, sizeof(delivery_number));
 
-    STRICT_EXPECTED_CALL(messagereceiver_get_link_name(TEST_MESSAGE_RECEIVER_HANDLE, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(messagereceiver_get_link_name(TEST_MESSAGE_RECEIVER_HANDLE, IGNORED_ARG))
         .IgnoreArgument(2);
     static char* link_name = TEST_MESSAGE_RECEIVER_LINK_NAME_CHAR_PTR;
-    EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG))
         .CopyOutArgumentBuffer_destination(&link_name, sizeof(char*));
 }
 
 static void set_expected_calls_for_destroy_message_disposition_info()
 {
-    EXPECTED_CALL(free(IGNORED_PTR_ARG));
-    EXPECTED_CALL(free(IGNORED_PTR_ARG));
+    EXPECTED_CALL(free(IGNORED_ARG));
+    EXPECTED_CALL(free(IGNORED_ARG));
 }
 
 static void set_expected_calls_for_on_message_received_internal_callback(TELEMETRY_MESSENGER_DISPOSITION_RESULT disposition_result)
 {
     TEST_on_new_message_received_callback_result = disposition_result;
-    STRICT_EXPECTED_CALL(message_create_IoTHubMessage_from_uamqp_message(TEST_MESSAGE_HANDLE, IGNORED_PTR_ARG)).IgnoreArgument(2);
+    STRICT_EXPECTED_CALL(message_create_IoTHubMessage_from_uamqp_message(TEST_MESSAGE_HANDLE, IGNORED_ARG)).IgnoreArgument(2);
 
     set_expected_calls_for_create_message_disposition_info();
 
@@ -2839,13 +2839,13 @@ TEST_FUNCTION(telemetry_messenger_do_work_send_events_messagesender_send_fails)
 
         // send events
         STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(TEST_WAIT_TO_SEND_LIST));
-        EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(singlylinkedlist_remove(TEST_WAIT_TO_SEND_LIST, IGNORED_PTR_ARG))
+        EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(singlylinkedlist_remove(TEST_WAIT_TO_SEND_LIST, IGNORED_ARG))
             .IgnoreArgument(2);
 
-        STRICT_EXPECTED_CALL(link_get_peer_max_message_size(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(link_get_peer_max_message_size(IGNORED_ARG, IGNORED_ARG))
             .SetReturn(1);
-        STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(free(IGNORED_ARG));
 
         // act
         telemetry_messenger_do_work(handle);
@@ -3029,7 +3029,7 @@ TEST_FUNCTION(messenger_on_message_received_internal_callback_message_create_IoT
 
     umock_c_reset_all_calls();
     TEST_on_new_message_received_callback_result = TELEMETRY_MESSENGER_DISPOSITION_RESULT_ACCEPTED;
-    STRICT_EXPECTED_CALL(message_create_IoTHubMessage_from_uamqp_message(TEST_MESSAGE_HANDLE, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(message_create_IoTHubMessage_from_uamqp_message(TEST_MESSAGE_HANDLE, IGNORED_ARG))
         .IgnoreArgument(2)
         .SetReturn(1);
     STRICT_EXPECTED_CALL(messaging_delivery_rejected("Rejected due to failure reading AMQP message", "Failed reading AMQP message"));
@@ -3055,7 +3055,7 @@ TEST_FUNCTION(messenger_on_message_received_internal_callback_create_TELEMETRY_M
 
     umock_c_reset_all_calls();
     TEST_on_new_message_received_callback_result = TELEMETRY_MESSENGER_DISPOSITION_RESULT_ACCEPTED;
-    STRICT_EXPECTED_CALL(message_create_IoTHubMessage_from_uamqp_message(TEST_MESSAGE_HANDLE, IGNORED_PTR_ARG)).IgnoreArgument(2);
+    STRICT_EXPECTED_CALL(message_create_IoTHubMessage_from_uamqp_message(TEST_MESSAGE_HANDLE, IGNORED_ARG)).IgnoreArgument(2);
     STRICT_EXPECTED_CALL(malloc(sizeof(TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO))).SetReturn(NULL);
     STRICT_EXPECTED_CALL(messaging_delivery_released());
 
@@ -3553,9 +3553,9 @@ TEST_FUNCTION(telemetry_messenger_send_message_disposition_failure_checks)
 
 static void set_expected_calls_for_telemetry_messenger_retrieve_options()
 {
-    EXPECTED_CALL(OptionHandler_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    EXPECTED_CALL(OptionHandler_Create(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(OptionHandler_AddOption(TEST_OPTIONHANDLER_HANDLE, TELEMETRY_MESSENGER_OPTION_EVENT_SEND_TIMEOUT_SECS, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(OptionHandler_AddOption(TEST_OPTIONHANDLER_HANDLE, TELEMETRY_MESSENGER_OPTION_EVENT_SEND_TIMEOUT_SECS, IGNORED_ARG))
         .IgnoreArgument(3);
 }
 

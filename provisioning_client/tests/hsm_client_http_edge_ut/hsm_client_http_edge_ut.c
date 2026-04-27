@@ -27,7 +27,7 @@ static void my_gballoc_free(void* ptr)
 #include "umock_c/umocktypes_stdint.h"
 #include "umock_c/umocktypes_bool.h"
 #include "umock_c/umock_c_negative_tests.h"
-#include "azure_macro_utils/macro_utils.h"
+#include "macro_utils/macro_utils.h"
 
 #if defined _MSC_VER
 #pragma warning(disable: 4054) /* MSC incorrectly fires this */
@@ -407,23 +407,23 @@ static int should_skip_index(size_t current_index, const size_t skip_array[], si
 
 static void setup_hsm_client_http_edge_create_http_mock(const char* edge_uri_env, bool valid_edge_uri)
 {
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(environment_get_variable(IGNORED_PTR_ARG)).SetReturn(TEST_ENV_MODULE_GENERATION_ID);
-    STRICT_EXPECTED_CALL(environment_get_variable(IGNORED_PTR_ARG)).SetReturn(TEST_ENV_EDGEMODULEID);
-    STRICT_EXPECTED_CALL(environment_get_variable(IGNORED_PTR_ARG)).SetReturn(edge_uri_env);
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(environment_get_variable(IGNORED_ARG)).SetReturn(TEST_ENV_MODULE_GENERATION_ID);
+    STRICT_EXPECTED_CALL(environment_get_variable(IGNORED_ARG)).SetReturn(TEST_ENV_EDGEMODULEID);
+    STRICT_EXPECTED_CALL(environment_get_variable(IGNORED_ARG)).SetReturn(edge_uri_env);
 
     if (valid_edge_uri == true)
     {
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
     }
     else
     {
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
     }
 }
 
@@ -452,14 +452,14 @@ static void hsm_client_http_edge_create_http_Impl(const char* edge_uri_env, bool
 
 static void hsm_client_http_edge_create_domain_socket_Impl(const char* edge_uri_env, bool valid_edge_uri)
 {
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(environment_get_variable(IGNORED_PTR_ARG)).SetReturn(TEST_ENV_MODULE_GENERATION_ID);
-    STRICT_EXPECTED_CALL(environment_get_variable(IGNORED_PTR_ARG)).SetReturn(TEST_ENV_EDGEMODULEID);
-    STRICT_EXPECTED_CALL(environment_get_variable(IGNORED_PTR_ARG)).SetReturn(edge_uri_env);
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(environment_get_variable(IGNORED_ARG)).SetReturn(TEST_ENV_MODULE_GENERATION_ID);
+    STRICT_EXPECTED_CALL(environment_get_variable(IGNORED_ARG)).SetReturn(TEST_ENV_EDGEMODULEID);
+    STRICT_EXPECTED_CALL(environment_get_variable(IGNORED_ARG)).SetReturn(edge_uri_env);
 
     if (valid_edge_uri == true)
     {
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
     }
 }
 
@@ -505,10 +505,10 @@ TEST_FUNCTION(hsm_client_http_edge_destroy_success)
 
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
 
     // test
@@ -542,86 +542,86 @@ TEST_FUNCTION(hsm_client_http_edge_interface_succeed)
 
 static void set_expected_calls_construct_json_signing_blob()
 {
-    STRICT_EXPECTED_CALL(STRING_construct_n(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(URL_Encode(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Azure_Base64_Encode_Bytes(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(STRING_construct_n(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(URL_Encode(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Azure_Base64_Encode_Bytes(IGNORED_ARG, IGNORED_ARG));
     STRICT_EXPECTED_CALL(json_value_init_object());
-    STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
     STRICT_EXPECTED_CALL(json_serialize_to_string(TEST_JSON_VALUE));
-    STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_ARG, IGNORED_ARG));
     STRICT_EXPECTED_CALL(json_free_serialized_string(TEST_CHAR_PTR));
-    STRICT_EXPECTED_CALL(json_object_clear(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(json_value_free(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(json_object_clear(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_value_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
 }
 
 static void set_expected_calls_send_and_poll_http_signing_request(bool post_data)
 {
-    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_NUM_ARG)).SetReturn(post_data ? (unsigned char*)TEST_STRING_1 : NULL);
-    STRICT_EXPECTED_CALL(get_time(IGNORED_NUM_ARG)).SetReturn(TEST_TIME_T);
-    STRICT_EXPECTED_CALL(uhttp_client_execute_request(IGNORED_PTR_ARG, post_data ? HTTP_CLIENT_REQUEST_POST : HTTP_CLIENT_REQUEST_GET, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(uhttp_client_dowork(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(get_time(IGNORED_NUM_ARG)).SetReturn(timed_out ? TEST_TIME_FOR_TIMEOUT_T : TEST_TIME_T);
-    STRICT_EXPECTED_CALL(uhttp_client_dowork(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(get_time(IGNORED_NUM_ARG)).SetReturn(TEST_TIME_T);
+    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG)).SetReturn(post_data ? (unsigned char*)TEST_STRING_1 : NULL);
+    STRICT_EXPECTED_CALL(get_time(IGNORED_ARG)).SetReturn(TEST_TIME_T);
+    STRICT_EXPECTED_CALL(uhttp_client_execute_request(IGNORED_ARG, post_data ? HTTP_CLIENT_REQUEST_POST : HTTP_CLIENT_REQUEST_GET, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(uhttp_client_dowork(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(get_time(IGNORED_ARG)).SetReturn(timed_out ? TEST_TIME_FOR_TIMEOUT_T : TEST_TIME_T);
+    STRICT_EXPECTED_CALL(uhttp_client_dowork(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(get_time(IGNORED_ARG)).SetReturn(TEST_TIME_T);
 }
 
 static void set_expected_calls_send_http_workload_request(bool expect_success, bool post_data, TEST_PROTOCOL testProtocol)
 {
     STRICT_EXPECTED_CALL(socketio_get_interface_description());
-    STRICT_EXPECTED_CALL(uhttp_client_create(IGNORED_NUM_ARG, IGNORED_NUM_ARG, IGNORED_NUM_ARG, IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(uhttp_client_create(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
     if (testProtocol == TEST_DOMAIN_SOCKET_PROTOCOL)
     {
-        STRICT_EXPECTED_CALL(uhttp_client_set_option(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(uhttp_client_set_option(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
     }
 
-    STRICT_EXPECTED_CALL(uhttp_client_open(IGNORED_NUM_ARG, IGNORED_NUM_ARG, IGNORED_NUM_ARG, IGNORED_NUM_ARG, IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(uhttp_client_open(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
     if (post_data)
     {
         STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
-        STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_NUM_ARG, IGNORED_NUM_ARG, IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
     }
     set_expected_calls_send_and_poll_http_signing_request(post_data);
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(uhttp_client_close(IGNORED_NUM_ARG, NULL, NULL));
-    STRICT_EXPECTED_CALL(uhttp_client_destroy(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(uhttp_client_close(IGNORED_ARG, NULL, NULL));
+    STRICT_EXPECTED_CALL(uhttp_client_destroy(IGNORED_ARG));
 
     if (expect_success == false)
     {
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG));
     }
 }
 
 static void set_expected_calls_parse_json_workload_response()
 {
-    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(json_parse_string(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_object_dotget_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_object_clear(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(json_value_free(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_parse_string(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_object_dotget_string(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_object_clear(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_value_free(IGNORED_ARG));
 }
 
 static void set_expected_calls_hsm_client_http_edge_sign_data(TEST_PROTOCOL testProtocol)
 {
     set_expected_calls_construct_json_signing_blob();
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_STRING_1);
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).SetReturn(TEST_STRING_1);
     set_expected_calls_send_http_workload_request(true, true, testProtocol);
     set_expected_calls_parse_json_workload_response();
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
 }
 
 TEST_FUNCTION(hsm_client_http_edge_sign_data_succeed)
@@ -795,11 +795,11 @@ TEST_FUNCTION(hsm_client_http_edge_sign_data_http_fail)
 
 static void set_expected_calls_hsm_client_http_edge_get_trust_bundle(TEST_PROTOCOL testProtocol)
 {
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_STRING_1);
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).SetReturn(TEST_STRING_1);
     set_expected_calls_send_http_workload_request(true, false, testProtocol);
     set_expected_calls_parse_json_workload_response();
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG));
 }
 
 TEST_FUNCTION(hsm_client_http_edge_get_trust_bundle_success)

@@ -9,7 +9,7 @@
 #include "multitree.h"
 #include "azure_c_shared_utility/optimize_size.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
-#include "azure_macro_utils/macro_utils.h"
+#include "macro_utils/macro_utils.h"
 #include "azure_c_shared_utility/lock.h"
 
 #ifndef SIZE_MAX
@@ -384,9 +384,8 @@ TEST_FUNCTION(MultiTree_Create_succeeds)
 {
     ///arrange
     CMultiTreeMocks mocks;
-    STRICT_EXPECTED_CALL(mocks, gballoc_calloc(1, 0))
-        .IgnoreAllArguments();
-    STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(mocks, gballoc_calloc(1, 0));
+    STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     ///act
@@ -430,8 +429,7 @@ TEST_FUNCTION(MultiTree_Create_if_calloc_fails_then_it_fails)
     CMultiTreeMocks mocks;
 
     whenShallcalloc_fail = 1;
-    STRICT_EXPECTED_CALL(mocks, gballoc_calloc(1, 0))
-        .IgnoreAllArguments();
+    STRICT_EXPECTED_CALL(mocks, gballoc_calloc(1, 0));
     auto res = MultiTree_Create(StringClone, StringFree);
 
     ///assert
@@ -458,9 +456,8 @@ TEST_FUNCTION(MultiTree_AddLeaf_with_NULL_path_fails)
 {
     ///arrange
     CMultiTreeMocks mocks;
-    STRICT_EXPECTED_CALL(mocks, gballoc_calloc(1, 0)) /*because MultiTree_Create*/
-        .IgnoreAllArguments();
-    STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG)) /*because MultiTree_Destroy*/
+    STRICT_EXPECTED_CALL(mocks, gballoc_calloc(1, 0)) /*because MultiTree_Create*/;
+    STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_ARG)) /*because MultiTree_Destroy*/
         .IgnoreArgument(1);
 
     auto treeHandle = MultiTree_Create(StringClone, StringFree);
@@ -479,9 +476,8 @@ TEST_FUNCTION(MultiTree_AddLeaf_with_NULL_value_fails)
 {
     ///arrange
     CMultiTreeMocks mocks;
-    STRICT_EXPECTED_CALL(mocks, gballoc_calloc(1, 0)) /*because MultiTree_Create*/
-        .IgnoreAllArguments();
-    STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG)) /*because MultiTree_Destroy*/
+    STRICT_EXPECTED_CALL(mocks, gballoc_calloc(1, 0)) /*because MultiTree_Create*/;
+    STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_ARG)) /*because MultiTree_Destroy*/
         .IgnoreArgument(1);
 
     auto treeHandle = MultiTree_Create(StringClone, StringFree);
@@ -1481,9 +1477,8 @@ TEST_FUNCTION(MultiTree_Destroy_with_an_empty_tree_calls_free_once)
 {
     ///arrange
     CMultiTreeMocks mocks;
-    STRICT_EXPECTED_CALL(mocks, gballoc_calloc(1, 0)) /*because MultiTree_Create*/
-        .IgnoreAllArguments();
-    STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(mocks, gballoc_calloc(1, 0)) /*because MultiTree_Create*/;
+    STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
     MULTITREE_HANDLE treeHandle = MultiTree_Create(StringClone, StringFree);
 
@@ -1586,9 +1581,8 @@ TEST_FUNCTION(MultiTree_AddChild_With_NULL_ChildName_Fails)
 {
     ///arrange
     CMultiTreeMocks mocks;
-    STRICT_EXPECTED_CALL(mocks, gballoc_calloc(1, 0)) /*because MultiTree_Create*/
-        .IgnoreAllArguments();
-    STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG)) /*because MultiTree_Destroy*/
+    STRICT_EXPECTED_CALL(mocks, gballoc_calloc(1, 0)) /*because MultiTree_Create*/;
+    STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_ARG)) /*because MultiTree_Destroy*/
         .IgnoreArgument(1);
 
 
@@ -1608,9 +1602,8 @@ TEST_FUNCTION(MultiTree_AddChild_With_NULL_ChildHandle_Fails)
 {
     ///arrange
     CMultiTreeMocks mocks;
-    STRICT_EXPECTED_CALL(mocks, gballoc_calloc(1, 0)) /*because MultiTree_Create*/
-        .IgnoreAllArguments();
-    STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG)) /*because MultiTree_Destroy*/
+    STRICT_EXPECTED_CALL(mocks, gballoc_calloc(1, 0)) /*because MultiTree_Create*/;
+    STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_ARG)) /*because MultiTree_Destroy*/
         .IgnoreArgument(1);
 
     MULTITREE_HANDLE treeHandle = MultiTree_Create(StringClone, StringFree);
@@ -1628,19 +1621,17 @@ TEST_FUNCTION(MultiTree_AddChild_With_Correct_Arguments_Succeeds)
 {
     ///arrange
     CMultiTreeMocks mocks;
-    STRICT_EXPECTED_CALL(mocks, gballoc_calloc(1, 0)) /*because MultiTree_Create*/
-        .IgnoreAllArguments();
-    STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG)) /*because MultiTree_Destroy*/
+    STRICT_EXPECTED_CALL(mocks, gballoc_calloc(1, 0)) /*because MultiTree_Create*/;
+    STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_ARG)) /*because MultiTree_Destroy*/
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(mocks, gballoc_calloc(1, 0)) /*because create the child*/
-        .IgnoreAllArguments();
-    STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG)) /*because destroy the child*/
+    STRICT_EXPECTED_CALL(mocks, gballoc_calloc(1, 0)) /*because create the child*/;
+    STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_ARG)) /*because destroy the child*/
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(mocks, gballoc_realloc(NULL, sizeof(MULTITREE_HANDLE))); /*because insertion of child node in the array of children in the parent*/
-    STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG)) /*because insertion of child node in the array of children in the parent*/
+    STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_ARG)) /*because insertion of child node in the array of children in the parent*/
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(mocks, gballoc_malloc(6)); /*this is clone of "child" string*/
-    STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG)) /*this is clone of "child" string*/
+    STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_ARG)) /*this is clone of "child" string*/
         .IgnoreArgument(1);
 
     MULTITREE_HANDLE treeHandle = MultiTree_Create(StringClone, StringFree);
@@ -1661,9 +1652,8 @@ TEST_FUNCTION(MultiTree_AddChild_With_Empty_ChildName_Fails)
 {
     ///arrange
     CMultiTreeMocks mocks;
-    STRICT_EXPECTED_CALL(mocks, gballoc_calloc(1, 0)) /*because MultiTree_Create*/
-        .IgnoreAllArguments();
-    STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG)) /*because MultiTree_Destroy*/
+    STRICT_EXPECTED_CALL(mocks, gballoc_calloc(1, 0)) /*because MultiTree_Create*/;
+    STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_ARG)) /*because MultiTree_Destroy*/
         .IgnoreArgument(1);
 
     MULTITREE_HANDLE treeHandle = MultiTree_Create(StringClone, StringFree);
@@ -1702,30 +1692,27 @@ TEST_FUNCTION(MultiTree_AddChild_With_2_Different_Child_Names_Succeeds)
 {
     ///arrange
     CMultiTreeMocks mocks;
-    STRICT_EXPECTED_CALL(mocks, gballoc_calloc(1, 0)) /*because MultiTree_Create*/
-        .IgnoreAllArguments();
-    STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG)) /*because MultiTree_Destroy*/
+    STRICT_EXPECTED_CALL(mocks, gballoc_calloc(1, 0)) /*because MultiTree_Create*/;
+    STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_ARG)) /*because MultiTree_Destroy*/
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(mocks, gballoc_calloc(1, 0)) /*because create the child 1 */
-        .IgnoreAllArguments();
-    STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG)) /*because destroy the child 1 */
+    STRICT_EXPECTED_CALL(mocks, gballoc_calloc(1, 0)) /*because create the child 1 */;
+    STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_ARG)) /*because destroy the child 1 */
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(mocks, gballoc_realloc(NULL, sizeof(MULTITREE_HANDLE))); /*because insertion of child 1 node in the array of children in the parent*/
     STRICT_EXPECTED_CALL(mocks, gballoc_malloc(sizeof("childName1"))); /*this is clone of "childName1" string*/
-    STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG)) /*this is clone of "childName1" string*/
+    STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_ARG)) /*this is clone of "childName1" string*/
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(mocks, gballoc_calloc(1, 0)) /*because create the child 2 */
-        .IgnoreAllArguments();
-    STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG)) /*because destroy the child 2*/
+    STRICT_EXPECTED_CALL(mocks, gballoc_calloc(1, 0)) /*because create the child 2 */;
+    STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_ARG)) /*because destroy the child 2*/
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(mocks, gballoc_realloc(IGNORED_PTR_ARG, 2 * sizeof(MULTITREE_HANDLE))) /*because insertion of child 2 node in the array of children in the parent*/
+    STRICT_EXPECTED_CALL(mocks, gballoc_realloc(IGNORED_ARG, 2 * sizeof(MULTITREE_HANDLE))) /*because insertion of child 2 node in the array of children in the parent*/
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(mocks, gballoc_malloc(sizeof("childName2"))); /*this is clone of "child" string*/
-    STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG)) /*this is clone of "child" string*/
+    STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_ARG)) /*this is clone of "child" string*/
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG)) /*because realloc of children only has 1 free*/
+    STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_ARG)) /*because realloc of children only has 1 free*/
         .IgnoreArgument(1);
 
 

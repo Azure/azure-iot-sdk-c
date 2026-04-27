@@ -20,7 +20,7 @@ void real_free(void* ptr)
 }
 
 #include "testrunnerswitcher.h"
-#include "azure_macro_utils/macro_utils.h"
+#include "macro_utils/macro_utils.h"
 #include "umock_c/umock_c.h"
 #include "umock_c/umock_c_negative_tests.h"
 
@@ -171,77 +171,77 @@ static int should_skip_index(size_t current_index, const size_t skip_array[], si
 
 static void expected_calls_twinCollection_toJson()
 {
-    STRICT_EXPECTED_CALL(json_parse_string(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(json_parse_string(IGNORED_ARG));
 }
 
 static void expected_calls_twinProperties_toJson()
 {
     STRICT_EXPECTED_CALL(json_value_init_object());
-    STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_ARG));
     expected_calls_twinCollection_toJson();
-    STRICT_EXPECTED_CALL(json_object_set_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(json_object_set_value(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
 }
 
 static void expected_calls_initialTwin_toJson(bool tags, bool desired_properties)
 {
     STRICT_EXPECTED_CALL(json_value_init_object());
-    STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_ARG));
     if (tags)
     {
         expected_calls_twinCollection_toJson();
-        STRICT_EXPECTED_CALL(json_object_set_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(json_object_set_value(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
     }
     if (desired_properties)
     {
         expected_calls_twinProperties_toJson();
-        STRICT_EXPECTED_CALL(json_object_set_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(json_object_set_value(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
     }
 }
 
 static void expected_calls_twinCollection_fromJson()
 {
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(json_object_get_wrapping_value(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_serialize_to_string(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_free_serialized_string(IGNORED_PTR_ARG)); //cannot fail
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_object_get_wrapping_value(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_serialize_to_string(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_free_serialized_string(IGNORED_ARG)); //cannot fail
 }
 
 static void expected_calls_twinProperties_fromJson(bool desired)
 {
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
     if (desired)
     {
-        STRICT_EXPECTED_CALL(json_object_get_object(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(json_object_get_object(IGNORED_ARG, IGNORED_ARG));
         expected_calls_twinCollection_fromJson();
     }
     else
     {
-        STRICT_EXPECTED_CALL(json_object_get_object(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(NULL);
+        STRICT_EXPECTED_CALL(json_object_get_object(IGNORED_ARG, IGNORED_ARG)).SetReturn(NULL);
     }
 }
 
 static void expected_calls_initialTwin_fromJson(bool tags, bool desired_properties)
 {
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
 
     if (tags)
     {
-        STRICT_EXPECTED_CALL(json_object_get_object(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(json_object_get_object(IGNORED_ARG, IGNORED_ARG));
         expected_calls_twinCollection_fromJson();
     }
     else
     {
-        STRICT_EXPECTED_CALL(json_object_get_object(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(NULL);
+        STRICT_EXPECTED_CALL(json_object_get_object(IGNORED_ARG, IGNORED_ARG)).SetReturn(NULL);
     }
     if (desired_properties)
     {
-        STRICT_EXPECTED_CALL(json_object_get_object(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(json_object_get_object(IGNORED_ARG, IGNORED_ARG));
         expected_calls_twinProperties_fromJson(desired_properties);
     }
     else
     {
-        STRICT_EXPECTED_CALL(json_object_get_object(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(NULL);
+        STRICT_EXPECTED_CALL(json_object_get_object(IGNORED_ARG, IGNORED_ARG)).SetReturn(NULL);
     }
 }
 
@@ -250,9 +250,9 @@ static void expected_calls_initialTwin_fromJson(bool tags, bool desired_properti
 TEST_FUNCTION(initialTwin_create_desired_properties_null)
 {
     //arrange
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_JSON));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_JSON));
 
     //act
     INITIAL_TWIN_HANDLE twin = initialTwin_create(TEST_JSON, NULL);
@@ -270,9 +270,9 @@ TEST_FUNCTION(initialTwin_create_desired_properties_null)
 TEST_FUNCTION(initialTwin_create_desired_properties_empty)
 {
     //arrange
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_JSON));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_JSON));
 
     //act
     INITIAL_TWIN_HANDLE twin = initialTwin_create(TEST_JSON, TEST_EMPTY_JSON);
@@ -290,10 +290,10 @@ TEST_FUNCTION(initialTwin_create_desired_properties_empty)
 TEST_FUNCTION(initialTwin_create_tags_null)
 {
     //arrange
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_JSON));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_JSON));
 
     //act
     INITIAL_TWIN_HANDLE twin = initialTwin_create(NULL, TEST_JSON);
@@ -311,10 +311,10 @@ TEST_FUNCTION(initialTwin_create_tags_null)
 TEST_FUNCTION(initialTwin_create_tags_empty)
 {
     //arrange
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_JSON));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_JSON));
 
     //act
     INITIAL_TWIN_HANDLE twin = initialTwin_create(TEST_EMPTY_JSON, TEST_JSON);
@@ -332,12 +332,12 @@ TEST_FUNCTION(initialTwin_create_tags_empty)
 TEST_FUNCTION(initialTwin_create_both_args)
 {
     //arrange
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_JSON));
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_JSON2));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_JSON));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_JSON2));
 
     //act
     INITIAL_TWIN_HANDLE twin = initialTwin_create(TEST_JSON, TEST_JSON2);
@@ -382,12 +382,12 @@ TEST_FUNCTION(initialTwin_create_fail)
     int negativeTestsInitResult = umock_c_negative_tests_init();
     ASSERT_ARE_EQUAL(int, 0, negativeTestsInitResult);
 
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_JSON));
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_JSON2));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_JSON));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_JSON2));
 
     umock_c_negative_tests_snapshot();
     size_t count = umock_c_negative_tests_call_count();
@@ -424,12 +424,12 @@ TEST_FUNCTION(initialTwin_destroy_full)
     INITIAL_TWIN_HANDLE twin = initialTwin_create(TEST_JSON, TEST_JSON2);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)); //twin->tags->json
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)); //twin->tags
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)); //twin->properties->desired->json
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)); //twin->properties->desired
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)); //twin->properties
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)); //twin
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)); //twin->tags->json
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)); //twin->tags
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)); //twin->properties->desired->json
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)); //twin->properties->desired
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)); //twin->properties
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)); //twin
 
     //act
     initialTwin_destroy(twin);
@@ -444,10 +444,10 @@ TEST_FUNCTION(initialTwin_destroy_no_tags)
     INITIAL_TWIN_HANDLE twin = initialTwin_create(NULL, TEST_JSON2);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)); //twin->properties->desired->json
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)); //twin->properties->desired
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)); //twin->properties
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)); //twin
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)); //twin->properties->desired->json
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)); //twin->properties->desired
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)); //twin->properties
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)); //twin
 
     //act
     initialTwin_destroy(twin);
@@ -462,9 +462,9 @@ TEST_FUNCTION(initialTwin_destroy_no_desired_properties)
     INITIAL_TWIN_HANDLE twin = initialTwin_create(TEST_JSON, NULL);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)); //twin->tags->json
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)); //twin->tags
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)); //twin
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)); //twin->tags->json
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)); //twin->tags
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)); //twin
 
     //act
     initialTwin_destroy(twin);
@@ -563,8 +563,8 @@ TEST_FUNCTION(initialTwin_setTags_null_tag)
     INITIAL_TWIN_HANDLE twin = initialTwin_create(TEST_JSON, NULL);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
     //act
     int result = initialTwin_setTags(twin, NULL);
@@ -584,8 +584,8 @@ TEST_FUNCTION(initialTwin_setTags_empty_tag)
     INITIAL_TWIN_HANDLE twin = initialTwin_create(TEST_JSON, NULL);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
     //act
     int result = initialTwin_setTags(twin, NULL);
@@ -605,8 +605,8 @@ TEST_FUNCTION(initialTwin_setTags_no_existing_tags)
     INITIAL_TWIN_HANDLE twin = initialTwin_create(NULL, TEST_JSON2);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_JSON));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_JSON));
 
     //act
     int result = initialTwin_setTags(twin, TEST_JSON);
@@ -629,8 +629,8 @@ TEST_FUNCTION(initialTwin_setTags_no_existing_tags_fail)
     INITIAL_TWIN_HANDLE twin = initialTwin_create(NULL, TEST_JSON2);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_JSON));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_JSON));
 
     umock_c_negative_tests_snapshot();
     size_t count = umock_c_negative_tests_call_count();
@@ -668,8 +668,8 @@ TEST_FUNCTION(initialTwin_setTags_overwrite_existing_tags)
     INITIAL_TWIN_HANDLE twin = initialTwin_create(TEST_JSON, NULL);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_JSON2));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_JSON2));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
     //act
     int result = initialTwin_setTags(twin, TEST_JSON2);
@@ -692,8 +692,8 @@ TEST_FUNCTION(initialTwin_setTags_overwrite_existing_tags_fail)
     INITIAL_TWIN_HANDLE twin = initialTwin_create(TEST_JSON, NULL);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_JSON2));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_JSON2));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
     umock_c_negative_tests_snapshot();
 
     size_t calls_cannot_fail[] = { 1 };
@@ -745,9 +745,9 @@ TEST_FUNCTION(initialTwin_setDesiredProperties_null_desired_properties)
     INITIAL_TWIN_HANDLE twin = initialTwin_create(NULL, TEST_JSON);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
     //act
     int result = initialTwin_setDesiredProperties(twin, NULL);
@@ -767,9 +767,9 @@ TEST_FUNCTION(initialTwin_setDesiredProperties_empty_desired_properties)
     INITIAL_TWIN_HANDLE twin = initialTwin_create(NULL, TEST_JSON);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
     //act
     int result = initialTwin_setDesiredProperties(twin, TEST_EMPTY_JSON);
@@ -789,9 +789,9 @@ TEST_FUNCTION(initialTwin_setDesiredProperties_no_existing_desired_properties)
     INITIAL_TWIN_HANDLE twin = initialTwin_create(TEST_JSON, NULL);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_JSON2));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_JSON2));
 
     //act
     int result = initialTwin_setDesiredProperties(twin, TEST_JSON2);
@@ -814,9 +814,9 @@ TEST_FUNCTION(initialTwin_setDesiredProperties_no_existing_desired_properties_fa
     INITIAL_TWIN_HANDLE twin = initialTwin_create(TEST_JSON2, NULL);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_JSON));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_JSON));
 
     umock_c_negative_tests_snapshot();
     size_t count = umock_c_negative_tests_call_count();
@@ -854,8 +854,8 @@ TEST_FUNCTION(initialTwin_setDesiredProperties_overwrite_existing_desired_proper
     INITIAL_TWIN_HANDLE twin = initialTwin_create(NULL, TEST_JSON);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_JSON2));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_JSON2));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
     //act
     int result = initialTwin_setDesiredProperties(twin, TEST_JSON2);
@@ -878,8 +878,8 @@ TEST_FUNCTION(initialTwin_setDesiredProperties_overwrite_existing_desired_proper
     INITIAL_TWIN_HANDLE twin = initialTwin_create(NULL, TEST_JSON);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_JSON2));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_JSON2));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
     umock_c_negative_tests_snapshot();
     size_t calls_cannot_fail[] = { 1 };

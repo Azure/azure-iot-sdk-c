@@ -20,7 +20,7 @@ void real_free(void* ptr)
 }
 
 #include "testrunnerswitcher.h"
-#include "azure_macro_utils/macro_utils.h"
+#include "macro_utils/macro_utils.h"
 #include "umock_c/umock_c.h"
 #include "umock_c/umocktypes_bool.h"
 #include "umock_c/umock_c_negative_tests.h"
@@ -142,7 +142,7 @@ TEST_FUNCTION(deviceCapabilities_create_malloc_NULL_fail)
     DEVICE_CAPABILITIES_HANDLE handle;
 
     //arrange
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)).SetReturn(NULL);
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG)).SetReturn(NULL);
 
     //act
     handle = deviceCapabilities_create();
@@ -159,7 +159,7 @@ TEST_FUNCTION(deviceCapabilities_create_success)
     DEVICE_CAPABILITIES_HANDLE handle;
 
     //arrange
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
 
     //act
     handle = deviceCapabilities_create();
@@ -191,7 +191,7 @@ TEST_FUNCTION(deviceCapabilities_destroy_success)
     DEVICE_CAPABILITIES_HANDLE handle = deviceCapabilities_create();
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
     //act
     deviceCapabilities_destroy(handle);
@@ -282,8 +282,8 @@ TEST_FUNCTION(deviceCapabilities_toJson_fail)
     ASSERT_ARE_EQUAL(int, 0, negativeTestsInitResult);
 
     STRICT_EXPECTED_CALL(json_value_init_object());
-    STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_object_set_boolean(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_object_set_boolean(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
 
     umock_c_negative_tests_snapshot();
 
@@ -317,8 +317,8 @@ TEST_FUNCTION(deviceCapabilities_toJson_success)
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(json_value_init_object());
-    STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_object_set_boolean(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_object_set_boolean(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
 
     //act
     json = deviceCapabilities_toJson(handle);
@@ -356,8 +356,8 @@ TEST_FUNCTION(deviceCapabilities_fromJson_fail)
     int negativeTestsInitResult = umock_c_negative_tests_init();
     ASSERT_ARE_EQUAL(int, 0, negativeTestsInitResult);
 
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(json_object_get_boolean(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(true);
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_object_get_boolean(IGNORED_ARG, IGNORED_ARG)).SetReturn(true);
     umock_c_negative_tests_snapshot();
 
     //act
@@ -386,8 +386,8 @@ TEST_FUNCTION(deviceCapabilities_fromJson_success)
     DEVICE_CAPABILITIES_HANDLE handle;
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(json_object_get_boolean(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(true);
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_object_get_boolean(IGNORED_ARG, IGNORED_ARG)).SetReturn(true);
 
     //act
     handle = deviceCapabilities_fromJson(TEST_JSON_CAPS);

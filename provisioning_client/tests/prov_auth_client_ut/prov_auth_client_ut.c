@@ -26,7 +26,7 @@ static void my_gballoc_free(void* ptr)
 #include "umock_c/umocktypes_charptr.h"
 #include "umock_c/umocktypes_stdint.h"
 #include "umock_c/umock_c_negative_tests.h"
-#include "azure_macro_utils/macro_utils.h"
+#include "macro_utils/macro_utils.h"
 
 #define ENABLE_MOCKS
 #include "azure_c_shared_utility/gballoc.h"
@@ -449,70 +449,70 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
     {
         if (use_key)
         {
-            STRICT_EXPECTED_CALL(secure_device_get_symm_key(IGNORED_PTR_ARG));
-            STRICT_EXPECTED_CALL(Azure_Base64_Decode(IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(secure_device_get_symm_key(IGNORED_ARG));
+            STRICT_EXPECTED_CALL(Azure_Base64_Decode(IGNORED_ARG));
             STRICT_EXPECTED_CALL(BUFFER_new());
-            STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG)).CallCannotFail();
-            STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG)).CallCannotFail();
-            STRICT_EXPECTED_CALL(HMACSHA256_ComputeHash(IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG));
-            STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG)).CallCannotFail();
-            STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-            STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG)).CallCannotFail();
-            STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
-            STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
-            STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_ARG)).CallCannotFail();
+            STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG)).CallCannotFail();
+            STRICT_EXPECTED_CALL(HMACSHA256_ComputeHash(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+            STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_ARG)).CallCannotFail();
+            STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+            STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG)).CallCannotFail();
+            STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG));
+            STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG));
+            STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
         }
         else
         {
-            STRICT_EXPECTED_CALL(secure_device_sign_data(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(secure_device_sign_data(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
         }
     }
 
     static void setup_prov_auth_construct_sas_token_mocks(bool use_key)
     {
-        STRICT_EXPECTED_CALL(size_tToString(IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_NUM_ARG)).CallCannotFail();
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(size_tToString(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG)).CallCannotFail();
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
         setup_sign_sas_data(use_key);
-        STRICT_EXPECTED_CALL(Azure_Base64_Encode_Bytes(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(URL_Encode(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(Azure_Base64_Encode_Bytes(IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(URL_Encode(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).CallCannotFail();
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).CallCannotFail();
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
     }
 
     static void setup_load_registration_id_mocks(bool use_tpm)
     {
         if (use_tpm)
         {
-            STRICT_EXPECTED_CALL(secure_device_get_endorsement_key(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-            STRICT_EXPECTED_CALL(SHA256Reset(IGNORED_PTR_ARG));
-            STRICT_EXPECTED_CALL(SHA256Input(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-            STRICT_EXPECTED_CALL(SHA256Result(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-            STRICT_EXPECTED_CALL(Azure_Base32_Encode_Bytes(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-            STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-            STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-            STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(secure_device_get_endorsement_key(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+            STRICT_EXPECTED_CALL(SHA256Reset(IGNORED_ARG));
+            STRICT_EXPECTED_CALL(SHA256Input(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+            STRICT_EXPECTED_CALL(SHA256Result(IGNORED_ARG, IGNORED_ARG));
+            STRICT_EXPECTED_CALL(Azure_Base32_Encode_Bytes(IGNORED_ARG, IGNORED_ARG));
+            STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+            STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+            STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
         }
         else
         {
-            STRICT_EXPECTED_CALL(secure_device_get_common_name(IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(secure_device_get_common_name(IGNORED_ARG));
         }
     }
 
     static void setup_prov_auth_get_registration_id_mocks()
     {
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
     }
 
     TEST_FUNCTION(prov_auth_client_create_tpm_malloc_NULL_fail)
     {
         //arrange
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)).SetReturn(NULL);
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG)).SetReturn(NULL);
 
         //act
         PROV_AUTH_HANDLE sec_handle = prov_auth_create();
@@ -528,10 +528,10 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
     TEST_FUNCTION(prov_auth_client_create_tpm_interface_NULL_fail)
     {
         //arrange
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
         STRICT_EXPECTED_CALL(prov_dev_security_get_type()).SetReturn(SECURE_DEVICE_TYPE_TPM);
         STRICT_EXPECTED_CALL(hsm_client_tpm_interface()).SetReturn(&test_tpm_interface_fail);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
         //act
         PROV_AUTH_HANDLE sec_handle = prov_auth_create();
@@ -547,7 +547,7 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
     TEST_FUNCTION(prov_auth_client_create_tpm_succeed)
     {
         //arrange
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
         STRICT_EXPECTED_CALL(prov_dev_security_get_type()).SetReturn(SECURE_DEVICE_TYPE_TPM);
         STRICT_EXPECTED_CALL(hsm_client_tpm_interface()).SetReturn(&test_tpm_interface);
         STRICT_EXPECTED_CALL(secure_device_create());
@@ -566,10 +566,10 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
     TEST_FUNCTION(prov_auth_client_create_x509_interface_NULL_fail)
     {
         //arrange
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
         STRICT_EXPECTED_CALL(prov_dev_security_get_type()).SetReturn(SECURE_DEVICE_TYPE_X509);
         STRICT_EXPECTED_CALL(hsm_client_x509_interface()).SetReturn(&test_x509_interface_fail);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
         //act
         PROV_AUTH_HANDLE sec_handle = prov_auth_create();
@@ -585,7 +585,7 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
     TEST_FUNCTION(prov_auth_client_create_x509_succeed)
     {
         //arrange
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
         STRICT_EXPECTED_CALL(prov_dev_security_get_type()).SetReturn(SECURE_DEVICE_TYPE_X509);
         STRICT_EXPECTED_CALL(hsm_client_x509_interface()).SetReturn(&test_x509_interface);
         STRICT_EXPECTED_CALL(secure_device_create());
@@ -604,10 +604,10 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
     TEST_FUNCTION(prov_auth_client_create_x509_sec_device_create_NULL_fail)
     {
         //arrange
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
         STRICT_EXPECTED_CALL(prov_dev_security_get_type()).SetReturn(SECURE_DEVICE_TYPE_X509);
         STRICT_EXPECTED_CALL(hsm_client_x509_interface()).SetReturn(&test_x509_interface_fail);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
         //act
         PROV_AUTH_HANDLE sec_handle = prov_auth_create();
@@ -625,9 +625,9 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
         umock_c_reset_all_calls();
 
         //arrange
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(secure_device_destroy(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(secure_device_destroy(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
         //act
         prov_auth_destroy(sec_handle);
@@ -687,7 +687,7 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
 
     TEST_FUNCTION(prov_auth_get_type_x509_succeed)
     {
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
         STRICT_EXPECTED_CALL(prov_dev_security_get_type()).SetReturn(SECURE_DEVICE_TYPE_X509);
         STRICT_EXPECTED_CALL(hsm_client_x509_interface()).SetReturn(&test_x509_interface);
         PROV_AUTH_HANDLE sec_handle = prov_auth_create();
@@ -778,7 +778,7 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
 
     TEST_FUNCTION(prov_auth_get_registration_id_x509_fail)
     {
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
         STRICT_EXPECTED_CALL(prov_dev_security_get_type()).SetReturn(SECURE_DEVICE_TYPE_X509);
         STRICT_EXPECTED_CALL(hsm_client_x509_interface()).SetReturn(&test_x509_interface_fail);
         PROV_AUTH_HANDLE sec_handle = prov_auth_create();
@@ -815,7 +815,7 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
 
     TEST_FUNCTION(prov_auth_get_registration_id_x509_succeed)
     {
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
         STRICT_EXPECTED_CALL(prov_dev_security_get_type()).SetReturn(SECURE_DEVICE_TYPE_X509);
         STRICT_EXPECTED_CALL(hsm_client_x509_interface()).SetReturn(&test_x509_interface);
         PROV_AUTH_HANDLE sec_handle = prov_auth_create();
@@ -839,7 +839,7 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
 
     TEST_FUNCTION(prov_auth_get_endorsement_key_x509_fail)
     {
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
         STRICT_EXPECTED_CALL(prov_dev_security_get_type()).SetReturn(SECURE_DEVICE_TYPE_X509);
         STRICT_EXPECTED_CALL(hsm_client_x509_interface()).SetReturn(&test_x509_interface_fail);
         PROV_AUTH_HANDLE sec_handle = prov_auth_create();
@@ -878,9 +878,9 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
         umock_c_reset_all_calls();
 
         //arrange
-        STRICT_EXPECTED_CALL(secure_device_get_endorsement_key(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(secure_device_get_endorsement_key(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
         //act
         BUFFER_HANDLE result = prov_auth_get_endorsement_key(sec_handle);
@@ -895,7 +895,7 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
 
     TEST_FUNCTION(prov_auth_get_storage_key_x509_fail)
     {
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
         STRICT_EXPECTED_CALL(prov_dev_security_get_type()).SetReturn(SECURE_DEVICE_TYPE_X509);
         STRICT_EXPECTED_CALL(hsm_client_x509_interface()).SetReturn(&test_x509_interface_fail);
         PROV_AUTH_HANDLE sec_handle = prov_auth_create();
@@ -934,9 +934,9 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
         umock_c_reset_all_calls();
 
         //arrange
-        STRICT_EXPECTED_CALL(secure_device_get_storage_key(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(secure_device_get_storage_key(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
         //act
         BUFFER_HANDLE result = prov_auth_get_storage_key(sec_handle);
@@ -951,7 +951,7 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
 
     TEST_FUNCTION(prov_auth_import_key_x509_fail)
     {
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
         STRICT_EXPECTED_CALL(prov_dev_security_get_type()).SetReturn(SECURE_DEVICE_TYPE_X509);
         STRICT_EXPECTED_CALL(hsm_client_x509_interface()).SetReturn(&test_x509_interface_fail);
         PROV_AUTH_HANDLE sec_handle = prov_auth_create();
@@ -1026,7 +1026,7 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
         umock_c_reset_all_calls();
 
         //arrange
-        STRICT_EXPECTED_CALL(secure_device_import_key(IGNORED_PTR_ARG, TEST_DATA, TEST_DATA_LEN));
+        STRICT_EXPECTED_CALL(secure_device_import_key(IGNORED_ARG, TEST_DATA, TEST_DATA_LEN));
 
         //act
         int result = prov_auth_import_key(sec_handle, TEST_DATA, TEST_DATA_LEN);
@@ -1045,7 +1045,7 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
         umock_c_reset_all_calls();
 
         //arrange
-        STRICT_EXPECTED_CALL(secure_device_import_key(IGNORED_PTR_ARG, TEST_DATA, TEST_DATA_LEN)).SetReturn(__LINE__);
+        STRICT_EXPECTED_CALL(secure_device_import_key(IGNORED_ARG, TEST_DATA, TEST_DATA_LEN)).SetReturn(__LINE__);
 
         //act
         int result = prov_auth_import_key(sec_handle, TEST_DATA, TEST_DATA_LEN);
@@ -1111,7 +1111,7 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
 
     TEST_FUNCTION(prov_auth_construct_sas_token_x509_fail)
     {
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
         STRICT_EXPECTED_CALL(prov_dev_security_get_type()).SetReturn(SECURE_DEVICE_TYPE_X509);
         STRICT_EXPECTED_CALL(hsm_client_x509_interface()).SetReturn(&test_x509_interface_fail);
         PROV_AUTH_HANDLE sec_handle = prov_auth_create();
@@ -1132,7 +1132,7 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
 
     TEST_FUNCTION(prov_auth_construct_symm_key_succeed)
     {
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
         STRICT_EXPECTED_CALL(prov_dev_security_get_type()).SetReturn(SECURE_DEVICE_TYPE_SYMMETRIC_KEY);
         STRICT_EXPECTED_CALL(hsm_client_key_interface());
         PROV_AUTH_HANDLE sec_handle = prov_auth_create();
@@ -1277,7 +1277,7 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
         umock_c_reset_all_calls();
 
         //arrange
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
 
         //act
         int result = prov_auth_set_registration_id(sec_handle, TEST_REGISTRATION_ID);
@@ -1296,7 +1296,7 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
         umock_c_reset_all_calls();
 
         //arrange
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
 
         //act
         int result = prov_auth_set_registration_id(sec_handle, TEST_REGISTRATION_ID);
@@ -1313,14 +1313,14 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
 
     TEST_FUNCTION(prov_auth_get_certificate_succeed)
     {
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
         STRICT_EXPECTED_CALL(prov_dev_security_get_type()).SetReturn(SECURE_DEVICE_TYPE_X509);
         STRICT_EXPECTED_CALL(hsm_client_x509_interface()).SetReturn(&test_x509_interface);
         PROV_AUTH_HANDLE sec_handle = prov_auth_create();
         umock_c_reset_all_calls();
 
         //arrange
-        STRICT_EXPECTED_CALL(secure_device_get_certificate(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(secure_device_get_certificate(IGNORED_ARG));
 
         //act
         char* result = prov_auth_get_certificate(sec_handle);
@@ -1367,14 +1367,14 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
 
     TEST_FUNCTION(prov_auth_get_alias_key_succeed)
     {
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
         STRICT_EXPECTED_CALL(prov_dev_security_get_type()).SetReturn(SECURE_DEVICE_TYPE_X509);
         STRICT_EXPECTED_CALL(hsm_client_x509_interface()).SetReturn(&test_x509_interface);
         PROV_AUTH_HANDLE sec_handle = prov_auth_create();
         umock_c_reset_all_calls();
 
         //arrange
-        STRICT_EXPECTED_CALL(secure_device_get_alias_key(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(secure_device_get_alias_key(IGNORED_ARG));
 
         //act
         char* result = prov_auth_get_alias_key(sec_handle);

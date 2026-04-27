@@ -11,7 +11,7 @@
 #include <stdexcept>
 #include "multitree.h"
 
-#include "azure_macro_utils/macro_utils.h"
+#include "macro_utils/macro_utils.h"
 
 /*this is what we test*/
 #include "jsonencoder.h"
@@ -672,7 +672,7 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         TEST_FUNCTION(JSONEncoder_EncodeTree_when_MultiTree_GetChildCount_fails_fails)
         {
             ///arrange
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 .SetReturn(MULTITREE_ERROR)
                 ;
@@ -688,7 +688,7 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         TEST_FUNCTION(JSONEncoder_EncodeTree_when_adding_open_paranthesis_fails_fails)
         {
             ///arrange
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
             STRICT_EXPECTED_CALL((*mocks), STRING_concat(global_bufferTemp, "{"))
@@ -709,7 +709,7 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             STRICT_EXPECTED_CALL((*mocks), STRING_concat(global_bufferTemp, "{"))
                 .SetReturn(1);
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
             
@@ -726,7 +726,7 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             STRICT_EXPECTED_CALL((*mocks), STRING_concat(global_bufferTemp, "{"));
             STRICT_EXPECTED_CALL((*mocks), STRING_concat(global_bufferTemp, "}"));
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
@@ -745,41 +745,40 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         {
             ///arrange
 
-            //EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+            //EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG));
+            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG));
+            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG));
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG));
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG));
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG));
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG));
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG));
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG));
 
             EXPECTED_CALL((*mocks), STRING_new());
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG));
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG));
             EXPECTED_CALL((*mocks), STRING_new());
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG));
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG));
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_2, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_2, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_2, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_2, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_ARG, IGNORED_ARG))
                 ;
 
 
@@ -802,7 +801,7 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         {
             ///arrange
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_2, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_2, IGNORED_ARG))
                 .IgnoreArgument(2)
                 .SetReturn(MULTITREE_ERROR)
                 ;
@@ -821,9 +820,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         TEST_FUNCTION(JSONEncoder_EncodeTree_2_fails_when_strcat_s_fails_1)
         {
             ///arrange
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG));
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_2, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_2, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
@@ -846,15 +845,15 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         {
             ///arrange
             EXPECTED_CALL((*mocks), STRING_new());
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG));
                 
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG));
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG));
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG));
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_2, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_2, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_2, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_2, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 .SetReturn(MULTITREE_ERROR)
                 ;
@@ -877,21 +876,21 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         {
             ///arrange
             /*mocks non-argument checked*/
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG));
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG));
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG));
             EXPECTED_CALL((*mocks), STRING_new());
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG));
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG));
 
 
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_2, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_2, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_2, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_2, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 .SetReturn(MULTITREE_ERROR)
                 ;
@@ -915,22 +914,22 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         {
             ///arrange
 
-            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG));
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG));
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG));
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG));
 
             EXPECTED_CALL((*mocks), STRING_new());
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG));
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG));
 
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_2, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_2, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_2, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_2, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
@@ -956,27 +955,27 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             ///arrange
 
             /*mocks non-argument checked*/
-            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG));
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG));
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG));
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG));
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG));
 
             EXPECTED_CALL((*mocks), STRING_new());
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG));
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG));
 
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_2, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_2, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_2, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_2, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 .SetReturn(MULTITREE_ERROR)
                 ;
@@ -1001,30 +1000,30 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         {
             ///arrange
 
-            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG));
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG));
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG));
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG));
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG));
 
             EXPECTED_CALL((*mocks), STRING_new());
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG));
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG));
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_2, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_2, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_2, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_2, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 .SetReturn(MULTITREE_ERROR)
                 ;
@@ -1049,38 +1048,37 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         {
             ///arrange
 
-            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG));
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG));
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG));
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG));
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG));
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG));
 
             EXPECTED_CALL((*mocks), STRING_new());
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG));
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG));
             EXPECTED_CALL((*mocks), STRING_new());
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG));
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG));
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_2, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_2, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_2, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_2, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_ARG, IGNORED_ARG))
                 .SetReturn(JSON_ENCODER_TOSTRING_ERROR)
                 ;
 
@@ -1105,39 +1103,38 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         {
             ///arrange
 
-            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG));
+            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG));
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG));
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG));
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG));
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG));
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG));
 
             EXPECTED_CALL((*mocks), STRING_new());
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG));
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG));
             EXPECTED_CALL((*mocks), STRING_new());
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG));
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG));
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_2, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_2, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_2, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_2, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_ARG, IGNORED_ARG))
                 ;
 
             whenShallSTRING_concat_with_STRING_fail = 2;
@@ -1157,54 +1154,52 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         TEST_FUNCTION(JSONEncoder_EncodeTree_3_success)
         {
             ///arrange
-            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(4);
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(11);
             EXPECTED_CALL((*mocks), STRING_new())
                 .ExpectedTimesExactly(4);
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
                 .ExpectedTimesExactly(4);
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_3, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_3, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_3, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_3, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_ARG, IGNORED_ARG))
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_3, 1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_3, 1, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_ARG, IGNORED_ARG))
                 ;
 
 
@@ -1232,7 +1227,7 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         {
             ///arrange
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_3, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_3, IGNORED_ARG))
                 .IgnoreArgument(2)
                 .SetReturn(MULTITREE_ERROR)
                 ;
@@ -1254,16 +1249,16 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         {
             ///arrange
 
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(1);
-            EXPECTED_CALL((*mocks), STRING_c_str(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_c_str(IGNORED_ARG))
                 .ExpectedTimesExactly(0);
             EXPECTED_CALL((*mocks), STRING_new())
                 .ExpectedTimesExactly(0);
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
                 .ExpectedTimesExactly(0);
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_3, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_3, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
@@ -1285,16 +1280,16 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         {
             ///arrange
 
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(1);
-            EXPECTED_CALL((*mocks), STRING_c_str(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_c_str(IGNORED_ARG))
                 .ExpectedTimesExactly(0);
             EXPECTED_CALL((*mocks), STRING_new())
                 .ExpectedTimesExactly(0);
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
                 .ExpectedTimesExactly(0);
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_3, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_3, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
@@ -1317,16 +1312,16 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         {
             ///arrange
 
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG));
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG));
 
             EXPECTED_CALL((*mocks), STRING_new());
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG));
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG));
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_3, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_3, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_3, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_3, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 .SetReturn(MULTITREE_ERROR)
                 ;
@@ -1349,22 +1344,22 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         {
             ///arrange
 
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(3);
-            EXPECTED_CALL((*mocks), STRING_c_str(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_c_str(IGNORED_ARG))
                 .ExpectedTimesExactly(0);
             EXPECTED_CALL((*mocks), STRING_new())
                 .ExpectedTimesExactly(1);
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
                 .ExpectedTimesExactly(1);
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_3, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_3, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_3, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_3, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 .SetReturn(MULTITREE_ERROR);
                 ;
@@ -1388,22 +1383,22 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         TEST_FUNCTION(JSONEncoder_EncodeTree_3_fails_when_strcat_s_fails_2)
         {
             ///arrange
-            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(1);
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(3);
             EXPECTED_CALL((*mocks), STRING_new())
                 .ExpectedTimesExactly(1);
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
                 .ExpectedTimesExactly(1);
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_3, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_3, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_3, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_3, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
@@ -1427,26 +1422,26 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         TEST_FUNCTION(JSONEncoder_EncodeTree_3_fails_when_MultiTree_GetChildCount_fails_2)
         {
             ///arrange
-            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(1);
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(4);
             EXPECTED_CALL((*mocks), STRING_new())
                 .ExpectedTimesExactly(1);
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
                 .ExpectedTimesExactly(1);
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_3, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_3, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_3, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_3, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 .SetReturn(MULTITREE_ERROR)
                 ;
@@ -1470,30 +1465,30 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         TEST_FUNCTION(JSONEncoder_EncodeTree_3_fails_when_MultiTree_GetValue_fails_1)
         {
             ///arrange
-            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(1);
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(4);
             EXPECTED_CALL((*mocks), STRING_new())
                 .ExpectedTimesExactly(1);
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
                 .ExpectedTimesExactly(1);
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_3, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_3, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_3, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_3, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 .SetReturn(MULTITREE_ERROR)
                 ;
@@ -1517,35 +1512,34 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         TEST_FUNCTION(JSONEncoder_EncodeTree_3_fails_when_toStringFunc_fails)
         {
             ///arrange
-            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(1);
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(5);
             EXPECTED_CALL((*mocks), STRING_new())
                 .ExpectedTimesExactly(2);
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
                 .ExpectedTimesExactly(2);
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_3, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_3, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_3, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_3, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_ARG, IGNORED_ARG))
                 .SetReturn(JSON_ENCODER_TOSTRING_ERROR)
                 ;
 
@@ -1566,35 +1560,34 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         TEST_FUNCTION(JSONEncoder_EncodeTree_3_fails_when_strcat_s_fails_3)
         {
             ///arrange
-            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(2);
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(5);
             EXPECTED_CALL((*mocks), STRING_new())
                 .ExpectedTimesExactly(2);
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
                 .ExpectedTimesExactly(2);
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_3, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_3, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_3, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_3, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_ARG, IGNORED_ARG))
                 ;
 
             whenShallSTRING_concat_with_STRING_fail = 2;
@@ -1618,35 +1611,34 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         TEST_FUNCTION(JSONEncoder_EncodeTree_3_fails_when_strcat_s_fails_4)
         {
             ///arrange
-            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(2);
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(5);
             EXPECTED_CALL((*mocks), STRING_new())
                 .ExpectedTimesExactly(2);
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
                 .ExpectedTimesExactly(2);
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_3, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_3, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_3, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_3, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_ARG, IGNORED_ARG))
                 ;
 
             whenShallSTRING_concat_with_STRING_fail = 2;
@@ -1666,38 +1658,37 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         TEST_FUNCTION(JSONEncoder_EncodeTree_3_fails_when_MultiTree_GetChild_fails_2)
         {
             ///arrange
-            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(2);
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(7);
             EXPECTED_CALL((*mocks), STRING_new())
                 .ExpectedTimesExactly(3);
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
                 .ExpectedTimesExactly(3);
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_3, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_3, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_3, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_3, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_ARG, IGNORED_ARG))
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_3, 1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_3, 1, IGNORED_ARG))
                 .IgnoreArgument(3)
                 .SetReturn(MULTITREE_ERROR)
                 ;
@@ -1723,41 +1714,40 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         TEST_FUNCTION(JSONEncoder_EncodeTree_3_fails_when_MultiTree_GetName_fails_2)
         {
             ///arrange
-            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(2);
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(8);
             EXPECTED_CALL((*mocks), STRING_new())
                 .ExpectedTimesExactly(3);
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
                 .ExpectedTimesExactly(3);
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_3, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_3, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_3, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_3, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_ARG, IGNORED_ARG))
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_3, 1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_3, 1, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_ARG))
                 .IgnoreArgument(2)
                 .SetReturn(MULTITREE_ERROR)
                 ;
@@ -1783,42 +1773,41 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         TEST_FUNCTION(JSONEncoder_EncodeTree_3_fails_when_strcat_s_fails_5)
         {
             ///arrange
-            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(3);
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(8);
             EXPECTED_CALL((*mocks), STRING_new())
                 .ExpectedTimesExactly(3);
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
                 .ExpectedTimesExactly(3);
 
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_3, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_3, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_3, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_3, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_ARG, IGNORED_ARG))
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_3, 1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_3, 1, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
@@ -1845,45 +1834,44 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         TEST_FUNCTION(JSONEncoder_EncodeTree_3_fails_when_MultiTree_GetChildCount_fails_3)
         {
             ///arrange
-            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(3);
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(9);
             EXPECTED_CALL((*mocks), STRING_new())
                 .ExpectedTimesExactly(3);
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
                 .ExpectedTimesExactly(3);
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_3, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_3, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_3, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_3, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_ARG, IGNORED_ARG))
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_3, 1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_3, 1, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_ARG))
                 .IgnoreArgument(2)
                 .SetReturn(MULTITREE_ERROR)
                 ;
@@ -1909,49 +1897,48 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         TEST_FUNCTION(JSONEncoder_EncodeTree_3_fails_when_MultiTree_GetValue_fails_2)
         {
             ///arrange
-            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(3);
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(9);
             EXPECTED_CALL((*mocks), STRING_new())
                 .ExpectedTimesExactly(3);
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
                 .ExpectedTimesExactly(3);
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_3, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_3, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_3, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_3, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_ARG, IGNORED_ARG))
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_3, 1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_3, 1, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_ARG))
                 .IgnoreArgument(2)
                 .SetReturn(MULTITREE_ERROR)
                 ;
@@ -1977,54 +1964,52 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         TEST_FUNCTION(JSONEncoder_EncodeTree_3_fails_when_toStringFunc_fails_2)
         {
             ///arrange
-            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(3);
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(10);
             EXPECTED_CALL((*mocks), STRING_new())
                 .ExpectedTimesExactly(4);
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
                 .ExpectedTimesExactly(4);
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_3, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_3, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_3, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_3, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_ARG, IGNORED_ARG))
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_3, 1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_3, 1, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_ARG, IGNORED_ARG))
                 .SetReturn(JSON_ENCODER_TOSTRING_ERROR)
                 ;
 
@@ -2049,54 +2034,52 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         TEST_FUNCTION(JSONEncoder_EncodeTree_3_fails_when_strcat_s_fails_6)
         {
             ///arrange
-            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(4);
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(10);
             EXPECTED_CALL((*mocks), STRING_new())
                 .ExpectedTimesExactly(4);
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
                 .ExpectedTimesExactly(4);
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_3, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_3, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_3, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_3, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_ARG, IGNORED_ARG))
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_3, 1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_3, 1, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_ARG, IGNORED_ARG))
                 ;
 
             whenShallSTRING_concat_with_STRING_fail = 4;
@@ -2124,73 +2107,70 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         TEST_FUNCTION(JSONEncoder_EncodeTree_4_success)
         {
             ///arrange
-            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(6);
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(16);
             EXPECTED_CALL((*mocks), STRING_new())
                 .ExpectedTimesExactly(6);
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
                 .ExpectedTimesExactly(6);
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_4, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_4, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_ARG, IGNORED_ARG))
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 1, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_ARG, IGNORED_ARG))
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 2, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 2, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_3, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_3, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_3, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_3, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_3, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_3, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_ARG, IGNORED_ARG))
                 ;
 
 
@@ -2223,7 +2203,7 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         {
             ///arrange
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_4, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_4, IGNORED_ARG))
                 .IgnoreArgument(2)
                 .SetReturn(MULTITREE_ERROR)
                 ;
@@ -2244,16 +2224,16 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         {
             ///arrange
 
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(1);
-            EXPECTED_CALL((*mocks), STRING_c_str(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_c_str(IGNORED_ARG))
                 .ExpectedTimesExactly(0);
             EXPECTED_CALL((*mocks), STRING_new())
                 .ExpectedTimesExactly(0);
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
                 .ExpectedTimesExactly(0);
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_4, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_4, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
@@ -2275,19 +2255,19 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         {
             ///arrange
 
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(2);
-            EXPECTED_CALL((*mocks), STRING_c_str(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_c_str(IGNORED_ARG))
                 .ExpectedTimesExactly(0);
             EXPECTED_CALL((*mocks), STRING_new())
                 .ExpectedTimesExactly(1);
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
                 .ExpectedTimesExactly(1);
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_4, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_4, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 .SetReturn(MULTITREE_ERROR)
                 ;
@@ -2311,23 +2291,23 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         {
             ///arrange
 
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(3);
-            EXPECTED_CALL((*mocks), STRING_c_str(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_c_str(IGNORED_ARG))
                 .ExpectedTimesExactly(0);
             EXPECTED_CALL((*mocks), STRING_new())
                 .ExpectedTimesExactly(1);
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
                 .ExpectedTimesExactly(1);
 
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_4, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_4, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 .SetReturn(MULTITREE_ERROR)
                 ;
@@ -2350,23 +2330,23 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         TEST_FUNCTION(JSONEncoder_EncodeTree_4_fails_when_strcat_s_fails_2)
         {
             ///arrange
-            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(1);
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(3);
             EXPECTED_CALL((*mocks), STRING_new())
                 .ExpectedTimesExactly(1);
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
                 .ExpectedTimesExactly(1);
 
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_4, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_4, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
@@ -2390,26 +2370,26 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         TEST_FUNCTION(JSONEncoder_EncodeTree_4_fails_when_MultiTree_GetChildCount_fails_2)
         {
             ///arrange
-            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(1);
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(4);
             EXPECTED_CALL((*mocks), STRING_new())
                 .ExpectedTimesExactly(1);
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
                 .ExpectedTimesExactly(1);
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_4, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_4, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 .SetReturn(MULTITREE_ERROR)
                 ;
@@ -2432,30 +2412,30 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         TEST_FUNCTION(JSONEncoder_EncodeTree_4_fails_when_MultiTree_GetValue_fails_1)
         {
             ///arrange
-            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(1);
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(4);
             EXPECTED_CALL((*mocks), STRING_new())
                 .ExpectedTimesExactly(1);
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
                 .ExpectedTimesExactly(1);
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_4, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_4, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 .SetReturn(MULTITREE_ERROR)
                 ;
@@ -2479,35 +2459,34 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         TEST_FUNCTION(JSONEncoder_EncodeTree_4_fails_when_toStringFunc_fails_1)
         {
             ///arrange
-            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(1);
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(5);
             EXPECTED_CALL((*mocks), STRING_new())
                 .ExpectedTimesExactly(2);
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
                 .ExpectedTimesExactly(2);
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_4, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_4, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_ARG, IGNORED_ARG))
                 .SetReturn(JSON_ENCODER_TOSTRING_ERROR)
                 ;
 
@@ -2530,36 +2509,35 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         TEST_FUNCTION(JSONEncoder_EncodeTree_4_fails_when_strcat_s_fails_3)
         {
             ///arrange
-            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(2);
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(5);
             EXPECTED_CALL((*mocks), STRING_new())
                 .ExpectedTimesExactly(2);
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
                 .ExpectedTimesExactly(2);
 
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_4, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_4, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_ARG, IGNORED_ARG))
                 ;
 
             whenShallSTRING_concat_with_STRING_fail = 2;
@@ -2579,35 +2557,34 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         TEST_FUNCTION(JSONEncoder_EncodeTree_4_fails_when_strcat_s_fails_4)
         {
             ///arrange
-            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(2);
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(5);
             EXPECTED_CALL((*mocks), STRING_new())
                 .ExpectedTimesExactly(2);
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
                 .ExpectedTimesExactly(2);
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_4, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_4, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_ARG, IGNORED_ARG))
                 ;
 
             whenShallSTRING_concat_with_STRING_fail = 2;
@@ -2632,38 +2609,37 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         TEST_FUNCTION(JSONEncoder_EncodeTree_4_fails_when_MultiTree_GetChild_fails_2)
         {
             ///arrange
-            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(2);
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(7);
             EXPECTED_CALL((*mocks), STRING_new())
                 .ExpectedTimesExactly(3);
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
                 .ExpectedTimesExactly(3);
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_4, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_4, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_ARG, IGNORED_ARG))
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 1, IGNORED_ARG))
                 .IgnoreArgument(3)
                 .SetReturn(MULTITREE_ERROR)
                 ;
@@ -2689,42 +2665,41 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         TEST_FUNCTION(JSONEncoder_EncodeTree_4_fails_when_MultiTree_GetName_fails_2)
         {
             ///arrange
-            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(2);
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(8);
             EXPECTED_CALL((*mocks), STRING_new())
                 .ExpectedTimesExactly(3);
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
                 .ExpectedTimesExactly(3);
 
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_4, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_4, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_ARG, IGNORED_ARG))
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 1, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_ARG))
                 .IgnoreArgument(2)
                 .SetReturn(MULTITREE_ERROR)
                 ;
@@ -2750,41 +2725,40 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         TEST_FUNCTION(JSONEncoder_EncodeTree_4_fails_when_strcat_s_fails_5)
         {
             ///arrange
-            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(3);
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(8);
             EXPECTED_CALL((*mocks), STRING_new())
                 .ExpectedTimesExactly(3);
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
                 .ExpectedTimesExactly(3);
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_4, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_4, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_ARG, IGNORED_ARG))
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 1, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
@@ -2805,45 +2779,44 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         TEST_FUNCTION(JSONEncoder_EncodeTree_4_fails_when_MultiTree_GetChildCount_fails_3)
         {
             ///arrange
-            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(3);
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(9);
             EXPECTED_CALL((*mocks), STRING_new())
                 .ExpectedTimesExactly(3);
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
                 .ExpectedTimesExactly(3);
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_4, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_4, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_ARG, IGNORED_ARG))
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 1, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_ARG))
                 .IgnoreArgument(2)
                 .SetReturn(MULTITREE_ERROR)
                 ;
@@ -2870,50 +2843,49 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         TEST_FUNCTION(JSONEncoder_EncodeTree_4_fails_when_MultiTree_GetValue_fails_2)
         {
             ///arrange
-            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(3);
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(9);
             EXPECTED_CALL((*mocks), STRING_new())
                 .ExpectedTimesExactly(3);
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
                 .ExpectedTimesExactly(3);
 
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_4, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_4, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_ARG, IGNORED_ARG))
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 1, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_ARG))
                 .IgnoreArgument(2)
                 .SetReturn(MULTITREE_ERROR)
                 ;
@@ -2934,54 +2906,52 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         TEST_FUNCTION(JSONEncoder_EncodeTree_4_fails_when_toStringFunc_fails_2)
         {
             ///arrange
-            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(3);
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(10);
             EXPECTED_CALL((*mocks), STRING_new())
                 .ExpectedTimesExactly(4);
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
                 .ExpectedTimesExactly(4);
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_4, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_4, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_ARG, IGNORED_ARG))
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 1, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_ARG, IGNORED_ARG))
                 .SetReturn(JSON_ENCODER_TOSTRING_ERROR)
                 ;
 
@@ -3007,54 +2977,52 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         TEST_FUNCTION(JSONEncoder_EncodeTree_4_fails_when_strcat_s_fails_6)
         {
             ///arrange
-            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(4);
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(10);
             EXPECTED_CALL((*mocks), STRING_new())
                 .ExpectedTimesExactly(4);
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
                 .ExpectedTimesExactly(4);
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_4, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_4, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_ARG, IGNORED_ARG))
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 1, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_ARG, IGNORED_ARG))
                 ;
 
             whenShallSTRING_concat_with_STRING_fail = 4;
@@ -3074,55 +3042,53 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         TEST_FUNCTION(JSONEncoder_EncodeTree_4_fails_when_strcat_s_fails_7)
         {
             ///arrange
-            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(4);
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(10);
             EXPECTED_CALL((*mocks), STRING_new())
                 .ExpectedTimesExactly(4);
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
                 .ExpectedTimesExactly(4);
 
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_4, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_4, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_ARG, IGNORED_ARG))
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 1, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_ARG, IGNORED_ARG))
                 ;
 
             whenShallSTRING_concat_with_STRING_fail = 4;
@@ -3150,57 +3116,55 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         TEST_FUNCTION(JSONEncoder_EncodeTree_4_fails_when_MultiTree_GetChild_fails_3)
         {
             ///arrange
-            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(4);
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(12);
             EXPECTED_CALL((*mocks), STRING_new())
                 .ExpectedTimesExactly(5);
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
                 .ExpectedTimesExactly(5);
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_4, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_4, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_ARG, IGNORED_ARG))
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 1, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_ARG, IGNORED_ARG))
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 2, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 2, IGNORED_ARG))
                 .IgnoreArgument(3)
                 .SetReturn(MULTITREE_ERROR)
                 ;
@@ -3229,61 +3193,59 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         TEST_FUNCTION(JSONEncoder_EncodeTree_4_fails_when_MultiTree_GetName_fails_3)
         {
             ///arrange
-            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(4);
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(13);
             EXPECTED_CALL((*mocks), STRING_new())
                 .ExpectedTimesExactly(5);
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
                 .ExpectedTimesExactly(5);
 
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_4, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_4, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_ARG, IGNORED_ARG))
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 1, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_ARG, IGNORED_ARG))
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 2, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 2, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_3, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_3, IGNORED_ARG))
                 .IgnoreArgument(2)
                 .SetReturn(MULTITREE_ERROR)
                 ;
@@ -3312,60 +3274,58 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         TEST_FUNCTION(JSONEncoder_EncodeTree_4_fails_when_strcat_s_fails_8)
         {
             ///arrange
-            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(5);
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(13);
             EXPECTED_CALL((*mocks), STRING_new())
                 .ExpectedTimesExactly(5);
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
                 .ExpectedTimesExactly(5);
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_4, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_4, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_ARG, IGNORED_ARG))
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 1, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_ARG, IGNORED_ARG))
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 2, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 2, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_3, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_3, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
@@ -3394,65 +3354,63 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         TEST_FUNCTION(JSONEncoder_EncodeTree_4_fails_when_MultiTree_GetChildCount_fails_4)
         {
             ///arrange
-            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(5);
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(14);
             EXPECTED_CALL((*mocks), STRING_new())
                 .ExpectedTimesExactly(5);
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
                 .ExpectedTimesExactly(5);
 
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_4, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_4, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_ARG, IGNORED_ARG))
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 1, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_ARG, IGNORED_ARG))
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 2, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 2, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_3, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_3, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_3, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_3, IGNORED_ARG))
                 .IgnoreArgument(2)
                 .SetReturn(MULTITREE_ERROR)
                 ;
@@ -3482,69 +3440,67 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         TEST_FUNCTION(JSONEncoder_EncodeTree_4_fails_when_MultiTree_GetValue_fails_3)
         {
             ///arrange
-            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(5);
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(14);
             EXPECTED_CALL((*mocks), STRING_new())
                 .ExpectedTimesExactly(5);
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
                 .ExpectedTimesExactly(5);
 
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_4, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_4, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_ARG, IGNORED_ARG))
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 1, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_ARG, IGNORED_ARG))
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 2, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 2, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_3, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_3, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_3, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_3, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_3, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_3, IGNORED_ARG))
                 .IgnoreArgument(2)
                 .SetReturn(MULTITREE_ERROR)
                 ;
@@ -3574,73 +3530,70 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         TEST_FUNCTION(JSONEncoder_EncodeTree_4_fails_when_toStringFunc_fails_3)
         {
             ///arrange
-            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(5);
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(15);
             EXPECTED_CALL((*mocks), STRING_new())
                 .ExpectedTimesExactly(6);
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
                 .ExpectedTimesExactly(6);
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_4, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_4, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_ARG, IGNORED_ARG))
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 1, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_ARG, IGNORED_ARG))
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 2, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 2, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_3, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_3, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_3, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_3, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_3, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_3, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_ARG, IGNORED_ARG))
                 .SetReturn(JSON_ENCODER_TOSTRING_ERROR)
                 ;
 
@@ -3660,73 +3613,70 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         TEST_FUNCTION(JSONEncoder_EncodeTree_4_fails_when_strcat_s_fails_9)
         {
             ///arrange
-            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(6);
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(15);
             EXPECTED_CALL((*mocks), STRING_new())
                 .ExpectedTimesExactly(6);
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
                 .ExpectedTimesExactly(6);
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_4, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_4, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_ARG, IGNORED_ARG))
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 1, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_2, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_ARG, IGNORED_ARG))
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 2, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 2, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_3, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_3, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_3, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_3, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_3, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_3, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_ARG, IGNORED_ARG))
                 ;
 
             whenShallSTRING_concat_with_STRING_fail = 6;
@@ -3755,77 +3705,75 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         TEST_FUNCTION(JSONEncoder_EncodeTree_5_1_success)
         {
             ///arrange
-            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(6);
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(16);
             EXPECTED_CALL((*mocks), STRING_new())
                 .ExpectedTimesExactly(6);
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
                 .ExpectedTimesExactly(6);
 
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
             
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5_1, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5_1, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
             /*below are because of recursive call of Encode Tree*/
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
             /*child 4*/
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_ARG, IGNORED_ARG))
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5, 1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5, 1, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
 
             /*child 5*/
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_ARG, IGNORED_ARG))
                 ;
 
 
@@ -3857,7 +3805,7 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         {
             ///arrange
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 .SetReturn(MULTITREE_ERROR)
                 ;
@@ -3877,16 +3825,16 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         TEST_FUNCTION(JSONEncoder_EncodeTree_5_1_fails_when_strcpy_s_fails_1)
         {
             ///arrange
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(1);
-            EXPECTED_CALL((*mocks), STRING_c_str(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_c_str(IGNORED_ARG))
                 .ExpectedTimesExactly(0);
             EXPECTED_CALL((*mocks), STRING_new())
                 .ExpectedTimesExactly(0);
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
                 .ExpectedTimesExactly(0);
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
@@ -3908,17 +3856,17 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         {
             ///arrange
 
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(1);
-            EXPECTED_CALL((*mocks), STRING_c_str(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_c_str(IGNORED_ARG))
                 .ExpectedTimesExactly(0);
             EXPECTED_CALL((*mocks), STRING_new())
                 .ExpectedTimesExactly(0);
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
                 .ExpectedTimesExactly(0);
 
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
@@ -3942,20 +3890,20 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         {
             ///arrange
 
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(2);
-            EXPECTED_CALL((*mocks), STRING_c_str(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_c_str(IGNORED_ARG))
                 .ExpectedTimesExactly(0);
             EXPECTED_CALL((*mocks), STRING_new())
                 .ExpectedTimesExactly(1);
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
                 .ExpectedTimesExactly(1);
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5_1, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5_1, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 .SetReturn(MULTITREE_ERROR)
                 ;
@@ -3979,24 +3927,24 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         {
             ///arrange
 
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(3);
-            EXPECTED_CALL((*mocks), STRING_c_str(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_c_str(IGNORED_ARG))
                 .ExpectedTimesExactly(0);
             EXPECTED_CALL((*mocks), STRING_new())
                 .ExpectedTimesExactly(1);
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
                 .ExpectedTimesExactly(1);
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5_1, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5_1, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 .SetReturn(MULTITREE_ERROR)
                 ;
@@ -4018,24 +3966,24 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         TEST_FUNCTION(JSONEncoder_EncodeTree_5_1_fails_when_strcat_s_fails_2)
         {
             ///arrange
-            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(1);
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(3);
             EXPECTED_CALL((*mocks), STRING_new())
                 .ExpectedTimesExactly(1);
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
                 .ExpectedTimesExactly(1);
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5_1, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5_1, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
@@ -4060,28 +4008,28 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         TEST_FUNCTION(JSONEncoder_EncodeTree_5_1_fails_when_MultiTree_GetChildCount_fails_2)
         {
             ///arrange
-            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(1);
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(4);
             EXPECTED_CALL((*mocks), STRING_new())
                 .ExpectedTimesExactly(1);
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
                 .ExpectedTimesExactly(1);
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5_1, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5_1, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 .SetReturn(MULTITREE_ERROR)
                 ;
@@ -4104,33 +4052,33 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         TEST_FUNCTION(JSONEncoder_EncodeTree_5_1_fails_when_MultiTree_GetChildCount_fails_3) /*this is first recursive call*/
         {
             ///arrange
-            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(1);
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(4);
             EXPECTED_CALL((*mocks), STRING_new())
                 .ExpectedTimesExactly(2);
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
                 .ExpectedTimesExactly(2);
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5_1, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5_1, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
             /*below are because of recursive call of Encode Tree*/
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 .SetReturn(MULTITREE_ERROR)
                 ;
@@ -4154,32 +4102,32 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         TEST_FUNCTION(JSONEncoder_EncodeTree_5_1_fails_when_strcpy_s_fails_2)
         {
             ///arrange
-            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(1);
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(6);
             EXPECTED_CALL((*mocks), STRING_new())
                 .ExpectedTimesExactly(2);
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
                 .ExpectedTimesExactly(2);
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5_1, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5_1, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
@@ -4200,33 +4148,33 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         TEST_FUNCTION(JSONEncoder_EncodeTree_5_1_fails_when_strcat_s_fails_3)
         {
             ///arrange
-            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(1);
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(6);
             EXPECTED_CALL((*mocks), STRING_new())
                 .ExpectedTimesExactly(2);
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
                 .ExpectedTimesExactly(2);
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5_1, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5_1, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
             /*below are because of recursive call of Encode Tree*/
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
@@ -4248,38 +4196,38 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         TEST_FUNCTION(JSONEncoder_EncodeTree_5_1_fais_when_MultiTree_GetChild_fails_2)
         {
             ///arrange
-            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(1);
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(6);
             EXPECTED_CALL((*mocks), STRING_new())
                 .ExpectedTimesExactly(3);
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
                 .ExpectedTimesExactly(3);
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5_1, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5_1, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
             /*below are because of recursive call of Encode Tree*/
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
             /*child 4*/
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 .SetReturn(MULTITREE_ERROR)
                 ;
@@ -4304,42 +4252,42 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         TEST_FUNCTION(JSONEncoder_EncodeTree_5_1_fails_when_MultiTree_GetName_fails_2)
         {
             ///arrange
-            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(1);
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(7);
             EXPECTED_CALL((*mocks), STRING_new())
                 .ExpectedTimesExactly(3);
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
                 .ExpectedTimesExactly(3);
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5_1, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5_1, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
             /*below are because of recursive call of Encode Tree*/
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
             /*child 4*/
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_ARG))
                 .IgnoreArgument(2)
                 .SetReturn(MULTITREE_ERROR)
                 ;
@@ -4366,42 +4314,42 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         TEST_FUNCTION(JSONEncoder_EncodeTree_5_1_fails_when_strcat_s_fails_4)
         {
             ///arrange
-            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(2);
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(7);
             EXPECTED_CALL((*mocks), STRING_new())
                 .ExpectedTimesExactly(3);
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
                 .ExpectedTimesExactly(3);
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5_1, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5_1, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
             /*below are because of recursive call of Encode Tree*/
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
             /*child 4*/
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
@@ -4427,46 +4375,46 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         TEST_FUNCTION(JSONEncoder_EncodeTree_5_1_fails_when_MultiTree_GetChildCount_fails)
         {
             ///arrange
-            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(2);
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(8);
             EXPECTED_CALL((*mocks), STRING_new())
                 .ExpectedTimesExactly(3);
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
                 .ExpectedTimesExactly(3);
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5_1, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5_1, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
             /*below are because of recursive call of Encode Tree*/
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
             /*child 4*/
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_ARG))
                 .IgnoreArgument(2)
                 .SetReturn(MULTITREE_ERROR)
                 ;
@@ -4492,50 +4440,50 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         TEST_FUNCTION(JSONEncoder_EncodeTree_5_1_fails_when_MultiTree_GetValue_fails_1)
         {
             ///arrange
-            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(2);
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(8);
             EXPECTED_CALL((*mocks), STRING_new())
                 .ExpectedTimesExactly(3);
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
                 .ExpectedTimesExactly(3);
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5_1, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5_1, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
             /*below are because of recursive call of Encode Tree*/
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
             /*child 4*/
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_ARG))
                 .IgnoreArgument(2)
                 .SetReturn(MULTITREE_ERROR)
                 ;
@@ -4561,55 +4509,54 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         TEST_FUNCTION(JSONEncoder_EncodeTree_5_1_fails_when_toStringFunc_fails_1)
         {
             ///arrange
-            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(2);
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(9);
             EXPECTED_CALL((*mocks), STRING_new())
                 .ExpectedTimesExactly(4);
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
                 .ExpectedTimesExactly(4);
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5_1, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5_1, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
             /*below are because of recursive call of Encode Tree*/
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
             /*child 4*/
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_ARG, IGNORED_ARG))
                 .SetReturn(JSON_ENCODER_TOSTRING_ERROR)
                 ;
 
@@ -4628,55 +4575,54 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         TEST_FUNCTION(JSONEncoder_EncodeTree_5_1_fails_when_strcat_s_fails_5)
         {
             ///arrange
-            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(3);
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(9);
             EXPECTED_CALL((*mocks), STRING_new())
                 .ExpectedTimesExactly(4);
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
                 .ExpectedTimesExactly(4);
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5_1, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5_1, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
             /*below are because of recursive call of Encode Tree*/
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
             /*child 4*/
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_ARG, IGNORED_ARG))
                 ;
 
             whenShallSTRING_concat_with_STRING_fail = 3;
@@ -4702,55 +4648,54 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         TEST_FUNCTION(JSONEncoder_EncodeTree_5_1_fails_when_strcat_s_fails_6)
         {
             ///arrange
-            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(3);
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(9);
             EXPECTED_CALL((*mocks), STRING_new())
                 .ExpectedTimesExactly(4);
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
                 .ExpectedTimesExactly(4);
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5_1, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5_1, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
             /*below are because of recursive call of Encode Tree*/
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
             /*child 4*/
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_ARG, IGNORED_ARG))
                 ;
 
             whenShallSTRING_concat_with_STRING_fail = 3;
@@ -4770,60 +4715,59 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         TEST_FUNCTION(JSONEncoder_EncodeTree_5_1_fails_when_MultiTree_GetChild_fails_3)
         {
             ///arrange
-            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(3);
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(11);
             EXPECTED_CALL((*mocks), STRING_new())
                 .ExpectedTimesExactly(5);
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
                 .ExpectedTimesExactly(5);
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5_1, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5_1, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
             /*below are because of recursive call of Encode Tree*/
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
             /*child 4*/
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_ARG, IGNORED_ARG))
                 ;
 
             /*child 5*/
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5, 1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5, 1, IGNORED_ARG))
                 .IgnoreArgument(3)
                 .SetReturn(MULTITREE_ERROR)
                 ;
@@ -4850,65 +4794,64 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         TEST_FUNCTION(JSONEncoder_EncodeTree_5_1_fails_when_MultiTree_GetName_fails_3)
         {
             ///arrange
-            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(3);
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(12);
             EXPECTED_CALL((*mocks), STRING_new())
                 .ExpectedTimesExactly(5);
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
                 .ExpectedTimesExactly(5);
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5_1, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5_1, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
             /*below are because of recursive call of Encode Tree*/
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
             /*child 4*/
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_ARG, IGNORED_ARG))
                 ;
 
             /*child 5*/
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5, 1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5, 1, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
 
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 .SetReturn(MULTITREE_ERROR)
                 ;
@@ -4936,65 +4879,64 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         TEST_FUNCTION(JSONEncoder_EncodeTree_5_1_fails_when_strcat_s_fails_7)
         {
             ///arrange
-            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(4);
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(12);
             EXPECTED_CALL((*mocks), STRING_new())
                 .ExpectedTimesExactly(5);
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
                 .ExpectedTimesExactly(5);
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5_1, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5_1, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
             /*below are because of recursive call of Encode Tree*/
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
             /*child 4*/
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_ARG, IGNORED_ARG))
                 ;
 
             /*child 5*/
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5, 1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5, 1, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
 
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
@@ -5015,69 +4957,68 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         TEST_FUNCTION(JSONEncoder_EncodeTree_5_1_fails_when_MultiTree_GetChildCount_fails_4)
         {
             ///arrange
-            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(4);
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(13);
             EXPECTED_CALL((*mocks), STRING_new())
                 .ExpectedTimesExactly(5);
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
                 .ExpectedTimesExactly(5);
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5_1, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5_1, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
             /*below are because of recursive call of Encode Tree*/
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
             /*child 4*/
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_ARG, IGNORED_ARG))
                 ;
 
             /*child 5*/
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5, 1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5, 1, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
 
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 .SetReturn(MULTITREE_ERROR)
                 ;
@@ -5106,73 +5047,72 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         TEST_FUNCTION(JSONEncoder_EncodeTree_5_1_fails_when_MultiTree_GetValue_fails_2)
         {
             ///arrange
-            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(4);
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(13);
             EXPECTED_CALL((*mocks), STRING_new())
                 .ExpectedTimesExactly(5);
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
                 .ExpectedTimesExactly(5);
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5_1, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5_1, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
             /*below are because of recursive call of Encode Tree*/
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
             /*child 4*/
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_ARG, IGNORED_ARG))
                 ;
 
             /*child 5*/
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5, 1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5, 1, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
 
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 .SetReturn(MULTITREE_ERROR)
                 ;
@@ -5201,78 +5141,76 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         TEST_FUNCTION(JSONEncoder_EncodeTree_5_1_fails_when_toStringFunc_fails_2)
         {
             ///arrange
-            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(4);
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(14);
             EXPECTED_CALL((*mocks), STRING_new())
                 .ExpectedTimesExactly(6);
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
                 .ExpectedTimesExactly(6);
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5_1, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5_1, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
             /*below are because of recursive call of Encode Tree*/
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
             /*child 4*/
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_ARG, IGNORED_ARG))
                 ;
 
             /*child 5*/
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5, 1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5, 1, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
 
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_ARG, IGNORED_ARG))
                 .SetReturn(JSON_ENCODER_TOSTRING_ERROR)
                 ;
 
@@ -5291,78 +5229,76 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         TEST_FUNCTION(JSONEncoder_EncodeTree_5_1_fails_when_strcat_s_fails_8)
         {
             ///arrange
-            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(5);
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(14);
             EXPECTED_CALL((*mocks), STRING_new())
                 .ExpectedTimesExactly(6);
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
                 .ExpectedTimesExactly(6);
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5_1, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5_1, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
             /*below are because of recursive call of Encode Tree*/
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
             /*child 4*/
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_ARG, IGNORED_ARG))
                 ;
 
             /*child 5*/
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5, 1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5, 1, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
 
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_ARG, IGNORED_ARG))
                 ;
 
             whenShallSTRING_concat_with_STRING_fail = 5;
@@ -5382,78 +5318,76 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         TEST_FUNCTION(JSONEncoder_EncodeTree_5_1_fails_when_strcat_s_fails_9)
         {
             ///arrange
-            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(5);
-            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_concat(IGNORED_ARG, IGNORED_ARG))
                 .ExpectedTimesExactly(14);
             EXPECTED_CALL((*mocks), STRING_new())
                 .ExpectedTimesExactly(6);
-            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_PTR_ARG))
+            EXPECTED_CALL((*mocks), STRING_delete(IGNORED_ARG))
                 .ExpectedTimesExactly(6);
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5_1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5_1, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5_1, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5_1, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
             /*below are because of recursive call of Encode Tree*/
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
             /*child 4*/
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5, 0, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_4, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_ARG, IGNORED_ARG))
                 ;
 
             /*child 5*/
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5, 1, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5, 1, IGNORED_ARG))
                 .IgnoreArgument(3)
                 ;
 
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetName(TEST_MULTITREE_HANDLE_CHILD_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChildCount(TEST_MULTITREE_HANDLE_CHILD_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_5, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL((*mocks), MultiTree_GetValue(TEST_MULTITREE_HANDLE_CHILD_5, IGNORED_ARG))
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_ARG, IGNORED_ARG))
                 ;
 
             whenShallSTRING_concat_with_STRING_fail = 5;

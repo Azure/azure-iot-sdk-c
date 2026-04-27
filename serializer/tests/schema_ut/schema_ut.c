@@ -422,26 +422,25 @@ BEGIN_TEST_SUITE(Schema_ut)
 
     void Schema_CreateModelType_With_Valid_Arguments_inert_path(void)
     {
-        STRICT_EXPECTED_CALL(gballoc_realloc(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(gballoc_realloc(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_ptr()
             .IgnoreArgument_size();
 
-        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG))
-            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_ARG, IGNORED_ARG));
 
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, MODEL_NAME))
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, MODEL_NAME))
             .IgnoreArgument_destination();
 
-        STRICT_EXPECTED_CALL(VECTOR_create(IGNORED_NUM_ARG)) /*these are models*/
+        STRICT_EXPECTED_CALL(VECTOR_create(IGNORED_ARG)) /*these are models*/
             .IgnoreArgument_elementSize();
 
-        STRICT_EXPECTED_CALL(VECTOR_create(IGNORED_NUM_ARG)) /*these are reported properties*/
+        STRICT_EXPECTED_CALL(VECTOR_create(IGNORED_ARG)) /*these are reported properties*/
             .IgnoreArgument_elementSize();
 
-        STRICT_EXPECTED_CALL(VECTOR_create(IGNORED_NUM_ARG)) /*these are desired properties*/
+        STRICT_EXPECTED_CALL(VECTOR_create(IGNORED_ARG)) /*these are desired properties*/
             .IgnoreArgument_elementSize();
 
-        STRICT_EXPECTED_CALL(VECTOR_create(IGNORED_NUM_ARG)) /*these are methods*/
+        STRICT_EXPECTED_CALL(VECTOR_create(IGNORED_ARG)) /*these are methods*/
             .IgnoreArgument_elementSize();
     }
 
@@ -3784,7 +3783,7 @@ BEGIN_TEST_SUITE(Schema_ut)
 
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, reportedPropertyName))
+        STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_ARG, IGNORED_ARG, reportedPropertyName))
             .IgnoreArgument_handle()
             .IgnoreArgument_pred();
 
@@ -3801,16 +3800,16 @@ BEGIN_TEST_SUITE(Schema_ut)
 
     void Schema_AddModelReportedProperty_inert_path(const char* reportedPropertyName, const char* reportedPropertyType)
     {
-        STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, reportedPropertyName))
+        STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_ARG, IGNORED_ARG, reportedPropertyName))
             .IgnoreArgument_handle()
             .IgnoreArgument_pred();
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
             .IgnoreArgument_size();
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, reportedPropertyName))
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, reportedPropertyName))
             .IgnoreArgument_destination();
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, reportedPropertyType))
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, reportedPropertyType))
             .IgnoreArgument_destination();
-        STRICT_EXPECTED_CALL(VECTOR_push_back(IGNORED_PTR_ARG, IGNORED_PTR_ARG, 1))
+        STRICT_EXPECTED_CALL(VECTOR_push_back(IGNORED_ARG, IGNORED_ARG, 1))
             .IgnoreArgument_handle()
             .IgnoreArgument_elements();
     }
@@ -3924,7 +3923,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(VECTOR_size(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(VECTOR_size(IGNORED_ARG))
             .IgnoreArgument_handle();
 
         ///act
@@ -3948,7 +3947,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         (void)Schema_AddModelReportedProperty(modelType, "a,", "b");
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(VECTOR_size(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(VECTOR_size(IGNORED_ARG))
             .IgnoreArgument_handle();
 
         ///act
@@ -4001,7 +4000,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         (void)Schema_AddModelReportedProperty(modelType, "a", "b");
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "a"))
+        STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_ARG, IGNORED_ARG, "a"))
             .IgnoreArgument_handle()
             .IgnoreArgument_pred();
 
@@ -4023,7 +4022,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         (void)Schema_AddModelReportedProperty(modelType, "a", "b");
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "a"))
+        STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_ARG, IGNORED_ARG, "a"))
             .IgnoreArgument_handle()
             .IgnoreArgument_pred();
 
@@ -4057,7 +4056,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_PTR_ARG, 0))
+        STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_ARG, 0))
             .IgnoreArgument_handle();
 
         ///act
@@ -4078,7 +4077,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         (void)Schema_AddModelReportedProperty(modelType, "a", "b");
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_PTR_ARG, 0))
+        STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_ARG, 0))
             .IgnoreArgument_handle();
 
         ///act
@@ -4351,20 +4350,19 @@ BEGIN_TEST_SUITE(Schema_ut)
     static void Schema_AddModelDesiredProperty_inert_path(const char* desiredPropertyName, const char* desiredPropertyType)
     {
 
-        STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, desiredPropertyName))
+        STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_ARG, IGNORED_ARG, desiredPropertyName))
             .IgnoreArgument_handle()
             .IgnoreArgument_pred();
 
-        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG))
-            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_ARG, IGNORED_ARG));
 
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, desiredPropertyName))
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, desiredPropertyName))
             .IgnoreArgument_destination();
 
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, desiredPropertyType))
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, desiredPropertyType))
             .IgnoreArgument_destination();
 
-        STRICT_EXPECTED_CALL(VECTOR_push_back(IGNORED_PTR_ARG, IGNORED_PTR_ARG, 1))
+        STRICT_EXPECTED_CALL(VECTOR_push_back(IGNORED_ARG, IGNORED_ARG, 1))
             .IgnoreArgument_handle()
             .IgnoreArgument_elements();
     }
@@ -4453,7 +4451,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         umock_c_reset_all_calls();
 
 
-        STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, name))
+        STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_ARG, IGNORED_ARG, name))
             .IgnoreArgument_handle()
             .IgnoreArgument_pred();
 
@@ -4508,7 +4506,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         size_t nDesiredProperties;
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(VECTOR_size(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(VECTOR_size(IGNORED_ARG))
             .IgnoreArgument_handle();
 
         ///act
@@ -4533,7 +4531,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         size_t nDesiredProperties;
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(VECTOR_size(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(VECTOR_size(IGNORED_ARG))
             .IgnoreArgument_handle();
 
         ///act
@@ -4559,7 +4557,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         size_t nDesiredProperties;
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(VECTOR_size(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(VECTOR_size(IGNORED_ARG))
             .IgnoreArgument_handle();
 
         ///act
@@ -4614,7 +4612,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         umock_c_reset_all_calls();
         const char* desiredPropertyName = "a";
 
-        STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, desiredPropertyName))
+        STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_ARG, IGNORED_ARG, desiredPropertyName))
             .IgnoreArgument_handle()
             .IgnoreArgument_pred();
 
@@ -4638,7 +4636,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         umock_c_reset_all_calls();
         const char* desiredPropertyName = "c"; /*only "a" exists*/
 
-        STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, desiredPropertyName))
+        STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_ARG, IGNORED_ARG, desiredPropertyName))
             .IgnoreArgument_handle()
             .IgnoreArgument_pred();
 
@@ -4662,7 +4660,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         umock_c_reset_all_calls();
         const char* desiredPropertyName = "a"; /*only "a" exists*/
 
-        STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, desiredPropertyName))
+        STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_ARG, IGNORED_ARG, desiredPropertyName))
             .IgnoreArgument_handle()
             .IgnoreArgument_pred();
 
@@ -4698,7 +4696,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_PTR_ARG, 0))
+        STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_ARG, 0))
             .IgnoreArgument_handle();
 
         ///act
@@ -4720,7 +4718,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         (void)Schema_AddModelDesiredProperty(modelType, "a", "b", g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 0, NULL);
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_PTR_ARG, 1))
+        STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_ARG, 1))
             .IgnoreArgument_handle();
 
         ///act
@@ -4742,7 +4740,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         (void)Schema_AddModelDesiredProperty(modelType, "a", "b", g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 0, NULL);
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_PTR_ARG, 0))
+        STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_ARG, 0))
             .IgnoreArgument_handle();
 
         ///act
@@ -5421,17 +5419,17 @@ BEGIN_TEST_SUITE(Schema_ut)
 
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_handle()
             .IgnoreArgument_pred()
             .IgnoreArgument_value();
 
-        STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_handle()
             .IgnoreArgument_pred()
             .IgnoreArgument_value();
 
-        STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_handle()
             .IgnoreArgument_pred()
             .IgnoreArgument_value();
@@ -5461,12 +5459,12 @@ BEGIN_TEST_SUITE(Schema_ut)
 
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_handle()
             .IgnoreArgument_pred()
             .IgnoreArgument_value();
 
-        STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_handle()
             .IgnoreArgument_pred()
             .IgnoreArgument_value();
@@ -5496,7 +5494,7 @@ BEGIN_TEST_SUITE(Schema_ut)
 
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_handle()
             .IgnoreArgument_pred()
             .IgnoreArgument_value();
@@ -5550,7 +5548,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         (void)Schema_CreateModelMethod(model, "method");
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_handle()
             .IgnoreArgument_pred()
             .IgnoreArgument_value();
@@ -5568,19 +5566,19 @@ BEGIN_TEST_SUITE(Schema_ut)
 
     static void Schema_CreateModelMethod_inert_path(void)
     {
-        STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_handle()
             .IgnoreArgument_pred()
             .IgnoreArgument_value();
 
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
             .IgnoreArgument_size();
 
-        STRICT_EXPECTED_CALL(VECTOR_create(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(VECTOR_create(IGNORED_ARG))
             .IgnoreArgument_elementSize();
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "method"))
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, "method"))
             .IgnoreArgument_destination();
-        STRICT_EXPECTED_CALL(VECTOR_push_back(IGNORED_PTR_ARG, IGNORED_PTR_ARG, 1))
+        STRICT_EXPECTED_CALL(VECTOR_push_back(IGNORED_ARG, IGNORED_ARG, 1))
             .IgnoreArgument_handle()
             .IgnoreArgument_elements();
     }
@@ -5694,7 +5692,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         (void)Schema_AddModelMethodArgument(method, "a", "int");
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_handle()
             .IgnoreArgument_pred()
             .IgnoreArgument_value();
@@ -5711,18 +5709,18 @@ BEGIN_TEST_SUITE(Schema_ut)
 
     static void Schema_AddModelMethodArgument_inert_path(void)
     {
-        STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
 
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
             .IgnoreArgument_size();
 
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "a"))
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, "a"))
             .IgnoreArgument_destination();
 
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "int"))
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, "int"))
             .IgnoreArgument_destination();
 
-        STRICT_EXPECTED_CALL(VECTOR_push_back(IGNORED_PTR_ARG, IGNORED_PTR_ARG, 1))
+        STRICT_EXPECTED_CALL(VECTOR_push_back(IGNORED_ARG, IGNORED_ARG, 1))
             .IgnoreArgument_handle()
             .IgnoreArgument_elements();
     }
@@ -5821,7 +5819,7 @@ BEGIN_TEST_SUITE(Schema_ut)
 
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_handle()
             .IgnoreArgument_pred()
             .IgnoreArgument_value();
@@ -5846,7 +5844,7 @@ BEGIN_TEST_SUITE(Schema_ut)
 
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_handle()
             .IgnoreArgument_pred()
             .IgnoreArgument_value();

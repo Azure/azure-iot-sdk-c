@@ -25,7 +25,7 @@ static void my_gballoc_free(void* s)
 #include "real_vector.h"
 #include "real_crt_abstractions.h"
 
-#include "azure_macro_utils/macro_utils.h"
+#include "macro_utils/macro_utils.h"
 #include "testrunnerswitcher.h"
 
 #include "umock_c/umock_c.h"
@@ -331,7 +331,7 @@ BEGIN_TEST_SUITE(serializer_dt_ut)
         STRICT_EXPECTED_CALL(IoTHubClient_SetDeviceTwinCallback(TEST_IOTHUB_CLIENT_HANDLE, serializer_ingest, TEST_DEVICE_HANDLE));
         STRICT_EXPECTED_CALL(IoTHubClient_SetDeviceMethodCallback(TEST_IOTHUB_CLIENT_HANDLE, deviceMethodCallback, TEST_DEVICE_HANDLE));
         STRICT_EXPECTED_CALL(VECTOR_create(sizeof(SERIALIZER_DEVICETWIN_PROTOHANDLE)));
-        STRICT_EXPECTED_CALL(VECTOR_push_back(IGNORED_PTR_ARG, IGNORED_PTR_ARG, 1))
+        STRICT_EXPECTED_CALL(VECTOR_push_back(IGNORED_ARG, IGNORED_ARG, 1))
             .IgnoreArgument_handle()
             .IgnoreArgument_elements();
     }
@@ -402,7 +402,7 @@ BEGIN_TEST_SUITE(serializer_dt_ut)
         STRICT_EXPECTED_CALL(IoTHubClient_LL_SetDeviceTwinCallback(TEST_IOTHUB_CLIENT_LL_HANDLE, serializer_ingest, TEST_DEVICE_HANDLE));
         STRICT_EXPECTED_CALL(IoTHubClient_LL_SetDeviceMethodCallback(TEST_IOTHUB_CLIENT_LL_HANDLE, deviceMethodCallback, TEST_DEVICE_HANDLE));
         STRICT_EXPECTED_CALL(VECTOR_create(sizeof(SERIALIZER_DEVICETWIN_PROTOHANDLE)));
-        STRICT_EXPECTED_CALL(VECTOR_push_back(IGNORED_PTR_ARG, IGNORED_PTR_ARG, 1))
+        STRICT_EXPECTED_CALL(VECTOR_push_back(IGNORED_ARG, IGNORED_ARG, 1))
             .IgnoreArgument_handle()
             .IgnoreArgument_elements();
     }
@@ -466,9 +466,9 @@ BEGIN_TEST_SUITE(serializer_dt_ut)
     void serializer_ingest_DEVICE_TWIN_UPDATE_COMPLETE_inert_path(size_t payloadSize)
     {
         STRICT_EXPECTED_CALL(gballoc_malloc(payloadSize + 1));
-        STRICT_EXPECTED_CALL(CodeFirst_IngestDesiredProperties(TEST_SERIALIZER_INGEST_CONTEXT, IGNORED_PTR_ARG, true))
+        STRICT_EXPECTED_CALL(CodeFirst_IngestDesiredProperties(TEST_SERIALIZER_INGEST_CONTEXT, IGNORED_ARG, true))
             .IgnoreArgument_jsonPayload();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument_ptr();
     }
 
@@ -527,9 +527,9 @@ BEGIN_TEST_SUITE(serializer_dt_ut)
     void serializer_ingest_DEVICE_TWIN_UPDATE_PARTIAL_inert_path(size_t payloadSize)
     {
         STRICT_EXPECTED_CALL(gballoc_malloc(payloadSize + 1));
-        STRICT_EXPECTED_CALL(CodeFirst_IngestDesiredProperties(TEST_SERIALIZER_INGEST_CONTEXT, IGNORED_PTR_ARG, false))
+        STRICT_EXPECTED_CALL(CodeFirst_IngestDesiredProperties(TEST_SERIALIZER_INGEST_CONTEXT, IGNORED_ARG, false))
             .IgnoreArgument_jsonPayload();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument_ptr();
     }
 
@@ -610,7 +610,7 @@ BEGIN_TEST_SUITE(serializer_dt_ut)
         STRICT_EXPECTED_CALL(IoTHubClient_LL_SetDeviceTwinCallback(TEST_IOTHUB_CLIENT_LL_HANDLE, NULL, NULL));
         STRICT_EXPECTED_CALL(IoTHubClient_LL_SetDeviceMethodCallback(TEST_IOTHUB_CLIENT_LL_HANDLE, NULL, NULL));
         STRICT_EXPECTED_CALL(CodeFirst_DestroyDevice(model));
-        STRICT_EXPECTED_CALL(VECTOR_erase(g_allProtoHandles, IGNORED_PTR_ARG, 1))
+        STRICT_EXPECTED_CALL(VECTOR_erase(g_allProtoHandles, IGNORED_ARG, 1))
             .IgnoreArgument_elements();
         STRICT_EXPECTED_CALL(VECTOR_size(g_allProtoHandles));
         STRICT_EXPECTED_CALL(VECTOR_destroy(g_allProtoHandles));
@@ -637,7 +637,7 @@ BEGIN_TEST_SUITE(serializer_dt_ut)
         STRICT_EXPECTED_CALL(IoTHubClient_SetDeviceTwinCallback(TEST_IOTHUB_CLIENT_HANDLE, NULL, NULL));
         STRICT_EXPECTED_CALL(IoTHubClient_SetDeviceMethodCallback(TEST_IOTHUB_CLIENT_HANDLE, NULL, NULL));
         STRICT_EXPECTED_CALL(CodeFirst_DestroyDevice(model));
-        STRICT_EXPECTED_CALL(VECTOR_erase(g_allProtoHandles, IGNORED_PTR_ARG, 1))
+        STRICT_EXPECTED_CALL(VECTOR_erase(g_allProtoHandles, IGNORED_ARG, 1))
             .IgnoreArgument_elements();
         STRICT_EXPECTED_CALL(VECTOR_size(g_allProtoHandles));
         STRICT_EXPECTED_CALL(VECTOR_destroy(g_allProtoHandles));
@@ -660,9 +660,9 @@ BEGIN_TEST_SUITE(serializer_dt_ut)
         STRICT_EXPECTED_CALL(MethodReturn_GetReturn(TEST_METHODRETURN_HANDLE))
             .SetReturn(&data2);
         STRICT_EXPECTED_CALL(gballoc_malloc(4)); /*answer is "1234"*/
-        STRICT_EXPECTED_CALL(MethodReturn_Destroy(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MethodReturn_Destroy(IGNORED_ARG))
             .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument_ptr();
     }
 
@@ -738,9 +738,9 @@ BEGIN_TEST_SUITE(serializer_dt_ut)
 
         STRICT_EXPECTED_CALL(gballoc_malloc(2));
         STRICT_EXPECTED_CALL(VECTOR_find_if(g_allProtoHandles, protoHandleHasDeviceStartAddress, model));
-        STRICT_EXPECTED_CALL(IoTHubClient_SendReportedState(TEST_IOTHUB_CLIENT_HANDLE, IGNORED_PTR_ARG, 2, reportedStateCallback, (void*)1))
+        STRICT_EXPECTED_CALL(IoTHubClient_SendReportedState(TEST_IOTHUB_CLIENT_HANDLE, IGNORED_ARG, 2, reportedStateCallback, (void*)1))
             .IgnoreArgument_reportedState();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument_ptr();
     }
 
@@ -835,9 +835,9 @@ BEGIN_TEST_SUITE(serializer_dt_ut)
 
         STRICT_EXPECTED_CALL(gballoc_malloc(2));
         STRICT_EXPECTED_CALL(VECTOR_find_if(g_allProtoHandles, protoHandleHasDeviceStartAddress, model));
-        STRICT_EXPECTED_CALL(IoTHubClient_LL_SendReportedState(TEST_IOTHUB_CLIENT_LL_HANDLE, IGNORED_PTR_ARG, 2, reportedStateCallback, (void*)1))
+        STRICT_EXPECTED_CALL(IoTHubClient_LL_SendReportedState(TEST_IOTHUB_CLIENT_LL_HANDLE, IGNORED_ARG, 2, reportedStateCallback, (void*)1))
             .IgnoreArgument_reportedState();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument_ptr();
     }
 

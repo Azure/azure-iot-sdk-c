@@ -20,7 +20,7 @@ void real_free(void* ptr)
 }
 
 #include "testrunnerswitcher.h"
-#include "azure_macro_utils/macro_utils.h"
+#include "macro_utils/macro_utils.h"
 #include "umock_c/umock_c.h"
 #include "umock_c/umock_c_negative_tests.h"
 
@@ -201,8 +201,8 @@ TEST_FUNCTION(tpmAttestation_getEndorsementKey_success)
 TEST_FUNCTION(tpmAttestation_create_ek_only)
 {
     //arrange
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, DUMMY_EK));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, DUMMY_EK));
 
     //act
     TPM_ATTESTATION_HANDLE tpm_att = tpmAttestation_create(DUMMY_EK, NULL);
@@ -219,9 +219,9 @@ TEST_FUNCTION(tpmAttestation_create_ek_only)
 TEST_FUNCTION(tpmAttestation_create_ek_and_srk)
 {
     //arrange
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, DUMMY_EK));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, DUMMY_SRK));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, DUMMY_EK));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, DUMMY_SRK));
 
     //act
     TPM_ATTESTATION_HANDLE tpm_att = tpmAttestation_create(DUMMY_EK, DUMMY_SRK);
@@ -256,9 +256,9 @@ TEST_FUNCTION(tpmAttestation_create_tags_and_srk_throw_error)
     int negativeTestsInitResult = umock_c_negative_tests_init();
     ASSERT_ARE_EQUAL(int, 0, negativeTestsInitResult);
 
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, DUMMY_EK));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, DUMMY_SRK));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, DUMMY_EK));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, DUMMY_SRK));
 
     umock_c_negative_tests_snapshot();
 
@@ -299,9 +299,9 @@ TEST_FUNCTION(tpmAttestation_destroy_success)
     TPM_ATTESTATION_HANDLE tpm_att = tpmAttestation_create(DUMMY_EK, DUMMY_SRK);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
     //act
     tpmAttestation_destroy(tpm_att);
@@ -342,8 +342,8 @@ TEST_FUNCTION(tpmAttestation_toJson_only_ek)
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(json_value_init_object());
-    STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
 
     //act
     JSON_Value* json_val = tpmAttestation_toJson(tpm_att);
@@ -364,9 +364,9 @@ TEST_FUNCTION(tpmAttestation_toJson_full_tpm)
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(json_value_init_object());
-    STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
 
     //act
     JSON_Value* json_val = tpmAttestation_toJson(tpm_att);
@@ -390,9 +390,9 @@ TEST_FUNCTION(tpmAttestation_toJson_full_tpm_error)
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(json_value_init_object());
-    STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
 
     umock_c_negative_tests_snapshot();
 
@@ -443,10 +443,10 @@ TEST_FUNCTION(tpmAttestation_fromJson_null)
 TEST_FUNCTION(tpmAttestation_fromJson_min)
 {
     //arrange
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(DUMMY_EK);
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(NULL);
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_ARG, IGNORED_ARG)).SetReturn(DUMMY_EK);
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_ARG, IGNORED_ARG)).SetReturn(NULL);
 
     //act
     TPM_ATTESTATION_HANDLE tpm_att = tpmAttestation_fromJson(TEST_JSON_OBJECT);
@@ -463,11 +463,11 @@ TEST_FUNCTION(tpmAttestation_fromJson_min)
 TEST_FUNCTION(tpmAttestation_fromJson_max)
 {
     //arrange
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(DUMMY_EK);
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(DUMMY_SRK);
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_ARG, IGNORED_ARG)).SetReturn(DUMMY_EK);
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_ARG, IGNORED_ARG)).SetReturn(DUMMY_SRK);
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
 
     //act
     TPM_ATTESTATION_HANDLE tpm_att = tpmAttestation_fromJson(TEST_JSON_OBJECT);
@@ -487,10 +487,10 @@ TEST_FUNCTION(tpmAttestation_fromJson_min_error)
     int negativeTestsInitResult = umock_c_negative_tests_init();
     ASSERT_ARE_EQUAL(int, 0, negativeTestsInitResult);
 
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(DUMMY_EK); //can't really "fail" (yet)
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(NULL); //can't really "fail"
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_ARG, IGNORED_ARG)).SetReturn(DUMMY_EK); //can't really "fail" (yet)
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_ARG, IGNORED_ARG)).SetReturn(NULL); //can't really "fail"
 
     umock_c_negative_tests_snapshot();
 
@@ -529,11 +529,11 @@ TEST_FUNCTION(tpmAttestation_fromJson_max_error)
     int negativeTestsInitResult = umock_c_negative_tests_init();
     ASSERT_ARE_EQUAL(int, 0, negativeTestsInitResult);
 
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(DUMMY_EK); //can't really "fail" (yet)
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(DUMMY_SRK); //can't really "fail"
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_ARG, IGNORED_ARG)).SetReturn(DUMMY_EK); //can't really "fail" (yet)
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_ARG, IGNORED_ARG)).SetReturn(DUMMY_SRK); //can't really "fail"
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
 
     umock_c_negative_tests_snapshot();
 

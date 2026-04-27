@@ -12,7 +12,7 @@ extern "C" {
 #endif /* __cplusplus */
 
 #include "umock_c/umock_c_prod.h"
-#include "azure_macro_utils/macro_utils.h"
+#include "macro_utils/macro_utils.h"
 
 #define SECURE_DEVICE_TYPE_VALUES \
     SECURE_DEVICE_TYPE_UNKNOWN,   \

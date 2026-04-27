@@ -21,7 +21,7 @@ static void real_free(void* ptr)
 }
 
 #include "testrunnerswitcher.h"
-#include "azure_macro_utils/macro_utils.h"
+#include "macro_utils/macro_utils.h"
 #include "umock_c/umock_c.h"
 #include "umock_c/umocktypes_charptr.h"
 #include "umock_c/umocktypes_stdint.h"
@@ -170,8 +170,8 @@ static int test_amqpvalue_get_uuid(AMQP_VALUE value, uuid* uuid_value)
 
 static void set_add_map_item(void)
 {
-    STRICT_EXPECTED_CALL(amqpvalue_create_symbol(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(amqpvalue_create_string(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(amqpvalue_create_symbol(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(amqpvalue_create_string(IGNORED_ARG));
     STRICT_EXPECTED_CALL(amqpvalue_set_map_value(TEST_AMQP_VALUE, TEST_AMQP_VALUE, TEST_AMQP_VALUE));
     STRICT_EXPECTED_CALL(amqpvalue_destroy(TEST_AMQP_VALUE));
     STRICT_EXPECTED_CALL(amqpvalue_destroy(TEST_AMQP_VALUE));
@@ -188,12 +188,12 @@ static void set_exp_calls_for_create_encoded_annotations_properties(bool has_dia
 
         set_add_map_item();
 
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
 
         // Add Map Item
         set_add_map_item();
 
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
     }
     else
     {
@@ -209,7 +209,7 @@ static void set_exp_calls_for_create_encoded_annotations_properties(bool has_dia
     if (has_diagnostic_properties || has_security_props)
     {
         STRICT_EXPECTED_CALL(amqpvalue_create_message_annotations(TEST_AMQP_VALUE));
-        STRICT_EXPECTED_CALL(amqpvalue_get_encoded_size(TEST_AMQP_VALUE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(amqpvalue_get_encoded_size(TEST_AMQP_VALUE, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &encoding_size, sizeof(encoding_size));
         STRICT_EXPECTED_CALL(amqpvalue_destroy(TEST_AMQP_VALUE));
     }
@@ -250,7 +250,7 @@ static void set_exp_calls_for_create_encoded_message_properties(bool has_message
 
     if (content_type != NULL)
     {
-        STRICT_EXPECTED_CALL(properties_set_content_type(IGNORED_PTR_ARG, content_type));
+        STRICT_EXPECTED_CALL(properties_set_content_type(IGNORED_ARG, content_type));
     }
 
     STRICT_EXPECTED_CALL(IoTHubMessage_GetContentEncodingSystemProperty(TEST_IOTHUB_MESSAGE_HANDLE)).CallCannotFail()
@@ -258,11 +258,11 @@ static void set_exp_calls_for_create_encoded_message_properties(bool has_message
 
     if (content_encoding != NULL)
     {
-        STRICT_EXPECTED_CALL(properties_set_content_encoding(IGNORED_PTR_ARG, content_encoding));
+        STRICT_EXPECTED_CALL(properties_set_content_encoding(IGNORED_ARG, content_encoding));
     }
 
     STRICT_EXPECTED_CALL(amqpvalue_create_properties(TEST_PROPERTIES_HANDLE));
-    STRICT_EXPECTED_CALL(amqpvalue_get_encoded_size(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(amqpvalue_get_encoded_size(IGNORED_ARG, IGNORED_ARG))
         .CopyOutArgumentBuffer(2, &encoding_size, sizeof(encoding_size));
     STRICT_EXPECTED_CALL(properties_destroy(TEST_PROPERTIES_HANDLE));
 }
@@ -275,9 +275,9 @@ static void set_exp_calls_for_create_encoded_application_properties(size_t numbe
 
     STRICT_EXPECTED_CALL(IoTHubMessage_GetMessageCreationTimeUtcSystemProperty(TEST_IOTHUB_MESSAGE_HANDLE))
         .CallCannotFail();
-    STRICT_EXPECTED_CALL(Map_AddOrUpdate(TEST_MAP_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Map_AddOrUpdate(TEST_MAP_HANDLE, IGNORED_ARG, IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(Map_GetInternals(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Map_GetInternals(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
         .CopyOutArgumentBuffer(2, &TEST_MAP_KEYS, sizeof(TEST_MAP_KEYS))
         .CopyOutArgumentBuffer(3, &TEST_MAP_VALUES, sizeof(TEST_MAP_VALUES))
         .CopyOutArgumentBuffer(4, &number_of_app_properties, sizeof(number_of_app_properties));
@@ -296,9 +296,9 @@ static void set_exp_calls_for_create_encoded_application_properties(size_t numbe
         }
 
         STRICT_EXPECTED_CALL(amqpvalue_create_application_properties(TEST_AMQP_VALUE));
-        STRICT_EXPECTED_CALL(amqpvalue_get_encoded_size(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(amqpvalue_get_encoded_size(IGNORED_ARG, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &encoding_size, sizeof(encoding_size));
-        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_ARG));
     }
 }
 
@@ -310,7 +310,7 @@ static void set_exp_calls_for_create_encoded_data(IOTHUBMESSAGE_CONTENT_TYPE msg
 
     if (msg_content_type == IOTHUBMESSAGE_BYTEARRAY)
     {
-        STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(TEST_IOTHUB_MESSAGE_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(TEST_IOTHUB_MESSAGE_HANDLE, IGNORED_ARG, IGNORED_ARG));
     }
     else if (msg_content_type == IOTHUBMESSAGE_STRING)
     {
@@ -320,7 +320,7 @@ static void set_exp_calls_for_create_encoded_data(IOTHUBMESSAGE_CONTENT_TYPE msg
     data d;
     memset(&d, 0, sizeof(d));
     STRICT_EXPECTED_CALL(amqpvalue_create_data(d)).IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(amqpvalue_get_encoded_size(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(amqpvalue_get_encoded_size(IGNORED_ARG, IGNORED_ARG))
         .CopyOutArgumentBuffer(2, &encoding_size, sizeof(encoding_size));
 }
 
@@ -332,21 +332,21 @@ static void set_exp_calls_for_message_create_uamqp_encoding_from_iothub_message(
 
     set_exp_calls_for_create_encoded_data(msg_content_type);
 
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .SetReturn(g_encoding_buffer);
-    STRICT_EXPECTED_CALL(amqpvalue_encode(TEST_AMQP_VALUE, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(amqpvalue_encode(TEST_AMQP_VALUE, IGNORED_ARG, IGNORED_ARG));
 
     if (number_of_app_properties > 0)
     {
-        STRICT_EXPECTED_CALL(amqpvalue_encode(TEST_AMQP_VALUE, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(amqpvalue_encode(TEST_AMQP_VALUE, IGNORED_ARG, IGNORED_ARG));
     }
 
     if (has_diag_properties)
     {
-        STRICT_EXPECTED_CALL(amqpvalue_encode(TEST_AMQP_VALUE, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(amqpvalue_encode(TEST_AMQP_VALUE, IGNORED_ARG, IGNORED_ARG));
     }
 
-    STRICT_EXPECTED_CALL(amqpvalue_encode(TEST_AMQP_VALUE, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(amqpvalue_encode(TEST_AMQP_VALUE, IGNORED_ARG, IGNORED_ARG));
 
     STRICT_EXPECTED_CALL(amqpvalue_destroy(TEST_AMQP_VALUE));
     if (number_of_app_properties > 0)
@@ -377,20 +377,20 @@ static void set_exp_calls_for_message_create_IoTHubMessage_from_uamqp_message(
 
     MESSAGE_BODY_TYPE body_type = MESSAGE_BODY_TYPE_DATA;
 
-    STRICT_EXPECTED_CALL(message_get_body_type(TEST_MESSAGE_HANDLE, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(message_get_body_type(TEST_MESSAGE_HANDLE, IGNORED_ARG))
         .IgnoreArgument_body_type()
         .CopyOutArgumentBuffer_body_type(&body_type, sizeof(MESSAGE_BODY_TYPE));
-    STRICT_EXPECTED_CALL(message_get_body_amqp_data_in_place(TEST_MESSAGE_HANDLE, 0, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(message_get_body_amqp_data_in_place(TEST_MESSAGE_HANDLE, 0, IGNORED_ARG))
         .IgnoreArgument(3)
         .CopyOutArgumentBuffer_amqp_data(&test_binary_data, sizeof (BINARY_DATA));
-    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_PTR_ARG, IGNORED_NUM_ARG)).IgnoreAllArguments();
+    STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_ARG, IGNORED_ARG));
 
     // readPropertiesFromuAMQPMessage
-    STRICT_EXPECTED_CALL(message_get_properties(TEST_MESSAGE_HANDLE, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(message_get_properties(TEST_MESSAGE_HANDLE, IGNORED_ARG))
         .IgnoreArgument_properties()
         .CopyOutArgumentBuffer_properties(&TEST_PROPERTIES_HANDLE_PTR, sizeof(PROPERTIES_HANDLE));
 
-    STRICT_EXPECTED_CALL(properties_get_message_id(TEST_PROPERTIES_HANDLE, IGNORED_PTR_ARG)).IgnoreArgument_message_id_value();
+    STRICT_EXPECTED_CALL(properties_get_message_id(TEST_PROPERTIES_HANDLE, IGNORED_ARG)).IgnoreArgument_message_id_value();
 
     if (has_message_id)
     {
@@ -398,23 +398,23 @@ static void set_exp_calls_for_message_create_IoTHubMessage_from_uamqp_message(
 
         if (message_id_type == AMQP_TYPE_STRING)
         {
-            STRICT_EXPECTED_CALL(amqpvalue_get_string(TEST_AMQP_VALUE, IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(amqpvalue_get_string(TEST_AMQP_VALUE, IGNORED_ARG));
         }
         else if (message_id_type == AMQP_TYPE_ULONG)
         {
-            STRICT_EXPECTED_CALL(amqpvalue_get_ulong(TEST_AMQP_VALUE, IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(amqpvalue_get_ulong(TEST_AMQP_VALUE, IGNORED_ARG));
         }
         else if (message_id_type == AMQP_TYPE_UUID)
         {
-            STRICT_EXPECTED_CALL(amqpvalue_get_uuid(TEST_AMQP_VALUE, IGNORED_PTR_ARG));
-            STRICT_EXPECTED_CALL(UUID_to_string(IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(amqpvalue_get_uuid(TEST_AMQP_VALUE, IGNORED_ARG));
+            STRICT_EXPECTED_CALL(UUID_to_string(IGNORED_ARG));
         }
 
-        STRICT_EXPECTED_CALL(IoTHubMessage_SetMessageId(TEST_IOTHUB_MESSAGE_HANDLE, IGNORED_PTR_ARG)).SetReturn(IOTHUB_MESSAGE_OK);
+        STRICT_EXPECTED_CALL(IoTHubMessage_SetMessageId(TEST_IOTHUB_MESSAGE_HANDLE, IGNORED_ARG)).SetReturn(IOTHUB_MESSAGE_OK);
 
         if (message_id_type == AMQP_TYPE_UUID)
         {
-            STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(free(IGNORED_ARG));
         }
     }
     else
@@ -422,7 +422,7 @@ static void set_exp_calls_for_message_create_IoTHubMessage_from_uamqp_message(
         STRICT_EXPECTED_CALL(amqpvalue_get_type(TEST_AMQP_VALUE)).SetReturn(AMQP_TYPE_NULL);
     }
 
-    STRICT_EXPECTED_CALL(properties_get_correlation_id(TEST_PROPERTIES_HANDLE, IGNORED_PTR_ARG)).IgnoreArgument_correlation_id_value();
+    STRICT_EXPECTED_CALL(properties_get_correlation_id(TEST_PROPERTIES_HANDLE, IGNORED_ARG)).IgnoreArgument_correlation_id_value();
 
     if (has_correlation_id)
     {
@@ -430,23 +430,23 @@ static void set_exp_calls_for_message_create_IoTHubMessage_from_uamqp_message(
 
         if (correlation_id_type == AMQP_TYPE_STRING)
         {
-            STRICT_EXPECTED_CALL(amqpvalue_get_string(TEST_AMQP_VALUE, IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(amqpvalue_get_string(TEST_AMQP_VALUE, IGNORED_ARG));
         }
         else if (correlation_id_type == AMQP_TYPE_ULONG)
         {
-            STRICT_EXPECTED_CALL(amqpvalue_get_ulong(TEST_AMQP_VALUE, IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(amqpvalue_get_ulong(TEST_AMQP_VALUE, IGNORED_ARG));
         }
         else if (correlation_id_type == AMQP_TYPE_UUID)
         {
-            STRICT_EXPECTED_CALL(amqpvalue_get_uuid(TEST_AMQP_VALUE, IGNORED_PTR_ARG));
-            STRICT_EXPECTED_CALL(UUID_to_string(IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(amqpvalue_get_uuid(TEST_AMQP_VALUE, IGNORED_ARG));
+            STRICT_EXPECTED_CALL(UUID_to_string(IGNORED_ARG));
         }
 
-        STRICT_EXPECTED_CALL(IoTHubMessage_SetCorrelationId(TEST_IOTHUB_MESSAGE_HANDLE, IGNORED_PTR_ARG)).SetReturn(IOTHUB_MESSAGE_OK);
+        STRICT_EXPECTED_CALL(IoTHubMessage_SetCorrelationId(TEST_IOTHUB_MESSAGE_HANDLE, IGNORED_ARG)).SetReturn(IOTHUB_MESSAGE_OK);
 
         if (message_id_type == AMQP_TYPE_UUID)
         {
-            STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(free(IGNORED_ARG));
         }
     }
     else
@@ -454,15 +454,15 @@ static void set_exp_calls_for_message_create_IoTHubMessage_from_uamqp_message(
         STRICT_EXPECTED_CALL(amqpvalue_get_type(TEST_AMQP_VALUE)).SetReturn(AMQP_TYPE_NULL);
     }
 
-    STRICT_EXPECTED_CALL(properties_get_user_id(TEST_PROPERTIES_HANDLE, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(properties_get_user_id(TEST_PROPERTIES_HANDLE, IGNORED_ARG))
         .CopyOutArgumentBuffer(2, &user_id, sizeof(amqp_binary));
 
     if (user_id.bytes != NULL)
     {
-        STRICT_EXPECTED_CALL(IoTHubMessage_SetMessageUserIdSystemProperty(TEST_IOTHUB_MESSAGE_HANDLE, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(IoTHubMessage_SetMessageUserIdSystemProperty(TEST_IOTHUB_MESSAGE_HANDLE, IGNORED_ARG));
     }
 
-    STRICT_EXPECTED_CALL(properties_get_content_type(TEST_PROPERTIES_HANDLE, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(properties_get_content_type(TEST_PROPERTIES_HANDLE, IGNORED_ARG))
         .CopyOutArgumentBuffer(2, &content_type, sizeof(content_type));
 
     if (content_type != NULL)
@@ -470,7 +470,7 @@ static void set_exp_calls_for_message_create_IoTHubMessage_from_uamqp_message(
         STRICT_EXPECTED_CALL(IoTHubMessage_SetContentTypeSystemProperty(TEST_IOTHUB_MESSAGE_HANDLE, content_type));
     }
 
-    STRICT_EXPECTED_CALL(properties_get_content_encoding(TEST_PROPERTIES_HANDLE, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(properties_get_content_encoding(TEST_PROPERTIES_HANDLE, IGNORED_ARG))
         .CopyOutArgumentBuffer(2, &content_encoding, sizeof(content_encoding));
 
     if (content_encoding != NULL)
@@ -485,24 +485,24 @@ static void set_exp_calls_for_message_create_IoTHubMessage_from_uamqp_message(
 
     if (has_properties)
     {
-        STRICT_EXPECTED_CALL(message_get_application_properties(TEST_MESSAGE_HANDLE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(message_get_application_properties(TEST_MESSAGE_HANDLE, IGNORED_ARG))
             .IgnoreArgument(2)
             .CopyOutArgumentBuffer_application_properties(&TEST_AMQP_VALUE2, sizeof(AMQP_VALUE));
         STRICT_EXPECTED_CALL(amqpvalue_get_inplace_described_value(TEST_AMQP_VALUE));
-        STRICT_EXPECTED_CALL(amqpvalue_get_map_pair_count(TEST_AMQP_VALUE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(amqpvalue_get_map_pair_count(TEST_AMQP_VALUE, IGNORED_ARG))
             .IgnoreArgument(2)
             .CopyOutArgumentBuffer_pair_count((uint32_t *)&number_of_properties, sizeof(uint32_t));
 
         size_t i;
         for (i = 0; i < number_of_properties; i++)
         {
-            STRICT_EXPECTED_CALL(amqpvalue_get_map_key_value_pair(TEST_AMQP_VALUE, (uint32_t)i, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL(amqpvalue_get_map_key_value_pair(TEST_AMQP_VALUE, (uint32_t)i, IGNORED_ARG, IGNORED_ARG))
                 .IgnoreArgument_key().IgnoreArgument_value()
                 .CopyOutArgumentBuffer_key(&TEST_AMQP_VALUE2, sizeof(AMQP_VALUE))
                 .CopyOutArgumentBuffer_value(&TEST_AMQP_VALUE2, sizeof(AMQP_VALUE));
-            STRICT_EXPECTED_CALL(amqpvalue_get_string(TEST_AMQP_VALUE, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL(amqpvalue_get_string(TEST_AMQP_VALUE, IGNORED_ARG))
                 .IgnoreArgument_string_value().CopyOutArgumentBuffer_string_value(&TEST_MAP_KEYS[i], sizeof(char*));
-            STRICT_EXPECTED_CALL(amqpvalue_get_string(TEST_AMQP_VALUE, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL(amqpvalue_get_string(TEST_AMQP_VALUE, IGNORED_ARG))
                 .IgnoreArgument_string_value().CopyOutArgumentBuffer_string_value(&TEST_MAP_VALUES[i], sizeof(char*));
             STRICT_EXPECTED_CALL(Map_AddOrUpdate(TEST_MAP_HANDLE, TEST_MAP_KEYS[i], TEST_MAP_VALUES[i]));
             STRICT_EXPECTED_CALL(amqpvalue_destroy(TEST_AMQP_VALUE));
@@ -513,7 +513,7 @@ static void set_exp_calls_for_message_create_IoTHubMessage_from_uamqp_message(
     }
     else
     {
-        STRICT_EXPECTED_CALL(message_get_application_properties(TEST_MESSAGE_HANDLE, IGNORED_PTR_ARG)).IgnoreArgument(2);
+        STRICT_EXPECTED_CALL(message_get_application_properties(TEST_MESSAGE_HANDLE, IGNORED_ARG)).IgnoreArgument(2);
     }
 }
 

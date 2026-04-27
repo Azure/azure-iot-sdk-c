@@ -25,7 +25,7 @@ static void my_gballoc_free(void* ptr)
 #include "umock_c/umock_c.h"
 #include "umock_c/umocktypes_charptr.h"
 #include "umock_c/umock_c_negative_tests.h"
-#include "azure_macro_utils/macro_utils.h"
+#include "macro_utils/macro_utils.h"
 
 #define ENABLE_MOCKS
 #include "azure_c_shared_utility/gballoc.h"
@@ -246,27 +246,27 @@ static int should_skip_index(size_t current_index, const size_t skip_array[], si
 
 static void setup_dps_hsm_tpm_create_mock(void)
 {
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(BUFFER_clone(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(BUFFER_clone(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_SCOPE_ID));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_clone(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_clone(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_SCOPE_ID));
     STRICT_EXPECTED_CALL(BUFFER_new());
 }
 
 static void setup_prov_sasl_mechanism_challenge_sastoken_mock(bool last_seq)
 {
-    STRICT_EXPECTED_CALL(BUFFER_append_build(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_append_build(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
     if (!last_seq)
     {
-        STRICT_EXPECTED_CALL(on_challenge_callback(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(on_challenge_callback(IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
     }
     else
     {
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
     }
 }
 
@@ -296,8 +296,8 @@ TEST_FUNCTION(prov_sasltpm_create_ek_NULL_fail)
     sasl_tpm_config.hostname = TEST_DPS_URI;
 
     //arrange
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
     //act
     CONCRETE_SASL_MECHANISM_HANDLE handle = prov_sasl_mechanism_create(&sasl_tpm_config);
@@ -421,18 +421,18 @@ TEST_FUNCTION(prov_sasltpm_destroy_succeed)
     umock_c_reset_all_calls();
 
     //arrange
-    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
     //act
     prov_sasl_mechanism_destroy(handle);
@@ -517,9 +517,9 @@ TEST_FUNCTION(prov_sasltpm_get_init_bytes_succeed)
     umock_c_reset_all_calls();
 
     //arrange
-    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
 
     //act
     int reply = prov_sasl_mechanism_get_init_bytes(handle, &init_bytes);
@@ -557,9 +557,9 @@ TEST_FUNCTION(prov_sasltpm_get_init_bytes_chunk_succeed)
     umock_c_reset_all_calls();
 
     //arrange
-    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG)).SetReturn(TEST_CHUNK_BUFFER);
-    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG)).SetReturn(TEST_CHUNK_BUFF_SIZE);
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG)).SetReturn(TEST_CHUNK_BUFFER);
+    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_ARG)).SetReturn(TEST_CHUNK_BUFF_SIZE);
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
 
     //act
     int reply = prov_sasl_mechanism_get_init_bytes(handle, &init_bytes);
@@ -593,9 +593,9 @@ TEST_FUNCTION(prov_sasltpm_get_init_bytes_fail)
     umock_c_reset_all_calls();
 
     //arrange
-    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)).SetReturn(NULL);
+    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG)).SetReturn(NULL);
 
     //act
     int reply = prov_sasl_mechanism_get_init_bytes(handle, &init_bytes);
@@ -648,9 +648,9 @@ TEST_FUNCTION(prov_sasl_mechanism_challenge_srk_succeed)
     umock_c_reset_all_calls();
 
     //arrange
-    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
 
     //act
     int reply = prov_sasl_mechanism_challenge(handle, &challenge_bytes, &reply_bytes);
@@ -682,9 +682,9 @@ TEST_FUNCTION(prov_sasl_mechanism_challenge_srk_fail)
     umock_c_reset_all_calls();
 
     //arrange
-    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)).SetReturn(NULL);
+    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG)).SetReturn(NULL);
 
     //act
     int reply = prov_sasl_mechanism_challenge(handle, &challenge_bytes, &reply_bytes);
@@ -784,7 +784,7 @@ TEST_FUNCTION(prov_sasl_mechanism_challenge_sastoken_invalid_seq_succeed)
     umock_c_reset_all_calls();
 
     //arrange
-    STRICT_EXPECTED_CALL(BUFFER_append_build(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_append_build(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
 
     //act
     int reply = prov_sasl_mechanism_challenge(handle, &challenge_bytes, &reply_bytes);

@@ -14,7 +14,7 @@ extern "C" {
 #endif /* __cplusplus */
 
 #include "umock_c/umock_c_prod.h"
-#include "azure_macro_utils/macro_utils.h"
+#include "macro_utils/macro_utils.h"
 
 typedef struct IOTHUB_SECURITY_INFO_TAG* IOTHUB_SECURITY_HANDLE;
 

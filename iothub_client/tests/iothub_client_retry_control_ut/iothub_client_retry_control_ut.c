@@ -130,13 +130,13 @@ static void run_and_verify_should_retry(RETRY_CONTROL_HANDLE handle, time_t firs
     if (is_first_check)
     {
         tickcount = SECONDS_TO_TICKS(current_time);
-        STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CopyOutArgumentBuffer_current_ms(&tickcount, sizeof(tickcount));
+        STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG)).CopyOutArgumentBuffer_current_ms(&tickcount, sizeof(tickcount));
 
     }
     else
     {
         tickcount = SECONDS_TO_TICKS(current_time);
-        STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CopyOutArgumentBuffer_current_ms(&tickcount, sizeof(tickcount));
+        STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG)).CopyOutArgumentBuffer_current_ms(&tickcount, sizeof(tickcount));
         STRICT_EXPECTED_CALL(get_difftime(current_time, first_retry_time)).SetReturn(secs_since_first_retry);
 
         if (expected_retry_action != RETRY_ACTION_STOP_RETRYING)
@@ -148,7 +148,7 @@ static void run_and_verify_should_retry(RETRY_CONTROL_HANDLE handle, time_t firs
     if (expected_retry_action == RETRY_ACTION_RETRY_NOW)
     {
         tickcount = SECONDS_TO_TICKS(current_time);
-        STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CopyOutArgumentBuffer_current_ms(&tickcount, sizeof(tickcount));
+        STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG)).CopyOutArgumentBuffer_current_ms(&tickcount, sizeof(tickcount));
     }
 
     // act
@@ -253,9 +253,9 @@ static void register_global_mock_returns()
 static RETRY_CONTROL_HANDLE create_retry_control(IOTHUB_CLIENT_RETRY_POLICY policy_name, unsigned int max_retry_time_in_secs)
 {
     umock_c_reset_all_calls();
-    EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
+    EXPECTED_CALL(malloc(IGNORED_ARG));
     EXPECTED_CALL(tickcounter_create());
-    EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
+    EXPECTED_CALL(malloc(IGNORED_ARG));
     RETRY_CONTROL_HANDLE handle = retry_control_create(policy_name, max_retry_time_in_secs);
 
     return handle;
@@ -315,7 +315,7 @@ TEST_FUNCTION(create_malloc_fails)
     ASSERT_ARE_EQUAL(int, 0, umock_c_negative_tests_init());
 
     umock_c_reset_all_calls();
-    EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
+    EXPECTED_CALL(malloc(IGNORED_ARG));
     umock_c_negative_tests_snapshot();
 
     umock_c_negative_tests_fail_call(0);
@@ -338,9 +338,9 @@ TEST_FUNCTION(tickcounter_create_fails)
     ASSERT_ARE_EQUAL(int, 0, umock_c_negative_tests_init());
 
     umock_c_reset_all_calls();
-    EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
+    EXPECTED_CALL(malloc(IGNORED_ARG));
     EXPECTED_CALL(tickcounter_create());
-    EXPECTED_CALL(free(IGNORED_PTR_ARG));
+    EXPECTED_CALL(free(IGNORED_ARG));
     umock_c_negative_tests_snapshot();
 
     umock_c_negative_tests_fail_call(1);
@@ -361,7 +361,7 @@ TEST_FUNCTION(create_success)
 {
     // arrange
     umock_c_reset_all_calls();
-    EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
+    EXPECTED_CALL(malloc(IGNORED_ARG));
     EXPECTED_CALL(tickcounter_create());
 
     // act
@@ -393,14 +393,14 @@ TEST_FUNCTION(destroy_success)
 {
     // arrange
     umock_c_reset_all_calls();
-    EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
+    EXPECTED_CALL(malloc(IGNORED_ARG));
     EXPECTED_CALL(tickcounter_create());
-    EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
+    EXPECTED_CALL(malloc(IGNORED_ARG));
     RETRY_CONTROL_HANDLE handle = retry_control_create(IOTHUB_CLIENT_RETRY_EXPONENTIAL_BACKOFF_WITH_JITTER, 10);
 
     umock_c_reset_all_calls();
-    EXPECTED_CALL(tickcounter_destroy(IGNORED_PTR_ARG));
-    EXPECTED_CALL(free(IGNORED_PTR_ARG));
+    EXPECTED_CALL(tickcounter_destroy(IGNORED_ARG));
+    EXPECTED_CALL(free(IGNORED_ARG));
 
     // act
     retry_control_destroy(handle);
@@ -447,7 +447,7 @@ TEST_FUNCTION(is_timeout_reached_TRUE_success)
     // arrange
     umock_c_reset_all_calls();
     STRICT_EXPECTED_CALL(get_time(NULL)).SetReturn(TEST_current_time);
-    EXPECTED_CALL(get_difftime(IGNORED_NUM_ARG, IGNORED_NUM_ARG)).SetReturn(10);
+    EXPECTED_CALL(get_difftime(IGNORED_ARG, IGNORED_ARG)).SetReturn(10);
 
     // act
     bool is_timed_out;
@@ -466,7 +466,7 @@ TEST_FUNCTION(is_timeout_reached_FALSE_success)
     // arrange
     umock_c_reset_all_calls();
     STRICT_EXPECTED_CALL(get_time(NULL)).SetReturn(TEST_current_time);
-    EXPECTED_CALL(get_difftime(IGNORED_NUM_ARG, IGNORED_NUM_ARG)).SetReturn(9);
+    EXPECTED_CALL(get_difftime(IGNORED_ARG, IGNORED_ARG)).SetReturn(9);
 
     // act
     bool is_timed_out;
@@ -517,14 +517,14 @@ TEST_FUNCTION(Retrieve_Options_success)
 {
     // arrange
     umock_c_reset_all_calls();
-    EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
+    EXPECTED_CALL(malloc(IGNORED_ARG));
     RETRY_CONTROL_HANDLE handle = retry_control_create(IOTHUB_CLIENT_RETRY_EXPONENTIAL_BACKOFF_WITH_JITTER, 10);
 
     umock_c_reset_all_calls();
-    EXPECTED_CALL(OptionHandler_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(OptionHandler_AddOption(TEST_OPTIONHANDLER_HANDLE, RETRY_CONTROL_OPTION_INITIAL_WAIT_TIME_IN_SECS, IGNORED_PTR_ARG))
+    EXPECTED_CALL(OptionHandler_Create(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(OptionHandler_AddOption(TEST_OPTIONHANDLER_HANDLE, RETRY_CONTROL_OPTION_INITIAL_WAIT_TIME_IN_SECS, IGNORED_ARG))
         .IgnoreArgument_value();
-    STRICT_EXPECTED_CALL(OptionHandler_AddOption(TEST_OPTIONHANDLER_HANDLE, RETRY_CONTROL_OPTION_MAX_JITTER_PERCENT, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(OptionHandler_AddOption(TEST_OPTIONHANDLER_HANDLE, RETRY_CONTROL_OPTION_MAX_JITTER_PERCENT, IGNORED_ARG))
         .IgnoreArgument_value();
 
     // act
@@ -545,14 +545,14 @@ TEST_FUNCTION(Retrieve_Options_failure_checks)
     ASSERT_ARE_EQUAL(int, 0, umock_c_negative_tests_init());
 
     umock_c_reset_all_calls();
-    EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
+    EXPECTED_CALL(malloc(IGNORED_ARG));
     RETRY_CONTROL_HANDLE handle = retry_control_create(IOTHUB_CLIENT_RETRY_EXPONENTIAL_BACKOFF_WITH_JITTER, 10);
 
     umock_c_reset_all_calls();
-    EXPECTED_CALL(OptionHandler_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(OptionHandler_AddOption(TEST_OPTIONHANDLER_HANDLE, RETRY_CONTROL_OPTION_INITIAL_WAIT_TIME_IN_SECS, IGNORED_PTR_ARG))
+    EXPECTED_CALL(OptionHandler_Create(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(OptionHandler_AddOption(TEST_OPTIONHANDLER_HANDLE, RETRY_CONTROL_OPTION_INITIAL_WAIT_TIME_IN_SECS, IGNORED_ARG))
         .IgnoreArgument_value();
-    STRICT_EXPECTED_CALL(OptionHandler_AddOption(TEST_OPTIONHANDLER_HANDLE, RETRY_CONTROL_OPTION_MAX_JITTER_PERCENT, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(OptionHandler_AddOption(TEST_OPTIONHANDLER_HANDLE, RETRY_CONTROL_OPTION_MAX_JITTER_PERCENT, IGNORED_ARG))
         .IgnoreArgument_value();
     umock_c_negative_tests_snapshot();
 
@@ -785,7 +785,7 @@ TEST_FUNCTION(Should_Retry_failure)
 
     umock_c_reset_all_calls();
     tickcount = (tickcounter_ms_t)INDEFINITE_TIME;
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CopyOutArgumentBuffer_current_ms(&tickcount, sizeof(tickcount));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG)).CopyOutArgumentBuffer_current_ms(&tickcount, sizeof(tickcount));
 
     // act
     RETRY_ACTION retry_action;
@@ -809,15 +809,15 @@ TEST_FUNCTION(Should_Retry_evaluate_retry_action_failure)
     // This first call succeeds because retry_count is 0
     umock_c_reset_all_calls();
     tickcount = SECONDS_TO_TICKS(TEST_current_time);
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CopyOutArgumentBuffer_current_ms(&tickcount, sizeof(tickcount));
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CopyOutArgumentBuffer_current_ms(&tickcount, sizeof(tickcount));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG)).CopyOutArgumentBuffer_current_ms(&tickcount, sizeof(tickcount));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG)).CopyOutArgumentBuffer_current_ms(&tickcount, sizeof(tickcount));
 
     RETRY_ACTION retry_action;
     (void)retry_control_should_retry(handle, &retry_action);
 
     umock_c_reset_all_calls();
     tickcount = (tickcounter_ms_t)INDEFINITE_TIME;
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CopyOutArgumentBuffer_current_ms(&tickcount, sizeof(tickcount));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG)).CopyOutArgumentBuffer_current_ms(&tickcount, sizeof(tickcount));
 
     // act
     int result = retry_control_should_retry(handle, &retry_action);
@@ -840,9 +840,9 @@ TEST_FUNCTION(Should_Retry_INDEFINITE_last_retry_time)
     // This first call succeeds because retry_count is 0
     umock_c_reset_all_calls();
     tickcount = SECONDS_TO_TICKS(TEST_current_time);
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CopyOutArgumentBuffer_current_ms(&tickcount, sizeof(tickcount));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG)).CopyOutArgumentBuffer_current_ms(&tickcount, sizeof(tickcount));
     tickcount = (tickcounter_ms_t)INDEFINITE_TIME;
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CopyOutArgumentBuffer_current_ms(&tickcount, sizeof(tickcount));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG)).CopyOutArgumentBuffer_current_ms(&tickcount, sizeof(tickcount));
 
     RETRY_ACTION retry_action;
     (void)retry_control_should_retry(handle, &retry_action);
@@ -873,14 +873,14 @@ TEST_FUNCTION(Should_Retry_NO_MAX_RETRY_TIME_success)
     // This first call succeeds because retry_count is 0
     umock_c_reset_all_calls();
     tickcount = SECONDS_TO_TICKS(first_try_time);
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CopyOutArgumentBuffer_current_ms(&tickcount, sizeof(tickcount));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG)).CopyOutArgumentBuffer_current_ms(&tickcount, sizeof(tickcount));
 
     RETRY_ACTION retry_action;
     (void)retry_control_should_retry(handle, &retry_action);
 
     umock_c_reset_all_calls();
     tickcount = SECONDS_TO_TICKS(next_try_time);
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CopyOutArgumentBuffer_current_ms(&tickcount, sizeof(tickcount));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG)).CopyOutArgumentBuffer_current_ms(&tickcount, sizeof(tickcount));
 
     // no get_difftime gets invoked.
 
@@ -1046,7 +1046,7 @@ TEST_FUNCTION(Should_Retry_RETRY_IMMEDIATE_success)
     umock_c_reset_all_calls();
     tickcounter_ms_t tickcount = SECONDS_TO_TICKS(current_time);
 
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CopyOutArgumentBuffer_current_ms(&tickcount, sizeof(tickcount));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG)).CopyOutArgumentBuffer_current_ms(&tickcount, sizeof(tickcount));
 
     unsigned int i;
     for (i = 0; i <= max_retry_time_in_secs; i++)
@@ -1058,7 +1058,7 @@ TEST_FUNCTION(Should_Retry_RETRY_IMMEDIATE_success)
         {
             // i.e., if it's not the first call to _should_retry.
             tickcount = SECONDS_TO_TICKS(current_time);
-            STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CopyOutArgumentBuffer_current_ms(&tickcount, sizeof(tickcount));
+            STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG)).CopyOutArgumentBuffer_current_ms(&tickcount, sizeof(tickcount));
             STRICT_EXPECTED_CALL(get_difftime(current_time, first_time)).SetReturn(i);
         }
 
@@ -1121,7 +1121,7 @@ TEST_FUNCTION(Reset_success)
     // This first call succeeds because retry_count is 0
     umock_c_reset_all_calls();
     tickcounter_ms_t tickcount = SECONDS_TO_TICKS(first_try_time);
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CopyOutArgumentBuffer_current_ms(&tickcount, sizeof(tickcount));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG)).CopyOutArgumentBuffer_current_ms(&tickcount, sizeof(tickcount));
     RETRY_ACTION retry_action;
     int result = retry_control_should_retry(handle, &retry_action);
     ASSERT_ARE_EQUAL(int, 0, result);
@@ -1130,7 +1130,7 @@ TEST_FUNCTION(Reset_success)
     // At this point the retry control reached the max_retry_time_in_secs.
     umock_c_reset_all_calls();
     tickcount = SECONDS_TO_TICKS(next_try_time);
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CopyOutArgumentBuffer_current_ms(&tickcount, sizeof(tickcount));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG)).CopyOutArgumentBuffer_current_ms(&tickcount, sizeof(tickcount));
     STRICT_EXPECTED_CALL(get_difftime(next_try_time, first_try_time)).SetReturn(max_retry_time_in_secs);
     result = retry_control_should_retry(handle, &retry_action);
     ASSERT_ARE_EQUAL(int, 0, result);
@@ -1141,7 +1141,7 @@ TEST_FUNCTION(Reset_success)
 
     // assert
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CopyOutArgumentBuffer_current_ms(&tickcount, sizeof(tickcount));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG)).CopyOutArgumentBuffer_current_ms(&tickcount, sizeof(tickcount));
     // The return is RETRY_ACTION_RETRY_NOW because retry_count is 0.
     result = retry_control_should_retry(handle, &retry_action);
 

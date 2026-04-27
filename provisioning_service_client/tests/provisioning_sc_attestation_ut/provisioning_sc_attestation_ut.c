@@ -20,7 +20,7 @@ void real_free(void* ptr)
 }
 
 #include "testrunnerswitcher.h"
-#include "azure_macro_utils/macro_utils.h"
+#include "macro_utils/macro_utils.h"
 #include "umock_c/umock_c.h"
 #include "umock_c/umock_c_negative_tests.h"
 #include "azure_c_shared_utility/const_defines.h"
@@ -267,7 +267,7 @@ TEST_FUNCTION(attestationMechanism_createWithTpm_null_ek)
 TEST_FUNCTION(attestationMechanism_createWithTpm_null_srk)
 {
     //arrange
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
     STRICT_EXPECTED_CALL(tpmAttestation_create(DUMMY_EK, NULL));
 
     //act
@@ -286,7 +286,7 @@ TEST_FUNCTION(attestationMechanism_createWithTpm_null_srk)
 TEST_FUNCTION(attestationMechanism_createWithTpm_ek_and_srk)
 {
     //arrange
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
     STRICT_EXPECTED_CALL(tpmAttestation_create(DUMMY_EK, DUMMY_SRK));
 
     //act
@@ -308,7 +308,7 @@ TEST_FUNCTION(attestationMechanism_createWithTpm_error)
     int negativeTestsInitResult = umock_c_negative_tests_init();
     ASSERT_ARE_EQUAL(int, 0, negativeTestsInitResult);
 
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
     STRICT_EXPECTED_CALL(tpmAttestation_create(DUMMY_EK, DUMMY_SRK));
     umock_c_negative_tests_snapshot();
 
@@ -357,7 +357,7 @@ TEST_FUNCTION(attestationMechanism_createWithX509ClientCert_null_primary_cert)
 TEST_FUNCTION(attestationMechanism_createWithX509ClientCert_null_secondary_cert)
 {
     //arrange
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
     STRICT_EXPECTED_CALL(x509Attestation_create(X509_CERTIFICATE_TYPE_CLIENT, DUMMY_CERT1, NULL));
 
     //act
@@ -376,7 +376,7 @@ TEST_FUNCTION(attestationMechanism_createWithX509ClientCert_null_secondary_cert)
 TEST_FUNCTION(attestationMechanism_createWithX509ClientCert_both_certs)
 {
     //arrange
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
     STRICT_EXPECTED_CALL(x509Attestation_create(X509_CERTIFICATE_TYPE_CLIENT, DUMMY_CERT1, DUMMY_CERT2));
 
     //act
@@ -398,7 +398,7 @@ TEST_FUNCTION(attestationMechanism_createWithX509ClientCert_error)
     int negativeTestsInitResult = umock_c_negative_tests_init();
     ASSERT_ARE_EQUAL(int, 0, negativeTestsInitResult);
 
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
     STRICT_EXPECTED_CALL(x509Attestation_create(X509_CERTIFICATE_TYPE_CLIENT, DUMMY_CERT1, DUMMY_CERT2));
     umock_c_negative_tests_snapshot();
 
@@ -447,7 +447,7 @@ TEST_FUNCTION(attestationMechanism_createWithX509SigningCert_null_primary_cert)
 TEST_FUNCTION(attestationMechanism_createWithX509SigningCert_null_secondary_cert)
 {
     //arrange
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
     STRICT_EXPECTED_CALL(x509Attestation_create(X509_CERTIFICATE_TYPE_SIGNING, DUMMY_CERT1, NULL));
 
     //act
@@ -466,7 +466,7 @@ TEST_FUNCTION(attestationMechanism_createWithX509SigningCert_null_secondary_cert
 TEST_FUNCTION(attestationMechanism_createWithX509SigningCert_both_certs)
 {
     //arrange
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
     STRICT_EXPECTED_CALL(x509Attestation_create(X509_CERTIFICATE_TYPE_SIGNING, DUMMY_CERT1, DUMMY_CERT2));
 
     //act
@@ -488,7 +488,7 @@ TEST_FUNCTION(attestationMechanism_createWithX509SigningCert_error)
     int negativeTestsInitResult = umock_c_negative_tests_init();
     ASSERT_ARE_EQUAL(int, 0, negativeTestsInitResult);
 
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
     STRICT_EXPECTED_CALL(x509Attestation_create(X509_CERTIFICATE_TYPE_SIGNING, DUMMY_CERT1, DUMMY_CERT2));
     umock_c_negative_tests_snapshot();
 
@@ -537,7 +537,7 @@ TEST_FUNCTION(attestationMechanism_createWithX509CAReference_null_primary_ref)
 TEST_FUNCTION(attestationMechanism_createWithX509CAReference_null_secondary_ref)
 {
     //arrange
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
     STRICT_EXPECTED_CALL(x509Attestation_create(X509_CERTIFICATE_TYPE_CA_REFERENCES, DUMMY_REF1, NULL));
 
     //act
@@ -556,7 +556,7 @@ TEST_FUNCTION(attestationMechanism_createWithX509CAReference_null_secondary_ref)
 TEST_FUNCTION(attestationMechanism_createWithX509CAReference_both_refs)
 {
     //arrange
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
     STRICT_EXPECTED_CALL(x509Attestation_create(X509_CERTIFICATE_TYPE_CA_REFERENCES, DUMMY_REF1, DUMMY_REF2));
 
     //act
@@ -578,7 +578,7 @@ TEST_FUNCTION(attestationMechanism_createWithX509CAReference_error)
     int negativeTestsInitResult = umock_c_negative_tests_init();
     ASSERT_ARE_EQUAL(int, 0, negativeTestsInitResult);
 
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
     STRICT_EXPECTED_CALL(x509Attestation_create(X509_CERTIFICATE_TYPE_CA_REFERENCES, DUMMY_REF1, DUMMY_REF2));
     umock_c_negative_tests_snapshot();
 
@@ -629,7 +629,7 @@ TEST_FUNCTION(attestationMechanism_destroy_tpm)
     ATTESTATION_MECHANISM_HANDLE att = attestationMechanism_createWithTpm(DUMMY_EK, NULL);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(tpmAttestation_destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(tpmAttestation_destroy(IGNORED_ARG));
     STRICT_EXPECTED_CALL(gballoc_free(att));
 
     //act
@@ -647,7 +647,7 @@ TEST_FUNCTION(attestationMechanism_destroy_x509)
     ATTESTATION_MECHANISM_HANDLE att = attestationMechanism_createWithX509ClientCert(DUMMY_CERT1, NULL);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(x509Attestation_destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(x509Attestation_destroy(IGNORED_ARG));
     STRICT_EXPECTED_CALL(gballoc_free(att));
 
     //act
@@ -682,7 +682,7 @@ TEST_FUNCTION(attestationMechanism_isValidForIndividualEnrollment_x509_client)
     ATTESTATION_MECHANISM_HANDLE att = attestationMechanism_createWithX509ClientCert(DUMMY_CERT1, NULL);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(x509Attestation_getCertificateType(IGNORED_PTR_ARG)).SetReturn(X509_CERTIFICATE_TYPE_CLIENT);
+    STRICT_EXPECTED_CALL(x509Attestation_getCertificateType(IGNORED_ARG)).SetReturn(X509_CERTIFICATE_TYPE_CLIENT);
 
     //act
     bool res = attestationMechanism_isValidForIndividualEnrollment(att);
@@ -701,7 +701,7 @@ TEST_FUNCTION(attestationMechanism_isValidForIndividualEnrollment_x509_signing)
     ATTESTATION_MECHANISM_HANDLE att = attestationMechanism_createWithX509SigningCert(DUMMY_CERT1, NULL);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(x509Attestation_getCertificateType(IGNORED_PTR_ARG)).SetReturn(X509_CERTIFICATE_TYPE_SIGNING);
+    STRICT_EXPECTED_CALL(x509Attestation_getCertificateType(IGNORED_ARG)).SetReturn(X509_CERTIFICATE_TYPE_SIGNING);
 
     //act
     bool res = attestationMechanism_isValidForIndividualEnrollment(att);
@@ -720,7 +720,7 @@ TEST_FUNCTION(attestationMechanism_isValidForIndividualEnrollment_x509_ca)
     ATTESTATION_MECHANISM_HANDLE att = attestationMechanism_createWithX509CAReference(DUMMY_REF1, NULL);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(x509Attestation_getCertificateType(IGNORED_PTR_ARG)).SetReturn(X509_CERTIFICATE_TYPE_CA_REFERENCES);
+    STRICT_EXPECTED_CALL(x509Attestation_getCertificateType(IGNORED_ARG)).SetReturn(X509_CERTIFICATE_TYPE_CA_REFERENCES);
 
     //act
     bool res = attestationMechanism_isValidForIndividualEnrollment(att);
@@ -739,7 +739,7 @@ TEST_FUNCTION(attestationMechanism_isValidForIndividualEnrollment_x509_invalid)
     ATTESTATION_MECHANISM_HANDLE att = attestationMechanism_createWithX509CAReference(DUMMY_REF1, NULL);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(x509Attestation_getCertificateType(IGNORED_PTR_ARG)).SetReturn(X509_CERTIFICATE_TYPE_NONE); //this shouldn't happen (indicates error)
+    STRICT_EXPECTED_CALL(x509Attestation_getCertificateType(IGNORED_ARG)).SetReturn(X509_CERTIFICATE_TYPE_NONE); //this shouldn't happen (indicates error)
 
     //act
     bool res = attestationMechanism_isValidForIndividualEnrollment(att);
@@ -775,7 +775,7 @@ TEST_FUNCTION(attestationMechanism_isValidForEnrollmentGroup_x509_client)
     ATTESTATION_MECHANISM_HANDLE att = attestationMechanism_createWithX509ClientCert(DUMMY_CERT1, NULL);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(x509Attestation_getCertificateType(IGNORED_PTR_ARG)).SetReturn(X509_CERTIFICATE_TYPE_CLIENT);
+    STRICT_EXPECTED_CALL(x509Attestation_getCertificateType(IGNORED_ARG)).SetReturn(X509_CERTIFICATE_TYPE_CLIENT);
 
     //act
     bool res = attestationMechanism_isValidForEnrollmentGroup(att);
@@ -794,7 +794,7 @@ TEST_FUNCTION(attestationMechanism_isValidForEnrollmentGroup_x509_signing)
     ATTESTATION_MECHANISM_HANDLE att = attestationMechanism_createWithX509SigningCert(DUMMY_CERT1, NULL);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(x509Attestation_getCertificateType(IGNORED_PTR_ARG)).SetReturn(X509_CERTIFICATE_TYPE_SIGNING);
+    STRICT_EXPECTED_CALL(x509Attestation_getCertificateType(IGNORED_ARG)).SetReturn(X509_CERTIFICATE_TYPE_SIGNING);
 
     //act
     bool res = attestationMechanism_isValidForEnrollmentGroup(att);
@@ -813,7 +813,7 @@ TEST_FUNCTION(attestationMechanism_isValidForEnrollmentGroup_x509_ca)
     ATTESTATION_MECHANISM_HANDLE att = attestationMechanism_createWithX509CAReference(DUMMY_REF1, NULL);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(x509Attestation_getCertificateType(IGNORED_PTR_ARG)).SetReturn(X509_CERTIFICATE_TYPE_NONE); //this shouldn't happen (indicates an error)
+    STRICT_EXPECTED_CALL(x509Attestation_getCertificateType(IGNORED_ARG)).SetReturn(X509_CERTIFICATE_TYPE_NONE); //this shouldn't happen (indicates an error)
 
     //act
     bool res = attestationMechanism_isValidForEnrollmentGroup(att);
@@ -832,7 +832,7 @@ TEST_FUNCTION(attestationMechanism_isValidForEnrollmentGroup_x509_invalid)
     ATTESTATION_MECHANISM_HANDLE att = attestationMechanism_createWithX509CAReference(DUMMY_REF1, NULL);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(x509Attestation_getCertificateType(IGNORED_PTR_ARG)).SetReturn(X509_CERTIFICATE_TYPE_CA_REFERENCES);
+    STRICT_EXPECTED_CALL(x509Attestation_getCertificateType(IGNORED_ARG)).SetReturn(X509_CERTIFICATE_TYPE_CA_REFERENCES);
 
     //act
     bool res = attestationMechanism_isValidForEnrollmentGroup(att);
@@ -1004,9 +1004,9 @@ TEST_FUNCTION(attestationMechanism_fromJson_null)
 TEST_FUNCTION(attestationMechanism_fromJson_invalid_attestation_type)
 {
     //arrange
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, IGNORED_PTR_ARG)).SetReturn(INVALID_STRING);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, IGNORED_ARG)).SetReturn(INVALID_STRING);
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
     //act
     ATTESTATION_MECHANISM_HANDLE att = attestationMechanism_fromJson(TEST_JSON_OBJECT);
@@ -1021,10 +1021,10 @@ TEST_FUNCTION(attestationMechanism_fromJson_invalid_attestation_type)
 TEST_FUNCTION(attestationMechanism_fromJson_tpm)
 {
     //arrange
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, IGNORED_PTR_ARG)).SetReturn(ATTESTATION_TYPE_JSON_VALUE_TPM);
-    STRICT_EXPECTED_CALL(json_object_get_object(TEST_JSON_OBJECT, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(tpmAttestation_fromJson(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, IGNORED_ARG)).SetReturn(ATTESTATION_TYPE_JSON_VALUE_TPM);
+    STRICT_EXPECTED_CALL(json_object_get_object(TEST_JSON_OBJECT, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(tpmAttestation_fromJson(IGNORED_ARG));
 
     //act
     ATTESTATION_MECHANISM_HANDLE att = attestationMechanism_fromJson(TEST_JSON_OBJECT);
@@ -1045,10 +1045,10 @@ TEST_FUNCTION(attestationMechanism_fromJson_tpm_error)
     int negativeTestsInitResult = umock_c_negative_tests_init();
     ASSERT_ARE_EQUAL(int, 0, negativeTestsInitResult);
 
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, IGNORED_PTR_ARG)).SetReturn(ATTESTATION_TYPE_JSON_VALUE_TPM);
-    STRICT_EXPECTED_CALL(json_object_get_object(TEST_JSON_OBJECT, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(tpmAttestation_fromJson(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, IGNORED_ARG)).SetReturn(ATTESTATION_TYPE_JSON_VALUE_TPM);
+    STRICT_EXPECTED_CALL(json_object_get_object(TEST_JSON_OBJECT, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(tpmAttestation_fromJson(IGNORED_ARG));
     umock_c_negative_tests_snapshot();
 
     //size_t calls_cannot_fail[] = { };
@@ -1082,10 +1082,10 @@ TEST_FUNCTION(attestationMechanism_fromJson_tpm_error)
 TEST_FUNCTION(attestationMechanism_fromJson_x509)
 {
     //arrange
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, IGNORED_PTR_ARG)).SetReturn(ATTESTATION_TYPE_JSON_VALUE_X509);
-    STRICT_EXPECTED_CALL(json_object_get_object(TEST_JSON_OBJECT, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(x509Attestation_fromJson(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, IGNORED_ARG)).SetReturn(ATTESTATION_TYPE_JSON_VALUE_X509);
+    STRICT_EXPECTED_CALL(json_object_get_object(TEST_JSON_OBJECT, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(x509Attestation_fromJson(IGNORED_ARG));
 
     //act
     ATTESTATION_MECHANISM_HANDLE att = attestationMechanism_fromJson(TEST_JSON_OBJECT);
@@ -1106,10 +1106,10 @@ TEST_FUNCTION(attestationMechanism_fromJson_x509_error)
     int negativeTestsInitResult = umock_c_negative_tests_init();
     ASSERT_ARE_EQUAL(int, 0, negativeTestsInitResult);
 
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, IGNORED_PTR_ARG)).SetReturn(ATTESTATION_TYPE_JSON_VALUE_X509);
-    STRICT_EXPECTED_CALL(json_object_get_object(TEST_JSON_OBJECT, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(x509Attestation_fromJson(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, IGNORED_ARG)).SetReturn(ATTESTATION_TYPE_JSON_VALUE_X509);
+    STRICT_EXPECTED_CALL(json_object_get_object(TEST_JSON_OBJECT, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(x509Attestation_fromJson(IGNORED_ARG));
     umock_c_negative_tests_snapshot();
 
     //size_t calls_cannot_fail[] = { };
@@ -1161,10 +1161,10 @@ TEST_FUNCTION(attestationMechanism_toJson_tpm)
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(json_value_init_object());
-    STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(tpmAttestation_toJson(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_object_set_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(tpmAttestation_toJson(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_object_set_value(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
 
     //act
     JSON_Value* result = attestationMechanism_toJson(att);
@@ -1187,10 +1187,10 @@ TEST_FUNCTION(attestationMechanism_toJson_tpm_error)
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(json_value_init_object());
-    STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(tpmAttestation_toJson(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_object_set_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(tpmAttestation_toJson(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_object_set_value(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
     umock_c_negative_tests_snapshot();
 
     //size_t calls_cannot_fail[] = { };
@@ -1231,10 +1231,10 @@ TEST_FUNCTION(attestationMechanism_toJson_x509)
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(json_value_init_object());
-    STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(x509Attestation_toJson(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_object_set_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(x509Attestation_toJson(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_object_set_value(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
 
     //act
     JSON_Value* result = attestationMechanism_toJson(att);
@@ -1257,10 +1257,10 @@ TEST_FUNCTION(attestationMechanism_toJson_x509_error)
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(json_value_init_object());
-    STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(x509Attestation_toJson(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_object_set_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(x509Attestation_toJson(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_object_set_value(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
     umock_c_negative_tests_snapshot();
 
     //size_t calls_cannot_fail[] = { };

@@ -31,7 +31,7 @@ static void my_gballoc_free(void* ptr)
 #include "umock_c/umocktypes_stdint.h"
 #include "umock_c/umocktypes_bool.h"
 #include "umock_c/umock_c_negative_tests.h"
-#include "azure_macro_utils/macro_utils.h"
+#include "macro_utils/macro_utils.h"
 
 #define ENABLE_MOCKS
 #include "azure_c_shared_utility/gballoc.h"
@@ -332,15 +332,15 @@ BEGIN_TEST_SUITE(hsm_client_tpm_ut)
     static void setup_hsm_client_tpm_create_mock()
     {
         OBJECT_ATTR tmp = FixedTPM;
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(TSS_CreatePwAuthSession(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(Initialize_TPM_Codec(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(TSS_CreatePwAuthSession(IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(Initialize_TPM_Codec(IGNORED_ARG));
         STRICT_EXPECTED_CALL(ToTpmaObject(tmp))
             .IgnoreArgument_attrs();
-        STRICT_EXPECTED_CALL(TSS_CreatePersistentKey(IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(TSS_CreatePersistentKey(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
         STRICT_EXPECTED_CALL(ToTpmaObject(tmp))
             .IgnoreArgument_attrs();
-        STRICT_EXPECTED_CALL(TSS_CreatePersistentKey(IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(TSS_CreatePersistentKey(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
     }
 
     static void setup_hsm_client_tpm_import_key_mock()
@@ -353,56 +353,55 @@ BEGIN_TEST_SUITE(hsm_client_tpm_ut)
         TPMI_DH_CONTEXT tmp_dh_ctx = { 0 };
         TPMI_DH_PERSISTENT tmp_dh_per = { 0 };
 
-        STRICT_EXPECTED_CALL(TSS_StartAuthSession(IGNORED_PTR_ARG, tmp_se, IGNORED_NUM_ARG, tmp_session, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(TSS_StartAuthSession(IGNORED_ARG, tmp_se, IGNORED_ARG, tmp_session, IGNORED_ARG))
             .IgnoreArgument_sessAttrs()
             .IgnoreArgument_sessionType();
-        STRICT_EXPECTED_CALL(TSS_PolicySecret(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG)); // 4
+        STRICT_EXPECTED_CALL(TSS_PolicySecret(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG)); // 4
 
-        STRICT_EXPECTED_CALL(TPM2B_ID_OBJECT_Unmarshal(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));     // 2
-        STRICT_EXPECTED_CALL(TPM2B_ENCRYPTED_SECRET_Unmarshal(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(TPM2B_PRIVATE_Unmarshal(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(TPM2B_ENCRYPTED_SECRET_Unmarshal(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(TPM2B_PUBLIC_Unmarshal(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, TRUE));
-        STRICT_EXPECTED_CALL(UINT16_Unmarshal(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));       // 7
+        STRICT_EXPECTED_CALL(TPM2B_ID_OBJECT_Unmarshal(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));     // 2
+        STRICT_EXPECTED_CALL(TPM2B_ENCRYPTED_SECRET_Unmarshal(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(TPM2B_PRIVATE_Unmarshal(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(TPM2B_ENCRYPTED_SECRET_Unmarshal(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(TPM2B_PUBLIC_Unmarshal(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, TRUE));
+        STRICT_EXPECTED_CALL(UINT16_Unmarshal(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));       // 7
 
-        STRICT_EXPECTED_CALL(TPM2_ActivateCredential(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(TPM2_Import(IGNORED_PTR_ARG, IGNORED_PTR_ARG, tmp_dh, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(TPM2_ActivateCredential(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(TPM2_Import(IGNORED_ARG, IGNORED_ARG, tmp_dh, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_parentHandle();
 
         STRICT_EXPECTED_CALL(ToTpmaObject(tmp)).IgnoreArgument_attrs(); // 10
-        STRICT_EXPECTED_CALL(TSS_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, tmp_dh, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(TSS_Create(IGNORED_ARG, IGNORED_ARG, tmp_dh, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
 
-        STRICT_EXPECTED_CALL(TPM2_Load(IGNORED_PTR_ARG, IGNORED_PTR_ARG, tmp_dh, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(TPM2_Load(IGNORED_ARG, IGNORED_ARG, tmp_dh, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_parentHandle();     // 12
-        STRICT_EXPECTED_CALL(TPM2_EvictControl(IGNORED_PTR_ARG, IGNORED_PTR_ARG, tmp_prov, tmp_dh, tmp_dh_per))
+        STRICT_EXPECTED_CALL(TPM2_EvictControl(IGNORED_ARG, IGNORED_ARG, tmp_prov, tmp_dh, tmp_dh_per))
             .IgnoreArgument_auth()
             .IgnoreArgument_objectHandle()
             .IgnoreArgument_persistentHandle();
-        STRICT_EXPECTED_CALL(TPM2_EvictControl(IGNORED_PTR_ARG, IGNORED_PTR_ARG, tmp_prov, tmp_dh, tmp_dh_per))
+        STRICT_EXPECTED_CALL(TPM2_EvictControl(IGNORED_ARG, IGNORED_ARG, tmp_prov, tmp_dh, tmp_dh_per))
             .IgnoreArgument_auth()
             .IgnoreArgument_objectHandle()
             .IgnoreArgument_persistentHandle();
-        STRICT_EXPECTED_CALL(TPM2_FlushContext(IGNORED_PTR_ARG, tmp_dh_ctx)) // 15
+        STRICT_EXPECTED_CALL(TPM2_FlushContext(IGNORED_ARG, tmp_dh_ctx)) // 15
             .IgnoreArgument_flushHandle();
     }
 
     static void setup_hsm_client_tpm_get_storage_key_mocks()
     {
-        STRICT_EXPECTED_CALL(TPM2B_PUBLIC_Marshal(IGNORED_PTR_ARG, IGNORED_PTR_ARG, NULL));
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(TPM2B_PUBLIC_Marshal(IGNORED_ARG, IGNORED_ARG, NULL));
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
     }
 
     static void setup_hsm_client_tpm_sign_data_mocks()
     {
-        STRICT_EXPECTED_CALL(SignData(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(SignData(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
     }
 
     static void setup_hsm_client_tpm_get_endorsement_key_mocks()
     {
-        STRICT_EXPECTED_CALL(TPM2B_PUBLIC_Marshal(IGNORED_PTR_ARG, IGNORED_PTR_ARG, NULL));
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(TPM2B_PUBLIC_Marshal(IGNORED_ARG, IGNORED_ARG, NULL));
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
     }
 
     TEST_FUNCTION(hsm_client_tpm_create_succeed)
@@ -465,8 +464,8 @@ BEGIN_TEST_SUITE(hsm_client_tpm_ut)
         HSM_CLIENT_HANDLE sec_handle = hsm_client_tpm_create();
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(Deinit_TPM_Codec(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(Deinit_TPM_Codec(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
         //act
         hsm_client_tpm_destroy(sec_handle);

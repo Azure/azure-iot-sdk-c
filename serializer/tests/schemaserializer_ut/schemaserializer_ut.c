@@ -143,7 +143,7 @@ BEGIN_TEST_SUITE(SchemaSerializer_ut)
     static void SchemaSerializer_SerializeCommandMetadata_When_Command_Count_Is_0_Should_Yield_An_Empty_Commands_Array_inert_path(const size_t* commandCount)
     {
         STRICT_EXPECTED_CALL(STRING_concat(TEST_STRING_HANDLE, "["));
-        STRICT_EXPECTED_CALL(Schema_GetModelActionCount(TEST_MODEL_HANDLE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetModelActionCount(TEST_MODEL_HANDLE, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, commandCount, sizeof(*commandCount));
         STRICT_EXPECTED_CALL(STRING_concat(TEST_STRING_HANDLE, "]"));
     }
@@ -196,7 +196,7 @@ BEGIN_TEST_SUITE(SchemaSerializer_ut)
     )
     {
         STRICT_EXPECTED_CALL(STRING_concat(TEST_STRING_HANDLE, "["));
-        STRICT_EXPECTED_CALL(Schema_GetModelActionCount(TEST_MODEL_HANDLE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetModelActionCount(TEST_MODEL_HANDLE, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, commandCount, sizeof(*commandCount));
         STRICT_EXPECTED_CALL(Schema_GetModelActionByIndex(TEST_MODEL_HANDLE, 0))
             .SetReturn(TEST_ACTION_1);
@@ -205,7 +205,7 @@ BEGIN_TEST_SUITE(SchemaSerializer_ut)
             .SetReturn("Action1");
         STRICT_EXPECTED_CALL(STRING_concat(TEST_STRING_HANDLE, "Action1"));
         STRICT_EXPECTED_CALL(STRING_concat(TEST_STRING_HANDLE, "\", \"Parameters\":["));
-        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(TEST_ACTION_1, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(TEST_ACTION_1, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, argCount, sizeof(*argCount));
         STRICT_EXPECTED_CALL(STRING_concat(TEST_STRING_HANDLE, "]}"));
         STRICT_EXPECTED_CALL(STRING_concat(TEST_STRING_HANDLE, "]"));
@@ -259,7 +259,7 @@ BEGIN_TEST_SUITE(SchemaSerializer_ut)
     )
     {
         STRICT_EXPECTED_CALL(STRING_concat(TEST_STRING_HANDLE, "["));
-        STRICT_EXPECTED_CALL(Schema_GetModelActionCount(TEST_MODEL_HANDLE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetModelActionCount(TEST_MODEL_HANDLE, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, commandCount, sizeof(*commandCount));
         STRICT_EXPECTED_CALL(Schema_GetModelActionByIndex(TEST_MODEL_HANDLE, 0))
             .SetReturn(TEST_ACTION_1);
@@ -268,7 +268,7 @@ BEGIN_TEST_SUITE(SchemaSerializer_ut)
             .SetReturn("Action1");
         STRICT_EXPECTED_CALL(STRING_concat(TEST_STRING_HANDLE, "Action1"));
         STRICT_EXPECTED_CALL(STRING_concat(TEST_STRING_HANDLE, "\", \"Parameters\":["));
-        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(TEST_ACTION_1, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(TEST_ACTION_1, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, argCount, sizeof(*argCount));
         STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentByIndex(TEST_ACTION_1, 0))
             .SetReturn(TEST_ARG_1);
@@ -331,7 +331,7 @@ BEGIN_TEST_SUITE(SchemaSerializer_ut)
     static void SchemaSerializer_SerializeCommandMetadata_2_Commanda_With_1_Argument_Each_Yields_The_Proper_JSON_inert_path(const size_t* commandCount, const size_t* argCount)
     {
         STRICT_EXPECTED_CALL(STRING_concat(TEST_STRING_HANDLE, "["));
-        STRICT_EXPECTED_CALL(Schema_GetModelActionCount(TEST_MODEL_HANDLE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetModelActionCount(TEST_MODEL_HANDLE, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, commandCount, sizeof(*commandCount));
         STRICT_EXPECTED_CALL(Schema_GetModelActionByIndex(TEST_MODEL_HANDLE, 0))
             .SetReturn(TEST_ACTION_1);
@@ -341,7 +341,7 @@ BEGIN_TEST_SUITE(SchemaSerializer_ut)
         STRICT_EXPECTED_CALL(STRING_concat(TEST_STRING_HANDLE, "Action1"));
         STRICT_EXPECTED_CALL(STRING_concat(TEST_STRING_HANDLE, "\", \"Parameters\":["));
 
-        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(TEST_ACTION_1, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(TEST_ACTION_1, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, argCount, sizeof(*argCount));
         STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentByIndex(TEST_ACTION_1, 0))
             .SetReturn(TEST_ARG_1);
@@ -362,7 +362,7 @@ BEGIN_TEST_SUITE(SchemaSerializer_ut)
             .SetReturn("Action2");
         STRICT_EXPECTED_CALL(STRING_concat(TEST_STRING_HANDLE, "Action2"));
         STRICT_EXPECTED_CALL(STRING_concat(TEST_STRING_HANDLE, "\", \"Parameters\":["));
-        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(TEST_ACTION_2, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(TEST_ACTION_2, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, argCount, sizeof(*argCount));
         STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentByIndex(TEST_ACTION_2, 0))
             .SetReturn(TEST_ARG_1);
@@ -427,7 +427,7 @@ BEGIN_TEST_SUITE(SchemaSerializer_ut)
     void static SchemaSerializer_SerializeCommandMetadata_1_Command_With_1_Argument_Different_Than_String_Keeps_The_Same_Type_inert_path(const size_t* commandCount, const size_t* argCount)
     {
         STRICT_EXPECTED_CALL(STRING_concat(TEST_STRING_HANDLE, "["));
-        STRICT_EXPECTED_CALL(Schema_GetModelActionCount(TEST_MODEL_HANDLE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetModelActionCount(TEST_MODEL_HANDLE, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, commandCount, sizeof(*commandCount));
         STRICT_EXPECTED_CALL(Schema_GetModelActionByIndex(TEST_MODEL_HANDLE, 0))
             .SetReturn(TEST_ACTION_1);
@@ -436,7 +436,7 @@ BEGIN_TEST_SUITE(SchemaSerializer_ut)
             .SetReturn("Action1");
         STRICT_EXPECTED_CALL(STRING_concat(TEST_STRING_HANDLE, "Action1"));
         STRICT_EXPECTED_CALL(STRING_concat(TEST_STRING_HANDLE, "\", \"Parameters\":["));
-        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(TEST_ACTION_1, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(TEST_ACTION_1, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, argCount, sizeof(*argCount));
         STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentByIndex(TEST_ACTION_1, 0))
             .SetReturn(TEST_ARG_1);
@@ -501,7 +501,7 @@ BEGIN_TEST_SUITE(SchemaSerializer_ut)
     static void SchemaSerializer_SerializeCommandMetadata_1_Command_With_2_Arguments_Yields_The_Proper_JSON_inert_path(const size_t* commandCount, const size_t* argCount)
     {
         STRICT_EXPECTED_CALL(STRING_concat(TEST_STRING_HANDLE, "["));
-        STRICT_EXPECTED_CALL(Schema_GetModelActionCount(TEST_MODEL_HANDLE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetModelActionCount(TEST_MODEL_HANDLE, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, commandCount, sizeof(*commandCount));
         STRICT_EXPECTED_CALL(Schema_GetModelActionByIndex(TEST_MODEL_HANDLE, 0))
             .SetReturn(TEST_ACTION_1);
@@ -510,7 +510,7 @@ BEGIN_TEST_SUITE(SchemaSerializer_ut)
             .SetReturn("Action1");
         STRICT_EXPECTED_CALL(STRING_concat(TEST_STRING_HANDLE, "Action1"));
         STRICT_EXPECTED_CALL(STRING_concat(TEST_STRING_HANDLE, "\", \"Parameters\":["));
-        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(TEST_ACTION_1, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(TEST_ACTION_1, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, argCount, sizeof(*argCount));
         STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentByIndex(TEST_ACTION_1, 0))
             .SetReturn(TEST_ARG_1);

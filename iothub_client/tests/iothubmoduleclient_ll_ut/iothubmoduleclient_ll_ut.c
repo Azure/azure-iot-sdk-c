@@ -11,7 +11,7 @@
 #endif
 
 #include "testrunnerswitcher.h"
-#include "azure_macro_utils/macro_utils.h"
+#include "macro_utils/macro_utils.h"
 
 #include "umock_c/umock_c.h"
 #include "umock_c/umock_c_negative_tests.h"
@@ -165,7 +165,7 @@ TEST_FUNCTION_INITIALIZE(method_init)
 TEST_FUNCTION(IoTHubModuleClient_LL_CreateFromConnectionString_Test)
 {
     //arrange
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
     STRICT_EXPECTED_CALL(IoTHubClientCore_LL_CreateFromConnectionString(TEST_CONNECTION_STRING, TEST_TRANSPORT_PROVIDER));
 
     //act
@@ -191,7 +191,7 @@ TEST_FUNCTION(IoTHubModuleClient_LL_Destroy_Test)
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(IoTHubClientCore_LL_Destroy(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
     //act
     IoTHubModuleClient_LL_Destroy(clientHandle);
@@ -401,7 +401,7 @@ TEST_FUNCTION(IoTHubModuleClient_LL_SendMessageDisposition_Test)
 {
     //arrange
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SendMessageDisposition(IGNORED_PTR_ARG, TEST_MESSAGE_HANDLE, IOTHUBMESSAGE_ACCEPTED));
+    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SendMessageDisposition(IGNORED_ARG, TEST_MESSAGE_HANDLE, IOTHUBMESSAGE_ACCEPTED));
 
     //act
     IOTHUB_CLIENT_RESULT result = IoTHubModuleClient_LL_SendMessageDisposition(TEST_IOTHUB_MODULE_CLIENT_LL_HANDLE, TEST_MESSAGE_HANDLE, IOTHUBMESSAGE_ACCEPTED);

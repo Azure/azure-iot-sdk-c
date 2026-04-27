@@ -36,7 +36,7 @@ static int real_strcmp(const char* str1, const char* str2)
 
 #include "testrunnerswitcher.h"
 #include "azure_c_shared_utility/optimize_size.h"
-#include "azure_macro_utils/macro_utils.h"
+#include "macro_utils/macro_utils.h"
 #include "umock_c/umock_c.h"
 #include "umock_c/umocktypes_charptr.h"
 #include "umock_c/umocktypes_stdint.h"
@@ -366,7 +366,7 @@ static void set_expected_calls_for_authentication_create(AUTHENTICATION_CONFIG* 
 {
     (void)config;
 
-    EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
+    EXPECTED_CALL(malloc(IGNORED_ARG));
     STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_DeviceId(TEST_AUTHORIZATION_MODULE_HANDLE));
     STRICT_EXPECTED_CALL(STRING_construct(TEST_IOTHUB_HOST_FQDN)).SetReturn(TEST_IOTHUB_HOST_FQDN_STRING_HANDLE);
 
@@ -405,12 +405,12 @@ static void set_expected_calls_for_put_SAS_token_to_cbs(AUTHENTICATION_HANDLE ha
     STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(TEST_AUTHORIZATION_MODULE_HANDLE)).SetReturn(cred_type);
     if (sas_token != TEST_USER_DEFINED_SAS_TOKEN_STRING_HANDLE)
     {
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG));
     }
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_SasToken(TEST_AUTHORIZATION_MODULE_HANDLE, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_SasToken(TEST_AUTHORIZATION_MODULE_HANDLE, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
 
     STRICT_EXPECTED_CALL(STRING_c_str(TEST_DEVICES_PATH_STRING_HANDLE)).SetReturn(TEST_DEVICES_PATH);
-    STRICT_EXPECTED_CALL(cbs_put_token_async(TEST_CBS_HANDLE, SAS_TOKEN_TYPE, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, handle));
+    STRICT_EXPECTED_CALL(cbs_put_token_async(TEST_CBS_HANDLE, SAS_TOKEN_TYPE, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, handle));
     STRICT_EXPECTED_CALL(get_time(NULL)).SetReturn(current_time);
 }
 
@@ -440,26 +440,26 @@ static void set_expected_calls_for_authentication_do_work(AUTHENTICATION_CONFIG*
         {
             if (!exp_context->is_cbs_put_token_in_progress)
             {
-                STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_SasToken_Expiry(IGNORED_PTR_ARG));
+                STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_SasToken_Expiry(IGNORED_ARG));
             }
             STRICT_EXPECTED_CALL(get_time(NULL)).SetReturn(current_time);
             double actual_difftime_result = difftime(current_time, exp_context->current_sas_token_put_time);
-            STRICT_EXPECTED_CALL(get_difftime(current_time, IGNORED_NUM_ARG)).SetReturn(actual_difftime_result);
+            STRICT_EXPECTED_CALL(get_difftime(current_time, IGNORED_ARG)).SetReturn(actual_difftime_result);
         }
     }
     else if (exp_context->current_state == AUTHENTICATION_STATE_STARTING)
     {
         STRICT_EXPECTED_CALL(STRING_c_str(TEST_IOTHUB_HOST_FQDN_STRING_HANDLE));
         set_expected_calls_for_put_SAS_token_to_cbs(handle, current_time, exp_context->sas_token_to_use);
-        STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(free(IGNORED_ARG));
         STRICT_EXPECTED_CALL(STRING_delete(TEST_DEVICES_PATH_STRING_HANDLE));
     }
     else if (exp_context->current_state == AUTHENTICATION_STATE_STARTED)
     {
-        STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG)).SetReturn(cred_type);
+        STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_ARG)).SetReturn(cred_type);
         if (!exp_context->is_cbs_put_token_in_progress)
         {
-            STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_SasToken_Expiry(IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_SasToken_Expiry(IGNORED_ARG));
         }
         STRICT_EXPECTED_CALL(get_time(NULL)).SetReturn(current_time);
         STRICT_EXPECTED_CALL(get_difftime(current_time, exp_context->current_sas_token_put_time));
@@ -857,9 +857,9 @@ TEST_FUNCTION(authentication_destroy_with_pending_cbs_put_token_success)
     crank_authentication_do_work(config, handle, current_time, exp_state, IOTHUB_CREDENTIAL_TYPE_DEVICE_KEY);
     
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(async_operation_cancel(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(async_operation_cancel(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
 
     // act
@@ -1224,10 +1224,10 @@ TEST_FUNCTION(authentication_do_work_SAS_TOKEN_next_calls_no_op)
 
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG)).SetReturn(IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN);
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG)).SetReturn(IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN);
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG)).SetReturn(IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN);
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG)).SetReturn(IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN);
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_ARG)).SetReturn(IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN);
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_ARG)).SetReturn(IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN);
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_ARG)).SetReturn(IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN);
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_ARG)).SetReturn(IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN);
 
     // act
     authentication_do_work(handle);
@@ -1556,8 +1556,8 @@ TEST_FUNCTION(authentication_retrieve_options_succeeds)
     AUTHENTICATION_HANDLE handle = create_and_start_authentication(config, false);
 
     umock_c_reset_all_calls();
-    EXPECTED_CALL(OptionHandler_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(TEST_OPTIONHANDLER_HANDLE);
-    STRICT_EXPECTED_CALL(OptionHandler_AddOption(TEST_OPTIONHANDLER_HANDLE, AUTHENTICATION_OPTION_CBS_REQUEST_TIMEOUT_SECS, IGNORED_PTR_ARG))
+    EXPECTED_CALL(OptionHandler_Create(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG)).SetReturn(TEST_OPTIONHANDLER_HANDLE);
+    STRICT_EXPECTED_CALL(OptionHandler_AddOption(TEST_OPTIONHANDLER_HANDLE, AUTHENTICATION_OPTION_CBS_REQUEST_TIMEOUT_SECS, IGNORED_ARG))
         .IgnoreArgument(3)
         .SetReturn(OPTIONHANDLER_OK);
 
@@ -1583,8 +1583,8 @@ TEST_FUNCTION(authentication_retrieve_options_failure_checks)
     AUTHENTICATION_HANDLE handle = create_and_start_authentication(config, false);
 
     umock_c_reset_all_calls();
-    EXPECTED_CALL(OptionHandler_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(TEST_OPTIONHANDLER_HANDLE);
-    STRICT_EXPECTED_CALL(OptionHandler_AddOption(TEST_OPTIONHANDLER_HANDLE, AUTHENTICATION_OPTION_CBS_REQUEST_TIMEOUT_SECS, IGNORED_PTR_ARG))
+    EXPECTED_CALL(OptionHandler_Create(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG)).SetReturn(TEST_OPTIONHANDLER_HANDLE);
+    STRICT_EXPECTED_CALL(OptionHandler_AddOption(TEST_OPTIONHANDLER_HANDLE, AUTHENTICATION_OPTION_CBS_REQUEST_TIMEOUT_SECS, IGNORED_ARG))
         .IgnoreArgument(3)
         .SetReturn(OPTIONHANDLER_OK);
     umock_c_negative_tests_snapshot();
