@@ -695,10 +695,10 @@ TEST_FUNCTION(IoTHubDeviceConfiguration_Create_return_null_if_input_parameter_se
 TEST_FUNCTION(IoTHubDeviceConfiguration_Create_happy_path)
 {
     ///arrange
-    EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+    EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+    EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
 
     ///act
     IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE result = IoTHubDeviceConfiguration_Create(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE);
@@ -728,10 +728,10 @@ TEST_FUNCTION(IoTHubDeviceConfiguration_Create_non_happy_path)
     int umockc_result = umock_c_negative_tests_init();
     ASSERT_ARE_EQUAL(int, 0, umockc_result);
 
-    EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, (const char*)(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE->hostname)));
-    EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, (const char*)(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE->iothubName)));
-    EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, (const char*)(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE->keyName)));
+    EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, (const char*)(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE->hostname)));
+    EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, (const char*)(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE->iothubName)));
+    EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, (const char*)(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE->keyName)));
 
     umock_c_negative_tests_snapshot();
 
@@ -772,10 +772,10 @@ TEST_FUNCTION(IoTHubDeviceConfiguration_Destroy_do_clean_up_and_return_if_input_
 
     umock_c_reset_all_calls();
 
-    EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
     ///act
     IoTHubDeviceConfiguration_Destroy(handle);
@@ -867,41 +867,39 @@ static void set_expected_calls_for_sendHttpRequestDeviceConfiguration(const unsi
     EXPECTED_CALL(STRING_construct(TEST_SHAREDACCESSKEYNAME));
 
     EXPECTED_CALL(HTTPHeaders_Alloc());
-    EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, TEST_HTTP_HEADER_KEY_AUTHORIZATION, TEST_HTTP_HEADER_VAL_AUTHORIZATION));
-    EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    EXPECTED_CALL(UniqueId_Generate(IGNORED_PTR_ARG, IGNORED_NUM_ARG)).CallCannotFail();
+    EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, TEST_HTTP_HEADER_KEY_AUTHORIZATION, TEST_HTTP_HEADER_VAL_AUTHORIZATION));
+    EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    EXPECTED_CALL(UniqueId_Generate(IGNORED_ARG, IGNORED_ARG)).CallCannotFail();
 
-    EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, TEST_HTTP_HEADER_KEY_REQUEST_ID, TEST_HTTP_HEADER_VAL_REQUEST_ID));
-    EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, TEST_HTTP_HEADER_KEY_USER_AGENT, IGNORED_PTR_ARG));
-    EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, TEST_HTTP_HEADER_KEY_ACCEPT, TEST_HTTP_HEADER_VAL_ACCEPT));
-    EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, TEST_HTTP_HEADER_KEY_CONTENT_TYPE, TEST_HTTP_HEADER_VAL_CONTENT_TYPE));
+    EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, TEST_HTTP_HEADER_KEY_REQUEST_ID, TEST_HTTP_HEADER_VAL_REQUEST_ID));
+    EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, TEST_HTTP_HEADER_KEY_USER_AGENT, IGNORED_ARG));
+    EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, TEST_HTTP_HEADER_KEY_ACCEPT, TEST_HTTP_HEADER_VAL_ACCEPT));
+    EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, TEST_HTTP_HEADER_KEY_CONTENT_TYPE, TEST_HTTP_HEADER_VAL_CONTENT_TYPE));
 
     if ((hubRequestType == IOTHUB_DEVICECONFIGURATION_REQUEST_UPDATE) || (hubRequestType == IOTHUB_DEVICECONFIGURATION_REQUEST_DELETE))
     {
-        EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, TEST_HTTP_HEADER_KEY_IFMATCH, TEST_HTTP_HEADER_VAL_IFMATCH));
+        EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, TEST_HTTP_HEADER_KEY_IFMATCH, TEST_HTTP_HEADER_VAL_IFMATCH));
     }
 
-    EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
-    EXPECTED_CALL(HTTPAPIEX_SAS_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .IgnoreAllArguments();
+    EXPECTED_CALL(HTTPAPIEX_SAS_Create(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
     EXPECTED_CALL(HTTPAPIEX_Create(TEST_HOSTNAME));
 
-    EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
+    EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).CallCannotFail();
 
-    EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(IGNORED_PTR_ARG, IGNORED_PTR_ARG, requestType, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .IgnoreAllArguments()
+    EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(IGNORED_ARG, IGNORED_ARG, requestType, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
         .CopyOutArgumentBuffer_statusCode(&httpStatusCode, sizeof(httpStatusCode))
         .SetReturn(HTTPAPIEX_OK);
 
-    EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-    EXPECTED_CALL(HTTPAPIEX_Destroy(IGNORED_PTR_ARG));
-    EXPECTED_CALL(HTTPAPIEX_SAS_Destroy(IGNORED_PTR_ARG));
-    EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG));
+    EXPECTED_CALL(STRING_delete(IGNORED_ARG));
+    EXPECTED_CALL(HTTPAPIEX_Destroy(IGNORED_ARG));
+    EXPECTED_CALL(HTTPAPIEX_SAS_Destroy(IGNORED_ARG));
+    EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG));
 
-    EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-    EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-    EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+    EXPECTED_CALL(STRING_delete(IGNORED_ARG));
+    EXPECTED_CALL(STRING_delete(IGNORED_ARG));
+    EXPECTED_CALL(STRING_delete(IGNORED_ARG));
 }
 
 static void set_expected_calls_for_parseDeviceConfigurationJsonObject()
@@ -912,14 +910,14 @@ static void set_expected_calls_for_parseDeviceConfigurationJsonObject()
     STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_CONFIGURATION_JSON_KEY_SCHEMA_VERSION))
         .SetReturn(TEST_SCHEMA_VERSION);
 
-    STRICT_EXPECTED_CALL(json_object_dotget_value(IGNORED_PTR_ARG, TEST_CONFIGURATION_DEVICE_CONTENT_NODE_NAME));
+    STRICT_EXPECTED_CALL(json_object_dotget_value(IGNORED_ARG, TEST_CONFIGURATION_DEVICE_CONTENT_NODE_NAME));
 
-    STRICT_EXPECTED_CALL(json_serialize_to_string(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(json_serialize_to_string(IGNORED_ARG))
         .SetReturn(TEST_DEVICE_CONTENT);
 
-    STRICT_EXPECTED_CALL(json_object_dotget_value(IGNORED_PTR_ARG, TEST_CONFIGURATION_MODULES_CONTENT_NODE_NAME));
+    STRICT_EXPECTED_CALL(json_object_dotget_value(IGNORED_ARG, TEST_CONFIGURATION_MODULES_CONTENT_NODE_NAME));
 
-    STRICT_EXPECTED_CALL(json_serialize_to_string(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(json_serialize_to_string(IGNORED_ARG))
         .SetReturn(TEST_MODULES_CONTENT);
 
     STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_CONFIGURATION_JSON_KEY_TARGET_CONDITION))
@@ -937,122 +935,121 @@ static void set_expected_calls_for_parseDeviceConfigurationJsonObject()
     STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_CONFIGURATION_JSON_KEY_ETAG))
         .SetReturn(TEST_ETAG);
 
-    STRICT_EXPECTED_CALL(json_object_dotget_object(IGNORED_PTR_ARG, TEST_CONFIGURATION_SYSTEM_METRICS_RESULTS_NODE_NAME));
+    STRICT_EXPECTED_CALL(json_object_dotget_object(IGNORED_ARG, TEST_CONFIGURATION_SYSTEM_METRICS_RESULTS_NODE_NAME));
 
-    STRICT_EXPECTED_CALL(json_object_dotget_object(IGNORED_PTR_ARG, TEST_CONFIGURATION_SYSTEM_METRICS_QUERIES_NODE_NAME));
+    STRICT_EXPECTED_CALL(json_object_dotget_object(IGNORED_ARG, TEST_CONFIGURATION_SYSTEM_METRICS_QUERIES_NODE_NAME));
 
-    STRICT_EXPECTED_CALL(json_object_dotget_object(IGNORED_PTR_ARG, TEST_CONFIGURATION_CUSTOM_METRICS_RESULTS_NODE_NAME));
+    STRICT_EXPECTED_CALL(json_object_dotget_object(IGNORED_ARG, TEST_CONFIGURATION_CUSTOM_METRICS_RESULTS_NODE_NAME));
 
-    STRICT_EXPECTED_CALL(json_object_dotget_object(IGNORED_PTR_ARG, TEST_CONFIGURATION_CUSTOM_METRICS_QUERIES_NODE_NAME));
+    STRICT_EXPECTED_CALL(json_object_dotget_object(IGNORED_ARG, TEST_CONFIGURATION_CUSTOM_METRICS_QUERIES_NODE_NAME));
 
-    STRICT_EXPECTED_CALL(json_object_dotget_object(IGNORED_PTR_ARG, TEST_CONFIGURATION_JSON_KEY_LABELS));
+    STRICT_EXPECTED_CALL(json_object_dotget_object(IGNORED_ARG, TEST_CONFIGURATION_JSON_KEY_LABELS));
 
     //malloc for each metrics name-value pair above
     for (int i = 0; i < 8; i++)
     {
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
     }
 
-    STRICT_EXPECTED_CALL(json_object_get_number(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(json_object_get_number(IGNORED_ARG, IGNORED_ARG));
 
     //get_count for each type name-value sub-structure of device configuration
     for (int i = 0; i < 5; i++)
     {
-        STRICT_EXPECTED_CALL(json_object_get_count(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(json_object_get_count(IGNORED_ARG));
     }
 
-    EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-    EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+    EXPECTED_CALL(STRING_delete(IGNORED_ARG));
+    EXPECTED_CALL(STRING_delete(IGNORED_ARG));
 }
 
 static void set_expected_calls_for_GetConfigurations_processing()
 {
-    EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG))
+    EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG))
         .SetReturn(TEST_UNSIGNED_CHAR_PTR);
-    STRICT_EXPECTED_CALL(json_parse_string(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_value_get_array(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_array_get_count(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(json_parse_string(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_value_get_array(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_array_get_count(IGNORED_ARG))
         .SetReturn(1);
-    STRICT_EXPECTED_CALL(json_array_get_object(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(json_array_get_object(IGNORED_ARG, IGNORED_ARG));
 
     set_expected_calls_for_parseDeviceConfigurationJsonObject();
 
-    EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG));
-    EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    EXPECTED_CALL(gballoc_calloc(IGNORED_ARG, IGNORED_ARG));
+    EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+    EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+    EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+    EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+    EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+    EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+    EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+    EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
 
-    EXPECTED_CALL(singlylinkedlist_add(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(json_object_clear(IGNORED_PTR_ARG));
+    EXPECTED_CALL(singlylinkedlist_add(IGNORED_ARG, IGNORED_ARG));
+    EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_object_clear(IGNORED_ARG));
 
-    EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_array_clear(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_value_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
+    EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_array_clear(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_value_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG));
 }
 
 static void set_expected_calls_for_GetConfiguration_processing()
 {
-    EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG))
+    EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG))
         .SetReturn(TEST_UNSIGNED_CHAR_PTR);
 
-    EXPECTED_CALL(json_parse_string(IGNORED_PTR_ARG));
+    EXPECTED_CALL(json_parse_string(IGNORED_ARG));
 
     STRICT_EXPECTED_CALL(json_value_get_object(TEST_JSON_VALUE));
 
     set_expected_calls_for_parseDeviceConfigurationJsonObject();
 
-    STRICT_EXPECTED_CALL(json_object_clear(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_value_free(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(json_object_clear(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_value_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG));
 }
 
 static void set_expected_calls_for_AddConfiguration_UpdateConfiguration_processing()
 {
     // build configuration JSON doc
     EXPECTED_CALL(json_value_init_object());
-    EXPECTED_CALL(json_value_get_object(IGNORED_PTR_ARG));
+    EXPECTED_CALL(json_value_get_object(IGNORED_ARG));
     STRICT_EXPECTED_CALL(json_object_set_string(TEST_JSON_OBJECT, TEST_CONFIGURATION_JSON_KEY_CONFIGURATION_ID, TEST_CONFIGURATION_ID));
-    STRICT_EXPECTED_CALL(json_object_set_string(TEST_JSON_OBJECT, TEST_CONFIGURATION_JSON_KEY_SCHEMA_VERSION, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(json_object_set_string(TEST_JSON_OBJECT, TEST_CONFIGURATION_JSON_KEY_SCHEMA_VERSION, IGNORED_ARG));
     STRICT_EXPECTED_CALL(json_object_set_string(TEST_JSON_OBJECT, TEST_CONFIGURATION_JSON_KEY_TARGET_CONDITION, TEST_TARGET_CONDITION));
     STRICT_EXPECTED_CALL(json_object_set_number(TEST_JSON_OBJECT, TEST_CONFIGURATION_JSON_KEY_PRIORITY, TEST_PRIORITY));
-    STRICT_EXPECTED_CALL(json_object_set_string(TEST_JSON_OBJECT, TEST_CONFIGURATION_JSON_KEY_ETAG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(json_object_set_string(TEST_JSON_OBJECT, TEST_CONFIGURATION_JSON_KEY_ETAG, IGNORED_ARG));
     EXPECTED_CALL(json_value_init_object());
-    EXPECTED_CALL(json_value_get_object(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_parse_string(IGNORED_PTR_ARG));
+    EXPECTED_CALL(json_value_get_object(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_parse_string(IGNORED_ARG));
     STRICT_EXPECTED_CALL(json_object_set_value(TEST_JSON_OBJECT, TEST_CONFIGURATION_JSON_KEY_DEVICE_CONTENT, TEST_JSON_VALUE));
     STRICT_EXPECTED_CALL(json_object_set_value(TEST_JSON_OBJECT, TEST_CONFIGURATION_JSON_KEY_CONTENT, TEST_JSON_VALUE));
     EXPECTED_CALL(json_value_init_object());
     EXPECTED_CALL(json_value_init_object());
-    EXPECTED_CALL(json_value_get_object(IGNORED_PTR_ARG));
-    EXPECTED_CALL(json_value_get_object(IGNORED_PTR_ARG));
+    EXPECTED_CALL(json_value_get_object(IGNORED_ARG));
+    EXPECTED_CALL(json_value_get_object(IGNORED_ARG));
     STRICT_EXPECTED_CALL(json_object_set_value(TEST_JSON_OBJECT, TEST_CONFIGURATION_JSON_KEY_METRICS_QUERIES, TEST_JSON_VALUE));
     STRICT_EXPECTED_CALL(json_object_set_value(TEST_JSON_OBJECT, TEST_CONFIGURATION_JSON_KEY_CUSTOM_METRICS, TEST_JSON_VALUE));
     EXPECTED_CALL(json_value_init_object());
     EXPECTED_CALL(json_value_init_object());
-    EXPECTED_CALL(json_value_get_object(IGNORED_PTR_ARG));
-    EXPECTED_CALL(json_value_get_object(IGNORED_PTR_ARG));
+    EXPECTED_CALL(json_value_get_object(IGNORED_ARG));
+    EXPECTED_CALL(json_value_get_object(IGNORED_ARG));
     STRICT_EXPECTED_CALL(json_object_set_value(TEST_JSON_OBJECT, TEST_CONFIGURATION_JSON_KEY_METRICS_QUERIES, TEST_JSON_VALUE));
     STRICT_EXPECTED_CALL(json_object_set_value(TEST_JSON_OBJECT, TEST_CONFIGURATION_JSON_KEY_SYSTEM_METRICS, TEST_JSON_VALUE));
-    STRICT_EXPECTED_CALL(json_serialize_to_string(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(json_free_serialized_string(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_object_clear(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_value_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(json_serialize_to_string(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_free_serialized_string(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_object_clear(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_value_free(IGNORED_ARG));
 }
 
 TEST_FUNCTION(IoTHubDeviceConfiguration_AddConfiguration_happy_path_status_code_200)
@@ -1063,7 +1060,7 @@ TEST_FUNCTION(IoTHubDeviceConfiguration_AddConfiguration_happy_path_status_code_
     umock_c_reset_all_calls();
 
     ///arrange
-    EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
 
     set_expected_calls_for_AddConfiguration_UpdateConfiguration_processing();
 
@@ -1072,8 +1069,8 @@ TEST_FUNCTION(IoTHubDeviceConfiguration_AddConfiguration_happy_path_status_code_
     set_expected_calls_for_sendHttpRequestDeviceConfiguration(httpStatusCodeOk, HTTPAPI_REQUEST_PUT, IOTHUB_DEVICECONFIGURATION_REQUEST_ADD);
     set_expected_calls_for_GetConfiguration_processing();
 
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
-    EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG));
+    EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
     IOTHUB_DEVICE_CONFIGURATION_ADD deviceConfigurationAddInfo;
     IOTHUB_DEVICE_CONFIGURATION deviceConfiguration;
@@ -1108,7 +1105,7 @@ TEST_FUNCTION(IoTHubDeviceConfiguration_AddConfiguration_non_happy_path)
     int umockc_result = umock_c_negative_tests_init();
     ASSERT_ARE_EQUAL(int, 0, umockc_result);
 
-    EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
 
     set_expected_calls_for_AddConfiguration_UpdateConfiguration_processing();
 
@@ -1117,8 +1114,8 @@ TEST_FUNCTION(IoTHubDeviceConfiguration_AddConfiguration_non_happy_path)
     set_expected_calls_for_sendHttpRequestDeviceConfiguration(httpStatusCodeOk, HTTPAPI_REQUEST_PUT, IOTHUB_DEVICECONFIGURATION_REQUEST_ADD);
     set_expected_calls_for_GetConfiguration_processing();
 
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
-    EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG));
+    EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
     IOTHUB_DEVICE_CONFIGURATION_ADD deviceConfigurationAddInfo;
     IOTHUB_DEVICE_CONFIGURATION deviceConfiguration;
@@ -1514,8 +1511,8 @@ TEST_FUNCTION(IoTHubDeviceConfiguration_UpdateConfiguration_happy_path_status_co
 
     set_expected_calls_for_sendHttpRequestDeviceConfiguration(httpStatusCodeOk, HTTPAPI_REQUEST_PUT, IOTHUB_DEVICECONFIGURATION_REQUEST_UPDATE);
 
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG));
 
     IOTHUB_DEVICE_CONFIGURATION deviceConfiguration;
 
@@ -1552,8 +1549,8 @@ TEST_FUNCTION(IoTHubDeviceConfiguration_UpdateConfiguration_non_happy_path)
 
     set_expected_calls_for_sendHttpRequestDeviceConfiguration(httpStatusCodeOk, HTTPAPI_REQUEST_PUT, IOTHUB_DEVICECONFIGURATION_REQUEST_UPDATE);
 
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG));
 
     IOTHUB_DEVICE_CONFIGURATION deviceConfiguration;
 

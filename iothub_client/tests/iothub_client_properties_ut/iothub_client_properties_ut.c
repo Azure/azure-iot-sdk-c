@@ -67,6 +67,23 @@ extern "C"
 #endif
 #undef ENABLE_MOCKS
 
+// The parson functions are declared as MOCKABLE_FUNCTION above, so umock-c
+// generates mock wrappers. The real_ aliases point to the actual parson
+// implementations linked from the parson library.
+#define real_json_parse_string          json_parse_string
+#define real_json_serialize_to_string   json_serialize_to_string
+#define real_json_free_serialized_string json_free_serialized_string
+#define real_json_value_get_object      json_value_get_object
+#define real_json_object_get_value      json_object_get_value
+#define real_json_value_free            json_value_free
+#define real_json_value_get_type        json_value_get_type
+#define real_json_object_get_object     json_object_get_object
+#define real_json_object_get_count      json_object_get_count
+#define real_json_object_get_name       json_object_get_name
+#define real_json_object_get_value_at   json_object_get_value_at
+#define real_json_object_get_string     json_object_get_string
+#define real_mallocAndStrcpy_s          mallocAndStrcpy_s
+
 #include "iothub_client_properties.h"
 
 MU_DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)

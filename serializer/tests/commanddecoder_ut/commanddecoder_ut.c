@@ -56,6 +56,9 @@ MOCKABLE_FUNCTION(, METHODRETURN_HANDLE, methodCallbackMock, void*, methodCallba
 MOCKABLE_FUNCTION(, int, int_pfDesiredPropertyFromAGENT_DATA_TYPE, const AGENT_DATA_TYPE*, source, void*, dest);
 #undef ENABLE_MOCKS
 
+// real_ aliases for c-utility functions mocked above
+#define real_mallocAndStrcpy_s  mallocAndStrcpy_s
+
 #include "azure_c_shared_utility/lock.h"
 #include "testrunnerswitcher.h"
 

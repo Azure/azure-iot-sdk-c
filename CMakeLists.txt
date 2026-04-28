@@ -10,6 +10,21 @@ if ((NOT TARGET c_build_tools) AND (EXISTS ${CMAKE_CURRENT_LIST_DIR}/deps/c-buil
     set_default_build_options()
 endif()
 
+# Remove /CETCOMPAT - CET shadow stacks are incompatible with umock-c test framework
+string(REPLACE "/CETCOMPAT" "" CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
+string(REPLACE "/CETCOMPAT" "" CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS}")
+
+# Remove security flags incompatible with umock-c test framework
+string(REPLACE "/guard:cf" "" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+string(REPLACE "/guard:cf" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+string(REPLACE "/GUARD:CF" "" CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
+string(REPLACE "/GUARD:CF" "" CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS}")
+string(REPLACE "/sdl" "" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+string(REPLACE "/sdl" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+# Disable buffer security check for tests - umock-c framework triggers false positives
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /GS-")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /GS-")
+
 ########## Enable CMake Features ##########
 # Use solution folders.
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)

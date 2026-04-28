@@ -45,6 +45,20 @@ static void my_gballoc_free(void * t)
 #include "azure_c_shared_utility/vector.h"
 #undef ENABLE_MOCKS
 
+// real_ aliases for c-utility functions mocked above
+#define real_VECTOR_create      VECTOR_create
+#define real_VECTOR_destroy     VECTOR_destroy
+#define real_VECTOR_push_back   VECTOR_push_back
+#define real_VECTOR_erase       VECTOR_erase
+#define real_VECTOR_clear       VECTOR_clear
+#define real_VECTOR_element     VECTOR_element
+#define real_VECTOR_front       VECTOR_front
+#define real_VECTOR_back        VECTOR_back
+#define real_VECTOR_find_if     VECTOR_find_if
+#define real_VECTOR_size        VECTOR_size
+#define real_unsignedIntToString unsignedIntToString
+#define real_size_tToString     size_tToString
+
 #include "testrunnerswitcher.h"
 #include "schema.h"
 
