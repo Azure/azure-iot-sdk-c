@@ -2783,7 +2783,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_ConnectionStatusCallBack_calls_upper_layer_suc
     (void)IoTHubClientCore_LL_SetConnectionStatusCallback(handle, connectionStatusCallback, (void*)11);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(connectionStatusCallback((IOTHUB_CLIENT_CONNECTION_STATUS)IGNORED_ARG, (IOTHUB_CLIENT_CONNECTION_STATUS_REASON)IGNORED_ARG, (void*)11));
+    STRICT_EXPECTED_CALL(connectionStatusCallback(IGNORED_ARG, IGNORED_ARG, (void*)11));
 
     ///act
     g_transport_cb_info.connection_status_cb(IOTHUB_CLIENT_CONNECTION_AUTHENTICATED, IOTHUB_CLIENT_CONNECTION_OK, handle);

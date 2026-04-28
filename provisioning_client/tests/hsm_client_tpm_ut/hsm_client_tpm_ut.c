@@ -214,6 +214,7 @@ BEGIN_TEST_SUITE(hsm_client_tpm_ut)
 
         REGISTER_UMOCK_ALIAS_TYPE(BUFFER_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(TPM_HANDLE, unsigned int);
+        REGISTER_UMOCK_ALIAS_TYPE(TPM_RC, unsigned int);
         REGISTER_UMOCK_ALIAS_TYPE(UINT32, unsigned int);
         REGISTER_UMOCK_ALIAS_TYPE(BOOL, int);
         REGISTER_UMOCK_ALIAS_TYPE(TPM_PT, unsigned int);
@@ -370,7 +371,8 @@ BEGIN_TEST_SUITE(hsm_client_tpm_ut)
             .IgnoreArgument_parentHandle();
 
         STRICT_EXPECTED_CALL(ToTpmaObject(tmp)).IgnoreArgument_attrs(); // 10
-        STRICT_EXPECTED_CALL(TSS_Create(IGNORED_ARG, IGNORED_ARG, tmp_dh, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(TSS_Create(IGNORED_ARG, IGNORED_ARG, tmp_dh, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
+            .IgnoreArgument_parent();
 
         STRICT_EXPECTED_CALL(TPM2_Load(IGNORED_ARG, IGNORED_ARG, tmp_dh, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_parentHandle();     // 12

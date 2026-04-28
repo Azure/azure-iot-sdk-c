@@ -446,6 +446,13 @@ static int my_mqtt_client_disconnect(MQTT_CLIENT_HANDLE handle, ON_MQTT_DISCONNE
     (void)handle;
     g_disconnect_callback = callback;
     g_disconnect_callback_ctx = ctx;
+    // Invoke the callback immediately so that the disconnect wait loop
+    // in IoTHubTransport_MQTT_Common_Destroy does not spin with real
+    // ThreadAPI_Sleep calls (50 ms x 50 iterations per test).
+    if (callback != NULL)
+    {
+        callback(ctx);
+    }
     return 0;
 }
 

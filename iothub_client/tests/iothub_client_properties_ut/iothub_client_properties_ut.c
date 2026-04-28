@@ -68,21 +68,23 @@ extern "C"
 #undef ENABLE_MOCKS
 
 // The parson functions are declared as MOCKABLE_FUNCTION above, so umock-c
-// generates mock wrappers. The real_ aliases point to the actual parson
-// implementations linked from the parson library.
-#define real_json_parse_string          json_parse_string
-#define real_json_serialize_to_string   json_serialize_to_string
-#define real_json_free_serialized_string json_free_serialized_string
-#define real_json_value_get_object      json_value_get_object
-#define real_json_object_get_value      json_object_get_value
-#define real_json_value_free            json_value_free
-#define real_json_value_get_type        json_value_get_type
-#define real_json_object_get_object     json_object_get_object
-#define real_json_object_get_count      json_object_get_count
-#define real_json_object_get_name       json_object_get_name
-#define real_json_object_get_value_at   json_object_get_value_at
-#define real_json_object_get_string     json_object_get_string
-#define real_mallocAndStrcpy_s          mallocAndStrcpy_s
+// generates mock wrappers. The real_ implementations come from real_parson.c
+// (which compiles parson.c with all symbols renamed to real_ prefix) and
+// real_crt_abstractions.c (which compiles crt_abstractions.c with real_ prefix).
+// We declare real_ functions as extern so the linker resolves them to real_parson.o.
+extern JSON_Value*    real_json_parse_string(const char* string);
+extern char*          real_json_serialize_to_string(const JSON_Value* value);
+extern void           real_json_free_serialized_string(char* string);
+extern JSON_Object*   real_json_value_get_object(const JSON_Value* value);
+extern JSON_Value*    real_json_object_get_value(const JSON_Object* object, const char* name);
+extern void           real_json_value_free(JSON_Value* value);
+extern JSON_Value_Type real_json_value_get_type(const JSON_Value* value);
+extern JSON_Object*   real_json_object_get_object(const JSON_Object* object, const char* name);
+extern size_t         real_json_object_get_count(const JSON_Object* object);
+extern const char*    real_json_object_get_name(const JSON_Object* object, size_t index);
+extern JSON_Value*    real_json_object_get_value_at(const JSON_Object* object, size_t index);
+extern const char*    real_json_object_get_string(const JSON_Object* object, const char* name);
+extern int            real_mallocAndStrcpy_s(char** destination, const char* source);
 
 #include "iothub_client_properties.h"
 
