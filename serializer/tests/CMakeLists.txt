@@ -1,6 +1,12 @@
 #Copyright (c) Microsoft. All rights reserved.
 #Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+# NOTE: Serializer tests are currently disabled at the parent CMakeLists.txt level.
+# The serializer relies on MU_C1 and complex DECLARE_MODEL/DECLARE_STRUCT macro expansions
+# from the old azure-macro-utils-c that do not exist in the new macro-utils-c.
+# Several tests also use the legacy micromock framework instead of umock-c.
+# The serializer library itself compiles and links correctly; only its test suite is affected.
+
 cmake_minimum_required (VERSION 3.5)
 
 usePermissiveRulesForSdkSamplesAndTests()

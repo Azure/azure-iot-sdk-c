@@ -412,7 +412,9 @@ endif()
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/iothub_client)
 
 
-# Note this is deprecated
+# Note this is deprecated.
+# The serializer library compiles but its tests are disabled due to incompatibility with the
+# new macro-utils-c (missing MU_C1, DECLARE_MODEL expansion issues). See serializer/CMakeLists.txt.
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/serializer)
 
 ########## Add SDK samples ##########
