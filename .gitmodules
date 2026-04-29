@@ -36,7 +36,7 @@
 	url = https://github.com/Azure/macro-utils-c.git
 [submodule "deps/c-logging"]
 	path = deps/c-logging
-	url = https://github.com/Azure/c-logging.git
+	url = https://github.com/Azure/c-logging
 [submodule "deps/ctest"]
 	path = deps/ctest
 	url = https://github.com/Azure/ctest.git
