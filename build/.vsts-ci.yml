@@ -30,8 +30,9 @@ stages:
           $PSVersionTable
           New-Item -ItemType Directory -Force -Path test_config | Out-Null
 
-          # Always pull Azure.Iot.Sdk.Test.psm1 from iot-sdks-e2e-fx@master.
-          $PsmUrl = 'https://raw.githubusercontent.com/Azure/iot-sdks-e2e-fx/master/scripts/Azure.Iot.Sdk.Test.psm1'
+          # TEMP: pinned to a working branch on iot-sdks-e2e-fx until the fix is merged to master.
+          # Revert to master once https://github.com/Azure/iot-sdks-e2e-fx/tree/ewertons/install-stable-azure-iot-extension-by-default is merged.
+          $PsmUrl = 'https://raw.githubusercontent.com/Azure/iot-sdks-e2e-fx/ewertons/install-stable-azure-iot-extension-by-default/scripts/Azure.Iot.Sdk.Test.psm1'
           $PsmPath = Join-Path $PWD 'Azure.Iot.Sdk.Test.psm1'
           Invoke-WebRequest -Uri $PsmUrl -OutFile $PsmPath -UseBasicParsing
           Import-Module $PsmPath
