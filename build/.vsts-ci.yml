@@ -75,6 +75,7 @@ stages:
       displayName: 'Check Submodules Match'
 
   - job: windowsx64debug
+    dependsOn: checksubmodule
     timeoutInMinutes: 190
     pool:
       vmImage: 'windows-2022'
@@ -102,6 +103,7 @@ stages:
       condition: succeededOrFailed()
 
   - job: windowsx86
+    dependsOn: checksubmodule
     timeoutInMinutes: 190
     pool:
       vmImage: 'windows-2022'
@@ -129,6 +131,7 @@ stages:
       condition: succeededOrFailed()
 
   - job: windowsx64release
+    dependsOn: checksubmodule
     timeoutInMinutes: 190
     variables:
       CodeQL.Enabled: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
@@ -162,6 +165,7 @@ stages:
       condition: succeededOrFailed()
 
   - job: windowsdynamic
+    dependsOn: checksubmodule
     timeoutInMinutes: 190
     pool:
       vmImage: 'windows-2022'
@@ -177,6 +181,7 @@ stages:
         cmd /c "call jenkins\windows_c_VsDevCmd.cmd && call jenkins\windows_c_build_as_dynamic.cmd"
       displayName: 'Build'
   - job: linuxoptions
+    dependsOn: checksubmodule
     pool:
       vmImage: 'ubuntu-24.04'
     displayName: 'Linux with Options'
@@ -194,6 +199,7 @@ stages:
       condition: always()
 
   - job: raspberrypi
+    dependsOn: checksubmodule
     pool:
       vmImage: 'ubuntu-24.04'
     displayName: "Raspberry Pi"
@@ -223,6 +229,7 @@ stages:
         ./jenkins/raspberrypi_c_buster.sh
       displayName: 'Build'
   - job: crosscompile_mips32
+    dependsOn: checksubmodule
     pool:
       vmImage: 'ubuntu-24.04'
     displayName: "Cross Compile (MIPS32)"
@@ -244,6 +251,7 @@ stages:
         docker build -t mipsiotapp:latest . --network=host --file ./MIPS32/Dockerfile_adjunct
       displayName: 'Build MIPS32'
   - job: crosscompile_arm
+    dependsOn: checksubmodule
     pool:
       vmImage: 'ubuntu-24.04'
     displayName: "Cross Compile (ARM)"
@@ -265,6 +273,7 @@ stages:
         docker build -t armiotapp:latest . --network=host --file ./ARM/Dockerfile_adjunct
       displayName: 'Build ARM'
   - job: ubuntu2404_dbg_build
+    dependsOn: checksubmodule
     pool:
       vmImage: 'ubuntu-24.04'
     displayName: 'Ubuntu 24.04 Build (Debug)'
@@ -288,7 +297,9 @@ stages:
       displayName: 'Publish build output'
 
   - job: ubuntu2404_dbg_tests
-    dependsOn: ubuntu2404_dbg_build
+    dependsOn:
+      - checksubmodule
+      - ubuntu2404_dbg_build
     timeoutInMinutes: 90
     pool:
       vmImage: 'ubuntu-24.04'
@@ -339,6 +350,7 @@ stages:
       condition: succeededOrFailed()
 
   - job: clang
+    dependsOn: checksubmodule
     timeoutInMinutes: 90
     pool:
       vmImage: 'ubuntu-24.04'
@@ -376,6 +388,7 @@ stages:
       condition: succeededOrFailed()
 
   - job: clang_release
+    dependsOn: checksubmodule
     timeoutInMinutes: 90
     pool:
       vmImage: 'ubuntu-24.04'
@@ -413,6 +426,7 @@ stages:
       condition: succeededOrFailed()
 
   - job: ubuntu2404arm
+    dependsOn: checksubmodule
     # ARM64 replacement for the retired ubuntu2204arm self-hosted ARM agent.
     # Microsoft-hosted Azure Pipelines does not offer a generally-available
     # ARM64 Linux vmImage on the default Azure Pipelines agent pool.
@@ -512,6 +526,7 @@ stages:
       displayName: 'Cross-compile SDK for aarch64'
 
   - job: ubuntuRIOT
+    dependsOn: checksubmodule
     timeoutInMinutes: 90
     pool:
       vmImage: 'ubuntu-24.04'
@@ -546,6 +561,7 @@ stages:
       condition: succeededOrFailed()
 
   - job: ubuntu2404dualipstack
+    dependsOn: checksubmodule
     timeoutInMinutes: 90
     pool:
       vmImage: 'ubuntu-24.04'
@@ -584,6 +600,7 @@ stages:
       condition: succeededOrFailed()
 
   - job: debian
+    dependsOn: checksubmodule
     timeoutInMinutes: 90
     pool:
       vmImage: 'ubuntu-24.04'
@@ -618,6 +635,7 @@ stages:
       condition: succeededOrFailed()
 
   - job: linux_installed_deps
+    dependsOn: checksubmodule
     pool:
       vmImage: 'ubuntu-24.04'
     displayName: 'Linux with Installed Deps'
@@ -636,6 +654,7 @@ stages:
       displayName: 'Build'
 
   - job: wolfssl
+    dependsOn: checksubmodule
     timeoutInMinutes: 90
     pool:
       vmImage: 'ubuntu-24.04'
@@ -670,6 +689,7 @@ stages:
       condition: succeededOrFailed()
 
   - job: bearssl
+    dependsOn: checksubmodule
     timeoutInMinutes: 90
     pool:
       vmImage: 'ubuntu-24.04'
@@ -704,6 +724,7 @@ stages:
       condition: succeededOrFailed()
 
   - job: mbedtls_2_16
+    dependsOn: checksubmodule
     # Coverage for mbedTLS 2.16.x, previously provided by the linux-c-ubuntu-mbed
     # Docker image (Ubuntu 20.04 + apt libmbedtls-dev).  Ubuntu 24.04 ships 3.x,
     # so install 2.16.x from source.
@@ -752,6 +773,7 @@ stages:
       condition: succeededOrFailed()
 
   - job: mbedtls_2_28
+    dependsOn: checksubmodule
     # Coverage for mbedTLS 2.28.x, previously provided by the linux-c-ubuntu-2204
     # Docker image (Ubuntu 22.04 + apt libmbedtls-dev).  Ubuntu 24.04 ships 3.x,
     # so install 2.28.x from source.
@@ -800,6 +822,7 @@ stages:
       condition: succeededOrFailed()
 
   - job: mbedtls_3x
+    dependsOn: checksubmodule
     # Coverage for mbedTLS 3.x, previously provided by the linux-c-ubuntu-2404
     # Docker image which built v3.6.2 from source.  Reproduce that here.
     timeoutInMinutes: 90
@@ -848,6 +871,7 @@ stages:
       condition: succeededOrFailed()
 
   - job: cares
+    dependsOn: checksubmodule
     timeoutInMinutes: 90
     pool:
       vmImage: 'ubuntu-24.04'
@@ -881,6 +905,7 @@ stages:
       condition: succeededOrFailed()
 
   - job: openssl_engine
+    dependsOn: checksubmodule
     timeoutInMinutes: 90
     pool:
       vmImage: 'ubuntu-24.04'
@@ -915,6 +940,7 @@ stages:
       condition: succeededOrFailed()
 
   - job: OSX
+    dependsOn: checksubmodule
     variables:
       CodeQL.Enabled: false
     pool:
@@ -948,6 +974,7 @@ stages:
       condition: always()
 
   - job: xcodenative
+    dependsOn: checksubmodule
     variables:
       CodeQL.Enabled: false
     pool:
@@ -984,6 +1011,7 @@ stages:
       condition: always()
 
   - job: DotNET
+    dependsOn: checksubmodule
     displayName: '.NET'
     variables:
       Codeql.Enabled: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
