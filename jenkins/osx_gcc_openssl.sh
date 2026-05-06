@@ -21,5 +21,5 @@ CORES=$(grep -c ^processor /proc/cpuinfo 2>/dev/null || sysctl -n hw.ncpu)
 rm -r -f $build_folder
 mkdir -p $build_folder
 pushd $build_folder
-cmake .. -DOPENSSL_ROOT_DIR:PATH=/usr/local/opt/openssl -Duse_openssl:bool=ON -Drun_unittests:bool=ON
+cmake .. -DOPENSSL_ROOT_DIR:PATH=/usr/local/opt/openssl -Duse_openssl:bool=ON -Drun_unittests:bool=ON -DCMAKE_POLICY_VERSION_MINIMUM=3.5
 cmake --build . -- --jobs=$CORES
