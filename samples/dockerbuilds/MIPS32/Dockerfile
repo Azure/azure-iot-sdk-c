@@ -103,7 +103,12 @@ RUN echo "SET(OPENSSL_ROOT_DIR ${TOOLCHAIN_PREFIX})" >> toolchain.cmake
 RUN echo "SET(set_trusted_cert_in_samples true CACHE BOOL \"Force use of TrustedCerts option\" FORCE)" >> toolchain.cmake
 RUN echo "include_directories(${TOOLCHAIN_PREFIX}/include)" >> toolchain.cmake
 
-RUN cmake -DCMAKE_TOOLCHAIN_FILE=toolchain.cmake ..
+# CMAKE_POLICY_VERSION_MINIMUM=3.5 keeps CMake >= 4.0 (default in newer base
+# images) compatible with sub-projects (e.g. deps/azure-macro-utils-c) whose
+# top-level CMakeLists.txt still calls cmake_minimum_required(VERSION 2.8.x).
+# Without this, CMake aborts with: "Compatibility with CMake < 3.5 has been
+# removed from CMake."
+RUN cmake -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -DCMAKE_TOOLCHAIN_FILE=toolchain.cmake ..
 RUN cmake --build .
 RUN cmake --install . --prefix ${TOOLCHAIN_PREFIX}
 
