@@ -76,6 +76,8 @@ option(hsm_type_custom "hsm type of custom used with the Provisioning client" OF
 option(use_amqp "set use_amqp to ON if amqp is to be used, set to OFF to not use amqp" ON)
 option(use_http "set use_http to ON if http is to be used, set to OFF to not use http" ON)
 option(use_mqtt "set use_mqtt to ON if mqtt is to be used, set to OFF to not use mqtt" ON)
+# Deprecated components
+option(build_serializer "set build_serializer to ON to build the deprecated serializer library and its tests/samples (default OFF)" OFF)
 # TLS Options (OpenSSL further below)
 option(use_mbedtls "set use_mbedtls to ON to use mbedtls." OFF)
 option(use_bearssl "set use_bearssl to ON to use bearssl." OFF)
@@ -253,12 +255,83 @@ if (${original_run_e2e_tests} OR ${original_run_unittests} OR ${run_sfc_tests})
     set(SHARED_UTIL_REAL_TEST_FOLDER ${CMAKE_CURRENT_LIST_DIR}/c-utility/tests/real_test_files CACHE INTERNAL "this is what needs to be included when doing test sources" FORCE)
 endif()
 
+# Hoist the shared sub-submodules from the c-build-tools-migrated nested deps
+# (c-utility, uamqp, umqtt, deps/azure-ctest, deps/uhttp, deps/umock-c,
+# provisioning_client/deps/utpm) up to the SDK root, so a 1-level
+# `submodules: true` ADO checkout is sufficient. Each nested CMakeLists guards
+# its own add_subdirectory with `if (NOT TARGET <name>) AND EXISTS ...`, so
+# providing these targets at the root makes the nested guards short-circuit.
+#
+# c-build-tools is loaded first because macro-utils-c, c-logging and the
+# remaining root deps (azure-ctest, umock-c, etc.) call macros it defines
+# (set_default_build_options, add_vld_if_defined, add_repo_validation, ...).
+#
+# Disable c-build-tools' own SDK-irrelevant subprojects (C# tooling, repo
+# validation, traceability, reals check, sarif results checker). The SDK has
+# never relied on these and lacks their build-time prerequisites (NuGet
+# packages, Rust toolchain).
+if (NOT ${use_installed_dependencies})
+    set(build_csharp_projects OFF CACHE BOOL "Disable c-build-tools C# projects in SDK build" FORCE)
+    set(build_sarif_results_checker OFF CACHE BOOL "Disable c-build-tools SARIF results checker in SDK build" FORCE)
+    set(build_traceability_tool OFF CACHE BOOL "Disable c-build-tools traceability tool in SDK build" FORCE)
+    set(run_traceability OFF CACHE BOOL "Disable c-build-tools traceability run in SDK build" FORCE)
+    set(run_repo_validation OFF CACHE BOOL "Disable c-build-tools repo validation in SDK build" FORCE)
+    set(run_reals_check OFF CACHE BOOL "Disable c-build-tools reals check in SDK build" FORCE)
+
+    if ((NOT TARGET c_build_tools) AND (EXISTS ${CMAKE_CURRENT_LIST_DIR}/deps/c-build-tools/CMakeLists.txt))
+        add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/deps/c-build-tools)
+    endif()
+    if ((NOT TARGET macro_utils_c) AND (EXISTS ${CMAKE_CURRENT_LIST_DIR}/deps/macro-utils-c/CMakeLists.txt))
+        add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/deps/macro-utils-c)
+    endif()
+    if ((NOT TARGET c_logging) AND (EXISTS ${CMAKE_CURRENT_LIST_DIR}/deps/c-logging/CMakeLists.txt))
+        add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/deps/c-logging)
+        # c-logging's own guard checks `TARGET c_logging`, but it only creates
+        # the `c_logging_v2` target. Without this alias, nested deps that check
+        # `NOT TARGET c_logging` would re-add c-logging's subdirectory and
+        # collide on `c_logging_v2`. (c-utility does the same alias inline.)
+        if (TARGET c_logging_v2 AND NOT TARGET c_logging)
+            add_library(c_logging ALIAS c_logging_v2)
+        endif()
+    endif()
+endif()
+
+# Back-compat shim for umock-c API rename: legacy SDK tests use
+# IGNORED_PTR_ARG / IGNORED_NUM_ARG; the bumped umock-c only exposes
+# IGNORED_ARG. Aliasing them globally is safe because production code
+# does not reference these symbols.
+if (original_run_unittests OR original_run_e2e_tests OR run_sfc_tests OR run_int_tests)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DIGNORED_PTR_ARG=IGNORED_ARG -DIGNORED_NUM_ARG=IGNORED_ARG")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DIGNORED_PTR_ARG=IGNORED_ARG -DIGNORED_NUM_ARG=IGNORED_ARG")
+endif()
+
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/deps)
 if(${use_installed_dependencies})
     find_package(parson REQUIRED CONFIG)
 endif()
 
 include_directories(${MACRO_UTILS_INC_FOLDER})
+# The bumped serializer/iothub_client/etc. include `macro_utils/macro_utils.h`
+# (from Azure/macro-utils-c) in addition to the legacy
+# `azure_macro_utils/macro_utils.h` (from Azure/azure-macro-utils-c). Add the
+# new layout to global includes too.
+if (EXISTS ${CMAKE_CURRENT_LIST_DIR}/deps/macro-utils-c/inc/macro_utils/macro_utils.h)
+    include_directories(${CMAKE_CURRENT_LIST_DIR}/deps/macro-utils-c/inc)
+endif()
+# c-logging v2 headers (e.g. `c_logging/logger.h`) are pulled in by xlogging.h
+# in the bumped c-utility. Add to global includes.
+if (EXISTS ${CMAKE_CURRENT_LIST_DIR}/deps/c-logging/v2/inc/c_logging/logger.h)
+    include_directories(${CMAKE_CURRENT_LIST_DIR}/deps/c-logging/v2/inc)
+endif()
+# UMOCK_C_INC_FOLDER used to be exported by deps/umock-c's CMakeLists.txt as a
+# CACHE INTERNAL variable, but the c-build-tools-migrated version of umock-c
+# only exposes its includes via target_include_directories(umock_c ...). Some
+# legacy SDK sources (e.g. serializer/src/agenttypesystem.c) include
+# `umock_c/umock_c_prod.h` without linking to the umock_c target, so set the
+# variable here as a fallback.
+if (NOT DEFINED UMOCK_C_INC_FOLDER OR "${UMOCK_C_INC_FOLDER}" STREQUAL "")
+    set(UMOCK_C_INC_FOLDER ${CMAKE_CURRENT_LIST_DIR}/deps/umock-c/inc CACHE INTERNAL "umock-c include folder" FORCE)
+endif()
 include_directories(${UMOCK_C_INC_FOLDER})
 
 if(${use_installed_dependencies})
@@ -390,8 +463,12 @@ endif()
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/iothub_client)
 
 
-# Note this is deprecated
-add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/serializer)
+# Note: the serializer library is deprecated. It is excluded from the
+# default build because it depends on legacy preprocessor macros that are
+# incompatible with newer dependency versions. Opt in with -Dbuild_serializer=ON.
+if (${build_serializer})
+    add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/serializer)
+endif()
 
 ########## Add SDK samples ##########
 if (NOT ${skip_samples})

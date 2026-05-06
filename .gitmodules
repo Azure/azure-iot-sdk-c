@@ -34,3 +34,9 @@
 [submodule "deps/c-build-tools"]
 	path = deps/c-build-tools
 	url = https://github.com/Azure/c-build-tools.git
+[submodule "deps/macro-utils-c"]
+	path = deps/macro-utils-c
+	url = https://github.com/Azure/macro-utils-c.git
+[submodule "deps/c-logging"]
+	path = deps/c-logging
+	url = https://github.com/Azure/c-logging.git

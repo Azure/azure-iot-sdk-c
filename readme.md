@@ -254,7 +254,7 @@ Contains libraries that enable interactions with the Device Proviosining service
 
 `/serializer`
 
-Contains libraries that provide modeling and JSON serialization capabilities on top of the raw messaging library.
+Contains libraries that provide modeling and JSON serialization capabilities on top of the raw messaging library. **The serializer is deprecated and is no longer built by default.** It depends on legacy preprocessor macros that are incompatible with current dependency versions, so its tests are also disabled. To opt in (at your own risk), configure CMake with `-Dbuild_serializer=ON`. New code should not use the serializer; see [the serializer readme](serializer/readme.md) for alternatives.
 
 # Releases
 
