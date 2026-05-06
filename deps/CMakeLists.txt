@@ -4,6 +4,15 @@
 ########## SDK Testing Dependencies ##########
 if (NOT ${use_installed_dependencies})
 
+    # Provide c-build-tools at the root so nested deps (azure-ctest, c-utility,
+    # uamqp, umqtt, uhttp, umock-c, utpm) reuse it instead of each requiring
+    # their own deps/c-build-tools sub-submodule to be checked out (which fails
+    # under `submodules: true` in CI). Each nested CMakeLists guards its own
+    # add_subdirectory with `if (NOT TARGET c_build_tools)`, so they will skip.
+    if ((NOT TARGET c_build_tools) AND (EXISTS "${CMAKE_CURRENT_LIST_DIR}/c-build-tools/CMakeLists.txt"))
+        add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/c-build-tools)
+    endif()
+
     if (NOT TARGET azure_macro_utils_c AND EXISTS "${CMAKE_CURRENT_LIST_DIR}/azure-macro-utils-c/CMakeLists.txt")
         add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/azure-macro-utils-c)
     endif()

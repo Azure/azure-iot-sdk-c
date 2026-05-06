@@ -31,3 +31,6 @@
 [submodule "deps/azure-ctest"]
 	path = deps/azure-ctest
 	url = https://github.com/Azure/azure-ctest.git
+[submodule "deps/c-build-tools"]
+	path = deps/c-build-tools
+	url = https://github.com/Azure/c-build-tools.git
