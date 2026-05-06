@@ -463,3 +463,31 @@
    fun:RunTests
    fun:main
 }
+
+# ------------------------------------------------------------------------
+# Ubuntu 24.04 (glibc 2.39 / valgrind 3.22) - libp11-kit shared-library
+# destructor calls pthread_mutex_destroy on already-torn-down mutexes
+# during process exit. Matches the existing libp11 suppression style above.
+# ------------------------------------------------------------------------
+{
+   libp11-kit pthread_mutex_destroy at exit (Ubuntu 24.04 / glibc 2.39)
+   Helgrind:Misc
+   obj:*/vgpreload_helgrind-amd64-linux.so
+   ...
+   fun:_dl_call_fini
+   fun:_dl_fini
+   fun:__run_exit_handlers
+   fun:exit
+   fun:(below main)
+}
+{
+   libp11-kit pthread_mutex_destroy at exit (Ubuntu 24.04 / PthAPIerror variant)
+   Helgrind:PthAPIerror
+   obj:*/vgpreload_helgrind-amd64-linux.so
+   ...
+   fun:_dl_call_fini
+   fun:_dl_fini
+   fun:__run_exit_handlers
+   fun:exit
+   fun:(below main)
+}
