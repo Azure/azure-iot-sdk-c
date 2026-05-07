@@ -60,7 +60,8 @@ if $run_valgrind; then
     # Unit tests under valgrind
     ctest -T test --no-compress-output -C "Debug" -V -j $VALGRIND_UT_CORES --schedule-random -R "_valgrind$" -E "e2e"
     if $run_e2e; then
-        # E2E tests under valgrind (quarantine: see note above)
+        # E2E tests under valgrind. Quarantined:
+        #   iothubclient_mqtt_dt_e2e: see GitHub issue (twin PATCH delivery flake).
         ctest -T test --no-compress-output -C "Debug" -V -j $VALGRIND_E2E_CORES --schedule-random -R "e2e_valgrind$" -E "^iothubclient_mqtt_dt_e2e_valgrind$"
     fi
 fi
@@ -69,8 +70,12 @@ if $run_helgrind; then
     # Unit tests under helgrind
     ctest -T test --no-compress-output -C "Debug" -V -j $VALGRIND_UT_CORES --schedule-random -R "_helgrind$" -E "e2e"
     if $run_e2e; then
-        # E2E tests under helgrind (quarantine: see note above)
-        ctest -T test --no-compress-output -C "Debug" -V -j $VALGRIND_E2E_CORES --schedule-random -R "e2e_helgrind$" -E "^iothubclient_mqtt_dt_e2e_helgrind$"
+        # E2E tests under helgrind. Quarantined:
+        #   iothubclient_mqtt_dt_e2e: see GitHub issue (twin PATCH delivery flake).
+        #   iothubclient_uploadtoblob_e2e: helgrind instrumentation makes
+        #     IoTHubClient_Destroy() exceed the test's 30s deadline on the
+        #     Microsoft-hosted 4-vCPU agents (similar to E2E_CORES tuning).
+        ctest -T test --no-compress-output -C "Debug" -V -j $VALGRIND_E2E_CORES --schedule-random -R "e2e_helgrind$" -E "^(iothubclient_mqtt_dt_e2e|iothubclient_uploadtoblob_e2e)_helgrind$"
     fi
 fi
 
