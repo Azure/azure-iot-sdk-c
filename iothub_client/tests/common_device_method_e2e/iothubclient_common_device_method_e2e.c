@@ -589,8 +589,22 @@ static void sendeventasync_on_device_or_module(IOTHUB_MESSAGE_HANDLE msgHandle)
 
 static void create_hub_client_from_provisioned_device(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, const char* modelId)
 {
-    ASSERT_IS_NULL(iothub_deviceclient_handle, "iothub_deviceclient_handle is non-NULL on test initialization");
-    ASSERT_IS_NULL(iothub_moduleclient_handle, "iothub_moduleclient_handle is non-NULL on test initialization");
+    // Defensively drain any client handle leaked by a prior test that exited
+    // via a longjmp from an ASSERT_xxx macro before reaching its cleanup call.
+    // Without this, a single test failure cascades into every subsequent test in the
+    // same suite reporting "...handle is non-NULL on test initialization".
+    if (iothub_deviceclient_handle != NULL)
+    {
+        LogError("create_hub_client_from_provisioned_device(): leftover device client handle from a prior test; destroying before re-creating.");
+        IoTHubDeviceClient_Destroy(iothub_deviceclient_handle);
+        iothub_deviceclient_handle = NULL;
+    }
+    if (iothub_moduleclient_handle != NULL)
+    {
+        LogError("create_hub_client_from_provisioned_device(): leftover module client handle from a prior test; destroying before re-creating.");
+        IoTHubModuleClient_Destroy(iothub_moduleclient_handle);
+        iothub_moduleclient_handle = NULL;
+    }
 
     if (deviceToUse->moduleConnectionString != NULL)
     {

@@ -772,8 +772,16 @@ static void setup_iothub_client(IOTHUB_PROVISIONED_DEVICE* deviceToUse)
 
 static void client_connect_to_hub(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 {
-    ASSERT_IS_NULL(iothub_deviceclient_handle, "iothub_deviceclient_handle is non-NULL on test initialization");
-    ASSERT_IS_NULL(iothub_moduleclient_handle, "iothub_moduleclient_handle is non-NULL on test initialization");
+    // Defensively drain any client handle leaked by a prior test that exited
+    // via a longjmp from an ASSERT_xxx macro before reaching its destroy_on_device_or_module()
+    // call. Without this, a single test failure cascades into every subsequent test in the
+    // same suite reporting "...handle is non-NULL on test initialization".
+    if (iothub_deviceclient_handle != NULL || iothub_moduleclient_handle != NULL ||
+        iothub_deviceclient_ll_handle != NULL || iothub_moduleclient_ll_handle != NULL)
+    {
+        LogError("client_connect_to_hub(): leftover client handle from a prior test; cleaning up before re-creating.");
+        destroy_on_device_or_module();
+    }
 
     if (deviceToUse->moduleConnectionString != NULL)
     {

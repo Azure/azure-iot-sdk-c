@@ -374,13 +374,24 @@ static void set_client_option(const char* option_name,
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, error_message);
 }
 
+// Forward declaration: destroy_client_handle() is defined below but is used
+// defensively from create_client_handle() to drain leaked handles after a
+// longjmp'd ASSERT in a prior test.
+static void destroy_client_handle(void);
+
 static void create_client_handle(IOTHUB_PROVISIONED_DEVICE* device_to_use,
                         IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 {
-    ASSERT_IS_NULL(iothub_deviceclient_handle,
-                   "iothub_deviceclient_handle is non-NULL on test initialization.");
-    ASSERT_IS_NULL(iothub_moduleclient_handle,
-                   "iothub_moduleclient_handle is non-NULL on test initialization.");
+    // Defensively drain any client handle leaked by a prior test that exited
+    // via a longjmp from an ASSERT_xxx macro before reaching its destroy_client_handle()
+    // call. Without this, a single test failure cascades into every subsequent
+    // test in the same suite reporting "...handle is non-NULL on test initialization"
+    // and turns one real failure into N reported failures (see GitHub issue: dt_e2e cascade).
+    if (iothub_deviceclient_handle != NULL || iothub_moduleclient_handle != NULL)
+    {
+        LogError("create_client_handle(): leftover client handle from a prior test; cleaning up before re-creating.");
+        destroy_client_handle();
+    }
 
     if (device_to_use->moduleConnectionString)
     {

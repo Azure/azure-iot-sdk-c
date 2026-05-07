@@ -1,58 +1,13 @@
 name: $(BuildID)_$(BuildDefinitionName)_$(SourceBranchName)_$(Date:yyyyMMdd)$(Rev:.r)
-variables:
-  runCodesignValidationInjection: false
 resources:
-  containers:
-  - container: linux-c-ubuntu-2404
-    endpoint: csdk-containers
-    image: csdkcontainerregistry.azurecr.io/linux-c-ubuntu-2404:latest
-  - container: linux-c-ubuntu-2204
-    endpoint: csdk-containers
-    image: csdkcontainerregistry.azurecr.io/linux-c-ubuntu-2204:latest
-  - container: linux-c-ubuntu-2004
-    endpoint: csdk-containers
-    image: csdkcontainerregistry.azurecr.io/linux-c-ubuntu-2004:latest
-  - container: linux-c-ubuntu-wolfssl
-    endpoint: csdk-containers
-    image: csdkcontainerregistry.azurecr.io/linux-c-ubuntu-wolfssl:latest
-  - container: linux-c-ubuntu-bearssl
-    endpoint: csdk-containers
-    image: csdkcontainerregistry.azurecr.io/linux-c-ubuntu-bearssl:latest
-  - container: linux-c-ubuntu-mbed
-    endpoint: csdk-containers
-    image: csdkcontainerregistry.azurecr.io/linux-c-ubuntu-mbed:latest
-  - container: linux-c-ubuntu-c-ares
-    endpoint: csdk-containers
-    image: csdkcontainerregistry.azurecr.io/linux-c-ubuntu-c-ares:latest
-  - container: linux-c-debian-buster
-    endpoint: csdk-containers
-    image: csdkcontainerregistry.azurecr.io/linux-c-debian-buster:latest
-  - container: linux-c-ubuntu-clang
-    endpoint: csdk-containers
-    image: csdkcontainerregistry.azurecr.io/linux-c-ubuntu-clang:latest
-  - container: linux-c-openssl-pkcs11
-    endpoint: csdk-containers
-    image: csdkcontainerregistry.azurecr.io/linux-c-openssl-pkcs11:latest
-  - container: raspberrypi-c-buster
-    endpoint: csdk-containers
-    image: csdkcontainerregistry.azurecr.io/raspberrypi-c-buster:brown
+  - repo: self
+    clean: true
+
+variables:
+  AZURE_LOCATION: centraluseuap
+
 stages:
-- stage: Setup
-  jobs:
-  - job: setup
-    container: linux-c-ubuntu-2204
-    pool:
-      name: 'sdk-c--ubuntu-22'
-    displayName: 'Setup'
-    steps:
-    - script: |
-        az login --identity
-        az storage account update -g $STORAGE_ACCOUNT_RESOURCE_GROUP -n $STORAGE_ACCOUNT_NAME --allow-shared-key-access true --default-action Allow
-      displayName: 'Setup Azure Storage Account'
-      env:
-        STORAGE_ACCOUNT_NAME: $(STORAGE-ACCOUNT-NAME)
-        STORAGE_ACCOUNT_RESOURCE_GROUP: $(STORAGE-ACCOUNT-RESOURCE-GROUP)
-- stage: Tests  
+- stage: Requirements
   jobs:
   - job: checksubmodule
     variables:
@@ -61,91 +16,85 @@ stages:
       vmImage: 'ubuntu-24.04'
     displayName: "Check Submodules"
     steps:
+    - script: git config --global core.longpaths true
+      displayName: 'Enable git longpaths'
+    - checkout: self
+      submodules: recursive
     - script: |
-        sudo apt-get update && apt-get install -y \
+        sudo apt-get update && sudo apt-get install -y \
         curl \
         git \
-        python-software-properties \
         build-essential \
         pkg-config
         sudo curl -sL https://deb.nodesource.com/setup_16.x | bash -
         sudo apt-get install -y nodejs
       displayName: 'Setup'
     - script: |
-        npm install check_submodules 
+        npm install check_submodules
         node_modules/.bin/check_submodules . main
       displayName: 'Check Submodules Match'
-  - job: windowsx86
-    timeoutInMinutes: 190
+
+- stage: Setup
+  dependsOn: Requirements
+  jobs:
+  - job: create_azure_resources
     pool:
-      name: 'sdk-c--win-vs2022'
-    displayName: "Windows x86"
+      vmImage: 'windows-latest'
     steps:
-    - script: |
-        call jenkins\windows_c.cmd
-      displayName: 'Build'
-    - script: |
-        call jenkins\windows_c_VsDevCmd.cmd x86
-        cd cmake && ctest -T test --no-compress-output -C "Debug" -V -j 16 --schedule-random
-      displayName: "Run Tests"
-      env:
-        IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
-        IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
-        IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
-        IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
-        IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
-        IOTHUB_POLICY_KEY: $(IOTHUB-POLICY-KEY)
-        STORAGE_ACCOUNT_CONNECTION_STRING: $(STORAGE-ACCOUNT-CONNECTION-STRING)
-        IOT_DPS_CONNECTION_STRING: $(IOT-DPS-CONNECTION-STRING)
-        IOT_DPS_ID_SCOPE: $(IOT-DPS-ID-SCOPE)
-        IOTHUB_DEVICE_CONN_STRING_INVALIDCERT: $(IOTHUB-DEVICE-CONN-STRING-INVALIDCERT)
-        IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
-        DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
-        IOT_DPS_INDIVIDUAL_X509_CERTIFICATE: $(IOTHUB-E2E-X509-ECC-CERT-BASE64)
-        IOT_DPS_INDIVIDUAL_X509_KEY: $(IOTHUB-E2E-X509-ECC-PRIVATE-KEY-BASE64)
-        IOT_DPS_INDIVIDUAL_REGISTRATION_ID: $(IOT-DPS-INDIVIDUAL-REGISTRATION-ID)
-        # PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
-    - task: PublishTestResults@2
-      displayName: 'Publish Windows x86 Results'
+    - checkout: none
+    - task: AzureCLI@2
       inputs:
-        testRunner: CTest
-        testResultsFiles: '**/Test.xml'
-        mergeTestResults: true
-        testRunTitle: 'windowsx86'
-      condition: succeededOrFailed()
+        azureSubscription: 'iot hub sdk service connection'
+        # Use PowerShell 7 (pwsh) so RSA.ExportRSAPrivateKeyPem() is available.
+        # Windows PowerShell 5.1 (scriptType: 'ps') lacks this API, which forces
+        # the test config to fall back to PKCS#8 ("BEGIN PRIVATE KEY"). Schannel's
+        # CryptDecodeObjectEx(PKCS_RSA_PRIVATE_KEY) can only decode PKCS#1 DER
+        # ("BEGIN RSA PRIVATE KEY"), so every x509 E2E test then fails in
+        # c-utility/adapters/x509_schannel.c::decode_crypt_object.
+        scriptType: 'pscore'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          $ErrorActionPreference = 'Stop'
+          $PSVersionTable
+          New-Item -ItemType Directory -Force -Path test_config | Out-Null
+
+          # TEMP: pinned to a working branch on iot-sdks-e2e-fx until the fix is merged to master.
+          # Revert to master once https://github.com/Azure/iot-sdks-e2e-fx/tree/ewertons/install-stable-azure-iot-extension-by-default is merged.
+          $PsmUrl = 'https://raw.githubusercontent.com/Azure/iot-sdks-e2e-fx/ewertons/install-stable-azure-iot-extension-by-default/scripts/Azure.Iot.Sdk.Test.psm1'
+          $PsmPath = Join-Path $PWD 'Azure.Iot.Sdk.Test.psm1'
+          Invoke-WebRequest -Uri $PsmUrl -OutFile $PsmPath -UseBasicParsing
+          Import-Module $PsmPath
+
+          $ResourceGroupName = New-AzureResourceGroupName -OutFile "test_config/azure-resource-group-name.txt"
+          $TestEnvInfo = New-AzIotTestEnvironment -AzureLocation $env:AZURE_LOCATION -ResourceGroup $ResourceGroupName -EnableFileUpload -IotHubX509ThumbprintDevices 1 -DpsX509IndividualEnrollments 1
+
+          New-AzIotCSDKE2ETestConfig -TestEnvInfo $TestEnvInfo -Target bash -OutFile test_config/set_e2e_test_env_vars.sh
+          New-AzIotCSDKE2ETestConfig -TestEnvInfo $TestEnvInfo -Target powershell -OutFile test_config/Set-E2ETestEnvVars.ps1
+      displayName: 'Create Azure Resources and Test Config'
+    - publish: test_config
+      artifact: test_config_scripts
+      displayName: Publish artifact (test config scripts)
+      condition: always()
+- stage: Tests
+  jobs:
   - job: windowsx64debug
     timeoutInMinutes: 190
     pool:
-      name: 'sdk-c--win-vs2022'
+      vmImage: 'windows-2022'
     displayName: 'Windows x64 (Debug)'
     steps:
+    - checkout: self
+      submodules: true
+    - download: current
+      artifact: test_config_scripts
+      displayName: Download artifact (test config scripts)
     - script: |
         call jenkins\windows_c.cmd --platform x64
       displayName: 'Build'
-    - script: |
-        call jenkins\windows_c_VsDevCmd.cmd x64
-        cd cmake && ctest -T test --no-compress-output -C "Debug" -V -j 16 --schedule-random
+    - powershell: |
+        . "$(Pipeline.Workspace)\test_config_scripts\Set-E2ETestEnvVars.ps1"
+        cmd /c "call jenkins\windows_c_VsDevCmd.cmd x64 && cd cmake && ctest -T test --no-compress-output -C Debug -V -j 16 --schedule-random -E iothubclient_mqtt_dt_e2e"
       displayName: "Run Tests"
-      env:
-        IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
-        IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
-        IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
-        IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
-        IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
-        IOTHUB_POLICY_KEY: $(IOTHUB-POLICY-KEY)
-        STORAGE_ACCOUNT_CONNECTION_STRING: $(STORAGE-ACCOUNT-CONNECTION-STRING)
-        IOT_DPS_CONNECTION_STRING: $(IOT-DPS-CONNECTION-STRING)
-        IOT_DPS_ID_SCOPE: $(IOT-DPS-ID-SCOPE)
-        IOTHUB_CA_ROOT_CERT: $(IOTHUB-CA-ROOT-CERT)
-        IOTHUB_CA_ROOT_CERT_KEY: $(IOTHUB-CA-ROOT-CERT-KEY)
-        IOT_DPS_GLOBAL_ENDPOINT: $(IOT-DPS-GLOBAL-ENDPOINT)
-        IOTHUB_DEVICE_CONN_STRING_INVALIDCERT: $(IOTHUB-DEVICE-CONN-STRING-INVALIDCERT)
-        IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
-        DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
-        PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
-        IOT_DPS_INDIVIDUAL_X509_CERTIFICATE: $(IOTHUB-E2E-X509-ECC-CERT-BASE64)
-        IOT_DPS_INDIVIDUAL_X509_KEY: $(IOTHUB-E2E-X509-ECC-PRIVATE-KEY-BASE64)
-        IOT_DPS_INDIVIDUAL_REGISTRATION_ID: $(IOT-DPS-INDIVIDUAL-REGISTRATION-ID)
     - task: PublishTestResults@2
       displayName: 'Publish Windows x64 (Debug) Results'
       inputs:
@@ -154,45 +103,58 @@ stages:
         mergeTestResults: true
         testRunTitle: 'windowsx64'
       condition: succeededOrFailed()
+
+  - job: windowsx86
+    timeoutInMinutes: 190
+    pool:
+      vmImage: 'windows-2022'
+    displayName: 'Windows x86'
+    steps:
+    - checkout: self
+      submodules: true
+    - download: current
+      artifact: test_config_scripts
+      displayName: Download artifact (test config scripts)
+    - script: |
+        call jenkins\windows_c.cmd
+      displayName: 'Build'
+    - powershell: |
+        . "$(Pipeline.Workspace)\test_config_scripts\Set-E2ETestEnvVars.ps1"
+        cmd /c "call jenkins\windows_c_VsDevCmd.cmd x86 && cd cmake && ctest -T test --no-compress-output -C Debug -V -j 16 --schedule-random -E iothubclient_mqtt_dt_e2e"
+      displayName: 'Run Tests'
+    - task: PublishTestResults@2
+      displayName: 'Publish Windows x86 Results'
+      inputs:
+        testRunner: CTest
+        testResultsFiles: '**/Test.xml'
+        mergeTestResults: true
+        testRunTitle: 'windowsx86'
+      condition: succeededOrFailed()
+
   - job: windowsx64release
     timeoutInMinutes: 190
     variables:
       CodeQL.Enabled: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
       CodeQL.Language: cpp
     pool:
-      name: 'sdk-c--win-vs2022'
+      vmImage: 'windows-2022'
     displayName: 'Windows x64 (Release)'
     steps:
+    - checkout: self
+      submodules: true
+    - download: current
+      artifact: test_config_scripts
+      displayName: Download artifact (test config scripts)
     - task: CodeQL3000Init@0
     - script: |
         call jenkins\windows_c_release.cmd --platform x64
       displayName: 'Build'
     - task: CodeQL3000Finalize@0
       condition: always()
-    - script: |
-        call jenkins\windows_c_VsDevCmd.cmd x64
-        cd cmake && ctest -T test --no-compress-output -C "Release" -V -j 16 --schedule-random
-      displayName: "Run Tests"
-      env:
-        IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
-        IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
-        IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
-        IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
-        IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
-        IOTHUB_POLICY_KEY: $(IOTHUB-POLICY-KEY)
-        STORAGE_ACCOUNT_CONNECTION_STRING: $(STORAGE-ACCOUNT-CONNECTION-STRING)
-        IOT_DPS_CONNECTION_STRING: $(IOT-DPS-CONNECTION-STRING)
-        IOT_DPS_ID_SCOPE: $(IOT-DPS-ID-SCOPE)
-        IOTHUB_CA_ROOT_CERT: $(IOTHUB-CA-ROOT-CERT)
-        IOTHUB_CA_ROOT_CERT_KEY: $(IOTHUB-CA-ROOT-CERT-KEY)
-        IOT_DPS_GLOBAL_ENDPOINT: $(IOT-DPS-GLOBAL-ENDPOINT)
-        IOTHUB_DEVICE_CONN_STRING_INVALIDCERT: $(IOTHUB-DEVICE-CONN-STRING-INVALIDCERT)
-        IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
-        DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
-        PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
-        IOT_DPS_INDIVIDUAL_X509_CERTIFICATE: $(IOTHUB-E2E-X509-ECC-CERT-BASE64)
-        IOT_DPS_INDIVIDUAL_X509_KEY: $(IOTHUB-E2E-X509-ECC-PRIVATE-KEY-BASE64)
-        IOT_DPS_INDIVIDUAL_REGISTRATION_ID: $(IOT-DPS-INDIVIDUAL-REGISTRATION-ID)
+    - powershell: |
+        . "$(Pipeline.Workspace)\test_config_scripts\Set-E2ETestEnvVars.ps1"
+        cmd /c "call jenkins\windows_c_VsDevCmd.cmd x64 && cd cmake && ctest -T test --no-compress-output -C Release -V -j 16 --schedule-random -E iothubclient_mqtt_dt_e2e"
+      displayName: 'Run Tests'
     - task: PublishTestResults@2
       displayName: 'Publish Windows x64 (Release) Results'
       inputs:
@@ -201,401 +163,411 @@ stages:
         mergeTestResults: true
         testRunTitle: 'windowsx64release'
       condition: succeededOrFailed()
+
   - job: windowsdynamic
     timeoutInMinutes: 190
     pool:
-      name: 'sdk-c--win-vs2022'
-    displayName: "Windows Dynamic"
+      vmImage: 'windows-2022'
+    displayName: 'Windows Dynamic'
     steps:
-    - script: |
-        call jenkins\windows_c_VsDevCmd.cmd
-        call jenkins\windows_c_build_as_dynamic.cmd
+    - checkout: self
+      submodules: true
+    - download: current
+      artifact: test_config_scripts
+      displayName: Download artifact (test config scripts)
+    - powershell: |
+        . "$(Pipeline.Workspace)\test_config_scripts\Set-E2ETestEnvVars.ps1"
+        cmd /c "call jenkins\windows_c_VsDevCmd.cmd && call jenkins\windows_c_build_as_dynamic.cmd"
       displayName: 'Build'
-      env:
-        IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
-        IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
-        IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
-        IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
-        IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
-        IOTHUB_POLICY_KEY: $(IOTHUB-POLICY-KEY)
-        STORAGE_ACCOUNT_CONNECTION_STRING: $(STORAGE-ACCOUNT-CONNECTION-STRING)
-        IOT_DPS_CONNECTION_STRING: $(IOT-DPS-CONNECTION-STRING)
-        IOT_DPS_ID_SCOPE: $(IOT-DPS-ID-SCOPE)
-        IOTHUB_CA_ROOT_CERT: $(IOTHUB-CA-ROOT-CERT)
-        IOTHUB_CA_ROOT_CERT_KEY: $(IOTHUB-CA-ROOT-CERT-KEY)
-        IOTHUB_DEVICE_CONN_STRING_INVALIDCERT: $(IOTHUB-DEVICE-CONN-STRING-INVALIDCERT)
-        IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
-        DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
-        PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
-        IOT_DPS_INDIVIDUAL_X509_CERTIFICATE: $(IOTHUB-E2E-X509-ECC-CERT-BASE64)
-        IOT_DPS_INDIVIDUAL_X509_KEY: $(IOTHUB-E2E-X509-ECC-PRIVATE-KEY-BASE64)
-        IOT_DPS_INDIVIDUAL_REGISTRATION_ID: $(IOT-DPS-INDIVIDUAL-REGISTRATION-ID)
   - job: linuxoptions
-    container: linux-c-ubuntu-2004
-    pool: 
-      name: 'sdk-c--ubuntu-22'
+    pool:
+      vmImage: 'ubuntu-24.04'
     displayName: 'Linux with Options'
     steps:
+    - checkout: self
+      submodules: true
+    - script: |
+        set -e
+        sudo apt-get update && sudo apt-get upgrade
+        sudo ./build_all/linux/setup.sh
+      displayName: 'Host setup'
+      condition: always()
     - script: 'sudo ./jenkins/linux_c_option_test.sh'
       displayName: 'Build'
       condition: always()
+
+  - job: raspberrypi
+    pool:
+      vmImage: 'ubuntu-24.04'
+    displayName: "Raspberry Pi"
+    steps:
+    - checkout: self
+      submodules: true
+    - script: |
+        source ./testtools/scripts/linux-setup-raspberry.sh
+      displayName: 'Host setup'
+      condition: always()
+    - script: |
+       $HOME
+       whoami
+       ls -lr
+       pwd
+       # raspberry_env_vars.sh is generated by linux-setup-raspberry.sh
+       source ./toolchain/raspberry_env_vars.sh
+       # Point pkg-config at the cross-compile toolchain's .pc files (libuuid, etc.)
+       # so pkg_search_module(uuid) in CMake resolves against the toolchain sysroot
+       # instead of the host's system pkg-config paths.
+       export PKG_CONFIG_LIBDIR=${TOOLCHAIN_PREFIX}/lib/pkgconfig
+       export PKG_CONFIG_PATH=${TOOLCHAIN_PREFIX}/lib/pkgconfig
+       # Ensure cross linker search path includes toolchain libs (libuuid, openssl, curl).
+       export LIBRARY_PATH=${TOOLCHAIN_PREFIX}/lib:${LIBRARY_PATH}
+       export LDFLAGS="-L${TOOLCHAIN_PREFIX}/lib ${LDFLAGS}"
+       chmod +x jenkins/raspberrypi_c_buster.sh
+        ./jenkins/raspberrypi_c_buster.sh
+      displayName: 'Build'
+  - job: crosscompile_mips32
+    pool:
+      vmImage: 'ubuntu-24.04'
+    displayName: "Cross Compile (MIPS32)"
+    steps:
+    - checkout: self
+      submodules: false
+    - script: |
+        # Microsoft-hosted ubuntu-24.04 ships with docker + containerd preinstalled.
+        # Installing docker.io from apt would conflict with containerd.io and fail
+        # the apt resolver ("containerd.io : Conflicts: containerd").
+        sudo apt-get update && sudo apt-get install -y \
+        curl \
+        git \
+        build-essential \
+        pkg-config
+      displayName: 'Setup'
+    - script: |
+        cd samples/dockerbuilds/MIPS32
+        docker build --build-arg TARGET_BRANCH=$BUILD_SOURCEBRANCH -t mipsiotbuild:latest . --network=host
+        cd ..
+        docker build -t mipsiotapp:latest . --network=host --file ./MIPS32/Dockerfile_adjunct
+      displayName: 'Build MIPS32'
+  - job: crosscompile_arm
+    pool:
+      vmImage: 'ubuntu-24.04'
+    displayName: "Cross Compile (ARM)"
+    steps:
+    - checkout: self
+      submodules: false
+    - script: |
+        # Microsoft-hosted ubuntu-24.04 ships with docker + containerd preinstalled.
+        # Installing docker.io from apt would conflict with containerd.io and fail
+        # the apt resolver ("containerd.io : Conflicts: containerd").
+        sudo apt-get update && sudo apt-get install -y \
+        curl \
+        git \
+        build-essential \
+        pkg-config
+      displayName: 'Setup'
+    - script: |
+        cd samples/dockerbuilds/ARM
+        docker build --build-arg TARGET_BRANCH=$BUILD_SOURCEBRANCH -t armiotbuild:latest . --network=host
+        cd ..
+        docker build -t armiotapp:latest . --network=host --file ./ARM/Dockerfile_adjunct
+      displayName: 'Build ARM'
+  - job: ubuntu2404_dbg_build
+    pool:
+      vmImage: 'ubuntu-24.04'
+    displayName: 'Ubuntu 24.04 Build (Debug)'
+    steps:
+    - checkout: self
+      submodules: true
+    - script: |
+        set -e
+        sudo apt-get update && sudo apt-get upgrade
+        sudo ./build_all/linux/setup.sh
+      displayName: 'Host setup'
+    - script: |
+        sudo -E ./jenkins/ubuntu_c.sh
+      displayName: 'Build'
+    - script: |
+        sudo chmod -R 755 .
+        tar cf $(Build.ArtifactStagingDirectory)/build_output.tar -C $(Build.SourcesDirectory) cmake
+      displayName: 'Package build output'
+    - publish: $(Build.ArtifactStagingDirectory)/build_output.tar
+      artifact: ubuntu2404_dbg_build_output
+      displayName: 'Publish build output'
+
+  - job: ubuntu2404_dbg_tests
+    dependsOn: ubuntu2404_dbg_build
+    timeoutInMinutes: 90
+    pool:
+      vmImage: 'ubuntu-24.04'
+    displayName: 'Ubuntu 24.04 Tests'
+    strategy:
+      matrix:
+        ut_e2e:
+          RUN_TESTS_ARGS: '--e2e'
+          NEEDS_E2E_CONFIG: 'true'
+        valgrind:
+          RUN_TESTS_ARGS: '--valgrind --e2e'
+          NEEDS_E2E_CONFIG: 'true'
+        helgrind:
+          RUN_TESTS_ARGS: '--helgrind --e2e'
+          NEEDS_E2E_CONFIG: 'true'
+        drd:
+          RUN_TESTS_ARGS: '--drd --e2e'
+          NEEDS_E2E_CONFIG: 'true'
+    steps:
+    - checkout: self
+      submodules: true
+    - download: current
+      artifact: test_config_scripts
+      displayName: Download artifact (test config scripts)
+    - download: current
+      artifact: ubuntu2404_dbg_build_output
+      displayName: Download artifact (build output)
+    - script: |
+        set -e
+        sudo apt-get update && sudo apt-get upgrade
+        sudo ./build_all/linux/setup.sh
+      displayName: 'Host setup'
+    - script: |
+        set -e
+        tar xf "$(Pipeline.Workspace)/ubuntu2404_dbg_build_output/build_output.tar" -C $(Build.SourcesDirectory)
+        export OPENSSL_ia32cap=0x00000000
+        sudo chmod -R 755 .
+        cd cmake
+        sudo bash -c 'source "$(Pipeline.Workspace)/test_config_scripts/set_e2e_test_env_vars.sh" && ../build_all/linux/run_tests.sh $(RUN_TESTS_ARGS)'
+      displayName: "Run Tests ($(RUN_TESTS_ARGS))"
+    - task: PublishTestResults@2
+      displayName: 'Publish Test Results ($(RUN_TESTS_ARGS))'
+      inputs:
+        testRunner: CTest
+        testResultsFiles: '**/Test.xml'
+        mergeTestResults: true
+        testRunTitle: 'ubuntu2404_$(System.JobPositionInPhase)'
+      condition: succeededOrFailed()
+
   - job: clang
-    timeoutInMinutes: 190
-    container: linux-c-ubuntu-clang
-    pool: 
-      name: 'sdk-c--ubuntu-22'
+    timeoutInMinutes: 90
+    pool:
+      vmImage: 'ubuntu-24.04'
     displayName: 'Clang (Debug)'
     steps:
+    - checkout: self
+      submodules: true
+    - download: current
+      artifact: test_config_scripts
+      displayName: Download artifact (test config scripts)
+    - script: |
+        set -e
+        sudo apt-get update && sudo apt-get upgrade
+        sudo ./build_all/linux/setup.sh
+        sudo apt-get install -y clang
+      displayName: 'Host setup'
     - script: |
         export OPENSSL_ia32cap=0x00000000
         sudo chmod -R 755 .
         sudo -E ./jenkins/ubuntu_clang.sh
       displayName: 'Build'
     - script: |
-        cd cmake && sudo -E ../build_all/linux/run_tests.sh
-      displayName: "Run Tests"
-      env:
-        IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
-        IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
-        IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
-        IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
-        IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
-        IOTHUB_POLICY_KEY: $(IOTHUB-POLICY-KEY)
-        STORAGE_ACCOUNT_CONNECTION_STRING: $(STORAGE-ACCOUNT-CONNECTION-STRING)
-        IOT_DPS_CONNECTION_STRING: $(IOT-DPS-CONNECTION-STRING)
-        IOT_DPS_ID_SCOPE: $(IOT-DPS-ID-SCOPE)
-        IOTHUB_CA_ROOT_CERT: $(IOTHUB-CA-ROOT-CERT)
-        IOTHUB_CA_ROOT_CERT_KEY: $(IOTHUB-CA-ROOT-CERT-KEY)
-        IOT_DPS_GLOBAL_ENDPOINT: $(IOT-DPS-GLOBAL-ENDPOINT)
-        IOTHUB_DEVICE_CONN_STRING_INVALIDCERT: $(IOTHUB-DEVICE-CONN-STRING-INVALIDCERT)
-        IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
-        DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
-        PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
-        IOT_DPS_INDIVIDUAL_X509_CERTIFICATE: $(IOTHUB-E2E-X509-ECC-CERT-BASE64)
-        IOT_DPS_INDIVIDUAL_X509_KEY: $(IOTHUB-E2E-X509-ECC-PRIVATE-KEY-BASE64)
-        IOT_DPS_INDIVIDUAL_REGISTRATION_ID: $(IOT-DPS-INDIVIDUAL-REGISTRATION-ID)
+        export OPENSSL_ia32cap=0x00000000
+        sudo chmod -R 755 .
+        cd cmake
+        sudo bash -c 'source "$(Pipeline.Workspace)/test_config_scripts/set_e2e_test_env_vars.sh" && ../build_all/linux/run_tests.sh --e2e'
+      displayName: 'Run Tests'
     - task: PublishTestResults@2
-      displayName: 'Publish Clang (Debug) Results'
+      displayName: 'Publish Test Results (Clang Debug)'
       inputs:
         testRunner: CTest
         testResultsFiles: '**/Test.xml'
         mergeTestResults: true
         testRunTitle: 'clang'
       condition: succeededOrFailed()
+
   - job: clang_release
-    timeoutInMinutes: 190
-    container: linux-c-ubuntu-clang
-    pool: 
-      name: 'sdk-c--ubuntu-22'
+    timeoutInMinutes: 90
+    pool:
+      vmImage: 'ubuntu-24.04'
     displayName: 'Clang (Release)'
     steps:
+    - checkout: self
+      submodules: true
+    - download: current
+      artifact: test_config_scripts
+      displayName: Download artifact (test config scripts)
+    - script: |
+        set -e
+        sudo apt-get update && sudo apt-get upgrade
+        sudo ./build_all/linux/setup.sh
+        sudo apt-get install -y clang
+      displayName: 'Host setup'
     - script: |
         export OPENSSL_ia32cap=0x00000000
         sudo chmod -R 755 .
         sudo -E ./jenkins/ubuntu_clang_release.sh
       displayName: 'Build'
     - script: |
-        cd cmake && sudo -E ../build_all/linux/run_tests.sh
-      displayName: "Run Tests"
-      env:
-        IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
-        IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
-        IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
-        IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
-        IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
-        IOTHUB_POLICY_KEY: $(IOTHUB-POLICY-KEY)
-        STORAGE_ACCOUNT_CONNECTION_STRING: $(STORAGE-ACCOUNT-CONNECTION-STRING)
-        IOT_DPS_CONNECTION_STRING: $(IOT-DPS-CONNECTION-STRING)
-        IOT_DPS_ID_SCOPE: $(IOT-DPS-ID-SCOPE)
-        IOTHUB_CA_ROOT_CERT: $(IOTHUB-CA-ROOT-CERT)
-        IOTHUB_CA_ROOT_CERT_KEY: $(IOTHUB-CA-ROOT-CERT-KEY)
-        IOT_DPS_GLOBAL_ENDPOINT: $(IOT-DPS-GLOBAL-ENDPOINT)
-        IOTHUB_DEVICE_CONN_STRING_INVALIDCERT: $(IOTHUB-DEVICE-CONN-STRING-INVALIDCERT)
-        IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
-        DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
-        PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
-        IOT_DPS_INDIVIDUAL_X509_CERTIFICATE: $(IOTHUB-E2E-X509-ECC-CERT-BASE64)
-        IOT_DPS_INDIVIDUAL_X509_KEY: $(IOTHUB-E2E-X509-ECC-PRIVATE-KEY-BASE64)
-        IOT_DPS_INDIVIDUAL_REGISTRATION_ID: $(IOT-DPS-INDIVIDUAL-REGISTRATION-ID)
+        export OPENSSL_ia32cap=0x00000000
+        sudo chmod -R 755 .
+        cd cmake
+        sudo bash -c 'source "$(Pipeline.Workspace)/test_config_scripts/set_e2e_test_env_vars.sh" && ../build_all/linux/run_tests.sh --e2e'
+      displayName: 'Run Tests'
     - task: PublishTestResults@2
-      displayName: 'Publish Clang (Release) Results'
+      displayName: 'Publish Test Results (Clang Release)'
       inputs:
         testRunner: CTest
         testResultsFiles: '**/Test.xml'
         mergeTestResults: true
         testRunTitle: 'clang_release'
       condition: succeededOrFailed()
-  - job: ubuntu2004debug
-    timeoutInMinutes: 190
-    container: linux-c-ubuntu-2004
+
+  - job: ubuntu2404arm
+    # ARM64 replacement for the retired ubuntu2204arm self-hosted ARM agent.
+    # Microsoft-hosted Azure Pipelines does not offer a generally-available
+    # ARM64 Linux vmImage on the default Azure Pipelines agent pool.
+    # Two approaches were evaluated:
+    #   1) QEMU user-mode emulation of linux/arm64 on an x64 agent: gcc
+    #      segfaulted deterministically while compiling larger translation
+    #      units (e.g. c-utility/src/constbuffer_array.c), which is a known
+    #      QEMU instability and not fixable in this SDK.
+    #   2) Cross-compile with the aarch64-linux-gnu toolchain on the x64
+    #      agent: stable, fast, and still validates ARM64 code generation
+    #      for the entire SDK.
+    # We use approach (2). Tests are NOT executed on ARM64 in hosted CI;
+    # runtime validation remains the responsibility of the self-hosted
+    # ARM agents (when available) and the raspberrypi jobs.
+    timeoutInMinutes: 60
     pool:
-      name: 'sdk-c--ubuntu-22'
-    displayName: 'Ubuntu 20.04 (Debug)'
+      vmImage: 'ubuntu-24.04'
+    displayName: 'Ubuntu 24.04 ARM64 (Cross-compile only)'
     steps:
+    - checkout: self
+      submodules: true
     - script: |
-        sudo -E ./jenkins/ubuntu_c.sh
-      displayName: 'Build'
+        set -e
+        sudo dpkg --add-architecture arm64
+        # Restrict the default (amd64) sources to amd64 so apt does not try
+        # to resolve arm64 packages against the x86_64 mirror (which fails).
+        sudo sed -i 's|^deb |deb [arch=amd64] |' /etc/apt/sources.list || true
+        if [ -f /etc/apt/sources.list.d/ubuntu.sources ]; then
+          sudo sed -i 's|^Types: deb$|Types: deb\nArchitectures: amd64|' /etc/apt/sources.list.d/ubuntu.sources || true
+        fi
+        # Add an arm64-only sources list pointing at the Ubuntu ports mirror.
+        CODENAME=$(lsb_release -cs)
+        sudo tee /etc/apt/sources.list.d/arm64-ports.list >/dev/null <<EOF
+        deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports ${CODENAME} main restricted universe multiverse
+        deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports ${CODENAME}-updates main restricted universe multiverse
+        deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports ${CODENAME}-security main restricted universe multiverse
+        EOF
+        sudo apt-get update
+        sudo apt-get install -y \
+          cmake \
+          build-essential \
+          pkg-config \
+          crossbuild-essential-arm64 \
+          libcurl4-openssl-dev:arm64 \
+          libssl-dev:arm64 \
+          uuid-dev:arm64 \
+          zlib1g-dev:arm64
+      displayName: 'Install aarch64 cross toolchain and arm64 dev libs'
     - script: |
-        export OPENSSL_ia32cap=0x00000000
-        sudo chmod -R 755 .
-        cd cmake && sudo -E ../build_all/linux/run_tests.sh
-      displayName: "Run Tests"
-      env:
-        IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
-        IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
-        IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
-        IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
-        IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
-        IOTHUB_POLICY_KEY: $(IOTHUB-POLICY-KEY)
-        STORAGE_ACCOUNT_CONNECTION_STRING: $(STORAGE-ACCOUNT-CONNECTION-STRING)
-        IOT_DPS_CONNECTION_STRING: $(IOT-DPS-CONNECTION-STRING)
-        IOT_DPS_ID_SCOPE: $(IOT-DPS-ID-SCOPE)
-        IOTHUB_CA_ROOT_CERT: $(IOTHUB-CA-ROOT-CERT)
-        IOTHUB_CA_ROOT_CERT_KEY: $(IOTHUB-CA-ROOT-CERT-KEY)
-        IOT_DPS_GLOBAL_ENDPOINT: $(IOT-DPS-GLOBAL-ENDPOINT)
-        IOTHUB_DEVICE_CONN_STRING_INVALIDCERT: $(IOTHUB-DEVICE-CONN-STRING-INVALIDCERT)
-        IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
-        DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
-        PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
-        IOT_DPS_INDIVIDUAL_X509_CERTIFICATE: $(IOTHUB-E2E-X509-ECC-CERT-BASE64)
-        IOT_DPS_INDIVIDUAL_X509_KEY: $(IOTHUB-E2E-X509-ECC-PRIVATE-KEY-BASE64)
-        IOT_DPS_INDIVIDUAL_REGISTRATION_ID: $(IOT-DPS-INDIVIDUAL-REGISTRATION-ID)
-    - task: PublishTestResults@2
-      displayName: 'Publish Ubuntu 20 (Debug) Results'
-      inputs:
-        testRunner: CTest
-        testResultsFiles: '**/Test.xml'
-        mergeTestResults: true
-        testRunTitle: 'ubuntu2004debug'
-      condition: succeededOrFailed()
-  - job: ubuntu2004release
-    timeoutInMinutes: 190
-    container: linux-c-ubuntu-2004
-    pool:
-      name: 'sdk-c--ubuntu-22'
-    displayName: 'Ubuntu 20.04 (Release)'
-    steps:
-    - script: |
-        sudo -E ./jenkins/ubuntu_c_release.sh
-      displayName: 'Build'
-    - script: |
-        export OPENSSL_ia32cap=0x00000000
-        sudo chmod -R 755 .
-        cd cmake && sudo -E ../build_all/linux/run_tests.sh
-      displayName: "Run Tests"
-      env:
-        IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
-        IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
-        IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
-        IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
-        IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
-        IOTHUB_POLICY_KEY: $(IOTHUB-POLICY-KEY)
-        STORAGE_ACCOUNT_CONNECTION_STRING: $(STORAGE-ACCOUNT-CONNECTION-STRING)
-        IOT_DPS_CONNECTION_STRING: $(IOT-DPS-CONNECTION-STRING)
-        IOT_DPS_ID_SCOPE: $(IOT-DPS-ID-SCOPE)
-        IOTHUB_CA_ROOT_CERT: $(IOTHUB-CA-ROOT-CERT)
-        IOTHUB_CA_ROOT_CERT_KEY: $(IOTHUB-CA-ROOT-CERT-KEY)
-        IOT_DPS_GLOBAL_ENDPOINT: $(IOT-DPS-GLOBAL-ENDPOINT)
-        IOTHUB_DEVICE_CONN_STRING_INVALIDCERT: $(IOTHUB-DEVICE-CONN-STRING-INVALIDCERT)
-        IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
-        DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
-        PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
-        IOT_DPS_INDIVIDUAL_X509_CERTIFICATE: $(IOTHUB-E2E-X509-ECC-CERT-BASE64)
-        IOT_DPS_INDIVIDUAL_X509_KEY: $(IOTHUB-E2E-X509-ECC-PRIVATE-KEY-BASE64)
-        IOT_DPS_INDIVIDUAL_REGISTRATION_ID: $(IOT-DPS-INDIVIDUAL-REGISTRATION-ID)
-    - task: PublishTestResults@2
-      displayName: 'Publish Ubuntu 20 (Release) Results'
-      inputs:
-        testRunner: CTest
-        testResultsFiles: '**/Test.xml'
-        mergeTestResults: true
-        testRunTitle: 'ubuntu2004release'
-      condition: succeededOrFailed()
-  - job: ubuntu2204arm
-    pool: 
-      name: 'sdk-c--ubuntu-22-arm'
-    displayName: 'Ubuntu 22.04 (ARM)'
-    steps:
-    - script: |
-        sudo nproc --all
-        sudo apt-get update && apt-get upgrade -y
-        sudo apt-get install -y git cmake build-essential curl libcurl4-openssl-dev libssl-dev uuid-dev ca-certificates
-        mkdir cmake
-        cd cmake
-        sudo cmake '-DcompileOption_C:STRING= ' -DCMAKE_BUILD_TYPE=Debug -Drun_e2e_tests:BOOL=OFF -Drun_sfc_tests:BOOL=OFF -Drun_longhaul_tests=OFF -Duse_amqp:BOOL=ON -Duse_http:BOOL=ON -Duse_mqtt:BOOL=ON -Ddont_use_uploadtoblob:BOOL=OFF -Drun_unittests:BOOL=ON -Dno_logging:BOOL=OFF -Duse_prov_client:BOOL=ON -Duse_tpm_simulator:BOOL=OFF -Duse_edge_modules=ON -Dhsm_type_riot=OFF -Dhsm_type_x509=ON -Dhsm_type_symm_key=ON -Dhsm_type_sastoken=ON -Denable_ipv6=OFF ..
-        sudo make -j8 
-      displayName: 'Build'
-    - script: |
-        cd cmake && sudo ctest -T test --no-compress-output -V
-      displayName: "Run Tests"
-      env:
-        IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
-        IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
-        IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
-        IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
-        IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
-        IOTHUB_POLICY_KEY: $(IOTHUB-POLICY-KEY)
-        STORAGE_ACCOUNT_CONNECTION_STRING: $(STORAGE-ACCOUNT-CONNECTION-STRING)
-        IOT_DPS_CONNECTION_STRING: $(IOT-DPS-CONNECTION-STRING)
-        IOT_DPS_ID_SCOPE: $(IOT-DPS-ID-SCOPE)
-        IOTHUB_CA_ROOT_CERT: $(IOTHUB-CA-ROOT-CERT)
-        IOTHUB_CA_ROOT_CERT_KEY: $(IOTHUB-CA-ROOT-CERT-KEY)
-        IOT_DPS_GLOBAL_ENDPOINT: $(IOT-DPS-GLOBAL-ENDPOINT)
-        IOTHUB_DEVICE_CONN_STRING_INVALIDCERT: $(IOTHUB-DEVICE-CONN-STRING-INVALIDCERT)
-        IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
-        DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
-        PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
-        IOT_DPS_INDIVIDUAL_X509_CERTIFICATE: $(IOTHUB-E2E-X509-ECC-CERT-BASE64)
-        IOT_DPS_INDIVIDUAL_X509_KEY: $(IOTHUB-E2E-X509-ECC-PRIVATE-KEY-BASE64)
-        IOT_DPS_INDIVIDUAL_REGISTRATION_ID: $(IOT-DPS-INDIVIDUAL-REGISTRATION-ID)
-    - task: PublishTestResults@2
-      displayName: 'Publish Debian Results'
-      inputs:
-        testRunner: CTest
-        testResultsFiles: '**/Test.xml'
-        mergeTestResults: true
-        testRunTitle: 'debian'
-      condition: succeededOrFailed()
-  - job: ubuntu2204build
-    timeoutInMinutes: 190
-    container: linux-c-ubuntu-2204
-    pool:
-      name: 'sdk-c--ubuntu-22'
-    displayName: 'Ubuntu 22.04 Unit Tests (Debug)'
-    steps:
-    - script: |
-        cat /etc/*release | grep VERSION*
-        gcc --version
-        openssl version
-        curl --version
-        sudo -E env PATH="$PATH" ./build_all/linux/build.sh --run-unittests --provisioning --use-hsmsymmkey --use-hsmsas --use-hsmx509 --use-edge-modules --config Debug
-      displayName: 'Build'
-    - script: |
-        export OPENSSL_ia32cap=0x00000000
-        sudo chmod -R 755 .
-        cd cmake && sudo -E ../build_all/linux/run_tests.sh
-      displayName: "Run Tests"
-      env:
-        IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
-        IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
-        IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
-        IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
-        IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
-        IOTHUB_POLICY_KEY: $(IOTHUB-POLICY-KEY)
-        STORAGE_ACCOUNT_CONNECTION_STRING: $(STORAGE-ACCOUNT-CONNECTION-STRING)
-        IOT_DPS_CONNECTION_STRING: $(IOT-DPS-CONNECTION-STRING)
-        IOT_DPS_ID_SCOPE: $(IOT-DPS-ID-SCOPE)
-        IOTHUB_CA_ROOT_CERT: $(IOTHUB-CA-ROOT-CERT)
-        IOTHUB_CA_ROOT_CERT_KEY: $(IOTHUB-CA-ROOT-CERT-KEY)
-        IOT_DPS_GLOBAL_ENDPOINT: $(IOT-DPS-GLOBAL-ENDPOINT)
-        IOTHUB_DEVICE_CONN_STRING_INVALIDCERT: $(IOTHUB-DEVICE-CONN-STRING-INVALIDCERT)
-        IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
-        DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
-        PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
-        IOT_DPS_INDIVIDUAL_X509_CERTIFICATE: $(IOTHUB-E2E-X509-ECC-CERT-BASE64)
-        IOT_DPS_INDIVIDUAL_X509_KEY: $(IOTHUB-E2E-X509-ECC-PRIVATE-KEY-BASE64)
-        IOT_DPS_INDIVIDUAL_REGISTRATION_ID: $(IOT-DPS-INDIVIDUAL-REGISTRATION-ID)
-    - task: PublishTestResults@2
-      displayName: 'Publish Ubuntu 22 (Debug) Results'
-      inputs:
-        testRunner: CTest
-        testResultsFiles: '**/Test.xml'
-        mergeTestResults: true
-        testRunTitle: 'ubuntu2004debug'
-      condition: succeededOrFailed()
+        set -e
+        mkdir -p cmake-arm64
+        cd cmake-arm64
+        # Toolchain settings inline (no toolchain file needed).
+        # FindOpenSSL does not honor CMAKE_LIBRARY_ARCHITECTURE on its own and
+        # will happily pick up /usr/lib/x86_64-linux-gnu/libssl.so on a
+        # multiarch host, so we point it explicitly at the aarch64 tree via
+        # OPENSSL_ROOT_DIR and its per-lib overrides.
+        cmake \
+          -DCMAKE_SYSTEM_NAME=Linux \
+          -DCMAKE_SYSTEM_PROCESSOR=aarch64 \
+          -DCMAKE_C_COMPILER=aarch64-linux-gnu-gcc \
+          -DCMAKE_CXX_COMPILER=aarch64-linux-gnu-g++ \
+          -DCMAKE_LIBRARY_ARCHITECTURE=aarch64-linux-gnu \
+          -DCMAKE_FIND_ROOT_PATH="/usr/aarch64-linux-gnu;/usr/lib/aarch64-linux-gnu;/usr/include/aarch64-linux-gnu" \
+          -DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER \
+          -DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY \
+          -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY \
+          -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY \
+          -DPKG_CONFIG_LIBDIR=/usr/lib/aarch64-linux-gnu/pkgconfig:/usr/share/pkgconfig \
+          -DOPENSSL_ROOT_DIR=/usr/lib/aarch64-linux-gnu \
+          -DOPENSSL_INCLUDE_DIR=/usr/include \
+          -DOPENSSL_CRYPTO_LIBRARY=/usr/lib/aarch64-linux-gnu/libcrypto.so \
+          -DOPENSSL_SSL_LIBRARY=/usr/lib/aarch64-linux-gnu/libssl.so \
+          "-DcompileOption_C:STRING= " \
+          -DCMAKE_BUILD_TYPE=Debug \
+          -Drun_e2e_tests:BOOL=OFF \
+          -Drun_sfc_tests:BOOL=OFF \
+          -Drun_longhaul_tests=OFF \
+          -Duse_amqp:BOOL=ON \
+          -Duse_http:BOOL=ON \
+          -Duse_mqtt:BOOL=ON \
+          -Ddont_use_uploadtoblob:BOOL=OFF \
+          -Drun_unittests:BOOL=OFF \
+          -Dno_logging:BOOL=OFF \
+          -Duse_prov_client:BOOL=ON \
+          -Duse_tpm_simulator:BOOL=OFF \
+          -Duse_edge_modules=ON \
+          -Dhsm_type_riot=OFF \
+          -Dhsm_type_x509=ON \
+          -Dhsm_type_symm_key=ON \
+          -Dhsm_type_sastoken=ON \
+          -Denable_ipv6=OFF \
+          ..
+        make -j$(nproc)
+        # Sanity-check: confirm produced binaries are actually ARM64.
+        file iothub_client/samples/iothub_ll_client_sample/iothub_ll_client_sample || true
+      displayName: 'Cross-compile SDK for aarch64'
+
   - job: ubuntuRIOT
-    timeoutInMinutes: 190
-    container: linux-c-ubuntu-2004
+    timeoutInMinutes: 90
     pool:
-      name: 'sdk-c--ubuntu-22'
+      vmImage: 'ubuntu-24.04'
     displayName: 'Ubuntu RIOT/DICE'
     steps:
+    - checkout: self
+      submodules: true
+    - download: current
+      artifact: test_config_scripts
+      displayName: Download artifact (test config scripts)
+    - script: |
+        set -e
+        sudo apt-get update && sudo apt-get upgrade
+        sudo ./build_all/linux/setup.sh
+      displayName: 'Host setup'
     - script: |
         sudo -E ./jenkins/ubuntu_c_riot.sh
       displayName: 'Build'
     - script: |
         export OPENSSL_ia32cap=0x00000000
         sudo chmod -R 755 .
-        cd cmake && sudo -E ../build_all/linux/run_tests.sh
-      displayName: "Run Tests"
-      env:
-        IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
-        IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
-        IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
-        IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
-        IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
-        IOTHUB_POLICY_KEY: $(IOTHUB-POLICY-KEY)
-        STORAGE_ACCOUNT_CONNECTION_STRING: $(STORAGE-ACCOUNT-CONNECTION-STRING)
-        IOT_DPS_CONNECTION_STRING: $(IOT-DPS-CONNECTION-STRING)
-        IOT_DPS_ID_SCOPE: $(IOT-DPS-ID-SCOPE)
-        IOTHUB_CA_ROOT_CERT: $(IOTHUB-CA-ROOT-CERT)
-        IOTHUB_CA_ROOT_CERT_KEY: $(IOTHUB-CA-ROOT-CERT-KEY)
-        IOT_DPS_GLOBAL_ENDPOINT: $(IOT-DPS-GLOBAL-ENDPOINT)
-        IOTHUB_DEVICE_CONN_STRING_INVALIDCERT: $(IOTHUB-DEVICE-CONN-STRING-INVALIDCERT)
-        IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
-        DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
-        PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
-        IOT_DPS_INDIVIDUAL_X509_CERTIFICATE: $(IOTHUB-E2E-X509-ECC-CERT-BASE64)
-        IOT_DPS_INDIVIDUAL_X509_KEY: $(IOTHUB-E2E-X509-ECC-PRIVATE-KEY-BASE64)
-        IOT_DPS_INDIVIDUAL_REGISTRATION_ID: $(IOT-DPS-INDIVIDUAL-REGISTRATION-ID)
+        cd cmake
+        sudo bash -c 'source "$(Pipeline.Workspace)/test_config_scripts/set_e2e_test_env_vars.sh" && ../build_all/linux/run_tests.sh --e2e'
+      displayName: 'Run Tests'
     - task: PublishTestResults@2
-      displayName: 'Publish Ubuntu RIOT Results'
+      displayName: 'Publish Test Results (Ubuntu RIOT)'
       inputs:
         testRunner: CTest
         testResultsFiles: '**/Test.xml'
         mergeTestResults: true
         testRunTitle: 'ubuntuRIOT'
       condition: succeededOrFailed()
-  - job: ubuntu2004dualipstack
-    timeoutInMinutes: 190
-    container: linux-c-ubuntu-2004
+
+  - job: ubuntu2404dualipstack
+    timeoutInMinutes: 90
     pool:
-      name: 'sdk-c--ubuntu-22'
-    displayName: 'Ubuntu 20.04 with Dual IP Stack'
+      vmImage: 'ubuntu-24.04'
+    displayName: 'Ubuntu 24.04 with Dual IP Stack'
     steps:
+    - checkout: self
+      submodules: true
+    - download: current
+      artifact: test_config_scripts
+      displayName: Download artifact (test config scripts)
     - script: |
-        export OPENSSL_ia32cap=0x00000000
-        sudo chmod -R 755 .
-        sudo -E ./jenkins/ubuntu_c_ipv6_dual_stack.sh
-      displayName: 'Build'
-    - script: |
-        cd cmake && sudo -E ../build_all/linux/run_tests.sh
-      displayName: "Run Tests"
-      env:
-        IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
-        IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
-        IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
-        IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
-        IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
-        IOTHUB_POLICY_KEY: $(IOTHUB-POLICY-KEY)
-        STORAGE_ACCOUNT_CONNECTION_STRING: $(STORAGE-ACCOUNT-CONNECTION-STRING)
-        IOT_DPS_CONNECTION_STRING: $(IOT-DPS-CONNECTION-STRING)
-        IOT_DPS_ID_SCOPE: $(IOT-DPS-ID-SCOPE)
-        IOTHUB_CA_ROOT_CERT: $(IOTHUB-CA-ROOT-CERT)
-        IOTHUB_CA_ROOT_CERT_KEY: $(IOTHUB-CA-ROOT-CERT-KEY)
-        IOT_DPS_GLOBAL_ENDPOINT: $(IOT-DPS-GLOBAL-ENDPOINT)
-        IOTHUB_DEVICE_CONN_STRING_INVALIDCERT: $(IOTHUB-DEVICE-CONN-STRING-INVALIDCERT)
-        IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
-        DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
-        PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
-        IOT_DPS_INDIVIDUAL_X509_CERTIFICATE: $(IOTHUB-E2E-X509-ECC-CERT-BASE64)
-        IOT_DPS_INDIVIDUAL_X509_KEY: $(IOTHUB-E2E-X509-ECC-PRIVATE-KEY-BASE64)
-        IOT_DPS_INDIVIDUAL_REGISTRATION_ID: $(IOT-DPS-INDIVIDUAL-REGISTRATION-ID)
-    - task: PublishTestResults@2
-      displayName: 'Publish Ubuntu 20.04 with Dual IP Stack Results'
-      inputs:
-        testRunner: CTest
-        testResultsFiles: '**/Test.xml'
-        mergeTestResults: true
-        testRunTitle: 'ubuntu2004dualipstack'
-      condition: succeededOrFailed()
-  - job: ubuntu2204dualipstack
-    timeoutInMinutes: 190
-    container: linux-c-ubuntu-2204
-    pool:
-      name: 'sdk-c--ubuntu-22'
-    displayName: 'Ubuntu 22.04 with Dual IP Stack'
-    steps:
+        set -e
+        sudo apt-get update && sudo apt-get upgrade
+        sudo ./build_all/linux/setup.sh
+      displayName: 'Host setup'
     - script: |
         cat /etc/*release | grep VERSION*
         gcc --version
@@ -606,428 +578,368 @@ stages:
     - script: |
         export OPENSSL_ia32cap=0x00000000
         sudo chmod -R 755 .
-        cd cmake && sudo -E ../build_all/linux/run_tests.sh
-      displayName: "Run Tests"
-      env:
-        IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
-        IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
-        IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
-        IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
-        IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
-        IOTHUB_POLICY_KEY: $(IOTHUB-POLICY-KEY)
-        STORAGE_ACCOUNT_CONNECTION_STRING: $(STORAGE-ACCOUNT-CONNECTION-STRING)
-        IOT_DPS_CONNECTION_STRING: $(IOT-DPS-CONNECTION-STRING)
-        IOT_DPS_ID_SCOPE: $(IOT-DPS-ID-SCOPE)
-        IOTHUB_CA_ROOT_CERT: $(IOTHUB-CA-ROOT-CERT)
-        IOTHUB_CA_ROOT_CERT_KEY: $(IOTHUB-CA-ROOT-CERT-KEY)
-        IOT_DPS_GLOBAL_ENDPOINT: $(IOT-DPS-GLOBAL-ENDPOINT)
-        IOTHUB_DEVICE_CONN_STRING_INVALIDCERT: $(IOTHUB-DEVICE-CONN-STRING-INVALIDCERT)
-        IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
-        DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
-        PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
-        IOT_DPS_INDIVIDUAL_X509_CERTIFICATE: $(IOTHUB-E2E-X509-ECC-CERT-BASE64)
-        IOT_DPS_INDIVIDUAL_X509_KEY: $(IOTHUB-E2E-X509-ECC-PRIVATE-KEY-BASE64)
-        IOT_DPS_INDIVIDUAL_REGISTRATION_ID: $(IOT-DPS-INDIVIDUAL-REGISTRATION-ID)
+        cd cmake
+        sudo bash -c 'source "$(Pipeline.Workspace)/test_config_scripts/set_e2e_test_env_vars.sh" && ../build_all/linux/run_tests.sh --e2e'
+      displayName: 'Run Tests'
     - task: PublishTestResults@2
-      displayName: 'Publish Ubuntu 22.04 with Dual IP Stack Results'
+      displayName: 'Publish Test Results (Dual IP Stack)'
       inputs:
         testRunner: CTest
         testResultsFiles: '**/Test.xml'
         mergeTestResults: true
-        testRunTitle: 'ubuntu2204dualipstack'
+        testRunTitle: 'ubuntu2404dualipstack'
       condition: succeededOrFailed()
+
   - job: debian
-    container: linux-c-debian-Buster
-    pool: 
-      name: 'sdk-c--ubuntu-22'
-    displayName: 'Debian (Buster)'
+    timeoutInMinutes: 90
+    pool:
+      vmImage: 'ubuntu-24.04'
+    displayName: 'Debian Build Script'
     steps:
+    - checkout: self
+      submodules: true
+    - download: current
+      artifact: test_config_scripts
+      displayName: Download artifact (test config scripts)
+    - script: |
+        set -e
+        sudo apt-get update && sudo apt-get upgrade
+        sudo ./build_all/linux/setup.sh
+      displayName: 'Host setup'
     - script: |
         sudo ./jenkins/debian_c.sh
       displayName: 'Build'
     - script: |
-        cd cmake && sudo -E ../build_all/linux/run_tests.sh
-      displayName: "Run Tests"
-      env:
-        IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
-        IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
-        IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
-        IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
-        IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
-        IOTHUB_POLICY_KEY: $(IOTHUB-POLICY-KEY)
-        STORAGE_ACCOUNT_CONNECTION_STRING: $(STORAGE-ACCOUNT-CONNECTION-STRING)
-        IOT_DPS_CONNECTION_STRING: $(IOT-DPS-CONNECTION-STRING)
-        IOT_DPS_ID_SCOPE: $(IOT-DPS-ID-SCOPE)
-        IOTHUB_CA_ROOT_CERT: $(IOTHUB-CA-ROOT-CERT)
-        IOTHUB_CA_ROOT_CERT_KEY: $(IOTHUB-CA-ROOT-CERT-KEY)
-        IOT_DPS_GLOBAL_ENDPOINT: $(IOT-DPS-GLOBAL-ENDPOINT)
-        IOTHUB_DEVICE_CONN_STRING_INVALIDCERT: $(IOTHUB-DEVICE-CONN-STRING-INVALIDCERT)
-        IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
-        DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
-        PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
-        IOT_DPS_INDIVIDUAL_X509_CERTIFICATE: $(IOTHUB-E2E-X509-ECC-CERT-BASE64)
-        IOT_DPS_INDIVIDUAL_X509_KEY: $(IOTHUB-E2E-X509-ECC-PRIVATE-KEY-BASE64)
-        IOT_DPS_INDIVIDUAL_REGISTRATION_ID: $(IOT-DPS-INDIVIDUAL-REGISTRATION-ID)
+        export OPENSSL_ia32cap=0x00000000
+        sudo chmod -R 755 .
+        cd cmake
+        sudo bash -c 'source "$(Pipeline.Workspace)/test_config_scripts/set_e2e_test_env_vars.sh" && ../build_all/linux/run_tests.sh --e2e'
+      displayName: 'Run Tests'
     - task: PublishTestResults@2
-      displayName: 'Publish Debian Results'
+      displayName: 'Publish Test Results (Debian)'
       inputs:
         testRunner: CTest
         testResultsFiles: '**/Test.xml'
         mergeTestResults: true
         testRunTitle: 'debian'
       condition: succeededOrFailed()
+
   - job: linux_installed_deps
-    container: linux-c-ubuntu-2004
-    pool: 
-      name: 'sdk-c--ubuntu-22'
+    pool:
+      vmImage: 'ubuntu-24.04'
     displayName: 'Linux with Installed Deps'
     steps:
+    - checkout: self
+      submodules: true
+    - script: |
+        set -e
+        sudo apt-get update && sudo apt-get upgrade
+        sudo ./build_all/linux/setup.sh
+      displayName: 'Host setup'
     - script: |
         export OPENSSL_ia32cap=0x00000000
         sudo chmod -R 755 .
         sudo -E ./jenkins/linux_install_deps.sh
       displayName: 'Build'
-      env:
-        IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
-        IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
-        IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
-        IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
-        IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
-        IOTHUB_POLICY_KEY: $(IOTHUB-POLICY-KEY)
-        STORAGE_ACCOUNT_CONNECTION_STRING: $(STORAGE-ACCOUNT-CONNECTION-STRING)
-        IOT_DPS_CONNECTION_STRING: $(IOT-DPS-CONNECTION-STRING)
-        IOT_DPS_ID_SCOPE: $(IOT-DPS-ID-SCOPE)
-        IOTHUB_CA_ROOT_CERT: $(IOTHUB-CA-ROOT-CERT)
-        IOTHUB_CA_ROOT_CERT_KEY: $(IOTHUB-CA-ROOT-CERT-KEY)
-        IOT_DPS_GLOBAL_ENDPOINT: $(IOT-DPS-GLOBAL-ENDPOINT)
-        IOTHUB_DEVICE_CONN_STRING_INVALIDCERT: $(IOTHUB-DEVICE-CONN-STRING-INVALIDCERT)
-        IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
-        DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
-        PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
-        IOT_DPS_INDIVIDUAL_X509_CERTIFICATE: $(IOTHUB-E2E-X509-ECC-CERT-BASE64)
-        IOT_DPS_INDIVIDUAL_X509_KEY: $(IOTHUB-E2E-X509-ECC-PRIVATE-KEY-BASE64)
-        IOT_DPS_INDIVIDUAL_REGISTRATION_ID: $(IOT-DPS-INDIVIDUAL-REGISTRATION-ID)
+
   - job: wolfssl
+    timeoutInMinutes: 90
     pool:
-      name: 'sdk-c--ubuntu-22'
-    container: linux-c-ubuntu-wolfssl
+      vmImage: 'ubuntu-24.04'
     displayName: 'WolfSSL'
     steps:
+    - checkout: self
+      submodules: true
+    - download: current
+      artifact: test_config_scripts
+      displayName: Download artifact (test config scripts)
     - script: |
-        LD_LIBRARY_PATH=/usr/local/lib
-        LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/my_library/
+        set -e
+        sudo apt-get update && sudo apt-get upgrade
+        sudo ./build_all/linux/setup.sh
+        # wolfSSL is not in Ubuntu main; install dev headers from universe.
+        sudo apt-get install -y libwolfssl-dev || true
+      displayName: 'Host setup'
+    - script: |
         sudo -E jenkins/linux_wolfssl.sh
       displayName: 'Build'
     - script: |
-        cd cmake && sudo -E ../build_all/linux/run_tests.sh
-      displayName: "Run Tests"
-      env:
-        IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
-        IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
-        IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
-        IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
-        IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
-        IOTHUB_POLICY_KEY: $(IOTHUB-POLICY-KEY)
-        STORAGE_ACCOUNT_CONNECTION_STRING: $(STORAGE-ACCOUNT-CONNECTION-STRING)
-        IOT_DPS_CONNECTION_STRING: $(IOT-DPS-CONNECTION-STRING)
-        IOT_DPS_ID_SCOPE: $(IOT-DPS-ID-SCOPE)
-        IOTHUB_CA_ROOT_CERT: $(IOTHUB-CA-ROOT-CERT)
-        IOTHUB_CA_ROOT_CERT_KEY: $(IOTHUB-CA-ROOT-CERT-KEY)
-        IOT_DPS_GLOBAL_ENDPOINT: $(IOT-DPS-GLOBAL-ENDPOINT)
-        IOTHUB_DEVICE_CONN_STRING_INVALIDCERT: $(IOTHUB-DEVICE-CONN-STRING-INVALIDCERT)
-        IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
-        DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
-        PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
-        IOT_DPS_INDIVIDUAL_X509_CERTIFICATE: $(IOTHUB-E2E-X509-ECC-CERT-BASE64)
-        IOT_DPS_INDIVIDUAL_X509_KEY: $(IOTHUB-E2E-X509-ECC-PRIVATE-KEY-BASE64)
-        IOT_DPS_INDIVIDUAL_REGISTRATION_ID: $(IOT-DPS-INDIVIDUAL-REGISTRATION-ID)
+        cd cmake
+        sudo bash -c 'source "$(Pipeline.Workspace)/test_config_scripts/set_e2e_test_env_vars.sh" && ../build_all/linux/run_tests.sh --e2e'
+      displayName: 'Run Tests'
     - task: PublishTestResults@2
-      displayName: 'Publish WolfSSL Results'
+      displayName: 'Publish Test Results (WolfSSL)'
       inputs:
         testRunner: CTest
         testResultsFiles: '**/Test.xml'
         mergeTestResults: true
         testRunTitle: 'wolfssl'
       condition: succeededOrFailed()
+
   - job: bearssl
-    container: linux-c-ubuntu-bearssl
+    timeoutInMinutes: 90
     pool:
-      name: 'sdk-c--ubuntu-22'
+      vmImage: 'ubuntu-24.04'
     displayName: 'BearSSL'
     steps:
+    - checkout: self
+      submodules: true
+    - download: current
+      artifact: test_config_scripts
+      displayName: Download artifact (test config scripts)
     - script: |
-        LD_LIBRARY_PATH=/usr/local/lib
-        LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/my_library/
+        set -e
+        sudo apt-get update && sudo apt-get upgrade
+        sudo ./build_all/linux/setup.sh
+        # Ensure BearSSL dev package is present so CMake can resolve libbearssl.
+        sudo apt-get install -y libbearssl-dev
+      displayName: 'Host setup'
+    - script: |
         sudo -E bash jenkins/linux_bearssl.sh
       displayName: 'Build'
     - script: |
-        cd cmake && sudo -E ../build_all/linux/run_tests.sh
-      env:
-        IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
-        IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
-        IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
-        IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
-        IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
-        IOTHUB_POLICY_KEY: $(IOTHUB-POLICY-KEY)
-        STORAGE_ACCOUNT_CONNECTION_STRING: $(STORAGE-ACCOUNT-CONNECTION-STRING)
-        IOT_DPS_CONNECTION_STRING: $(IOT-DPS-CONNECTION-STRING)
-        IOT_DPS_ID_SCOPE: $(IOT-DPS-ID-SCOPE)
-        IOTHUB_CA_ROOT_CERT: $(IOTHUB-CA-ROOT-CERT)
-        IOTHUB_CA_ROOT_CERT_KEY: $(IOTHUB-CA-ROOT-CERT-KEY)
-        IOT_DPS_GLOBAL_ENDPOINT: $(IOT-DPS-GLOBAL-ENDPOINT)
-        IOTHUB_DEVICE_CONN_STRING_INVALIDCERT: $(IOTHUB-DEVICE-CONN-STRING-INVALIDCERT)
-        IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
-        DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
-        PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
-        IOT_DPS_INDIVIDUAL_X509_CERTIFICATE: $(IOTHUB-E2E-X509-ECC-CERT-BASE64)
-        IOT_DPS_INDIVIDUAL_X509_KEY: $(IOTHUB-E2E-X509-ECC-PRIVATE-KEY-BASE64)
-        IOT_DPS_INDIVIDUAL_REGISTRATION_ID: $(IOT-DPS-INDIVIDUAL-REGISTRATION-ID)
-      displayName: "Run Tests"
+        cd cmake
+        sudo bash -c 'source "$(Pipeline.Workspace)/test_config_scripts/set_e2e_test_env_vars.sh" && ../build_all/linux/run_tests.sh --e2e'
+      displayName: 'Run Tests'
     - task: PublishTestResults@2
-      displayName: 'Publish BearSSL Results'
+      displayName: 'Publish Test Results (BearSSL)'
       inputs:
         testRunner: CTest
         testResultsFiles: '**/Test.xml'
         mergeTestResults: true
         testRunTitle: 'bearssl'
       condition: succeededOrFailed()
-  - job: mbedtls
-    container: linux-c-ubuntu-mbed
+
+  - job: mbedtls_2_16
+    # Coverage for mbedTLS 2.16.x, previously provided by the linux-c-ubuntu-mbed
+    # Docker image (Ubuntu 20.04 + apt libmbedtls-dev).  Ubuntu 24.04 ships 3.x,
+    # so install 2.16.x from source.
+    timeoutInMinutes: 90
     pool:
-      name: 'sdk-c--ubuntu-22'
-    displayName: 'mbedTLS'
+      vmImage: 'ubuntu-24.04'
+    displayName: 'mbedTLS 2.16'
     steps:
+    - checkout: self
+      submodules: true
+    - download: current
+      artifact: test_config_scripts
+      displayName: Download artifact (test config scripts)
     - script: |
-        LD_LIBRARY_PATH=/usr/local/lib
-        LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/my_library/
+        set -e
+        sudo apt-get update && sudo apt-get upgrade
+        sudo ./build_all/linux/setup.sh
+      displayName: 'Host setup'
+    - script: |
+        set -e
+        # Install mbedTLS 2.16.x from source (latest 2.16 point release).
+        git clone --depth 1 -b mbedtls-2.16.12 https://github.com/Mbed-TLS/mbedtls /tmp/mbedtls-2.16
+        cd /tmp/mbedtls-2.16
+        mkdir build && cd build
+        cmake -DUSE_SHARED_MBEDTLS_LIBRARY=ON -DCMAKE_INSTALL_PREFIX=/usr/local ..
+        make -j$(nproc)
+        sudo make install
+        sudo ldconfig
+      displayName: 'Install mbedTLS 2.16'
+    - script: |
         sudo -E bash jenkins/linux_mbedtls.sh
       displayName: 'Build'
-    - script: |
-        cd cmake && sudo -E ../build_all/linux/run_tests.sh
       env:
-        IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
-        IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
-        IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
-        IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
-        IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
-        IOTHUB_POLICY_KEY: $(IOTHUB-POLICY-KEY)
-        STORAGE_ACCOUNT_CONNECTION_STRING: $(STORAGE-ACCOUNT-CONNECTION-STRING)
-        IOT_DPS_CONNECTION_STRING: $(IOT-DPS-CONNECTION-STRING)
-        IOT_DPS_ID_SCOPE: $(IOT-DPS-ID-SCOPE)
-        IOTHUB_CA_ROOT_CERT: $(IOTHUB-CA-ROOT-CERT)
-        IOTHUB_CA_ROOT_CERT_KEY: $(IOTHUB-CA-ROOT-CERT-KEY)
-        IOT_DPS_GLOBAL_ENDPOINT: $(IOT-DPS-GLOBAL-ENDPOINT)
-        IOTHUB_DEVICE_CONN_STRING_INVALIDCERT: $(IOTHUB-DEVICE-CONN-STRING-INVALIDCERT)
-        IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
-        DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
-        PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
-        IOT_DPS_INDIVIDUAL_X509_CERTIFICATE: $(IOTHUB-E2E-X509-ECC-CERT-BASE64)
-        IOT_DPS_INDIVIDUAL_X509_KEY: $(IOTHUB-E2E-X509-ECC-PRIVATE-KEY-BASE64)
-        IOT_DPS_INDIVIDUAL_REGISTRATION_ID: $(IOT-DPS-INDIVIDUAL-REGISTRATION-ID)
-      displayName: "Run Tests"
+        LD_LIBRARY_PATH: /usr/local/lib
+    - script: |
+        cd cmake
+        sudo bash -c 'export LD_LIBRARY_PATH=/usr/local/lib && source "$(Pipeline.Workspace)/test_config_scripts/set_e2e_test_env_vars.sh" && ../build_all/linux/run_tests.sh --e2e'
+      displayName: 'Run Tests'
     - task: PublishTestResults@2
-      displayName: 'Publish mbedTLS Results'
+      displayName: 'Publish Test Results (mbedTLS 2.16)'
       inputs:
         testRunner: CTest
         testResultsFiles: '**/Test.xml'
         mergeTestResults: true
-        testRunTitle: 'mbedtls'
+        testRunTitle: 'mbedtls_2_16'
       condition: succeededOrFailed()
-  - job: mbedtls228
-    container: linux-c-ubuntu-2204
+
+  - job: mbedtls_2_28
+    # Coverage for mbedTLS 2.28.x, previously provided by the linux-c-ubuntu-2204
+    # Docker image (Ubuntu 22.04 + apt libmbedtls-dev).  Ubuntu 24.04 ships 3.x,
+    # so install 2.28.x from source.
+    timeoutInMinutes: 90
     pool:
-      name: 'sdk-c--ubuntu-22'
+      vmImage: 'ubuntu-24.04'
     displayName: 'mbedTLS 2.28'
     steps:
+    - checkout: self
+      submodules: true
+    - download: current
+      artifact: test_config_scripts
+      displayName: Download artifact (test config scripts)
+    - script: |
+        set -e
+        sudo apt-get update && sudo apt-get upgrade
+        sudo ./build_all/linux/setup.sh
+      displayName: 'Host setup'
+    - script: |
+        set -e
+        # Install mbedTLS 2.28.x from source (latest long-term-support 2.28 release).
+        git clone --depth 1 -b mbedtls-2.28.10 https://github.com/Mbed-TLS/mbedtls /tmp/mbedtls-2.28
+        cd /tmp/mbedtls-2.28
+        mkdir build && cd build
+        cmake -DUSE_SHARED_MBEDTLS_LIBRARY=ON -DCMAKE_INSTALL_PREFIX=/usr/local ..
+        make -j$(nproc)
+        sudo make install
+        sudo ldconfig
+      displayName: 'Install mbedTLS 2.28'
     - script: |
         sudo -E bash jenkins/linux_mbedtls.sh
       displayName: 'Build'
-    - script: |
-        cd cmake && sudo -E ../build_all/linux/run_tests.sh
       env:
-        IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
-        IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
-        IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
-        IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
-        IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
-        IOTHUB_POLICY_KEY: $(IOTHUB-POLICY-KEY)
-        STORAGE_ACCOUNT_CONNECTION_STRING: $(STORAGE-ACCOUNT-CONNECTION-STRING)
-        IOT_DPS_CONNECTION_STRING: $(IOT-DPS-CONNECTION-STRING)
-        IOT_DPS_ID_SCOPE: $(IOT-DPS-ID-SCOPE)
-        IOTHUB_CA_ROOT_CERT: $(IOTHUB-CA-ROOT-CERT)
-        IOTHUB_CA_ROOT_CERT_KEY: $(IOTHUB-CA-ROOT-CERT-KEY)
-        IOT_DPS_GLOBAL_ENDPOINT: $(IOT-DPS-GLOBAL-ENDPOINT)
-        IOTHUB_DEVICE_CONN_STRING_INVALIDCERT: $(IOTHUB-DEVICE-CONN-STRING-INVALIDCERT)
-        IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
-        DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
-        PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
-        IOT_DPS_INDIVIDUAL_X509_CERTIFICATE: $(IOTHUB-E2E-X509-ECC-CERT-BASE64)
-        IOT_DPS_INDIVIDUAL_X509_KEY: $(IOTHUB-E2E-X509-ECC-PRIVATE-KEY-BASE64)
-        IOT_DPS_INDIVIDUAL_REGISTRATION_ID: $(IOT-DPS-INDIVIDUAL-REGISTRATION-ID)
-      displayName: "Run Tests"
+        LD_LIBRARY_PATH: /usr/local/lib
+    - script: |
+        cd cmake
+        sudo bash -c 'export LD_LIBRARY_PATH=/usr/local/lib && source "$(Pipeline.Workspace)/test_config_scripts/set_e2e_test_env_vars.sh" && ../build_all/linux/run_tests.sh --e2e'
+      displayName: 'Run Tests'
     - task: PublishTestResults@2
-      displayName: 'Publish mbedTLS Results'
+      displayName: 'Publish Test Results (mbedTLS 2.28)'
       inputs:
         testRunner: CTest
         testResultsFiles: '**/Test.xml'
         mergeTestResults: true
-        testRunTitle: 'mbedtls'
+        testRunTitle: 'mbedtls_2_28'
       condition: succeededOrFailed()
-  - job: mbedtls3x
-    container: linux-c-ubuntu-2404
+
+  - job: mbedtls_3x
+    # Coverage for mbedTLS 3.x, previously provided by the linux-c-ubuntu-2404
+    # Docker image which built v3.6.2 from source.  Reproduce that here.
+    timeoutInMinutes: 90
     pool:
-      name: 'sdk-c--ubuntu-22'
+      vmImage: 'ubuntu-24.04'
     displayName: 'mbedTLS 3.x'
     steps:
+    - checkout: self
+      submodules: true
+    - download: current
+      artifact: test_config_scripts
+      displayName: Download artifact (test config scripts)
+    - script: |
+        set -e
+        sudo apt-get update && sudo apt-get upgrade
+        sudo ./build_all/linux/setup.sh
+      displayName: 'Host setup'
+    - script: |
+        set -e
+        # Install mbedTLS 3.6.x from source, matching the old linux-c-ubuntu-2404 image.
+        git clone --depth 1 -b v3.6.2 https://github.com/Mbed-TLS/mbedtls /tmp/mbedtls-3x
+        cd /tmp/mbedtls-3x
+        git submodule update --init --depth 1
+        mkdir build && cd build
+        cmake -DUSE_SHARED_MBEDTLS_LIBRARY=ON -DCMAKE_INSTALL_PREFIX=/usr/local ..
+        make -j$(nproc)
+        sudo make install
+        sudo ldconfig
+      displayName: 'Install mbedTLS 3.x'
     - script: |
         sudo -E bash jenkins/linux_mbedtls.sh
       displayName: 'Build'
-    - script: |
-        cd cmake && sudo -E ../build_all/linux/run_tests.sh
       env:
-        IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
-        IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
-        IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
-        IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
-        IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
-        IOTHUB_POLICY_KEY: $(IOTHUB-POLICY-KEY)
-        STORAGE_ACCOUNT_CONNECTION_STRING: $(STORAGE-ACCOUNT-CONNECTION-STRING)
-        IOT_DPS_CONNECTION_STRING: $(IOT-DPS-CONNECTION-STRING)
-        IOT_DPS_ID_SCOPE: $(IOT-DPS-ID-SCOPE)
-        IOTHUB_CA_ROOT_CERT: $(IOTHUB-CA-ROOT-CERT)
-        IOTHUB_CA_ROOT_CERT_KEY: $(IOTHUB-CA-ROOT-CERT-KEY)
-        IOT_DPS_GLOBAL_ENDPOINT: $(IOT-DPS-GLOBAL-ENDPOINT)
-        IOTHUB_DEVICE_CONN_STRING_INVALIDCERT: $(IOTHUB-DEVICE-CONN-STRING-INVALIDCERT)
-        IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
-        DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
-        PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
-        IOT_DPS_INDIVIDUAL_X509_CERTIFICATE: $(IOTHUB-E2E-X509-ECC-CERT-BASE64)
-        IOT_DPS_INDIVIDUAL_X509_KEY: $(IOTHUB-E2E-X509-ECC-PRIVATE-KEY-BASE64)
-        IOT_DPS_INDIVIDUAL_REGISTRATION_ID: $(IOT-DPS-INDIVIDUAL-REGISTRATION-ID)
-      displayName: "Run Tests"
+        LD_LIBRARY_PATH: /usr/local/lib
+    - script: |
+        cd cmake
+        sudo bash -c 'export LD_LIBRARY_PATH=/usr/local/lib && source "$(Pipeline.Workspace)/test_config_scripts/set_e2e_test_env_vars.sh" && ../build_all/linux/run_tests.sh --e2e'
+      displayName: 'Run Tests'
     - task: PublishTestResults@2
-      displayName: 'Publish mbedTLS Results'
+      displayName: 'Publish Test Results (mbedTLS 3.x)'
       inputs:
         testRunner: CTest
         testResultsFiles: '**/Test.xml'
         mergeTestResults: true
-        testRunTitle: 'mbedtls'
+        testRunTitle: 'mbedtls_3x'
       condition: succeededOrFailed()
+
   - job: cares
-    container: linux-c-ubuntu-c-ares
-    pool: 
-      name: 'sdk-c--ubuntu-22'
+    timeoutInMinutes: 90
+    pool:
+      vmImage: 'ubuntu-24.04'
     displayName: 'Linux with C-Ares'
     steps:
+    - checkout: self
+      submodules: true
+    - download: current
+      artifact: test_config_scripts
+      displayName: Download artifact (test config scripts)
+    - script: |
+        set -e
+        sudo apt-get update && sudo apt-get upgrade
+        sudo ./build_all/linux/setup.sh
+        sudo apt-get install -y libc-ares-dev
+      displayName: 'Host setup'
     - script: |
         sudo -E bash jenkins/linux_cares.sh
       displayName: 'Build'
     - script: |
-        cd cmake && sudo -E ../build_all/linux/run_tests.sh
-      displayName: "Run Tests"
-      env:
-        IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
-        IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
-        IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
-        IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
-        IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
-        IOTHUB_POLICY_KEY: $(IOTHUB-POLICY-KEY)
-        STORAGE_ACCOUNT_CONNECTION_STRING: $(STORAGE-ACCOUNT-CONNECTION-STRING)
-        IOT_DPS_CONNECTION_STRING: $(IOT-DPS-CONNECTION-STRING)
-        IOT_DPS_ID_SCOPE: $(IOT-DPS-ID-SCOPE)
-        IOTHUB_CA_ROOT_CERT: $(IOTHUB-CA-ROOT-CERT)
-        IOTHUB_CA_ROOT_CERT_KEY: $(IOTHUB-CA-ROOT-CERT-KEY)
-        IOT_DPS_GLOBAL_ENDPOINT: $(IOT-DPS-GLOBAL-ENDPOINT)
-        IOTHUB_DEVICE_CONN_STRING_INVALIDCERT: $(IOTHUB-DEVICE-CONN-STRING-INVALIDCERT)
-        IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
-        DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
-        PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
-        IOT_DPS_INDIVIDUAL_X509_CERTIFICATE: $(IOTHUB-E2E-X509-ECC-CERT-BASE64)
-        IOT_DPS_INDIVIDUAL_X509_KEY: $(IOTHUB-E2E-X509-ECC-PRIVATE-KEY-BASE64)
-        IOT_DPS_INDIVIDUAL_REGISTRATION_ID: $(IOT-DPS-INDIVIDUAL-REGISTRATION-ID)
+        cd cmake
+        sudo bash -c 'source "$(Pipeline.Workspace)/test_config_scripts/set_e2e_test_env_vars.sh" && ../build_all/linux/run_tests.sh --e2e'
+      displayName: 'Run Tests'
     - task: PublishTestResults@2
-      displayName: 'Publish C Ares Results'
+      displayName: 'Publish Test Results (C-Ares)'
       inputs:
         testRunner: CTest
         testResultsFiles: '**/Test.xml'
         mergeTestResults: true
         testRunTitle: 'cares'
       condition: succeededOrFailed()
+
   - job: openssl_engine
-    container: linux-c-openssl-pkcs11
-    pool: 
-      name: 'sdk-c--ubuntu-22'
+    timeoutInMinutes: 90
+    pool:
+      vmImage: 'ubuntu-24.04'
     displayName: 'OpenSSL with pkcs11 engine and SoftHSM'
     steps:
+    - checkout: self
+      submodules: true
+    - download: current
+      artifact: test_config_scripts
+      displayName: Download artifact (test config scripts)
     - script: |
-        sudo -E bash jenkins/linux_openssl_engine.sh
+        set -e
+        sudo apt-get update && sudo apt-get upgrade
+        sudo ./build_all/linux/setup.sh
+        sudo apt-get install -y softhsm2 libengine-pkcs11-openssl opensc libp11-dev
+      displayName: 'Host setup'
+    - script: |
+        # Use dynamically generated E2E variables from Setup stage to avoid unresolved placeholders.
+        sudo bash -c 'source "$(Pipeline.Workspace)/test_config_scripts/set_e2e_test_env_vars.sh" && ./jenkins/linux_openssl_engine.sh'
       displayName: 'Build'
-      env:
-        IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
-        IOT_DPS_INDIVIDUAL_X509_KEY: $(IOTHUB-E2E-X509-ECC-PRIVATE-KEY-BASE64)
     - script: |
-        cd cmake && sudo -E ../build_all/linux/run_tests.sh
-      displayName: "Run Tests"
-      env:
-        IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
-        IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
-        IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
-        IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
-        IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
-        IOTHUB_POLICY_KEY: $(IOTHUB-POLICY-KEY)
-        STORAGE_ACCOUNT_CONNECTION_STRING: $(STORAGE-ACCOUNT-CONNECTION-STRING)
-        IOT_DPS_CONNECTION_STRING: $(IOT-DPS-CONNECTION-STRING)
-        IOT_DPS_ID_SCOPE: $(IOT-DPS-ID-SCOPE)
-        IOTHUB_CA_ROOT_CERT: $(IOTHUB-CA-ROOT-CERT)
-        IOTHUB_CA_ROOT_CERT_KEY: $(IOTHUB-CA-ROOT-CERT-KEY)
-        IOT_DPS_GLOBAL_ENDPOINT: $(IOT-DPS-GLOBAL-ENDPOINT)
-        IOTHUB_DEVICE_CONN_STRING_INVALIDCERT: $(IOTHUB-DEVICE-CONN-STRING-INVALIDCERT)
-        IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
-        DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
-        PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
-        IOT_DPS_INDIVIDUAL_X509_CERTIFICATE: $(IOTHUB-E2E-X509-ECC-CERT-BASE64)
-        IOT_DPS_INDIVIDUAL_X509_KEY: $(IOTHUB-E2E-X509-ECC-PRIVATE-KEY-BASE64)
-        IOT_DPS_INDIVIDUAL_REGISTRATION_ID: $(IOT-DPS-INDIVIDUAL-REGISTRATION-ID)
+        cd cmake
+        sudo bash -c 'source "$(Pipeline.Workspace)/test_config_scripts/set_e2e_test_env_vars.sh" && ../build_all/linux/run_tests.sh --e2e'
+      displayName: 'Run Tests'
     - task: PublishTestResults@2
-      displayName: 'Publish openssl_engine Results'
+      displayName: 'Publish Test Results (OpenSSL Engine)'
       inputs:
         testRunner: CTest
         testResultsFiles: '**/Test.xml'
         mergeTestResults: true
         testRunTitle: 'openssl_engine'
       condition: succeededOrFailed()
+
   - job: OSX
     variables:
       CodeQL.Enabled: false
     pool:
-      vmImage: 'macOS-13'
+      vmImage: 'macOS-14'
+    displayName: 'OSX'
     steps:
+    - checkout: self
+      submodules: true
+    - download: current
+      artifact: test_config_scripts
+      displayName: Download artifact (test config scripts)
     - script: |
         ./jenkins/osx_gcc_openssl.sh
       displayName: 'Build'
     - script: |
-        cd cmake && ctest -T test --no-compress-output -C "Debug" -V -j 8 --schedule-random
+        cd cmake
+        bash -c 'source "$(Pipeline.Workspace)/test_config_scripts/set_e2e_test_env_vars.sh" && ctest -T test --no-compress-output -C "Debug" -V -j 8 --schedule-random -E iothubclient_mqtt_dt_e2e'
       displayName: 'Run Tests'
-      env:
-        IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
-        IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
-        IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
-        IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
-        IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
-        IOTHUB_POLICY_KEY: $(IOTHUB-POLICY-KEY)
-        STORAGE_ACCOUNT_CONNECTION_STRING: $(STORAGE-ACCOUNT-CONNECTION-STRING)
-        IOT_DPS_CONNECTION_STRING: $(IOT-DPS-CONNECTION-STRING)
-        IOT_DPS_ID_SCOPE: $(IOT-DPS-ID-SCOPE)
-        IOTHUB_CA_ROOT_CERT: $(IOTHUB-CA-ROOT-CERT)
-        IOTHUB_CA_ROOT_CERT_KEY: $(IOTHUB-CA-ROOT-CERT-KEY)
-        IOT_DPS_GLOBAL_ENDPOINT: $(IOT-DPS-GLOBAL-ENDPOINT)
-        IOTHUB_DEVICE_CONN_STRING_INVALIDCERT: $(IOTHUB-DEVICE-CONN-STRING-INVALIDCERT)
-        IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
-        DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
-        PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
-        IOT_DPS_INDIVIDUAL_X509_CERTIFICATE: $(IOTHUB-E2E-X509-ECC-CERT-BASE64)
-        IOT_DPS_INDIVIDUAL_X509_KEY: $(IOTHUB-E2E-X509-ECC-PRIVATE-KEY-BASE64)
-        IOT_DPS_INDIVIDUAL_REGISTRATION_ID: $(IOT-DPS-INDIVIDUAL-REGISTRATION-ID)
     - task: PublishTestResults@2
       displayName: 'Publish OSX Results'
       inputs:
@@ -1041,13 +953,19 @@ stages:
     - script: rm -rf $(Agent.BuildDirectory)/*
       displayName: 'Cleanup'
       condition: always()
+
   - job: xcodenative
     variables:
       CodeQL.Enabled: false
     pool:
-      vmImage: 'macOS-13'
-    displayName: "Xcode Native"
+      vmImage: 'macOS-14'
+    displayName: 'Xcode Native'
     steps:
+    - checkout: self
+      submodules: true
+    - download: current
+      artifact: test_config_scripts
+      displayName: Download artifact (test config scripts)
     - script: |
         curl --version
         export DYLD_LIBRARY_PATH="/usr/local/Cellar/curl/$(ls -b /usr/local/Cellar/curl | grep -e '[0-9\.]')/lib"
@@ -1055,28 +973,9 @@ stages:
       displayName: 'Build'
     - script: |
         export DYLD_LIBRARY_PATH="/usr/local/Cellar/curl/$(ls -b /usr/local/Cellar/curl | grep -e '[0-9\.]')/lib"
-        cd cmake && ctest -T test --no-compress-output -C "Debug" -V -j 8 --schedule-random
-      displayName: "Run Tests"
-      env:
-        IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
-        IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
-        IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
-        IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
-        IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
-        IOTHUB_POLICY_KEY: $(IOTHUB-POLICY-KEY)
-        STORAGE_ACCOUNT_CONNECTION_STRING: $(STORAGE-ACCOUNT-CONNECTION-STRING)
-        IOT_DPS_CONNECTION_STRING: $(IOT-DPS-CONNECTION-STRING)
-        IOT_DPS_ID_SCOPE: $(IOT-DPS-ID-SCOPE)
-        IOTHUB_CA_ROOT_CERT: $(IOTHUB-CA-ROOT-CERT)
-        IOTHUB_CA_ROOT_CERT_KEY: $(IOTHUB-CA-ROOT-CERT-KEY)
-        IOT_DPS_GLOBAL_ENDPOINT: $(IOT-DPS-GLOBAL-ENDPOINT)
-        IOTHUB_DEVICE_CONN_STRING_INVALIDCERT: $(IOTHUB-DEVICE-CONN-STRING-INVALIDCERT)
-        IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
-        DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
-        PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
-        IOT_DPS_INDIVIDUAL_X509_CERTIFICATE: $(IOTHUB-E2E-X509-ECC-CERT-BASE64)
-        IOT_DPS_INDIVIDUAL_X509_KEY: $(IOTHUB-E2E-X509-ECC-PRIVATE-KEY-BASE64)
-        IOT_DPS_INDIVIDUAL_REGISTRATION_ID: $(IOT-DPS-INDIVIDUAL-REGISTRATION-ID)
+        cd cmake
+        bash -c 'source "$(Pipeline.Workspace)/test_config_scripts/set_e2e_test_env_vars.sh" && ctest -T test --no-compress-output -C "Debug" -V -j 8 --schedule-random -E iothubclient_mqtt_dt_e2e'
+      displayName: 'Run Tests'
     - task: PublishTestResults@2
       displayName: 'Publish XCode Results'
       inputs:
@@ -1090,72 +989,17 @@ stages:
     - script: rm -rf $(Agent.BuildDirectory)/*
       displayName: 'Cleanup'
       condition: always()
-  - job: raspberrypi
-    container: raspberrypi-c-buster
-    pool: 
-      name: 'sdk-c--ubuntu-22'
-    displayName: "Raspberry Pi"
-    steps:
-    - script: |
-       $HOME
-       whoami
-       ls -lr
-       pwd
-       chmod +x jenkins/raspberrypi_c_buster.sh
-        ./jenkins/raspberrypi_c_buster.sh
-      displayName: 'Build'
-  - job: crosscompile_mips32
-    pool:
-      vmImage: 'ubuntu-24.04'
-    displayName: "Cross Compile (MIPS32)"
-    steps:
-    - script: |
-        sudo apt-get update && sudo apt-get install -y \
-        curl \
-        git \
-        python-software-properties \
-        build-essential \
-        pkg-config \
-        docker.io
-        sudo curl -sL https://deb.nodesource.com/setup_16.x | bash -
-        sudo apt-get install -y nodejs
-      displayName: 'Setup'
-    - script: |
-        cd samples/dockerbuilds/MIPS32
-        docker build --build-arg TARGET_BRANCH=$BUILD_SOURCEBRANCH -t mipsiotbuild:latest . --network=host
-        cd ..
-        docker build -t mipsiotapp:latest . --network=host --file ./MIPS32/Dockerfile_adjunct
-      displayName: 'Build MIPS32'
-  - job: crosscompile_arm
-    pool:
-      vmImage: 'ubuntu-24.04'
-    displayName: "Cross Compile (ARM)"
-    steps:
-    - script: |
-        sudo apt-get update && sudo apt-get install -y \
-        curl \
-        git \
-        python-software-properties \
-        build-essential \
-        pkg-config \
-        docker.io
-        sudo curl -sL https://deb.nodesource.com/setup_16.x | bash -
-        sudo apt-get install -y nodejs
-      displayName: 'Setup'
-    - script: |
-        cd samples/dockerbuilds/ARM
-        docker build --build-arg TARGET_BRANCH=$BUILD_SOURCEBRANCH -t armiotbuild:latest . --network=host
-        cd ..
-        docker build -t armiotapp:latest . --network=host --file ./ARM/Dockerfile_adjunct
-      displayName: 'Build ARM'
+
   - job: DotNET
-    displayName: .NET
+    displayName: '.NET'
     variables:
       Codeql.Enabled: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
       Codeql.Language: csharp,python
-    pool: 
-      vmImage: 'windows-latest'
+    pool:
+      vmImage: 'windows-2022'
     steps:
+    - checkout: self
+      submodules: true
     - task: CodeQL3000Init@0
     - task: NuGetCommand@2
       inputs:
@@ -1169,22 +1013,31 @@ stages:
         projects: 'tools\traceabilitytool\traceabilitytool.sln'
     - task: CodeQL3000Finalize@0
       condition: always()
-- stage: Cleanup 
+
+- stage: Cleanup
+  dependsOn:
+  - Setup
+  - Tests
   condition: always() # Run stage even if the pipeline run is cancelled.
   jobs:
-  - job: cleanup
+  - job: destroy_azure_resource_group
     condition: always() # Run job even if the pipeline run is cancelled.
-    container: linux-c-ubuntu-2204
     pool:
-      name: 'sdk-c--ubuntu-22'
-    displayName: 'Cleanup'
+      vmImage: 'ubuntu-24.04'
     steps:
-    - script: |
-        az login --identity
-        az storage account update -g $STORAGE_ACCOUNT_RESOURCE_GROUP -n $STORAGE_ACCOUNT_NAME --allow-shared-key-access false --default-action Deny
-      displayName: 'Setup Azure Storage Account'
-      env:
-        STORAGE_ACCOUNT_NAME: $(STORAGE-ACCOUNT-NAME)
-        STORAGE_ACCOUNT_RESOURCE_GROUP: $(STORAGE-ACCOUNT-RESOURCE-GROUP)
+    - checkout: none
+    - download: current
+      artifact: test_config_scripts
+      displayName: Download artifact (test config scripts)
+    - task: AzureCLI@2
+      inputs:
+        azureSubscription: 'iot hub sdk service connection'
+        scriptType: 'bash'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          set -e
+          export AZURE_RESOURCE_GROUP=$(cat "$(Pipeline.Workspace)/test_config_scripts/azure-resource-group-name.txt")
+          az group delete --name $AZURE_RESOURCE_GROUP --yes --no-wait
+      displayName: Destroy Azure Resource Group
       condition: always() # Run step even if the pipeline run is cancelled.
-  
+
