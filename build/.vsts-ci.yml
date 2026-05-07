@@ -93,7 +93,7 @@ stages:
       displayName: 'Build'
     - powershell: |
         . "$(Pipeline.Workspace)\test_config_scripts\Set-E2ETestEnvVars.ps1"
-        cmd /c "call jenkins\windows_c_VsDevCmd.cmd x64 && cd cmake && ctest -T test --no-compress-output -C Debug -V -j 16 --schedule-random"
+        cmd /c "call jenkins\windows_c_VsDevCmd.cmd x64 && cd cmake && ctest -T test --no-compress-output -C Debug -V -j 16 --schedule-random -E iothubclient_mqtt_dt_e2e"
       displayName: "Run Tests"
     - task: PublishTestResults@2
       displayName: 'Publish Windows x64 (Debug) Results'
@@ -120,7 +120,7 @@ stages:
       displayName: 'Build'
     - powershell: |
         . "$(Pipeline.Workspace)\test_config_scripts\Set-E2ETestEnvVars.ps1"
-        cmd /c "call jenkins\windows_c_VsDevCmd.cmd x86 && cd cmake && ctest -T test --no-compress-output -C Debug -V -j 16 --schedule-random"
+        cmd /c "call jenkins\windows_c_VsDevCmd.cmd x86 && cd cmake && ctest -T test --no-compress-output -C Debug -V -j 16 --schedule-random -E iothubclient_mqtt_dt_e2e"
       displayName: 'Run Tests'
     - task: PublishTestResults@2
       displayName: 'Publish Windows x86 Results'
@@ -153,7 +153,7 @@ stages:
       condition: always()
     - powershell: |
         . "$(Pipeline.Workspace)\test_config_scripts\Set-E2ETestEnvVars.ps1"
-        cmd /c "call jenkins\windows_c_VsDevCmd.cmd x64 && cd cmake && ctest -T test --no-compress-output -C Release -V -j 16 --schedule-random"
+        cmd /c "call jenkins\windows_c_VsDevCmd.cmd x64 && cd cmake && ctest -T test --no-compress-output -C Release -V -j 16 --schedule-random -E iothubclient_mqtt_dt_e2e"
       displayName: 'Run Tests'
     - task: PublishTestResults@2
       displayName: 'Publish Windows x64 (Release) Results'
@@ -938,7 +938,7 @@ stages:
       displayName: 'Build'
     - script: |
         cd cmake
-        bash -c 'source "$(Pipeline.Workspace)/test_config_scripts/set_e2e_test_env_vars.sh" && ctest -T test --no-compress-output -C "Debug" -V -j 8 --schedule-random'
+        bash -c 'source "$(Pipeline.Workspace)/test_config_scripts/set_e2e_test_env_vars.sh" && ctest -T test --no-compress-output -C "Debug" -V -j 8 --schedule-random -E iothubclient_mqtt_dt_e2e'
       displayName: 'Run Tests'
     - task: PublishTestResults@2
       displayName: 'Publish OSX Results'
@@ -974,7 +974,7 @@ stages:
     - script: |
         export DYLD_LIBRARY_PATH="/usr/local/Cellar/curl/$(ls -b /usr/local/Cellar/curl | grep -e '[0-9\.]')/lib"
         cd cmake
-        bash -c 'source "$(Pipeline.Workspace)/test_config_scripts/set_e2e_test_env_vars.sh" && ctest -T test --no-compress-output -C "Debug" -V -j 8 --schedule-random'
+        bash -c 'source "$(Pipeline.Workspace)/test_config_scripts/set_e2e_test_env_vars.sh" && ctest -T test --no-compress-output -C "Debug" -V -j 8 --schedule-random -E iothubclient_mqtt_dt_e2e'
       displayName: 'Run Tests'
     - task: PublishTestResults@2
       displayName: 'Publish XCode Results'
