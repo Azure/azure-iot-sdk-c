@@ -374,6 +374,11 @@ static void set_client_option(const char* option_name,
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, error_message);
 }
 
+// Forward declaration: destroy_client_handle() is defined below but is used
+// defensively from create_client_handle() to drain leaked handles after a
+// longjmp'd ASSERT in a prior test.
+static void destroy_client_handle(void);
+
 static void create_client_handle(IOTHUB_PROVISIONED_DEVICE* device_to_use,
                         IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 {
