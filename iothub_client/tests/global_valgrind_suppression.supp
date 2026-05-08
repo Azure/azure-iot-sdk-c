@@ -188,7 +188,7 @@
 {
    OpenSSL/libp11-0.4.11
    Helgrind:Misc
-   obj:/usr/lib/x86_64-linux-gnu/valgrind/vgpreload_helgrind-amd64-linux.so
+   obj:*/vgpreload_helgrind-amd64-linux.so
    ...
    fun:_dl_fini
    fun:__run_exit_handlers
@@ -339,7 +339,7 @@
 {
    Helgrind thinks LOCK_HANDLE is not a mutex
    Helgrind:Misc
-   obj:/usr/lib/x86_64-linux-gnu/valgrind/vgpreload_helgrind-amd64-linux.so
+   obj:*/vgpreload_helgrind-amd64-linux.so
    fun:_dl_fini
    fun:__run_exit_handlers
    fun:exit
@@ -348,7 +348,7 @@
 {
    Helgrind thinks LOCK_HANDLE is not a mutex
    Helgrind:Misc
-   obj:/usr/lib/x86_64-linux-gnu/valgrind/vgpreload_helgrind-amd64-linux.so
+   obj:*/vgpreload_helgrind-amd64-linux.so
    obj:/usr/lib/x86_64-linux-gnu/libp11-kit.so.0.3.0
    fun:_dl_fini
    fun:__run_exit_handlers
@@ -1670,6 +1670,21 @@
    obj:*/vgpreload_helgrind-amd64-linux.so
    ...
    fun:_dl_call_fini
+   fun:_dl_fini
+   fun:__run_exit_handlers
+   fun:exit
+   fun:(below main)
+}
+# ------------------------------------------------------------------------
+# Ubuntu 22.04 (glibc 2.35 / valgrind 3.18) - libp11-kit destructor stack
+# does not include _dl_call_fini, so the entries above don't match. Same
+# bug class - mutex destroyed during shared-library finalization.
+# ------------------------------------------------------------------------
+{
+   libp11-kit pthread_mutex_destroy at exit (Ubuntu 22.04 / glibc 2.35)
+   Helgrind:Misc
+   obj:*/vgpreload_helgrind-amd64-linux.so
+   obj:/usr/lib/x86_64-linux-gnu/libp11-kit.so*
    fun:_dl_fini
    fun:__run_exit_handlers
    fun:exit
