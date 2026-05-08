@@ -72,10 +72,7 @@ if $run_helgrind; then
     if $run_e2e; then
         # E2E tests under helgrind. Quarantined:
         #   iothubclient_mqtt_dt_e2e: see GitHub issue (twin PATCH delivery flake).
-        #   iothubclient_uploadtoblob_e2e: helgrind instrumentation makes
-        #     IoTHubClient_Destroy() exceed the test's 30s deadline on the
-        #     Microsoft-hosted 4-vCPU agents (similar to E2E_CORES tuning).
-        ctest -T test --no-compress-output -C "Debug" -V -j $VALGRIND_E2E_CORES --schedule-random -R "e2e_helgrind$" -E "^(iothubclient_mqtt_dt_e2e|iothubclient_uploadtoblob_e2e)_helgrind$"
+        ctest -T test --no-compress-output -C "Debug" -V -j $VALGRIND_E2E_CORES --schedule-random -R "e2e_helgrind$" -E "^iothubclient_mqtt_dt_e2e_helgrind$"
     fi
 fi
 
