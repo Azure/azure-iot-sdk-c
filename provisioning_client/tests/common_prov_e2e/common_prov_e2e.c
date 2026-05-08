@@ -324,18 +324,34 @@ static REGISTRATION_RESULT send_dps_test_registration(const char* global_uri, co
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
 
 #ifdef HSM_TYPE_X509
-    // For X509, these options cannot be modified without re-initializing the HSM. These are expected to fail for all but the first test.
     Prov_Device_LL_SetOption(handle, PROV_REGISTRATION_ID, g_dps_regid_individual);
-    Prov_Device_LL_SetOption(handle, OPTION_X509_CERT, g_dps_x509_cert_individual);
-    // Private Key is either an in-memory key or an OpenSSL Engine specific string identifying the key slot.
-    Prov_Device_LL_SetOption(handle, OPTION_X509_PRIVATE_KEY, g_dps_x509_key_individual);
 
-    #ifdef TEST_OPENSSL_ENGINE
-    static const char* opensslEngine = OPENSSL_ENGINE_ID;
-    static const OPTION_OPENSSL_KEY_TYPE x509_key_from_engine = KEY_TYPE_ENGINE;
-    Prov_Device_LL_SetOption(handle, OPTION_OPENSSL_ENGINE, opensslEngine);
-    Prov_Device_LL_SetOption(handle, OPTION_OPENSSL_PRIVATE_KEY_TYPE, &x509_key_from_engine);
-    #endif
+    // OPTION_X509_CERT and OPTION_X509_PRIVATE_KEY route into the process-wide
+    // hsm_client_x509 singleton, which is set-once by design. The cert/key
+    // values are loaded once from environment variables in TEST_SUITE_INITIALIZE
+    // and never change between test functions, so set them only on the first
+    // test in the suite. (Each test gets its own PROV_DEVICE_LL_HANDLE, but
+    // the underlying HSM state is shared across the whole process.)
+    static bool x509_credentials_set = false;
+    if (!x509_credentials_set)
+    {
+        ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK,
+            Prov_Device_LL_SetOption(handle, OPTION_X509_CERT, g_dps_x509_cert_individual),
+            "Failure setting X509 certificate option");
+        // Private Key is either an in-memory key or an OpenSSL Engine specific string identifying the key slot.
+        ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK,
+            Prov_Device_LL_SetOption(handle, OPTION_X509_PRIVATE_KEY, g_dps_x509_key_individual),
+            "Failure setting X509 private key option");
+
+        #ifdef TEST_OPENSSL_ENGINE
+        static const char* opensslEngine = OPENSSL_ENGINE_ID;
+        static const OPTION_OPENSSL_KEY_TYPE x509_key_from_engine = KEY_TYPE_ENGINE;
+        Prov_Device_LL_SetOption(handle, OPTION_OPENSSL_ENGINE, opensslEngine);
+        Prov_Device_LL_SetOption(handle, OPTION_OPENSSL_PRIVATE_KEY_TYPE, &x509_key_from_engine);
+        #endif
+
+        x509_credentials_set = true;
+    }
 #endif
 
     // act
