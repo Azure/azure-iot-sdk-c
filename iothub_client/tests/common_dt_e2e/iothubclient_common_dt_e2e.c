@@ -508,12 +508,20 @@ static void get_twin_async(IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK twin_callback,
                      "IoTHub(Device|Module)Client_GetTwinAsync failed.");
 }
 
-static void receive_twin_loop(RECEIVED_TWIN_DATA* received_twin_data, DEVICE_TWIN_UPDATE_STATE expected_update_state)
+// Wait up to MAX_CLOUD_TRAVEL_TIME seconds for the device client to receive
+// a twin message in the expected state. Returns true if the message arrived,
+// false on timeout. Callers that have a retry strategy of their own (e.g.
+// dt_e2e_get_complete_desired_test, which can re-issue the service-side
+// update_twin call) should use this function and inspect the return value.
+// Callers that have no retry strategy should use receive_twin_loop(), which
+// asserts on timeout.
+static bool try_receive_twin_loop(RECEIVED_TWIN_DATA* received_twin_data, DEVICE_TWIN_UPDATE_STATE expected_update_state)
 {
     time_t begin_operation = time(NULL);
     time_t now_time;
+    bool received = false;
 
-    LogInfo("receive_twin_loop(): Entering loop with expected state %s.", MU_ENUM_TO_STRING(DEVICE_TWIN_UPDATE_STATE, expected_update_state));
+    LogInfo("try_receive_twin_loop(): Entering loop with expected state %s.", MU_ENUM_TO_STRING(DEVICE_TWIN_UPDATE_STATE, expected_update_state));
 
     while (now_time = time(NULL), (difftime(now_time, begin_operation) < MAX_CLOUD_TRAVEL_TIME))
     {
@@ -530,6 +538,7 @@ static void receive_twin_loop(RECEIVED_TWIN_DATA* received_twin_data, DEVICE_TWI
             }
 
             Unlock(received_twin_data->lock);
+            received = true;
             break;
         }
         Unlock(received_twin_data->lock);
@@ -537,10 +546,16 @@ static void receive_twin_loop(RECEIVED_TWIN_DATA* received_twin_data, DEVICE_TWI
         ThreadAPI_Sleep(1000);
     }
 
-    ASSERT_IS_TRUE(difftime(now_time, begin_operation) < MAX_CLOUD_TRAVEL_TIME,
-                   "Timeout waiting for twin message.");
+    LogInfo("try_receive_twin_loop(): Exiting loop with state %s, received=%s.",
+            MU_ENUM_TO_STRING(DEVICE_TWIN_UPDATE_STATE, received_twin_data->update_state),
+            received ? "true" : "false");
+    return received;
+}
 
-    LogInfo("receive_twin_loop(): Exiting loop with state %s.", MU_ENUM_TO_STRING(DEVICE_TWIN_UPDATE_STATE, received_twin_data->update_state));
+static void receive_twin_loop(RECEIVED_TWIN_DATA* received_twin_data, DEVICE_TWIN_UPDATE_STATE expected_update_state)
+{
+    bool received = try_receive_twin_loop(received_twin_data, expected_update_state);
+    ASSERT_IS_TRUE(received, "Timeout waiting for twin message.");
 }
 
 static void reported_state_callback(int status_code, void* user_context_callback)
@@ -798,6 +813,7 @@ void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol,
     int expected_desired_integer;
     char* expected_desired_string = NULL;
     char* desired_payload = NULL;
+    bool received_partial_twin = false;
     for (int i = 0; i < RETRY_COUNT; i++)
     {
         received_twin_data_reset(received_twin_data);
@@ -820,16 +836,35 @@ void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol,
         LogInfo("dt_e2e_get_complete_desired_test: Updating device twin from service client.");
         if (service_client_update_twin(serviceclient_devicetwin_handle, device_to_use, desired_payload))
         {
-            receive_twin_loop(received_twin_data, DEVICE_TWIN_UPDATE_PARTIAL);
-            if (received_twin_data->wasDisconnected == false)
+            if (try_receive_twin_loop(received_twin_data, DEVICE_TWIN_UPDATE_PARTIAL))
             {
-                break;
+                if (received_twin_data->wasDisconnected == false)
+                {
+                    received_partial_twin = true;
+                    break;
+                }
+                LogInfo("dt_e2e_get_complete_desired_test: Network was disconnected during twin update, retrying (%d).", i + 1);
+            }
+            else
+            {
+                // The device client subscribed to the desired-properties PATCH topic and the
+                // service-side twin update succeeded, but no PATCH message was delivered to the
+                // device within MAX_CLOUD_TRAVEL_TIME. This has been observed intermittently on
+                // hosted CI agents (see issue #2702) and is treated as a retryable transport
+                // flake here.
+                LogInfo("dt_e2e_get_complete_desired_test: Timeout waiting for desired-properties PATCH, retrying (%d).", i + 1);
             }
         }
+        else
+        {
+            LogInfo("dt_e2e_get_complete_desired_test: Service-side twin update failed, retrying (%d).", i + 1);
+        }
 
-        LogInfo("dt_e2e_get_complete_desired_test: Network was disconnected during twin update, retrying (%d).", i + 1);
         ThreadAPI_Sleep(LONG_SLEEP_MS);
     }
+
+    ASSERT_IS_TRUE(received_partial_twin,
+                   "Timeout waiting for desired-properties PATCH after %d retries.", RETRY_COUNT);
 
     // Check results.
     ASSERT_IS_TRUE(Lock(received_twin_data->lock) == LOCK_OK);
