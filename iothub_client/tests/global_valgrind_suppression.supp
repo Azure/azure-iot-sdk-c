@@ -1690,3 +1690,107 @@
    fun:exit
    fun:(below main)
 }
+# ------------------------------------------------------------------------
+# HTTPAPIEX one-time-init flag (`useGlobalInitialization`) - the main
+# thread sets it under no lock in HTTPAPIEX_Init() during IoTHub_Init,
+# while the transport worker thread later reads it (under locks) from
+# HTTPAPIEX_ExecuteRequest(). The init happens before any worker thread
+# is created, so the read-after-write is safe in practice but helgrind
+# cannot prove the happens-before through pthread_create.
+# ------------------------------------------------------------------------
+{
+   HTTPAPIEX_Init useGlobalInitialization one-time init flag (write)
+   Helgrind:Race
+   fun:HTTPAPIEX_Init
+}
+{
+   HTTPAPIEX_Init useGlobalInitialization one-time init flag (read)
+   Helgrind:Race
+   fun:HTTPAPIEX_ExecuteRequest
+}
+{
+   DRD HTTPAPIEX_Init useGlobalInitialization one-time init flag (write)
+   drd:ConflictingAccess
+   fun:HTTPAPIEX_Init
+}
+{
+   DRD HTTPAPIEX_Init useGlobalInitialization one-time init flag (read)
+   drd:ConflictingAccess
+   fun:HTTPAPIEX_ExecuteRequest
+}
+# ------------------------------------------------------------------------
+# glibc stdio buffer races on stdout between the test's main thread
+# (calling printf/puts from RecvMessage / RunTests) and the IoT Hub
+# message callback running on the transport worker thread (also calling
+# puts/printf). Existing file has DRD entries that match the older
+# `fun:vfprintf` / `fun:_IO_file_xsputn@@GLIBC_2.2.5` symbols; on
+# Ubuntu 24.04 (glibc 2.39 / valgrind 3.22) the inner frames changed
+# to `__printf_buffer_write`, `__printf_buffer`, `__vfprintf_internal`,
+# and the matching Helgrind:Race entries were never present.
+# ------------------------------------------------------------------------
+{
+   Helgrind glibc stdio race on stdout buffer (printf via __printf_buffer_write)
+   Helgrind:Race
+   ...
+   fun:__printf_buffer_write
+   ...
+}
+{
+   Helgrind glibc stdio race on stdout buffer (printf via __printf_buffer)
+   Helgrind:Race
+   ...
+   fun:__printf_buffer
+   ...
+}
+{
+   Helgrind glibc stdio race on stdout buffer (printf via __vfprintf_internal)
+   Helgrind:Race
+   ...
+   fun:__vfprintf_internal
+   ...
+}
+{
+   Helgrind glibc stdio race on stdout buffer (puts)
+   Helgrind:Race
+   ...
+   fun:_IO_file_xsputn*
+   fun:puts
+   ...
+}
+{
+   Helgrind glibc stdio race on stdout buffer (write via _IO_file_write)
+   Helgrind:Race
+   fun:__libc_write
+   fun:write
+   fun:_IO_file_write*
+   ...
+}
+{
+   DRD glibc stdio race on stdout buffer (printf via __printf_buffer_write)
+   drd:ConflictingAccess
+   ...
+   fun:__printf_buffer_write
+   ...
+}
+{
+   DRD glibc stdio race on stdout buffer (printf via __printf_buffer)
+   drd:ConflictingAccess
+   ...
+   fun:__printf_buffer
+   ...
+}
+{
+   DRD glibc stdio race on stdout buffer (printf via __vfprintf_internal)
+   drd:ConflictingAccess
+   ...
+   fun:__vfprintf_internal
+   ...
+}
+{
+   DRD glibc stdio race on stdout buffer (write via _IO_file_write)
+   drd:ConflictingAccess
+   fun:__libc_write
+   fun:write
+   fun:_IO_file_write*
+   ...
+}
