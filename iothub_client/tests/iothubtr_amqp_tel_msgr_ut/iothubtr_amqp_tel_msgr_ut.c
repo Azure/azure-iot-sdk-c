@@ -925,7 +925,7 @@ static void set_expected_calls_for_message_receiver_destroy()
 
 static void set_expected_calls_for_telemetry_messenger_send_async()
 {
-    EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
+    EXPECTED_CALL(calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG));
     EXPECTED_CALL(singlylinkedlist_add(TEST_IN_PROGRESS_LIST, IGNORED_PTR_ARG));
 }
 
