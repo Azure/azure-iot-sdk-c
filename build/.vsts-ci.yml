@@ -3,8 +3,14 @@ resources:
   - repo: self
     clean: true
 
+parameters:
+  - name: azureLocation
+    displayName: Azure region for E2E test resources
+    type: string
+    default: centraluseuap
+
 variables:
-  AZURE_LOCATION: centraluseuap
+  AZURE_LOCATION: ${{ parameters.azureLocation }}
 
 stages:
 - stage: Requirements
