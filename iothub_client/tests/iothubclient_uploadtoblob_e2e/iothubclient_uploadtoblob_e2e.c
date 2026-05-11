@@ -72,15 +72,13 @@ UPLOADTOBLOB_CALLBACK_STATUS g_uploadToBlobStatus;
 #define TEST_SLEEP_BEFORE_EARLY_HANDLE_CLOSE 1000
 #define TEST_SLEEP_SLOW_WORKER_THREAD 5000
 
-// In normal operation we should only need a few seconds for the workers to complete
-// (TEST_SLEEP_SLOW_WORKER_THREAD ~= 5s). On instrumented test runs (valgrind/helgrind/drd)
-// the SDK's lock-protected shutdown path -- IoTHubClient_Destroy() joining its worker
-// threads -- is slowed substantially by the tool's pthread instrumentation, especially on
-// Microsoft-hosted 4-vCPU agents. The previous 30s ceiling was tight even for non-helgrind
-// runs and routinely fired under helgrind (see Azure/azure-iot-sdk-c#2704). Keep the
-// ceiling generous (still well under the per-test ctest timeout, which catches genuine
-// hangs) so the assertion only fires for true multi-orders-of-magnitude regressions.
-#define TEST_MAXIMUM_TIME_FOR_DESTROY_ON_BLOCKED_THREADS_TO_COMPLETE_SECONDS 240
+// In normal operation we should only need a few seconds for the workers to complete.
+// On Valgrind/Helgrind/DRD test runs, however, there's a significant performance degradation
+// because of all the simultaneous threads the test creates -- thread scheduling alone can add
+// well over 10 seconds before the worker thread even starts executing.  The intent of the
+// assertion is only to ensure IoTHubClient_Destroy unblocks at all (no hang / no crash), not
+// to measure precise timing.  Allow ample time (but not forever).
+#define TEST_MAXIMUM_TIME_FOR_DESTROY_ON_BLOCKED_THREADS_TO_COMPLETE_SECONDS 60
 
 #define INDEFINITE_TIME ((time_t)(-1))
 

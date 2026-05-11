@@ -1547,10 +1547,10 @@ int telemetry_messenger_send_async(TELEMETRY_MESSENGER_HANDLE messenger_handle, 
     }
     else
     {
-        MESSENGER_SEND_EVENT_CALLER_INFORMATION *caller_info;
         TELEMETRY_MESSENGER_INSTANCE *instance = (TELEMETRY_MESSENGER_INSTANCE*)messenger_handle;
+        MESSENGER_SEND_EVENT_CALLER_INFORMATION *caller_info = calloc(1, sizeof(MESSENGER_SEND_EVENT_CALLER_INFORMATION));
 
-        if ((caller_info = (MESSENGER_SEND_EVENT_CALLER_INFORMATION*)malloc(sizeof(MESSENGER_SEND_EVENT_CALLER_INFORMATION))) == NULL)
+        if (caller_info == NULL)
         {
             LogError("Failed sending event (failed to create struct for task; malloc failed)");
             result = MU_FAILURE;
