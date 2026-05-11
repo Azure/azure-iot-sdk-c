@@ -5,6 +5,8 @@ resources:
 
 variables:
   AZURE_LOCATION: centraluseuap
+  CCACHE_DIR: /tmp/ccache_cache
+  CCACHE_UMASK: '000'
 
 stages:
 - stage: Requirements
@@ -29,13 +31,18 @@ stages:
         sudo curl -sL https://deb.nodesource.com/setup_16.x | bash -
         sudo apt-get install -y nodejs
       displayName: 'Setup'
+    - task: Cache@2
+      inputs:
+        key: 'npm | check_submodules | "v1"'
+        path: $(System.DefaultWorkingDirectory)/node_modules
+      displayName: 'Cache node_modules'
     - script: |
         npm install check_submodules
         node_modules/.bin/check_submodules . main
       displayName: 'Check Submodules Match'
 
 - stage: Setup
-  dependsOn: Requirements
+  dependsOn: [] # Run in parallel with Requirements to save ~3-5 min
   jobs:
   - job: create_azure_resources
     pool:
@@ -76,6 +83,9 @@ stages:
       displayName: Publish artifact (test config scripts)
       condition: always()
 - stage: Tests
+  dependsOn:
+  - Requirements
+  - Setup
   jobs:
   - job: windowsx64debug
     timeoutInMinutes: 190
@@ -85,6 +95,7 @@ stages:
     steps:
     - checkout: self
       submodules: true
+      fetchDepth: 1
     - download: current
       artifact: test_config_scripts
       displayName: Download artifact (test config scripts)
@@ -112,6 +123,7 @@ stages:
     steps:
     - checkout: self
       submodules: true
+      fetchDepth: 1
     - download: current
       artifact: test_config_scripts
       displayName: Download artifact (test config scripts)
@@ -142,6 +154,7 @@ stages:
     steps:
     - checkout: self
       submodules: true
+      fetchDepth: 1
     - download: current
       artifact: test_config_scripts
       displayName: Download artifact (test config scripts)
@@ -172,6 +185,7 @@ stages:
     steps:
     - checkout: self
       submodules: true
+      fetchDepth: 1
     - download: current
       artifact: test_config_scripts
       displayName: Download artifact (test config scripts)
@@ -186,9 +200,10 @@ stages:
     steps:
     - checkout: self
       submodules: true
+      fetchDepth: 1
     - script: |
         set -e
-        sudo apt-get update && sudo apt-get upgrade
+        sudo apt-get update -qq
         sudo ./build_all/linux/setup.sh
       displayName: 'Host setup'
       condition: always()
@@ -203,6 +218,7 @@ stages:
     steps:
     - checkout: self
       submodules: true
+      fetchDepth: 1
     - script: |
         source ./testtools/scripts/linux-setup-raspberry.sh
       displayName: 'Host setup'
@@ -232,6 +248,7 @@ stages:
     steps:
     - checkout: self
       submodules: false
+      fetchDepth: 1
     - script: |
         # Microsoft-hosted ubuntu-24.04 ships with docker + containerd preinstalled.
         # Installing docker.io from apt would conflict with containerd.io and fail
@@ -255,6 +272,7 @@ stages:
     steps:
     - checkout: self
       submodules: false
+      fetchDepth: 1
     - script: |
         # Microsoft-hosted ubuntu-24.04 ships with docker + containerd preinstalled.
         # Installing docker.io from apt would conflict with containerd.io and fail
@@ -278,11 +296,22 @@ stages:
     steps:
     - checkout: self
       submodules: true
+      fetchDepth: 1
     - script: |
         set -e
-        sudo apt-get update && sudo apt-get upgrade
+        sudo apt-get update -qq
         sudo ./build_all/linux/setup.sh
       displayName: 'Host setup'
+    - task: Cache@2
+      inputs:
+        key: 'ccache | "$(Agent.JobName)" | "v1"'
+        path: /tmp/ccache_cache
+      displayName: 'Restore ccache'
+    - script: |
+        mkdir -p /tmp/ccache_cache && chmod 777 /tmp/ccache_cache
+        ccache --set-config=max_size=500M
+        ccache --zero-stats
+      displayName: 'Configure ccache'
     - script: |
         sudo -E ./jenkins/ubuntu_c.sh
       displayName: 'Build'
@@ -305,11 +334,17 @@ stages:
         ut_e2e:
           RUN_TESTS_ARGS: '--e2e'
           NEEDS_E2E_CONFIG: 'true'
-        valgrind:
-          RUN_TESTS_ARGS: '--valgrind --e2e'
+        valgrind_ut:
+          RUN_TESTS_ARGS: '--valgrind --ut-only'
           NEEDS_E2E_CONFIG: 'true'
-        helgrind:
-          RUN_TESTS_ARGS: '--helgrind --e2e'
+        valgrind_e2e:
+          RUN_TESTS_ARGS: '--valgrind --e2e --e2e-only'
+          NEEDS_E2E_CONFIG: 'true'
+        helgrind_ut:
+          RUN_TESTS_ARGS: '--helgrind --ut-only'
+          NEEDS_E2E_CONFIG: 'true'
+        helgrind_e2e:
+          RUN_TESTS_ARGS: '--helgrind --e2e --e2e-only'
           NEEDS_E2E_CONFIG: 'true'
         drd:
           RUN_TESTS_ARGS: '--drd --e2e'
@@ -317,6 +352,7 @@ stages:
     steps:
     - checkout: self
       submodules: true
+      fetchDepth: 1
     - download: current
       artifact: test_config_scripts
       displayName: Download artifact (test config scripts)
@@ -325,8 +361,12 @@ stages:
       displayName: Download artifact (build output)
     - script: |
         set -e
-        sudo apt-get update && sudo apt-get upgrade
-        sudo ./build_all/linux/setup.sh
+        if command -v valgrind >/dev/null 2>&1; then
+          echo "Using preinstalled valgrind on hosted agent"
+        else
+          sudo apt-get update -qq
+          sudo ./build_all/linux/setup.sh
+        fi
       displayName: 'Host setup'
     - script: |
         set -e
@@ -353,15 +393,32 @@ stages:
     steps:
     - checkout: self
       submodules: true
+      fetchDepth: 1
     - download: current
       artifact: test_config_scripts
       displayName: Download artifact (test config scripts)
     - script: |
         set -e
-        sudo apt-get update && sudo apt-get upgrade
-        sudo ./build_all/linux/setup.sh
-        sudo apt-get install -y clang
+        if command -v clang >/dev/null 2>&1 && command -v valgrind >/dev/null 2>&1; then
+          echo "Using preinstalled clang and valgrind on hosted agent"
+        else
+          sudo apt-get update -qq
+          sudo ./build_all/linux/setup.sh
+          if ! command -v clang >/dev/null 2>&1; then
+            sudo apt-get install -y clang
+          fi
+        fi
       displayName: 'Host setup'
+    - task: Cache@2
+      inputs:
+        key: 'ccache | "$(Agent.JobName)" | "v1"'
+        path: /tmp/ccache_cache
+      displayName: 'Restore ccache'
+    - script: |
+        mkdir -p /tmp/ccache_cache && chmod 777 /tmp/ccache_cache
+        ccache --set-config=max_size=500M
+        ccache --zero-stats
+      displayName: 'Configure ccache'
     - script: |
         export OPENSSL_ia32cap=0x00000000
         sudo chmod -R 755 .
@@ -390,15 +447,32 @@ stages:
     steps:
     - checkout: self
       submodules: true
+      fetchDepth: 1
     - download: current
       artifact: test_config_scripts
       displayName: Download artifact (test config scripts)
     - script: |
         set -e
-        sudo apt-get update && sudo apt-get upgrade
-        sudo ./build_all/linux/setup.sh
-        sudo apt-get install -y clang
+        if command -v clang >/dev/null 2>&1 && command -v valgrind >/dev/null 2>&1; then
+          echo "Using preinstalled clang and valgrind on hosted agent"
+        else
+          sudo apt-get update -qq
+          sudo ./build_all/linux/setup.sh
+          if ! command -v clang >/dev/null 2>&1; then
+            sudo apt-get install -y clang
+          fi
+        fi
       displayName: 'Host setup'
+    - task: Cache@2
+      inputs:
+        key: 'ccache | "$(Agent.JobName)" | "v1"'
+        path: /tmp/ccache_cache
+      displayName: 'Restore ccache'
+    - script: |
+        mkdir -p /tmp/ccache_cache && chmod 777 /tmp/ccache_cache
+        ccache --set-config=max_size=500M
+        ccache --zero-stats
+      displayName: 'Configure ccache'
     - script: |
         export OPENSSL_ia32cap=0x00000000
         sudo chmod -R 755 .
@@ -441,6 +515,7 @@ stages:
     steps:
     - checkout: self
       submodules: true
+      fetchDepth: 1
     - script: |
         set -e
         sudo dpkg --add-architecture arm64
@@ -526,14 +601,25 @@ stages:
     steps:
     - checkout: self
       submodules: true
+      fetchDepth: 1
     - download: current
       artifact: test_config_scripts
       displayName: Download artifact (test config scripts)
     - script: |
         set -e
-        sudo apt-get update && sudo apt-get upgrade
+        sudo apt-get update -qq
         sudo ./build_all/linux/setup.sh
       displayName: 'Host setup'
+    - task: Cache@2
+      inputs:
+        key: 'ccache | "$(Agent.JobName)" | "v1"'
+        path: /tmp/ccache_cache
+      displayName: 'Restore ccache'
+    - script: |
+        mkdir -p /tmp/ccache_cache && chmod 777 /tmp/ccache_cache
+        ccache --set-config=max_size=500M
+        ccache --zero-stats
+      displayName: 'Configure ccache'
     - script: |
         sudo -E ./jenkins/ubuntu_c_riot.sh
       displayName: 'Build'
@@ -560,14 +646,25 @@ stages:
     steps:
     - checkout: self
       submodules: true
+      fetchDepth: 1
     - download: current
       artifact: test_config_scripts
       displayName: Download artifact (test config scripts)
     - script: |
         set -e
-        sudo apt-get update && sudo apt-get upgrade
+        sudo apt-get update -qq
         sudo ./build_all/linux/setup.sh
       displayName: 'Host setup'
+    - task: Cache@2
+      inputs:
+        key: 'ccache | "$(Agent.JobName)" | "v1"'
+        path: /tmp/ccache_cache
+      displayName: 'Restore ccache'
+    - script: |
+        mkdir -p /tmp/ccache_cache && chmod 777 /tmp/ccache_cache
+        ccache --set-config=max_size=500M
+        ccache --zero-stats
+      displayName: 'Configure ccache'
     - script: |
         cat /etc/*release | grep VERSION*
         gcc --version
@@ -598,14 +695,25 @@ stages:
     steps:
     - checkout: self
       submodules: true
+      fetchDepth: 1
     - download: current
       artifact: test_config_scripts
       displayName: Download artifact (test config scripts)
     - script: |
         set -e
-        sudo apt-get update && sudo apt-get upgrade
+        sudo apt-get update -qq
         sudo ./build_all/linux/setup.sh
       displayName: 'Host setup'
+    - task: Cache@2
+      inputs:
+        key: 'ccache | "$(Agent.JobName)" | "v1"'
+        path: /tmp/ccache_cache
+      displayName: 'Restore ccache'
+    - script: |
+        mkdir -p /tmp/ccache_cache && chmod 777 /tmp/ccache_cache
+        ccache --set-config=max_size=500M
+        ccache --zero-stats
+      displayName: 'Configure ccache'
     - script: |
         sudo ./jenkins/debian_c.sh
       displayName: 'Build'
@@ -631,9 +739,10 @@ stages:
     steps:
     - checkout: self
       submodules: true
+      fetchDepth: 1
     - script: |
         set -e
-        sudo apt-get update && sudo apt-get upgrade
+        sudo apt-get update -qq
         sudo ./build_all/linux/setup.sh
       displayName: 'Host setup'
     - script: |
@@ -650,16 +759,27 @@ stages:
     steps:
     - checkout: self
       submodules: true
+      fetchDepth: 1
     - download: current
       artifact: test_config_scripts
       displayName: Download artifact (test config scripts)
     - script: |
         set -e
-        sudo apt-get update && sudo apt-get upgrade
+        sudo apt-get update -qq
         sudo ./build_all/linux/setup.sh
         # wolfSSL is not in Ubuntu main; install dev headers from universe.
         sudo apt-get install -y libwolfssl-dev || true
       displayName: 'Host setup'
+    - task: Cache@2
+      inputs:
+        key: 'ccache | "$(Agent.JobName)" | "v1"'
+        path: /tmp/ccache_cache
+      displayName: 'Restore ccache'
+    - script: |
+        mkdir -p /tmp/ccache_cache && chmod 777 /tmp/ccache_cache
+        ccache --set-config=max_size=500M
+        ccache --zero-stats
+      displayName: 'Configure ccache'
     - script: |
         sudo -E jenkins/linux_wolfssl.sh
       displayName: 'Build'
@@ -684,16 +804,27 @@ stages:
     steps:
     - checkout: self
       submodules: true
+      fetchDepth: 1
     - download: current
       artifact: test_config_scripts
       displayName: Download artifact (test config scripts)
     - script: |
         set -e
-        sudo apt-get update && sudo apt-get upgrade
+        sudo apt-get update -qq
         sudo ./build_all/linux/setup.sh
         # Ensure BearSSL dev package is present so CMake can resolve libbearssl.
         sudo apt-get install -y libbearssl-dev
       displayName: 'Host setup'
+    - task: Cache@2
+      inputs:
+        key: 'ccache | "$(Agent.JobName)" | "v1"'
+        path: /tmp/ccache_cache
+      displayName: 'Restore ccache'
+    - script: |
+        mkdir -p /tmp/ccache_cache && chmod 777 /tmp/ccache_cache
+        ccache --set-config=max_size=500M
+        ccache --zero-stats
+      displayName: 'Configure ccache'
     - script: |
         sudo -E bash jenkins/linux_bearssl.sh
       displayName: 'Build'
@@ -721,23 +852,44 @@ stages:
     steps:
     - checkout: self
       submodules: true
+      fetchDepth: 1
     - download: current
       artifact: test_config_scripts
       displayName: Download artifact (test config scripts)
     - script: |
         set -e
-        sudo apt-get update && sudo apt-get upgrade
+        sudo apt-get update -qq
         sudo ./build_all/linux/setup.sh
       displayName: 'Host setup'
+    - task: Cache@2
+      inputs:
+        key: 'ccache | "$(Agent.JobName)" | "v1"'
+        path: /tmp/ccache_cache
+      displayName: 'Restore ccache'
+    - script: |
+        mkdir -p /tmp/ccache_cache && chmod 777 /tmp/ccache_cache
+        ccache --set-config=max_size=500M
+        ccache --zero-stats
+      displayName: 'Configure ccache'
+    - task: Cache@2
+      inputs:
+        key: 'mbedtls | "2.16.12" | "v1"'
+        path: /tmp/mbedtls-2.16-install
+        cacheHitVar: MBEDTLS_CACHE_RESTORED
+      displayName: 'Restore cached mbedTLS 2.16'
     - script: |
         set -e
-        # Install mbedTLS 2.16.x from source (latest 2.16 point release).
-        git clone --depth 1 -b mbedtls-2.16.12 https://github.com/Mbed-TLS/mbedtls /tmp/mbedtls-2.16
-        cd /tmp/mbedtls-2.16
-        mkdir build && cd build
-        cmake -DUSE_SHARED_MBEDTLS_LIBRARY=ON -DCMAKE_INSTALL_PREFIX=/usr/local ..
-        make -j$(nproc)
-        sudo make install
+        if [ "$MBEDTLS_CACHE_RESTORED" = "true" ]; then
+          echo "mbedTLS 2.16 restored from cache"
+        else
+          git clone --depth 1 -b mbedtls-2.16.12 https://github.com/Mbed-TLS/mbedtls /tmp/mbedtls-2.16
+          cd /tmp/mbedtls-2.16
+          mkdir build && cd build
+          cmake -DUSE_SHARED_MBEDTLS_LIBRARY=ON -DCMAKE_INSTALL_PREFIX=/tmp/mbedtls-2.16-install ..
+          make -j$(nproc)
+          make install
+        fi
+        sudo cp -a /tmp/mbedtls-2.16-install/* /usr/local/
         sudo ldconfig
       displayName: 'Install mbedTLS 2.16'
     - script: |
@@ -769,23 +921,44 @@ stages:
     steps:
     - checkout: self
       submodules: true
+      fetchDepth: 1
     - download: current
       artifact: test_config_scripts
       displayName: Download artifact (test config scripts)
     - script: |
         set -e
-        sudo apt-get update && sudo apt-get upgrade
+        sudo apt-get update -qq
         sudo ./build_all/linux/setup.sh
       displayName: 'Host setup'
+    - task: Cache@2
+      inputs:
+        key: 'ccache | "$(Agent.JobName)" | "v1"'
+        path: /tmp/ccache_cache
+      displayName: 'Restore ccache'
+    - script: |
+        mkdir -p /tmp/ccache_cache && chmod 777 /tmp/ccache_cache
+        ccache --set-config=max_size=500M
+        ccache --zero-stats
+      displayName: 'Configure ccache'
+    - task: Cache@2
+      inputs:
+        key: 'mbedtls | "2.28.10" | "v1"'
+        path: /tmp/mbedtls-2.28-install
+        cacheHitVar: MBEDTLS_CACHE_RESTORED
+      displayName: 'Restore cached mbedTLS 2.28'
     - script: |
         set -e
-        # Install mbedTLS 2.28.x from source (latest long-term-support 2.28 release).
-        git clone --depth 1 -b mbedtls-2.28.10 https://github.com/Mbed-TLS/mbedtls /tmp/mbedtls-2.28
-        cd /tmp/mbedtls-2.28
-        mkdir build && cd build
-        cmake -DUSE_SHARED_MBEDTLS_LIBRARY=ON -DCMAKE_INSTALL_PREFIX=/usr/local ..
-        make -j$(nproc)
-        sudo make install
+        if [ "$MBEDTLS_CACHE_RESTORED" = "true" ]; then
+          echo "mbedTLS 2.28 restored from cache"
+        else
+          git clone --depth 1 -b mbedtls-2.28.10 https://github.com/Mbed-TLS/mbedtls /tmp/mbedtls-2.28
+          cd /tmp/mbedtls-2.28
+          mkdir build && cd build
+          cmake -DUSE_SHARED_MBEDTLS_LIBRARY=ON -DCMAKE_INSTALL_PREFIX=/tmp/mbedtls-2.28-install ..
+          make -j$(nproc)
+          make install
+        fi
+        sudo cp -a /tmp/mbedtls-2.28-install/* /usr/local/
         sudo ldconfig
       displayName: 'Install mbedTLS 2.28'
     - script: |
@@ -816,24 +989,45 @@ stages:
     steps:
     - checkout: self
       submodules: true
+      fetchDepth: 1
     - download: current
       artifact: test_config_scripts
       displayName: Download artifact (test config scripts)
     - script: |
         set -e
-        sudo apt-get update && sudo apt-get upgrade
+        sudo apt-get update -qq
         sudo ./build_all/linux/setup.sh
       displayName: 'Host setup'
+    - task: Cache@2
+      inputs:
+        key: 'ccache | "$(Agent.JobName)" | "v1"'
+        path: /tmp/ccache_cache
+      displayName: 'Restore ccache'
+    - script: |
+        mkdir -p /tmp/ccache_cache && chmod 777 /tmp/ccache_cache
+        ccache --set-config=max_size=500M
+        ccache --zero-stats
+      displayName: 'Configure ccache'
+    - task: Cache@2
+      inputs:
+        key: 'mbedtls | "3.6.2" | "v1"'
+        path: /tmp/mbedtls-3x-install
+        cacheHitVar: MBEDTLS_CACHE_RESTORED
+      displayName: 'Restore cached mbedTLS 3.x'
     - script: |
         set -e
-        # Install mbedTLS 3.6.x from source, matching the old linux-c-ubuntu-2404 image.
-        git clone --depth 1 -b v3.6.2 https://github.com/Mbed-TLS/mbedtls /tmp/mbedtls-3x
-        cd /tmp/mbedtls-3x
-        git submodule update --init --depth 1
-        mkdir build && cd build
-        cmake -DUSE_SHARED_MBEDTLS_LIBRARY=ON -DCMAKE_INSTALL_PREFIX=/usr/local ..
-        make -j$(nproc)
-        sudo make install
+        if [ "$MBEDTLS_CACHE_RESTORED" = "true" ]; then
+          echo "mbedTLS 3.x restored from cache"
+        else
+          git clone --depth 1 -b v3.6.2 https://github.com/Mbed-TLS/mbedtls /tmp/mbedtls-3x
+          cd /tmp/mbedtls-3x
+          git submodule update --init --depth 1
+          mkdir build && cd build
+          cmake -DUSE_SHARED_MBEDTLS_LIBRARY=ON -DCMAKE_INSTALL_PREFIX=/tmp/mbedtls-3x-install ..
+          make -j$(nproc)
+          make install
+        fi
+        sudo cp -a /tmp/mbedtls-3x-install/* /usr/local/
         sudo ldconfig
       displayName: 'Install mbedTLS 3.x'
     - script: |
@@ -862,15 +1056,26 @@ stages:
     steps:
     - checkout: self
       submodules: true
+      fetchDepth: 1
     - download: current
       artifact: test_config_scripts
       displayName: Download artifact (test config scripts)
     - script: |
         set -e
-        sudo apt-get update && sudo apt-get upgrade
+        sudo apt-get update -qq
         sudo ./build_all/linux/setup.sh
         sudo apt-get install -y libc-ares-dev
       displayName: 'Host setup'
+    - task: Cache@2
+      inputs:
+        key: 'ccache | "$(Agent.JobName)" | "v1"'
+        path: /tmp/ccache_cache
+      displayName: 'Restore ccache'
+    - script: |
+        mkdir -p /tmp/ccache_cache && chmod 777 /tmp/ccache_cache
+        ccache --set-config=max_size=500M
+        ccache --zero-stats
+      displayName: 'Configure ccache'
     - script: |
         sudo -E bash jenkins/linux_cares.sh
       displayName: 'Build'
@@ -895,15 +1100,26 @@ stages:
     steps:
     - checkout: self
       submodules: true
+      fetchDepth: 1
     - download: current
       artifact: test_config_scripts
       displayName: Download artifact (test config scripts)
     - script: |
         set -e
-        sudo apt-get update && sudo apt-get upgrade
+        sudo apt-get update -qq
         sudo ./build_all/linux/setup.sh
         sudo apt-get install -y softhsm2 libengine-pkcs11-openssl opensc libp11-dev
       displayName: 'Host setup'
+    - task: Cache@2
+      inputs:
+        key: 'ccache | "$(Agent.JobName)" | "v1"'
+        path: /tmp/ccache_cache
+      displayName: 'Restore ccache'
+    - script: |
+        mkdir -p /tmp/ccache_cache && chmod 777 /tmp/ccache_cache
+        ccache --set-config=max_size=500M
+        ccache --zero-stats
+      displayName: 'Configure ccache'
     - script: |
         # Use dynamically generated E2E variables from Setup stage to avoid unresolved placeholders.
         sudo bash -c 'source "$(Pipeline.Workspace)/test_config_scripts/set_e2e_test_env_vars.sh" && ./jenkins/linux_openssl_engine.sh'
@@ -930,6 +1146,7 @@ stages:
     steps:
     - checkout: self
       submodules: true
+      fetchDepth: 1
     - download: current
       artifact: test_config_scripts
       displayName: Download artifact (test config scripts)
@@ -963,6 +1180,7 @@ stages:
     steps:
     - checkout: self
       submodules: true
+      fetchDepth: 1
     - download: current
       artifact: test_config_scripts
       displayName: Download artifact (test config scripts)
@@ -1000,6 +1218,7 @@ stages:
     steps:
     - checkout: self
       submodules: true
+      fetchDepth: 1
     - task: CodeQL3000Init@0
     - task: NuGetCommand@2
       inputs:

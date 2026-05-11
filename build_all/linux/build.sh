@@ -139,7 +139,15 @@ rm -r -f $build_folder
 mkdir -m777 -p $build_folder
 pushd $build_folder
 echo "Generating Build Files"
-cmake $toolchainfile $cmake_install_prefix $build_root -Drun_valgrind:BOOL=$run_valgrind -DcompileOption_C:STRING="$extracloptions" -Drun_e2e_tests:BOOL=$run_e2e_tests -Drun_sfc_tests:BOOL=$run_sfc_tests -Drun_longhaul_tests=$run_longhaul_tests -Duse_amqp:BOOL=$build_amqp -Duse_http:BOOL=$build_http -Duse_mqtt:BOOL=$build_mqtt -Ddont_use_uploadtoblob:BOOL=$no_blob -Drun_unittests:BOOL=$run_unittests -Dno_logging:BOOL=$no_logging -Duse_prov_client:BOOL=$prov_auth -Duse_tpm_simulator:BOOL=$prov_use_tpm_simulator -Duse_edge_modules=$use_edge_modules -Dhsm_type_riot=$hsm_type_riot -Dhsm_type_x509=$hsm_type_x509 -Dhsm_type_symm_key=$hsm_type_symm_key -Dhsm_type_sastoken=$hsm_type_sastoken -Denable_ipv6=$enable_ipv6 -DCMAKE_BUILD_TYPE=$build_config
+
+# Use ccache as compiler launcher when available for faster rebuilds.
+CCACHE_LAUNCHER=""
+if command -v ccache >/dev/null 2>&1; then
+  CCACHE_LAUNCHER="-DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache"
+  echo "ccache found — enabling CMAKE_*_COMPILER_LAUNCHER"
+fi
+
+cmake $toolchainfile $cmake_install_prefix $build_root $CCACHE_LAUNCHER -Drun_valgrind:BOOL=$run_valgrind -DcompileOption_C:STRING="$extracloptions" -Drun_e2e_tests:BOOL=$run_e2e_tests -Drun_sfc_tests:BOOL=$run_sfc_tests -Drun_longhaul_tests=$run_longhaul_tests -Duse_amqp:BOOL=$build_amqp -Duse_http:BOOL=$build_http -Duse_mqtt:BOOL=$build_mqtt -Ddont_use_uploadtoblob:BOOL=$no_blob -Drun_unittests:BOOL=$run_unittests -Dno_logging:BOOL=$no_logging -Duse_prov_client:BOOL=$prov_auth -Duse_tpm_simulator:BOOL=$prov_use_tpm_simulator -Duse_edge_modules=$use_edge_modules -Dhsm_type_riot=$hsm_type_riot -Dhsm_type_x509=$hsm_type_x509 -Dhsm_type_symm_key=$hsm_type_symm_key -Dhsm_type_sastoken=$hsm_type_sastoken -Denable_ipv6=$enable_ipv6 -DCMAKE_BUILD_TYPE=$build_config
 chmod --recursive ugo+rw ../cmake
 
 # Set the default cores
