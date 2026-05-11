@@ -361,8 +361,12 @@ stages:
       displayName: Download artifact (build output)
     - script: |
         set -e
-        sudo apt-get update -qq
-        sudo ./build_all/linux/setup.sh
+        if command -v valgrind >/dev/null 2>&1; then
+          echo "Using preinstalled valgrind on hosted agent"
+        else
+          sudo apt-get update -qq
+          sudo ./build_all/linux/setup.sh
+        fi
       displayName: 'Host setup'
     - script: |
         set -e
@@ -395,9 +399,15 @@ stages:
       displayName: Download artifact (test config scripts)
     - script: |
         set -e
-        sudo apt-get update -qq
-        sudo ./build_all/linux/setup.sh
-        sudo apt-get install -y clang
+        if command -v clang >/dev/null 2>&1 && command -v valgrind >/dev/null 2>&1; then
+          echo "Using preinstalled clang and valgrind on hosted agent"
+        else
+          sudo apt-get update -qq
+          sudo ./build_all/linux/setup.sh
+          if ! command -v clang >/dev/null 2>&1; then
+            sudo apt-get install -y clang
+          fi
+        fi
       displayName: 'Host setup'
     - task: Cache@2
       inputs:
@@ -443,9 +453,15 @@ stages:
       displayName: Download artifact (test config scripts)
     - script: |
         set -e
-        sudo apt-get update -qq
-        sudo ./build_all/linux/setup.sh
-        sudo apt-get install -y clang
+        if command -v clang >/dev/null 2>&1 && command -v valgrind >/dev/null 2>&1; then
+          echo "Using preinstalled clang and valgrind on hosted agent"
+        else
+          sudo apt-get update -qq
+          sudo ./build_all/linux/setup.sh
+          if ! command -v clang >/dev/null 2>&1; then
+            sudo apt-get install -y clang
+          fi
+        fi
       displayName: 'Host setup'
     - task: Cache@2
       inputs:
