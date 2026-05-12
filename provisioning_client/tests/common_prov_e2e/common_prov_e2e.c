@@ -343,15 +343,20 @@ static REGISTRATION_RESULT send_dps_test_registration(const char* global_uri, co
             Prov_Device_LL_SetOption(handle, OPTION_X509_PRIVATE_KEY, g_dps_x509_key_individual),
             "Failure setting X509 private key option");
 
-        #ifdef TEST_OPENSSL_ENGINE
-        static const char* opensslEngine = OPENSSL_ENGINE_ID;
-        static const OPTION_OPENSSL_KEY_TYPE x509_key_from_engine = KEY_TYPE_ENGINE;
-        Prov_Device_LL_SetOption(handle, OPTION_OPENSSL_ENGINE, opensslEngine);
-        Prov_Device_LL_SetOption(handle, OPTION_OPENSSL_PRIVATE_KEY_TYPE, &x509_key_from_engine);
-        #endif
-
         x509_credentials_set = true;
     }
+
+    #ifdef TEST_OPENSSL_ENGINE
+    // OPTION_OPENSSL_ENGINE and OPTION_OPENSSL_PRIVATE_KEY_TYPE configure the
+    // per-handle TLS-IO (they do NOT touch the HSM singleton), so they must be
+    // set on every PROV_DEVICE_LL_HANDLE; otherwise tlsio_openssl will try to
+    // PEM-decode the engine key-id string and fail with
+    // "DECODER routines::unsupported".
+    static const char* opensslEngine = OPENSSL_ENGINE_ID;
+    static const OPTION_OPENSSL_KEY_TYPE x509_key_from_engine = KEY_TYPE_ENGINE;
+    Prov_Device_LL_SetOption(handle, OPTION_OPENSSL_ENGINE, opensslEngine);
+    Prov_Device_LL_SetOption(handle, OPTION_OPENSSL_PRIVATE_KEY_TYPE, &x509_key_from_engine);
+    #endif
 #endif
 
     // act
