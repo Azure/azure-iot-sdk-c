@@ -3,16 +3,11 @@ resources:
   - repo: self
     clean: true
 
-parameters:
-  - name: azureLocation
-    displayName: Azure region for E2E test resources
-    type: string
-    default: centraluseuap
-
 variables:
-  AZURE_LOCATION: ${{ parameters.azureLocation }}
   CCACHE_DIR: /tmp/ccache_cache
   CCACHE_UMASK: '000'
+  DEFAULT_AZURE_LOCATION: centraluseuap
+  AZURE_LOCATION_EFFECTIVE: $[ coalesce(variables['AZURE_LOCATION'], variables['DEFAULT_AZURE_LOCATION']) ]
 
 stages:
 - stage: Requirements
@@ -79,7 +74,7 @@ stages:
           Import-Module $PsmPath
 
           $ResourceGroupName = New-AzureResourceGroupName -OutFile "test_config/azure-resource-group-name.txt"
-          $TestEnvInfo = New-AzIotTestEnvironment -AzureLocation $env:AZURE_LOCATION -ResourceGroup $ResourceGroupName -EnableFileUpload -IotHubX509ThumbprintDevices 1 -DpsX509IndividualEnrollments 1
+          $TestEnvInfo = New-AzIotTestEnvironment -AzureLocation $env:AZURE_LOCATION_EFFECTIVE -ResourceGroup $ResourceGroupName -EnableFileUpload -IotHubX509ThumbprintDevices 1 -DpsX509IndividualEnrollments 1
 
           New-AzIotCSDKE2ETestConfig -TestEnvInfo $TestEnvInfo -Target bash -OutFile test_config/set_e2e_test_env_vars.sh
           New-AzIotCSDKE2ETestConfig -TestEnvInfo $TestEnvInfo -Target powershell -OutFile test_config/Set-E2ETestEnvVars.ps1
