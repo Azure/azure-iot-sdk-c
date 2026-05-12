@@ -2,7 +2,7 @@
 
 set -e
 
-sudo apt-get update && sudo apt-get upgrade
+sudo apt-get update -qq
 sudo apt install --fix-missing -y wget git build-essential cmake xz-utils ca-certificates pkg-config sudo
 
 export WORK_ROOT="$(pwd)/toolchain"

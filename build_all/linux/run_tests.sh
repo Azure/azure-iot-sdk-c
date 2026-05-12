@@ -24,6 +24,8 @@ run_e2e=false
 run_valgrind=false
 run_helgrind=false
 run_drd=false
+ut_only=false
+e2e_only=false
 
 for arg in "$@"; do
     case "$arg" in
@@ -31,9 +33,16 @@ for arg in "$@"; do
         --valgrind)  run_valgrind=true ;;
         --helgrind)  run_helgrind=true ;;
         --drd)       run_drd=true ;;
+        --ut-only)   ut_only=true ;;
+        --e2e-only)  e2e_only=true ;;
         *)           echo "Unknown option: $arg"; exit 1 ;;
     esac
 done
+
+if $ut_only && $e2e_only; then
+    echo "Cannot use --ut-only and --e2e-only together"
+    exit 1
+fi
 
 # If no instrumentation flags are set, run plain (non-valgrind) tests.
 run_plain=true
@@ -46,42 +55,53 @@ sudo ldconfig
 
 if $run_plain; then
     if $run_e2e; then
-        # Unit tests + E2E, no valgrind/helgrind/drd
-        # iothubclient_mqtt_dt_e2e is quarantined: see GitHub issue (twin PATCH never
-        # delivered to device after subscribe; pre-existing flake, not pipeline-related).
-        ctest -T test --no-compress-output -C "Debug" -V -j $E2E_CORES --schedule-random -E "_(valgrind|helgrind|drd)$|^iothubclient_mqtt_dt_e2e$"
+        if ! $ut_only; then
+            # Unit tests + E2E, no valgrind/helgrind/drd
+            # iothubclient_mqtt_dt_e2e is quarantined: see GitHub issue (twin PATCH never
+            # delivered to device after subscribe; pre-existing flake, not pipeline-related).
+            ctest -T test --no-compress-output -C "Debug" -V -j $E2E_CORES --schedule-random -E "_(valgrind|helgrind|drd)$|^iothubclient_mqtt_dt_e2e$"
+        fi
     else
-        # Unit tests only, no E2E, no valgrind/helgrind/drd
-        ctest -T test --no-compress-output -C "Debug" -V -j $UT_CORES --schedule-random -E "_(valgrind|helgrind|drd)|e2e"
+        if ! $e2e_only; then
+            # Unit tests only, no E2E, no valgrind/helgrind/drd
+            ctest -T test --no-compress-output -C "Debug" -V -j $UT_CORES --schedule-random -E "_(valgrind|helgrind|drd)|e2e"
+        fi
     fi
 fi
 
 if $run_valgrind; then
-    # Unit tests under valgrind
-    ctest -T test --no-compress-output -C "Debug" -V -j $VALGRIND_UT_CORES --schedule-random -R "_valgrind$" -E "e2e"
+    if ! $e2e_only; then
+        # Unit tests under valgrind
+        ctest -T test --no-compress-output -C "Debug" -V -j $VALGRIND_UT_CORES --schedule-random -R "_valgrind$" -E "e2e"
+    fi
     if $run_e2e; then
-        # E2E tests under valgrind. Quarantined:
-        #   iothubclient_mqtt_dt_e2e: see GitHub issue (twin PATCH delivery flake).
-        ctest -T test --no-compress-output -C "Debug" -V -j $VALGRIND_E2E_CORES --schedule-random -R "e2e_valgrind$" -E "^iothubclient_mqtt_dt_e2e_valgrind$"
+        if ! $ut_only; then
+            # E2E tests under valgrind. Quarantined:
+            #   iothubclient_mqtt_dt_e2e: see GitHub issue (twin PATCH delivery flake).
+            ctest -T test --no-compress-output -C "Debug" -V -j $VALGRIND_E2E_CORES --schedule-random -R "e2e_valgrind$" -E "^iothubclient_mqtt_dt_e2e_valgrind$"
+        fi
     fi
 fi
 
 if $run_helgrind; then
-    # Unit tests under helgrind
-    ctest -T test --no-compress-output -C "Debug" -V -j $VALGRIND_UT_CORES --schedule-random -R "_helgrind$" -E "e2e"
+    if ! $e2e_only; then
+        # Unit tests under helgrind
+        ctest -T test --no-compress-output -C "Debug" -V -j $VALGRIND_UT_CORES --schedule-random -R "_helgrind$" -E "e2e"
+    fi
     if $run_e2e; then
-        # E2E tests under helgrind. Quarantined:
-        #   iothubclient_mqtt_dt_e2e: see GitHub issue (twin PATCH delivery flake).
-        #   iothubclient_uploadtoblob_e2e: helgrind instrumentation makes
-        #     IoTHubClient_Destroy() exceed the test's 30s deadline on the
-        #     Microsoft-hosted 4-vCPU agents (similar to E2E_CORES tuning).
-        ctest -T test --no-compress-output -C "Debug" -V -j $VALGRIND_E2E_CORES --schedule-random -R "e2e_helgrind$" -E "^(iothubclient_mqtt_dt_e2e|iothubclient_uploadtoblob_e2e)_helgrind$"
+        if ! $ut_only; then
+            # E2E tests under helgrind. Quarantined:
+            #   iothubclient_mqtt_dt_e2e: see GitHub issue (twin PATCH delivery flake).
+            ctest -T test --no-compress-output -C "Debug" -V -j $VALGRIND_E2E_CORES --schedule-random -R "e2e_helgrind$" -E "^iothubclient_mqtt_dt_e2e_helgrind$"
+        fi
     fi
 fi
 
 if $run_drd; then
-    # Unit tests under drd
-    ctest -T test --no-compress-output -C "Debug" -V -j $VALGRIND_UT_CORES --schedule-random -R "_drd$" -E "e2e"
+    if ! $e2e_only; then
+        # Unit tests under drd
+        ctest -T test --no-compress-output -C "Debug" -V -j $VALGRIND_UT_CORES --schedule-random -R "_drd$" -E "e2e"
+    fi
     # NOTE: E2E tests are intentionally not run under drd.  drd's thread instrumentation adds
     # 20-50x performance overhead, which makes libcurl's TLS handshakes to Azure services fail
     # with "SSL connect error".  Each failed IoTHubDeviceMethod_Invoke then cascades through
