@@ -21,7 +21,7 @@
 	url = https://github.com/Azure/azure-utpm-c.git
 [submodule "deps/azure-macro-utils-c"]
 	path = deps/azure-macro-utils-c
-	url = https://github.com/Azure/azure-macro-utils-c.git
+	url = https://github.com/Azure/macro-utils-c.git
 [submodule "deps/umock-c"]
 	path = deps/umock-c
 	url = https://github.com/Azure/umock-c.git
