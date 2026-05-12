@@ -4,6 +4,19 @@
 ########## SDK Testing Dependencies ##########
 if (NOT ${use_installed_dependencies})
 
+    # Newer macro-utils-c revisions call this helper from c-build-tools.
+    # Define a no-op fallback so this repo can consume the submodule update
+    # without requiring a full c-build-tools cascade in the same PR.
+    if (NOT COMMAND add_vld_if_defined)
+        function(add_vld_if_defined DIR)
+        endfunction()
+    endif()
+
+    if (NOT COMMAND add_repo_validation)
+        function(add_repo_validation TARGET)
+        endfunction()
+    endif()
+
     if (NOT TARGET azure_macro_utils_c AND EXISTS "${CMAKE_CURRENT_LIST_DIR}/azure-macro-utils-c/CMakeLists.txt")
         add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/azure-macro-utils-c)
     endif()
