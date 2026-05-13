@@ -253,15 +253,13 @@ if (${original_run_e2e_tests} OR ${original_run_unittests} OR ${run_sfc_tests})
     set(SHARED_UTIL_REAL_TEST_FOLDER ${CMAKE_CURRENT_LIST_DIR}/c-utility/tests/real_test_files CACHE INTERNAL "this is what needs to be included when doing test sources" FORCE)
 endif()
 
-add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/deps)
 if(${use_installed_dependencies})
+    add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/deps)
     find_package(parson REQUIRED CONFIG)
-endif()
 
-include_directories(${MACRO_UTILS_INC_FOLDER})
-include_directories(${UMOCK_C_INC_FOLDER})
+    include_directories(${MACRO_UTILS_INC_FOLDER})
+    include_directories(${UMOCK_C_INC_FOLDER})
 
-if(${use_installed_dependencies})
     if (NOT azure_c_shared_utility_FOUND)
         find_package(azure_c_shared_utility REQUIRED CONFIG)
     endif ()
@@ -284,7 +282,42 @@ if(${use_installed_dependencies})
         endif ()
     endif ()
 else ()
+    # c-utility provides all test deps (c-build-tools, macro-utils-c,
+    # c-logging, umock-c, ctest, testrunnerswitcher) from its own deps/.
     add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/c-utility)
+
+    # Enable the conformant preprocessor at top-level scope so that all
+    # targets (iothub_client, serializer, etc.) can use macro-utils-c
+    # macros with > 127 parameters.
+    if(MSVC AND NOT "${CMAKE_GENERATOR}" STREQUAL "Visual Studio 15 2017")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:preprocessor /wd5105 /wd4200")
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /Zc:preprocessor /wd5105 /wd4200")
+    endif()
+
+    # Point legacy include-path variables at c-utility's copies of the deps.
+    set(MACRO_UTILS_INC_FOLDER ${CMAKE_CURRENT_LIST_DIR}/c-utility/deps/macro-utils-c/inc CACHE INTERNAL "" FORCE)
+    set(UMOCK_C_INC_FOLDER ${CMAKE_CURRENT_LIST_DIR}/c-utility/deps/umock-c/inc CACHE INTERNAL "" FORCE)
+
+    # Create forwarding headers so existing code that includes
+    # "azure_macro_utils/macro_utils.h" transparently picks up
+    # "macro_utils/macro_utils.h" from the new macro-utils-c layout.
+    file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/azure_macro_utils)
+    file(WRITE ${CMAKE_BINARY_DIR}/azure_macro_utils/macro_utils.h
+        "#include \"macro_utils/macro_utils.h\"\n")
+    file(WRITE ${CMAKE_BINARY_DIR}/azure_macro_utils/macro_utils_generated.h
+        "#include \"macro_utils/macro_utils_generated.h\"\n")
+
+    include_directories(${CMAKE_BINARY_DIR})
+    include_directories(${MACRO_UTILS_INC_FOLDER})
+    include_directories(${UMOCK_C_INC_FOLDER})
+
+    # c-logging v2 headers are needed by the new c-utility's xlogging.h.
+    # Targets that use include_directories() instead of linking aziotsharedutil
+    # (e.g. serializer) need this path explicitly.
+    include_directories(${CMAKE_CURRENT_LIST_DIR}/c-utility/deps/c-logging/v2/inc)
+
+    # Parson (only non-test dep still in deps/)
+    add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/deps)
 
     if (${use_amqp})
         add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/uamqp)
@@ -294,8 +327,6 @@ else ()
         add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/umqtt)
     endif ()
 
-    # For now this must go here and not in deps/CMakeLists.txt for
-    # CMake functionality which is in c-utility.
     if (${use_http})
         add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/deps/uhttp)
     endif ()

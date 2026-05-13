@@ -2,58 +2,9 @@
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 ########## SDK Testing Dependencies ##########
-if (NOT ${use_installed_dependencies})
-
-    # Newer macro-utils-c revisions call this helper from c-build-tools.
-    # Define a no-op fallback so this repo can consume the submodule update
-    # without requiring a full c-build-tools cascade in the same PR.
-    if (NOT COMMAND add_vld_if_defined)
-        function(add_vld_if_defined DIR)
-        endfunction()
-    endif()
-
-    if (NOT COMMAND add_repo_validation)
-        function(add_repo_validation TARGET)
-        endfunction()
-    endif()
-
-    if (NOT TARGET azure_macro_utils_c AND EXISTS "${CMAKE_CURRENT_LIST_DIR}/azure-macro-utils-c/CMakeLists.txt")
-        add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/azure-macro-utils-c)
-    endif()
-
-    # Bridge newer macro-utils-c naming/layout to legacy expectations used by
-    # umock-c/ctest/testrunnerswitcher in this repository.
-    if (TARGET macro_utils_c AND NOT TARGET azure_macro_utils_c)
-        add_library(azure_macro_utils_c ALIAS macro_utils_c)
-    endif()
-
-    if (NOT DEFINED MACRO_UTILS_INC_FOLDER)
-        if (EXISTS "${CMAKE_CURRENT_LIST_DIR}/azure-ctest/deps/azure-macro-utils-c/inc")
-            set(MACRO_UTILS_INC_FOLDER "${CMAKE_CURRENT_LIST_DIR}/azure-ctest/deps/azure-macro-utils-c/inc" CACHE INTERNAL "macro utils include root" FORCE)
-        elseif (EXISTS "${CMAKE_CURRENT_LIST_DIR}/azure-c-testrunnerswitcher/deps/azure-macro-utils-c/inc")
-            set(MACRO_UTILS_INC_FOLDER "${CMAKE_CURRENT_LIST_DIR}/azure-c-testrunnerswitcher/deps/azure-macro-utils-c/inc" CACHE INTERNAL "macro utils include root" FORCE)
-        elseif (EXISTS "${CMAKE_CURRENT_LIST_DIR}/azure-macro-utils-c/inc")
-            set(MACRO_UTILS_INC_FOLDER "${CMAKE_CURRENT_LIST_DIR}/azure-macro-utils-c/inc" CACHE INTERNAL "macro utils include root" FORCE)
-        endif()
-    endif()
-
-    if (${original_run_e2e_tests} OR ${original_run_unittests} OR ${run_sfc_tests})
-        if (NOT TARGET testrunnerswitcher)
-            add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/azure-c-testrunnerswitcher)
-        endif()
-        if (NOT TARGET ctest)
-            # Get the repo if it's not there
-            add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/azure-ctest)
-        endif()
-        enable_testing()
-    endif()
-
-
-    if (NOT TARGET umock_c)
-        # Get the repo if it's not there
-        add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/umock-c)
-    endif()
-else()
+# Test dependencies (macro-utils-c, umock-c, ctest, testrunnerswitcher, c-logging)
+# are now provided by c-utility, which is loaded before this file.
+if (${use_installed_dependencies})
     if (NOT azure_macro_utils_cFOUND)
         find_package(azure_macro_utils_c REQUIRED CONFIG)
     endif ()
