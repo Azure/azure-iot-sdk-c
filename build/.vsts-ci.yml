@@ -43,7 +43,7 @@ stages:
             Write-Verbose "No GitHub token found in git config; proceeding without auth."
           }
 
-          $PsmUrl = 'https://raw.githubusercontent.com/Azure/iot-sdks-e2e-fx/ewertons/faster-checksubmodules/scripts/Azure.Iot.Sdk.Test.psm1'
+          $PsmUrl = 'https://raw.githubusercontent.com/Azure/iot-sdks-e2e-fx/master/scripts/Azure.Iot.Sdk.Test.psm1'
           $PsmPath = Join-Path $PWD 'Azure.Iot.Sdk.Test.psm1'
           Invoke-WebRequest -Uri $PsmUrl -OutFile $PsmPath -UseBasicParsing
           Import-Module $PsmPath
@@ -55,7 +55,6 @@ stages:
           }
 
 - stage: Setup
-  condition: false
   dependsOn: [] # Run in parallel with Requirements to save ~3-5 min
   jobs:
   - job: create_azure_resources
@@ -97,7 +96,6 @@ stages:
       displayName: Publish artifact (test config scripts)
       condition: always()
 - stage: Tests
-  condition: false
   dependsOn:
   - Requirements
   - Setup
@@ -1252,7 +1250,7 @@ stages:
   dependsOn:
   - Setup
   - Tests
-  condition: false # DISABLED FOR TESTING
+  condition: always()
   jobs:
   - job: destroy_azure_resource_group
     condition: always() # Run job even if the pipeline run is cancelled.
