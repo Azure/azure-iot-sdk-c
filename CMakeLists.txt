@@ -5,6 +5,11 @@ cmake_minimum_required (VERSION 3.5)
 project(azure_iot_sdks)
 
 ########## Enable CMake Features ##########
+# Allow target_link_libraries() on targets from other directories (needed by utpm samples)
+if(POLICY CMP0079)
+    cmake_policy(SET CMP0079 NEW)
+endif()
+
 # Use solution folders.
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 # Set CMAKE_INSTALL_LIBDIR if not defined

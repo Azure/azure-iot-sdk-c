@@ -22,15 +22,7 @@
 [submodule "deps/azure-macro-utils-c"]
 	path = deps/azure-macro-utils-c
 	url = https://github.com/Azure/macro-utils-c.git
-[submodule "deps/umock-c"]
-	path = deps/umock-c
-	url = https://github.com/Azure/umock-c.git
-[submodule "deps/azure-c-testrunnerswitcher"]
-	path = deps/azure-c-testrunnerswitcher
-	url = https://github.com/Azure/azure-c-testrunnerswitcher.git
-[submodule "deps/azure-ctest"]
-	path = deps/azure-ctest
-	url = https://github.com/Azure/azure-ctest.git
+
 [submodule "deps/c-logging"]
 	path = deps/c-logging
 	url = https://github.com/Azure/c-logging
