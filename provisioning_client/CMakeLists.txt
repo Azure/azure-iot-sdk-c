@@ -3,6 +3,12 @@
 
 cmake_minimum_required (VERSION 3.5)
 
+# Re-enable CMP0079 (cross-directory target_link_libraries) after
+# cmake_minimum_required(3.5) reset it to OLD in this scope.
+if(POLICY CMP0079)
+    cmake_policy(SET CMP0079 NEW)
+endif()
+
 compileAsC99()
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_PROV_MODULE")
