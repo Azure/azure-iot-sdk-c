@@ -370,7 +370,7 @@ BEGIN_TEST_SUITE(hsm_client_tpm_ut)
             .IgnoreArgument_parentHandle();
 
         STRICT_EXPECTED_CALL(ToTpmaObject(tmp)).IgnoreArgument_attrs(); // 10
-        STRICT_EXPECTED_CALL(TSS_Create(IGNORED_ARG, IGNORED_ARG, tmp_dh, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
+        STRICT_EXPECTED_CALL(TSS_Create(IGNORED_ARG, IGNORED_ARG, tmp_dh, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
 
         STRICT_EXPECTED_CALL(TPM2_Load(IGNORED_ARG, IGNORED_ARG, tmp_dh, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_parentHandle();     // 12

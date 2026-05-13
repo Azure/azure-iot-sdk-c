@@ -290,6 +290,9 @@ else ()
     # Add top-level deps BEFORE c-utility so that c-utility sees the targets
     # already defined and skips its own nested copies.  This allows customers
     # to build with just "git submodule update --init" (non-recursive).
+    set(build_traceability_tool OFF CACHE BOOL "" FORCE)
+    set(build_sarif_results_checker OFF CACHE BOOL "" FORCE)
+    set(run_traceability OFF CACHE BOOL "" FORCE)
     add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/deps/c-build-tools)
     set_default_build_options()
 
