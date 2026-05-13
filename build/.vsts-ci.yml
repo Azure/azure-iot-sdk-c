@@ -19,28 +19,30 @@ stages:
       vmImage: 'ubuntu-24.04'
     displayName: "Check Submodules"
     steps:
-    - script: git config --global core.longpaths true
-      displayName: 'Enable git longpaths'
     - checkout: self
-      submodules: recursive
-    - script: |
-        sudo apt-get update && sudo apt-get install -y \
-        curl \
-        git \
-        build-essential \
-        pkg-config
-        sudo curl -sL https://deb.nodesource.com/setup_16.x | bash -
-        sudo apt-get install -y nodejs
-      displayName: 'Setup'
-    - task: Cache@2
+      submodules: false
+
+    - task: PowerShell@2
+      displayName: 'Check Submodule Consistency'
       inputs:
-        key: 'npm | check_submodules | "v1"'
-        path: $(System.DefaultWorkingDirectory)/node_modules
-      displayName: 'Cache node_modules'
-    - script: |
-        npm install check_submodules
-        node_modules/.bin/check_submodules . main
-      displayName: 'Check Submodules Match'
+        targetType: 'inline'
+        pwsh: true
+        script: |
+          $ErrorActionPreference = 'Stop'
+          $VerbosePreference = 'Continue'
+
+          $PsmUrl = 'https://raw.githubusercontent.com/Azure/iot-sdks-e2e-fx/master/scripts/Azure.Iot.Sdk.Test.psm1'
+          $PsmPath = Join-Path $PWD 'Azure.Iot.Sdk.Test.psm1'
+          Invoke-WebRequest -Uri $PsmUrl -OutFile $PsmPath -UseBasicParsing
+          Import-Module $PsmPath
+
+          $result = Test-SubmoduleConsistency -Path "$(Build.SourcesDirectory)" -ShowTree -Verbose
+          if (-not $result) {
+            Write-Error "Submodule consistency check FAILED. See conflicts above."
+            exit 1
+          }
+      env:
+        GITHUB_TOKEN: $(GitHubToken)
 
 - stage: Setup
   dependsOn: [] # Run in parallel with Requirements to save ~3-5 min
@@ -97,8 +99,6 @@ stages:
     - checkout: self
       submodules: true
       fetchDepth: 1
-    - script: git -C c-utility submodule update --init --depth 1 deps/c-build-tools deps/macro-utils-c deps/c-logging deps/umock-c deps/ctest deps/c-testrunnerswitcher
-      displayName: 'Init c-utility nested deps'
     - download: current
       artifact: test_config_scripts
       displayName: Download artifact (test config scripts)
@@ -127,8 +127,6 @@ stages:
     - checkout: self
       submodules: true
       fetchDepth: 1
-    - script: git -C c-utility submodule update --init --depth 1 deps/c-build-tools deps/macro-utils-c deps/c-logging deps/umock-c deps/ctest deps/c-testrunnerswitcher
-      displayName: 'Init c-utility nested deps'
     - download: current
       artifact: test_config_scripts
       displayName: Download artifact (test config scripts)
@@ -160,8 +158,6 @@ stages:
     - checkout: self
       submodules: true
       fetchDepth: 1
-    - script: git -C c-utility submodule update --init --depth 1 deps/c-build-tools deps/macro-utils-c deps/c-logging deps/umock-c deps/ctest deps/c-testrunnerswitcher
-      displayName: 'Init c-utility nested deps'
     - download: current
       artifact: test_config_scripts
       displayName: Download artifact (test config scripts)
@@ -193,8 +189,6 @@ stages:
     - checkout: self
       submodules: true
       fetchDepth: 1
-    - script: git -C c-utility submodule update --init --depth 1 deps/c-build-tools deps/macro-utils-c deps/c-logging deps/umock-c deps/ctest deps/c-testrunnerswitcher
-      displayName: 'Init c-utility nested deps'
     - download: current
       artifact: test_config_scripts
       displayName: Download artifact (test config scripts)
@@ -210,8 +204,6 @@ stages:
     - checkout: self
       submodules: true
       fetchDepth: 1
-    - script: git -C c-utility submodule update --init --depth 1 deps/c-build-tools deps/macro-utils-c deps/c-logging deps/umock-c deps/ctest deps/c-testrunnerswitcher
-      displayName: 'Init c-utility nested deps'
     - script: |
         set -e
         sudo apt-get update -qq
@@ -230,8 +222,6 @@ stages:
     - checkout: self
       submodules: true
       fetchDepth: 1
-    - script: git -C c-utility submodule update --init --depth 1 deps/c-build-tools deps/macro-utils-c deps/c-logging deps/umock-c deps/ctest deps/c-testrunnerswitcher
-      displayName: 'Init c-utility nested deps'
     - script: |
         source ./testtools/scripts/linux-setup-raspberry.sh
       displayName: 'Host setup'
@@ -310,8 +300,6 @@ stages:
     - checkout: self
       submodules: true
       fetchDepth: 1
-    - script: git -C c-utility submodule update --init --depth 1 deps/c-build-tools deps/macro-utils-c deps/c-logging deps/umock-c deps/ctest deps/c-testrunnerswitcher
-      displayName: 'Init c-utility nested deps'
     - script: |
         set -e
         sudo apt-get update -qq
@@ -368,8 +356,6 @@ stages:
     - checkout: self
       submodules: true
       fetchDepth: 1
-    - script: git -C c-utility submodule update --init --depth 1 deps/c-build-tools deps/macro-utils-c deps/c-logging deps/umock-c deps/ctest deps/c-testrunnerswitcher
-      displayName: 'Init c-utility nested deps'
     - download: current
       artifact: test_config_scripts
       displayName: Download artifact (test config scripts)
@@ -411,8 +397,6 @@ stages:
     - checkout: self
       submodules: true
       fetchDepth: 1
-    - script: git -C c-utility submodule update --init --depth 1 deps/c-build-tools deps/macro-utils-c deps/c-logging deps/umock-c deps/ctest deps/c-testrunnerswitcher
-      displayName: 'Init c-utility nested deps'
     - download: current
       artifact: test_config_scripts
       displayName: Download artifact (test config scripts)
@@ -467,8 +451,6 @@ stages:
     - checkout: self
       submodules: true
       fetchDepth: 1
-    - script: git -C c-utility submodule update --init --depth 1 deps/c-build-tools deps/macro-utils-c deps/c-logging deps/umock-c deps/ctest deps/c-testrunnerswitcher
-      displayName: 'Init c-utility nested deps'
     - download: current
       artifact: test_config_scripts
       displayName: Download artifact (test config scripts)
@@ -537,8 +519,6 @@ stages:
     - checkout: self
       submodules: true
       fetchDepth: 1
-    - script: git -C c-utility submodule update --init --depth 1 deps/c-build-tools deps/macro-utils-c deps/c-logging deps/umock-c deps/ctest deps/c-testrunnerswitcher
-      displayName: 'Init c-utility nested deps'
     - script: |
         set -e
         sudo dpkg --add-architecture arm64
@@ -625,8 +605,6 @@ stages:
     - checkout: self
       submodules: true
       fetchDepth: 1
-    - script: git -C c-utility submodule update --init --depth 1 deps/c-build-tools deps/macro-utils-c deps/c-logging deps/umock-c deps/ctest deps/c-testrunnerswitcher
-      displayName: 'Init c-utility nested deps'
     - download: current
       artifact: test_config_scripts
       displayName: Download artifact (test config scripts)
@@ -672,8 +650,6 @@ stages:
     - checkout: self
       submodules: true
       fetchDepth: 1
-    - script: git -C c-utility submodule update --init --depth 1 deps/c-build-tools deps/macro-utils-c deps/c-logging deps/umock-c deps/ctest deps/c-testrunnerswitcher
-      displayName: 'Init c-utility nested deps'
     - download: current
       artifact: test_config_scripts
       displayName: Download artifact (test config scripts)
@@ -723,8 +699,6 @@ stages:
     - checkout: self
       submodules: true
       fetchDepth: 1
-    - script: git -C c-utility submodule update --init --depth 1 deps/c-build-tools deps/macro-utils-c deps/c-logging deps/umock-c deps/ctest deps/c-testrunnerswitcher
-      displayName: 'Init c-utility nested deps'
     - download: current
       artifact: test_config_scripts
       displayName: Download artifact (test config scripts)
@@ -769,8 +743,6 @@ stages:
     - checkout: self
       submodules: true
       fetchDepth: 1
-    - script: git -C c-utility submodule update --init --depth 1 deps/c-build-tools deps/macro-utils-c deps/c-logging deps/umock-c deps/ctest deps/c-testrunnerswitcher
-      displayName: 'Init c-utility nested deps'
     - script: |
         set -e
         sudo apt-get update -qq
@@ -791,8 +763,6 @@ stages:
     - checkout: self
       submodules: true
       fetchDepth: 1
-    - script: git -C c-utility submodule update --init --depth 1 deps/c-build-tools deps/macro-utils-c deps/c-logging deps/umock-c deps/ctest deps/c-testrunnerswitcher
-      displayName: 'Init c-utility nested deps'
     - download: current
       artifact: test_config_scripts
       displayName: Download artifact (test config scripts)
@@ -838,8 +808,6 @@ stages:
     - checkout: self
       submodules: true
       fetchDepth: 1
-    - script: git -C c-utility submodule update --init --depth 1 deps/c-build-tools deps/macro-utils-c deps/c-logging deps/umock-c deps/ctest deps/c-testrunnerswitcher
-      displayName: 'Init c-utility nested deps'
     - download: current
       artifact: test_config_scripts
       displayName: Download artifact (test config scripts)
@@ -888,8 +856,6 @@ stages:
     - checkout: self
       submodules: true
       fetchDepth: 1
-    - script: git -C c-utility submodule update --init --depth 1 deps/c-build-tools deps/macro-utils-c deps/c-logging deps/umock-c deps/ctest deps/c-testrunnerswitcher
-      displayName: 'Init c-utility nested deps'
     - download: current
       artifact: test_config_scripts
       displayName: Download artifact (test config scripts)
@@ -959,8 +925,6 @@ stages:
     - checkout: self
       submodules: true
       fetchDepth: 1
-    - script: git -C c-utility submodule update --init --depth 1 deps/c-build-tools deps/macro-utils-c deps/c-logging deps/umock-c deps/ctest deps/c-testrunnerswitcher
-      displayName: 'Init c-utility nested deps'
     - download: current
       artifact: test_config_scripts
       displayName: Download artifact (test config scripts)
@@ -1029,8 +993,6 @@ stages:
     - checkout: self
       submodules: true
       fetchDepth: 1
-    - script: git -C c-utility submodule update --init --depth 1 deps/c-build-tools deps/macro-utils-c deps/c-logging deps/umock-c deps/ctest deps/c-testrunnerswitcher
-      displayName: 'Init c-utility nested deps'
     - download: current
       artifact: test_config_scripts
       displayName: Download artifact (test config scripts)
@@ -1098,8 +1060,6 @@ stages:
     - checkout: self
       submodules: true
       fetchDepth: 1
-    - script: git -C c-utility submodule update --init --depth 1 deps/c-build-tools deps/macro-utils-c deps/c-logging deps/umock-c deps/ctest deps/c-testrunnerswitcher
-      displayName: 'Init c-utility nested deps'
     - download: current
       artifact: test_config_scripts
       displayName: Download artifact (test config scripts)
@@ -1144,8 +1104,6 @@ stages:
     - checkout: self
       submodules: true
       fetchDepth: 1
-    - script: git -C c-utility submodule update --init --depth 1 deps/c-build-tools deps/macro-utils-c deps/c-logging deps/umock-c deps/ctest deps/c-testrunnerswitcher
-      displayName: 'Init c-utility nested deps'
     - download: current
       artifact: test_config_scripts
       displayName: Download artifact (test config scripts)
@@ -1192,8 +1150,6 @@ stages:
     - checkout: self
       submodules: true
       fetchDepth: 1
-    - script: git -C c-utility submodule update --init --depth 1 deps/c-build-tools deps/macro-utils-c deps/c-logging deps/umock-c deps/ctest deps/c-testrunnerswitcher
-      displayName: 'Init c-utility nested deps'
     - download: current
       artifact: test_config_scripts
       displayName: Download artifact (test config scripts)
@@ -1228,8 +1184,6 @@ stages:
     - checkout: self
       submodules: true
       fetchDepth: 1
-    - script: git -C c-utility submodule update --init --depth 1 deps/c-build-tools deps/macro-utils-c deps/c-logging deps/umock-c deps/ctest deps/c-testrunnerswitcher
-      displayName: 'Init c-utility nested deps'
     - download: current
       artifact: test_config_scripts
       displayName: Download artifact (test config scripts)
@@ -1268,8 +1222,6 @@ stages:
     - checkout: self
       submodules: true
       fetchDepth: 1
-    - script: git -C c-utility submodule update --init --depth 1 deps/c-build-tools deps/macro-utils-c deps/c-logging deps/umock-c deps/ctest deps/c-testrunnerswitcher
-      displayName: 'Init c-utility nested deps'
     - task: CodeQL3000Init@0
     - task: NuGetCommand@2
       inputs:

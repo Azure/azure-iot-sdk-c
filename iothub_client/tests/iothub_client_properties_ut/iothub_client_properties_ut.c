@@ -67,6 +67,23 @@ extern "C"
 #endif
 #undef ENABLE_MOCKS
 
+/* Declarations for real_ parson functions (parson.h include guard prevents
+   re-inclusion, so we declare them manually) */
+extern JSON_Value* real_json_parse_string(const char *string);
+extern char* real_json_serialize_to_string(const JSON_Value *value);
+extern void real_json_free_serialized_string(char *string);
+extern const char* real_json_object_get_string(const JSON_Object *object, const char *name);
+extern JSON_Object* real_json_object_get_object(const JSON_Object *object, const char *name);
+extern size_t real_json_object_get_count(const JSON_Object *object);
+extern const char* real_json_object_get_name(const JSON_Object *object, size_t index);
+extern JSON_Value* real_json_object_get_value(const JSON_Object *object, const char *name);
+extern JSON_Value* real_json_object_get_value_at(const JSON_Object *object, size_t index);
+extern void real_json_value_free(JSON_Value *value);
+extern JSON_Object* real_json_value_get_object(const JSON_Value *value);
+extern JSON_Value_Type real_json_value_get_type(const JSON_Value *value);
+
+extern int real_mallocAndStrcpy_s(char** destination, const char* source);
+
 #include "iothub_client_properties.h"
 
 MU_DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
@@ -412,7 +429,7 @@ TEST_FUNCTION_CLEANUP(TestMethodCleanup)
 //
 static void set_expected_calls_for_IoTHubClient_Properties_Serializer_CreateReported(void)
 {
-    STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_ARG, IGNORED_ARG));
 }
 
 TEST_FUNCTION(IoTHubClient_Properties_Serializer_CreateReported_NULL_properties)
@@ -684,7 +701,7 @@ TEST_FUNCTION(IoTHubClient_Properties_Serializer_CreateReported_fail)
 // 
 static void set_expected_calls_for_IoTHubClient_Properties_Serializer_CreateWritableResponse(void)
 {
-    STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_ARG, IGNORED_ARG));
 }
 
 TEST_FUNCTION(IoTHubClient_Properties_Serializer_CreateWritableResponse_NULL_properties)
@@ -998,7 +1015,7 @@ TEST_FUNCTION(IoTHubClient_Serialize_WritableProperties_fail)
 // 
 static void set_expected_calls_for_IoTHubClient_Properties_Serializer_Destroy(void)
 {
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 }
 
 TEST_FUNCTION(IoTHubClient_Properties_Serializer_Destroy_success)
@@ -1035,18 +1052,18 @@ TEST_FUNCTION(IoTHubClient_Properties_Serializer_Destroy_null)
 //
 static void set_expected_calls_for_IoTHubClient_Properties_Deserializer_Create(IOTHUB_CLIENT_PROPERTY_PAYLOAD_TYPE payloadType)
 {
-    STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(json_parse_string(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_parse_string(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_ARG));
     if (payloadType == IOTHUB_CLIENT_PROPERTY_PAYLOAD_ALL)
     {
-        STRICT_EXPECTED_CALL(json_object_get_object(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CallCannotFail();
-        STRICT_EXPECTED_CALL(json_object_get_object(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CallCannotFail();
+        STRICT_EXPECTED_CALL(json_object_get_object(IGNORED_ARG, IGNORED_ARG)).CallCannotFail();
+        STRICT_EXPECTED_CALL(json_object_get_object(IGNORED_ARG, IGNORED_ARG)).CallCannotFail();
     }
-    STRICT_EXPECTED_CALL(json_object_get_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_value_get_type(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(json_object_get_value(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_value_get_type(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 }
 
 static IOTHUB_CLIENT_PROPERTIES_DESERIALIZER_HANDLE TestAllocatePropertiesReader(IOTHUB_CLIENT_PROPERTY_PAYLOAD_TYPE payloadType, const unsigned char* payload)
@@ -1591,19 +1608,19 @@ TEST_FUNCTION(IoTHubClient_Properties_Deserializer_GetNext_three_writable_and_re
 
 static void set_expected_calls_for_IoTHubClient_Properties_Deserializer_GetNext_fail_tests(void)
 {
-    STRICT_EXPECTED_CALL(json_object_get_count(IGNORED_PTR_ARG)).CallCannotFail();
-    STRICT_EXPECTED_CALL(json_object_get_name(IGNORED_PTR_ARG,IGNORED_NUM_ARG)).CallCannotFail();
-    STRICT_EXPECTED_CALL(json_object_get_value_at(IGNORED_PTR_ARG, IGNORED_NUM_ARG)).CallCannotFail(); 
-    STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_PTR_ARG)).CallCannotFail();
-    STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CallCannotFail();
-    STRICT_EXPECTED_CALL(json_object_get_name(IGNORED_PTR_ARG,IGNORED_NUM_ARG)).CallCannotFail();    
-    STRICT_EXPECTED_CALL(json_object_get_value_at(IGNORED_PTR_ARG,IGNORED_NUM_ARG)).CallCannotFail();
-    STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_PTR_ARG)).CallCannotFail();
-    STRICT_EXPECTED_CALL(json_object_get_count(IGNORED_PTR_ARG)).CallCannotFail();
-    STRICT_EXPECTED_CALL(json_object_get_name(IGNORED_PTR_ARG,IGNORED_NUM_ARG)).CallCannotFail();
-    STRICT_EXPECTED_CALL(json_object_get_name(IGNORED_PTR_ARG,IGNORED_NUM_ARG)).CallCannotFail();
-    STRICT_EXPECTED_CALL(json_object_get_value_at(IGNORED_PTR_ARG,IGNORED_NUM_ARG)).CallCannotFail();
-    STRICT_EXPECTED_CALL(json_serialize_to_string(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(json_object_get_count(IGNORED_ARG)).CallCannotFail();
+    STRICT_EXPECTED_CALL(json_object_get_name(IGNORED_ARG,IGNORED_ARG)).CallCannotFail();
+    STRICT_EXPECTED_CALL(json_object_get_value_at(IGNORED_ARG, IGNORED_ARG)).CallCannotFail(); 
+    STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_ARG)).CallCannotFail();
+    STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_ARG, IGNORED_ARG)).CallCannotFail();
+    STRICT_EXPECTED_CALL(json_object_get_name(IGNORED_ARG,IGNORED_ARG)).CallCannotFail();    
+    STRICT_EXPECTED_CALL(json_object_get_value_at(IGNORED_ARG,IGNORED_ARG)).CallCannotFail();
+    STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_ARG)).CallCannotFail();
+    STRICT_EXPECTED_CALL(json_object_get_count(IGNORED_ARG)).CallCannotFail();
+    STRICT_EXPECTED_CALL(json_object_get_name(IGNORED_ARG,IGNORED_ARG)).CallCannotFail();
+    STRICT_EXPECTED_CALL(json_object_get_name(IGNORED_ARG,IGNORED_ARG)).CallCannotFail();
+    STRICT_EXPECTED_CALL(json_object_get_value_at(IGNORED_ARG,IGNORED_ARG)).CallCannotFail();
+    STRICT_EXPECTED_CALL(json_serialize_to_string(IGNORED_ARG));
 }
 
 TEST_FUNCTION(IoTHubClient_Properties_Deserializer_GetNext_three_writable_and_reported_fail)
@@ -1658,7 +1675,7 @@ TEST_FUNCTION(IoTHubClient_Properties_Deserializer_GetNext_three_writable_and_re
 //
 static void set_expected_calls_for_IoTHubClient_Properties_DeserializerProperty_Destroy(void)
 {
-    STRICT_EXPECTED_CALL(json_free_serialized_string(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(json_free_serialized_string(IGNORED_ARG));
 }
 
 TEST_FUNCTION(IoTHubClient_Properties_DeserializerProperty_Destroy_ok)
@@ -1702,8 +1719,8 @@ TEST_FUNCTION(IoTHubClient_Properties_DeserializerProperty_Destroy_null)
 //
 static void set_expected_calls_for_IoTHubClient_Properties_Deserializer_Destroy(void)
 {
-    STRICT_EXPECTED_CALL(json_value_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(json_value_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 }
 
 TEST_FUNCTION(IoTHubClient_Properties_Deserializer_Destroy_success)

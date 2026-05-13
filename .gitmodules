@@ -26,3 +26,15 @@
 [submodule "deps/c-logging"]
 	path = deps/c-logging
 	url = https://github.com/Azure/c-logging
+[submodule "deps/c-build-tools"]
+	path = deps/c-build-tools
+	url = https://github.com/Azure/c-build-tools
+[submodule "deps/umock-c"]
+	path = deps/umock-c
+	url = https://github.com/Azure/umock-c
+[submodule "deps/ctest"]
+	path = deps/ctest
+	url = https://github.com/Azure/ctest
+[submodule "deps/c-testrunnerswitcher"]
+	path = deps/c-testrunnerswitcher
+	url = https://github.com/Azure/c-testrunnerswitcher

@@ -135,11 +135,10 @@ TEST_FUNCTION_INITIALIZE(Setup)
 static void MethodReturn_Create_with_non_NULL_jsonValue_inert_path(const char* jsonValue)
 {
     STRICT_EXPECTED_CALL(json_parse_string(jsonValue));
-    STRICT_EXPECTED_CALL(json_value_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(json_value_free(IGNORED_ARG))
         .IgnoreArgument_value();
-    STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG))
-        .IgnoreAllArguments();
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, jsonValue))
+    STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, jsonValue))
         .IgnoreArgument_destination();
 }
 
@@ -197,8 +196,7 @@ TEST_FUNCTION(MethodReturn_Create_succeeds_with_non_NULL_jsonValue_unhappy_paths
 static void MethodReturn_Create_with_NULL_jsonValue_inert_path(const char* jsonValue)
 {
     (void)(jsonValue);
-    STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG))
-        .IgnoreAllArguments();
+    STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_ARG, IGNORED_ARG));
 }
 
 TEST_FUNCTION(MethodReturn_Create_succeeds_with_NULL_jsonValue_happy_path)
@@ -266,10 +264,10 @@ TEST_FUNCTION(MethodReturn_Destroy_with_non_NULL_handle_returns)
     METHODRETURN_HANDLE h = MethodReturn_Create(1, jsonValue);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument_ptr();
 
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument_ptr();
 
     ///act

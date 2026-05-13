@@ -279,11 +279,11 @@ TEST_FUNCTION(IoTHubMessaging_Create_return_null_if_input_parameter_serviceClien
 TEST_FUNCTION(IoTHubMessaging_Create_happy_path)
 {
     // arrange
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(Lock_Init());
-    STRICT_EXPECTED_CALL(IoTHubMessaging_LL_Create(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessaging_LL_Create(IGNORED_ARG))
         .IgnoreArgument(1);
 
     // act
@@ -306,11 +306,11 @@ TEST_FUNCTION(IoTHubMessaging_Create_non_happy_path)
     int umockc_result = umock_c_negative_tests_init();
     ASSERT_ARE_EQUAL(int, 0, umockc_result);
 
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(Lock_Init());
-    STRICT_EXPECTED_CALL(IoTHubMessaging_LL_Create(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessaging_LL_Create(IGNORED_ARG))
         .IgnoreArgument(1);
 
     umock_c_negative_tests_snapshot();
@@ -347,13 +347,13 @@ TEST_FUNCTION(IoTHubMessaging_Destroy_happy_path)
 
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(IoTHubMessaging_LL_Destroy(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessaging_LL_Destroy(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(Lock_Deinit(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Lock_Deinit(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     // act
@@ -385,10 +385,10 @@ TEST_FUNCTION(IoTHubMessaging_Open_happy_path)
 
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG))
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(IoTHubMessaging_LL_Open((IOTHUB_MESSAGING_HANDLE)0X3333, TEST_IOTHUB_OPEN_COMPLETE_CALLBACK, (void*)0x4242));
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG))
         .IgnoreArgument(1);
 
     // act
@@ -409,7 +409,7 @@ TEST_FUNCTION(IoTHubMessaging_Open_Lock_fails)
 
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG))
         .IgnoreArgument(1)
         .SetReturn(LOCK_ERROR);
 
@@ -445,9 +445,9 @@ TEST_FUNCTION(IoTHubMessaging_Close_happy_path_thread_handle_null)
 
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG))
         .IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(IoTHubMessaging_LL_Close(TEST_IOTHUB_MESSAGING_HANDLE));
@@ -472,13 +472,12 @@ TEST_FUNCTION(IoTHubMessaging_Close_happy_path_thread_handle_not_null)
 
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(ThreadAPI_Join(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
-        .IgnoreAllArguments();
+    STRICT_EXPECTED_CALL(ThreadAPI_Join(IGNORED_ARG, IGNORED_ARG));
     STRICT_EXPECTED_CALL(IoTHubMessaging_LL_Close(TEST_IOTHUB_MESSAGING_HANDLE));
 
     // act
@@ -501,12 +500,11 @@ TEST_FUNCTION(IoTHubMessaging_Close_Lock_fails)
 
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG))
         .IgnoreArgument(1)
         .SetReturn(LOCK_ERROR);
 
-    STRICT_EXPECTED_CALL(ThreadAPI_Join(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
-        .IgnoreAllArguments();
+    STRICT_EXPECTED_CALL(ThreadAPI_Join(IGNORED_ARG, IGNORED_ARG));
     STRICT_EXPECTED_CALL(IoTHubMessaging_LL_Close(TEST_IOTHUB_MESSAGING_HANDLE));
 
     // act
@@ -539,10 +537,10 @@ TEST_FUNCTION(IoTHubMessaging_SetFeedbackMessageCallback_happy_path)
 
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG))
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(IoTHubMessaging_LL_SetFeedbackMessageCallback((IOTHUB_MESSAGING_HANDLE)0X3333, TEST_IOTHUB_FEEDBACK_MESSAGE_RECEIVED_CALLBACK, (void*)0x4242));
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG))
         .IgnoreArgument(1);
 
     // act
@@ -563,7 +561,7 @@ TEST_FUNCTION(IoTHubMessaging_SetFeedbackMessageCallback_Lock_fails)
 
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG))
         .IgnoreArgument(1)
         .SetReturn(LOCK_ERROR);
 
@@ -600,9 +598,9 @@ TEST_FUNCTION(IoTHubMessaging_SendAsync_happy_path)
 
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(ThreadAPI_Create(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
 
     /* If modules are re-enabled, re-enable this code and add testing_module paramater to this function
     if (testing_module == true)
@@ -613,7 +611,7 @@ TEST_FUNCTION(IoTHubMessaging_SendAsync_happy_path)
 
     STRICT_EXPECTED_CALL(IoTHubMessaging_LL_Send((IOTHUB_MESSAGING_HANDLE)0X3333, deviceId, TEST_IOTHUB_MESSAGE_HANDLE, TEST_IOTHUB_SEND_COMPLETE_CALLBACK, (void*)0x4242));
 
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
 
     // act
     IOTHUB_MESSAGING_RESULT result;
@@ -648,7 +646,7 @@ TEST_FUNCTION(IoTHubMessaging_SendAsync_happy_path_threadhandle_not_null)
 
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG))
         .IgnoreArgument(1);
 
     /* If modules are re-enabled, re-enable this code and add testing_module paramater to this function
@@ -659,7 +657,7 @@ TEST_FUNCTION(IoTHubMessaging_SendAsync_happy_path_threadhandle_not_null)
     */
     STRICT_EXPECTED_CALL(IoTHubMessaging_LL_Send((IOTHUB_MESSAGING_HANDLE)0X3333, deviceId, TEST_IOTHUB_MESSAGE_HANDLE, TEST_IOTHUB_SEND_COMPLETE_CALLBACK, (void*)0x4242));
 
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG))
         .IgnoreArgument(1);
 
     // act
@@ -691,7 +689,7 @@ TEST_FUNCTION(IoTHubMessaging_SendAsync_Lock_fails)
 
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG))
         .IgnoreArgument(1)
         .SetReturn(LOCK_ERROR);
 
@@ -725,13 +723,12 @@ TEST_FUNCTION(IoTHubMessaging_ThreadAPI_Create_fails)
 
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .IgnoreAllArguments()
+    STRICT_EXPECTED_CALL(ThreadAPI_Create(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
         .SetReturn(THREADAPI_ERROR);
 
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG))
         .IgnoreArgument(1);
 
     // act
@@ -813,9 +810,9 @@ TEST_FUNCTION(IoTHubMessaging_SetTrustedCert_success)
     IOTHUB_MESSAGING_CLIENT_HANDLE messagingClientHandle = IoTHubMessaging_Create(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubMessaging_LL_SetTrustedCert(IGNORED_PTR_ARG, TEST_TRUSTED_CERT));
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubMessaging_LL_SetTrustedCert(IGNORED_ARG, TEST_TRUSTED_CERT));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
 
     // act
     IOTHUB_MESSAGING_RESULT result;
@@ -835,7 +832,7 @@ TEST_FUNCTION(IoTHubMessaging_SetTrustedCert_Lock_fails)
     IOTHUB_MESSAGING_CLIENT_HANDLE messagingClientHandle = IoTHubMessaging_Create(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG)).SetReturn(LOCK_ERROR);
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG)).SetReturn(LOCK_ERROR);
 
     // act
     IOTHUB_MESSAGING_RESULT result;
@@ -855,9 +852,9 @@ TEST_FUNCTION(IoTHubMessaging_SetMaxSendQueueSize_success)
     IOTHUB_MESSAGING_CLIENT_HANDLE messagingClientHandle = IoTHubMessaging_Create(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubMessaging_LL_SetMaxSendQueueSize(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubMessaging_LL_SetMaxSendQueueSize(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_ARG));
 
     // act
     IOTHUB_MESSAGING_RESULT result;

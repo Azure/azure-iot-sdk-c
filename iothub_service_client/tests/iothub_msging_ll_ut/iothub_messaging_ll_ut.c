@@ -225,17 +225,17 @@ void umock_free_BINARY_DATA(BINARY_DATA* value)
 static IOTHUB_MESSAGING_HANDLE create_messaging_handle()
 {
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .SetReturn(TEST_IOTHUB_MESSAGING_INSTANCE);
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_HOSTNAME))
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_HOSTNAME))
         .CopyOutArgumentBuffer_destination(&TEST_HOSTNAME, sizeof(TEST_HOSTNAME));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_IOTHUBNAME))
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_IOTHUBNAME))
         .CopyOutArgumentBuffer_destination(&TEST_IOTHUBNAME, sizeof(TEST_IOTHUBNAME));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_IOTHUBSUFFIX))
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_IOTHUBSUFFIX))
         .CopyOutArgumentBuffer_destination(&TEST_IOTHUBSUFFIX, sizeof(TEST_IOTHUBSUFFIX));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_SHAREDACCESSKEY))
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_SHAREDACCESSKEY))
         .CopyOutArgumentBuffer_destination(&TEST_SHAREDACCESSKEY, sizeof(TEST_SHAREDACCESSKEY));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_SHAREDACCESSKEYNAME))
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_SHAREDACCESSKEYNAME))
         .CopyOutArgumentBuffer_destination(&TEST_SHAREDACCESSKEYNAME, sizeof(TEST_SHAREDACCESSKEYNAME));
     STRICT_EXPECTED_CALL(singlylinkedlist_create());
 
@@ -252,85 +252,85 @@ static void* saved_on_message_receiver_context;
 static void set_IoTHubMessaging_LL_Open_expected_calls()
 {
     // createSendTargetAddress
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .SetReturn(TEST_SEND_TARGET_ADDRESS_BUFFER);
     // createReceiveTargetAddress
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .SetReturn(TEST_RECEIVE_TARGET_ADDRESS_BUFFER);
     // createAuthCid
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .SetReturn(TEST_AUTH_CID_BUFFER);
     // createSasToken
-    STRICT_EXPECTED_CALL(STRING_construct(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_construct(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_construct(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(SASToken_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_construct(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_construct(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_construct(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(SASToken_Create(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG))
         .CopyOutArgumentBuffer_destination(&TEST_SAS_TOKEN, sizeof(TEST_SAS_TOKEN));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
     // back to IoTHubMessaging_LL_Open
     STRICT_EXPECTED_CALL(saslplain_get_interface());
-    STRICT_EXPECTED_CALL(saslmechanism_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(saslmechanism_create(IGNORED_ARG, IGNORED_ARG));
     STRICT_EXPECTED_CALL(platform_get_default_tlsio());
-    STRICT_EXPECTED_CALL(xio_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(xio_create(IGNORED_ARG, IGNORED_ARG));
     STRICT_EXPECTED_CALL(saslclientio_get_interface_description());
-    STRICT_EXPECTED_CALL(xio_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(connection_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(session_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(session_set_incoming_window(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(session_set_outgoing_window(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(messaging_create_source(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(messaging_create_target(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(link_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(xio_create(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(connection_create(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(session_create(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(session_set_incoming_window(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(session_set_outgoing_window(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(messaging_create_source(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(messaging_create_target(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(link_create(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
 
     // attachServiceClientTypeToLink
     STRICT_EXPECTED_CALL(amqpvalue_create_map());
-    STRICT_EXPECTED_CALL(amqpvalue_create_symbol(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(amqpvalue_create_string(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(amqpvalue_set_map_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(link_set_attach_properties(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(amqpvalue_create_symbol(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(amqpvalue_create_string(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(amqpvalue_set_map_value(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(link_set_attach_properties(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_ARG));
 
     // back to IoTHubMessaging_LL_Open
-    STRICT_EXPECTED_CALL(link_set_snd_settle_mode(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(messagesender_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(link_set_snd_settle_mode(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(messagesender_create(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
         .CaptureArgumentValue_on_message_sender_state_changed(&saved_on_message_sender_state_changed)
         .CaptureArgumentValue_context(&saved_messagesender_create_context);
-    STRICT_EXPECTED_CALL(messagesender_open(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(messaging_create_source(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(messaging_create_target(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(link_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(messagesender_open(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(messaging_create_source(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(messaging_create_target(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(link_create(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
     
     // attachServiceClientTypeToLink
     STRICT_EXPECTED_CALL(amqpvalue_create_map());
-    STRICT_EXPECTED_CALL(amqpvalue_create_symbol(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(amqpvalue_create_string(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(amqpvalue_set_map_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(link_set_attach_properties(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(amqpvalue_create_symbol(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(amqpvalue_create_string(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(amqpvalue_set_map_value(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(link_set_attach_properties(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_ARG));
 
     // back to IoTHubMessaging_LL_Open
-    STRICT_EXPECTED_CALL(link_set_rcv_settle_mode(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(messagereceiver_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(link_set_rcv_settle_mode(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(messagereceiver_create(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
         .CaptureArgumentValue_on_message_receiver_state_changed(&saved_on_message_receiver_state_changed)
         .CaptureArgumentValue_context(&saved_messagereceiver_create_context);
-    STRICT_EXPECTED_CALL(messagereceiver_open(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(messagereceiver_open(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
         .CaptureArgumentValue_on_message_received(&saved_on_message_receiver_callback)
         .CaptureArgumentValue_callback_context(&saved_on_message_receiver_context);
-    STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 }
 
 static bool is_open_complete_callback_fired;
@@ -358,58 +358,58 @@ static void set_IoTHubMessaging_LL_Send_expected_calls()
 {
     size_t number_of_arguments = 1;
 
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .SetReturn(TEST_DEVICE_DESTINATION_BUFFER);
-    STRICT_EXPECTED_CALL(IoTHubMessage_GetContentType(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_GetContentType(IGNORED_ARG))
         .CallCannotFail();
-    STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
     STRICT_EXPECTED_CALL(message_create());
-    STRICT_EXPECTED_CALL(amqpvalue_create_string(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(message_add_body_amqp_data(IGNORED_PTR_ARG, TEST_BINARY_DATA_INST))
+    STRICT_EXPECTED_CALL(amqpvalue_create_string(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(message_add_body_amqp_data(IGNORED_ARG, TEST_BINARY_DATA_INST))
         .CallCannotFail();
-    STRICT_EXPECTED_CALL(message_get_properties(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(message_get_properties(IGNORED_ARG, IGNORED_ARG))
         .CopyOutArgumentBuffer_properties(&TEST_PROPERTIES_HANDLE_NULL, sizeof(TEST_PROPERTIES_HANDLE_NULL));
     STRICT_EXPECTED_CALL(properties_create());
-    STRICT_EXPECTED_CALL(IoTHubMessage_GetMessageId(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_GetMessageId(IGNORED_ARG))
         .CallCannotFail()
         .SetReturn(TEST_CONST_CHAR_PTR);
-    STRICT_EXPECTED_CALL(amqpvalue_create_string(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(properties_set_message_id(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubMessage_GetCorrelationId(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(amqpvalue_create_string(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(properties_set_message_id(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubMessage_GetCorrelationId(IGNORED_ARG))
         .CallCannotFail()
         .SetReturn(TEST_CONST_CHAR_PTR);
-    STRICT_EXPECTED_CALL(amqpvalue_create_string(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(properties_set_correlation_id(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(properties_set_to(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(message_set_properties(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(properties_destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(amqpvalue_create_string(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(properties_set_correlation_id(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(properties_set_to(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(message_set_properties(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(properties_destroy(IGNORED_ARG));
     STRICT_EXPECTED_CALL(IoTHubMessage_Properties(TEST_IOTHUB_MESSAGE_HANDLE))
         .CallCannotFail()
         .SetReturn(TEST_MAP_HANDLE);
-    STRICT_EXPECTED_CALL(Map_GetInternals(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Map_GetInternals(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
         .CopyOutArgumentBuffer_keys(&pTEST_MAP_KEYS, sizeof(pTEST_MAP_KEYS))
         .CopyOutArgumentBuffer_values(&pTEST_MAP_VALUES, sizeof(pTEST_MAP_VALUES))
         .CopyOutArgumentBuffer_count(&number_of_arguments, sizeof(size_t))
         .SetReturn(MAP_OK);
     STRICT_EXPECTED_CALL(amqpvalue_create_map());
-    STRICT_EXPECTED_CALL(amqpvalue_create_string(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(amqpvalue_create_string(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(amqpvalue_set_map_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(message_set_application_properties(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) // SEND_CALLBACK_DATA
+    STRICT_EXPECTED_CALL(amqpvalue_create_string(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(amqpvalue_create_string(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(amqpvalue_set_map_value(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(message_set_application_properties(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG)) // SEND_CALLBACK_DATA
         .SetReturn(TEST_SEND_CALLBACK_DATA_BUFFER);
-    STRICT_EXPECTED_CALL(singlylinkedlist_add(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(messagesender_send_async(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(singlylinkedlist_add(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(messagesender_send_async(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
         .CaptureArgumentValue_on_message_send_complete(&saved_on_message_send_complete_callback)
         .CaptureArgumentValue_callback_context(&saved_on_message_send_complete_context);
-    STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(message_destroy(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(message_destroy(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 }
 
 typedef struct SEND_COMPLETE_INFO_STRUCT
@@ -495,12 +495,12 @@ static void reset_saved_feedback_message_received()
 
 static void set_IoTHubMessaging_LL_FeedbackMessageReceived_expected_calls(int array_count, char** feedback_record_status)
 {
-    STRICT_EXPECTED_CALL(message_get_body_amqp_data_in_place(IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_parse_string(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_value_get_array(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_array_get_count(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(message_get_body_amqp_data_in_place(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_parse_string(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_value_get_array(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_array_get_count(IGNORED_ARG))
         .SetReturn(array_count);
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .SetReturn(TEST_IOTHUB_SERVICE_FEEDBACK_BATCH_BUFFER);
 
 
@@ -511,10 +511,10 @@ static void set_IoTHubMessaging_LL_FeedbackMessageReceived_expected_calls(int ar
 
     for (int i = 0; i < array_count; i++)
     {
-        STRICT_EXPECTED_CALL(json_array_get_object(TEST_JSON_ARRAY, IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(json_array_get_object(TEST_JSON_ARRAY, IGNORED_ARG))
             .SetReturn(TEST_JSON_OBJECT);
 
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
             .SetReturn(TEST_IOTHUB_SERVICE_FEEDBACK_RECORD_BUFFER + i * sizeof(IOTHUB_SERVICE_FEEDBACK_RECORD));
         STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_FEEDBACK_RECORD_KEY_DEVICE_ID))
             .CallCannotFail()
@@ -531,29 +531,29 @@ static void set_IoTHubMessaging_LL_FeedbackMessageReceived_expected_calls(int ar
         STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_FEEDBACK_RECORD_KEY_ORIGINAL_MESSAGE_ID))
             .CallCannotFail()
             .SetReturn("originalMessageId");
-        STRICT_EXPECTED_CALL(singlylinkedlist_add(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(singlylinkedlist_add(IGNORED_ARG, IGNORED_ARG))
             .CallCannotFail();
     }
 
     STRICT_EXPECTED_CALL(messaging_delivery_accepted())
         .CallCannotFail();
-    STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_ARG))
         .CallCannotFail();
     for (int i = 0; i < array_count; i++)
     {
-        STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_ARG))
             .CallCannotFail()
             .SetReturn(TEST_IOTHUB_SERVICE_FEEDBACK_RECORD_BUFFER + i * sizeof(IOTHUB_SERVICE_FEEDBACK_RECORD));
-        STRICT_EXPECTED_CALL(singlylinkedlist_get_next_item(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(singlylinkedlist_get_next_item(IGNORED_ARG))
             .CallCannotFail()
             .SetReturn(i < (array_count - 1) ? TEST_LIST_ITEM_HANDLE : NULL);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
     }
-    STRICT_EXPECTED_CALL(singlylinkedlist_destroy(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_array_clear(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(singlylinkedlist_destroy(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_array_clear(IGNORED_ARG))
         .CallCannotFail();
-    STRICT_EXPECTED_CALL(json_value_free(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(json_value_free(IGNORED_ARG));
 }
 
 BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
@@ -584,7 +584,6 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         REGISTER_UMOCK_ALIAS_TYPE(LINK_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(MESSAGE_SENDER_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(MESSAGE_RECEIVER_HANDLE, void*);
-        REGISTER_UMOCK_ALIAS_TYPE(LOGGER_LOG, void*);
         REGISTER_UMOCK_ALIAS_TYPE(ON_LINK_ATTACHED, void*);
         REGISTER_UMOCK_ALIAS_TYPE(ON_MESSAGE_SENDER_STATE_CHANGED, void*);
         REGISTER_UMOCK_ALIAS_TYPE(ON_MESSAGE_RECEIVER_STATE_CHANGED, void*);
@@ -784,17 +783,17 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
     {
         // arrange
         umock_c_reset_all_calls();
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
             .SetReturn(TEST_IOTHUB_MESSAGING_INSTANCE);
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_HOSTNAME))
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_HOSTNAME))
             .CopyOutArgumentBuffer_destination(&TEST_HOSTNAME, sizeof(TEST_HOSTNAME));
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_IOTHUBNAME))
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_IOTHUBNAME))
             .CopyOutArgumentBuffer_destination(&TEST_IOTHUBNAME, sizeof(TEST_IOTHUBNAME));
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_IOTHUBSUFFIX))
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_IOTHUBSUFFIX))
             .CopyOutArgumentBuffer_destination(&TEST_IOTHUBSUFFIX, sizeof(TEST_IOTHUBSUFFIX));
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_SHAREDACCESSKEY))
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_SHAREDACCESSKEY))
             .CopyOutArgumentBuffer_destination(&TEST_SHAREDACCESSKEY, sizeof(TEST_SHAREDACCESSKEY));
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_SHAREDACCESSKEYNAME))
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_SHAREDACCESSKEYNAME))
             .CopyOutArgumentBuffer_destination(&TEST_SHAREDACCESSKEYNAME, sizeof(TEST_SHAREDACCESSKEYNAME));
         STRICT_EXPECTED_CALL(singlylinkedlist_create());
 
@@ -815,17 +814,17 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         ASSERT_ARE_EQUAL(int, 0, umock_c_negative_tests_init());
 
         umock_c_reset_all_calls();
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
             .SetReturn(TEST_IOTHUB_MESSAGING_INSTANCE);
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_HOSTNAME))
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_HOSTNAME))
             .CopyOutArgumentBuffer_destination(&TEST_HOSTNAME, sizeof(TEST_HOSTNAME));
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_IOTHUBNAME))
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_IOTHUBNAME))
             .CopyOutArgumentBuffer_destination(&TEST_IOTHUBNAME, sizeof(TEST_IOTHUBNAME));
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_IOTHUBSUFFIX))
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_IOTHUBSUFFIX))
             .CopyOutArgumentBuffer_destination(&TEST_IOTHUBSUFFIX, sizeof(TEST_IOTHUBSUFFIX));
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_SHAREDACCESSKEY))
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_SHAREDACCESSKEY))
             .CopyOutArgumentBuffer_destination(&TEST_SHAREDACCESSKEY, sizeof(TEST_SHAREDACCESSKEY));
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_SHAREDACCESSKEYNAME))
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_SHAREDACCESSKEYNAME))
             .CopyOutArgumentBuffer_destination(&TEST_SHAREDACCESSKEYNAME, sizeof(TEST_SHAREDACCESSKEYNAME));
         STRICT_EXPECTED_CALL(singlylinkedlist_create());
 
@@ -872,15 +871,15 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         IOTHUB_MESSAGING_HANDLE handle = create_messaging_handle();
 
         umock_c_reset_all_calls();
-        STRICT_EXPECTED_CALL(singlylinkedlist_remove_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(singlylinkedlist_destroy(IGNORED_PTR_ARG)); // send_callback_data
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)); // hostname
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)); // iothubName
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)); // iothubSuffix
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)); // sharedAccessKey
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)); // keyName
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)); // trusted_cert
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)); // messHandle
+        STRICT_EXPECTED_CALL(singlylinkedlist_remove_if(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(singlylinkedlist_destroy(IGNORED_ARG)); // send_callback_data
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)); // hostname
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)); // iothubName
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)); // iothubSuffix
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)); // sharedAccessKey
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)); // keyName
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)); // trusted_cert
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)); // messHandle
 
         // act
         IoTHubMessaging_LL_Destroy(handle);
@@ -907,79 +906,79 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
 
         umock_c_reset_all_calls();
         // createSendTargetAddress
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
             .SetReturn(TEST_SEND_TARGET_ADDRESS_BUFFER);
         // createReceiveTargetAddress
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
             .SetReturn(TEST_RECEIVE_TARGET_ADDRESS_BUFFER);
         // createAuthCid
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
             .SetReturn(TEST_AUTH_CID_BUFFER);
         // createSasToken
-        STRICT_EXPECTED_CALL(STRING_construct(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(STRING_construct(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(STRING_construct(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(SASToken_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_construct(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(STRING_construct(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(STRING_construct(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(SASToken_Create(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG))
             .CopyOutArgumentBuffer_destination(&TEST_SAS_TOKEN, sizeof(TEST_SAS_TOKEN));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
         // back to IoTHubMessaging_LL_Open
         STRICT_EXPECTED_CALL(saslplain_get_interface());
-        STRICT_EXPECTED_CALL(saslmechanism_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(saslmechanism_create(IGNORED_ARG, IGNORED_ARG));
         STRICT_EXPECTED_CALL(platform_get_default_tlsio());
-        STRICT_EXPECTED_CALL(xio_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(xio_create(IGNORED_ARG, IGNORED_ARG));
         STRICT_EXPECTED_CALL(saslclientio_get_interface_description());
-        STRICT_EXPECTED_CALL(xio_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(connection_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(session_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(session_set_incoming_window(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(session_set_outgoing_window(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(messaging_create_source(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(messaging_create_target(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(link_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(xio_create(IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(connection_create(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(session_create(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(session_set_incoming_window(IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(session_set_outgoing_window(IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(messaging_create_source(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(messaging_create_target(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(link_create(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
 
         // attachServiceClientTypeToLink
         STRICT_EXPECTED_CALL(amqpvalue_create_map());
-        STRICT_EXPECTED_CALL(amqpvalue_create_symbol(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(amqpvalue_create_string(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(amqpvalue_set_map_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(link_set_attach_properties(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(amqpvalue_create_symbol(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(amqpvalue_create_string(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(amqpvalue_set_map_value(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(link_set_attach_properties(IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_ARG));
 
         // back to IoTHubMessaging_LL_Open
-        STRICT_EXPECTED_CALL(link_set_snd_settle_mode(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(messagesender_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(messagesender_open(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(messaging_create_source(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(messaging_create_target(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(link_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(link_set_snd_settle_mode(IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(messagesender_create(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(messagesender_open(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(messaging_create_source(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(messaging_create_target(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(link_create(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
         
         // attachServiceClientTypeToLink
         STRICT_EXPECTED_CALL(amqpvalue_create_map());
-        STRICT_EXPECTED_CALL(amqpvalue_create_symbol(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(amqpvalue_create_string(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(amqpvalue_set_map_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(link_set_attach_properties(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(amqpvalue_create_symbol(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(amqpvalue_create_string(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(amqpvalue_set_map_value(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(link_set_attach_properties(IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_ARG));
 
         // back to IoTHubMessaging_LL_Open
-        STRICT_EXPECTED_CALL(link_set_rcv_settle_mode(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(messagereceiver_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(messagereceiver_open(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(link_set_rcv_settle_mode(IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(messagereceiver_create(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(messagereceiver_open(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
         //act
         IOTHUB_MESSAGING_RESULT result = IoTHubMessaging_LL_Open(iothub_messaging_handle, NULL, NULL);
@@ -1045,20 +1044,20 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         ASSERT_ARE_EQUAL(int, 0, open_messaging_handle(iothub_messaging_handle, true));
 
         umock_c_reset_all_calls();
-        STRICT_EXPECTED_CALL(messagesender_destroy(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(messagereceiver_destroy(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(messagesender_destroy(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(messagereceiver_destroy(IGNORED_ARG));
 
-        STRICT_EXPECTED_CALL(link_destroy(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(link_destroy(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(link_destroy(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(link_destroy(IGNORED_ARG));
 
-        STRICT_EXPECTED_CALL(session_destroy(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(connection_destroy(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(xio_destroy(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(xio_destroy(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(saslmechanism_destroy(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(session_destroy(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(connection_destroy(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(xio_destroy(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(xio_destroy(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(saslmechanism_destroy(IGNORED_ARG));
 
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
         // act
         IoTHubMessaging_LL_Close(iothub_messaging_handle);
@@ -1241,7 +1240,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         ASSERT_ARE_EQUAL(int, 0, open_messaging_handle(iothub_messaging_handle, true));
 
         umock_c_reset_all_calls();
-        STRICT_EXPECTED_CALL(connection_dowork(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(connection_dowork(IGNORED_ARG));
 
         //act
         IoTHubMessaging_LL_DoWork(iothub_messaging_handle);
@@ -1415,8 +1414,8 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         (void)IoTHubMessaging_LL_Send(iothub_messaging_handle, TEST_DEVICE_ID, TEST_IOTHUB_MESSAGE_HANDLE, NULL, NULL);
 
         umock_c_reset_all_calls();
-        STRICT_EXPECTED_CALL(singlylinkedlist_remove_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(singlylinkedlist_remove_if(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
         //act
         saved_on_message_send_complete_callback(saved_on_message_send_complete_context, MESSAGE_SEND_OK, TEST_AMQP_VALUE);
@@ -1450,8 +1449,8 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGING_OK, sendApiResult);
 
         umock_c_reset_all_calls();
-        STRICT_EXPECTED_CALL(singlylinkedlist_remove_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(singlylinkedlist_remove_if(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
         //act
         saved_on_message_send_complete_callback(saved_on_message_send_complete_context, MESSAGE_SEND_OK, TEST_AMQP_VALUE);
@@ -1500,12 +1499,12 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         umock_c_reset_all_calls();
         int array_count = 2;
 
-        STRICT_EXPECTED_CALL(message_get_body_amqp_data_in_place(IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(json_parse_string(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(json_value_get_array(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(json_array_get_count(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(message_get_body_amqp_data_in_place(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(json_parse_string(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(json_value_get_array(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(json_array_get_count(IGNORED_ARG))
             .SetReturn(array_count);
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
             .SetReturn(TEST_IOTHUB_SERVICE_FEEDBACK_BATCH_BUFFER);
 
 
@@ -1515,10 +1514,10 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
 
         for (int i = 0; i < array_count; i++)
         {
-            STRICT_EXPECTED_CALL(json_array_get_object(TEST_JSON_ARRAY, IGNORED_NUM_ARG))
+            STRICT_EXPECTED_CALL(json_array_get_object(TEST_JSON_ARRAY, IGNORED_ARG))
                 .SetReturn(TEST_JSON_OBJECT);
 
-            STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+            STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
                 .SetReturn(TEST_IOTHUB_SERVICE_FEEDBACK_RECORD_BUFFER + i * sizeof(IOTHUB_SERVICE_FEEDBACK_RECORD));
             STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_FEEDBACK_RECORD_KEY_DEVICE_ID))
                 .SetReturn("deviceId");
@@ -1530,23 +1529,23 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
                 .SetReturn("time");
             STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_FEEDBACK_RECORD_KEY_ORIGINAL_MESSAGE_ID))
                 .SetReturn("originalMessageId");
-            STRICT_EXPECTED_CALL(singlylinkedlist_add(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(singlylinkedlist_add(IGNORED_ARG, IGNORED_ARG));
         }
 
         STRICT_EXPECTED_CALL(messaging_delivery_accepted());
-        STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_ARG));
         for (int i = 0; i < array_count; i++)
         {
-            STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_ARG))
                 .SetReturn(TEST_IOTHUB_SERVICE_FEEDBACK_RECORD_BUFFER + i * sizeof(IOTHUB_SERVICE_FEEDBACK_RECORD));
-            STRICT_EXPECTED_CALL(singlylinkedlist_get_next_item(IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL(singlylinkedlist_get_next_item(IGNORED_ARG))
                 .SetReturn(i < (array_count - 1) ? TEST_LIST_ITEM_HANDLE : NULL);
-            STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
         }
-        STRICT_EXPECTED_CALL(singlylinkedlist_destroy(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(json_array_clear(IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(json_value_free(IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(singlylinkedlist_destroy(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(json_array_clear(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(json_value_free(IGNORED_ARG));
 
         //act
         void* amqp_result = (void*)saved_on_message_receiver_callback(iothub_messaging_handle, TEST_MESSAGE_HANDLE);
@@ -1749,7 +1748,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         IOTHUB_MESSAGING_HANDLE iothub_messaging_handle = create_messaging_handle();
 
         umock_c_reset_all_calls();
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_TRUSTED_CERT));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_TRUSTED_CERT));
 
         //act
         IOTHUB_MESSAGING_RESULT result = IoTHubMessaging_LL_SetTrustedCert(iothub_messaging_handle, TEST_TRUSTED_CERT);
@@ -1768,8 +1767,8 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         IOTHUB_MESSAGING_RESULT result = IoTHubMessaging_LL_SetTrustedCert(iothub_messaging_handle, TEST_TRUSTED_CERT);
 
         umock_c_reset_all_calls();
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_TRUSTED_CERT));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_TRUSTED_CERT));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
         //act
         result = IoTHubMessaging_LL_SetTrustedCert(iothub_messaging_handle, TEST_TRUSTED_CERT);

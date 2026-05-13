@@ -213,7 +213,7 @@ TEST_FUNCTION(IoTHubClient_GetSendStatus_Test)
 {
     //arrange
     IOTHUB_CLIENT_STATUS iothub_status;
-    STRICT_EXPECTED_CALL(IoTHubClientCore_GetSendStatus(IGNORED_PTR_ARG, &iothub_status));
+    STRICT_EXPECTED_CALL(IoTHubClientCore_GetSendStatus(IGNORED_ARG, &iothub_status));
 
     //act
     IOTHUB_CLIENT_RESULT result = IoTHubClient_GetSendStatus(TEST_IOTHUB_CLIENT_HANDLE, &iothub_status);

@@ -287,8 +287,25 @@ if(${use_installed_dependencies})
         endif ()
     endif ()
 else ()
-    # c-utility provides all test deps (c-build-tools, macro-utils-c,
-    # c-logging, umock-c, ctest, testrunnerswitcher) from its own deps/.
+    # Add top-level deps BEFORE c-utility so that c-utility sees the targets
+    # already defined and skips its own nested copies.  This allows customers
+    # to build with just "git submodule update --init" (non-recursive).
+    add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/deps/c-build-tools)
+    set_default_build_options()
+
+    add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/deps/azure-macro-utils-c)
+    add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/deps/c-logging)
+    # c-logging creates c_logging_v2; create alias so guard checks pass.
+    if (NOT TARGET c_logging)
+        add_library(c_logging ALIAS c_logging_v2)
+    endif()
+
+    if (${original_run_e2e_tests} OR ${original_run_unittests} OR ${run_sfc_tests})
+        add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/deps/ctest)
+        add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/deps/c-testrunnerswitcher)
+        add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/deps/umock-c)
+    endif()
+
     add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/c-utility)
 
     # Enable the conformant preprocessor at top-level scope so that all
@@ -299,9 +316,9 @@ else ()
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /Zc:preprocessor /wd5105 /wd4200")
     endif()
 
-    # Point legacy include-path variables at c-utility's copies of the deps.
-    set(MACRO_UTILS_INC_FOLDER ${CMAKE_CURRENT_LIST_DIR}/c-utility/deps/macro-utils-c/inc CACHE INTERNAL "" FORCE)
-    set(UMOCK_C_INC_FOLDER ${CMAKE_CURRENT_LIST_DIR}/c-utility/deps/umock-c/inc CACHE INTERNAL "" FORCE)
+    # Point legacy include-path variables at top-level copies of the deps.
+    set(MACRO_UTILS_INC_FOLDER ${CMAKE_CURRENT_LIST_DIR}/deps/azure-macro-utils-c/inc CACHE INTERNAL "" FORCE)
+    set(UMOCK_C_INC_FOLDER ${CMAKE_CURRENT_LIST_DIR}/deps/umock-c/inc CACHE INTERNAL "" FORCE)
 
     # Create forwarding headers so existing code that includes
     # "azure_macro_utils/macro_utils.h" transparently picks up
@@ -317,11 +334,9 @@ else ()
     include_directories(${UMOCK_C_INC_FOLDER})
 
     # c-logging v2 headers are needed by the new c-utility's xlogging.h.
-    # Targets that use include_directories() instead of linking aziotsharedutil
-    # (e.g. serializer) need this path explicitly.
-    include_directories(${CMAKE_CURRENT_LIST_DIR}/c-utility/deps/c-logging/v2/inc)
+    include_directories(${CMAKE_CURRENT_LIST_DIR}/deps/c-logging/v2/inc)
 
-    # Parson (only non-test dep still in deps/)
+    # Parson
     add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/deps)
 
     if (${use_amqp})

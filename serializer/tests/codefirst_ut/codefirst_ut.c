@@ -49,11 +49,11 @@ static void my_gballoc_free(void * t)
 #include "c_bool_size.h"
 
 
-TEST_DEFINE_ENUM_TYPE(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_RESULT_VALUES);
+TEST_DEFINE_ENUM_TYPE_WITHOUT_INVALID(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_RESULT_VALUES);
 IMPLEMENT_UMOCK_C_ENUM_TYPE(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_RESULT_VALUES);
-//TEST_DEFINE_ENUM_TYPE(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_RESULT_VALUES);
+//TEST_DEFINE_ENUM_TYPE_WITHOUT_INVALID(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_RESULT_VALUES);
 IMPLEMENT_UMOCK_C_ENUM_TYPE(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_RESULT_VALUES);
-//TEST_DEFINE_ENUM_TYPE(SCHEMA_RESULT, SCHEMA_RESULT_VALUES);
+//TEST_DEFINE_ENUM_TYPE_WITHOUT_INVALID(SCHEMA_RESULT, SCHEMA_RESULT_VALUES);
 IMPLEMENT_UMOCK_C_ENUM_TYPE(SCHEMA_RESULT, SCHEMA_RESULT_VALUES);
 
 MU_DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
@@ -512,9 +512,9 @@ static DEVICE_RESULT my_Device_CancelTransaction(TRANSACTION_HANDLE transactionH
     return DEVICE_OK;
 }
 
-TEST_DEFINE_ENUM_TYPE(CODEFIRST_RESULT, CODEFIRST_RESULT_VALUES);
+TEST_DEFINE_ENUM_TYPE_WITHOUT_INVALID(CODEFIRST_RESULT, CODEFIRST_RESULT_VALUES);
 IMPLEMENT_UMOCK_C_ENUM_TYPE(CODEFIRST_RESULT, CODEFIRST_RESULT_VALUES);
-TEST_DEFINE_ENUM_TYPE(DEVICE_RESULT, DEVICE_RESULT_VALUES);
+TEST_DEFINE_ENUM_TYPE_WITHOUT_INVALID(DEVICE_RESULT, DEVICE_RESULT_VALUES);
 IMPLEMENT_UMOCK_C_ENUM_TYPE(DEVICE_RESULT, DEVICE_RESULT_VALUES);
 
 static TEST_MUTEX_HANDLE g_testByTest;
@@ -1709,17 +1709,17 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         // arrange
         (void)CodeFirst_Init(NULL);
         size_t zero = 0;
-        STRICT_EXPECTED_CALL(Schema_GetModelDesiredPropertyCount(TEST_MODEL_HANDLE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetModelDesiredPropertyCount(TEST_MODEL_HANDLE, IGNORED_ARG))
             .CopyOutArgumentBuffer_desiredPropertyCount(&zero, sizeof(zero));
-        STRICT_EXPECTED_CALL(Schema_GetModelModelCount(TEST_MODEL_HANDLE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetModelModelCount(TEST_MODEL_HANDLE, IGNORED_ARG))
             .CopyOutArgumentBuffer_modelCount(&zero, sizeof(zero));
-        STRICT_EXPECTED_CALL(Device_Create(TEST_MODEL_HANDLE, CodeFirst_InvokeAction, TEST_CALLBACK_CONTEXT, CodeFirst_InvokeMethod, TEST_CALLBACK_CONTEXT, false, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_Create(TEST_MODEL_HANDLE, CodeFirst_InvokeAction, TEST_CALLBACK_CONTEXT, CodeFirst_InvokeMethod, TEST_CALLBACK_CONTEXT, false, IGNORED_ARG))
             .IgnoreArgument_deviceHandle()
             .IgnoreArgument_methodCallbackContext()
             .IgnoreArgument_callbackUserContext();
 
 
-        STRICT_EXPECTED_CALL(Schema_AddDeviceRef(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_AddDeviceRef(IGNORED_ARG))
             .IgnoreArgument(1);
 
         // act
@@ -1739,16 +1739,16 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         // arrange
         (void)CodeFirst_Init(NULL);
         size_t zero = 0;
-        STRICT_EXPECTED_CALL(Schema_GetModelDesiredPropertyCount(TEST_MODEL_HANDLE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetModelDesiredPropertyCount(TEST_MODEL_HANDLE, IGNORED_ARG))
             .CopyOutArgumentBuffer_desiredPropertyCount(&zero, sizeof(zero));
-        STRICT_EXPECTED_CALL(Schema_GetModelModelCount(TEST_MODEL_HANDLE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetModelModelCount(TEST_MODEL_HANDLE, IGNORED_ARG))
             .CopyOutArgumentBuffer_modelCount(&zero, sizeof(zero));
 
-        STRICT_EXPECTED_CALL(Device_Create(TEST_MODEL_HANDLE, CodeFirst_InvokeAction, TEST_CALLBACK_CONTEXT, CodeFirst_InvokeMethod, TEST_CALLBACK_CONTEXT, false, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_Create(TEST_MODEL_HANDLE, CodeFirst_InvokeAction, TEST_CALLBACK_CONTEXT, CodeFirst_InvokeMethod, TEST_CALLBACK_CONTEXT, false, IGNORED_ARG))
             .IgnoreArgument_deviceHandle()
             .IgnoreArgument_methodCallbackContext()
             .IgnoreArgument_callbackUserContext();
-        STRICT_EXPECTED_CALL(Schema_AddDeviceRef(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_AddDeviceRef(IGNORED_ARG))
             .IgnoreArgument(1);
 
         // act
@@ -1768,16 +1768,16 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         // arrange
         (void)CodeFirst_Init(NULL);
         size_t zero = 0;
-        STRICT_EXPECTED_CALL(Schema_GetModelDesiredPropertyCount(TEST_MODEL_HANDLE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetModelDesiredPropertyCount(TEST_MODEL_HANDLE, IGNORED_ARG))
             .CopyOutArgumentBuffer_desiredPropertyCount(&zero, sizeof(zero));
-        STRICT_EXPECTED_CALL(Schema_GetModelModelCount(TEST_MODEL_HANDLE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetModelModelCount(TEST_MODEL_HANDLE, IGNORED_ARG))
             .CopyOutArgumentBuffer_modelCount(&zero, sizeof(zero));
 
-        STRICT_EXPECTED_CALL(Device_Create(TEST_MODEL_HANDLE, CodeFirst_InvokeAction, TEST_CALLBACK_CONTEXT, CodeFirst_InvokeMethod, TEST_CALLBACK_CONTEXT, true, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_Create(TEST_MODEL_HANDLE, CodeFirst_InvokeAction, TEST_CALLBACK_CONTEXT, CodeFirst_InvokeMethod, TEST_CALLBACK_CONTEXT, true, IGNORED_ARG))
             .IgnoreArgument_deviceHandle()
             .IgnoreArgument_methodCallbackContext()
             .IgnoreArgument_callbackUserContext();
-        STRICT_EXPECTED_CALL(Schema_AddDeviceRef(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_AddDeviceRef(IGNORED_ARG))
             .IgnoreArgument(1);
 
         // act
@@ -1796,7 +1796,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
     {
         // arrange
         (void)CodeFirst_Init(NULL);
-        STRICT_EXPECTED_CALL(Device_Create(TEST_MODEL_HANDLE, CodeFirst_InvokeAction, TEST_CALLBACK_CONTEXT, CodeFirst_InvokeMethod, TEST_CALLBACK_CONTEXT, false, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_Create(TEST_MODEL_HANDLE, CodeFirst_InvokeAction, TEST_CALLBACK_CONTEXT, CodeFirst_InvokeMethod, TEST_CALLBACK_CONTEXT, false, IGNORED_ARG))
             .IgnoreArgument_deviceHandle()
             .IgnoreArgument_methodCallbackContext()
             .IgnoreArgument_callbackUserContext()
@@ -1847,12 +1847,12 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_allReflected, 1, false);
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(Schema_GetModelDesiredPropertyCount(TEST_MODEL_HANDLE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetModelDesiredPropertyCount(TEST_MODEL_HANDLE, IGNORED_ARG))
             .IgnoreArgument_desiredPropertyCount(); /*0 desired properties*/
-        STRICT_EXPECTED_CALL(Schema_GetModelModelCount(TEST_MODEL_HANDLE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetModelModelCount(TEST_MODEL_HANDLE, IGNORED_ARG))
             .IgnoreArgument_modelCount(); /*0 model in model*/
-        STRICT_EXPECTED_CALL(Schema_ReleaseDeviceRef(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(Schema_DestroyIfUnused(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(Schema_ReleaseDeviceRef(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(Schema_DestroyIfUnused(IGNORED_ARG));
         STRICT_EXPECTED_CALL(Device_Destroy(TEST_DEVICE_HANDLE));
 
         // act
@@ -1900,19 +1900,19 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         STRICT_EXPECTED_CALL(Device_StartTransaction(TEST_DEVICE_HANDLE));
         STRICT_EXPECTED_CALL(STRING_new());
         STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE));
-        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_handle()
             .IgnoreArgument_s2();
-        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_PTR_ARG, 0.0));
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_ARG, 0.0));
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
             .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_PTR_ARG, "this_is_double_Property", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_ARG, "this_is_double_Property", IGNORED_ARG))
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument(3);
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument_handle();
-        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(Device_EndTransaction(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(Device_EndTransaction(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument(2)
             .IgnoreArgument(3);
@@ -1940,33 +1940,33 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         STRICT_EXPECTED_CALL(Device_StartTransaction(TEST_DEVICE_HANDLE));
         STRICT_EXPECTED_CALL(STRING_new());
         STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE));
-        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_handle()
             .IgnoreArgument_s2();
-        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_PTR_ARG, 0.0));
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_ARG, 0.0));
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
             .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_PTR_ARG, "this_is_double_Property", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_ARG, "this_is_double_Property", IGNORED_ARG))
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument(3);
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument_handle();
-        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_ARG));
         STRICT_EXPECTED_CALL(STRING_new());
         STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE));
-        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_handle()
             .IgnoreArgument_s2();
-        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_SINT32(IGNORED_PTR_ARG, 0));
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_SINT32(IGNORED_ARG, 0));
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
             .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_PTR_ARG, "this_is_int_Property", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_ARG, "this_is_int_Property", IGNORED_ARG))
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument(3);
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument_handle();
-        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(Device_EndTransaction(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(Device_EndTransaction(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument(2)
             .IgnoreArgument(3);
@@ -2022,19 +2022,19 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         STRICT_EXPECTED_CALL(Device_StartTransaction(TEST_DEVICE_HANDLE));
         STRICT_EXPECTED_CALL(STRING_new());
         STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE));
-        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_handle()
             .IgnoreArgument_s2();
-        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_PTR_ARG, 0.0));
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_ARG, 0.0));
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
             .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_PTR_ARG, "this_is_double_Property", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_ARG, "this_is_double_Property", IGNORED_ARG))
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument(3).SetReturn(DEVICE_ERROR);
-        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(Device_CancelTransaction(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_CancelTransaction(IGNORED_ARG))
             .IgnoreArgument_transactionHandle();
         device->this_is_double_Property = 42.0;
         unsigned char* destination;
@@ -2062,33 +2062,33 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         STRICT_EXPECTED_CALL(Device_StartTransaction(TEST_DEVICE_HANDLE));
         STRICT_EXPECTED_CALL(STRING_new());
         STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE));
-        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_handle()
             .IgnoreArgument_s2();
-        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_PTR_ARG, 0.0));
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_ARG, 0.0));
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
             .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_PTR_ARG, "this_is_double_Property", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_ARG, "this_is_double_Property", IGNORED_ARG))
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument(3);
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument_handle();
-        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_ARG));
         STRICT_EXPECTED_CALL(STRING_new());
         STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE));
-        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_handle()
             .IgnoreArgument_s2();
-        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_SINT32(IGNORED_PTR_ARG, 0));
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_SINT32(IGNORED_ARG, 0));
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
             .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_PTR_ARG, "this_is_int_Property", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_ARG, "this_is_int_Property", IGNORED_ARG))
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument(3).SetReturn(DEVICE_ERROR);
-        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(Device_CancelTransaction(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_CancelTransaction(IGNORED_ARG))
             .IgnoreArgument_transactionHandle();
         device->this_is_double_Property = 42.0;
         device->this_is_int_Property = 1;
@@ -2117,19 +2117,19 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         STRICT_EXPECTED_CALL(Device_StartTransaction(TEST_DEVICE_HANDLE));
         STRICT_EXPECTED_CALL(STRING_new());
         STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE));
-        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_handle()
             .IgnoreArgument_s2();
-        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_PTR_ARG, 0.0));
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_ARG, 0.0));
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
             .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_PTR_ARG, "this_is_double_Property", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_ARG, "this_is_double_Property", IGNORED_ARG))
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument(3);
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument_handle();
-        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(Device_EndTransaction(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(Device_EndTransaction(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument(2)
             .IgnoreArgument(3)
@@ -2183,9 +2183,9 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         STRICT_EXPECTED_CALL(Device_StartTransaction(TEST_DEVICE_HANDLE));
         STRICT_EXPECTED_CALL(STRING_new());
         STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(Device_CancelTransaction(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_CancelTransaction(IGNORED_ARG))
             .IgnoreArgument_transactionHandle();
         device->this_is_double_Property = 42.0;
         unsigned char* destination;
@@ -2214,14 +2214,14 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         STRICT_EXPECTED_CALL(Device_StartTransaction(TEST_DEVICE_HANDLE));
         STRICT_EXPECTED_CALL(STRING_new());
         STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE));
-        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_handle()
             .IgnoreArgument_s2();
-        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_PTR_ARG, 0.0))
+        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_ARG, 0.0))
             .SetReturn(AGENT_DATA_TYPES_ERROR);
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(Device_CancelTransaction(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_CancelTransaction(IGNORED_ARG))
             .IgnoreArgument_transactionHandle();
         device->this_is_double_Property = 42.0;
         unsigned char* destination;
@@ -2250,28 +2250,28 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         STRICT_EXPECTED_CALL(Device_StartTransaction(TEST_DEVICE_HANDLE));
         STRICT_EXPECTED_CALL(STRING_new());
         STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE));
-        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_handle()
             .IgnoreArgument_s2();
-        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_PTR_ARG, 0.0));
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_ARG, 0.0));
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
             .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_PTR_ARG, "this_is_double_Property", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_ARG, "this_is_double_Property", IGNORED_ARG))
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument(3);
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument_handle();
-        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_ARG));
         STRICT_EXPECTED_CALL(STRING_new());
         STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE));
-        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_handle()
             .IgnoreArgument_s2();
-        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_SINT32(IGNORED_PTR_ARG, 0))
+        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_SINT32(IGNORED_ARG, 0))
             .SetReturn(AGENT_DATA_TYPES_ERROR);
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(Device_CancelTransaction(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_CancelTransaction(IGNORED_ARG))
             .IgnoreArgument_transactionHandle();
         device->this_is_double_Property = 42.0;
         unsigned char* destination;
@@ -2300,19 +2300,19 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         STRICT_EXPECTED_CALL(Device_StartTransaction(TEST_DEVICE_HANDLE));
         STRICT_EXPECTED_CALL(STRING_new());
         STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE));
-        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_handle()
             .IgnoreArgument_s2();
-        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_PTR_ARG, 0.0));
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_ARG, 0.0));
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
             .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_PTR_ARG, "this_is_double_Property", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_ARG, "this_is_double_Property", IGNORED_ARG))
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument(3);
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument_handle();
-        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(Device_CancelTransaction(IGNORED_PTR_ARG))
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(Device_CancelTransaction(IGNORED_ARG))
             .IgnoreArgument_transactionHandle();
         device1->this_is_double_Property = 42.0;
         device2->this_is_double_Property = 42.0;
@@ -2343,19 +2343,19 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         STRICT_EXPECTED_CALL(STRING_new());
 
         STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE));
-        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_handle()
             .IgnoreArgument_s2();
-        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
             .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_PTR_ARG, "this_is_double_Property", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_ARG, "this_is_double_Property", IGNORED_ARG))
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument(3);
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument_handle();
-        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(Device_EndTransaction(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(Device_EndTransaction(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument(2)
             .IgnoreArgument(3);
@@ -2386,33 +2386,33 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         STRICT_EXPECTED_CALL(Device_StartTransaction(TEST_DEVICE_HANDLE));
         STRICT_EXPECTED_CALL(STRING_new());
         STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE));
-        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_handle()
             .IgnoreArgument_s2();
-        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_PTR_ARG, (double)(IGNORED_NUM_ARG)));
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_ARG, (double)(IGNORED_ARG)));
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
             .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_PTR_ARG, "this_is_double_Property", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_ARG, "this_is_double_Property", IGNORED_ARG))
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument(3);
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument_handle();
-        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_ARG));
         STRICT_EXPECTED_CALL(STRING_new());
         STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE));
-        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_handle()
             .IgnoreArgument_s2();
-        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_SINT32(IGNORED_PTR_ARG, (int32_t)(IGNORED_NUM_ARG)));
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_SINT32(IGNORED_ARG, (int32_t)(IGNORED_ARG)));
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
             .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_PTR_ARG, "this_is_int_Property", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_ARG, "this_is_int_Property", IGNORED_ARG))
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument(3);
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument_handle();
-        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(Device_EndTransaction(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(Device_EndTransaction(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument(2)
             .IgnoreArgument(3);
@@ -2442,18 +2442,18 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         STRICT_EXPECTED_CALL(Device_StartTransaction(TEST_DEVICE_HANDLE));
         STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE));
-        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_SINT32(IGNORED_PTR_ARG, (int32_t)(IGNORED_NUM_ARG)));
-        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_PTR_ARG, "this_is_int_Property", IGNORED_PTR_ARG))
+        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_SINT32(IGNORED_ARG, (int32_t)(IGNORED_ARG)));
+        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_ARG, "this_is_int_Property", IGNORED_ARG))
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument(3);
-        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
-        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_PTR_ARG, (double)(IGNORED_NUM_ARG)));
-        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_PTR_ARG, "this_is_double_Property", IGNORED_PTR_ARG))
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_ARG));
+        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_ARG, (double)(IGNORED_ARG)));
+        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_ARG, "this_is_double_Property", IGNORED_ARG))
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument(3);
-        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_ARG));
 
-        STRICT_EXPECTED_CALL(Device_EndTransaction(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_EndTransaction(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument(2)
             .IgnoreArgument(3);
@@ -2484,9 +2484,9 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         STRICT_EXPECTED_CALL(Device_StartTransaction(TEST_DEVICE_HANDLE));
         STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE));
 
-        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_SINT32(IGNORED_PTR_ARG, (int32_t)(IGNORED_NUM_ARG)))
+        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_SINT32(IGNORED_ARG, (int32_t)(IGNORED_ARG)))
             .SetReturn(AGENT_DATA_TYPES_ERROR);
-        STRICT_EXPECTED_CALL(Device_CancelTransaction(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_CancelTransaction(IGNORED_ARG))
             .IgnoreArgument_transactionHandle();
         device->this_is_double_Property = 42.0;
         device->this_is_int_Property = 1;
@@ -2515,13 +2515,13 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         STRICT_EXPECTED_CALL(Device_StartTransaction(TEST_DEVICE_HANDLE));
         STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE));
 
-        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_SINT32(IGNORED_PTR_ARG, (int32_t)(IGNORED_NUM_ARG)));
-        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_PTR_ARG, "this_is_int_Property", IGNORED_PTR_ARG))
+        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_SINT32(IGNORED_ARG, (int32_t)(IGNORED_ARG)));
+        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_ARG, "this_is_int_Property", IGNORED_ARG))
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument(3)
             .SetReturn(DEVICE_ERROR);
-        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(Device_CancelTransaction(IGNORED_PTR_ARG))
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(Device_CancelTransaction(IGNORED_ARG))
             .IgnoreArgument_transactionHandle();
         device->this_is_double_Property = 42.0;
         device->this_is_int_Property = 1;
@@ -2549,14 +2549,14 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         STRICT_EXPECTED_CALL(Device_StartTransaction(TEST_DEVICE_HANDLE));
         STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE));
-        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_SINT32(IGNORED_PTR_ARG, (int32_t)(IGNORED_NUM_ARG)));
-        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_PTR_ARG, "this_is_int_Property", IGNORED_PTR_ARG))
+        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_SINT32(IGNORED_ARG, (int32_t)(IGNORED_ARG)));
+        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_ARG, "this_is_int_Property", IGNORED_ARG))
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument(3);
-        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
-        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_PTR_ARG, (double)(IGNORED_NUM_ARG)))
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_ARG));
+        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_ARG, (double)(IGNORED_ARG)))
             .SetReturn(AGENT_DATA_TYPES_ERROR);
-        STRICT_EXPECTED_CALL(Device_CancelTransaction(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_CancelTransaction(IGNORED_ARG))
             .IgnoreArgument_transactionHandle();
         device->this_is_double_Property = 42.0;
         device->this_is_int_Property = 1;
@@ -2584,18 +2584,18 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         STRICT_EXPECTED_CALL(Device_StartTransaction(TEST_DEVICE_HANDLE));
         STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE));
-        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_SINT32(IGNORED_PTR_ARG, (int32_t)(IGNORED_NUM_ARG)));
-        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_PTR_ARG, "this_is_int_Property", IGNORED_PTR_ARG))
+        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_SINT32(IGNORED_ARG, (int32_t)(IGNORED_ARG)));
+        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_ARG, "this_is_int_Property", IGNORED_ARG))
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument(3);
-        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
-        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_PTR_ARG, (double)(IGNORED_NUM_ARG)));
-        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_PTR_ARG, "this_is_double_Property", IGNORED_PTR_ARG))
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_ARG));
+        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_ARG, (double)(IGNORED_ARG)));
+        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_ARG, "this_is_double_Property", IGNORED_ARG))
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument(3)
             .SetReturn(DEVICE_ERROR);
-        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(Device_CancelTransaction(IGNORED_PTR_ARG))
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(Device_CancelTransaction(IGNORED_ARG))
             .IgnoreArgument_transactionHandle();
         device->this_is_double_Property = 42.0;
         device->this_is_int_Property = 1;
@@ -2624,25 +2624,25 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         STRICT_EXPECTED_CALL(Device_StartTransaction(TEST_DEVICE_HANDLE));
         STRICT_EXPECTED_CALL(STRING_new());
         STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_OUTERTYPE_MODEL_HANDLE)).SetReturn("OuterType");
-        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_handle()
             .IgnoreArgument_s2();
-        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_handle()
             .IgnoreArgument_s2();
-        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_handle()
             .IgnoreArgument_s2();
-        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_PTR_ARG, (double)(IGNORED_NUM_ARG)));
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_ARG, (double)(IGNORED_ARG)));
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
             .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_PTR_ARG, "Inner/this_is_double2", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_ARG, "Inner/this_is_double2", IGNORED_ARG))
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument(3);
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument_handle();
-        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(Device_EndTransaction(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(Device_EndTransaction(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument(2)
             .IgnoreArgument(3);
@@ -2672,25 +2672,25 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         STRICT_EXPECTED_CALL(Device_StartTransaction(TEST_DEVICE_HANDLE));
         STRICT_EXPECTED_CALL(STRING_new());
         STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_OUTERTYPE_MODEL_HANDLE)).SetReturn("OuterType");
-        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_handle()
             .IgnoreArgument_s2();
-        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_handle()
             .IgnoreArgument_s2();
-        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_handle()
             .IgnoreArgument_s2();
-        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_SINT32(IGNORED_PTR_ARG, (int32_t)(IGNORED_NUM_ARG)));
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_SINT32(IGNORED_ARG, (int32_t)(IGNORED_ARG)));
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
             .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_PTR_ARG, "Inner/this_is_int2", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_ARG, "Inner/this_is_int2", IGNORED_ARG))
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument(3);
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument_handle();
-        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(Device_EndTransaction(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(Device_EndTransaction(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument(2)
             .IgnoreArgument(3);
@@ -2761,21 +2761,21 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         STRICT_EXPECTED_CALL(Device_StartTransaction(TEST_DEVICE_HANDLE));
         STRICT_EXPECTED_CALL(STRING_new());
         STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE));
-        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_handle()
             .IgnoreArgument_s2();
-        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_PTR_ARG, 0.0));
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_ARG, 0.0));
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
             .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_PTR_ARG, "this_is_double_Property", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_ARG, "this_is_double_Property", IGNORED_ARG))
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument(3);
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument_handle();
-        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_ARG));
         unsigned char* destination;
         size_t destinationSize;
-        STRICT_EXPECTED_CALL(Device_EndTransaction(IGNORED_PTR_ARG, &destination, &destinationSize))
+        STRICT_EXPECTED_CALL(Device_EndTransaction(IGNORED_ARG, &destination, &destinationSize))
             .IgnoreArgument_transactionHandle();
         device->this_is_double_Property = 42.0;
 
@@ -2801,7 +2801,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         (void)CodeFirst_Init(NULL);
         umock_c_reset_all_calls();
         STRICT_EXPECTED_CALL(Schema_GetSchemaByNamespace("TestSchema"));
-        STRICT_EXPECTED_CALL(Schema_Create("TestSchema", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_Create("TestSchema", IGNORED_ARG))
             .IgnoreArgument_metadata();
         STRICT_EXPECTED_CALL(Schema_CreateStructType(TEST_SCHEMA_HANDLE, "theCarIsBehindTheVan_Struct"))
             .SetReturn(TEST_CAR_BEHIND_VAN_HANDLE);
@@ -2865,7 +2865,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         STRICT_EXPECTED_CALL(Schema_GetModelByName(TEST_SCHEMA_HANDLE, "InnerType"))
             .SetReturn(TEST_INNERTYPE_MODEL_HANDLE);
         STRICT_EXPECTED_CALL(Schema_GetModelByName(TEST_SCHEMA_HANDLE, "int"));
-        STRICT_EXPECTED_CALL(Schema_AddModelDesiredProperty(TEST_INNERTYPE_MODEL_HANDLE, "this_is_desired_int_Property_2", "int", IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, NULL))
+        STRICT_EXPECTED_CALL(Schema_AddModelDesiredProperty(TEST_INNERTYPE_MODEL_HANDLE, "this_is_desired_int_Property_2", "int", IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, NULL))
             .IgnoreArgument_desiredPropertyDeinitialize()
             .IgnoreArgument_desiredPropertyInitialize()
             .IgnoreArgument_desiredPropertyFromAGENT_DATA_TYPE()
@@ -3130,7 +3130,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_allReflected, sizeof(TruckType), false);
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(Device_ExecuteCommand(IGNORED_PTR_ARG, TEST_COMMAND))
+        STRICT_EXPECTED_CALL(Device_ExecuteCommand(IGNORED_ARG, TEST_COMMAND))
             .IgnoreArgument(1);
 
         ///act
@@ -3152,7 +3152,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_allReflected, sizeof(TruckType), false);
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(Device_ExecuteCommand(IGNORED_PTR_ARG, TEST_COMMAND))
+        STRICT_EXPECTED_CALL(Device_ExecuteCommand(IGNORED_ARG, TEST_COMMAND))
             .IgnoreArgument(1)
             .SetReturn(EXECUTE_COMMAND_FAILED);
 
@@ -3175,7 +3175,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_allReflected, sizeof(TruckType), false);
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(Device_ExecuteCommand(IGNORED_PTR_ARG, TEST_COMMAND))
+        STRICT_EXPECTED_CALL(Device_ExecuteCommand(IGNORED_ARG, TEST_COMMAND))
             .IgnoreArgument(1)
             .SetReturn(EXECUTE_COMMAND_ERROR);
 
@@ -3289,27 +3289,27 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         device2->reported_this_is_int = 2;
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(Device_CreateTransaction_ReportedProperties(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_CreateTransaction_ReportedProperties(IGNORED_ARG))
             .IgnoreArgument_deviceHandle();
         STRICT_EXPECTED_CALL(STRING_new());
-        STRICT_EXPECTED_CALL(Schema_GetModelName(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetModelName(IGNORED_ARG))
             .IgnoreArgument_modelTypeHandle()
             .SetReturn("TruckType");
-        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "reported_this_is_int"))
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, "reported_this_is_int"))
             .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_SINT32(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_SINT32(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_agentData()
             .IgnoreArgument_v();
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
             .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(Device_PublishTransacted_ReportedProperty(IGNORED_PTR_ARG, "reported_this_is_int", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_PublishTransacted_ReportedProperty(IGNORED_ARG, "reported_this_is_int", IGNORED_ARG))
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument_data();
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_ARG))
             .IgnoreArgument_agentData();
-        STRICT_EXPECTED_CALL(Device_DestroyTransaction_ReportedProperties(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_DestroyTransaction_ReportedProperties(IGNORED_ARG))
             .IgnoreArgument_transactionHandle();
 
         ///act
@@ -3336,14 +3336,14 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         device->reported_this_is_int = 3;
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(Device_CreateTransaction_ReportedProperties(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_CreateTransaction_ReportedProperties(IGNORED_ARG))
             .IgnoreArgument_deviceHandle();
         STRICT_EXPECTED_CALL(STRING_new());
-        STRICT_EXPECTED_CALL(Schema_GetModelName(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetModelName(IGNORED_ARG))
             .IgnoreArgument_modelTypeHandle();
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(Device_DestroyTransaction_ReportedProperties(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_DestroyTransaction_ReportedProperties(IGNORED_ARG))
             .IgnoreArgument_transactionHandle();
 
         ///act
@@ -3387,26 +3387,26 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         STRICT_EXPECTED_CALL(Device_CreateTransaction_ReportedProperties(TEST_DEVICE_HANDLE));
         STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE));
 
-        STRICT_EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_PTR_ARG, 5.5))
+        STRICT_EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_ARG, 5.5))
             .IgnoreArgument_agentData();
-        STRICT_EXPECTED_CALL(Device_PublishTransacted_ReportedProperty(IGNORED_PTR_ARG, "new_reported_this_is_double", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_PublishTransacted_ReportedProperty(IGNORED_ARG, "new_reported_this_is_double", IGNORED_ARG))
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument_data();
-        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_ARG));
 
-        STRICT_EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_SINT32(IGNORED_PTR_ARG, -5))
+        STRICT_EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_SINT32(IGNORED_ARG, -5))
             .IgnoreArgument_agentData();
-        STRICT_EXPECTED_CALL(Device_PublishTransacted_ReportedProperty(IGNORED_PTR_ARG, "new_reported_this_is_int", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_PublishTransacted_ReportedProperty(IGNORED_ARG, "new_reported_this_is_int", IGNORED_ARG))
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument_data();
-        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_ARG));
 
-        STRICT_EXPECTED_CALL(Device_CommitTransaction_ReportedProperties(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_CommitTransaction_ReportedProperties(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument(2)
             .IgnoreArgument(3);
 
-        STRICT_EXPECTED_CALL(Device_DestroyTransaction_ReportedProperties(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_DestroyTransaction_ReportedProperties(IGNORED_ARG))
             .IgnoreArgument_transactionHandle();
     }
 
@@ -3498,24 +3498,24 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         STRICT_EXPECTED_CALL(Device_CreateTransaction_ReportedProperties(TEST_DEVICE_HANDLE));
         STRICT_EXPECTED_CALL(STRING_new());
         STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE));
-        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "new_reported_this_is_double"))
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, "new_reported_this_is_double"))
             .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_PTR_ARG, 5.5))
+        STRICT_EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_ARG, 5.5))
             .IgnoreArgument_agentData();
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
             .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(Device_PublishTransacted_ReportedProperty(IGNORED_PTR_ARG, "new_reported_this_is_double", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_PublishTransacted_ReportedProperty(IGNORED_ARG, "new_reported_this_is_double", IGNORED_ARG))
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument_data();
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_ARG))
             .IgnoreArgument_agentData();
-        STRICT_EXPECTED_CALL(Device_CommitTransaction_ReportedProperties(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_CommitTransaction_ReportedProperties(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument(2)
             .IgnoreArgument(3);
-        STRICT_EXPECTED_CALL(Device_DestroyTransaction_ReportedProperties(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_DestroyTransaction_ReportedProperties(IGNORED_ARG))
             .IgnoreArgument_transactionHandle();
     }
 
@@ -3614,25 +3614,25 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         STRICT_EXPECTED_CALL(Device_StartTransaction(TEST_DEVICE_HANDLE));
         STRICT_EXPECTED_CALL(STRING_new());
         STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_OUTERTYPE_MODEL_HANDLE)).SetReturn("OuterType");
-        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_handle()
             .IgnoreArgument_s2();
-        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_handle()
             .IgnoreArgument_s2();
-        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_handle()
             .IgnoreArgument_s2();
-        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_SINT32(IGNORED_PTR_ARG, (int32_t)(IGNORED_NUM_ARG)));
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_SINT32(IGNORED_ARG, (int32_t)(IGNORED_ARG)));
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
             .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_PTR_ARG, "Inner/this_is_int2", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_ARG, "Inner/this_is_int2", IGNORED_ARG))
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument(3);
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument_handle();
-        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(Device_EndTransaction(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(Device_EndTransaction(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument(2)
             .IgnoreArgument(3);
@@ -3727,7 +3727,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         ///arrange
         STRICT_EXPECTED_CALL(Schema_GetSchemaByNamespace("TestSchema"));
-        STRICT_EXPECTED_CALL(Schema_Create("TestSchema", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_Create("TestSchema", IGNORED_ARG))
             .IgnoreArgument_metadata();
         STRICT_EXPECTED_CALL(Schema_CreateModelType(TEST_SCHEMA_HANDLE, "OuterType_onDesiredProperty"))
             .SetReturn(TEST_OUTERTYPE_MODEL_HANDLE);
@@ -3742,7 +3742,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         STRICT_EXPECTED_CALL(Schema_GetModelByName(TEST_SCHEMA_HANDLE, "InnerType_onDesiredProperty"))
             .SetReturn(TEST_INNERTYPE_MODEL_HANDLE);
         STRICT_EXPECTED_CALL(Schema_GetModelByName(TEST_SCHEMA_HANDLE, "int"));
-        STRICT_EXPECTED_CALL(Schema_AddModelDesiredProperty(TEST_INNERTYPE_MODEL_HANDLE, "this_is_desired_int_Property_2_onDesiredProperty", "int", IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, onthis_is_desired_int_Property_2_onDesiredProperty))
+        STRICT_EXPECTED_CALL(Schema_AddModelDesiredProperty(TEST_INNERTYPE_MODEL_HANDLE, "this_is_desired_int_Property_2_onDesiredProperty", "int", IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, onthis_is_desired_int_Property_2_onDesiredProperty))
             .IgnoreArgument_desiredPropertyDeinitialize()
             .IgnoreArgument_desiredPropertyInitialize()
             .IgnoreArgument_desiredPropertyFromAGENT_DATA_TYPE()
@@ -3795,15 +3795,15 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         // arrange
         /*note: no CodeFirst_Init...*/
         size_t zero = 0;
-        STRICT_EXPECTED_CALL(Schema_GetModelDesiredPropertyCount(TEST_MODEL_HANDLE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetModelDesiredPropertyCount(TEST_MODEL_HANDLE, IGNORED_ARG))
             .CopyOutArgumentBuffer_desiredPropertyCount(&zero, sizeof(zero));
-        STRICT_EXPECTED_CALL(Schema_GetModelModelCount(TEST_MODEL_HANDLE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetModelModelCount(TEST_MODEL_HANDLE, IGNORED_ARG))
             .CopyOutArgumentBuffer_modelCount(&zero, sizeof(zero));
-        STRICT_EXPECTED_CALL(Device_Create(TEST_MODEL_HANDLE, CodeFirst_InvokeAction, TEST_CALLBACK_CONTEXT, CodeFirst_InvokeMethod, TEST_CALLBACK_CONTEXT, false, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_Create(TEST_MODEL_HANDLE, CodeFirst_InvokeAction, TEST_CALLBACK_CONTEXT, CodeFirst_InvokeMethod, TEST_CALLBACK_CONTEXT, false, IGNORED_ARG))
             .IgnoreArgument_deviceHandle()
             .IgnoreArgument_methodCallbackContext()
             .IgnoreArgument_callbackUserContext();
-        STRICT_EXPECTED_CALL(Schema_AddDeviceRef(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_AddDeviceRef(IGNORED_ARG))
             .IgnoreArgument(1);
 
         // act
@@ -3824,13 +3824,13 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_allReflected, 1, false);
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(Schema_GetModelDesiredPropertyCount(TEST_MODEL_HANDLE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetModelDesiredPropertyCount(TEST_MODEL_HANDLE, IGNORED_ARG))
             .IgnoreArgument_desiredPropertyCount(); /*0 desired properties*/
-        STRICT_EXPECTED_CALL(Schema_GetModelModelCount(TEST_MODEL_HANDLE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetModelModelCount(TEST_MODEL_HANDLE, IGNORED_ARG))
             .IgnoreArgument_modelCount(); /*0 model in model*/
-        STRICT_EXPECTED_CALL(Schema_ReleaseDeviceRef(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_ReleaseDeviceRef(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(Schema_DestroyIfUnused(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_DestroyIfUnused(IGNORED_ARG))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(Device_Destroy(TEST_DEVICE_HANDLE));
 
@@ -3854,19 +3854,19 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         STRICT_EXPECTED_CALL(Device_StartTransaction(TEST_DEVICE_HANDLE));
         STRICT_EXPECTED_CALL(STRING_new());
         STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE));
-        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_handle()
             .IgnoreArgument_s2();
-        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_PTR_ARG, 0.0));
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_ARG, 0.0));
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
             .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_PTR_ARG, "this_is_double_Property", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_ARG, "this_is_double_Property", IGNORED_ARG))
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument(3);
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
             .IgnoreArgument_handle();
-        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(Device_EndTransaction(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(Device_EndTransaction(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument(2)
             .IgnoreArgument(3);

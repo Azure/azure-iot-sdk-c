@@ -56,6 +56,8 @@ MOCKABLE_FUNCTION(, METHODRETURN_HANDLE, methodCallbackMock, void*, methodCallba
 MOCKABLE_FUNCTION(, int, int_pfDesiredPropertyFromAGENT_DATA_TYPE, const AGENT_DATA_TYPE*, source, void*, dest);
 #undef ENABLE_MOCKS
 
+extern int real_mallocAndStrcpy_s(char** destination, const char* source);
+
 #include "azure_c_shared_utility/lock.h"
 #include "testrunnerswitcher.h"
 
@@ -107,25 +109,25 @@ static const SCHEMA_HANDLE TEST_SCHEMA_HANDLE = (SCHEMA_HANDLE)0x4401;
 
 static char TestCommand[] = TEST_COMMAND;
 
-TEST_DEFINE_ENUM_TYPE(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_RESULT_VALUES);
+TEST_DEFINE_ENUM_TYPE_WITHOUT_INVALID(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_RESULT_VALUES);
 IMPLEMENT_UMOCK_C_ENUM_TYPE(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_RESULT_VALUES);
 
-TEST_DEFINE_ENUM_TYPE(JSON_DECODER_RESULT, JSON_DECODER_RESULT_VALUES);
+TEST_DEFINE_ENUM_TYPE_WITHOUT_INVALID(JSON_DECODER_RESULT, JSON_DECODER_RESULT_VALUES);
 IMPLEMENT_UMOCK_C_ENUM_TYPE(JSON_DECODER_RESULT, JSON_DECODER_RESULT_VALUES);
 
-TEST_DEFINE_ENUM_TYPE(MULTITREE_RESULT, MULTITREE_RESULT_VALUES);
+TEST_DEFINE_ENUM_TYPE_WITHOUT_INVALID(MULTITREE_RESULT, MULTITREE_RESULT_VALUES);
 IMPLEMENT_UMOCK_C_ENUM_TYPE(MULTITREE_RESULT, MULTITREE_RESULT_VALUES);
 
-TEST_DEFINE_ENUM_TYPE(SCHEMA_RESULT, SCHEMA_RESULT_VALUES);
+TEST_DEFINE_ENUM_TYPE_WITHOUT_INVALID(SCHEMA_RESULT, SCHEMA_RESULT_VALUES);
 IMPLEMENT_UMOCK_C_ENUM_TYPE(SCHEMA_RESULT, SCHEMA_RESULT_VALUES);
 
-TEST_DEFINE_ENUM_TYPE(AGENT_DATA_TYPE_TYPE, AGENT_DATA_TYPE_TYPE_VALUES);
+TEST_DEFINE_ENUM_TYPE_WITHOUT_INVALID(AGENT_DATA_TYPE_TYPE, AGENT_DATA_TYPE_TYPE_VALUES);
 IMPLEMENT_UMOCK_C_ENUM_TYPE(AGENT_DATA_TYPE_TYPE, AGENT_DATA_TYPE_TYPE_VALUES);
 
-TEST_DEFINE_ENUM_TYPE(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_RESULT_VALUES);
+TEST_DEFINE_ENUM_TYPE_WITHOUT_INVALID(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_RESULT_VALUES);
 IMPLEMENT_UMOCK_C_ENUM_TYPE(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_RESULT_VALUES);
 
-TEST_DEFINE_ENUM_TYPE(SCHEMA_ELEMENT_TYPE, SCHEMA_ELEMENT_TYPE_VALUES);
+TEST_DEFINE_ENUM_TYPE_WITHOUT_INVALID(SCHEMA_ELEMENT_TYPE, SCHEMA_ELEMENT_TYPE_VALUES);
 IMPLEMENT_UMOCK_C_ENUM_TYPE(SCHEMA_ELEMENT_TYPE, SCHEMA_ELEMENT_TYPE_VALUES);
 
 MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(SCHEMA_ELEMENT_TYPE, SCHEMA_ELEMENT_TYPE_VALUES);
@@ -149,15 +151,15 @@ MU_DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES);
 
 static void SetupCommand(const char* quotedActionName, const char* actionName)
 {
-    STRICT_EXPECTED_CALL(JSONDecoder_JSON_To_MultiTree(TestCommand, IGNORED_PTR_ARG)).IgnoreArgument(2);
+    STRICT_EXPECTED_CALL(JSONDecoder_JSON_To_MultiTree(TestCommand, IGNORED_ARG)).IgnoreArgument(2);
     STRICT_EXPECTED_CALL(Schema_GetSchemaForModelType(TEST_MODEL_HANDLE));
-    STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ROOT_NODE, "Name", IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ROOT_NODE, "Name", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TEST_COMMAND_NAME_NODE, sizeof(TEST_COMMAND_NAME_NODE));
-    STRICT_EXPECTED_CALL(MultiTree_GetValue(TEST_COMMAND_NAME_NODE, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(MultiTree_GetValue(TEST_COMMAND_NAME_NODE, IGNORED_ARG))
         .CopyOutArgumentBuffer(2, &quotedActionName, sizeof(quotedActionName));
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*quotedActionName*/
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG)) /*quotedActionName*/
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ROOT_NODE, "Parameters", IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ROOT_NODE, "Parameters", IGNORED_ARG))
         .CopyOutArgumentBuffer(3, &TEST_COMMAND_ARGS_NODE, sizeof(TEST_COMMAND_ARGS_NODE));
     STRICT_EXPECTED_CALL(Schema_GetModelActionByName(TEST_MODEL_HANDLE, actionName))
         .SetReturn(SetACStateActionHandle);
@@ -445,7 +447,7 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         // arrange
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
             .IgnoreArgument(1);
 
         // act
@@ -465,7 +467,7 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         // arrange
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
             .IgnoreArgument(1);
 
         // act
@@ -484,7 +486,7 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         // arrange
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
             .IgnoreArgument(1);
 
         // act
@@ -503,7 +505,7 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         // arrange
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
             .IgnoreArgument(1)
             .SetReturn(NULL);
 
@@ -537,7 +539,7 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
 
         // arrange
 
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
 
         // act
@@ -626,10 +628,10 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
 
         STRICT_EXPECTED_CALL(gballoc_malloc(strlen(TEST_COMMAND) + 1)); /*this creates a copy of the command that is given to JSON decoder*/
 
-        STRICT_EXPECTED_CALL(JSONDecoder_JSON_To_MultiTree(TestCommand, IGNORED_PTR_ARG)).IgnoreArgument(2)
+        STRICT_EXPECTED_CALL(JSONDecoder_JSON_To_MultiTree(TestCommand, IGNORED_ARG)).IgnoreArgument(2)
             .SetReturn(JSON_DECODER_INVALID_ARG);
 
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)) /*free-ing the copy of the buffer*/
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)) /*free-ing the copy of the buffer*/
             .IgnoreArgument(1);
 
         // act
@@ -651,12 +653,12 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
 
         STRICT_EXPECTED_CALL(gballoc_malloc(strlen(TEST_COMMAND) + 1)); /*this creates a copy of the command that is given to JSON decoder*/
 
-        STRICT_EXPECTED_CALL(JSONDecoder_JSON_To_MultiTree(TestCommand, IGNORED_PTR_ARG)).IgnoreArgument(2);
+        STRICT_EXPECTED_CALL(JSONDecoder_JSON_To_MultiTree(TestCommand, IGNORED_ARG)).IgnoreArgument(2);
         STRICT_EXPECTED_CALL(Schema_GetSchemaForModelType(TEST_MODEL_HANDLE))
             .SetReturn((SCHEMA_HANDLE)NULL);
-        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_ARG))
             .IgnoreArgument_treeHandle();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)) /*free-ing the copy of the buffer*/
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)) /*free-ing the copy of the buffer*/
             .IgnoreArgument(1);
 
         // act
@@ -678,15 +680,15 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
 
         STRICT_EXPECTED_CALL(gballoc_malloc(strlen(TEST_COMMAND) + 1)); /*this creates a copy of the command that is given to JSON decoder*/
 
-        STRICT_EXPECTED_CALL(JSONDecoder_JSON_To_MultiTree(TestCommand, IGNORED_PTR_ARG)).IgnoreArgument(2);
+        STRICT_EXPECTED_CALL(JSONDecoder_JSON_To_MultiTree(TestCommand, IGNORED_ARG)).IgnoreArgument(2);
         STRICT_EXPECTED_CALL(Schema_GetSchemaForModelType(TEST_MODEL_HANDLE));
-        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(IGNORED_PTR_ARG, "Name", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(IGNORED_ARG, "Name", IGNORED_ARG))
             .IgnoreArgument_treeHandle()
             .IgnoreArgument_childHandle()
             .SetReturn(MULTITREE_INVALID_ARG);
-        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_ARG))
             .IgnoreArgument_treeHandle();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)) /*free-ing the copy of the buffer*/
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)) /*free-ing the copy of the buffer*/
             .IgnoreArgument(1);
 
         // act
@@ -708,15 +710,15 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
 
         STRICT_EXPECTED_CALL(gballoc_malloc(strlen(TEST_COMMAND) + 1)); /*this creates a copy of the command that is given to JSON decoder*/
 
-        STRICT_EXPECTED_CALL(JSONDecoder_JSON_To_MultiTree(TestCommand, IGNORED_PTR_ARG)).IgnoreArgument(2);
+        STRICT_EXPECTED_CALL(JSONDecoder_JSON_To_MultiTree(TestCommand, IGNORED_ARG)).IgnoreArgument(2);
         STRICT_EXPECTED_CALL(Schema_GetSchemaForModelType(TEST_MODEL_HANDLE));
-        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ROOT_NODE, "Name", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ROOT_NODE, "Name", IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &TEST_COMMAND_NAME_NODE, sizeof(TEST_COMMAND_NAME_NODE));
-        STRICT_EXPECTED_CALL(MultiTree_GetValue(TEST_COMMAND_NAME_NODE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetValue(TEST_COMMAND_NAME_NODE, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &quotedSetACStateName, sizeof(quotedSetACStateName))
             .SetReturn(MULTITREE_INVALID_ARG);
-        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG)).IgnoreArgument_treeHandle();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)) /*free-ing the copy of the buffer*/
+        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_ARG)).IgnoreArgument_treeHandle();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)) /*free-ing the copy of the buffer*/
             .IgnoreArgument(1);
         // act
         EXECUTE_COMMAND_RESULT result = CommandDecoder_ExecuteCommand(commandDecoderHandle, TEST_COMMAND);
@@ -737,21 +739,21 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
 
         STRICT_EXPECTED_CALL(gballoc_malloc(strlen(TEST_COMMAND) + 1)); /*this creates a copy of the command that is given to JSON decoder*/
 
-        STRICT_EXPECTED_CALL(JSONDecoder_JSON_To_MultiTree(TestCommand, IGNORED_PTR_ARG)).IgnoreArgument(2);
+        STRICT_EXPECTED_CALL(JSONDecoder_JSON_To_MultiTree(TestCommand, IGNORED_ARG)).IgnoreArgument(2);
         STRICT_EXPECTED_CALL(Schema_GetSchemaForModelType(TEST_MODEL_HANDLE));
-        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ROOT_NODE, "Name", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ROOT_NODE, "Name", IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &TEST_COMMAND_NAME_NODE, sizeof(TEST_COMMAND_NAME_NODE));
-        STRICT_EXPECTED_CALL(MultiTree_GetValue(TEST_COMMAND_NAME_NODE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetValue(TEST_COMMAND_NAME_NODE, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &quotedSetACStateName, sizeof(quotedSetACStateName));
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is relativeActionPath*/
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG)) /*this is relativeActionPath*/
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ROOT_NODE, "Parameters", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ROOT_NODE, "Parameters", IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &TEST_COMMAND_ARGS_NODE, sizeof(TEST_COMMAND_ARGS_NODE))
             .SetReturn(MULTITREE_INVALID_ARG);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG)).IgnoreArgument_treeHandle();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)) /*free-ing the copy of the buffer*/
+        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_ARG)).IgnoreArgument_treeHandle();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)) /*free-ing the copy of the buffer*/
             .IgnoreArgument(1);
 
         // act
@@ -772,17 +774,17 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         umock_c_reset_all_calls();
 
         STRICT_EXPECTED_CALL(gballoc_malloc(strlen(TEST_COMMAND) + 1)); /*this creates a copy of the command that is given to JSON decoder*/
-        STRICT_EXPECTED_CALL(JSONDecoder_JSON_To_MultiTree(TestCommand, IGNORED_PTR_ARG)).IgnoreArgument(2);
+        STRICT_EXPECTED_CALL(JSONDecoder_JSON_To_MultiTree(TestCommand, IGNORED_ARG)).IgnoreArgument(2);
         STRICT_EXPECTED_CALL(Schema_GetSchemaForModelType(TEST_MODEL_HANDLE));
-        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ROOT_NODE, "Name", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ROOT_NODE, "Name", IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &TEST_COMMAND_NAME_NODE, sizeof(TEST_COMMAND_NAME_NODE));
-        STRICT_EXPECTED_CALL(MultiTree_GetValue(TEST_COMMAND_NAME_NODE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetValue(TEST_COMMAND_NAME_NODE, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &quotedSetACStateName, sizeof(quotedSetACStateName));
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is relativeActionPath*/
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG)) /*this is relativeActionPath*/
             .IgnoreArgument(1)
             .SetReturn(NULL);
-        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG)).IgnoreArgument_treeHandle();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)) /*free-ing the copy of the buffer*/
+        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_ARG)).IgnoreArgument_treeHandle();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)) /*free-ing the copy of the buffer*/
             .IgnoreArgument(1);
         // act
         EXECUTE_COMMAND_RESULT result = CommandDecoder_ExecuteCommand(commandDecoderHandle, TEST_COMMAND);
@@ -803,23 +805,23 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
 
         STRICT_EXPECTED_CALL(gballoc_malloc(strlen(TEST_COMMAND) + 1)); /*this creates a copy of the command that is given to JSON decoder*/
 
-        STRICT_EXPECTED_CALL(JSONDecoder_JSON_To_MultiTree(TestCommand, IGNORED_PTR_ARG)).IgnoreArgument(2);
+        STRICT_EXPECTED_CALL(JSONDecoder_JSON_To_MultiTree(TestCommand, IGNORED_ARG)).IgnoreArgument(2);
         STRICT_EXPECTED_CALL(Schema_GetSchemaForModelType(TEST_MODEL_HANDLE));
-        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ROOT_NODE, "Name", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ROOT_NODE, "Name", IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &TEST_COMMAND_NAME_NODE, sizeof(TEST_COMMAND_NAME_NODE));
-        STRICT_EXPECTED_CALL(MultiTree_GetValue(TEST_COMMAND_NAME_NODE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetValue(TEST_COMMAND_NAME_NODE, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &quotedSetACStateName, sizeof(quotedSetACStateName));
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is relativeActionPath*/
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG)) /*this is relativeActionPath*/
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ROOT_NODE, "Parameters", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ROOT_NODE, "Parameters", IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &TEST_COMMAND_ARGS_NODE, sizeof(TEST_COMMAND_ARGS_NODE));
         STRICT_EXPECTED_CALL(Schema_GetModelActionByName(TEST_MODEL_HANDLE, setACStateName))
             .SetReturn((SCHEMA_ACTION_HANDLE)NULL);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG)).IgnoreArgument_treeHandle();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)) /*free-ing the copy of the buffer*/
+        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_ARG)).IgnoreArgument_treeHandle();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)) /*free-ing the copy of the buffer*/
             .IgnoreArgument(1);
 
         // act
@@ -844,26 +846,26 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
 
         STRICT_EXPECTED_CALL(gballoc_malloc(strlen(TEST_COMMAND) + 1)); /*this creates a copy of the command that is given to JSON decoder*/
 
-        STRICT_EXPECTED_CALL(JSONDecoder_JSON_To_MultiTree(TestCommand, IGNORED_PTR_ARG)).IgnoreArgument(2);
+        STRICT_EXPECTED_CALL(JSONDecoder_JSON_To_MultiTree(TestCommand, IGNORED_ARG)).IgnoreArgument(2);
         STRICT_EXPECTED_CALL(Schema_GetSchemaForModelType(TEST_MODEL_HANDLE));
-        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ROOT_NODE, "Name", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ROOT_NODE, "Name", IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &TEST_COMMAND_NAME_NODE, sizeof(TEST_COMMAND_NAME_NODE));
-        STRICT_EXPECTED_CALL(MultiTree_GetValue(TEST_COMMAND_NAME_NODE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetValue(TEST_COMMAND_NAME_NODE, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &quotedActionName, sizeof(quotedActionName));
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is relativeActionPath*/
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG)) /*this is relativeActionPath*/
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ROOT_NODE, "Parameters", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ROOT_NODE, "Parameters", IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &TEST_COMMAND_ARGS_NODE, sizeof(TEST_COMMAND_ARGS_NODE));
         STRICT_EXPECTED_CALL(Schema_GetModelActionByName(TEST_MODEL_HANDLE, actionName))
             .SetReturn(SetACStateActionHandle);
         size_t argCount = 0;
-        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetACStateActionHandle, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetACStateActionHandle, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &argCount, sizeof(argCount))
             .SetReturn(SCHEMA_ERROR);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG)).IgnoreArgument_treeHandle();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)) /*free-ing the copy of the buffer*/
+        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_ARG)).IgnoreArgument_treeHandle();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)) /*free-ing the copy of the buffer*/
             .IgnoreArgument(1);
         // act
 
@@ -887,14 +889,14 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
 
         STRICT_EXPECTED_CALL(gballoc_malloc(strlen(TEST_COMMAND) + 1)); /*this creates a copy of the command that is given to JSON decoder*/
 
-        STRICT_EXPECTED_CALL(JSONDecoder_JSON_To_MultiTree(TestCommand, IGNORED_PTR_ARG)).IgnoreArgument(2);
+        STRICT_EXPECTED_CALL(JSONDecoder_JSON_To_MultiTree(TestCommand, IGNORED_ARG)).IgnoreArgument(2);
         STRICT_EXPECTED_CALL(Schema_GetSchemaForModelType(TEST_MODEL_HANDLE));
-        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ROOT_NODE, "Name", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ROOT_NODE, "Name", IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &TEST_COMMAND_NAME_NODE, sizeof(TEST_COMMAND_NAME_NODE));
-        STRICT_EXPECTED_CALL(MultiTree_GetValue(TEST_COMMAND_NAME_NODE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetValue(TEST_COMMAND_NAME_NODE, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &quotedActionName, sizeof(quotedActionName));
-        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG)).IgnoreArgument_treeHandle();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)) /*free-ing the copy of the buffer*/
+        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_ARG)).IgnoreArgument_treeHandle();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)) /*free-ing the copy of the buffer*/
             .IgnoreArgument(1);
         // act
         EXECUTE_COMMAND_RESULT result = CommandDecoder_ExecuteCommand(commandDecoderHandle, TEST_COMMAND);
@@ -916,18 +918,18 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         const char* quotedActionName = "\"\"";
 
         STRICT_EXPECTED_CALL(gballoc_malloc(strlen(TEST_COMMAND) + 1)); /*this creates a copy of the command that is given to JSON decoder*/
-        STRICT_EXPECTED_CALL(JSONDecoder_JSON_To_MultiTree(TestCommand, IGNORED_PTR_ARG)).IgnoreArgument(2);
+        STRICT_EXPECTED_CALL(JSONDecoder_JSON_To_MultiTree(TestCommand, IGNORED_ARG)).IgnoreArgument(2);
         STRICT_EXPECTED_CALL(Schema_GetSchemaForModelType(TEST_MODEL_HANDLE));
-        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ROOT_NODE, "Name", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ROOT_NODE, "Name", IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &TEST_COMMAND_NAME_NODE, sizeof(TEST_COMMAND_NAME_NODE));
-        STRICT_EXPECTED_CALL(MultiTree_GetValue(TEST_COMMAND_NAME_NODE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetValue(TEST_COMMAND_NAME_NODE, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &quotedActionName, sizeof(quotedActionName));
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is relativeActionPath*/
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG)) /*this is relativeActionPath*/
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG)).IgnoreArgument_treeHandle();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)) /*free-ing the copy of the buffer*/
+        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_ARG)).IgnoreArgument_treeHandle();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)) /*free-ing the copy of the buffer*/
             .IgnoreArgument(1);
 
         // act
@@ -951,15 +953,14 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         STRICT_EXPECTED_CALL(gballoc_malloc(strlen(TEST_COMMAND) + 1)); /*this creates a copy of the command that is given to JSON decoder*/
         SetupCommand(quotedSetACStateName, setACStateName);
 
-        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetACStateActionHandle, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetACStateActionHandle, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &argCount, sizeof(argCount));
-        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
-            .IgnoreAllArguments()
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_ARG, IGNORED_ARG)) /*this is allocating memory for the argument array*/
             .SetReturn(NULL);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG)).IgnoreArgument_treeHandle();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)) /*free-ing the copy of the buffer*/
+        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_ARG)).IgnoreArgument_treeHandle();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)) /*free-ing the copy of the buffer*/
             .IgnoreArgument(1);
 
         // act
@@ -982,29 +983,28 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         size_t argCount = 1;
         STRICT_EXPECTED_CALL(gballoc_malloc(strlen(TEST_COMMAND) + 1)); /*this creates a copy of the command that is given to JSON decoder*/
         SetupCommand(quotedSetACStateName, setACStateName);
-        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetACStateActionHandle, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetACStateActionHandle, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &argCount, sizeof(argCount));
-        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
-            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_ARG, IGNORED_ARG)); /*this is allocating memory for the argument array*/
         SetupArgumentCalls(SetACStateActionHandle, 0, StateActionArgument, StateActionArgument_Name, StateActionArgument_Type);
         const char* stateValue = "true";
-        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ARGS_NODE, "State", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ARGS_NODE, "State", IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &TEST_ARG1_NODE, sizeof(TEST_ARG1_NODE));
         STRICT_EXPECTED_CALL(CodeFirst_GetPrimitiveType("bool"))
             .SetReturn(EDM_BOOLEAN_TYPE);
-        STRICT_EXPECTED_CALL(MultiTree_GetValue(TEST_ARG1_NODE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetValue(TEST_ARG1_NODE, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &stateValue, sizeof(stateValue));
-        STRICT_EXPECTED_CALL(CreateAgentDataType_From_String(stateValue, EDM_BOOLEAN_TYPE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(CreateAgentDataType_From_String(stateValue, EDM_BOOLEAN_TYPE, IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &StateAgentDataType, sizeof(StateAgentDataType));
-        STRICT_EXPECTED_CALL(ActionCallbackMock(TEST_CALLBACK_CONTEXT_VALUE, "", "SetACState", 1, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(ActionCallbackMock(TEST_CALLBACK_CONTEXT_VALUE, "", "SetACState", 1, IGNORED_ARG))
             .IgnoreArgument(5);
-        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG)).IgnoreArgument_treeHandle();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)) /*free-ing the copy of the buffer*/
+        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_ARG)).IgnoreArgument_treeHandle();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)) /*free-ing the copy of the buffer*/
             .IgnoreArgument(1);
 
         // act
@@ -1027,18 +1027,17 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         size_t argCount = 1;
         STRICT_EXPECTED_CALL(gballoc_malloc(strlen(TEST_COMMAND) + 1)); /*this creates a copy of the command that is given to JSON decoder*/
         SetupCommand(quotedSetACStateName, setACStateName);
-        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetACStateActionHandle, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetACStateActionHandle, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &argCount, sizeof(argCount));
-        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
-            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_ARG, IGNORED_ARG)); /*this is allocating memory for the argument array*/
         STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentByIndex(SetACStateActionHandle, 0))
             .SetReturn((SCHEMA_ACTION_ARGUMENT_HANDLE)NULL);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG)).IgnoreArgument_treeHandle();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)) /*free-ing the copy of the buffer*/
+        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_ARG)).IgnoreArgument_treeHandle();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)) /*free-ing the copy of the buffer*/
             .IgnoreArgument(1);
         // act
         EXECUTE_COMMAND_RESULT result = CommandDecoder_ExecuteCommand(commandDecoderHandle, TEST_COMMAND);
@@ -1060,20 +1059,19 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         size_t argCount = 1;
         STRICT_EXPECTED_CALL(gballoc_malloc(strlen(TEST_COMMAND) + 1)); /*this creates a copy of the command that is given to JSON decoder*/
         SetupCommand(quotedSetACStateName, setACStateName);
-        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetACStateActionHandle, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetACStateActionHandle, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &argCount, sizeof(argCount));
-        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
-            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_ARG, IGNORED_ARG)); /*this is allocating memory for the argument array*/
         STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentByIndex(SetACStateActionHandle, 0))
             .SetReturn(StateActionArgument);
         STRICT_EXPECTED_CALL(Schema_GetActionArgumentName(StateActionArgument))
             .SetReturn((const char*)NULL);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG)).IgnoreArgument_treeHandle();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)) /*free-ing the copy of the buffer*/
+        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_ARG)).IgnoreArgument_treeHandle();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)) /*free-ing the copy of the buffer*/
             .IgnoreArgument(1);
         // act
         EXECUTE_COMMAND_RESULT result = CommandDecoder_ExecuteCommand(commandDecoderHandle, TEST_COMMAND);
@@ -1095,22 +1093,21 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         size_t argCount = 1;
         STRICT_EXPECTED_CALL(gballoc_malloc(strlen(TEST_COMMAND) + 1)); /*this creates a copy of the command that is given to JSON decoder*/
         SetupCommand(quotedSetACStateName, setACStateName);
-        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetACStateActionHandle, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetACStateActionHandle, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &argCount, sizeof(argCount));
-        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
-            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_ARG, IGNORED_ARG)); /*this is allocating memory for the argument array*/
         STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentByIndex(SetACStateActionHandle, 0))
             .SetReturn(StateActionArgument);
         STRICT_EXPECTED_CALL(Schema_GetActionArgumentName(StateActionArgument))
             .SetReturn(StateActionArgument_Name);
         STRICT_EXPECTED_CALL(Schema_GetActionArgumentType(StateActionArgument))
             .SetReturn((const char*)NULL);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG)).IgnoreArgument_treeHandle();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)) /*free-ing the copy of the buffer*/
+        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_ARG)).IgnoreArgument_treeHandle();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)) /*free-ing the copy of the buffer*/
             .IgnoreArgument(1);
         // act
         EXECUTE_COMMAND_RESULT result = CommandDecoder_ExecuteCommand(commandDecoderHandle, TEST_COMMAND);
@@ -1132,20 +1129,19 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         size_t argCount = 1;
         STRICT_EXPECTED_CALL(gballoc_malloc(strlen(TEST_COMMAND) + 1)); /*this creates a copy of the command that is given to JSON decoder*/
         SetupCommand(quotedSetACStateName, setACStateName);
-        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetACStateActionHandle, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetACStateActionHandle, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &argCount, sizeof(argCount));
-        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
-            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_ARG, IGNORED_ARG)); /*this is allocating memory for the argument array*/
         SetupArgumentCalls(SetACStateActionHandle, 0, StateActionArgument, StateActionArgument_Name, StateActionArgument_Type);
-        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ARGS_NODE, "State", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ARGS_NODE, "State", IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &TEST_ARG1_NODE, sizeof(TEST_ARG1_NODE))
             .SetReturn(MULTITREE_INVALID_ARG);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG)).IgnoreArgument_treeHandle();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)) /*free-ing the copy of the buffer*/
+        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_ARG)).IgnoreArgument_treeHandle();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)) /*free-ing the copy of the buffer*/
             .IgnoreArgument(1);
         // act
         EXECUTE_COMMAND_RESULT result = CommandDecoder_ExecuteCommand(commandDecoderHandle, TEST_COMMAND);
@@ -1167,25 +1163,24 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         size_t argCount = 1;
         STRICT_EXPECTED_CALL(gballoc_malloc(strlen(TEST_COMMAND) + 1)); /*this creates a copy of the command that is given to JSON decoder*/
         SetupCommand(quotedSetACStateName, setACStateName);
-        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetACStateActionHandle, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetACStateActionHandle, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &argCount, sizeof(argCount));
-        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
-            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_ARG, IGNORED_ARG)); /*this is allocating memory for the argument array*/
         SetupArgumentCalls(SetACStateActionHandle, 0, StateActionArgument, StateActionArgument_Name, StateActionArgument_Type);
         const char* stateValue = "true";
-        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ARGS_NODE, "State", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ARGS_NODE, "State", IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &TEST_ARG1_NODE, sizeof(TEST_ARG1_NODE));
         STRICT_EXPECTED_CALL(CodeFirst_GetPrimitiveType("bool"))
             .SetReturn(EDM_BOOLEAN_TYPE);
-        STRICT_EXPECTED_CALL(MultiTree_GetValue(TEST_ARG1_NODE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetValue(TEST_ARG1_NODE, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &stateValue, sizeof(stateValue))
             .SetReturn(MULTITREE_INVALID_ARG);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG)).IgnoreArgument_treeHandle();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)) /*free-ing the copy of the buffer*/
+        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_ARG)).IgnoreArgument_treeHandle();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)) /*free-ing the copy of the buffer*/
             .IgnoreArgument(1);
 
         // act
@@ -1209,27 +1204,26 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         STRICT_EXPECTED_CALL(gballoc_malloc(strlen(TEST_COMMAND) + 1)); /*this creates a copy of the command that is given to JSON decoder*/
 
         SetupCommand(quotedSetACStateName, setACStateName);
-        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetACStateActionHandle, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetACStateActionHandle, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &argCount, sizeof(argCount));
-        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
-            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_ARG, IGNORED_ARG)); /*this is allocating memory for the argument array*/
         SetupArgumentCalls(SetACStateActionHandle, 0, StateActionArgument, StateActionArgument_Name, StateActionArgument_Type);
         const char* stateValue = "true";
-        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ARGS_NODE, "State", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ARGS_NODE, "State", IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &TEST_ARG1_NODE, sizeof(TEST_ARG1_NODE));
         STRICT_EXPECTED_CALL(CodeFirst_GetPrimitiveType("bool"))
             .SetReturn(EDM_BOOLEAN_TYPE);
-        STRICT_EXPECTED_CALL(MultiTree_GetValue(TEST_ARG1_NODE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetValue(TEST_ARG1_NODE, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &stateValue, sizeof(stateValue));
-        STRICT_EXPECTED_CALL(CreateAgentDataType_From_String(stateValue, EDM_BOOLEAN_TYPE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(CreateAgentDataType_From_String(stateValue, EDM_BOOLEAN_TYPE, IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &StateAgentDataType, sizeof(StateAgentDataType))
             .SetReturn(AGENT_DATA_TYPES_INVALID_ARG);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)) /*free-ing the copy of the buffer*/
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)) /*free-ing the copy of the buffer*/
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)) /*free-ing the copy of the buffer*/
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)) /*free-ing the copy of the buffer*/
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG)).IgnoreArgument_treeHandle();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)) /*free-ing the copy of the buffer*/
+        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_ARG)).IgnoreArgument_treeHandle();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)) /*free-ing the copy of the buffer*/
             .IgnoreArgument(1);
 
         // act
@@ -1254,46 +1248,45 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         SetupCommand(quotedSetACStateName, setACStateName);
 
         size_t argCount = 2;
-        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetACStateActionHandle, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetACStateActionHandle, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &argCount, sizeof(argCount));
-        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
-            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_ARG, IGNORED_ARG)); /*this is allocating memory for the argument array*/
         SetupArgumentCalls(SetACStateActionHandle, 0, StateActionArgument, StateActionArgument_Name, StateActionArgument_Type);
 
         const char* stateValue = "true";
-        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ARGS_NODE, "State", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ARGS_NODE, "State", IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &TEST_ARG1_NODE, sizeof(TEST_ARG1_NODE));
         STRICT_EXPECTED_CALL(CodeFirst_GetPrimitiveType("bool"))
             .SetReturn(EDM_BOOLEAN_TYPE);
-        STRICT_EXPECTED_CALL(MultiTree_GetValue(TEST_ARG1_NODE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetValue(TEST_ARG1_NODE, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &stateValue, sizeof(stateValue));
-        STRICT_EXPECTED_CALL(CreateAgentDataType_From_String(stateValue, EDM_BOOLEAN_TYPE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(CreateAgentDataType_From_String(stateValue, EDM_BOOLEAN_TYPE, IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &StateAgentDataType, sizeof(StateAgentDataType));
 
 
         /* arg 2 */
         SetupArgumentCalls(SetACStateActionHandle, 1, OtherArgActionArgument, OtherArgActionArgument_Name, OtherArgActionArgument_Type);
         const char* otherArgValue = OtherArgValue;
-        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ARGS_NODE, "OtherArg", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ARGS_NODE, "OtherArg", IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &TEST_ARG2_NODE, sizeof(TEST_ARG2_NODE));
         STRICT_EXPECTED_CALL(CodeFirst_GetPrimitiveType("ascii_char_ptr"))
             .SetReturn(EDM_STRING_TYPE);
-        STRICT_EXPECTED_CALL(MultiTree_GetValue(TEST_ARG2_NODE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetValue(TEST_ARG2_NODE, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &otherArgValue, sizeof(otherArgValue));
-        STRICT_EXPECTED_CALL(CreateAgentDataType_From_String(otherArgValue, EDM_STRING_TYPE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(CreateAgentDataType_From_String(otherArgValue, EDM_STRING_TYPE, IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &OtherArgAgentDataType, sizeof(OtherArgAgentDataType));
 
-        STRICT_EXPECTED_CALL(ActionCallbackMock(TEST_CALLBACK_CONTEXT_VALUE, "", "SetACState", 2, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(ActionCallbackMock(TEST_CALLBACK_CONTEXT_VALUE, "", "SetACState", 2, IGNORED_ARG))
             .IgnoreArgument(5);
 
-        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
-        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_ARG));
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)) /*free-ing the copy of the buffer*/
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)) /*free-ing the copy of the buffer*/
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG)).IgnoreArgument_treeHandle();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_ARG)).IgnoreArgument_treeHandle();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
 
         // act
@@ -1319,33 +1312,32 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         SetupCommand(quotedSetACStateName, setACStateName);
 
         size_t argCount = 2;
-        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetACStateActionHandle, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetACStateActionHandle, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &argCount, sizeof(argCount));
-        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
-            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_ARG, IGNORED_ARG)); /*this is allocating memory for the argument array*/
 
         SetupArgumentCalls(SetACStateActionHandle, 0, StateActionArgument, StateActionArgument_Name, StateActionArgument_Type);
         const char* stateValue = "true";
-        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ARGS_NODE, "State", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ARGS_NODE, "State", IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &TEST_ARG1_NODE, sizeof(TEST_ARG1_NODE));
         STRICT_EXPECTED_CALL(CodeFirst_GetPrimitiveType("bool"))
             .SetReturn(EDM_BOOLEAN_TYPE);
-        STRICT_EXPECTED_CALL(MultiTree_GetValue(TEST_ARG1_NODE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetValue(TEST_ARG1_NODE, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &stateValue, sizeof(stateValue));
-        STRICT_EXPECTED_CALL(CreateAgentDataType_From_String(stateValue, EDM_BOOLEAN_TYPE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(CreateAgentDataType_From_String(stateValue, EDM_BOOLEAN_TYPE, IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &StateAgentDataType, sizeof(StateAgentDataType));
 
         /* arg 2 */
         STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentByIndex(SetACStateActionHandle, 1))
             .SetReturn((SCHEMA_ACTION_ARGUMENT_HANDLE)NULL);
 
-        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG)).IgnoreArgument_treeHandle();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)) /*free-ing the copy of the buffer*/
+        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_ARG)).IgnoreArgument_treeHandle();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)) /*free-ing the copy of the buffer*/
             .IgnoreArgument(1);
 
         // act
@@ -1370,20 +1362,19 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
 
         SetupCommand(quotedSetACStateName, setACStateName);
         size_t argCount = 2;
-        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetACStateActionHandle, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetACStateActionHandle, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &argCount, sizeof(argCount));
-        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
-            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_ARG, IGNORED_ARG)); /*this is allocating memory for the argument array*/
 
         SetupArgumentCalls(SetACStateActionHandle, 0, StateActionArgument, StateActionArgument_Name, StateActionArgument_Type);
         const char* stateValue = "true";
-        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ARGS_NODE, "State", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ARGS_NODE, "State", IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &TEST_ARG1_NODE, sizeof(TEST_ARG1_NODE));
         STRICT_EXPECTED_CALL(CodeFirst_GetPrimitiveType("bool"))
             .SetReturn(EDM_BOOLEAN_TYPE);
-        STRICT_EXPECTED_CALL(MultiTree_GetValue(TEST_ARG1_NODE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetValue(TEST_ARG1_NODE, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &stateValue, sizeof(stateValue));
-        STRICT_EXPECTED_CALL(CreateAgentDataType_From_String(stateValue, EDM_BOOLEAN_TYPE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(CreateAgentDataType_From_String(stateValue, EDM_BOOLEAN_TYPE, IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &StateAgentDataType, sizeof(StateAgentDataType));
 
         /* arg 2 */
@@ -1392,13 +1383,13 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         STRICT_EXPECTED_CALL(Schema_GetActionArgumentName(OtherArgActionArgument))
             .SetReturn((const char*)NULL);
 
-        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG)).IgnoreArgument_treeHandle();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)) /*free-ing the copy of the buffer*/
+        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_ARG)).IgnoreArgument_treeHandle();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)) /*free-ing the copy of the buffer*/
             .IgnoreArgument(1);
 
         // act
@@ -1423,21 +1414,20 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
 
         SetupCommand(quotedSetACStateName, setACStateName);
         size_t argCount = 2;
-        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetACStateActionHandle, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetACStateActionHandle, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &argCount, sizeof(argCount));
-        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
-            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_ARG, IGNORED_ARG)); /*this is allocating memory for the argument array*/
 
 
         SetupArgumentCalls(SetACStateActionHandle, 0, StateActionArgument, StateActionArgument_Name, StateActionArgument_Type);
         const char* stateValue = "true";
-        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ARGS_NODE, "State", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ARGS_NODE, "State", IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &TEST_ARG1_NODE, sizeof(TEST_ARG1_NODE));
         STRICT_EXPECTED_CALL(CodeFirst_GetPrimitiveType("bool"))
             .SetReturn(EDM_BOOLEAN_TYPE);
-        STRICT_EXPECTED_CALL(MultiTree_GetValue(TEST_ARG1_NODE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetValue(TEST_ARG1_NODE, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &stateValue, sizeof(stateValue));
-        STRICT_EXPECTED_CALL(CreateAgentDataType_From_String(stateValue, EDM_BOOLEAN_TYPE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(CreateAgentDataType_From_String(stateValue, EDM_BOOLEAN_TYPE, IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &StateAgentDataType, sizeof(StateAgentDataType));
 
         /* arg 2 */
@@ -1448,13 +1438,13 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         STRICT_EXPECTED_CALL(Schema_GetActionArgumentType(OtherArgActionArgument))
             .SetReturn((const char*)NULL);
 
-        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG)).IgnoreArgument_treeHandle();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)) /*free-ing the copy of the buffer*/
+        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_ARG)).IgnoreArgument_treeHandle();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)) /*free-ing the copy of the buffer*/
             .IgnoreArgument(1);
 
         // act
@@ -1480,36 +1470,35 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
 
         SetupCommand(quotedSetACStateName, setACStateName);
         size_t argCount = 2;
-        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetACStateActionHandle, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetACStateActionHandle, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &argCount, sizeof(argCount));
-        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
-            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_ARG, IGNORED_ARG)); /*this is allocating memory for the argument array*/
 
 
         SetupArgumentCalls(SetACStateActionHandle, 0, StateActionArgument, StateActionArgument_Name, StateActionArgument_Type);
         const char* stateValue = "true";
-        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ARGS_NODE, "State", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ARGS_NODE, "State", IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &TEST_ARG1_NODE, sizeof(TEST_ARG1_NODE));
         STRICT_EXPECTED_CALL(CodeFirst_GetPrimitiveType("bool"))
             .SetReturn(EDM_BOOLEAN_TYPE);
-        STRICT_EXPECTED_CALL(MultiTree_GetValue(TEST_ARG1_NODE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetValue(TEST_ARG1_NODE, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &stateValue, sizeof(stateValue));
-        STRICT_EXPECTED_CALL(CreateAgentDataType_From_String(stateValue, EDM_BOOLEAN_TYPE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(CreateAgentDataType_From_String(stateValue, EDM_BOOLEAN_TYPE, IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &StateAgentDataType, sizeof(StateAgentDataType));
 
         /* arg 2 */
         SetupArgumentCalls(SetACStateActionHandle, 1, OtherArgActionArgument, OtherArgActionArgument_Name, OtherArgActionArgument_Type);
-        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ARGS_NODE, "OtherArg", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ARGS_NODE, "OtherArg", IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &TEST_ARG2_NODE, sizeof(TEST_ARG2_NODE))
             .SetReturn(MULTITREE_INVALID_ARG);
 
-        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)) /*free-ing the copy of the buffer*/
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)) /*free-ing the copy of the buffer*/
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)) /*free-ing the copy of the buffer*/
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)) /*free-ing the copy of the buffer*/
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG)).IgnoreArgument_treeHandle();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)) /*free-ing the copy of the buffer*/
+        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_ARG)).IgnoreArgument_treeHandle();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)) /*free-ing the copy of the buffer*/
             .IgnoreArgument(1);
 
         // act
@@ -1535,40 +1524,39 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
 
         SetupCommand(quotedSetACStateName, setACStateName);
         size_t argCount = 2;
-        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetACStateActionHandle, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetACStateActionHandle, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &argCount, sizeof(argCount));
-        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
-            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_ARG, IGNORED_ARG)); /*this is allocating memory for the argument array*/
 
         SetupArgumentCalls(SetACStateActionHandle, 0, StateActionArgument, StateActionArgument_Name, StateActionArgument_Type);
         const char* stateValue = "true";
-        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ARGS_NODE, "State", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ARGS_NODE, "State", IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &TEST_ARG1_NODE, sizeof(TEST_ARG1_NODE));
         STRICT_EXPECTED_CALL(CodeFirst_GetPrimitiveType("bool"))
             .SetReturn(EDM_BOOLEAN_TYPE);
-        STRICT_EXPECTED_CALL(MultiTree_GetValue(TEST_ARG1_NODE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetValue(TEST_ARG1_NODE, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &stateValue, sizeof(stateValue));
-        STRICT_EXPECTED_CALL(CreateAgentDataType_From_String(stateValue, EDM_BOOLEAN_TYPE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(CreateAgentDataType_From_String(stateValue, EDM_BOOLEAN_TYPE, IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &StateAgentDataType, sizeof(StateAgentDataType));
 
         /* arg 2 */
         SetupArgumentCalls(SetACStateActionHandle, 1, OtherArgActionArgument, OtherArgActionArgument_Name, OtherArgActionArgument_Type);
         const char* otherArgValue = OtherArgValue;
-        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ARGS_NODE, "OtherArg", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ARGS_NODE, "OtherArg", IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &TEST_ARG2_NODE, sizeof(TEST_ARG2_NODE));
         STRICT_EXPECTED_CALL(CodeFirst_GetPrimitiveType("ascii_char_ptr"))
             .SetReturn(EDM_STRING_TYPE);
-        STRICT_EXPECTED_CALL(MultiTree_GetValue(TEST_ARG2_NODE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetValue(TEST_ARG2_NODE, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &otherArgValue, sizeof(otherArgValue))
             .SetReturn(MULTITREE_INVALID_ARG);
 
-        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)) /*free-ing the copy of the buffer*/
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)) /*free-ing the copy of the buffer*/
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)) /*free-ing the copy of the buffer*/
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)) /*free-ing the copy of the buffer*/
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG)).IgnoreArgument_treeHandle();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)) /*free-ing the copy of the buffer*/
+        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_ARG)).IgnoreArgument_treeHandle();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)) /*free-ing the copy of the buffer*/
             .IgnoreArgument(1);
 
         // act
@@ -1594,42 +1582,41 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
 
         SetupCommand(quotedSetACStateName, setACStateName);
         size_t argCount = 2;
-        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetACStateActionHandle, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetACStateActionHandle, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &argCount, sizeof(argCount));
-        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
-            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_ARG, IGNORED_ARG)); /*this is allocating memory for the argument array*/
 
         SetupArgumentCalls(SetACStateActionHandle, 0, StateActionArgument, StateActionArgument_Name, StateActionArgument_Type);
-        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ARGS_NODE, "State", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ARGS_NODE, "State", IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &TEST_ARG1_NODE, sizeof(TEST_ARG1_NODE));
         const char* stateValue = "true";
         STRICT_EXPECTED_CALL(CodeFirst_GetPrimitiveType("bool"))
             .SetReturn(EDM_BOOLEAN_TYPE);
-        STRICT_EXPECTED_CALL(MultiTree_GetValue(TEST_ARG1_NODE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetValue(TEST_ARG1_NODE, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &stateValue, sizeof(stateValue));
-        STRICT_EXPECTED_CALL(CreateAgentDataType_From_String(stateValue, EDM_BOOLEAN_TYPE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(CreateAgentDataType_From_String(stateValue, EDM_BOOLEAN_TYPE, IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &StateAgentDataType, sizeof(StateAgentDataType));
 
         /* arg 2 */
         SetupArgumentCalls(SetACStateActionHandle, 1, OtherArgActionArgument, OtherArgActionArgument_Name, OtherArgActionArgument_Type);
         const char* otherArgValue = OtherArgValue;
-        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ARGS_NODE, "OtherArg", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ARGS_NODE, "OtherArg", IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &TEST_ARG2_NODE, sizeof(TEST_ARG2_NODE));
         STRICT_EXPECTED_CALL(CodeFirst_GetPrimitiveType("ascii_char_ptr"))
             .SetReturn(EDM_STRING_TYPE);
-        STRICT_EXPECTED_CALL(MultiTree_GetValue(TEST_ARG2_NODE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetValue(TEST_ARG2_NODE, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &otherArgValue, sizeof(otherArgValue));
-        STRICT_EXPECTED_CALL(CreateAgentDataType_From_String(otherArgValue, EDM_STRING_TYPE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(CreateAgentDataType_From_String(otherArgValue, EDM_STRING_TYPE, IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &OtherArgAgentDataType, sizeof(OtherArgAgentDataType))
             .SetReturn(AGENT_DATA_TYPES_INVALID_ARG);
 
-        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG)).IgnoreArgument_treeHandle();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)) /*free-ing the copy of the buffer*/
+        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_ARG)).IgnoreArgument_treeHandle();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)) /*free-ing the copy of the buffer*/
             .IgnoreArgument(1);
 
         // act
@@ -1653,26 +1640,24 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
 
         SetupCommand(quotedSetLocationName, setLocationName);
         size_t argCount = 1;
-        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetLocationActionHandle, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetLocationActionHandle, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &argCount, sizeof(argCount));
-        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
-            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_ARG, IGNORED_ARG)); /*this is allocating memory for the argument array*/
 
 
         SetupArgumentCalls(SetACStateActionHandle, 0, LocationActionArgument, LocationActionArgument_Name, LocationActionArgument_Type);
-        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ARGS_NODE, "Location", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ARGS_NODE, "Location", IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &TEST_ARG1_NODE, sizeof(TEST_ARG1_NODE));
         STRICT_EXPECTED_CALL(CodeFirst_GetPrimitiveType("GeoLocation"))
             .SetReturn(EDM_NO_TYPE);
         STRICT_EXPECTED_CALL(Schema_GetStructTypeByName(TEST_SCHEMA_HANDLE, "GeoLocation"))
             .SetReturn(TEST_STRUCT_1_HANDLE);
         size_t memberCount = 2;
-        STRICT_EXPECTED_CALL(Schema_GetStructTypePropertyCount(TEST_STRUCT_1_HANDLE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetStructTypePropertyCount(TEST_STRUCT_1_HANDLE, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &memberCount, sizeof(memberCount));
-        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating the member values of the struct*/
-            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_ARG, IGNORED_ARG)); /*this is allocating the member values of the struct*/
 
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is allocating the member names of the struct*/
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG)) /*this is allocating the member names of the struct*/
             .IgnoreArgument(1);
 
         /* member 1 */
@@ -1682,14 +1667,14 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
             .SetReturn("Lat");
         STRICT_EXPECTED_CALL(Schema_GetPropertyType(memberProperty1))
             .SetReturn("double");
-        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_ARG1_NODE, "Lat", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_ARG1_NODE, "Lat", IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &TEST_MEMBER1_NODE, sizeof(TEST_MEMBER1_NODE));
         const char* latValue = "42.42";
         STRICT_EXPECTED_CALL(CodeFirst_GetPrimitiveType("double"))
             .SetReturn(EDM_DOUBLE_TYPE);
-        STRICT_EXPECTED_CALL(MultiTree_GetValue(TEST_MEMBER1_NODE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetValue(TEST_MEMBER1_NODE, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &latValue, sizeof(latValue));
-        STRICT_EXPECTED_CALL(CreateAgentDataType_From_String(latValue, EDM_DOUBLE_TYPE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(CreateAgentDataType_From_String(latValue, EDM_DOUBLE_TYPE, IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &LatAgentDataType, sizeof(LatAgentDataType));
 
         /* member 2 */
@@ -1699,34 +1684,34 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
             .SetReturn("Long");
         STRICT_EXPECTED_CALL(Schema_GetPropertyType(memberProperty2))
             .SetReturn("double");
-        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_ARG1_NODE, "Long", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_ARG1_NODE, "Long", IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &TEST_MEMBER2_NODE, sizeof(TEST_MEMBER2_NODE));
         const char * longValue = "1.2";
         STRICT_EXPECTED_CALL(CodeFirst_GetPrimitiveType("double"))
             .SetReturn(EDM_DOUBLE_TYPE);
-        STRICT_EXPECTED_CALL(MultiTree_GetValue(TEST_MEMBER2_NODE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetValue(TEST_MEMBER2_NODE, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &longValue, sizeof(longValue));
-        STRICT_EXPECTED_CALL(CreateAgentDataType_From_String(longValue, EDM_DOUBLE_TYPE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(CreateAgentDataType_From_String(longValue, EDM_DOUBLE_TYPE, IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &LongAgentDataType, sizeof(LongAgentDataType));
 
-        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_Members(IGNORED_PTR_ARG, "GeoLocation", 2, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_Members(IGNORED_ARG, "GeoLocation", 2, IGNORED_ARG, IGNORED_ARG))
             .ValidateArgument(2).ValidateArgument(3);
 
-        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
-        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_ARG));
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(ActionCallbackMock(TEST_CALLBACK_CONTEXT_VALUE, "", "SetLocation", 1, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(ActionCallbackMock(TEST_CALLBACK_CONTEXT_VALUE, "", "SetLocation", 1, IGNORED_ARG))
             .IgnoreArgument(5);
-        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG)).IgnoreArgument_treeHandle();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)) /*free-ing the copy of the buffer*/
+        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_ARG)).IgnoreArgument_treeHandle();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)) /*free-ing the copy of the buffer*/
             .IgnoreArgument(1);
 
         // act
@@ -1752,37 +1737,35 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
 
         SetupCommand(quotedSetLocationName, setLocationName);
         size_t argCount = 1;
-        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetLocationActionHandle, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetLocationActionHandle, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &argCount, sizeof(argCount));
-        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
-            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_ARG, IGNORED_ARG)); /*this is allocating memory for the argument array*/
 
 
         SetupArgumentCalls(SetACStateActionHandle, 0, LocationActionArgument, LocationActionArgument_Name, LocationActionArgument_Type);
-        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ARGS_NODE, "Location", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ARGS_NODE, "Location", IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &TEST_ARG1_NODE, sizeof(TEST_ARG1_NODE));
         STRICT_EXPECTED_CALL(CodeFirst_GetPrimitiveType("GeoLocation"))
             .SetReturn(EDM_NO_TYPE);
         STRICT_EXPECTED_CALL(Schema_GetStructTypeByName(TEST_SCHEMA_HANDLE, "GeoLocation"))
             .SetReturn(TEST_STRUCT_1_HANDLE);
         size_t memberCount = 2;
-        STRICT_EXPECTED_CALL(Schema_GetStructTypePropertyCount(TEST_STRUCT_1_HANDLE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetStructTypePropertyCount(TEST_STRUCT_1_HANDLE, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &memberCount, sizeof(memberCount));
-        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating the member values of the struct*/
-            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_ARG, IGNORED_ARG)); /*this is allocating the member values of the struct*/
 
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is allocating the member names of the struct*/
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG)) /*this is allocating the member names of the struct*/
             .IgnoreArgument(1)
             .SetReturn(NULL);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG)).IgnoreArgument_treeHandle();
+        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_ARG)).IgnoreArgument_treeHandle();
 
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)) /*free-ing the copy of the buffer*/
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)) /*free-ing the copy of the buffer*/
             .IgnoreArgument(1);
 
         // act
@@ -1806,33 +1789,31 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
 
         SetupCommand(quotedSetLocationName, setLocationName);
         size_t argCount = 1;
-        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetLocationActionHandle, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetLocationActionHandle, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &argCount, sizeof(argCount));
-        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
-            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_ARG, IGNORED_ARG)); /*this is allocating memory for the argument array*/
 
 
         SetupArgumentCalls(SetACStateActionHandle, 0, LocationActionArgument, LocationActionArgument_Name, LocationActionArgument_Type);
-        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ARGS_NODE, "Location", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ARGS_NODE, "Location", IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &TEST_ARG1_NODE, sizeof(TEST_ARG1_NODE));
         STRICT_EXPECTED_CALL(CodeFirst_GetPrimitiveType("GeoLocation"))
             .SetReturn(EDM_NO_TYPE);
         STRICT_EXPECTED_CALL(Schema_GetStructTypeByName(TEST_SCHEMA_HANDLE, "GeoLocation"))
             .SetReturn(TEST_STRUCT_1_HANDLE);
         size_t memberCount = 2;
-        STRICT_EXPECTED_CALL(Schema_GetStructTypePropertyCount(TEST_STRUCT_1_HANDLE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetStructTypePropertyCount(TEST_STRUCT_1_HANDLE, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &memberCount, sizeof(memberCount));
 
-        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating the member values of the struct*/
-            .IgnoreAllArguments()
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_ARG, IGNORED_ARG)) /*this is allocating the member values of the struct*/
             .SetReturn(NULL);
 
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG)).IgnoreArgument_treeHandle();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)) /*free-ing the copy of the buffer*/
+        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_ARG)).IgnoreArgument_treeHandle();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)) /*free-ing the copy of the buffer*/
             .IgnoreArgument(1);
 
         // act
@@ -1856,24 +1837,23 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
 
         SetupCommand(quotedSetACStateName, setACStateName);
         size_t argCount = 1;
-        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetLocationActionHandle, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetLocationActionHandle, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &argCount, sizeof(argCount));
-        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
-            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_ARG, IGNORED_ARG)); /*this is allocating memory for the argument array*/
 
         SetupArgumentCalls(SetACStateActionHandle, 0, LocationActionArgument, LocationActionArgument_Name, LocationActionArgument_Type);
-        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ARGS_NODE, "Location", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ARGS_NODE, "Location", IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &TEST_ARG1_NODE, sizeof(TEST_ARG1_NODE));
         STRICT_EXPECTED_CALL(CodeFirst_GetPrimitiveType("GeoLocation"))
             .SetReturn(EDM_NO_TYPE);
         STRICT_EXPECTED_CALL(Schema_GetStructTypeByName(TEST_SCHEMA_HANDLE, "GeoLocation"))
             .SetReturn((SCHEMA_STRUCT_TYPE_HANDLE)NULL);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG)).IgnoreArgument_treeHandle();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)) /*free-ing the copy of the buffer*/
+        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_ARG)).IgnoreArgument_treeHandle();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)) /*free-ing the copy of the buffer*/
             .IgnoreArgument(1);
         // act
         EXECUTE_COMMAND_RESULT result = CommandDecoder_ExecuteCommand(commandDecoderHandle, TEST_COMMAND);
@@ -1896,28 +1876,27 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
 
         SetupCommand(quotedSetACStateName, setACStateName);
         size_t argCount = 1;
-        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetLocationActionHandle, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetLocationActionHandle, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &argCount, sizeof(argCount));
-        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
-            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_ARG, IGNORED_ARG)); /*this is allocating memory for the argument array*/
 
         SetupArgumentCalls(SetACStateActionHandle, 0, LocationActionArgument, LocationActionArgument_Name, LocationActionArgument_Type);
-        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ARGS_NODE, "Location", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ARGS_NODE, "Location", IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &TEST_ARG1_NODE, sizeof(TEST_ARG1_NODE));
         STRICT_EXPECTED_CALL(CodeFirst_GetPrimitiveType("GeoLocation"))
             .SetReturn(EDM_NO_TYPE);
         STRICT_EXPECTED_CALL(Schema_GetStructTypeByName(TEST_SCHEMA_HANDLE, "GeoLocation"))
             .SetReturn(TEST_STRUCT_1_HANDLE);
         size_t memberCount = 1;
-        STRICT_EXPECTED_CALL(Schema_GetStructTypePropertyCount(TEST_STRUCT_1_HANDLE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetStructTypePropertyCount(TEST_STRUCT_1_HANDLE, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &memberCount, sizeof(memberCount))
             .SetReturn(SCHEMA_ERROR);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG)).IgnoreArgument_treeHandle();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)) /*free-ing the copy of the buffer*/
+        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_ARG)).IgnoreArgument_treeHandle();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)) /*free-ing the copy of the buffer*/
             .IgnoreArgument(1);
 
         // act
@@ -1941,28 +1920,27 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
 
         SetupCommand(quotedSetACStateName, setACStateName);
         size_t argCount = 1;
-        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetLocationActionHandle, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetLocationActionHandle, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &argCount, sizeof(argCount));
-        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
-            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_ARG, IGNORED_ARG)); /*this is allocating memory for the argument array*/
 
         SetupArgumentCalls(SetACStateActionHandle, 0, LocationActionArgument, LocationActionArgument_Name, LocationActionArgument_Type);
-        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ARGS_NODE, "Location", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ARGS_NODE, "Location", IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &TEST_ARG1_NODE, sizeof(TEST_ARG1_NODE));
         STRICT_EXPECTED_CALL(CodeFirst_GetPrimitiveType("GeoLocation"))
             .SetReturn(EDM_NO_TYPE);
         STRICT_EXPECTED_CALL(Schema_GetStructTypeByName(TEST_SCHEMA_HANDLE, "GeoLocation"))
             .SetReturn(TEST_STRUCT_1_HANDLE);
         size_t memberCount = 0;
-        STRICT_EXPECTED_CALL(Schema_GetStructTypePropertyCount(TEST_STRUCT_1_HANDLE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetStructTypePropertyCount(TEST_STRUCT_1_HANDLE, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &memberCount, sizeof(memberCount));
 
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG)).IgnoreArgument_treeHandle();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)) /*free-ing the copy of the buffer*/
+        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_ARG)).IgnoreArgument_treeHandle();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)) /*free-ing the copy of the buffer*/
             .IgnoreArgument(1);
 
         // act
@@ -1986,40 +1964,38 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
 
         SetupCommand(quotedSetACStateName, setACStateName);
         size_t argCount = 1;
-        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetLocationActionHandle, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetLocationActionHandle, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &argCount, sizeof(argCount));
-        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
-            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_ARG, IGNORED_ARG)); /*this is allocating memory for the argument array*/
 
 
         SetupArgumentCalls(SetACStateActionHandle, 0, LocationActionArgument, LocationActionArgument_Name, LocationActionArgument_Type);
-        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ARGS_NODE, "Location", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ARGS_NODE, "Location", IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &TEST_ARG1_NODE, sizeof(TEST_ARG1_NODE));
         STRICT_EXPECTED_CALL(CodeFirst_GetPrimitiveType("GeoLocation"))
             .SetReturn(EDM_NO_TYPE);
         STRICT_EXPECTED_CALL(Schema_GetStructTypeByName(TEST_SCHEMA_HANDLE, "GeoLocation"))
             .SetReturn(TEST_STRUCT_1_HANDLE);
         size_t memberCount = 1;
-        STRICT_EXPECTED_CALL(Schema_GetStructTypePropertyCount(TEST_STRUCT_1_HANDLE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetStructTypePropertyCount(TEST_STRUCT_1_HANDLE, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &memberCount, sizeof(memberCount));
-        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating the member values of the struct*/
-            .IgnoreAllArguments();
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is allocating the member names of the struct*/
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_ARG, IGNORED_ARG)); /*this is allocating the member values of the struct*/
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG)) /*this is allocating the member names of the struct*/
             .IgnoreArgument(1);
 
         /* member 1 */
         STRICT_EXPECTED_CALL(Schema_GetStructTypePropertyByIndex(TEST_STRUCT_1_HANDLE, 0))
             .SetReturn((SCHEMA_PROPERTY_HANDLE)NULL);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG)).IgnoreArgument_treeHandle();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)) /*free-ing the copy of the buffer*/
+        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_ARG)).IgnoreArgument_treeHandle();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)) /*free-ing the copy of the buffer*/
             .IgnoreArgument(1);
 
         // act
@@ -2043,24 +2019,22 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
 
         SetupCommand(quotedSetACStateName, setACStateName);
         size_t argCount = 1;
-        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetLocationActionHandle, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetLocationActionHandle, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &argCount, sizeof(argCount));
-        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
-            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_ARG, IGNORED_ARG)); /*this is allocating memory for the argument array*/
 
         SetupArgumentCalls(SetACStateActionHandle, 0, LocationActionArgument, LocationActionArgument_Name, LocationActionArgument_Type);
-        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ARGS_NODE, "Location", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ARGS_NODE, "Location", IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &TEST_ARG1_NODE, sizeof(TEST_ARG1_NODE));
         STRICT_EXPECTED_CALL(CodeFirst_GetPrimitiveType("GeoLocation"))
             .SetReturn(EDM_NO_TYPE);
         STRICT_EXPECTED_CALL(Schema_GetStructTypeByName(TEST_SCHEMA_HANDLE, "GeoLocation"))
             .SetReturn(TEST_STRUCT_1_HANDLE);
         size_t memberCount = 1;
-        STRICT_EXPECTED_CALL(Schema_GetStructTypePropertyCount(TEST_STRUCT_1_HANDLE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetStructTypePropertyCount(TEST_STRUCT_1_HANDLE, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &memberCount, sizeof(memberCount));
-        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating the member values of the struct*/
-            .IgnoreAllArguments();
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is allocating the member names of the struct*/
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_ARG, IGNORED_ARG)); /*this is allocating the member values of the struct*/
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG)) /*this is allocating the member names of the struct*/
             .IgnoreArgument(1);
 
 
@@ -2069,16 +2043,16 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
             .SetReturn(memberProperty1);
         STRICT_EXPECTED_CALL(Schema_GetPropertyName(memberProperty1))
             .SetReturn((const char*)NULL);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG)).IgnoreArgument_treeHandle();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)) /*free-ing the copy of the buffer*/
+        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_ARG)).IgnoreArgument_treeHandle();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)) /*free-ing the copy of the buffer*/
             .IgnoreArgument(1);
 
         // act
@@ -2103,24 +2077,22 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         STRICT_EXPECTED_CALL(gballoc_malloc(strlen(TEST_COMMAND) + 1)); /*this creates a copy of the command that is given to JSON decoder*/
 
         SetupCommand(quotedSetACStateName, setACStateName);
-        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetLocationActionHandle, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetLocationActionHandle, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &argCount, sizeof(argCount));
-        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
-            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_ARG, IGNORED_ARG)); /*this is allocating memory for the argument array*/
 
         SetupArgumentCalls(SetACStateActionHandle, 0, LocationActionArgument, LocationActionArgument_Name, LocationActionArgument_Type);
-        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ARGS_NODE, "Location", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ARGS_NODE, "Location", IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &TEST_ARG1_NODE, sizeof(TEST_ARG1_NODE));
         STRICT_EXPECTED_CALL(CodeFirst_GetPrimitiveType("GeoLocation"))
             .SetReturn(EDM_NO_TYPE);
         STRICT_EXPECTED_CALL(Schema_GetStructTypeByName(TEST_SCHEMA_HANDLE, "GeoLocation"))
             .SetReturn(TEST_STRUCT_1_HANDLE);
         size_t memberCount = 1;
-        STRICT_EXPECTED_CALL(Schema_GetStructTypePropertyCount(TEST_STRUCT_1_HANDLE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetStructTypePropertyCount(TEST_STRUCT_1_HANDLE, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &memberCount, sizeof(memberCount));
-        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating the member values of the struct*/
-            .IgnoreAllArguments();
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is allocating the member names of the struct*/
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_ARG, IGNORED_ARG)); /*this is allocating the member values of the struct*/
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG)) /*this is allocating the member names of the struct*/
             .IgnoreArgument(1);
 
         /* member 1 */
@@ -2130,16 +2102,16 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
             .SetReturn("Lat");
         STRICT_EXPECTED_CALL(Schema_GetPropertyType(memberProperty1))
             .SetReturn((const char*)NULL);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG)).IgnoreArgument_treeHandle();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)) /*free-ing the copy of the buffer*/
+        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_ARG)).IgnoreArgument_treeHandle();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)) /*free-ing the copy of the buffer*/
             .IgnoreArgument(1);
 
         // act
@@ -2163,24 +2135,22 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
 
         SetupCommand(quotedSetACStateName, setACStateName);
         size_t argCount = 1;
-        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetLocationActionHandle, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetLocationActionHandle, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &argCount, sizeof(argCount));
-        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
-            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_ARG, IGNORED_ARG)); /*this is allocating memory for the argument array*/
 
         SetupArgumentCalls(SetACStateActionHandle, 0, LocationActionArgument, LocationActionArgument_Name, LocationActionArgument_Type);
-        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ARGS_NODE, "Location", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ARGS_NODE, "Location", IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &TEST_ARG1_NODE, sizeof(TEST_ARG1_NODE));
         STRICT_EXPECTED_CALL(CodeFirst_GetPrimitiveType("GeoLocation"))
             .SetReturn(EDM_NO_TYPE);
         STRICT_EXPECTED_CALL(Schema_GetStructTypeByName(TEST_SCHEMA_HANDLE, "GeoLocation"))
             .SetReturn(TEST_STRUCT_1_HANDLE);
         size_t memberCount = 1;
-        STRICT_EXPECTED_CALL(Schema_GetStructTypePropertyCount(TEST_STRUCT_1_HANDLE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetStructTypePropertyCount(TEST_STRUCT_1_HANDLE, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &memberCount, sizeof(memberCount));
-        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating the member values of the struct*/
-            .IgnoreAllArguments();
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is allocating the member names of the struct*/
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_ARG, IGNORED_ARG)); /*this is allocating the member values of the struct*/
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG)) /*this is allocating the member names of the struct*/
             .IgnoreArgument(1);
 
 
@@ -2191,19 +2161,19 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
             .SetReturn("Lat");
         STRICT_EXPECTED_CALL(Schema_GetPropertyType(memberProperty1))
             .SetReturn("double");
-        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_ARG1_NODE, "Lat", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_ARG1_NODE, "Lat", IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &TEST_MEMBER1_NODE, sizeof(TEST_MEMBER1_NODE))
             .SetReturn(MULTITREE_INVALID_ARG);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG)).IgnoreArgument_treeHandle();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)) /*free-ing the copy of the buffer*/
+        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_ARG)).IgnoreArgument_treeHandle();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)) /*free-ing the copy of the buffer*/
             .IgnoreArgument(1);
 
         // act
@@ -2227,24 +2197,22 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
 
         SetupCommand(quotedSetACStateName, setACStateName);
         size_t argCount = 1;
-        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetLocationActionHandle, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetLocationActionHandle, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &argCount, sizeof(argCount));
-        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
-            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_ARG, IGNORED_ARG)); /*this is allocating memory for the argument array*/
 
         SetupArgumentCalls(SetACStateActionHandle, 0, LocationActionArgument, LocationActionArgument_Name, LocationActionArgument_Type);
-        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ARGS_NODE, "Location", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ARGS_NODE, "Location", IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &TEST_ARG1_NODE, sizeof(TEST_ARG1_NODE));
         STRICT_EXPECTED_CALL(CodeFirst_GetPrimitiveType("GeoLocation"))
             .SetReturn(EDM_NO_TYPE);
         STRICT_EXPECTED_CALL(Schema_GetStructTypeByName(TEST_SCHEMA_HANDLE, "GeoLocation"))
             .SetReturn(TEST_STRUCT_1_HANDLE);
         size_t memberCount = 1;
-        STRICT_EXPECTED_CALL(Schema_GetStructTypePropertyCount(TEST_STRUCT_1_HANDLE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetStructTypePropertyCount(TEST_STRUCT_1_HANDLE, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &memberCount, sizeof(memberCount));
-        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating the member values of the struct*/
-            .IgnoreAllArguments();
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is allocating the member names of the struct*/
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_ARG, IGNORED_ARG)); /*this is allocating the member values of the struct*/
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG)) /*this is allocating the member names of the struct*/
             .IgnoreArgument(1);
 
         /* member 1 */
@@ -2255,24 +2223,24 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         STRICT_EXPECTED_CALL(Schema_GetPropertyType(memberProperty1))
             .SetReturn("double");
 
-        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_ARG1_NODE, "Lat", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_ARG1_NODE, "Lat", IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &TEST_MEMBER1_NODE, sizeof(TEST_MEMBER1_NODE));
         STRICT_EXPECTED_CALL(CodeFirst_GetPrimitiveType("double")) /*22*/
             .SetReturn(EDM_DOUBLE_TYPE);
         const char* latValue = "42.42";
-        STRICT_EXPECTED_CALL(MultiTree_GetValue(TEST_MEMBER1_NODE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetValue(TEST_MEMBER1_NODE, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &latValue, sizeof(latValue))
             .SetReturn(MULTITREE_INVALID_ARG);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG)).IgnoreArgument_treeHandle();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)) /*free-ing the copy of the buffer*/
+        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_ARG)).IgnoreArgument_treeHandle();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)) /*free-ing the copy of the buffer*/
             .IgnoreArgument(1);
 
         // act
@@ -2296,25 +2264,23 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
 
         SetupCommand(quotedSetACStateName, setACStateName);
         size_t argCount = 1;
-        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetLocationActionHandle, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetLocationActionHandle, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &argCount, sizeof(argCount));
-        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
-            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_ARG, IGNORED_ARG)); /*this is allocating memory for the argument array*/
 
 
         SetupArgumentCalls(SetACStateActionHandle, 0, LocationActionArgument, LocationActionArgument_Name, LocationActionArgument_Type);
-        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ARGS_NODE, "Location", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ARGS_NODE, "Location", IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &TEST_ARG1_NODE, sizeof(TEST_ARG1_NODE));
         STRICT_EXPECTED_CALL(CodeFirst_GetPrimitiveType("GeoLocation"))
             .SetReturn(EDM_NO_TYPE);
         STRICT_EXPECTED_CALL(Schema_GetStructTypeByName(TEST_SCHEMA_HANDLE, "GeoLocation"))
             .SetReturn(TEST_STRUCT_1_HANDLE);
         size_t memberCount = 1;
-        STRICT_EXPECTED_CALL(Schema_GetStructTypePropertyCount(TEST_STRUCT_1_HANDLE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetStructTypePropertyCount(TEST_STRUCT_1_HANDLE, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &memberCount, sizeof(memberCount));
-        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating the member values of the struct*/
-            .IgnoreAllArguments();
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is allocating the member names of the struct*/
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_ARG, IGNORED_ARG)); /*this is allocating the member values of the struct*/
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG)) /*this is allocating the member names of the struct*/
             .IgnoreArgument(1);
 
 
@@ -2325,26 +2291,26 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
             .SetReturn("Lat");
         STRICT_EXPECTED_CALL(Schema_GetPropertyType(memberProperty1))
             .SetReturn("double");
-        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_ARG1_NODE, "Lat", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_ARG1_NODE, "Lat", IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &TEST_MEMBER1_NODE, sizeof(TEST_MEMBER1_NODE));
         const char* latValue = "42.42";
         STRICT_EXPECTED_CALL(CodeFirst_GetPrimitiveType("double"))
             .SetReturn(EDM_DOUBLE_TYPE);
-        STRICT_EXPECTED_CALL(MultiTree_GetValue(TEST_MEMBER1_NODE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetValue(TEST_MEMBER1_NODE, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &latValue, sizeof(latValue));
-        STRICT_EXPECTED_CALL(CreateAgentDataType_From_String(latValue, EDM_DOUBLE_TYPE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(CreateAgentDataType_From_String(latValue, EDM_DOUBLE_TYPE, IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &LatAgentDataType, sizeof(LatAgentDataType))
             .SetReturn(AGENT_DATA_TYPES_INVALID_ARG);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG)).IgnoreArgument_treeHandle();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)) /*free-ing the copy of the buffer*/
+        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_ARG)).IgnoreArgument_treeHandle();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)) /*free-ing the copy of the buffer*/
             .IgnoreArgument(1);
 
         // act
@@ -2368,24 +2334,22 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
 
         SetupCommand(quotedSetACStateName, setACStateName);
         size_t argCount = 1;
-        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetLocationActionHandle, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetLocationActionHandle, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &argCount, sizeof(argCount));
-        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
-            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_ARG, IGNORED_ARG)); /*this is allocating memory for the argument array*/
 
         SetupArgumentCalls(SetACStateActionHandle, 0, LocationActionArgument, LocationActionArgument_Name, LocationActionArgument_Type);
-        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ARGS_NODE, "Location", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ARGS_NODE, "Location", IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &TEST_ARG1_NODE, sizeof(TEST_ARG1_NODE));
         STRICT_EXPECTED_CALL(CodeFirst_GetPrimitiveType("GeoLocation"))
             .SetReturn(EDM_NO_TYPE);
         STRICT_EXPECTED_CALL(Schema_GetStructTypeByName(TEST_SCHEMA_HANDLE, "GeoLocation"))
             .SetReturn(TEST_STRUCT_1_HANDLE);
         size_t memberCount = 1;
-        STRICT_EXPECTED_CALL(Schema_GetStructTypePropertyCount(TEST_STRUCT_1_HANDLE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetStructTypePropertyCount(TEST_STRUCT_1_HANDLE, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &memberCount, sizeof(memberCount));
-        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating the member values of the struct*/
-            .IgnoreAllArguments();
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is allocating the member names of the struct*/
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_ARG, IGNORED_ARG)); /*this is allocating the member values of the struct*/
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG)) /*this is allocating the member names of the struct*/
             .IgnoreArgument(1);
 
         /* member 1 */
@@ -2395,31 +2359,31 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
             .SetReturn("Lat");
         STRICT_EXPECTED_CALL(Schema_GetPropertyType(memberProperty1))
             .SetReturn("double");
-        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_ARG1_NODE, "Lat", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_ARG1_NODE, "Lat", IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &TEST_MEMBER1_NODE, sizeof(TEST_MEMBER1_NODE));
         STRICT_EXPECTED_CALL(CodeFirst_GetPrimitiveType("double"))
             .SetReturn(EDM_DOUBLE_TYPE);
         const char* latValue = "42.42";
-        STRICT_EXPECTED_CALL(MultiTree_GetValue(TEST_MEMBER1_NODE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetValue(TEST_MEMBER1_NODE, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &latValue, sizeof(latValue));
-        STRICT_EXPECTED_CALL(CreateAgentDataType_From_String(latValue, EDM_DOUBLE_TYPE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(CreateAgentDataType_From_String(latValue, EDM_DOUBLE_TYPE, IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &LatAgentDataType, sizeof(LatAgentDataType));
 
-        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_Members(IGNORED_PTR_ARG, "GeoLocation", 1, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_Members(IGNORED_ARG, "GeoLocation", 1, IGNORED_ARG, IGNORED_ARG))
             .ValidateArgument(2).ValidateArgument(3)
             .SetReturn(AGENT_DATA_TYPES_INVALID_ARG);
 
-        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG)).IgnoreArgument_treeHandle();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)) /*free-ing the copy of the buffer*/
+        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_ARG)).IgnoreArgument_treeHandle();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)) /*free-ing the copy of the buffer*/
             .IgnoreArgument(1);
 
         // act
@@ -2443,24 +2407,22 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
 
         SetupCommand(quotedSetACStateName, setACStateName);
         size_t argCount = 1;
-        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetLocationActionHandle, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetLocationActionHandle, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &argCount, sizeof(argCount));
-        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
-            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_ARG, IGNORED_ARG)); /*this is allocating memory for the argument array*/
 
         SetupArgumentCalls(SetACStateActionHandle, 0, LocationActionArgument, LocationActionArgument_Name, LocationActionArgument_Type);
-        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ARGS_NODE, "Location", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ARGS_NODE, "Location", IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &TEST_ARG1_NODE, sizeof(TEST_ARG1_NODE));
         STRICT_EXPECTED_CALL(CodeFirst_GetPrimitiveType("GeoLocation"))
             .SetReturn(EDM_NO_TYPE);
         STRICT_EXPECTED_CALL(Schema_GetStructTypeByName(TEST_SCHEMA_HANDLE, "GeoLocation"))
             .SetReturn(TEST_STRUCT_1_HANDLE);
         size_t memberCount = 2;
-        STRICT_EXPECTED_CALL(Schema_GetStructTypePropertyCount(TEST_STRUCT_1_HANDLE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetStructTypePropertyCount(TEST_STRUCT_1_HANDLE, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &memberCount, sizeof(memberCount));
-        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating the member values of the struct*/
-            .IgnoreAllArguments();
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is allocating the member names of the struct*/
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_ARG, IGNORED_ARG)); /*this is allocating the member values of the struct*/
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG)) /*this is allocating the member names of the struct*/
             .IgnoreArgument(1);
 
         /* member 1 */
@@ -2470,31 +2432,31 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
             .SetReturn("Lat");
         STRICT_EXPECTED_CALL(Schema_GetPropertyType(memberProperty1))
             .SetReturn("double");
-        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_ARG1_NODE, "Lat", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_ARG1_NODE, "Lat", IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &TEST_MEMBER1_NODE, sizeof(TEST_MEMBER1_NODE));
         const char* latValue = "42.42";
         STRICT_EXPECTED_CALL(CodeFirst_GetPrimitiveType("double"))
             .SetReturn(EDM_DOUBLE_TYPE);
-        STRICT_EXPECTED_CALL(MultiTree_GetValue(TEST_MEMBER1_NODE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetValue(TEST_MEMBER1_NODE, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &latValue, sizeof(latValue));
-        STRICT_EXPECTED_CALL(CreateAgentDataType_From_String(latValue, EDM_DOUBLE_TYPE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(CreateAgentDataType_From_String(latValue, EDM_DOUBLE_TYPE, IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &LatAgentDataType, sizeof(LatAgentDataType));
 
         /* member 2 */
         STRICT_EXPECTED_CALL(Schema_GetStructTypePropertyByIndex(TEST_STRUCT_1_HANDLE, 1))
             .SetReturn((SCHEMA_PROPERTY_HANDLE)NULL);
 
-        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG)).IgnoreArgument_treeHandle();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)) /*free-ing the copy of the buffer*/
+        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_ARG)).IgnoreArgument_treeHandle();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)) /*free-ing the copy of the buffer*/
             .IgnoreArgument(1);
 
         // act
@@ -2518,24 +2480,22 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
 
         SetupCommand(quotedSetLocationName, setLocationName);
         size_t argCount = 1;
-        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetLocationActionHandle, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetLocationActionHandle, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &argCount, sizeof(argCount));
-        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
-            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_ARG, IGNORED_ARG)); /*this is allocating memory for the argument array*/
 
         SetupArgumentCalls(SetACStateActionHandle, 0, LocationActionArgument, LocationActionArgument_Name, LocationActionArgument_Type);
-        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ARGS_NODE, "Location", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ARGS_NODE, "Location", IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &TEST_ARG1_NODE, sizeof(TEST_ARG1_NODE));
         STRICT_EXPECTED_CALL(CodeFirst_GetPrimitiveType("GeoLocation"))
             .SetReturn(EDM_NO_TYPE);
         STRICT_EXPECTED_CALL(Schema_GetStructTypeByName(TEST_SCHEMA_HANDLE, "GeoLocation"))
             .SetReturn(TEST_STRUCT_1_HANDLE);
         size_t memberCount = 1;
-        STRICT_EXPECTED_CALL(Schema_GetStructTypePropertyCount(TEST_STRUCT_1_HANDLE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetStructTypePropertyCount(TEST_STRUCT_1_HANDLE, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &memberCount, sizeof(memberCount));
-        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating the member values of the struct*/
-            .IgnoreAllArguments();
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is allocating the member names of the struct*/
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_ARG, IGNORED_ARG)); /*this is allocating the member values of the struct*/
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG)) /*this is allocating the member names of the struct*/
             .IgnoreArgument(1);
 
         /* member 1, nested complex type */
@@ -2545,18 +2505,17 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
             .SetReturn("NestedLocation");
         STRICT_EXPECTED_CALL(Schema_GetPropertyType(memberNestedComplexTypeProperty))
             .SetReturn("NestedGeoLocation");
-        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_ARG1_NODE, "NestedLocation", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_ARG1_NODE, "NestedLocation", IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &TEST_NESTED_STRUCT_NODE, sizeof(TEST_NESTED_STRUCT_NODE));
         STRICT_EXPECTED_CALL(CodeFirst_GetPrimitiveType("NestedGeoLocation"))
             .SetReturn(EDM_NO_TYPE);
         STRICT_EXPECTED_CALL(Schema_GetStructTypeByName(TEST_SCHEMA_HANDLE, "NestedGeoLocation"))
             .SetReturn(TEST_STRUCT_2_HANDLE);
         memberCount = 2;
-        STRICT_EXPECTED_CALL(Schema_GetStructTypePropertyCount(TEST_STRUCT_2_HANDLE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetStructTypePropertyCount(TEST_STRUCT_2_HANDLE, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &memberCount, sizeof(memberCount));
-        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating the member values of the struct*/
-            .IgnoreAllArguments();
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is allocating the member names of the struct*/
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_ARG, IGNORED_ARG)); /*this is allocating the member values of the struct*/
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG)) /*this is allocating the member names of the struct*/
             .IgnoreArgument(1);
 
         /* member 1, nested */
@@ -2566,14 +2525,14 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
             .SetReturn("Lat");
         STRICT_EXPECTED_CALL(Schema_GetPropertyType(memberProperty1))
             .SetReturn("double");
-        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_NESTED_STRUCT_NODE, "Lat", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_NESTED_STRUCT_NODE, "Lat", IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &TEST_MEMBER1_NODE, sizeof(TEST_MEMBER1_NODE));
         STRICT_EXPECTED_CALL(CodeFirst_GetPrimitiveType("double"))
             .SetReturn(EDM_DOUBLE_TYPE);
         const char* latValue = "42.42";
-        STRICT_EXPECTED_CALL(MultiTree_GetValue(TEST_MEMBER1_NODE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetValue(TEST_MEMBER1_NODE, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &latValue, sizeof(latValue));
-        STRICT_EXPECTED_CALL(CreateAgentDataType_From_String(latValue, EDM_DOUBLE_TYPE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(CreateAgentDataType_From_String(latValue, EDM_DOUBLE_TYPE, IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &LatAgentDataType, sizeof(LatAgentDataType));
 
         /* member 2, nested */
@@ -2583,43 +2542,43 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
             .SetReturn("Long");
         STRICT_EXPECTED_CALL(Schema_GetPropertyType(memberProperty2))
             .SetReturn("double");
-        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_NESTED_STRUCT_NODE, "Long", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_NESTED_STRUCT_NODE, "Long", IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &TEST_MEMBER2_NODE, sizeof(TEST_MEMBER2_NODE));
         STRICT_EXPECTED_CALL(CodeFirst_GetPrimitiveType("double"))
             .SetReturn(EDM_DOUBLE_TYPE);
         const char* longValue = "1.2";
-        STRICT_EXPECTED_CALL(MultiTree_GetValue(TEST_MEMBER2_NODE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetValue(TEST_MEMBER2_NODE, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &longValue, sizeof(longValue));
-        STRICT_EXPECTED_CALL(CreateAgentDataType_From_String(longValue, EDM_DOUBLE_TYPE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(CreateAgentDataType_From_String(longValue, EDM_DOUBLE_TYPE, IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &LongAgentDataType, sizeof(LongAgentDataType));
 
-        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_Members(IGNORED_PTR_ARG, "NestedGeoLocation", 2, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_Members(IGNORED_ARG, "NestedGeoLocation", 2, IGNORED_ARG, IGNORED_ARG))
             .ValidateArgument(2).ValidateArgument(3);
 
-        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
-        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_ARG));
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_Members(IGNORED_PTR_ARG, "GeoLocation", 1, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_Members(IGNORED_ARG, "GeoLocation", 1, IGNORED_ARG, IGNORED_ARG))
             .ValidateArgument(2).ValidateArgument(3);
-        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(ActionCallbackMock(TEST_CALLBACK_CONTEXT_VALUE, "", "SetLocation", 1, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(ActionCallbackMock(TEST_CALLBACK_CONTEXT_VALUE, "", "SetLocation", 1, IGNORED_ARG))
             .IgnoreArgument(5);
 
-        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_ARG));
 
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG)).IgnoreArgument_treeHandle();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)) /*free-ing the copy of the buffer*/
+        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_ARG)).IgnoreArgument_treeHandle();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)) /*free-ing the copy of the buffer*/
             .IgnoreArgument(1);
 
         // act
@@ -2646,35 +2605,35 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
 
         STRICT_EXPECTED_CALL(gballoc_malloc(strlen(TEST_COMMAND) + 1)); /*this creates a copy of the command that is given to JSON decoder*/
 
-        STRICT_EXPECTED_CALL(JSONDecoder_JSON_To_MultiTree(TestCommand, IGNORED_PTR_ARG)).IgnoreArgument(2);
+        STRICT_EXPECTED_CALL(JSONDecoder_JSON_To_MultiTree(TestCommand, IGNORED_ARG)).IgnoreArgument(2);
         STRICT_EXPECTED_CALL(Schema_GetSchemaForModelType(TEST_MODEL_HANDLE));
-        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ROOT_NODE, "Name", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ROOT_NODE, "Name", IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &TEST_COMMAND_NAME_NODE, sizeof(TEST_COMMAND_NAME_NODE));
-        STRICT_EXPECTED_CALL(MultiTree_GetValue(TEST_COMMAND_NAME_NODE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetValue(TEST_COMMAND_NAME_NODE, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &quotedActionName, sizeof(quotedActionName));
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is relativeActionPath*/ /*well - first part of it ="ChildModel"*/
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG)) /*this is relativeActionPath*/ /*well - first part of it ="ChildModel"*/
             .IgnoreArgument(1);
 
         STRICT_EXPECTED_CALL(Schema_GetModelModelByName(TEST_MODEL_HANDLE, "ChildModel"));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is relativeActionPath*/ /*well - first part of it ="ChildModel"*/
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG)) /*this is relativeActionPath*/ /*well - first part of it ="ChildModel"*/
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ROOT_NODE, "Parameters", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ROOT_NODE, "Parameters", IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &TEST_COMMAND_ARGS_NODE, sizeof(TEST_COMMAND_ARGS_NODE));
 
         STRICT_EXPECTED_CALL(Schema_GetModelActionByName(TEST_CHILD_MODEL_HANDLE, "SetACState"))
             .SetReturn(SetACStateActionHandle);
         size_t argCount = 0;
-        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetACStateActionHandle, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetACStateActionHandle, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &argCount, sizeof(argCount));
         STRICT_EXPECTED_CALL(ActionCallbackMock(TEST_CALLBACK_CONTEXT_VALUE, "ChildModel", "SetACState", 0, NULL));
 
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG)).IgnoreArgument_treeHandle();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)) /*free-ing the copy of the buffer*/
+        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_ARG)).IgnoreArgument_treeHandle();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)) /*free-ing the copy of the buffer*/
             .IgnoreArgument(1);
 
         // act
@@ -2699,35 +2658,35 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
 
         STRICT_EXPECTED_CALL(gballoc_malloc(strlen(TEST_COMMAND) + 1)); /*this creates a copy of the command that is given to JSON decoder*/
 
-        STRICT_EXPECTED_CALL(JSONDecoder_JSON_To_MultiTree(TestCommand, IGNORED_PTR_ARG)).IgnoreArgument(2);
+        STRICT_EXPECTED_CALL(JSONDecoder_JSON_To_MultiTree(TestCommand, IGNORED_ARG)).IgnoreArgument(2);
         STRICT_EXPECTED_CALL(Schema_GetSchemaForModelType(TEST_MODEL_HANDLE));
-        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ROOT_NODE, "Name", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ROOT_NODE, "Name", IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &TEST_COMMAND_NAME_NODE, sizeof(TEST_COMMAND_NAME_NODE));
-        STRICT_EXPECTED_CALL(MultiTree_GetValue(TEST_COMMAND_NAME_NODE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetValue(TEST_COMMAND_NAME_NODE, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &quotedActionName, sizeof(quotedActionName));
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is relativeActionPath*/ /*well - first part of it ="ChildModel"*/
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG)) /*this is relativeActionPath*/ /*well - first part of it ="ChildModel"*/
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(Schema_GetModelModelByName(TEST_MODEL_HANDLE, "ChildModel"));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is relativeActionPath*/ /*well - last part of it ="SetACState"*/
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG)) /*this is relativeActionPath*/ /*well - last part of it ="SetACState"*/
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ROOT_NODE, "Parameters", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ROOT_NODE, "Parameters", IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &TEST_COMMAND_ARGS_NODE, sizeof(TEST_COMMAND_ARGS_NODE));
 
         STRICT_EXPECTED_CALL(Schema_GetModelActionByName(TEST_CHILD_MODEL_HANDLE, "SetACState"))
             .SetReturn(SetACStateActionHandle);
         size_t argCount = 0;
-        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetACStateActionHandle, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetACStateActionHandle, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &argCount, sizeof(argCount));
         STRICT_EXPECTED_CALL(ActionCallbackMock(TEST_CALLBACK_CONTEXT_VALUE, "ChildModel", "SetACState", 0, NULL))
             .SetReturn(EXECUTE_COMMAND_FAILED);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG)).IgnoreArgument_treeHandle();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)) /*free-ing the copy of the buffer*/
+        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_ARG)).IgnoreArgument_treeHandle();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)) /*free-ing the copy of the buffer*/
             .IgnoreArgument(1);
 
         // act
@@ -2752,35 +2711,35 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
 
         STRICT_EXPECTED_CALL(gballoc_malloc(strlen(TEST_COMMAND) + 1)); /*this creates a copy of the command that is given to JSON decoder*/
 
-        STRICT_EXPECTED_CALL(JSONDecoder_JSON_To_MultiTree(TestCommand, IGNORED_PTR_ARG)).IgnoreArgument(2);
+        STRICT_EXPECTED_CALL(JSONDecoder_JSON_To_MultiTree(TestCommand, IGNORED_ARG)).IgnoreArgument(2);
         STRICT_EXPECTED_CALL(Schema_GetSchemaForModelType(TEST_MODEL_HANDLE));
-        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ROOT_NODE, "Name", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ROOT_NODE, "Name", IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &TEST_COMMAND_NAME_NODE, sizeof(TEST_COMMAND_NAME_NODE));
-        STRICT_EXPECTED_CALL(MultiTree_GetValue(TEST_COMMAND_NAME_NODE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetValue(TEST_COMMAND_NAME_NODE, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &quotedActionName, sizeof(quotedActionName));
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is relativeActionPath*/ /*well - first part of it ="ChildModel"*/
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG)) /*this is relativeActionPath*/ /*well - first part of it ="ChildModel"*/
             .IgnoreArgument(1);
 
         STRICT_EXPECTED_CALL(Schema_GetModelModelByName(TEST_MODEL_HANDLE, "ChildModel"));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is relativeActionPath*/ /*well - last part of it ="SetACState"*/
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG)) /*this is relativeActionPath*/ /*well - last part of it ="SetACState"*/
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ROOT_NODE, "Parameters", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ROOT_NODE, "Parameters", IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &TEST_COMMAND_ARGS_NODE, sizeof(TEST_COMMAND_ARGS_NODE));
 
         STRICT_EXPECTED_CALL(Schema_GetModelActionByName(TEST_CHILD_MODEL_HANDLE, "SetACState"))
             .SetReturn(SetACStateActionHandle);
         size_t argCount = 0;
-        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetACStateActionHandle, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetACStateActionHandle, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &argCount, sizeof(argCount));
         STRICT_EXPECTED_CALL(ActionCallbackMock(TEST_CALLBACK_CONTEXT_VALUE, "ChildModel", "SetACState", 0, NULL))
             .SetReturn(EXECUTE_COMMAND_ERROR);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG)).IgnoreArgument_treeHandle();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)) /*free-ing the copy of the buffer*/
+        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_ARG)).IgnoreArgument_treeHandle();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)) /*free-ing the copy of the buffer*/
             .IgnoreArgument(1);
 
         // act
@@ -2804,20 +2763,20 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
 
         STRICT_EXPECTED_CALL(gballoc_malloc(strlen(TEST_COMMAND) + 1)); /*this creates a copy of the command that is given to JSON decoder*/
 
-        STRICT_EXPECTED_CALL(JSONDecoder_JSON_To_MultiTree(TestCommand, IGNORED_PTR_ARG)).IgnoreArgument(2);
+        STRICT_EXPECTED_CALL(JSONDecoder_JSON_To_MultiTree(TestCommand, IGNORED_ARG)).IgnoreArgument(2);
         STRICT_EXPECTED_CALL(Schema_GetSchemaForModelType(TEST_MODEL_HANDLE));
-        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ROOT_NODE, "Name", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ROOT_NODE, "Name", IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &TEST_COMMAND_NAME_NODE, sizeof(TEST_COMMAND_NAME_NODE));
-        STRICT_EXPECTED_CALL(MultiTree_GetValue(TEST_COMMAND_NAME_NODE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetValue(TEST_COMMAND_NAME_NODE, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &quotedActionName, sizeof(quotedActionName));
 
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is relativeActionPath*/ /*well - first part of it ="ChildModel"*/
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG)) /*this is relativeActionPath*/ /*well - first part of it ="ChildModel"*/
             .IgnoreArgument(1)
             .SetReturn(NULL);
 
 
-        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG)).IgnoreArgument_treeHandle();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)) /*free-ing the copy of the buffer*/
+        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_ARG)).IgnoreArgument_treeHandle();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)) /*free-ing the copy of the buffer*/
             .IgnoreArgument(1);
 
         ASSERT_IS_NOT_NULL(CommandDecoder_ExecuteCommand);
@@ -2842,23 +2801,23 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         const char* quotedActionName = "\"ChildModel/SetLocation\"";
 
         STRICT_EXPECTED_CALL(gballoc_malloc(strlen(TEST_COMMAND) + 1)); /*this creates a copy of the command that is given to JSON decoder*/
-        STRICT_EXPECTED_CALL(JSONDecoder_JSON_To_MultiTree(TestCommand, IGNORED_PTR_ARG)).IgnoreArgument(2);
+        STRICT_EXPECTED_CALL(JSONDecoder_JSON_To_MultiTree(TestCommand, IGNORED_ARG)).IgnoreArgument(2);
         STRICT_EXPECTED_CALL(Schema_GetSchemaForModelType(TEST_MODEL_HANDLE));
-        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ROOT_NODE, "Name", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ROOT_NODE, "Name", IGNORED_ARG))
             .CopyOutArgumentBuffer(3, &TEST_COMMAND_NAME_NODE, sizeof(TEST_COMMAND_NAME_NODE));
-        STRICT_EXPECTED_CALL(MultiTree_GetValue(TEST_COMMAND_NAME_NODE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetValue(TEST_COMMAND_NAME_NODE, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &quotedActionName, sizeof(quotedActionName));
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is relativeActionPath*/ /*well - first part of it ="ChildModel"*/
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG)) /*this is relativeActionPath*/ /*well - first part of it ="ChildModel"*/
             .IgnoreArgument(1);
 
         /*this is relativeActionPath*/ /*well - notice there's no last part of it not found*/
 
         STRICT_EXPECTED_CALL(Schema_GetModelModelByName(TEST_MODEL_HANDLE, "ChildModel"))
             .SetReturn((SCHEMA_MODEL_TYPE_HANDLE)NULL);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG)).IgnoreArgument_treeHandle();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)) /*free-ing the copy of the buffer*/
+        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_ARG)).IgnoreArgument_treeHandle();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)) /*free-ing the copy of the buffer*/
             .IgnoreArgument(1);
 
         // act
@@ -2921,19 +2880,19 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
 
     void CommandDecoder_IngestDesiredProperties_with_1_simple_desired_property_succeeds_inert_path(unsigned char* deviceMemoryArea, const char* desiredPropertiesJSON, const char* three, size_t one, MULTITREE_HANDLE childHandle, bool desiredPropertyHasCallback)
     {
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, desiredPropertiesJSON))
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, desiredPropertiesJSON))
             .IgnoreArgument_destination();
 
-        STRICT_EXPECTED_CALL(JSONDecoder_JSON_To_MultiTree(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(JSONDecoder_JSON_To_MultiTree(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_json()
             .IgnoreArgument_multiTreeHandle();
 
-        STRICT_EXPECTED_CALL(MultiTree_DeleteChild(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CallCannotFail();
+        STRICT_EXPECTED_CALL(MultiTree_DeleteChild(IGNORED_ARG, IGNORED_ARG)).CallCannotFail();
 
-        STRICT_EXPECTED_CALL(MultiTree_GetChildCount(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CallCannotFail()
+        STRICT_EXPECTED_CALL(MultiTree_GetChildCount(IGNORED_ARG, IGNORED_ARG)).CallCannotFail()
             .CopyOutArgumentBuffer_count(&one, sizeof(one));
 
-        STRICT_EXPECTED_CALL(MultiTree_GetChild(IGNORED_PTR_ARG, 0, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetChild(IGNORED_ARG, 0, IGNORED_ARG))
             .IgnoreArgument_treeHandle()
             .CopyOutArgumentBuffer_childHandle(&childHandle, sizeof(childHandle));
 
@@ -2963,11 +2922,11 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
             .CallCannotFail()
             .SetReturn(EDM_INT32_TYPE);
 
-        STRICT_EXPECTED_CALL(MultiTree_GetValue(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetValue(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_treeHandle()
             .CopyOutArgumentBuffer_destination(&three, sizeof(three));
 
-        STRICT_EXPECTED_CALL(CreateAgentDataType_From_String(IGNORED_PTR_ARG, EDM_INT32_TYPE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(CreateAgentDataType_From_String(IGNORED_ARG, EDM_INT32_TYPE, IGNORED_ARG))
             .IgnoreArgument_source()
             .IgnoreArgument_agentData()
             .SetReturn(AGENT_DATA_TYPES_OK);
@@ -2980,25 +2939,25 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
             .CallCannotFail()
             .SetReturn(2);
 
-        STRICT_EXPECTED_CALL(int_pfDesiredPropertyFromAGENT_DATA_TYPE(IGNORED_PTR_ARG, (unsigned char*)deviceMemoryArea + 2))
+        STRICT_EXPECTED_CALL(int_pfDesiredPropertyFromAGENT_DATA_TYPE(IGNORED_ARG, (unsigned char*)deviceMemoryArea + 2))
             .IgnoreArgument_source();
 
-        STRICT_EXPECTED_CALL(Schema_GetModelDesiredProperty_pfOnDesiredProperty(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetModelDesiredProperty_pfOnDesiredProperty(IGNORED_ARG))
             .CallCannotFail()
             .SetReturn(desiredPropertyHasCallback ? onDesiredPropertySimpleProperty : NULL);
 
         if (desiredPropertyHasCallback)
         {
-            STRICT_EXPECTED_CALL(onDesiredPropertySimpleProperty(IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(onDesiredPropertySimpleProperty(IGNORED_ARG));
         }
 
-        STRICT_EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_ARG));
 
         STRICT_EXPECTED_CALL(STRING_delete(TEST_STRING_HANDLE_CHILD_NAME));
 
-        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_ARG));
 
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
     }
 
     /*case1: a simple property (non-recursive) is ingested*/
@@ -3069,22 +3028,22 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
 
     void CommandDecoder_IngestDesiredProperties_with_1_simple_model_in_model_desired_property_inert_path(unsigned char* deviceMemoryArea, const char* desiredPropertiesJSON, const char* three, size_t one, MULTITREE_HANDLE childHandle, bool desiredPropertiesHaveCallbacks)
     {
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, desiredPropertiesJSON))
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, desiredPropertiesJSON))
             .IgnoreArgument_destination();
 
-        STRICT_EXPECTED_CALL(JSONDecoder_JSON_To_MultiTree(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(JSONDecoder_JSON_To_MultiTree(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_json()
             .IgnoreArgument_multiTreeHandle();
 
-        STRICT_EXPECTED_CALL(MultiTree_DeleteChild(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_DeleteChild(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_treeHandle()
             .IgnoreArgument_childName();
 
-        STRICT_EXPECTED_CALL(MultiTree_GetChildCount(IGNORED_PTR_ARG, IGNORED_PTR_ARG)) /*2*/
+        STRICT_EXPECTED_CALL(MultiTree_GetChildCount(IGNORED_ARG, IGNORED_ARG)) /*2*/
             .IgnoreArgument_treeHandle()
             .CopyOutArgumentBuffer_count(&one, sizeof(one));
 
-        STRICT_EXPECTED_CALL(MultiTree_GetChild(IGNORED_PTR_ARG, 0, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetChild(IGNORED_ARG, 0, IGNORED_ARG))
             .IgnoreArgument_treeHandle()
             .CopyOutArgumentBuffer_childHandle(&childHandle, sizeof(childHandle));
 
@@ -3105,11 +3064,11 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         /*here recursion happens*/
 
         {
-            STRICT_EXPECTED_CALL(MultiTree_GetChildCount(IGNORED_PTR_ARG, IGNORED_PTR_ARG)) /*10*/
+            STRICT_EXPECTED_CALL(MultiTree_GetChildCount(IGNORED_ARG, IGNORED_ARG)) /*10*/
                 .IgnoreArgument_treeHandle()
                 .CopyOutArgumentBuffer_count(&one, sizeof(one));
 
-            STRICT_EXPECTED_CALL(MultiTree_GetChild(IGNORED_PTR_ARG, 0, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL(MultiTree_GetChild(IGNORED_ARG, 0, IGNORED_ARG))
                 .IgnoreArgument_treeHandle()
                 .CopyOutArgumentBuffer_childHandle(&childHandle, sizeof(childHandle));
 
@@ -3135,11 +3094,11 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
             STRICT_EXPECTED_CALL(CodeFirst_GetPrimitiveType("int")) /*19*/
                 .SetReturn(EDM_INT32_TYPE);
 
-            STRICT_EXPECTED_CALL(MultiTree_GetValue(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL(MultiTree_GetValue(IGNORED_ARG, IGNORED_ARG))
                 .IgnoreArgument_treeHandle()
                 .CopyOutArgumentBuffer_destination(&three, sizeof(three));
 
-            STRICT_EXPECTED_CALL(CreateAgentDataType_From_String(IGNORED_PTR_ARG, EDM_INT32_TYPE, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL(CreateAgentDataType_From_String(IGNORED_ARG, EDM_INT32_TYPE, IGNORED_ARG))
                 .IgnoreArgument_source()
                 .IgnoreArgument_agentData()
                 .SetReturn(AGENT_DATA_TYPES_OK);
@@ -3150,42 +3109,42 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
             STRICT_EXPECTED_CALL(Schema_GetModelDesiredProperty_offset(TEST_DESIRED_PROPERTY_HANDLE_INT_FIELD)) /*23*/
                 .SetReturn(2);
 
-            STRICT_EXPECTED_CALL(int_pfDesiredPropertyFromAGENT_DATA_TYPE(IGNORED_PTR_ARG, (unsigned char*)deviceMemoryArea + 12))  /*notice here the new offset (2+10)*/
+            STRICT_EXPECTED_CALL(int_pfDesiredPropertyFromAGENT_DATA_TYPE(IGNORED_ARG, (unsigned char*)deviceMemoryArea + 12))  /*notice here the new offset (2+10)*/
                 .IgnoreArgument_source();
 
-            STRICT_EXPECTED_CALL(Schema_GetModelDesiredProperty_pfOnDesiredProperty(IGNORED_PTR_ARG)) /*24*/
+            STRICT_EXPECTED_CALL(Schema_GetModelDesiredProperty_pfOnDesiredProperty(IGNORED_ARG)) /*24*/
                 .IgnoreArgument_desiredPropertyHandle()
                 .SetReturn(desiredPropertiesHaveCallbacks ? onDesiredPropertySimpleProperty : NULL);
 
             if (desiredPropertiesHaveCallbacks)
             {
-                STRICT_EXPECTED_CALL(onDesiredPropertySimpleProperty(IGNORED_PTR_ARG))
+                STRICT_EXPECTED_CALL(onDesiredPropertySimpleProperty(IGNORED_ARG))
                     .IgnoreArgument_v();
             }
 
 
-            STRICT_EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_ARG))
                 .IgnoreArgument_agentData();
 
             STRICT_EXPECTED_CALL(STRING_delete(TEST_STRING_HANDLE_CHILD_NAME));
         }
 
-        STRICT_EXPECTED_CALL(Schema_GetModelModelByName_OnDesiredProperty(IGNORED_PTR_ARG, "modelInModel")) /*27*/
+        STRICT_EXPECTED_CALL(Schema_GetModelModelByName_OnDesiredProperty(IGNORED_ARG, "modelInModel")) /*27*/
             .IgnoreArgument_modelTypeHandle()
             .SetReturn(desiredPropertiesHaveCallbacks ? onDesiredPropertyModelInModel : NULL);
 
         if (desiredPropertiesHaveCallbacks)
         {
-            STRICT_EXPECTED_CALL(onDesiredPropertyModelInModel(IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL(onDesiredPropertyModelInModel(IGNORED_ARG))
                 .IgnoreArgument_v();
         }
 
         STRICT_EXPECTED_CALL(STRING_delete(TEST_STRING_HANDLE_CHILD_NAME));
 
-        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_ARG))
             .IgnoreArgument_treeHandle();
 
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument_ptr();
     }
 
@@ -3401,13 +3360,13 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         STRICT_EXPECTED_CALL(Schema_GetSchemaForModelType(TEST_MODEL_HANDLE));
         STRICT_EXPECTED_CALL(gballoc_malloc(1)); /*this is the string "" for relative relativeMethodPath*/
         STRICT_EXPECTED_CALL(Schema_GetModelMethodByName(TEST_MODEL_HANDLE, "methodA"));
-        STRICT_EXPECTED_CALL(Schema_GetModelMethodArgumentCount(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetModelMethodArgumentCount(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_methodHandle()
             .IgnoreArgument_argumentCount()
             .CopyOutArgumentBuffer_argumentCount(zero, sizeof(*zero));
 
         STRICT_EXPECTED_CALL(methodCallbackMock(TEST_CALLBACK_CONTEXT_VALUE, "", "methodA", 0, NULL));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)) /*this is freeing the relativeMethodPath*/
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)) /*this is freeing the relativeMethodPath*/
             .IgnoreArgument_ptr();
     }
 
@@ -3469,21 +3428,21 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
 
     static void CommandDecoder_ExecuteMethod_with_1_arg_payload_inert_path(size_t* one, const char* methodPayload, const char** aValue)
     {
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, methodPayload))
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, methodPayload))
             .IgnoreArgument_destination();
-        STRICT_EXPECTED_CALL(JSONDecoder_JSON_To_MultiTree(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(JSONDecoder_JSON_To_MultiTree(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_json()
             .IgnoreArgument_multiTreeHandle();
         STRICT_EXPECTED_CALL(Schema_GetSchemaForModelType(TEST_MODEL_HANDLE));
         STRICT_EXPECTED_CALL(gballoc_malloc(1)); /*this is the string "" for relative relativeMethodPath*/
         STRICT_EXPECTED_CALL(Schema_GetModelMethodByName(TEST_MODEL_HANDLE, "methodA"));
-        STRICT_EXPECTED_CALL(Schema_GetModelMethodArgumentCount(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetModelMethodArgumentCount(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_methodHandle()
             .IgnoreArgument_argumentCount()
             .CopyOutArgumentBuffer_argumentCount(one, sizeof(*one));
 
-        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is the array holding 1 x AGENT_DATA_TYPE */
-            .IgnoreAllArguments().IgnoreArgument_size();
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_ARG, IGNORED_ARG)) /*this is the array holding 1 x AGENT_DATA_TYPE */
+            .IgnoreArgument_size();
 
         STRICT_EXPECTED_CALL(Schema_GetModelMethodArgumentByIndex(TEST_MODEL_METHOD_HANDLE, 0))
             .SetReturn(TEST_METHOD_ARGUMENT_HANDLE_0);
@@ -3492,35 +3451,35 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         STRICT_EXPECTED_CALL(Schema_GetMethodArgumentType(TEST_METHOD_ARGUMENT_HANDLE_0))
             .SetReturn("int");
 
-        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(IGNORED_PTR_ARG, "a", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetChildByName(IGNORED_ARG, "a", IGNORED_ARG))
             .IgnoreArgument_treeHandle()
             .IgnoreArgument_childHandle();
 
         { /*scope for DecodeValueFromNode*/
             STRICT_EXPECTED_CALL(CodeFirst_GetPrimitiveType("int"))
                 .SetReturn(EDM_INT32_TYPE);
-            STRICT_EXPECTED_CALL(MultiTree_GetValue(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL(MultiTree_GetValue(IGNORED_ARG, IGNORED_ARG))
                 .IgnoreArgument_treeHandle()
                 .IgnoreArgument_destination()
                 .CopyOutArgumentBuffer_destination(aValue, sizeof(aValue));
-            STRICT_EXPECTED_CALL(CreateAgentDataType_From_String("2", EDM_INT32_TYPE, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL(CreateAgentDataType_From_String("2", EDM_INT32_TYPE, IGNORED_ARG))
                 .IgnoreArgument_agentData();
         }
 
-        STRICT_EXPECTED_CALL(methodCallbackMock(TEST_CALLBACK_CONTEXT_VALUE, "", "methodA", 1, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(methodCallbackMock(TEST_CALLBACK_CONTEXT_VALUE, "", "methodA", 1, IGNORED_ARG))
             .IgnoreArgument_parameterValues();
 
-        STRICT_EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_ARG))
             .IgnoreArgument_agentData();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument_ptr();
 
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)) /*this is freeing the relativeMethodPath*/
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)) /*this is freeing the relativeMethodPath*/
             .IgnoreArgument_ptr();
 
-        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_ARG))
             .IgnoreArgument_treeHandle();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument_ptr();
 
     }
@@ -3595,18 +3554,18 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
 
     static void CommandDecoder_ExecuteMethod_with_2_arg_payload_inert_path(size_t* two, const char* methodPayload, const char** aValue, const char** bValue)
     {
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, methodPayload))
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, methodPayload))
             .IgnoreArgument_destination();
-        STRICT_EXPECTED_CALL(JSONDecoder_JSON_To_MultiTree(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(JSONDecoder_JSON_To_MultiTree(IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument_json()
             .IgnoreArgument_multiTreeHandle();
         STRICT_EXPECTED_CALL(Schema_GetSchemaForModelType(TEST_MODEL_HANDLE));
         STRICT_EXPECTED_CALL(gballoc_malloc(1)); /*this is the string "" for relative relativeMethodPath*/
         STRICT_EXPECTED_CALL(Schema_GetModelMethodByName(TEST_MODEL_HANDLE, "methodA"));
-        STRICT_EXPECTED_CALL(Schema_GetModelMethodArgumentCount(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetModelMethodArgumentCount(IGNORED_ARG, IGNORED_ARG))
             .CopyOutArgumentBuffer_argumentCount(two, sizeof(*two));
 
-        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)).IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_ARG, IGNORED_ARG));
 
         { /*scope for processing every individual argument*/
             STRICT_EXPECTED_CALL(Schema_GetModelMethodArgumentByIndex(TEST_MODEL_METHOD_HANDLE, 0))
@@ -3616,7 +3575,7 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
             STRICT_EXPECTED_CALL(Schema_GetMethodArgumentType(TEST_METHOD_ARGUMENT_HANDLE_0))
                 .SetReturn("int");
 
-            STRICT_EXPECTED_CALL(MultiTree_GetChildByName(IGNORED_PTR_ARG, "a", IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL(MultiTree_GetChildByName(IGNORED_ARG, "a", IGNORED_ARG))
                 .IgnoreArgument_treeHandle()
                 .IgnoreArgument_childHandle();
 
@@ -3624,9 +3583,9 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
                 STRICT_EXPECTED_CALL(CodeFirst_GetPrimitiveType("int"))
                     .CallCannotFail()
                     .SetReturn(EDM_INT32_TYPE);
-                STRICT_EXPECTED_CALL(MultiTree_GetValue(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+                STRICT_EXPECTED_CALL(MultiTree_GetValue(IGNORED_ARG, IGNORED_ARG))
                     .CopyOutArgumentBuffer_destination(aValue, sizeof(aValue));
-                STRICT_EXPECTED_CALL(CreateAgentDataType_From_String("2", EDM_INT32_TYPE, IGNORED_PTR_ARG))
+                STRICT_EXPECTED_CALL(CreateAgentDataType_From_String("2", EDM_INT32_TYPE, IGNORED_ARG))
                     .IgnoreArgument_agentData();
             }
 
@@ -3637,7 +3596,7 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
             STRICT_EXPECTED_CALL(Schema_GetMethodArgumentType(TEST_METHOD_ARGUMENT_HANDLE_1))
                 .SetReturn("int");
 
-            STRICT_EXPECTED_CALL(MultiTree_GetChildByName(IGNORED_PTR_ARG, "b", IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL(MultiTree_GetChildByName(IGNORED_ARG, "b", IGNORED_ARG))
                 .IgnoreArgument_treeHandle()
                 .IgnoreArgument_childHandle();
 
@@ -3645,24 +3604,24 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
                 STRICT_EXPECTED_CALL(CodeFirst_GetPrimitiveType("int"))
                     .CallCannotFail()
                     .SetReturn(EDM_INT32_TYPE);
-                STRICT_EXPECTED_CALL(MultiTree_GetValue(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+                STRICT_EXPECTED_CALL(MultiTree_GetValue(IGNORED_ARG, IGNORED_ARG))
                     .CopyOutArgumentBuffer_destination(bValue, sizeof(bValue));
-                STRICT_EXPECTED_CALL(CreateAgentDataType_From_String("3", EDM_INT32_TYPE, IGNORED_PTR_ARG)) /*20*/
+                STRICT_EXPECTED_CALL(CreateAgentDataType_From_String("3", EDM_INT32_TYPE, IGNORED_ARG)) /*20*/
                     .IgnoreArgument_agentData();
             }
         }
 
-        STRICT_EXPECTED_CALL(methodCallbackMock(TEST_CALLBACK_CONTEXT_VALUE, "", "methodA", 2, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(methodCallbackMock(TEST_CALLBACK_CONTEXT_VALUE, "", "methodA", 2, IGNORED_ARG))
             .IgnoreArgument_parameterValues();
 
-        STRICT_EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
-        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
     }
 
@@ -3731,21 +3690,21 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
 
     static void CommandDecoder_ExecuteMethod_model_in_model_with_2_arg_payload_inert_path(size_t* two, const char* methodPayload, const char** aValue, const char** bValue)
     {
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, methodPayload))
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, methodPayload))
             .IgnoreArgument_destination();
-        STRICT_EXPECTED_CALL(JSONDecoder_JSON_To_MultiTree(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(JSONDecoder_JSON_To_MultiTree(IGNORED_ARG, IGNORED_ARG));
         STRICT_EXPECTED_CALL(Schema_GetSchemaForModelType(TEST_MODEL_HANDLE));
         STRICT_EXPECTED_CALL(gballoc_malloc(11)); /*this is the string "innermodel" for relative relativeMethodPath*/
         STRICT_EXPECTED_CALL(Schema_GetModelModelByName(TEST_MODEL_HANDLE, "innermodel"));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)); /*this is the string "innermodel" for relative relativeMethodPath*/
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)); /*this is the string "innermodel" for relative relativeMethodPath*/
 
         STRICT_EXPECTED_CALL(gballoc_malloc(11)); /*this is the string "innermodel" for relative relativeMethodPath*/
 
         STRICT_EXPECTED_CALL(Schema_GetModelMethodByName(TEST_CHILD_MODEL_HANDLE, "methodA"));
-        STRICT_EXPECTED_CALL(Schema_GetModelMethodArgumentCount(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Schema_GetModelMethodArgumentCount(IGNORED_ARG, IGNORED_ARG))
             .CopyOutArgumentBuffer_argumentCount(two, sizeof(*two));
 
-        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)).IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_ARG, IGNORED_ARG));
 
         { /*scope for processing every individual argument*/
             STRICT_EXPECTED_CALL(Schema_GetModelMethodArgumentByIndex(TEST_MODEL_METHOD_HANDLE, 0))
@@ -3755,16 +3714,16 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
             STRICT_EXPECTED_CALL(Schema_GetMethodArgumentType(TEST_METHOD_ARGUMENT_HANDLE_0))
                 .SetReturn("int");
 
-            STRICT_EXPECTED_CALL(MultiTree_GetChildByName(IGNORED_PTR_ARG, "a", IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL(MultiTree_GetChildByName(IGNORED_ARG, "a", IGNORED_ARG))
                 .IgnoreArgument_treeHandle()
                 .IgnoreArgument_childHandle();
 
             { /*scope for DecodeValueFromNode*/
                 STRICT_EXPECTED_CALL(CodeFirst_GetPrimitiveType("int"))
                     .SetReturn(EDM_INT32_TYPE);
-                STRICT_EXPECTED_CALL(MultiTree_GetValue(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+                STRICT_EXPECTED_CALL(MultiTree_GetValue(IGNORED_ARG, IGNORED_ARG))
                     .CopyOutArgumentBuffer_destination(aValue, sizeof(aValue));
-                STRICT_EXPECTED_CALL(CreateAgentDataType_From_String("2", EDM_INT32_TYPE, IGNORED_PTR_ARG))
+                STRICT_EXPECTED_CALL(CreateAgentDataType_From_String("2", EDM_INT32_TYPE, IGNORED_ARG))
                     .IgnoreArgument_agentData();
             }
 
@@ -3775,33 +3734,33 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
             STRICT_EXPECTED_CALL(Schema_GetMethodArgumentType(TEST_METHOD_ARGUMENT_HANDLE_1))
                 .SetReturn("int");
 
-            STRICT_EXPECTED_CALL(MultiTree_GetChildByName(IGNORED_PTR_ARG, "b", IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL(MultiTree_GetChildByName(IGNORED_ARG, "b", IGNORED_ARG))
                 .IgnoreArgument_treeHandle()
                 .IgnoreArgument_childHandle();
 
             { /*scope for DecodeValueFromNode*/
                 STRICT_EXPECTED_CALL(CodeFirst_GetPrimitiveType("int"))
                     .SetReturn(EDM_INT32_TYPE).CallCannotFail();
-                STRICT_EXPECTED_CALL(MultiTree_GetValue(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+                STRICT_EXPECTED_CALL(MultiTree_GetValue(IGNORED_ARG, IGNORED_ARG))
                     .IgnoreArgument_treeHandle()
                     .IgnoreArgument_destination()
                     .CopyOutArgumentBuffer_destination(bValue, sizeof(bValue));
-                STRICT_EXPECTED_CALL(CreateAgentDataType_From_String("3", EDM_INT32_TYPE, IGNORED_PTR_ARG)) /*23*/
+                STRICT_EXPECTED_CALL(CreateAgentDataType_From_String("3", EDM_INT32_TYPE, IGNORED_ARG)) /*23*/
                     .IgnoreArgument_agentData();
             }
         }
 
-        STRICT_EXPECTED_CALL(methodCallbackMock(TEST_CALLBACK_CONTEXT_VALUE, "innermodel", "methodA", 2, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(methodCallbackMock(TEST_CALLBACK_CONTEXT_VALUE, "innermodel", "methodA", 2, IGNORED_ARG))
             .IgnoreArgument_parameterValues();
 
-        STRICT_EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
-        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
     }
 

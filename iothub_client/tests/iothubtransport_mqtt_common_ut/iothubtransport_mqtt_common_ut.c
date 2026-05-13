@@ -1014,28 +1014,28 @@ static void SetupIothubTransportConfigWithKeyAndSasToken(IOTHUBTRANSPORT_CONFIG*
 
 static void setup_IoTHubTransport_MQTT_Common_Create_mocks(bool use_gateway, const char* moduleId)
 {
-    STRICT_EXPECTED_CALL(IoTHub_Transport_ValidateCallbacks(IGNORED_PTR_ARG));
-    EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(IoTHub_Transport_ValidateCallbacks(IGNORED_ARG));
+    EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
     STRICT_EXPECTED_CALL(tickcounter_create());
     STRICT_EXPECTED_CALL(retry_control_create(DEFAULT_RETRY_POLICY, DEFAULT_RETRY_TIMEOUT_IN_SECONDS));
-    STRICT_EXPECTED_CALL(STRING_construct(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_construct(IGNORED_ARG));
 
     if (moduleId != NULL)
     {
-        STRICT_EXPECTED_CALL(STRING_construct(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(STRING_construct(IGNORED_ARG));
     }
 
-    EXPECTED_CALL(mqtt_client_init(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    EXPECTED_CALL(mqtt_client_init(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
 
     if (use_gateway)
     {
-        STRICT_EXPECTED_CALL(STRING_construct(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(STRING_construct(IGNORED_ARG));
     }
 
-    EXPECTED_CALL(DList_InitializeListHead(IGNORED_PTR_ARG));
-    EXPECTED_CALL(DList_InitializeListHead(IGNORED_PTR_ARG));
-    EXPECTED_CALL(DList_InitializeListHead(IGNORED_PTR_ARG)); // pending_get_twin_queue
-    STRICT_EXPECTED_CALL(get_time(IGNORED_PTR_ARG))
+    EXPECTED_CALL(DList_InitializeListHead(IGNORED_ARG));
+    EXPECTED_CALL(DList_InitializeListHead(IGNORED_ARG));
+    EXPECTED_CALL(DList_InitializeListHead(IGNORED_ARG)); // pending_get_twin_queue
+    STRICT_EXPECTED_CALL(get_time(IGNORED_ARG))
         .IgnoreArgument(1).SetReturn(TEST_SMALL_TIME_T).CallCannotFail();
 }
 
@@ -1045,12 +1045,12 @@ static void setup_message_receive_initial_calls(const char* topicName, bool isSu
     STRICT_EXPECTED_CALL(mqttmessage_getTopicName(TEST_MQTT_MESSAGE_HANDLE)).SetReturn(topicName);
     if (isSubscribedToInputQueue)
     {
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail().SetReturn(NULL);
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail().SetReturn(TEST_MQTT_INPUT_QUEUE_SUBSCRIBE_NAME_1);
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).CallCannotFail().SetReturn(NULL);
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).CallCannotFail().SetReturn(TEST_MQTT_INPUT_QUEUE_SUBSCRIBE_NAME_1);
     }
     else
     {
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail().SetReturn(TEST_MQTT_MESSAGE_TOPIC);
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).CallCannotFail().SetReturn(TEST_MQTT_MESSAGE_TOPIC);
     }
     STRICT_EXPECTED_CALL(mqttmessage_getApplicationMsg(TEST_MQTT_MESSAGE_HANDLE)).CallCannotFail();
     STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(appMessage, appMsgSize));
@@ -1059,33 +1059,33 @@ static void setup_message_receive_initial_calls(const char* topicName, bool isSu
 // Calls invoked when adding an application custom property to a C2D or IoT Hub module to module message
 static void set_expected_calls_for_custom_message_property(bool auto_decode)
 {
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
     if (auto_decode)
     {
-        STRICT_EXPECTED_CALL(URL_DecodeString(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(URL_DecodeString(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
+        STRICT_EXPECTED_CALL(URL_DecodeString(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(URL_DecodeString(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).CallCannotFail();
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).CallCannotFail();
     }
 
-    STRICT_EXPECTED_CALL(Map_AddOrUpdate(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Map_AddOrUpdate(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
     if (auto_decode)
     {
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
     }
 
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 }
 
 static void setup_set_message_disposition_context()
 {
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(mqttmessage_getPacketId(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mqttmessage_getPacketId(IGNORED_ARG))
         .CallCannotFail();
-    STRICT_EXPECTED_CALL(mqttmessage_getQosType(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(mqttmessage_getQosType(IGNORED_ARG))
         .CallCannotFail();
-    STRICT_EXPECTED_CALL(IoTHubMessage_SetDispositionContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubMessage_SetDispositionContext(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
 }
 
 static void setup_message_recv_with_properties_mocks(
@@ -1095,7 +1095,7 @@ static void setup_message_recv_with_properties_mocks(
     bool msgCbResult)
 {
     setup_message_receive_initial_calls(TEST_MQTT_MSG_TOPIC_W_1_PROP, false);
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail().SetReturn(TEST_MQTT_MESSAGE_TOPIC);
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).CallCannotFail().SetReturn(TEST_MQTT_MESSAGE_TOPIC);
     EXPECTED_CALL(STRING_TOKENIZER_create_from_char(TEST_MQTT_MSG_TOPIC_W_1_PROP));
     STRICT_EXPECTED_CALL(STRING_new());
     STRICT_EXPECTED_CALL(IoTHubMessage_Properties(TEST_IOTHUB_MSG_BYTEARRAY));
@@ -1103,197 +1103,197 @@ static void setup_message_recv_with_properties_mocks(
 
     if (has_content_type)
     {
-        STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "&"))
+        STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_ARG, IGNORED_ARG, "&"))
             .CallCannotFail();
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
             .SetReturn("%24.ct=application/json")
             .CallCannotFail();
         if (auto_decode)
         {
-            STRICT_EXPECTED_CALL(URL_DecodeString(IGNORED_PTR_ARG));
-            STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
+            STRICT_EXPECTED_CALL(URL_DecodeString(IGNORED_ARG));
+            STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).CallCannotFail();
         }
-        STRICT_EXPECTED_CALL(IoTHubMessage_SetContentTypeSystemProperty(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(IoTHubMessage_SetContentTypeSystemProperty(IGNORED_ARG, IGNORED_ARG));
         if (auto_decode)
         {
-            STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
         }
     }
 
     if (has_content_encoding)
     {
-        STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "&"))
+        STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_ARG, IGNORED_ARG, "&"))
             .CallCannotFail();
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
             .SetReturn("%24.ce=utf8")
             .CallCannotFail();
         if (auto_decode)
         {
-            STRICT_EXPECTED_CALL(URL_DecodeString(IGNORED_PTR_ARG));
-            STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
+            STRICT_EXPECTED_CALL(URL_DecodeString(IGNORED_ARG));
+            STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).CallCannotFail();
         }
-        STRICT_EXPECTED_CALL(IoTHubMessage_SetContentEncodingSystemProperty(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(IoTHubMessage_SetContentEncodingSystemProperty(IGNORED_ARG, IGNORED_ARG));
         if (auto_decode)
         {
-            STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
         }
     }
 
-    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "&"))
+    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_ARG, IGNORED_ARG, "&"))
             .CallCannotFail();
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .SetReturn("propName=propValue")
         .CallCannotFail();
 
     set_expected_calls_for_custom_message_property(auto_decode);
 
-    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "&"))
+    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_ARG, IGNORED_ARG, "&"))
             .CallCannotFail();
-    EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-    EXPECTED_CALL(STRING_TOKENIZER_destroy(IGNORED_PTR_ARG));
+    EXPECTED_CALL(STRING_delete(IGNORED_ARG));
+    EXPECTED_CALL(STRING_TOKENIZER_destroy(IGNORED_ARG));
     setup_set_message_disposition_context();
-    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_ARG, IGNORED_ARG))
         .SetReturn(msgCbResult);
     
     if (!msgCbResult)
     {
-        STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
     }
 }
 
 static void setup_connection_success_mocks()
 {
     STRICT_EXPECTED_CALL(retry_control_reset(TEST_RETRY_CONTROL_HANDLE));
-    STRICT_EXPECTED_CALL(Transport_ConnectionStatusCallBack(IOTHUB_CLIENT_CONNECTION_AUTHENTICATED, IOTHUB_CLIENT_CONNECTION_OK, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Transport_ConnectionStatusCallBack(IOTHUB_CLIENT_CONNECTION_AUTHENTICATED, IOTHUB_CLIENT_CONNECTION_OK, IGNORED_ARG));
 }
 
 static void setup_initialize_reconnection_mocks()
 {
     RETRY_ACTION retry_action = RETRY_ACTION_RETRY_NOW;
-    STRICT_EXPECTED_CALL(retry_control_should_retry(TEST_RETRY_CONTROL_HANDLE, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(retry_control_should_retry(TEST_RETRY_CONTROL_HANDLE, IGNORED_ARG))
         .CopyOutArgumentBuffer_retry_action(&retry_action, sizeof(retry_action));
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(xio_retrieveoptions(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mqtt_client_clear_xio(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(xio_destroy(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG));
-    EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_STRING_VALUE).CallCannotFail();
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_SasToken(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG));
-    EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_DEVICE_ID).CallCannotFail();
-    EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(NULL).CallCannotFail();
-    EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_STRING_VALUE).CallCannotFail();
-    EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_STRING_VALUE).CallCannotFail();
-    EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_STRING_VALUE).CallCannotFail();
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG));
-    EXPECTED_CALL(mqtt_client_connect(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG)).IgnoreArgument_handle();
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(xio_retrieveoptions(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mqtt_client_clear_xio(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(xio_destroy(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_ARG));
+    EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).SetReturn(TEST_STRING_VALUE).CallCannotFail();
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_SasToken(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).SetReturn(TEST_DEVICE_ID).CallCannotFail();
+    EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).SetReturn(NULL).CallCannotFail();
+    EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).SetReturn(TEST_STRING_VALUE).CallCannotFail();
+    EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).SetReturn(TEST_STRING_VALUE).CallCannotFail();
+    EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).SetReturn(TEST_STRING_VALUE).CallCannotFail();
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_ARG));
+    EXPECTED_CALL(mqtt_client_connect(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG)).IgnoreArgument_handle();
 }
 
 static void setup_devicemethod_response_mocks()
 {
-    EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
-    EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
-    EXPECTED_CALL(mqttmessage_create_in_place(IGNORED_NUM_ARG, IGNORED_PTR_ARG, DELIVER_AT_MOST_ONCE, appMessage, appMsgSize))
+    EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).CallCannotFail();
+    EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).CallCannotFail();
+    EXPECTED_CALL(mqttmessage_create_in_place(IGNORED_ARG, IGNORED_ARG, DELIVER_AT_MOST_ONCE, appMessage, appMsgSize))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
-    STRICT_EXPECTED_CALL(mqtt_client_publish(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(mqtt_client_publish(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
     STRICT_EXPECTED_CALL(mqttmessage_destroy(TEST_MQTT_MESSAGE_HANDLE))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument_handle();
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument_handle();
-    EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 }
 
 
 static void setup_initialize_connection_mocks(bool useModelId)
 {
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG));
-    EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_STRING_VALUE).CallCannotFail();
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_SasToken(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Transport_GetOption_Model_Id_Callback(IGNORED_PTR_ARG)).SetReturn(useModelId ? TEST_STRING_VALUE : NULL);
-    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(URL_EncodeString(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_ARG));
+    EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).SetReturn(TEST_STRING_VALUE).CallCannotFail();
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_SasToken(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Transport_GetOption_Model_Id_Callback(IGNORED_ARG)).SetReturn(useModelId ? TEST_STRING_VALUE : NULL);
+    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(URL_EncodeString(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).CallCannotFail();
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).CallCannotFail();
 
     if (useModelId)
     {
-        STRICT_EXPECTED_CALL(URL_EncodeString(IGNORED_PTR_ARG));
-        EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_STRING_VALUE).CallCannotFail();
-        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(URL_EncodeString(IGNORED_ARG));
+        EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).SetReturn(TEST_STRING_VALUE).CallCannotFail();
+        STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG));
     }
 
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG)).IgnoreArgument_handle();
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG)).IgnoreArgument_handle();
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG)).IgnoreArgument_handle();
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG)).IgnoreArgument_handle();
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG)).IgnoreArgument_handle();
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG)).IgnoreArgument_handle();
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG)).IgnoreArgument_handle();
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG)).IgnoreArgument_handle();
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG)).IgnoreArgument_handle();
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG)).IgnoreArgument_handle();
 
-    EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_DEVICE_ID).CallCannotFail();
-    EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_STRING_VALUE).CallCannotFail();
-    EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_STRING_VALUE).CallCannotFail();
-    EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_STRING_VALUE).CallCannotFail();
+    EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).SetReturn(TEST_DEVICE_ID).CallCannotFail();
+    EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).SetReturn(TEST_STRING_VALUE).CallCannotFail();
+    EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).SetReturn(TEST_STRING_VALUE).CallCannotFail();
+    EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).SetReturn(TEST_STRING_VALUE).CallCannotFail();
 
     // from GetTransportProviderIfNecessary()
-    EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_HOST_NAME).CallCannotFail();
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG));
-    EXPECTED_CALL(mqtt_client_connect(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG)).IgnoreArgument_handle();
+    EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).SetReturn(TEST_HOST_NAME).CallCannotFail();
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_ARG));
+    EXPECTED_CALL(mqtt_client_connect(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
+    EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG)).IgnoreArgument_handle();
 }
 
 static void setup_subscribe_devicetwin_dowork_mocks()
 {
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_SasToken_Expiry(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
-    STRICT_EXPECTED_CALL(mqtt_client_subscribe(IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-    EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_SasToken_Expiry(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).CallCannotFail();
+    STRICT_EXPECTED_CALL(mqtt_client_subscribe(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    EXPECTED_CALL(mqtt_client_dowork(IGNORED_ARG));
     // process_queued_ack_messages
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
     // removeExpiredTwinRequests
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
 }
 
 static void setup_IoTHubTransport_MQTT_Common_DoWork_mocks()
 {
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_SasToken_Expiry(IGNORED_PTR_ARG));
-    EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_MQTT_MSG_TOPIC).CallCannotFail();
-    EXPECTED_CALL(mqtt_client_subscribe(IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_SasToken_Expiry(IGNORED_ARG));
+    EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).SetReturn(TEST_MQTT_MSG_TOPIC).CallCannotFail();
+    EXPECTED_CALL(mqtt_client_subscribe(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
     // removeExpiredTwinRequests
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
 }
 
 static void setup_invoke_message_callback_mocks(IOTHUB_CLIENT_CONFIRMATION_RESULT expected, bool removeEntryList, bool removeHeadList)
 {
     if (removeEntryList)
     {
-        EXPECTED_CALL(DList_RemoveEntryList(IGNORED_PTR_ARG));
+        EXPECTED_CALL(DList_RemoveEntryList(IGNORED_ARG));
     }
 
     if (removeHeadList)
     {
-        EXPECTED_CALL(DList_RemoveHeadList(IGNORED_PTR_ARG));
+        EXPECTED_CALL(DList_RemoveHeadList(IGNORED_ARG));
     }
 
-    EXPECTED_CALL(DList_InitializeListHead(IGNORED_PTR_ARG));
-    EXPECTED_CALL(DList_InsertTailList(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_PTR_ARG, expected, transport_cb_ctx));
-    EXPECTED_CALL(free(IGNORED_PTR_ARG));
+    EXPECTED_CALL(DList_InitializeListHead(IGNORED_ARG));
+    EXPECTED_CALL(DList_InsertTailList(IGNORED_ARG, IGNORED_ARG));
+    EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_ARG, expected, transport_cb_ctx));
+    EXPECTED_CALL(free(IGNORED_ARG));
 }
 
 static void setup_IoTHubTransport_MQTT_Common_DoWork_events_mocks(
@@ -1320,20 +1320,20 @@ static void setup_IoTHubTransport_MQTT_Common_DoWork_events_mocks(
     TEST_DIAG_DATA.diagnosticCreationTimeUtc = (char*)diag_creation_time_utc;
     if (!msg_expiry || resend)
     {
-        STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_SasToken_Expiry(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_SasToken_Expiry(IGNORED_ARG));
     }
     if (resend) {
 #ifdef RUN_SFC_TESTS
         STRICT_EXPECTED_CALL(IoTHubMessage_Properties(msg_handle));
         if (propCount == 0)
         {
-            EXPECTED_CALL(Map_GetInternals(TEST_MESSAGE_PROP_MAP, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+            EXPECTED_CALL(Map_GetInternals(TEST_MESSAGE_PROP_MAP, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
         }
         else
         {
-            STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MESSAGE_PROP_MAP, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MESSAGE_PROP_MAP, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
                 .CopyOutArgumentBuffer(2, &ppKeys, sizeof(ppKeys))
                 .CopyOutArgumentBuffer(3, &ppValues, sizeof(ppValues))
                 .CopyOutArgumentBuffer(4, &propCount, sizeof(propCount));
@@ -1344,25 +1344,25 @@ static void setup_IoTHubTransport_MQTT_Common_DoWork_events_mocks(
                 {
                     STRICT_EXPECTED_CALL(URL_EncodeString((const char*)ppKeys[i]));
                     STRICT_EXPECTED_CALL(URL_EncodeString((const char*)ppValues[i]));
-                    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
-                    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
-                    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-                    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+                    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).CallCannotFail();
+                    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).CallCannotFail();
+                    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
+                    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
                 }
             }
         }
 #endif //RUN_SFC_TESTS
-        STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));  //ericwol
-        STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));  //ericwol
-        STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));  //ericwol
-        STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));  //ericwol
-        STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG));  //ericwol
-        STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_SasToken_Expiry(IGNORED_PTR_ARG));  //ericwol
+        STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));  //ericwol
+        STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));  //ericwol
+        STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));  //ericwol
+        STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));  //ericwol
+        STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_ARG));  //ericwol
+        STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_SasToken_Expiry(IGNORED_ARG));  //ericwol
     }
     if (!msg_expiry || resend)
     {
-        STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
     }
     STRICT_EXPECTED_CALL(IoTHubMessage_GetContentType(msg_handle));
     if (msg_handle == TEST_IOTHUB_MSG_STRING)
@@ -1371,24 +1371,24 @@ static void setup_IoTHubTransport_MQTT_Common_DoWork_events_mocks(
     }
     else
     {
-        STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(TEST_IOTHUB_MSG_BYTEARRAY, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(IoTHubMessage_GetByteArray(TEST_IOTHUB_MSG_BYTEARRAY, IGNORED_ARG, IGNORED_ARG));
     }
     if (!resend)
     {
-        EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
     }
-    EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
-    STRICT_EXPECTED_CALL(STRING_construct(IGNORED_PTR_ARG));
+    EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).CallCannotFail();
+    STRICT_EXPECTED_CALL(STRING_construct(IGNORED_ARG));
     //Add Properties
     STRICT_EXPECTED_CALL(IoTHubMessage_Properties(msg_handle));
     if (propCount == 0)
     {
-        EXPECTED_CALL(Map_GetInternals(TEST_MESSAGE_PROP_MAP, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        EXPECTED_CALL(Map_GetInternals(TEST_MESSAGE_PROP_MAP, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
     }
     else
     {
-        STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MESSAGE_PROP_MAP, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MESSAGE_PROP_MAP, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .CopyOutArgumentBuffer(2, &ppKeys, sizeof(ppKeys))
             .CopyOutArgumentBuffer(3, &ppValues, sizeof(ppValues))
             .CopyOutArgumentBuffer(4, &propCount, sizeof(propCount));
@@ -1399,102 +1399,102 @@ static void setup_IoTHubTransport_MQTT_Common_DoWork_events_mocks(
             {
                 STRICT_EXPECTED_CALL(URL_EncodeString((const char*)ppKeys[i]));
                 STRICT_EXPECTED_CALL(URL_EncodeString((const char*)ppValues[i]));
-                STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
-                STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
-                STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-                STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+                STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).CallCannotFail();
+                STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).CallCannotFail();
+                STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
+                STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
             }
         }
     }
-    STRICT_EXPECTED_CALL(IoTHubMessage_IsSecurityMessage(IGNORED_PTR_ARG)).SetReturn(security_msg);
-    STRICT_EXPECTED_CALL(IoTHubMessage_GetCorrelationId(IGNORED_PTR_ARG)).SetReturn(core_id);
+    STRICT_EXPECTED_CALL(IoTHubMessage_IsSecurityMessage(IGNORED_ARG)).SetReturn(security_msg);
+    STRICT_EXPECTED_CALL(IoTHubMessage_GetCorrelationId(IGNORED_ARG)).SetReturn(core_id);
     if (auto_urlencode && (core_id != NULL))
     {
-        STRICT_EXPECTED_CALL(URL_EncodeString(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(URL_EncodeString(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).CallCannotFail();
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
     }
-    STRICT_EXPECTED_CALL(IoTHubMessage_GetMessageId(IGNORED_PTR_ARG)).SetReturn(msg_id);
+    STRICT_EXPECTED_CALL(IoTHubMessage_GetMessageId(IGNORED_ARG)).SetReturn(msg_id);
     if (auto_urlencode && (msg_id != NULL))
     {
-        STRICT_EXPECTED_CALL(URL_EncodeString(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(URL_EncodeString(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).CallCannotFail();
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
     }
-    STRICT_EXPECTED_CALL(IoTHubMessage_GetContentTypeSystemProperty(IGNORED_PTR_ARG)).SetReturn(content_type);
+    STRICT_EXPECTED_CALL(IoTHubMessage_GetContentTypeSystemProperty(IGNORED_ARG)).SetReturn(content_type);
     if (auto_urlencode && (content_type != NULL))
     {
-        STRICT_EXPECTED_CALL(URL_EncodeString(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(URL_EncodeString(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).CallCannotFail();
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
     }
-    STRICT_EXPECTED_CALL(IoTHubMessage_GetContentEncodingSystemProperty(IGNORED_PTR_ARG)).SetReturn(content_encoding);
+    STRICT_EXPECTED_CALL(IoTHubMessage_GetContentEncodingSystemProperty(IGNORED_ARG)).SetReturn(content_encoding);
     if (security_msg || (auto_urlencode && (content_encoding != NULL)))
     {
-        STRICT_EXPECTED_CALL(URL_EncodeString(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(URL_EncodeString(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).CallCannotFail();
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
     }
-    STRICT_EXPECTED_CALL(IoTHubMessage_GetMessageCreationTimeUtcSystemProperty(IGNORED_PTR_ARG)).SetReturn(message_creation_time_utc);
+    STRICT_EXPECTED_CALL(IoTHubMessage_GetMessageCreationTimeUtcSystemProperty(IGNORED_ARG)).SetReturn(message_creation_time_utc);
     if (auto_urlencode && (message_creation_time_utc != NULL))
     {
-        STRICT_EXPECTED_CALL(URL_EncodeString(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(URL_EncodeString(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).CallCannotFail();
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
     }
     if (security_msg)
     {
-        STRICT_EXPECTED_CALL(URL_EncodeString(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(URL_EncodeString(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).CallCannotFail();
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
     }
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_GetOutputName(IGNORED_PTR_ARG)).SetReturn(output_name);
+    STRICT_EXPECTED_CALL(IoTHubMessage_GetOutputName(IGNORED_ARG)).SetReturn(output_name);
     if (auto_urlencode && output_name != NULL)
     {
-        STRICT_EXPECTED_CALL(URL_EncodeString(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(URL_EncodeString(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).CallCannotFail();
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
     }
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_GetComponentName(IGNORED_PTR_ARG)).SetReturn(component_name);
+    STRICT_EXPECTED_CALL(IoTHubMessage_GetComponentName(IGNORED_ARG)).SetReturn(component_name);
     if (auto_urlencode && (component_name != NULL))
     {
-        STRICT_EXPECTED_CALL(URL_EncodeString(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(URL_EncodeString(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).CallCannotFail();
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
     }
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_GetDiagnosticPropertyData(IGNORED_PTR_ARG)).SetReturn(&TEST_DIAG_DATA);
+    STRICT_EXPECTED_CALL(IoTHubMessage_GetDiagnosticPropertyData(IGNORED_ARG)).SetReturn(&TEST_DIAG_DATA);
 
     bool validMessage = true;
     if (diag_id != NULL && diag_creation_time_utc != NULL)
     {
-        STRICT_EXPECTED_CALL(URL_Encode(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(URL_Encode(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).CallCannotFail();
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
     }
     else if (diag_id != NULL || diag_creation_time_utc != NULL)
     {
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
         validMessage = false;
     }
 
     //Publish
     if (validMessage)
     {
-        EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
-        EXPECTED_CALL(mqttmessage_create_in_place(IGNORED_NUM_ARG, IGNORED_PTR_ARG, DELIVER_AT_LEAST_ONCE, IGNORED_PTR_ARG, appMsgSize));
-        STRICT_EXPECTED_CALL(mqttmessage_setIsDuplicateMsg(IGNORED_PTR_ARG, resend));
-        STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(mqtt_client_publish(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).CallCannotFail();
+        EXPECTED_CALL(mqttmessage_create_in_place(IGNORED_ARG, IGNORED_ARG, DELIVER_AT_LEAST_ONCE, IGNORED_ARG, appMsgSize));
+        STRICT_EXPECTED_CALL(mqttmessage_setIsDuplicateMsg(IGNORED_ARG, resend));
+        STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(mqtt_client_publish(IGNORED_ARG, IGNORED_ARG));
         STRICT_EXPECTED_CALL(mqttmessage_destroy(TEST_MQTT_MESSAGE_HANDLE));
-        EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+        EXPECTED_CALL(STRING_delete(IGNORED_ARG));
         if (!resend)
         {
-            EXPECTED_CALL(DList_RemoveEntryList(IGNORED_PTR_ARG));
-            STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+            EXPECTED_CALL(DList_RemoveEntryList(IGNORED_ARG));
+            STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_ARG, IGNORED_ARG));
         }
     }
     else
@@ -1503,13 +1503,13 @@ static void setup_IoTHubTransport_MQTT_Common_DoWork_events_mocks(
     }
     if (!resend || disconnect) 
     {
-        STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
     }
     if (!msg_expiry || !resend)
     {
         // removeExpiredTwinRequests
-        STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
     }
 }
 
@@ -1517,7 +1517,7 @@ static void setup_calls_for_next_token_with_slash(int expectedTokens)
 {
     for (int i = 0; i < expectedTokens; i++)
     {
-        STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "/")).SetReturn(0);
+        STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_ARG, IGNORED_ARG, "/")).SetReturn(0);
     }
 }
 
@@ -1525,93 +1525,93 @@ static void setup_message_recv_device_method_mocks()
 {
     STRICT_EXPECTED_CALL(mqttmessage_getTopicName(TEST_MQTT_MESSAGE_HANDLE)).SetReturn(TEST_MQTT_DEV_METHOD_MSG);
     STRICT_EXPECTED_CALL(STRING_new());
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)).IgnoreArgument_size();
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG)).IgnoreArgument_size();
     STRICT_EXPECTED_CALL(STRING_new());
-    STRICT_EXPECTED_CALL(STRING_TOKENIZER_create_from_char(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_TOKENIZER_create_from_char(IGNORED_ARG));
     STRICT_EXPECTED_CALL(STRING_new());
     setup_calls_for_next_token_with_slash(4);
-    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "/")).SetReturn(0);
-    STRICT_EXPECTED_CALL(STRING_length(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_ARG, IGNORED_ARG, "/")).SetReturn(0);
+    STRICT_EXPECTED_CALL(STRING_length(IGNORED_ARG))
         .SetReturn(7);
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .SetReturn("?$rid=b")
         .CallCannotFail();
-    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_TOKENIZER_destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_concat(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_TOKENIZER_destroy(IGNORED_ARG));
     STRICT_EXPECTED_CALL(mqttmessage_getApplicationMsg(TEST_MQTT_MESSAGE_HANDLE)).CallCannotFail();
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
-    STRICT_EXPECTED_CALL(Transport_DeviceMethod_Complete_Callback(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).CallCannotFail();
+    STRICT_EXPECTED_CALL(Transport_DeviceMethod_Complete_Callback(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
 }
 
 static void setup_processItem_mocks(bool fail_test)
 {
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(CONSTBUFFER_GetContent(IGNORED_PTR_ARG)).SetReturn(&g_cbuff);
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(CONSTBUFFER_GetContent(IGNORED_ARG)).SetReturn(&g_cbuff);
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
-    STRICT_EXPECTED_CALL(mqttmessage_create_in_place(IGNORED_NUM_ARG, IGNORED_PTR_ARG, DELIVER_AT_MOST_ONCE, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).CallCannotFail();
+    STRICT_EXPECTED_CALL(mqttmessage_create_in_place(IGNORED_ARG, IGNORED_ARG, DELIVER_AT_MOST_ONCE, IGNORED_ARG, IGNORED_ARG));
     if (!fail_test)
     {
-        STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
     }
-    STRICT_EXPECTED_CALL(mqtt_client_publish(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(mqtt_client_publish(IGNORED_ARG, IGNORED_ARG));
     STRICT_EXPECTED_CALL(mqttmessage_destroy(TEST_MQTT_MESSAGE_HANDLE));
-    EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+    EXPECTED_CALL(STRING_delete(IGNORED_ARG));
 }
 
 static void setup_message_recv_callback_device_twin_mocks(const char* token_type)
 {
     STRICT_EXPECTED_CALL(mqttmessage_getTopicName(TEST_MQTT_MESSAGE_HANDLE)).SetReturn(TEST_MQTT_DEV_TWIN_MSG_TOPIC);
-    STRICT_EXPECTED_CALL(STRING_TOKENIZER_create_from_char(IGNORED_PTR_ARG)).IgnoreArgument_input();
+    STRICT_EXPECTED_CALL(STRING_TOKENIZER_create_from_char(IGNORED_ARG)).IgnoreArgument_input();
     STRICT_EXPECTED_CALL(STRING_new());
-    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument_output()
         .IgnoreArgument_delimiters()
         .IgnoreArgument_t()
         .SetReturn(0);
-    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument_output()
         .IgnoreArgument_delimiters()
         .IgnoreArgument_t()
         .SetReturn(0);
-    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument_output()
         .IgnoreArgument_delimiters()
         .IgnoreArgument_t()
         .SetReturn(0);
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .IgnoreArgument_handle()
         .SetReturn(token_type)
         .CallCannotFail();
 
-    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(0);
+    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG)).SetReturn(0);
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .SetReturn("200")
         .CallCannotFail();
-    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(0);
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG)).SetReturn(0);
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .SetReturn("?$rid=4")
         .IgnoreArgument_handle()
         .CallCannotFail();
 
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument_handle();
-    STRICT_EXPECTED_CALL(STRING_TOKENIZER_destroy(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_TOKENIZER_destroy(IGNORED_ARG))
         .IgnoreArgument_t();
-    STRICT_EXPECTED_CALL(mqttmessage_getApplicationMsg(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(mqttmessage_getApplicationMsg(IGNORED_ARG))
         .IgnoreArgument_handle()
         .CallCannotFail();
 
-    EXPECTED_CALL(DList_RemoveEntryList(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Transport_Twin_ReportedStateComplete_Callback(1, 200, IGNORED_PTR_ARG));
-    EXPECTED_CALL(STRING_construct(IGNORED_PTR_ARG)).IgnoreArgument_psz();
+    EXPECTED_CALL(DList_RemoveEntryList(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Transport_Twin_ReportedStateComplete_Callback(1, 200, IGNORED_ARG));
+    EXPECTED_CALL(STRING_construct(IGNORED_ARG)).IgnoreArgument_psz();
     EXPECTED_CALL(gballoc_free(NULL));
 }
 
@@ -1619,23 +1619,23 @@ static void setup_message_recv_msg_callback_mocks(bool msgCbResult)
 {
     setup_message_receive_initial_calls(TEST_MQTT_MSG_TOPIC, false);
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail().SetReturn(TEST_MQTT_MESSAGE_TOPIC);
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).CallCannotFail().SetReturn(TEST_MQTT_MESSAGE_TOPIC);
     EXPECTED_CALL(STRING_TOKENIZER_create_from_char(TEST_MQTT_MSG_TOPIC));
     STRICT_EXPECTED_CALL(STRING_new());
     STRICT_EXPECTED_CALL(IoTHubMessage_Properties(TEST_IOTHUB_MSG_BYTEARRAY));
 
-    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "&")).SetReturn(1);
-    EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-    EXPECTED_CALL(STRING_TOKENIZER_destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_ARG, IGNORED_ARG, "&")).SetReturn(1);
+    EXPECTED_CALL(STRING_delete(IGNORED_ARG));
+    EXPECTED_CALL(STRING_TOKENIZER_destroy(IGNORED_ARG));
 
     setup_set_message_disposition_context();
-    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_ARG, IGNORED_ARG))
         .SetReturn(msgCbResult);
 
     if (!msgCbResult)
     {
-        STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
     }
 }
 
@@ -1662,30 +1662,30 @@ static XIO_HANDLE get_IO_transport_fail(const char* fully_qualified_name, const 
 
 static void setup_subscribe_inputqueue_dowork_mocks()
 {
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_SasToken_Expiry(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
-    STRICT_EXPECTED_CALL(mqtt_client_subscribe(IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-    EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_SasToken_Expiry(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).CallCannotFail();
+    STRICT_EXPECTED_CALL(mqtt_client_subscribe(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    EXPECTED_CALL(mqtt_client_dowork(IGNORED_ARG));
     // process_queued_ack_messages
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
     // removeExpiredTwinRequests
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
 }
 
 static void set_expected_calls_around_unsubscribe()
 {
-    EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_STRING_VALUE);
-    EXPECTED_CALL(mqtt_client_unsubscribe(IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, 1));
-    EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+    EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).SetReturn(TEST_STRING_VALUE);
+    EXPECTED_CALL(mqtt_client_unsubscribe(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, 1));
+    EXPECTED_CALL(STRING_delete(IGNORED_ARG));
 }
 
 static void set_expected_calls_for_proxy_default_copy()
 {
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "test_proxy"));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "haha"));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "bleah"));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, "test_proxy"));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, "haha"));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, "bleah"));
 }
 
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_Create_with_NULL_parameter_Succeed)
@@ -2019,7 +2019,7 @@ static void IoTHubTransport_MQTT_Common_Destroy_Unsubscribe_impl(bool useModelId
 
     EXPECTED_CALL(STRING_c_str(NULL)).SetReturn(TEST_STRING_VALUE);
 
-    EXPECTED_CALL(DList_IsListEmpty(IGNORED_PTR_ARG));
+    EXPECTED_CALL(DList_IsListEmpty(IGNORED_ARG));
 
     EXPECTED_CALL(STRING_delete(NULL));
     EXPECTED_CALL(STRING_delete(NULL));
@@ -2031,12 +2031,12 @@ static void IoTHubTransport_MQTT_Common_Destroy_Unsubscribe_impl(bool useModelId
 
     STRICT_EXPECTED_CALL(mqtt_client_disconnect(TEST_MQTT_CLIENT_HANDLE, NULL, NULL));
     STRICT_EXPECTED_CALL(mqtt_client_deinit(TEST_MQTT_CLIENT_HANDLE));
-    STRICT_EXPECTED_CALL(mqtt_client_unsubscribe(TEST_MQTT_CLIENT_HANDLE, IGNORED_NUM_ARG, IGNORED_PTR_ARG, 1))
+    STRICT_EXPECTED_CALL(mqtt_client_unsubscribe(TEST_MQTT_CLIENT_HANDLE, IGNORED_ARG, IGNORED_ARG, 1))
         .IgnoreArgument(2)
         .IgnoreArgument(3);
     EXPECTED_CALL(gballoc_free(NULL));
     STRICT_EXPECTED_CALL(xio_destroy(TEST_XIO_HANDLE));
-    STRICT_EXPECTED_CALL(tickcounter_destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_destroy(IGNORED_ARG));
 
     // act
     IoTHubTransport_MQTT_Common_Destroy(handle);
@@ -2060,7 +2060,7 @@ static void set_expected_calls_for_free_transport_handle_data()
 {
     STRICT_EXPECTED_CALL(mqtt_client_deinit(TEST_MQTT_CLIENT_HANDLE)).IgnoreArgument(1);
     STRICT_EXPECTED_CALL(retry_control_destroy(TEST_RETRY_CONTROL_HANDLE));
-    STRICT_EXPECTED_CALL(tickcounter_destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_destroy(IGNORED_ARG));
 
     EXPECTED_CALL(STRING_delete(NULL));
     EXPECTED_CALL(STRING_delete(NULL));
@@ -2074,8 +2074,8 @@ static void set_expected_calls_for_free_transport_handle_data()
     EXPECTED_CALL(STRING_delete(NULL));
     EXPECTED_CALL(STRING_delete(NULL));
 
-    STRICT_EXPECTED_CALL(mqtt_client_clear_xio(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(xio_destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(mqtt_client_clear_xio(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(xio_destroy(IGNORED_ARG));
 
     EXPECTED_CALL(gballoc_free(NULL));
 }
@@ -2097,17 +2097,17 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Destroy_One_Message_Ack_succeeds)
     IoTHubTransport_MQTT_Common_DoWork(handle);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(mqtt_client_disconnect(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(ThreadAPI_Sleep(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(mqtt_client_clear_xio(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(xio_destroy(IGNORED_PTR_ARG));
-    EXPECTED_CALL(DList_IsListEmpty(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(mqtt_client_disconnect(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(ThreadAPI_Sleep(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mqtt_client_clear_xio(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(xio_destroy(IGNORED_ARG));
+    EXPECTED_CALL(DList_IsListEmpty(IGNORED_ARG));
     setup_invoke_message_callback_mocks(IOTHUB_CLIENT_CONFIRMATION_BECAUSE_DESTROY, false, true);
 
-    EXPECTED_CALL(DList_IsListEmpty(IGNORED_PTR_ARG));
-    EXPECTED_CALL(DList_IsListEmpty(IGNORED_PTR_ARG));
-    EXPECTED_CALL(DList_IsListEmpty(IGNORED_PTR_ARG)); // pending_get_twin_queue
+    EXPECTED_CALL(DList_IsListEmpty(IGNORED_ARG));
+    EXPECTED_CALL(DList_IsListEmpty(IGNORED_ARG));
+    EXPECTED_CALL(DList_IsListEmpty(IGNORED_ARG)); // pending_get_twin_queue
     set_expected_calls_for_free_transport_handle_data();
 
     // act
@@ -2136,19 +2136,19 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Destroy_disconnect_timeout_succeeds)
     IoTHubTransport_MQTT_Common_DoWork(handle);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(mqtt_client_disconnect(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(mqtt_client_disconnect(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
     for(int i = 0; i < TEST_MAX_DISCONNECT_VALUE; ++i)
     {
-        STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(ThreadAPI_Sleep(IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(ThreadAPI_Sleep(IGNORED_ARG));
     }
-    STRICT_EXPECTED_CALL(mqtt_client_clear_xio(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(xio_destroy(IGNORED_PTR_ARG));
-    EXPECTED_CALL(DList_IsListEmpty(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(mqtt_client_clear_xio(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(xio_destroy(IGNORED_ARG));
+    EXPECTED_CALL(DList_IsListEmpty(IGNORED_ARG));
     setup_invoke_message_callback_mocks(IOTHUB_CLIENT_CONFIRMATION_BECAUSE_DESTROY, false, true);
-    EXPECTED_CALL(DList_IsListEmpty(IGNORED_PTR_ARG));
-    EXPECTED_CALL(DList_IsListEmpty(IGNORED_PTR_ARG));
-    EXPECTED_CALL(DList_IsListEmpty(IGNORED_PTR_ARG)); // pending_get_twin_queue
+    EXPECTED_CALL(DList_IsListEmpty(IGNORED_ARG));
+    EXPECTED_CALL(DList_IsListEmpty(IGNORED_ARG));
+    EXPECTED_CALL(DList_IsListEmpty(IGNORED_ARG)); // pending_get_twin_queue
     set_expected_calls_for_free_transport_handle_data();
 
     // act
@@ -2167,7 +2167,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Destroy_succeeds)
     TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport, &transport_cb_info, transport_cb_ctx);
     umock_c_reset_all_calls();
 
-    EXPECTED_CALL(DList_IsListEmpty(IGNORED_PTR_ARG));
+    EXPECTED_CALL(DList_IsListEmpty(IGNORED_ARG));
 
     EXPECTED_CALL(STRING_delete(NULL));
     EXPECTED_CALL(STRING_delete(NULL));
@@ -2178,11 +2178,11 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Destroy_succeeds)
     EXPECTED_CALL(STRING_delete(NULL));
 
     STRICT_EXPECTED_CALL(mqtt_client_deinit(TEST_MQTT_CLIENT_HANDLE));
-    STRICT_EXPECTED_CALL(xio_retrieveoptions(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(xio_retrieveoptions(IGNORED_ARG));
     STRICT_EXPECTED_CALL(mqtt_client_disconnect(TEST_MQTT_CLIENT_HANDLE, NULL, NULL));
     EXPECTED_CALL(xio_destroy(NULL));
-    EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(tickcounter_destroy(IGNORED_PTR_ARG)).IgnoreArgument(1);
+    EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_destroy(IGNORED_ARG)).IgnoreArgument(1);
 
     // act
     IoTHubTransport_MQTT_Common_Destroy(handle);
@@ -2193,9 +2193,9 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Destroy_succeeds)
 
 static void set_expected_calls_for_IoTHubTransport_MQTT_Common_Destroy()
 {
-    STRICT_EXPECTED_CALL(DList_IsListEmpty(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(DList_IsListEmpty(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(DList_IsListEmpty(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(DList_IsListEmpty(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(DList_IsListEmpty(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(DList_IsListEmpty(IGNORED_ARG));
     set_expected_calls_for_free_transport_handle_data();
 }
 
@@ -2268,7 +2268,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Subscribe_Succeed)
 
     umock_c_reset_all_calls();
 
-    EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_DEVICE_ID);
+    EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).SetReturn(TEST_DEVICE_ID);
     setup_IoTHubTransport_MQTT_Common_DoWork_mocks();
 
     // act
@@ -2365,7 +2365,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Subscribe_set_subscribe_type_Succeed)
     g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_CONNACK, &connack, g_callbackCtx);
     umock_c_reset_all_calls();
 
-    EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_DEVICE_ID);
+    EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).SetReturn(TEST_DEVICE_ID);
     setup_IoTHubTransport_MQTT_Common_DoWork_mocks();
 
     // act
@@ -2510,7 +2510,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Unsubscribe_DeviceTwin_Succeed)
     IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin(handle);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG)).IgnoreArgument_handle();
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG)).IgnoreArgument_handle();
 
     // act
     IoTHubTransport_MQTT_Common_Unsubscribe_DeviceTwin(handle);
@@ -2563,10 +2563,10 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_GetTwinAsync_Succeed)
     TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport, &transport_cb_info, transport_cb_ctx);
 
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_ARG, IGNORED_ARG));
 
     // act
     IOTHUB_CLIENT_RESULT result = IoTHubTransport_MQTT_Common_GetTwinAsync(handle, on_get_device_twin_completed_callback, (void*)0x4445);
@@ -2626,10 +2626,10 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_GetTwinAsync_fails)
     TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport, &transport_cb_info, transport_cb_ctx);
 
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_ARG, IGNORED_ARG));
     umock_c_negative_tests_snapshot();
 
     // act
@@ -2667,9 +2667,9 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Destroy_return_pending_get_twin_reques
     TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport, &transport_cb_info, transport_cb_ctx);
 
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_ARG, IGNORED_ARG));
     (void)IoTHubTransport_MQTT_Common_GetTwinAsync(handle, on_get_device_twin_completed_callback, (void*)0x4445);
 
     get_twin_size = 1234;
@@ -2677,14 +2677,14 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Destroy_return_pending_get_twin_reques
 
     umock_c_reset_all_calls();
 
-    EXPECTED_CALL(mqtt_client_clear_xio(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mqtt_client_clear_xio(IGNORED_ARG));
     EXPECTED_CALL(xio_destroy(NULL));
-    EXPECTED_CALL(DList_IsListEmpty(IGNORED_PTR_ARG));
-    EXPECTED_CALL(DList_IsListEmpty(IGNORED_PTR_ARG));
-    EXPECTED_CALL(DList_IsListEmpty(IGNORED_PTR_ARG));
-    EXPECTED_CALL(DList_RemoveHeadList(IGNORED_PTR_ARG));
-    EXPECTED_CALL(free(IGNORED_PTR_ARG));
-    EXPECTED_CALL(DList_IsListEmpty(IGNORED_PTR_ARG));
+    EXPECTED_CALL(DList_IsListEmpty(IGNORED_ARG));
+    EXPECTED_CALL(DList_IsListEmpty(IGNORED_ARG));
+    EXPECTED_CALL(DList_IsListEmpty(IGNORED_ARG));
+    EXPECTED_CALL(DList_RemoveHeadList(IGNORED_ARG));
+    EXPECTED_CALL(free(IGNORED_ARG));
+    EXPECTED_CALL(DList_IsListEmpty(IGNORED_ARG));
 
     set_expected_calls_for_free_transport_handle_data();
 
@@ -2712,9 +2712,9 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_SetOption_invokes_xio_setoption_when_o
     TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport, &transport_cb_info, transport_cb_ctx);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_ARG));
     EXPECTED_CALL(STRING_c_str(NULL)).SetReturn(TEST_STRING_VALUE);
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_ARG));
     STRICT_EXPECTED_CALL(xio_setoption(NULL, SOME_OPTION, SOME_VALUE))
         .IgnoreArgument(1);
 
@@ -2780,7 +2780,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_SetOption_x509Certificate_no_509_fail)
     TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport, &transport_cb_info, transport_cb_ctx);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_ARG));
 
     // act
     IOTHUB_CLIENT_RESULT result = IoTHubTransport_MQTT_Common_SetOption(handle, OPTION_X509_CERT, X509_CERT_CERTIFICATE);
@@ -2802,7 +2802,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_SetOption_x509Private_key_no_509_fail)
     TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport, &transport_cb_info, transport_cb_ctx);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_ARG));
 
     // act
     IOTHUB_CLIENT_RESULT result = IoTHubTransport_MQTT_Common_SetOption(handle, X509_PRIVATE_KEY_OPTION, X509_PRIVATE_KEY);
@@ -2824,12 +2824,12 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_SetOption_x509Certificate_succeed)
     TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport, &transport_cb_info, transport_cb_ctx);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG)).SetReturn(IOTHUB_CREDENTIAL_TYPE_UNKNOWN);
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Set_x509_Type(IGNORED_PTR_ARG, true));
-    EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_STRING_VALUE);
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG)).SetReturn(IOTHUB_CREDENTIAL_TYPE_X509_ECC);
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Set_xio_Certificate(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(xio_setoption(IGNORED_PTR_ARG, OPTION_X509_CERT, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_ARG)).SetReturn(IOTHUB_CREDENTIAL_TYPE_UNKNOWN);
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Set_x509_Type(IGNORED_ARG, true));
+    EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).SetReturn(TEST_STRING_VALUE);
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_ARG)).SetReturn(IOTHUB_CREDENTIAL_TYPE_X509_ECC);
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Set_xio_Certificate(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(xio_setoption(IGNORED_ARG, OPTION_X509_CERT, IGNORED_ARG));
 
     // act
     IOTHUB_CLIENT_RESULT result = IoTHubTransport_MQTT_Common_SetOption(handle, OPTION_X509_CERT, X509_CERT_CERTIFICATE);
@@ -2851,12 +2851,12 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_SetOption_x509Private_key_succeed)
     TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport, &transport_cb_info, transport_cb_ctx);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG)).SetReturn(IOTHUB_CREDENTIAL_TYPE_UNKNOWN);
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Set_x509_Type(IGNORED_PTR_ARG, true));
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_STRING_VALUE);
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG)).SetReturn(IOTHUB_CREDENTIAL_TYPE_X509_ECC);
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Set_xio_Certificate(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(xio_setoption(IGNORED_PTR_ARG, X509_PRIVATE_KEY_OPTION, X509_PRIVATE_KEY));
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_ARG)).SetReturn(IOTHUB_CREDENTIAL_TYPE_UNKNOWN);
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Set_x509_Type(IGNORED_ARG, true));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).SetReturn(TEST_STRING_VALUE);
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_ARG)).SetReturn(IOTHUB_CREDENTIAL_TYPE_X509_ECC);
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Set_xio_Certificate(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(xio_setoption(IGNORED_ARG, X509_PRIVATE_KEY_OPTION, X509_PRIVATE_KEY));
 
     // act
     IOTHUB_CLIENT_RESULT result = IoTHubTransport_MQTT_Common_SetOption(handle, X509_PRIVATE_KEY_OPTION, X509_PRIVATE_KEY);
@@ -2878,8 +2878,8 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_SetOption_succeed)
     TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport, &transport_cb_info, transport_cb_ctx);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mqtt_client_set_trace(IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mqtt_client_set_trace(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2)
         .IgnoreArgument(3);
@@ -2907,7 +2907,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_SetOption_keepAlive_succeed)
     umock_c_reset_all_calls();
 
     int keepAlive = 10;
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_ARG));
 
     // act
     IOTHUB_CLIENT_RESULT result = IoTHubTransport_MQTT_Common_SetOption(handle, OPTION_KEEP_ALIVE, &keepAlive);
@@ -2935,16 +2935,16 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_SetOption_keepAlive_previous_connectio
 
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(xio_retrieveoptions(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mqtt_client_disconnect(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(xio_retrieveoptions(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mqtt_client_disconnect(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
     for (size_t index = 0; index < NUM_DOWORK_VALUE; index++)
     {
-        STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(ThreadAPI_Sleep(IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(ThreadAPI_Sleep(IGNORED_ARG));
     }
-    STRICT_EXPECTED_CALL(mqtt_client_clear_xio(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(xio_destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(mqtt_client_clear_xio(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(xio_destroy(IGNORED_ARG));
 
     int keepAlive = 10;
 
@@ -2971,7 +2971,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_SetOption_xio_create_fail)
     TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport_fail, &transport_cb_info, transport_cb_ctx);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_ARG));
     EXPECTED_CALL(STRING_c_str(NULL)).SetReturn(TEST_STRING_VALUE);
 
     // act
@@ -2998,10 +2998,10 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_SetOption_fails_when_xio_setoption_fai
     TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport, &transport_cb_info, transport_cb_ctx);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG));
-    EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_STRING_VALUE);
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(xio_setoption(IGNORED_PTR_ARG, SOME_OPTION, SOME_VALUE))
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_ARG));
+    EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).SetReturn(TEST_STRING_VALUE);
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(xio_setoption(IGNORED_ARG, SOME_OPTION, SOME_VALUE))
         .IgnoreArgument(1)
         .SetReturn(MU_FAILURE);
 
@@ -3033,7 +3033,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_SetOption_keepAlive_same_value_succeed
 
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_ARG));
 
     // act
     result = IoTHubTransport_MQTT_Common_SetOption(handle, OPTION_KEEP_ALIVE, &keepAlive);
@@ -3061,10 +3061,10 @@ TEST_FUNCTION(SetOption_with_proxy_data_copies_the_options_for_later_use)
     http_proxy_options.username = "me";
     http_proxy_options.password = "shhhh";
 
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "test_proxy"));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "me"));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "shhhh"));
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, "test_proxy"));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, "me"));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, "shhhh"));
 
     // act
     IOTHUB_CLIENT_RESULT result = IoTHubTransport_MQTT_Common_SetOption(handle, "proxy_data", &http_proxy_options);
@@ -3092,7 +3092,7 @@ TEST_FUNCTION(SetOption_proxy_data_with_NULL_host_address_fails)
     http_proxy_options.username = "me";
     http_proxy_options.password = "shhhh";
 
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_ARG));
 
     // act
     IOTHUB_CLIENT_RESULT result = IoTHubTransport_MQTT_Common_SetOption(handle, "proxy_data", &http_proxy_options);
@@ -3140,8 +3140,8 @@ TEST_FUNCTION(SetOption_proxy_data_with_NULL_username_and_password_saves_only_th
     http_proxy_options.username = NULL;
     http_proxy_options.password = NULL;
 
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "test_proxy"));
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, "test_proxy"));
 
     // act
     IOTHUB_CLIENT_RESULT result = IoTHubTransport_MQTT_Common_SetOption(handle, "proxy_data", &http_proxy_options);
@@ -3169,7 +3169,7 @@ TEST_FUNCTION(SetOption_proxy_data_with_NULL_username_but_non_NULL_password_fail
     http_proxy_options.username = "the_other_me";
     http_proxy_options.password = NULL;
 
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_ARG));
 
     // act
     IOTHUB_CLIENT_RESULT result = IoTHubTransport_MQTT_Common_SetOption(handle, "proxy_data", &http_proxy_options);
@@ -3197,7 +3197,7 @@ TEST_FUNCTION(SetOption_proxy_data_with_NULL_password_but_non_NULL_username_fail
     http_proxy_options.username = NULL;
     http_proxy_options.password = "bleah";
 
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_ARG));
 
     // act
     IOTHUB_CLIENT_RESULT result = IoTHubTransport_MQTT_Common_SetOption(handle, "proxy_data", &http_proxy_options);
@@ -3231,13 +3231,13 @@ TEST_FUNCTION(SetOption_proxy_data_frees_previously_Saved_proxy_options)
 
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "test_proxy"));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "me"));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "shhhh"));
-    STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, "test_proxy"));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, "me"));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, "shhhh"));
+    STRICT_EXPECTED_CALL(free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(free(IGNORED_ARG));
 
     http_proxy_options.host_address = "test_proxy";
     http_proxy_options.port = 2222;
@@ -3270,8 +3270,8 @@ TEST_FUNCTION(when_allocating_proxy_name_fails_SetOption_proxy_data_fails)
     http_proxy_options.username = "haha";
     http_proxy_options.password = "bleah";
 
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "test_proxy"))
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, "test_proxy"))
         .SetReturn(1);
 
     // act
@@ -3300,11 +3300,11 @@ TEST_FUNCTION(when_allocating_username_fails_SetOption_proxy_data_fails)
     http_proxy_options.username = "haha";
     http_proxy_options.password = "bleah";
 
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "test_proxy"));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "haha"))
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, "test_proxy"));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, "haha"))
         .SetReturn(1);
-    STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(free(IGNORED_ARG));
 
     // act
     IOTHUB_CLIENT_RESULT result = IoTHubTransport_MQTT_Common_SetOption(handle, "proxy_data", &http_proxy_options);
@@ -3332,13 +3332,13 @@ TEST_FUNCTION(when_allocating_password_fails_SetOption_proxy_data_fails)
     http_proxy_options.username = "haha";
     http_proxy_options.password = "bleah";
 
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "test_proxy"));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "haha"));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "bleah"))
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, "test_proxy"));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, "haha"));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, "bleah"))
         .SetReturn(1);
-    STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(free(IGNORED_ARG));
 
     // act
     IOTHUB_CLIENT_RESULT result = IoTHubTransport_MQTT_Common_SetOption(handle, "proxy_data", &http_proxy_options);
@@ -3375,8 +3375,8 @@ TEST_FUNCTION(when_allocating_proxy_name_fails_SetOption_proxy_data_does_not_fre
     http_proxy_options.username = "haha";
     http_proxy_options.password = "bleah";
 
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "test_proxy"))
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, "test_proxy"))
         .SetReturn(1);
 
     // act
@@ -3414,11 +3414,11 @@ TEST_FUNCTION(when_allocating_username_fails_SetOption_proxy_data_does_not_free_
     http_proxy_options.username = "haha";
     http_proxy_options.password = "bleah";
 
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "test_proxy"));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "haha"))
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, "test_proxy"));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, "haha"))
         .SetReturn(1);
-    STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(free(IGNORED_ARG));
 
     // act
     IOTHUB_CLIENT_RESULT result = IoTHubTransport_MQTT_Common_SetOption(handle, "proxy_data", &http_proxy_options);
@@ -3455,13 +3455,13 @@ TEST_FUNCTION(when_allocating_password_fails_SetOption_proxy_data_does_not_free_
     http_proxy_options.username = "haha";
     http_proxy_options.password = "bleah";
 
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "test_proxy"));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "haha"));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "bleah"))
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, "test_proxy"));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, "haha"));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, "bleah"))
         .SetReturn(1);
-    STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(free(IGNORED_ARG));
 
     // act
     IOTHUB_CLIENT_RESULT result = IoTHubTransport_MQTT_Common_SetOption(handle, "proxy_data", &http_proxy_options);
@@ -3498,7 +3498,7 @@ TEST_FUNCTION(SetOption_proxy_data_with_NULL_hostname_does_not_free_previous_pro
     http_proxy_options.username = "haha";
     http_proxy_options.password = "bleah";
 
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_ARG));
 
     // act
     IOTHUB_CLIENT_RESULT result = IoTHubTransport_MQTT_Common_SetOption(handle, "proxy_data", &http_proxy_options);
@@ -3535,7 +3535,7 @@ TEST_FUNCTION(SetOption_proxy_data_with_NULL_username_and_non_NULL_password_does
     http_proxy_options.username = NULL;
     http_proxy_options.password = "cloanta";
 
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_ARG));
 
     // act
     IOTHUB_CLIENT_RESULT result = IoTHubTransport_MQTT_Common_SetOption(handle, "proxy_data", &http_proxy_options);
@@ -3559,10 +3559,10 @@ TEST_FUNCTION(SetOption_xio_option_get_underlying_TLS_when_proxy_data_was_not_se
 
     bool value = true;
 
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_STRING_VALUE);
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(xio_setoption(IGNORED_PTR_ARG, "Some XIO option name", &value));
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).SetReturn(TEST_STRING_VALUE);
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(xio_setoption(IGNORED_ARG, "Some XIO option name", &value));
 
     // act
     IOTHUB_CLIENT_RESULT result = IoTHubTransport_MQTT_Common_SetOption(handle, "Some XIO option name", &value);
@@ -3605,10 +3605,10 @@ TEST_FUNCTION(SetOption_xio_option_get_underlying_TLS_when_proxy_data_was_set_pa
 
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_STRING_VALUE);
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(xio_setoption(IGNORED_PTR_ARG, "Some XIO option name", &value));
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).SetReturn(TEST_STRING_VALUE);
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(xio_setoption(IGNORED_ARG, "Some XIO option name", &value));
 
     // act
     IOTHUB_CLIENT_RESULT result = IoTHubTransport_MQTT_Common_SetOption(handle, "Some XIO option name", &value);
@@ -3643,7 +3643,7 @@ TEST_FUNCTION(SetOption_proxy_data_when_underlying_IO_is_already_created_fails)
     http_proxy_options.username = "haha";
     http_proxy_options.password = "bleah";
 
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_ARG));
 
     IOTHUB_CLIENT_RESULT result = IoTHubTransport_MQTT_Common_SetOption(handle, "proxy_data", &http_proxy_options);
 
@@ -3675,21 +3675,21 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Destroy_frees_the_proxy_options)
     (void)IoTHubTransport_MQTT_Common_SetOption(handle, "proxy_data", &http_proxy_options);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(mqtt_client_deinit(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(mqtt_client_deinit(IGNORED_ARG))
         .IgnoreAllCalls();
-    STRICT_EXPECTED_CALL(mqtt_client_clear_xio(IGNORED_PTR_ARG)).IgnoreAllCalls();
-    STRICT_EXPECTED_CALL(xio_destroy(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(mqtt_client_clear_xio(IGNORED_ARG)).IgnoreAllCalls();
+    STRICT_EXPECTED_CALL(xio_destroy(IGNORED_ARG))
         .IgnoreAllCalls();
-    EXPECTED_CALL(DList_IsListEmpty(IGNORED_PTR_ARG))
+    EXPECTED_CALL(DList_IsListEmpty(IGNORED_ARG))
         .IgnoreAllCalls();
-    EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreAllCalls();
     STRICT_EXPECTED_CALL(retry_control_destroy(TEST_RETRY_CONTROL_HANDLE));
-    STRICT_EXPECTED_CALL(tickcounter_destroy(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_destroy(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
     // act
     IoTHubTransport_MQTT_Common_Destroy(handle);
@@ -3707,8 +3707,8 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_SetOption_retry_interval_succeed)
     TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport, &transport_cb_info, transport_cb_ctx);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(retry_control_set_option(IGNORED_PTR_ARG, RETRY_CONTROL_OPTION_INITIAL_WAIT_TIME_IN_SECS, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(retry_control_set_option(IGNORED_ARG, RETRY_CONTROL_OPTION_INITIAL_WAIT_TIME_IN_SECS, IGNORED_ARG));
 
     // act
     int retry_interval = 10;
@@ -3731,8 +3731,8 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_SetOption_retry_max_delay_succeed)
     TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport, &transport_cb_info, transport_cb_ctx);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(retry_control_set_option(IGNORED_PTR_ARG, RETRY_CONTROL_OPTION_MAX_DELAY_IN_SECS, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(retry_control_set_option(IGNORED_ARG, RETRY_CONTROL_OPTION_MAX_DELAY_IN_SECS, IGNORED_ARG));
 
     // act
     int retry_interval = 10;
@@ -3755,8 +3755,8 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_SetOption_retry_interval_fail)
     TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport, &transport_cb_info, transport_cb_ctx);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(retry_control_set_option(IGNORED_PTR_ARG, RETRY_CONTROL_OPTION_INITIAL_WAIT_TIME_IN_SECS, IGNORED_PTR_ARG)).SetReturn(__LINE__);
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(retry_control_set_option(IGNORED_ARG, RETRY_CONTROL_OPTION_INITIAL_WAIT_TIME_IN_SECS, IGNORED_ARG)).SetReturn(__LINE__);
 
     // act
     int retry_interval = 10;
@@ -3825,10 +3825,10 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_mqtt_client_connect_fail)
     umock_c_reset_all_calls();
 
     setup_initialize_connection_mocks(false);
-    STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
     // removeExpiredTwinRequests
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
 
     // act
     IoTHubTransport_MQTT_Common_DoWork(handle);
@@ -3851,10 +3851,10 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_Retry_Policy_First_connect_succ
     umock_c_reset_all_calls();
 
     setup_initialize_connection_mocks(false);
-    STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
     // removeExpiredTwinRequests
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
 
     // act
     IoTHubTransport_MQTT_Common_DoWork(handle);
@@ -3868,23 +3868,23 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_Retry_Policy_First_connect_succ
 
 static void set_expected_calls_for_first_gettwin_dowork()
 {
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_SasToken_Expiry(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(DList_RemoveEntryList(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_SasToken_Expiry(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(DList_RemoveEntryList(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).CallCannotFail();
     // STRING_construct_sprintf
-    STRICT_EXPECTED_CALL(mqttmessage_create(IGNORED_NUM_ARG, IGNORED_PTR_ARG, DELIVER_AT_MOST_ONCE, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(mqtt_client_publish(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mqttmessage_destroy(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(mqttmessage_create(IGNORED_ARG, IGNORED_ARG, DELIVER_AT_MOST_ONCE, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mqtt_client_publish(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mqttmessage_destroy(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
     // removeExpiredTwinRequests
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
 
 }
 
@@ -3907,9 +3907,9 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_send_get_twin_succeed)
 
     // Request the Twin content
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_ARG, IGNORED_ARG));
     (void)IoTHubTransport_MQTT_Common_GetTwinAsync(handle, on_get_device_twin_completed_callback, (void*)0x4445);
 
     // Send the GET request
@@ -3921,30 +3921,30 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_send_get_twin_succeed)
     ASSERT_IS_NOT_NULL(g_fnMqttMsgRecv);
     STRICT_EXPECTED_CALL(mqttmessage_getTopicName(TEST_MQTT_MESSAGE_HANDLE))
         .SetReturn(TEST_MQTT_MSG_TOPIC_GET_TWIN);
-    STRICT_EXPECTED_CALL(STRING_TOKENIZER_create_from_char(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_TOKENIZER_create_from_char(IGNORED_ARG));
     STRICT_EXPECTED_CALL(STRING_new());
-    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
         .SetReturn(0);
-    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
         .SetReturn(0);
-    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
         .SetReturn(0);
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .SetReturn("res");
-    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
         .SetReturn(0);
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .SetReturn("200");
-    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
         .SetReturn(0);
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .SetReturn("?$rid=2");
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_TOKENIZER_destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_TOKENIZER_destroy(IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(mqttmessage_getApplicationMsg(IGNORED_PTR_ARG)).CallCannotFail();
-    STRICT_EXPECTED_CALL(DList_RemoveEntryList(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(mqttmessage_getApplicationMsg(IGNORED_ARG)).CallCannotFail();
+    STRICT_EXPECTED_CALL(DList_RemoveEntryList(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
     // act
     g_fnMqttMsgRecv(TEST_MQTT_MESSAGE_HANDLE, g_callbackCtx);
@@ -3963,12 +3963,12 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_send_get_twin_succeed)
 // Initial, common calls for a run through DoWork that is going to destined to have timeouts
 static void set_expected_calls_for_DoWork_for_twin_timeouts()
 {
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_SasToken_Expiry(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_SasToken_Expiry(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
 }
 
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_send_get_twin_timesout)
@@ -3990,9 +3990,9 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_send_get_twin_timesout)
 
     // Request the Twin content
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_ARG, IGNORED_ARG));
     (void)IoTHubTransport_MQTT_Common_GetTwinAsync(handle, on_get_device_twin_completed_callback, (void*)0x4445);
 
     // Send the GET request
@@ -4005,13 +4005,13 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_send_get_twin_timesout)
 
     // Set up the returned time such that it's far enough into the future to trigger time out related logic.
     g_current_ms += 6*60*1000;
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG))
         .CopyOutArgumentBuffer(2, &g_current_ms, sizeof(g_current_ms));
 
     // The initial message removed is the implicit GetTwin() created on a listen for twin subscription.
     // This is not reported back to the application, by convention.
-    STRICT_EXPECTED_CALL(DList_RemoveEntryList(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(DList_RemoveEntryList(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
     // act
     IoTHubTransport_MQTT_Common_DoWork(handle);
@@ -4041,10 +4041,10 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_Retry_Policy_First_connect_succ
 
     umock_c_reset_all_calls();
     setup_initialize_connection_mocks(false);
-    STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
     // removeExpiredTwinRequests
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
     setup_connection_success_mocks();
 
     // act
@@ -4072,12 +4072,12 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_Retry_Policy_First_Connect_Fail
     connack.returnCode = CONN_REFUSED_SERVER_UNAVAIL;
 
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(Transport_ConnectionStatusCallBack(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_DEVICE_DISABLED, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mqtt_client_disconnect(IGNORED_PTR_ARG, NULL, NULL));
-    STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Transport_ConnectionStatusCallBack(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_DEVICE_DISABLED, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mqtt_client_disconnect(IGNORED_ARG, NULL, NULL));
+    STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
     // removeExpiredTwinRequests
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
 
     // act
     g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_CONNACK, &connack, g_callbackCtx);
@@ -4102,25 +4102,25 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_Retry_Policy_Connection_Break_W
     umock_c_reset_all_calls();
     /*First Do_Work*/
     RETRY_ACTION retry_action = RETRY_ACTION_RETRY_LATER;
-    EXPECTED_CALL(retry_control_should_retry(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    EXPECTED_CALL(retry_control_should_retry(IGNORED_ARG, IGNORED_ARG))
         .CopyOutArgumentBuffer_retry_action(&retry_action, sizeof(retry_action));
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
     // removeExpiredTwinRequests
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
 
     /*Second Do_Work*/
-    EXPECTED_CALL(retry_control_should_retry(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    EXPECTED_CALL(retry_control_should_retry(IGNORED_ARG, IGNORED_ARG))
         .CopyOutArgumentBuffer_retry_action(&retry_action, sizeof(retry_action));
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
     // removeExpiredTwinRequests
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
 
     /* Attempt to connect again*/
     setup_initialize_reconnection_mocks();
-    STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
     // removeExpiredTwinRequests
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
 
     // act
     /* Break Connection */
@@ -4163,17 +4163,17 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_Retry_Policy_Connection_Break_R
             retry_action = RETRY_ACTION_STOP_RETRYING;
         }
 
-        EXPECTED_CALL(retry_control_should_retry(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        EXPECTED_CALL(retry_control_should_retry(IGNORED_ARG, IGNORED_ARG))
             .CopyOutArgumentBuffer_retry_action(&retry_action, sizeof(retry_action));
 
         if (counter == 30)
         {
-            STRICT_EXPECTED_CALL(Transport_ConnectionStatusCallBack(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_RETRY_EXPIRED, IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(Transport_ConnectionStatusCallBack(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_RETRY_EXPIRED, IGNORED_ARG));
         }
 
-        STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
         // removeExpiredTwinRequests
-        STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
 
         IoTHubTransport_MQTT_Common_DoWork(handle);
     }
@@ -4202,37 +4202,37 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_Retry_Policy_Connection_Break_2
 
     /*First Do_Work*/
     setup_initialize_reconnection_mocks();
-    STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_ARG));
     // process_queued_ack_messages
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
     // removeExpiredTwinRequests
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
 
     /*Second Do_Work*/
     /* Attempt to connect again*/
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_ARG));
     // process_queued_ack_messages
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
     // removeExpiredTwinRequests
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
 
     ///* Fail connection */
-    STRICT_EXPECTED_CALL(mqtt_client_disconnect(IGNORED_PTR_ARG, NULL, NULL));
-    STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(mqtt_client_disconnect(IGNORED_ARG, NULL, NULL));
+    STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_ARG));
     // process_queued_ack_messages
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
     // removeExpiredTwinRequests
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
 
     ///* Second Retry */
     //// setup retry-setup mocks
     ///* Attempt to connect again*/
     setup_initialize_reconnection_mocks();
-    STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
     // removeExpiredTwinRequests
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
 
     // act
     /* Retry connecting */
@@ -4262,10 +4262,10 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_no_messages_succeed)
     umock_c_reset_all_calls();
 
     setup_initialize_connection_mocks(false);
-    STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
     // removeExpiredTwinRequests
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
 
     // act
     IoTHubTransport_MQTT_Common_DoWork(handle);
@@ -4292,8 +4292,8 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_no_messages_fail)
     umock_c_reset_all_calls();
 
     setup_initialize_connection_mocks(false);
-    STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
 
     umock_c_negative_tests_snapshot();
 
@@ -4331,10 +4331,10 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_SAS_token_from_user_succeed)
 
     setup_initialize_connection_mocks(false);
 
-    STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
     // removeExpiredTwinRequests
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
 
     // act
     IoTHubTransport_MQTT_Common_DoWork(handle);
@@ -4356,10 +4356,10 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_x509_succeed)
     umock_c_reset_all_calls();
 
     setup_initialize_connection_mocks(false);
-    STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
     // removeExpiredTwinRequests
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
 
     // act
     IoTHubTransport_MQTT_Common_DoWork(handle);
@@ -4439,21 +4439,21 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_get_item_fails)
     IoTHubTransport_MQTT_Common_DoWork(handle);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_SasToken_Expiry(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubMessage_GetContentType(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubMessage_GetString(IGNORED_PTR_ARG)).SetReturn(NULL);
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_SasToken_Expiry(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubMessage_GetContentType(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubMessage_GetString(IGNORED_ARG)).SetReturn(NULL);
 
-    EXPECTED_CALL(DList_RemoveEntryList(IGNORED_PTR_ARG));
-    EXPECTED_CALL(DList_InitializeListHead(IGNORED_PTR_ARG));
-    EXPECTED_CALL(DList_InsertTailList(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_PTR_ARG, IOTHUB_CLIENT_CONFIRMATION_ERROR, transport_cb_ctx));
-    EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    EXPECTED_CALL(DList_RemoveEntryList(IGNORED_ARG));
+    EXPECTED_CALL(DList_InitializeListHead(IGNORED_ARG));
+    EXPECTED_CALL(DList_InsertTailList(IGNORED_ARG, IGNORED_ARG));
+    EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_ARG, IOTHUB_CLIENT_CONFIRMATION_ERROR, transport_cb_ctx));
+    EXPECTED_CALL(mqtt_client_dowork(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
     // removeExpiredTwinRequests
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
 
     // act
     IoTHubTransport_MQTT_Common_DoWork(handle);
@@ -4489,27 +4489,27 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_x509_no_expire_success)
     // Reset the calls to make sure we're mocket the following calls
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG)).SetReturn(IOTHUB_CREDENTIAL_TYPE_X509);
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_ARG)).SetReturn(IOTHUB_CREDENTIAL_TYPE_X509);
     // DoWork to process the CONNACK call
     IoTHubTransport_MQTT_Common_DoWork(handle);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG)).SetReturn(IOTHUB_CREDENTIAL_TYPE_X509);
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_ARG)).SetReturn(IOTHUB_CREDENTIAL_TYPE_X509);
 
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubMessage_GetContentType(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubMessage_GetString(IGNORED_PTR_ARG)).SetReturn(NULL);
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubMessage_GetContentType(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubMessage_GetString(IGNORED_ARG)).SetReturn(NULL);
 
-    EXPECTED_CALL(DList_RemoveEntryList(IGNORED_PTR_ARG));
-    EXPECTED_CALL(DList_InitializeListHead(IGNORED_PTR_ARG));
-    EXPECTED_CALL(DList_InsertTailList(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_PTR_ARG, IOTHUB_CLIENT_CONFIRMATION_ERROR, transport_cb_ctx));
-    EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    EXPECTED_CALL(DList_RemoveEntryList(IGNORED_ARG));
+    EXPECTED_CALL(DList_InitializeListHead(IGNORED_ARG));
+    EXPECTED_CALL(DList_InsertTailList(IGNORED_ARG, IGNORED_ARG));
+    EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_ARG, IOTHUB_CLIENT_CONFIRMATION_ERROR, transport_cb_ctx));
+    EXPECTED_CALL(mqtt_client_dowork(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
     // removeExpiredTwinRequests
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
 
     // act
     IoTHubTransport_MQTT_Common_DoWork(handle);
@@ -4860,11 +4860,11 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_no_resend_message_succeeds)
     IoTHubTransport_MQTT_Common_DoWork(handle);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
     // removeExpiredTwinRequests
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
 
     // act
     IoTHubTransport_MQTT_Common_DoWork(handle);
@@ -5021,31 +5021,31 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_message_timeout_succeeds)
     umock_c_reset_all_calls();
 
     g_current_ms += RESEND_TIMEOUT_VALUE_MS;
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG))
         .CopyOutArgumentBuffer(2, &g_current_ms, sizeof(g_current_ms));
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_SasToken_Expiry(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(DList_InitializeListHead(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_PTR_ARG, IOTHUB_CLIENT_CONFIRMATION_MESSAGE_TIMEOUT, transport_cb_ctx));
-    STRICT_EXPECTED_CALL(DList_RemoveEntryList(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(xio_retrieveoptions(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mqtt_client_disconnect(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_SasToken_Expiry(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(DList_InitializeListHead(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_ARG, IOTHUB_CLIENT_CONFIRMATION_MESSAGE_TIMEOUT, transport_cb_ctx));
+    STRICT_EXPECTED_CALL(DList_RemoveEntryList(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(xio_retrieveoptions(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mqtt_client_disconnect(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
     for (size_t index = 0; index < NUM_DOWORK_VALUE; index++)
     {
-        STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(ThreadAPI_Sleep(IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(ThreadAPI_Sleep(IGNORED_ARG));
     }
-    STRICT_EXPECTED_CALL(mqtt_client_clear_xio(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(xio_destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(mqtt_client_clear_xio(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(xio_destroy(IGNORED_ARG));
     STRICT_EXPECTED_CALL(Transport_ConnectionStatusCallBack(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_COMMUNICATION_ERROR, transport_cb_ctx));
-    STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_ARG));
 
     // removeExpiredTwinRequests
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
 
     // act
     IoTHubTransport_MQTT_Common_DoWork(handle);
@@ -5101,44 +5101,44 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_2_message_timeout_succeeds)
 
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_SasToken_Expiry(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_SasToken_Expiry(IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG))
         .CopyOutArgumentBuffer(2, &g_current_ms, sizeof(g_current_ms));
 
-    STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_ARG));
 
     g_current_ms += RESEND_TIMEOUT_VALUE_MS;
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG))
         .CopyOutArgumentBuffer(2, &g_current_ms, sizeof(g_current_ms));
 
-    STRICT_EXPECTED_CALL(DList_InitializeListHead(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_PTR_ARG, IOTHUB_CLIENT_CONFIRMATION_MESSAGE_TIMEOUT, transport_cb_ctx));
-    STRICT_EXPECTED_CALL(DList_RemoveEntryList(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(xio_retrieveoptions(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mqtt_client_disconnect(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(DList_InitializeListHead(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_ARG, IOTHUB_CLIENT_CONFIRMATION_MESSAGE_TIMEOUT, transport_cb_ctx));
+    STRICT_EXPECTED_CALL(DList_RemoveEntryList(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(xio_retrieveoptions(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mqtt_client_disconnect(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
     for (size_t index = 0; index < NUM_DOWORK_VALUE; index++)
     {
-        STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(ThreadAPI_Sleep(IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(ThreadAPI_Sleep(IGNORED_ARG));
     }
-    STRICT_EXPECTED_CALL(mqtt_client_clear_xio(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(xio_destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(mqtt_client_clear_xio(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(xio_destroy(IGNORED_ARG));
     STRICT_EXPECTED_CALL(Transport_ConnectionStatusCallBack(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_COMMUNICATION_ERROR, transport_cb_ctx));
 
-    STRICT_EXPECTED_CALL(DList_InitializeListHead(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_PTR_ARG, IOTHUB_CLIENT_CONFIRMATION_MESSAGE_TIMEOUT, transport_cb_ctx));
-    STRICT_EXPECTED_CALL(DList_RemoveEntryList(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(DList_InitializeListHead(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_ARG, IOTHUB_CLIENT_CONFIRMATION_MESSAGE_TIMEOUT, transport_cb_ctx));
+    STRICT_EXPECTED_CALL(DList_RemoveEntryList(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
     STRICT_EXPECTED_CALL(Transport_ConnectionStatusCallBack(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_COMMUNICATION_ERROR, transport_cb_ctx));
 
     // removeExpiredTwinRequests
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
 
     // act
     IoTHubTransport_MQTT_Common_DoWork(handle);
@@ -5182,26 +5182,26 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_device_twin_resend_message_succ
     umock_c_reset_all_calls();
 
     RETRY_ACTION retry_action = RETRY_ACTION_RETRY_NOW;
-    STRICT_EXPECTED_CALL(retry_control_should_retry(TEST_RETRY_CONTROL_HANDLE, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(retry_control_should_retry(TEST_RETRY_CONTROL_HANDLE, IGNORED_ARG))
         .CopyOutArgumentBuffer_retry_action(&retry_action, sizeof(retry_action));
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG));
-    EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_STRING_VALUE);
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_SasToken(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG));
-    EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_DEVICE_ID);
-    EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(NULL);
-    EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_STRING_VALUE);
-    EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_STRING_VALUE);
-    EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_STRING_VALUE);
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG));
-    EXPECTED_CALL(mqtt_client_connect(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-    EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_ARG));
+    EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).SetReturn(TEST_STRING_VALUE);
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_SasToken(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).SetReturn(TEST_DEVICE_ID);
+    EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).SetReturn(NULL);
+    EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).SetReturn(TEST_STRING_VALUE);
+    EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).SetReturn(TEST_STRING_VALUE);
+    EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).SetReturn(TEST_STRING_VALUE);
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_ARG));
+    EXPECTED_CALL(mqtt_client_connect(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
+    EXPECTED_CALL(mqtt_client_dowork(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
     // removeExpiredTwinRequests
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
 
     // act
     IoTHubTransport_MQTT_Common_DoWork(handle);
@@ -5483,11 +5483,11 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_resend_max_recount_reached_mess
     g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_SUBSCRIBE_ACK, &suback, g_callbackCtx);
 
     RETRY_ACTION retry_action = RETRY_ACTION_RETRY_NOW;
-    EXPECTED_CALL(retry_control_should_retry(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    EXPECTED_CALL(retry_control_should_retry(IGNORED_ARG, IGNORED_ARG))
         .CopyOutArgumentBuffer_retry_action(&retry_action, sizeof(retry_action));
-    EXPECTED_CALL(retry_control_should_retry(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    EXPECTED_CALL(retry_control_should_retry(IGNORED_ARG, IGNORED_ARG))
         .CopyOutArgumentBuffer_retry_action(&retry_action, sizeof(retry_action));
-    EXPECTED_CALL(retry_control_should_retry(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    EXPECTED_CALL(retry_control_should_retry(IGNORED_ARG, IGNORED_ARG))
         .CopyOutArgumentBuffer_retry_action(&retry_action, sizeof(retry_action));
 
     for (size_t index = 0; index < 3; index++)
@@ -5499,7 +5499,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_resend_max_recount_reached_mess
 
     set_expected_calls_for_DoWork_for_twin_timeouts();
     // removeExpiredTwinRequests
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
 
     // act
     IoTHubTransport_MQTT_Common_DoWork(handle);
@@ -5525,16 +5525,16 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_connectFailCount_exceed_succeed
 
     for (size_t index = 0; index < iterationCount-1; index++)
     {
-        STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
         // removeExpiredTwinRequests
-        STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
     }
-    STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
     // removeExpiredTwinRequests
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
 
     // act
     for (size_t index = 0; index < iterationCount; index++)
@@ -5567,23 +5567,23 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_mqtt_client_connect_times_out)
     g_current_ms += (5 * 600 * 2000); // 4+ minutes have passed.
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_SasToken_Expiry(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(xio_retrieveoptions(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mqtt_client_disconnect(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_SasToken_Expiry(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(xio_retrieveoptions(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mqtt_client_disconnect(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
     for (size_t index = 0; index < NUM_DOWORK_VALUE; index++)
     {
-        STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(ThreadAPI_Sleep(IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(ThreadAPI_Sleep(IGNORED_ARG));
     }
-    STRICT_EXPECTED_CALL(mqtt_client_clear_xio(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(xio_destroy(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Transport_ConnectionStatusCallBack(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_EXPIRED_SAS_TOKEN, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(mqtt_client_clear_xio(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(xio_destroy(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Transport_ConnectionStatusCallBack(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_EXPIRED_SAS_TOKEN, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
     // removeExpiredTwinRequests
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
 
     // act
     IoTHubTransport_MQTT_Common_DoWork(handle);
@@ -5611,18 +5611,18 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_mqtt_client_connecting_times_ou
     g_current_ms += (5 * 600 * 2000); // 4+ minutes have passed.
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(xio_retrieveoptions(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(xio_retrieveoptions(IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(mqtt_client_disconnect(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(ThreadAPI_Sleep(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(mqtt_client_disconnect(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(ThreadAPI_Sleep(IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(mqtt_client_clear_xio(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(xio_destroy(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(mqtt_client_clear_xio(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(xio_destroy(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
     // removeExpiredTwinRequests
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
 
     //
     // client is not connected now, so mqtt_client_dowork shouldn't be called
@@ -5692,7 +5692,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_GetSendStatus_empty_waitingToSend_and_
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(DList_IsListEmpty(config.waitingToSend));
-    STRICT_EXPECTED_CALL(DList_IsListEmpty(IGNORED_PTR_ARG)).IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(DList_IsListEmpty(IGNORED_ARG)).IgnoreArgument(1);
 
     IOTHUB_CLIENT_STATUS status;
 
@@ -5717,7 +5717,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_GetSendStatus_waitingToSend_not_empty_
 
     TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport, &transport_cb_info, transport_cb_ctx);
 
-    IOTHUB_MESSAGE_HANDLE eventMessageHandle = IoTHubMessage_CreateFromByteArray(IGNORED_PTR_ARG, IGNORED_NUM_ARG);
+    IOTHUB_MESSAGE_HANDLE eventMessageHandle = IoTHubMessage_CreateFromByteArray(IGNORED_ARG, IGNORED_ARG);
     IOTHUB_MESSAGE_LIST newEntry;
     newEntry.messageHandle = eventMessageHandle;
     DList_InsertTailList(config.waitingToSend, &(newEntry.entry));
@@ -5771,14 +5771,14 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_delivered_MQTT_CLIENT_NO_PING_RESPONSE
     TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport, &transport_cb_info, transport_cb_ctx);
 
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(Transport_ConnectionStatusCallBack(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_NO_PING_RESPONSE, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(xio_retrieveoptions(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mqtt_client_clear_xio(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(xio_destroy(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Transport_ConnectionStatusCallBack(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_NO_PING_RESPONSE, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(xio_retrieveoptions(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mqtt_client_clear_xio(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(xio_destroy(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
     // removeExpiredTwinRequests
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
 
     // act
     g_fnMqttErrorCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_NO_PING_RESPONSE, g_callbackCtx);
@@ -5800,13 +5800,13 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_delivered_MQTT_CLIENT_MQTT_CLIENT_MEMO
     TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport, &transport_cb_info, transport_cb_ctx);
 
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(xio_retrieveoptions(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mqtt_client_clear_xio(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(xio_destroy(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(xio_retrieveoptions(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mqtt_client_clear_xio(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(xio_destroy(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
     // removeExpiredTwinRequests
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
 
     // act
     g_fnMqttErrorCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_MEMORY_ERROR, g_callbackCtx);
@@ -5829,7 +5829,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_delivered_MQTT_CLIENT_NO_NETWORK_success)
 
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(Transport_ConnectionStatusCallBack(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_NO_NETWORK, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Transport_ConnectionStatusCallBack(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_NO_NETWORK, IGNORED_ARG));
 
     // act
     g_fnMqttErrorCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_CONNECTION_ERROR, g_callbackCtx);
@@ -5851,7 +5851,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_delivered_MQTT_CLIENT_COMMUNICATION_ERROR_succ
 
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(Transport_ConnectionStatusCallBack(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_COMMUNICATION_ERROR, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Transport_ConnectionStatusCallBack(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_COMMUNICATION_ERROR, IGNORED_ARG));
 
     // act
     g_fnMqttErrorCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_COMMUNICATION_ERROR, g_callbackCtx);
@@ -5895,7 +5895,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MqttOpCompleteCallback_CONN_ACK_NOT_CO
     TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport, &transport_cb_info, transport_cb_ctx);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(Transport_ConnectionStatusCallBack(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_BAD_CREDENTIAL, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Transport_ConnectionStatusCallBack(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_BAD_CREDENTIAL, IGNORED_ARG));
 
     // act
     g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_CONNACK, &connack, g_callbackCtx);
@@ -5920,7 +5920,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_MqttOpCompleteCallback_CONN_ACK_CONN_REFUSED_N
     TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport, &transport_cb_info, transport_cb_ctx);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(Transport_ConnectionStatusCallBack(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_BAD_CREDENTIAL, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Transport_ConnectionStatusCallBack(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_BAD_CREDENTIAL, IGNORED_ARG));
 
     // act
     g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_CONNACK, &connack, g_callbackCtx);
@@ -6080,7 +6080,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_MessageRecv_device_twin_succeed)
     CONSTBUFFER cbuff;
     cbuff.buffer = appMessage;
     cbuff.size = appMsgSize;
-    STRICT_EXPECTED_CALL(CONSTBUFFER_GetContent(IGNORED_PTR_ARG)).SetReturn(&cbuff);
+    STRICT_EXPECTED_CALL(CONSTBUFFER_GetContent(IGNORED_ARG)).SetReturn(&cbuff);
     IOTHUB_DEVICE_TWIN device_twin;
     device_twin.report_data_handle = TEST_CONST_BUFFER_HANDLE;
     device_twin.item_id = 1;
@@ -6129,7 +6129,7 @@ static void test_invalid_mqtt_twin_topic_setup(const char* mqtt_topic, const cha
     CONSTBUFFER cbuff;
     cbuff.buffer = appMessage;
     cbuff.size = appMsgSize;
-    STRICT_EXPECTED_CALL(CONSTBUFFER_GetContent(IGNORED_PTR_ARG)).SetReturn(&cbuff);
+    STRICT_EXPECTED_CALL(CONSTBUFFER_GetContent(IGNORED_ARG)).SetReturn(&cbuff);
     IOTHUB_DEVICE_TWIN device_twin;
     device_twin.report_data_handle = TEST_CONST_BUFFER_HANDLE;
     device_twin.item_id = 1;
@@ -6142,36 +6142,36 @@ static void test_invalid_mqtt_twin_topic_setup(const char* mqtt_topic, const cha
     g_tokenizerIndex = 1;
 
     STRICT_EXPECTED_CALL(mqttmessage_getTopicName(TEST_MQTT_MESSAGE_HANDLE)).SetReturn(mqtt_topic);
-    STRICT_EXPECTED_CALL(STRING_TOKENIZER_create_from_char(IGNORED_PTR_ARG)).IgnoreArgument_input();
+    STRICT_EXPECTED_CALL(STRING_TOKENIZER_create_from_char(IGNORED_ARG)).IgnoreArgument_input();
     STRICT_EXPECTED_CALL(STRING_new());
-    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(0);
-    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(0);
-    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(0);
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn("res");
+    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG)).SetReturn(0);
+    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG)).SetReturn(0);
+    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG)).SetReturn(0);
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).SetReturn("res");
 
     if (status_code != NULL)
     {
-        STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(0);
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(status_code);
+        STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG)).SetReturn(0);
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).SetReturn(status_code);
 
         if (response_id != NULL)
         {
-            STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(0);
-            STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(response_id);
+            STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG)).SetReturn(0);
+            STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).SetReturn(response_id);
         }
         else
         {
-            STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(1);
+            STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG)).SetReturn(1);
         }
     }
     else
     {
-        STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(1);
+        STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG)).SetReturn(1);
     }
 
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument_handle();
-    STRICT_EXPECTED_CALL(STRING_TOKENIZER_destroy(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_TOKENIZER_destroy(IGNORED_ARG))
         .IgnoreArgument_t();
 
     // act
@@ -6223,7 +6223,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_MessageRecv_device_twin_fail)
     CONSTBUFFER cbuff;
     cbuff.buffer = appMessage;
     cbuff.size = appMsgSize;
-    STRICT_EXPECTED_CALL(CONSTBUFFER_GetContent(IGNORED_PTR_ARG)).SetReturn(&cbuff);
+    STRICT_EXPECTED_CALL(CONSTBUFFER_GetContent(IGNORED_ARG)).SetReturn(&cbuff);
     IOTHUB_DEVICE_TWIN device_twin;
     device_twin.report_data_handle = TEST_CONST_BUFFER_HANDLE;
     device_twin.item_id = 1;
@@ -6290,13 +6290,13 @@ TEST_FUNCTION(IoTHubTransportMqtt_implicit_gettwin_timeout)
 
     // Set up the returned time such that it's far enough into the future to trigger time out related logic.
     g_current_ms += 6*60*1000;
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG))
         .CopyOutArgumentBuffer(2, &g_current_ms, sizeof(g_current_ms));
 
     // The initial message removed is the implicit GetTwin() created on a listen for twin subscription.
     // This is not reported back to the application, by convention.
-    STRICT_EXPECTED_CALL(DList_RemoveEntryList(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(DList_RemoveEntryList(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
     // act
     IoTHubTransport_MQTT_Common_DoWork(handle);
@@ -6334,7 +6334,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_reported_property_timeout)
     CONSTBUFFER cbuff;
     cbuff.buffer = appMessage;
     cbuff.size = appMsgSize;
-    STRICT_EXPECTED_CALL(CONSTBUFFER_GetContent(IGNORED_PTR_ARG)).SetReturn(&cbuff);
+    STRICT_EXPECTED_CALL(CONSTBUFFER_GetContent(IGNORED_ARG)).SetReturn(&cbuff);
     IOTHUB_DEVICE_TWIN device_twin;
     device_twin.report_data_handle = TEST_CONST_BUFFER_HANDLE;
     device_twin.item_id = 1;
@@ -6347,18 +6347,18 @@ TEST_FUNCTION(IoTHubTransportMqtt_reported_property_timeout)
 
     // Set up the returned time such that it's far enough into the future to trigger time out related logic.
     g_current_ms += 6*60*1000;
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG))
         .CopyOutArgumentBuffer(2, &g_current_ms, sizeof(g_current_ms));
 
     // The initial message removed is the implicit GetTwin() created on a listen for twin subscription.
     // This is not reported back to the application, by convention.
-    STRICT_EXPECTED_CALL(DList_RemoveEntryList(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(DList_RemoveEntryList(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
     // The next message was queued there by the UT's request to send a reported property.
-    STRICT_EXPECTED_CALL(Transport_Twin_ReportedStateComplete_Callback(1, STATUS_CODE_TIMEOUT_VALUE, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(DList_RemoveEntryList(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Transport_Twin_ReportedStateComplete_Callback(1, STATUS_CODE_TIMEOUT_VALUE, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(DList_RemoveEntryList(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
     // act
     IoTHubTransport_MQTT_Common_DoWork(handle);
@@ -6382,22 +6382,22 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_sys_Properties_succee
     umock_c_reset_all_calls();
 
     setup_message_receive_initial_calls(TEST_MQTT_MSG_TOPIC_W_1_PROP, false);
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail().SetReturn(TEST_MQTT_MESSAGE_TOPIC);
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).CallCannotFail().SetReturn(TEST_MQTT_MESSAGE_TOPIC);
 
     EXPECTED_CALL(STRING_TOKENIZER_create_from_char(TEST_MQTT_MSG_TOPIC_W_1_PROP));
     STRICT_EXPECTED_CALL(STRING_new());
     STRICT_EXPECTED_CALL(IoTHubMessage_Properties(TEST_IOTHUB_MSG_BYTEARRAY));
 
-    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "&")).SetReturn(0);
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_ARG, IGNORED_ARG, "&")).SetReturn(0);
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .SetReturn("iothub-ack=Full");
 
-    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "&")).SetReturn(1);
-    EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-    EXPECTED_CALL(STRING_TOKENIZER_destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_ARG, IGNORED_ARG, "&")).SetReturn(1);
+    EXPECTED_CALL(STRING_delete(IGNORED_ARG));
+    EXPECTED_CALL(STRING_TOKENIZER_destroy(IGNORED_ARG));
 
     setup_set_message_disposition_context();
-    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_ARG, IGNORED_ARG))
         .SetReturn(true);
 
     // act
@@ -6425,59 +6425,59 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_sys_Properties_succee
     umock_c_reset_all_calls();
 
     setup_message_receive_initial_calls(TEST_MQTT_MSG_TOPIC_W_1_PROP, false);
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail().SetReturn(TEST_MQTT_MESSAGE_TOPIC);
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).CallCannotFail().SetReturn(TEST_MQTT_MESSAGE_TOPIC);
 
     EXPECTED_CALL(STRING_TOKENIZER_create_from_char(TEST_MQTT_MSG_TOPIC_W_1_PROP));
     STRICT_EXPECTED_CALL(STRING_new());
     STRICT_EXPECTED_CALL(IoTHubMessage_Properties(TEST_IOTHUB_MSG_BYTEARRAY));
 
     // "%24.cid&%24.uid";
-    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "&")).SetReturn(0);
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_ARG, IGNORED_ARG, "&")).SetReturn(0);
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .SetReturn("iothub-ack=Full");
     // iothub-ack-full is a "system" property but not mapped to IOTHUB_MESSAGE_HANDLE so it is silently ignored
 
-    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "&")).SetReturn(0);
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_ARG, IGNORED_ARG, "&")).SetReturn(0);
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .SetReturn("propName=PropValue");
 
     set_expected_calls_for_custom_message_property(true);
 
-    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "&")).SetReturn(0);
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_ARG, IGNORED_ARG, "&")).SetReturn(0);
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .SetReturn("DeviceInfo=smokeTest");
 
     set_expected_calls_for_custom_message_property(true);
 
-    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "&")).SetReturn(0);
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_ARG, IGNORED_ARG, "&")).SetReturn(0);
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .SetReturn("%24.to=%2Fdevices%2FmyDeviceId%2Fmessages%2FdeviceBound&");
     // %24.to is also silently ignored
 
-    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "&")).SetReturn(0);
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_ARG, IGNORED_ARG, "&")).SetReturn(0);
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .SetReturn("%24.cid=123");
 
-    STRICT_EXPECTED_CALL(URL_DecodeString(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
-    STRICT_EXPECTED_CALL(IoTHubMessage_SetCorrelationId(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(URL_DecodeString(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).CallCannotFail();
+    STRICT_EXPECTED_CALL(IoTHubMessage_SetCorrelationId(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "&")).SetReturn(0);
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_ARG, IGNORED_ARG, "&")).SetReturn(0);
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .SetReturn("%24.uid=456");
 
-    STRICT_EXPECTED_CALL(URL_DecodeString(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
-    STRICT_EXPECTED_CALL(IoTHubMessage_SetMessageUserIdSystemProperty(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(URL_DecodeString(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).CallCannotFail();
+    STRICT_EXPECTED_CALL(IoTHubMessage_SetMessageUserIdSystemProperty(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "&")).SetReturn(1);
-    EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-    EXPECTED_CALL(STRING_TOKENIZER_destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_ARG, IGNORED_ARG, "&")).SetReturn(1);
+    EXPECTED_CALL(STRING_delete(IGNORED_ARG));
+    EXPECTED_CALL(STRING_TOKENIZER_destroy(IGNORED_ARG));
 
     setup_set_message_disposition_context();
-    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_ARG, IGNORED_ARG))
         .SetReturn(true);
 
     // act
@@ -6816,7 +6816,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Register_deviceKey_null_and_deviceSasT
     TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport, &transport_cb_info, transport_cb_ctx);
     umock_c_reset_all_calls();
 
-    EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
+    EXPECTED_CALL(STRING_c_str(IGNORED_ARG));
 
     // act
     IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransport_MQTT_Common_Register(handle, &deviceConfig, config.waitingToSend);
@@ -6844,9 +6844,9 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Register_deviceKey_provided_null_retur
     TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport, &transport_cb_info, transport_cb_ctx);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_DEVICE_ID);
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(NULL);
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG)).SetReturn(IOTHUB_CREDENTIAL_TYPE_DEVICE_KEY);
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).SetReturn(TEST_DEVICE_ID);
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).SetReturn(NULL);
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_ARG)).SetReturn(IOTHUB_CREDENTIAL_TYPE_DEVICE_KEY);
 
     // act
     IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransport_MQTT_Common_Register(handle, &deviceConfig, config.waitingToSend);
@@ -6861,10 +6861,10 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Register_deviceKey_provided_null_retur
 
 static void set_expected_call_for_get_cred_and_devicekey()
 {
-    EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_DEVICE_ID);
-    EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(NULL);
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_DeviceKey(IGNORED_PTR_ARG));
+    EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).SetReturn(TEST_DEVICE_ID);
+    EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).SetReturn(NULL);
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_DeviceKey(IGNORED_ARG));
 }
 
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_Register_succeeds_returns_transport)
@@ -6913,7 +6913,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Register_twice_fails_second_time)
     umock_c_reset_all_calls();
 
     set_expected_call_for_get_cred_and_devicekey();
-    EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_DEVICE_KEY);
+    EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).SetReturn(TEST_DEVICE_KEY);
 
     // act
     IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransport_MQTT_Common_Register(handle, &TEST_DEVICE_1, config.waitingToSend);
@@ -6970,7 +6970,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Register_deviceid_mismatch_returns_nul
     TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport, &transport_cb_info, transport_cb_ctx);
     umock_c_reset_all_calls();
 
-    EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
+    EXPECTED_CALL(STRING_c_str(IGNORED_ARG));
 
     // act
     IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransport_MQTT_Common_Register(handle, &deviceConfig, config.waitingToSend);
@@ -7094,9 +7094,9 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Register_deviceKey_null_and_deviceSas_
     TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport, &transport_cb_info, transport_cb_ctx);
     umock_c_reset_all_calls();
 
-    EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_DEVICE_ID);
-    EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(NULL);
-    EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG)).SetReturn(IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN);
+    EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).SetReturn(TEST_DEVICE_ID);
+    EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).SetReturn(NULL);
+    EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_ARG)).SetReturn(IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN);
 
     // act
     IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransport_MQTT_Common_Register(handle, &deviceConfig, config.waitingToSend);
@@ -7218,7 +7218,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_GetHostname_with_non_NULL_handle_succe
     TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport, &transport_cb_info, transport_cb_ctx);
     umock_c_reset_all_calls();
 
-    EXPECTED_CALL(STRING_clone(IGNORED_PTR_ARG))
+    EXPECTED_CALL(STRING_clone(IGNORED_ARG))
         .IgnoreArgument_handle()
         .SetReturn(TEST_HOSTNAME_STRING_HANDLE);
 
@@ -7246,7 +7246,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin_Succeed)
     g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_CONNACK, &connack, g_callbackCtx);
     umock_c_reset_all_calls();
 
-    EXPECTED_CALL(STRING_construct(IGNORED_PTR_ARG)).IgnoreArgument_psz();
+    EXPECTED_CALL(STRING_construct(IGNORED_ARG)).IgnoreArgument_psz();
 
     // act
     int result = IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin(handle);
@@ -7349,24 +7349,24 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin_DoWork_2nd_fails)
 
     umock_c_reset_all_calls();
 
-     STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+     STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
-    EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
-    EXPECTED_CALL(mqttmessage_create(IGNORED_NUM_ARG, IGNORED_PTR_ARG, DELIVER_AT_MOST_ONCE, appMessage, appMsgSize))
+    EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).CallCannotFail();
+    EXPECTED_CALL(mqttmessage_create(IGNORED_ARG, IGNORED_ARG, DELIVER_AT_MOST_ONCE, appMessage, appMsgSize))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
-    STRICT_EXPECTED_CALL(mqtt_client_publish(TEST_MQTT_CLIENT_HANDLE, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(mqtt_client_publish(TEST_MQTT_CLIENT_HANDLE, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
-    STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
     STRICT_EXPECTED_CALL(mqttmessage_destroy(TEST_MQTT_MESSAGE_HANDLE))
         .IgnoreArgument(1);
-    EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-    EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
+    EXPECTED_CALL(STRING_delete(IGNORED_ARG));
+    EXPECTED_CALL(mqtt_client_dowork(IGNORED_ARG));
 
     umock_c_negative_tests_snapshot();
 
@@ -7413,7 +7413,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin_notify_Succeed)
     g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_CONNACK, &connack, g_callbackCtx);
     umock_c_reset_all_calls();
 
-    EXPECTED_CALL(STRING_construct(IGNORED_PTR_ARG)).IgnoreArgument_psz();
+    EXPECTED_CALL(STRING_construct(IGNORED_ARG)).IgnoreArgument_psz();
 
     // act
     int result = IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin(handle);
@@ -7456,7 +7456,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin_fail)
     g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_CONNACK, &connack, g_callbackCtx);
     umock_c_reset_all_calls();
 
-    EXPECTED_CALL(STRING_construct(IGNORED_PTR_ARG)).IgnoreArgument_psz();
+    EXPECTED_CALL(STRING_construct(IGNORED_ARG)).IgnoreArgument_psz();
 
     umock_c_negative_tests_snapshot();
 
@@ -7496,7 +7496,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin_notify_fail)
     g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_CONNACK, &connack, g_callbackCtx);
     umock_c_reset_all_calls();
 
-    EXPECTED_CALL(STRING_construct(IGNORED_PTR_ARG)).IgnoreArgument_psz();
+    EXPECTED_CALL(STRING_construct(IGNORED_ARG)).IgnoreArgument_psz();
 
     umock_c_negative_tests_snapshot();
 
@@ -7532,7 +7532,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Subscribe_DeviceMethod_Succeed)
     g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_CONNACK, &connack, g_callbackCtx);
     umock_c_reset_all_calls();
 
-    EXPECTED_CALL(STRING_construct(IGNORED_PTR_ARG)).IgnoreArgument_psz();
+    EXPECTED_CALL(STRING_construct(IGNORED_ARG)).IgnoreArgument_psz();
 
     // act
     int result = IoTHubTransport_MQTT_Common_Subscribe_DeviceMethod(handle);
@@ -7575,7 +7575,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Subscribe_DeviceMethod_fail)
     g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_CONNACK, &connack, g_callbackCtx);
     umock_c_reset_all_calls();
 
-    EXPECTED_CALL(STRING_construct(IGNORED_PTR_ARG)).IgnoreArgument_psz();
+    EXPECTED_CALL(STRING_construct(IGNORED_ARG)).IgnoreArgument_psz();
 
     umock_c_negative_tests_snapshot();
 
@@ -7766,7 +7766,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_ProcessItem_not_connected_Succeed)
     CONSTBUFFER cbuff;
     cbuff.buffer = appMessage;
     cbuff.size = appMsgSize;
-    STRICT_EXPECTED_CALL(CONSTBUFFER_GetContent(IGNORED_PTR_ARG)).SetReturn(&cbuff);
+    STRICT_EXPECTED_CALL(CONSTBUFFER_GetContent(IGNORED_ARG)).SetReturn(&cbuff);
     IOTHUB_DEVICE_TWIN device_twin;
     device_twin.report_data_handle = TEST_CONST_BUFFER_HANDLE;
     device_twin.item_id = 1;
@@ -7812,7 +7812,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_ProcessItem_continue_Succeed)
     CONSTBUFFER cbuff;
     cbuff.buffer = appMessage;
     cbuff.size = appMsgSize;
-    STRICT_EXPECTED_CALL(CONSTBUFFER_GetContent(IGNORED_PTR_ARG)).SetReturn(&cbuff);
+    STRICT_EXPECTED_CALL(CONSTBUFFER_GetContent(IGNORED_ARG)).SetReturn(&cbuff);
     IOTHUB_DEVICE_TWIN device_twin;
     device_twin.report_data_handle = TEST_CONST_BUFFER_HANDLE;
     device_twin.item_id = 1;
@@ -7854,7 +7854,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_ProcessItem_fail)
     CONSTBUFFER cbuff;
     cbuff.buffer = appMessage;
     cbuff.size = appMsgSize;
-    STRICT_EXPECTED_CALL(CONSTBUFFER_GetContent(IGNORED_PTR_ARG)).SetReturn(&cbuff);
+    STRICT_EXPECTED_CALL(CONSTBUFFER_GetContent(IGNORED_ARG)).SetReturn(&cbuff);
     IOTHUB_DEVICE_TWIN device_twin;
     device_twin.report_data_handle = TEST_CONST_BUFFER_HANDLE;
     device_twin.item_id = 1;
@@ -7895,8 +7895,8 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_ProcessItem_fail)
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_DeviceMethod_Response_handle_NULL_fail)
 {
     // arrange
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
     // act
     int result = IoTHubTransport_MQTT_Common_DeviceMethod_Response(NULL, TEST_METHOD_ID, TEST_DEVICE_METHOD_RESPONSE, TEST_DEVICE_RESP_LENGTH, TEST_DEVICE_STATUS_CODE);
@@ -8101,11 +8101,11 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_SendMessageDisposition_succeeds)
     MESSAGE_DISPOSITION_CONTEXT_HANDLE msgDispCtxHandle = (MESSAGE_DISPOSITION_CONTEXT_HANDLE)&msgDispCtx;
 
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(IoTHubMessage_GetDispositionContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_GetDispositionContext(IGNORED_ARG, IGNORED_ARG))
         .CopyOutArgumentBuffer_dispositionContext(&msgDispCtxHandle, sizeof(&msgDispCtxHandle));
-    STRICT_EXPECTED_CALL(mqtt_client_send_message_response(IGNORED_PTR_ARG, IGNORED_NUM_ARG, DELIVER_AT_LEAST_ONCE));
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(mqtt_client_send_message_response(IGNORED_ARG, IGNORED_ARG, DELIVER_AT_LEAST_ONCE));
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
     // act
     IOTHUB_CLIENT_RESULT result = IoTHubTransport_MQTT_Common_SendMessageDisposition(devHandle, (IOTHUB_MESSAGE_HANDLE)0x42, IOTHUBMESSAGE_ACCEPTED);
@@ -8130,8 +8130,8 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Subscribe_InputQueue_Succeed)
     g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_CONNACK, &connack, g_callbackCtx);
     umock_c_reset_all_calls();
 
-    EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_STRING_VALUE);
-    EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_STRING_VALUE);
+    EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).SetReturn(TEST_STRING_VALUE);
+    EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).SetReturn(TEST_STRING_VALUE);
 
     // act
     int result = IoTHubTransport_MQTT_Common_Subscribe_InputQueue(handle);
@@ -8322,11 +8322,11 @@ static void setup_message_recv_extractMqttProperties(const char* topicName, cons
 {
     (void)inputQueueName;
     // findMessagePropertyStart
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).IgnoreArgument(1).SetReturn(inputQueueSubscribeName).CallCannotFail();
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).IgnoreArgument(1).SetReturn(inputQueueSubscribeName).CallCannotFail();
 
     // addInputNamePropertyToMsg
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(IoTHubMessage_SetInputName(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubMessage_SetInputName(IGNORED_ARG, IGNORED_ARG));
     STRICT_EXPECTED_CALL(gballoc_free(NULL)).IgnoreArgument_ptr();
 
     EXPECTED_CALL(STRING_TOKENIZER_create_from_char(topicName));
@@ -8336,34 +8336,34 @@ static void setup_message_recv_extractMqttProperties(const char* topicName, cons
     if (connectedSystemProps)
     {
         // Parse out connected_device
-        STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "&"))
+        STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_ARG, IGNORED_ARG, "&"))
             .IgnoreArgument(3)
             .CallCannotFail();
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
             .IgnoreArgument(1)
             .SetReturn("%24.cdid=connected_device").
             CallCannotFail();
 
-        STRICT_EXPECTED_CALL(IoTHubMessage_SetConnectionDeviceId(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(IoTHubMessage_SetConnectionDeviceId(IGNORED_ARG, IGNORED_ARG));
 
         // Parse out connected_module
-        STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "&"))
+        STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_ARG, IGNORED_ARG, "&"))
             .IgnoreArgument(3)
             .SetReturn(0);
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
             .IgnoreArgument(1)
             .SetReturn("%24.cmid=connected_module/")
             .CallCannotFail();
 
-        STRICT_EXPECTED_CALL(IoTHubMessage_SetConnectionModuleId(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(IoTHubMessage_SetConnectionModuleId(IGNORED_ARG, IGNORED_ARG));
     }
 
-    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "&"))
+    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_ARG, IGNORED_ARG, "&"))
         .IgnoreArgument(3)
         .SetReturn(1);
 
-    EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-    EXPECTED_CALL(STRING_TOKENIZER_destroy(IGNORED_PTR_ARG));
+    EXPECTED_CALL(STRING_delete(IGNORED_ARG));
+    EXPECTED_CALL(STRING_TOKENIZER_destroy(IGNORED_ARG));
 }
 
 static void setup_message_recv_with_input_queue_mocks(
@@ -8374,10 +8374,10 @@ static void setup_message_recv_with_input_queue_mocks(
     bool msgCbResult)
 {
     STRICT_EXPECTED_CALL(mqttmessage_getTopicName(TEST_MQTT_MESSAGE_HANDLE)).SetReturn(topicName);
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .SetReturn(NULL)
         .CallCannotFail();
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG))
         .SetReturn(inputQueueSubscribeName)
         .CallCannotFail();
     STRICT_EXPECTED_CALL(mqttmessage_getApplicationMsg(TEST_MQTT_MESSAGE_HANDLE)).CallCannotFail();
@@ -8387,13 +8387,13 @@ static void setup_message_recv_with_input_queue_mocks(
     setup_message_recv_extractMqttProperties(topicName, inputQueueSubscribeName, inputQueueName, connectedSystemProps);
 
     setup_set_message_disposition_context();
-    STRICT_EXPECTED_CALL(Transport_MessageCallbackFromInput(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Transport_MessageCallbackFromInput(IGNORED_ARG, IGNORED_ARG))
         .SetReturn(msgCbResult);
 
     if (!msgCbResult)
     {
-        STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
     }
 }
 
@@ -8435,23 +8435,23 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_InputQueue_no_system_
 
     setup_message_receive_initial_calls(TEST_MQTT_INPUT_NO_PROPERTIES, true);
     // We only have an input queue but no properties.  In this case far fewer calls will be invoked than typical case with properties.
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(IoTHubMessage_SetInputName(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubMessage_SetInputName(IGNORED_ARG, IGNORED_ARG))
         .SetReturn(IOTHUB_MESSAGE_OK);
     STRICT_EXPECTED_CALL(gballoc_free(NULL)).IgnoreArgument_ptr();
 
-    STRICT_EXPECTED_CALL(STRING_TOKENIZER_create_from_char(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_TOKENIZER_create_from_char(IGNORED_ARG));
     STRICT_EXPECTED_CALL(STRING_new());
-    STRICT_EXPECTED_CALL(IoTHubMessage_Properties(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_TOKENIZER_destroy(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(mqttmessage_getPacketId(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mqttmessage_getQosType(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubMessage_SetDispositionContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Transport_MessageCallbackFromInput(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubMessage_Properties(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_TOKENIZER_destroy(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mqttmessage_getPacketId(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mqttmessage_getQosType(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubMessage_SetDispositionContext(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Transport_MessageCallbackFromInput(IGNORED_ARG, IGNORED_ARG))
         .SetReturn(true);
 
     // act
@@ -8478,13 +8478,13 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_InputQueue_missing_qu
     umock_c_reset_all_calls();
 
     setup_message_receive_initial_calls(TEST_MQTT_INPUT_MISSING_INPUT_QUEUE_NAME, true);
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail().SetReturn(TEST_MQTT_INPUT_MISSING_INPUT_QUEUE_NAME);
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).CallCannotFail().SetReturn(TEST_MQTT_INPUT_MISSING_INPUT_QUEUE_NAME);
     // Because the MQTT topic isn't formatted correctly and we detect this early, don't parse through it.
 
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-    EXPECTED_CALL(STRING_TOKENIZER_destroy(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    EXPECTED_CALL(STRING_delete(IGNORED_ARG));
+    EXPECTED_CALL(STRING_TOKENIZER_destroy(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_ARG));
 
     // act
     ASSERT_IS_NOT_NULL(g_fnMqttMsgRecv);

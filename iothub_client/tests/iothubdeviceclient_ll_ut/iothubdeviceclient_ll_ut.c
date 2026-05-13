@@ -424,7 +424,7 @@ TEST_FUNCTION(IoTHubDeviceClient_LL_SendMessageDisposition_Test)
 {
     //arrange
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SendMessageDisposition(IGNORED_PTR_ARG, TEST_MESSAGE_HANDLE, IOTHUBMESSAGE_ACCEPTED));
+    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SendMessageDisposition(IGNORED_ARG, TEST_MESSAGE_HANDLE, IOTHUBMESSAGE_ACCEPTED));
 
     //act
     IOTHUB_CLIENT_RESULT result = IoTHubDeviceClient_LL_SendMessageDisposition(TEST_IOTHUB_DEVICE_CLIENT_LL_HANDLE, TEST_MESSAGE_HANDLE, IOTHUBMESSAGE_ACCEPTED);

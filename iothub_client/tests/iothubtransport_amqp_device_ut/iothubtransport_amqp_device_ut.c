@@ -545,15 +545,15 @@ static void set_expected_calls_for_is_timeout_reached(time_t current_time)
 
     if (current_time != INDEFINITE_TIME)
     {
-        STRICT_EXPECTED_CALL(get_difftime(current_time, IGNORED_NUM_ARG)); // let the function hook calculate the actual difftime.
+        STRICT_EXPECTED_CALL(get_difftime(current_time, IGNORED_ARG)); // let the function hook calculate the actual difftime.
     }
 }
 
 static void set_expected_calls_for_clone_device_config(AMQP_DEVICE_CONFIG *config)
 {
-    STRICT_EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(malloc(IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, config->iothub_host_fqdn));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, config->iothub_host_fqdn));
     STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_DeviceId(TEST_AUTHORIZATION_HANDLE)).CallCannotFail();
     STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_ModuleId(TEST_AUTHORIZATION_HANDLE)).SetReturn(config->module_id).CallCannotFail();
 }
@@ -561,26 +561,26 @@ static void set_expected_calls_for_clone_device_config(AMQP_DEVICE_CONFIG *confi
 static void set_expected_calls_for_create_authentication_instance(AMQP_DEVICE_CONFIG *config)
 {
     (void)config;
-    EXPECTED_CALL(authentication_create(IGNORED_PTR_ARG));
+    EXPECTED_CALL(authentication_create(IGNORED_ARG));
 }
 
 static void set_expected_calls_for_create_messenger_instance(AMQP_DEVICE_CONFIG *config)
 {
     (void)config;
-    EXPECTED_CALL(telemetry_messenger_create(IGNORED_PTR_ARG, test_get_product_info, NULL));
+    EXPECTED_CALL(telemetry_messenger_create(IGNORED_ARG, test_get_product_info, NULL));
 }
 
 static void set_expected_calls_for_create_twin_messenger(AMQP_DEVICE_CONFIG *config)
 {
     (void)config;
-    EXPECTED_CALL(twin_messenger_create(IGNORED_PTR_ARG));
+    EXPECTED_CALL(twin_messenger_create(IGNORED_ARG));
 }
 
 static void set_expected_calls_for_device_create(AMQP_DEVICE_CONFIG *config, time_t current_time)
 {
     (void)current_time;
 
-    STRICT_EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(malloc(IGNORED_ARG));
 
     set_expected_calls_for_clone_device_config(config);
 
@@ -699,14 +699,14 @@ static void set_expected_calls_for_device_destroy(AMQP_DEVICE_HANDLE handle, AMQ
 
     // destroy config
     STRICT_EXPECTED_CALL(free(config->iothub_host_fqdn));
-    EXPECTED_CALL(free(IGNORED_PTR_ARG));
+    EXPECTED_CALL(free(IGNORED_ARG));
 
     STRICT_EXPECTED_CALL(free(handle));
 }
 
 static void set_expected_calls_for_device_retrieve_options(AMQP_DEVICE_CONFIG *config)
 {
-    EXPECTED_CALL(OptionHandler_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    EXPECTED_CALL(OptionHandler_Create(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
         .SetReturn(TEST_OPTIONHANDLER_HANDLE);
 
     if (config->authentication_mode == DEVICE_AUTH_MODE_CBS)
@@ -756,8 +756,8 @@ static void set_expected_calls_for_device_set_option(AMQP_DEVICE_HANDLE handle, 
 static void set_expected_calls_for_device_send_async(AMQP_DEVICE_CONFIG *config)
 {
     (void)config;
-    EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(telemetry_messenger_send_async(TEST_TELEMETRY_MESSENGER_HANDLE, TEST_IOTHUB_MESSAGE_LIST, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    EXPECTED_CALL(malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(telemetry_messenger_send_async(TEST_TELEMETRY_MESSENGER_HANDLE, TEST_IOTHUB_MESSAGE_LIST, IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(3)
         .IgnoreArgument(4);
 }
@@ -1411,7 +1411,7 @@ TEST_FUNCTION(device_get_send_status_IDLE_success)
     TELEMETRY_MESSENGER_SEND_STATUS telemetry_messenger_get_send_status_result = TELEMETRY_MESSENGER_SEND_STATUS_IDLE;
 
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(telemetry_messenger_get_send_status(TEST_TELEMETRY_MESSENGER_HANDLE, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(telemetry_messenger_get_send_status(TEST_TELEMETRY_MESSENGER_HANDLE, IGNORED_ARG))
         .IgnoreArgument(2)
         .CopyOutArgumentBuffer(2, &telemetry_messenger_get_send_status_result, sizeof(TELEMETRY_MESSENGER_SEND_STATUS))
         .SetReturn(0);
@@ -1441,7 +1441,7 @@ TEST_FUNCTION(device_get_send_status_IDLE_with_module_success)
     TELEMETRY_MESSENGER_SEND_STATUS telemetry_messenger_get_send_status_result = TELEMETRY_MESSENGER_SEND_STATUS_IDLE;
 
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(telemetry_messenger_get_send_status(TEST_TELEMETRY_MESSENGER_HANDLE, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(telemetry_messenger_get_send_status(TEST_TELEMETRY_MESSENGER_HANDLE, IGNORED_ARG))
         .IgnoreArgument(2)
         .CopyOutArgumentBuffer(2, &telemetry_messenger_get_send_status_result, sizeof(TELEMETRY_MESSENGER_SEND_STATUS))
         .SetReturn(0);
@@ -1472,7 +1472,7 @@ TEST_FUNCTION(device_get_send_status_BUSY_success)
     TELEMETRY_MESSENGER_SEND_STATUS telemetry_messenger_get_send_status_result = TELEMETRY_MESSENGER_SEND_STATUS_BUSY;
 
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(telemetry_messenger_get_send_status(TEST_TELEMETRY_MESSENGER_HANDLE, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(telemetry_messenger_get_send_status(TEST_TELEMETRY_MESSENGER_HANDLE, IGNORED_ARG))
         .IgnoreArgument(2)
         .CopyOutArgumentBuffer(2, &telemetry_messenger_get_send_status_result, sizeof(TELEMETRY_MESSENGER_SEND_STATUS))
         .SetReturn(0);
@@ -1500,7 +1500,7 @@ TEST_FUNCTION(device_get_send_status_failure_checks)
     AMQP_DEVICE_HANDLE handle = create_device(config, TEST_current_time);
 
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(telemetry_messenger_get_send_status(TEST_TELEMETRY_MESSENGER_HANDLE, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(telemetry_messenger_get_send_status(TEST_TELEMETRY_MESSENGER_HANDLE, IGNORED_ARG))
         .IgnoreArgument(2)
         .SetReturn(1);
 
@@ -1587,7 +1587,7 @@ TEST_FUNCTION(device_subscribe_message_succeess)
     umock_c_reset_all_calls();
 
     TEST_telemetry_messenger_subscribe_for_messages_return = 0;
-    STRICT_EXPECTED_CALL(telemetry_messenger_subscribe_for_messages(TEST_TELEMETRY_MESSENGER_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(telemetry_messenger_subscribe_for_messages(TEST_TELEMETRY_MESSENGER_HANDLE, IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3);
 
@@ -1614,7 +1614,7 @@ TEST_FUNCTION(device_subscribe_message_failure_checks)
 
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(telemetry_messenger_subscribe_for_messages(TEST_TELEMETRY_MESSENGER_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(telemetry_messenger_subscribe_for_messages(TEST_TELEMETRY_MESSENGER_HANDLE, IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3)
         .SetReturn(1);
@@ -2207,7 +2207,7 @@ TEST_FUNCTION(telemetry_messenger_send_async_succeeds)
     ASSERT_IS_NOT_NULL(handle);
 
     // cleanup
-    EXPECTED_CALL(free(IGNORED_PTR_ARG));
+    EXPECTED_CALL(free(IGNORED_ARG));
     TEST_telemetry_messenger_send_async_saved_callback(TEST_telemetry_messenger_send_async_saved_message, TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_OK, TEST_telemetry_messenger_send_async_saved_context);
 
     amqp_device_destroy(handle);
@@ -2548,7 +2548,7 @@ TEST_FUNCTION(on_event_send_complete_messenger_callback_succeeds)
 
         ASSERT_IS_NOT_NULL(TEST_telemetry_messenger_send_async_saved_callback);
 
-        EXPECTED_CALL(free(IGNORED_PTR_ARG));
+        EXPECTED_CALL(free(IGNORED_ARG));
         TEST_telemetry_messenger_send_async_saved_callback(TEST_telemetry_messenger_send_async_saved_message, messenger_results[i], TEST_telemetry_messenger_send_async_saved_context);
 
         ASSERT_ARE_EQUAL(int, device_results[i], TEST_on_device_d2c_event_send_complete_callback_saved_result);
@@ -2569,7 +2569,7 @@ TEST_FUNCTION(on_messenger_message_received_callback_NULL_handle)
 
     umock_c_reset_all_calls();
     TEST_telemetry_messenger_subscribe_for_messages_return = 0;
-    STRICT_EXPECTED_CALL(telemetry_messenger_subscribe_for_messages(TEST_TELEMETRY_MESSENGER_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(telemetry_messenger_subscribe_for_messages(TEST_TELEMETRY_MESSENGER_HANDLE, IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3);
 
@@ -2606,7 +2606,7 @@ TEST_FUNCTION(on_messenger_message_received_callback_NULL_context)
 
     umock_c_reset_all_calls();
     TEST_telemetry_messenger_subscribe_for_messages_return = 0;
-    STRICT_EXPECTED_CALL(telemetry_messenger_subscribe_for_messages(TEST_TELEMETRY_MESSENGER_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(telemetry_messenger_subscribe_for_messages(TEST_TELEMETRY_MESSENGER_HANDLE, IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3);
 
@@ -2653,7 +2653,7 @@ TEST_FUNCTION(on_messenger_message_received_callback_succeess)
 
     umock_c_reset_all_calls();
     TEST_telemetry_messenger_subscribe_for_messages_return = 0;
-    STRICT_EXPECTED_CALL(telemetry_messenger_subscribe_for_messages(TEST_TELEMETRY_MESSENGER_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(telemetry_messenger_subscribe_for_messages(TEST_TELEMETRY_MESSENGER_HANDLE, IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3);
 
@@ -2674,9 +2674,9 @@ TEST_FUNCTION(on_messenger_message_received_callback_succeess)
 
         umock_c_reset_all_calls();
         STRICT_EXPECTED_CALL(malloc(sizeof(DEVICE_MESSAGE_DISPOSITION_INFO)));
-        EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        EXPECTED_CALL(free(IGNORED_PTR_ARG));
-        EXPECTED_CALL(free(IGNORED_PTR_ARG));
+        EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+        EXPECTED_CALL(free(IGNORED_ARG));
+        EXPECTED_CALL(free(IGNORED_ARG));
 
         TELEMETRY_MESSENGER_DISPOSITION_RESULT result = TEST_telemetry_messenger_subscribe_for_messages_saved_on_message_received_callback(
             TEST_IOTHUB_MESSAGE_HANDLE,
@@ -2702,7 +2702,7 @@ TEST_FUNCTION(on_messenger_message_received_callback_failure_checks)
 
     umock_c_reset_all_calls();
     TEST_telemetry_messenger_subscribe_for_messages_return = 0;
-    STRICT_EXPECTED_CALL(telemetry_messenger_subscribe_for_messages(TEST_TELEMETRY_MESSENGER_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(telemetry_messenger_subscribe_for_messages(TEST_TELEMETRY_MESSENGER_HANDLE, IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3);
 
@@ -2715,9 +2715,9 @@ TEST_FUNCTION(on_messenger_message_received_callback_failure_checks)
 
     umock_c_reset_all_calls();
     STRICT_EXPECTED_CALL(malloc(sizeof(DEVICE_MESSAGE_DISPOSITION_INFO)));
-    EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    EXPECTED_CALL(free(IGNORED_PTR_ARG));
-    EXPECTED_CALL(free(IGNORED_PTR_ARG));
+    EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+    EXPECTED_CALL(free(IGNORED_ARG));
+    EXPECTED_CALL(free(IGNORED_ARG));
     umock_c_negative_tests_snapshot();
 
     // act
@@ -2763,11 +2763,11 @@ TEST_FUNCTION(device_send_message_disposition_succeess)
 
     umock_c_reset_all_calls();
     STRICT_EXPECTED_CALL(malloc(sizeof(TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO)));
-    EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(telemetry_messenger_send_message_disposition(TEST_TELEMETRY_MESSENGER_HANDLE, IGNORED_PTR_ARG, TELEMETRY_MESSENGER_DISPOSITION_RESULT_ACCEPTED))
+    EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(telemetry_messenger_send_message_disposition(TEST_TELEMETRY_MESSENGER_HANDLE, IGNORED_ARG, TELEMETRY_MESSENGER_DISPOSITION_RESULT_ACCEPTED))
         .IgnoreArgument(2);
-    EXPECTED_CALL(free(IGNORED_PTR_ARG));
-    EXPECTED_CALL(free(IGNORED_PTR_ARG));
+    EXPECTED_CALL(free(IGNORED_ARG));
+    EXPECTED_CALL(free(IGNORED_ARG));
 
     // act
     int result = amqp_device_send_message_disposition(handle, &disposition_info, DEVICE_MESSAGE_DISPOSITION_RESULT_ACCEPTED);
@@ -2855,11 +2855,11 @@ TEST_FUNCTION(device_send_message_disposition_failure_checks)
 
     umock_c_reset_all_calls();
     STRICT_EXPECTED_CALL(malloc(sizeof(TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO)));
-    EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(telemetry_messenger_send_message_disposition(TEST_TELEMETRY_MESSENGER_HANDLE, IGNORED_PTR_ARG, TELEMETRY_MESSENGER_DISPOSITION_RESULT_ACCEPTED))
+    EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(telemetry_messenger_send_message_disposition(TEST_TELEMETRY_MESSENGER_HANDLE, IGNORED_ARG, TELEMETRY_MESSENGER_DISPOSITION_RESULT_ACCEPTED))
         .IgnoreArgument(2);
-    EXPECTED_CALL(free(IGNORED_PTR_ARG));
-    EXPECTED_CALL(free(IGNORED_PTR_ARG));
+    EXPECTED_CALL(free(IGNORED_ARG));
+    EXPECTED_CALL(free(IGNORED_ARG));
     umock_c_negative_tests_snapshot();
 
     // act
@@ -2897,8 +2897,8 @@ TEST_FUNCTION(device_get_twin_async_succeess)
     AMQP_DEVICE_HANDLE handle = create_and_start_device(config, TEST_current_time);
 
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
-    EXPECTED_CALL(twin_messenger_get_twin_async(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(malloc(IGNORED_ARG));
+    EXPECTED_CALL(twin_messenger_get_twin_async(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
 
     // act
     int result = amqp_device_get_twin_async(handle, on_device_get_twin_completed_callback, (void*)0x4567);
@@ -2920,11 +2920,11 @@ TEST_FUNCTION(device_get_twin_async_callback_succeess)
     AMQP_DEVICE_HANDLE handle = create_and_start_device(config, TEST_current_time);
 
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(twin_messenger_get_twin_async(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(twin_messenger_get_twin_async(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
     (void)amqp_device_get_twin_async(handle, on_device_get_twin_completed_callback, (void*)0x4567);
 
-    STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(free(IGNORED_ARG));
 
     ASSERT_IS_NOT_NULL(get_twin_callback);
     ASSERT_IS_NOT_NULL(get_twin_context);
@@ -2955,8 +2955,8 @@ TEST_FUNCTION(device_get_twin_async_failure_checks)
     AMQP_DEVICE_HANDLE handle = create_and_start_device(config, TEST_current_time);
 
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(twin_messenger_get_twin_async(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(twin_messenger_get_twin_async(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
     umock_c_negative_tests_snapshot();
 
     size_t count = umock_c_negative_tests_call_count();

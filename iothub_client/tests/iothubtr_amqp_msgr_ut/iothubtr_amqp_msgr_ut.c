@@ -530,12 +530,12 @@ static void set_clone_link_configuration_expected_calls(role link_role, AMQP_MES
 {
     if (link_role == role_sender)
     {
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, config->target_suffix))
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, config->target_suffix))
             .CopyOutArgumentBuffer(1, &config->target_suffix, sizeof(config->target_suffix));
     }
     else
     {
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, config->source_suffix))
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, config->source_suffix))
             .CopyOutArgumentBuffer(1, &config->source_suffix, sizeof(config->source_suffix));
     }
 
@@ -544,15 +544,15 @@ static void set_clone_link_configuration_expected_calls(role link_role, AMQP_MES
 
 static void set_clone_configuration_expected_calls(AMQP_MESSENGER_CONFIG* config)
 {
-    EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, config->device_id))
+    EXPECTED_CALL(malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, config->device_id))
         .CopyOutArgumentBuffer(1, &config->device_id, sizeof(config->device_id));
     if (config->module_id != NULL)
     {
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, config->module_id))
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, config->module_id))
             .CopyOutArgumentBuffer(1, &config->module_id, sizeof(config->module_id));
     }
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, config->iothub_host_fqdn))
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, config->iothub_host_fqdn))
         .CopyOutArgumentBuffer(1, &config->iothub_host_fqdn, sizeof(config->iothub_host_fqdn));
     set_clone_link_configuration_expected_calls(role_sender, &config->send_link);
     set_clone_link_configuration_expected_calls(role_receiver, &config->receive_link);
@@ -560,10 +560,10 @@ static void set_clone_configuration_expected_calls(AMQP_MESSENGER_CONFIG* config
 
 static void set_expected_calls_for_amqp_messenger_create(AMQP_MESSENGER_CONFIG* config)
 {
-    EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
+    EXPECTED_CALL(malloc(IGNORED_ARG));
     set_clone_configuration_expected_calls(config);
     // memset() - not mocked.
-    STRICT_EXPECTED_CALL(message_queue_create(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(message_queue_create(IGNORED_ARG));
 }
 
 static void set_create_link_address_expected_calls(role link_role)
@@ -575,8 +575,8 @@ static void set_create_link_address_expected_calls(role link_role)
 
 static void set_create_link_name_expected_calls(role link_role)
 {
-    EXPECTED_CALL(calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(UniqueId_Generate(IGNORED_PTR_ARG, UNIQUE_ID_BUFFER_SIZE));
+    EXPECTED_CALL(calloc(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(UniqueId_Generate(IGNORED_ARG, UNIQUE_ID_BUFFER_SIZE));
 
     if (link_role == role_sender)
     {
@@ -588,7 +588,7 @@ static void set_create_link_name_expected_calls(role link_role)
     }
 
     // EXPECTED: STRING_sprintf
-    EXPECTED_CALL(free(IGNORED_PTR_ARG));
+    EXPECTED_CALL(free(IGNORED_ARG));
 }
 
 static void set_attach_properties_expected_calls(const char* const** attach_property_keys, const char* const** attach_property_values, size_t number_of_attach_properties)
@@ -596,21 +596,21 @@ static void set_attach_properties_expected_calls(const char* const** attach_prop
     size_t i;
 
     STRICT_EXPECTED_CALL(amqpvalue_create_map());
-    STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MAP_HANDLE, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
         .CopyOutArgumentBuffer(2, &attach_property_keys, sizeof(attach_property_keys))
         .CopyOutArgumentBuffer(3, &attach_property_values, sizeof(attach_property_values))
         .CopyOutArgumentBuffer(4, &number_of_attach_properties, sizeof(size_t));
 
     for (i = 0; i < number_of_attach_properties; i++)
     {
-        STRICT_EXPECTED_CALL(amqpvalue_create_symbol(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(amqpvalue_create_string(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(amqpvalue_set_map_value(TEST_LINK_ATTACH_PROPERTIES, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(amqpvalue_create_symbol(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(amqpvalue_create_string(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(amqpvalue_set_map_value(TEST_LINK_ATTACH_PROPERTIES, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_ARG));
     }
 
-    STRICT_EXPECTED_CALL(link_set_attach_properties(IGNORED_PTR_ARG, TEST_LINK_ATTACH_PROPERTIES));
+    STRICT_EXPECTED_CALL(link_set_attach_properties(IGNORED_ARG, TEST_LINK_ATTACH_PROPERTIES));
     STRICT_EXPECTED_CALL(amqpvalue_destroy(TEST_LINK_ATTACH_PROPERTIES));
 }
 
@@ -622,52 +622,52 @@ static void set_create_link_expected_calls(role link_role, const char* const** a
     if (link_role == role_sender)
     {
         STRICT_EXPECTED_CALL(STRING_new());
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
-        // STRICT_EXPECTED_CALL(STRING_sprintf(TEST_STRING_HANDLE, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG));
+        // STRICT_EXPECTED_CALL(STRING_sprintf(TEST_STRING_HANDLE, IGNORED_ARG));
 
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG));
 
-        STRICT_EXPECTED_CALL(messaging_create_source(IGNORED_PTR_ARG)).SetReturn(TEST_SEND_LINK_SOURCE_AMQP_VALUE);
-        STRICT_EXPECTED_CALL(messaging_create_target(IGNORED_PTR_ARG)).SetReturn(TEST_SEND_LINK_TARGET_AMQP_VALUE);
+        STRICT_EXPECTED_CALL(messaging_create_source(IGNORED_ARG)).SetReturn(TEST_SEND_LINK_SOURCE_AMQP_VALUE);
+        STRICT_EXPECTED_CALL(messaging_create_target(IGNORED_ARG)).SetReturn(TEST_SEND_LINK_TARGET_AMQP_VALUE);
 
         STRICT_EXPECTED_CALL(STRING_delete(TEST_STRING_HANDLE));
     }
     else
     {
         STRICT_EXPECTED_CALL(STRING_new());
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
-        // STRICT_EXPECTED_CALL(STRING_sprintf(TEST_STRING_HANDLE, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG));
+        // STRICT_EXPECTED_CALL(STRING_sprintf(TEST_STRING_HANDLE, IGNORED_ARG));
 
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG));
 
-        STRICT_EXPECTED_CALL(messaging_create_source(IGNORED_PTR_ARG)).SetReturn(TEST_RECEIVE_LINK_SOURCE_AMQP_VALUE);
-        STRICT_EXPECTED_CALL(messaging_create_target(IGNORED_PTR_ARG)).SetReturn(TEST_RECEIVE_LINK_TARGET_AMQP_VALUE);
+        STRICT_EXPECTED_CALL(messaging_create_source(IGNORED_ARG)).SetReturn(TEST_RECEIVE_LINK_SOURCE_AMQP_VALUE);
+        STRICT_EXPECTED_CALL(messaging_create_target(IGNORED_ARG)).SetReturn(TEST_RECEIVE_LINK_TARGET_AMQP_VALUE);
 
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
     }
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(link_create(TEST_SESSION_HANDLE, IGNORED_PTR_ARG, link_role, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(link_create(TEST_SESSION_HANDLE, IGNORED_ARG, link_role, IGNORED_ARG, IGNORED_ARG))
         .SetReturn(link_role == role_sender ? TEST_EVENT_SENDER_LINK_HANDLE : TEST_MESSAGE_RECEIVER_LINK_HANDLE);
 
-    STRICT_EXPECTED_CALL(link_set_max_message_size(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(link_set_max_message_size(IGNORED_ARG, IGNORED_ARG));
 
     set_attach_properties_expected_calls(attach_property_keys, attach_property_values, number_of_attach_properties);
 
-    STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
 }
 
 static void set_expected_calls_for_message_receiver_create(const char* const** attach_property_keys, const char* const** attach_property_values, size_t number_of_attach_properties)
 {
     set_create_link_expected_calls(role_receiver, attach_property_keys, attach_property_values, number_of_attach_properties);
 
-    STRICT_EXPECTED_CALL(messagereceiver_create(TEST_MESSAGE_RECEIVER_LINK_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(messagereceiver_open(TEST_MESSAGE_RECEIVER_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(messagereceiver_create(TEST_MESSAGE_RECEIVER_LINK_HANDLE, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(messagereceiver_open(TEST_MESSAGE_RECEIVER_HANDLE, IGNORED_ARG, IGNORED_ARG));
 }
 
 static void set_expected_calls_for_message_receiver_destroy()
@@ -691,9 +691,9 @@ static void TEST_on_message_processing_completed_callback(MQ_MESSAGE_HANDLE mess
 
 static void set_expected_calls_for_amqp_messenger_send_async()
 {
-    STRICT_EXPECTED_CALL(message_clone(IGNORED_NUM_ARG));
-    EXPECTED_CALL(malloc(IGNORED_NUM_ARG)); // create_message_send_context
-    STRICT_EXPECTED_CALL(message_queue_add(TEST_MESSAGE_QUEUE_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(message_clone(IGNORED_ARG));
+    EXPECTED_CALL(malloc(IGNORED_ARG)); // create_message_send_context
+    STRICT_EXPECTED_CALL(message_queue_add(TEST_MESSAGE_QUEUE_HANDLE, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
 }
 
 static AMQP_MESSENGER_SEND_RESULT TEST_on_event_send_complete_result;
@@ -728,7 +728,7 @@ static void set_expected_calls_for_message_sender_create(const char* const** att
 {
     set_create_link_expected_calls(role_sender, attach_property_keys, attach_property_values, number_of_attach_properties);
 
-    STRICT_EXPECTED_CALL(messagesender_create(TEST_EVENT_SENDER_LINK_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(messagesender_create(TEST_EVENT_SENDER_LINK_HANDLE, IGNORED_ARG, IGNORED_ARG));
     STRICT_EXPECTED_CALL(messagesender_open(TEST_MESSAGE_SENDER_HANDLE));
 }
 
@@ -761,7 +761,7 @@ static void set_expected_calls_for_amqp_messenger_stop(size_t wait_to_send_list_
 
 static void set_expected_calls_for_on_message_send_complete()
 {
-    EXPECTED_CALL(free(IGNORED_PTR_ARG));
+    EXPECTED_CALL(free(IGNORED_ARG));
 }
 
 static void set_expected_calls_for_message_do_work_send_pending_events(int number_of_events_pending, time_t current_time)
@@ -769,11 +769,11 @@ static void set_expected_calls_for_message_do_work_send_pending_events(int numbe
     int i;
     for (i = 0; i < number_of_events_pending; i++)
     {
-        STRICT_EXPECTED_CALL(messagesender_send_async(TEST_MESSAGE_SENDER_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(messagesender_send_async(TEST_MESSAGE_SENDER_HANDLE, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
             .IgnoreArgument(2).IgnoreArgument(3).IgnoreArgument(4);
         STRICT_EXPECTED_CALL(get_time(NULL)).SetReturn(current_time);
 
-        EXPECTED_CALL(message_destroy(IGNORED_PTR_ARG));
+        EXPECTED_CALL(message_destroy(IGNORED_ARG));
     }
 
 }
@@ -838,20 +838,20 @@ static void set_expected_calls_for_amqp_messenger_do_work(MESSENGER_DO_WORK_EXP_
 
 static void set_detroy_configuration_expected_calls(bool testing_modules)
 {
-    STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(free(IGNORED_ARG));
     if (testing_modules == true)
     {
-        STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(free(IGNORED_ARG));
     }
-    STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(free(IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Map_Destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Map_Destroy(IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Map_Destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Map_Destroy(IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(free(IGNORED_ARG));
 }
 
 static void set_expected_calls_for_amqp_messenger_destroy(AMQP_MESSENGER_CONFIG* config, AMQP_MESSENGER_HANDLE messenger_handle, bool destroy_message_sender, bool destroy_message_receiver, size_t wait_to_send_list_length, size_t in_progress_list_length, bool testing_modules)
@@ -865,14 +865,14 @@ static void set_expected_calls_for_amqp_messenger_destroy(AMQP_MESSENGER_CONFIG*
 
     for (i = 0; i < wait_to_send_list_length; i++)
     {
-        STRICT_EXPECTED_CALL(message_destroy(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(message_destroy(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(free(IGNORED_ARG));
     }
 
     for (i = 0; i < in_progress_list_length; i++)
     {
-        STRICT_EXPECTED_CALL(message_destroy(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(message_destroy(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(free(IGNORED_ARG));
     }
 
     set_detroy_configuration_expected_calls(testing_modules);
@@ -891,21 +891,21 @@ static int TEST_messagereceiver_get_link_name(MESSAGE_RECEIVER_HANDLE message_re
 static void set_expected_calls_for_create_message_disposition_info()
 {
     STRICT_EXPECTED_CALL(malloc(sizeof(AMQP_MESSENGER_MESSAGE_DISPOSITION_INFO)));
-    STRICT_EXPECTED_CALL(messagereceiver_get_received_message_id(TEST_MESSAGE_RECEIVER_HANDLE, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(messagereceiver_get_received_message_id(TEST_MESSAGE_RECEIVER_HANDLE, IGNORED_ARG))
         .IgnoreArgument(2)
         .CopyOutArgumentBuffer(2, &TEST_DELIVERY_NUMBER, sizeof(delivery_number));
 
-    STRICT_EXPECTED_CALL(messagereceiver_get_link_name(TEST_MESSAGE_RECEIVER_HANDLE, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(messagereceiver_get_link_name(TEST_MESSAGE_RECEIVER_HANDLE, IGNORED_ARG))
         .IgnoreArgument(2);
     static char* link_name = TEST_MESSAGE_RECEIVER_LINK_NAME_CHAR_PTR;
-    EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG))
         .CopyOutArgumentBuffer_destination(&link_name, sizeof(char*));
 }
 
 static void set_expected_calls_for_destroy_message_disposition_info()
 {
-    EXPECTED_CALL(free(IGNORED_PTR_ARG));
-    EXPECTED_CALL(free(IGNORED_PTR_ARG));
+    EXPECTED_CALL(free(IGNORED_ARG));
+    EXPECTED_CALL(free(IGNORED_ARG));
 }
 
 static void set_expected_calls_for_on_message_received_internal_callback(AMQP_MESSENGER_DISPOSITION_RESULT disposition_result)
@@ -949,8 +949,8 @@ static void set_expected_calls_for_amqp_messenger_send_message_disposition(AMQP_
     }
 
     STRICT_EXPECTED_CALL(messagereceiver_send_message_disposition(TEST_MESSAGE_RECEIVER_HANDLE, disposition_info->source, disposition_info->message_id, uamqp_disposition_result));
-    STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(free(IGNORED_ARG));
     STRICT_EXPECTED_CALL(amqpvalue_destroy(uamqp_disposition_result));
 }
 
@@ -2410,7 +2410,7 @@ TEST_FUNCTION(amqp_messenger_get_send_status_failure_checks)
     AMQP_MESSENGER_HANDLE handle = create_and_start_messenger2(config, false);
 
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(message_queue_is_empty(TEST_MESSAGE_QUEUE_HANDLE, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(message_queue_is_empty(TEST_MESSAGE_QUEUE_HANDLE, IGNORED_ARG))
         .SetReturn(1);
 
     // act
@@ -2434,7 +2434,7 @@ TEST_FUNCTION(amqp_messenger_get_send_status_IDLE_succeeds)
     bool is_empty = true;
 
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(message_queue_is_empty(TEST_MESSAGE_QUEUE_HANDLE, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(message_queue_is_empty(TEST_MESSAGE_QUEUE_HANDLE, IGNORED_ARG))
         .CopyOutArgumentBuffer(2, &is_empty, sizeof(bool));
 
     // act
@@ -2459,7 +2459,7 @@ TEST_FUNCTION(amqp_messenger_get_send_status_BUSY_succeeds)
     bool is_empty = false;
 
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(message_queue_is_empty(TEST_MESSAGE_QUEUE_HANDLE, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(message_queue_is_empty(TEST_MESSAGE_QUEUE_HANDLE, IGNORED_ARG))
         .CopyOutArgumentBuffer(2, &is_empty, sizeof(bool));
 
     // act
@@ -2742,9 +2742,9 @@ TEST_FUNCTION(amqp_messenger_send_message_disposition_failure_checks)
 
 static void set_expected_calls_for_amqp_messenger_retrieve_options()
 {
-    EXPECTED_CALL(OptionHandler_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    EXPECTED_CALL(OptionHandler_Create(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
     STRICT_EXPECTED_CALL(message_queue_retrieve_options(TEST_MESSAGE_QUEUE_HANDLE));
-    STRICT_EXPECTED_CALL(OptionHandler_AddOption(TEST_OPTIONHANDLER_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(OptionHandler_AddOption(TEST_OPTIONHANDLER_HANDLE, IGNORED_ARG, IGNORED_ARG));
 }
 
 TEST_FUNCTION(amqp_messenger_retrieve_options_NULL_handle)

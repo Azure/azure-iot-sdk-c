@@ -3,10 +3,12 @@
 
 #include <stddef.h>
 #include "testrunnerswitcher.h"
+#include "c_logging/logger.h"
 
 int main(void)
 {
     size_t failedTestCount = 0;
+    logger_init();
     RUN_TEST_SUITE(iothub_client_core_ll_ut, failedTestCount);
     return (int)failedTestCount;
 }

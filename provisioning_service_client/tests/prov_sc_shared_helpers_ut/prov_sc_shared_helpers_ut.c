@@ -257,12 +257,12 @@ TEST_FUNCTION(json_deserialize_and_get_struct_array_GOLDEN)
     //arrange
 
     STRICT_EXPECTED_CALL(json_object_get_array(TEST_JSON_OBJECT, DUMMY_STRING));
-    STRICT_EXPECTED_CALL(json_array_get_count(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(json_array_get_count(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
     for (int i = 0; i < ARRAY_SIZE; i++)
     {
-        STRICT_EXPECTED_CALL(json_array_get_object(IGNORED_PTR_ARG, i));
-        STRICT_EXPECTED_CALL(from_json_mock(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(json_array_get_object(IGNORED_ARG, i));
+        STRICT_EXPECTED_CALL(from_json_mock(IGNORED_ARG));
     }
 
     size_t dest_len;
@@ -291,12 +291,12 @@ TEST_FUNCTION(json_deserialize_and_get_struct_array_ERROR)
     void** dest_arr;
 
     STRICT_EXPECTED_CALL(json_object_get_array(TEST_JSON_OBJECT, DUMMY_STRING));
-    STRICT_EXPECTED_CALL(json_array_get_count(IGNORED_PTR_ARG)); //cannot fail
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(json_array_get_count(IGNORED_ARG)); //cannot fail
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
     for (int i = 0; i < ARRAY_SIZE; i++)
     {
-        STRICT_EXPECTED_CALL(json_array_get_object(IGNORED_PTR_ARG, i));
-        STRICT_EXPECTED_CALL(from_json_mock(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(json_array_get_object(IGNORED_ARG, i));
+        STRICT_EXPECTED_CALL(from_json_mock(IGNORED_ARG));
     }
     umock_c_negative_tests_snapshot();
 
@@ -350,13 +350,13 @@ TEST_FUNCTION(json_serialize_and_set_struct_array_GOLDEN)
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(json_value_init_array());
-    STRICT_EXPECTED_CALL(json_value_get_array(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(json_value_get_array(IGNORED_ARG));
     for (int i = 0; i < ARRAY_SIZE; i++)
     {
-        STRICT_EXPECTED_CALL(to_json_mock(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(json_array_append_value(IGNORED_PTR_ARG, TO_JSON_MOCK_RETURN));
+        STRICT_EXPECTED_CALL(to_json_mock(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(json_array_append_value(IGNORED_ARG, TO_JSON_MOCK_RETURN));
     }
-    STRICT_EXPECTED_CALL(json_object_set_value(TEST_JSON_OBJECT, DUMMY_STRING, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(json_object_set_value(TEST_JSON_OBJECT, DUMMY_STRING, IGNORED_ARG));
 
     //act
     int result = json_serialize_and_set_struct_array(TEST_JSON_OBJECT, DUMMY_STRING, arr, ARRAY_SIZE, (TO_JSON_FUNCTION)to_json_mock);
@@ -384,13 +384,13 @@ TEST_FUNCTION(json_serialize_and_set_struct_array_ERROR)
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(json_value_init_array());
-    STRICT_EXPECTED_CALL(json_value_get_array(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(json_value_get_array(IGNORED_ARG));
     for (int i = 0; i < ARRAY_SIZE; i++)
     {
-        STRICT_EXPECTED_CALL(to_json_mock(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(json_array_append_value(IGNORED_PTR_ARG, TO_JSON_MOCK_RETURN));
+        STRICT_EXPECTED_CALL(to_json_mock(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(json_array_append_value(IGNORED_ARG, TO_JSON_MOCK_RETURN));
     }
-    STRICT_EXPECTED_CALL(json_object_set_value(TEST_JSON_OBJECT, DUMMY_STRING, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(json_object_set_value(TEST_JSON_OBJECT, DUMMY_STRING, IGNORED_ARG));
     umock_c_negative_tests_snapshot();
 
     //size_t calls_cannot_fail[] = { 1 };
