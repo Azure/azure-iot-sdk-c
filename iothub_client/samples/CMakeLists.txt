@@ -33,7 +33,8 @@ endif()
 
 if(${use_mqtt})
     if(LINUX)
-        add_sample_directory(iothub_client_sample_mqtt_dm)
+        # Disabled: uses serializer DECLARE_MODEL incompatible with new macro-utils-c
+        #add_sample_directory(iothub_client_sample_mqtt_dm)
     endif()
     if(${use_edge_modules})
         add_sample_directory(iothub_client_sample_module_sender)

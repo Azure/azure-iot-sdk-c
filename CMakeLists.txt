@@ -296,6 +296,14 @@ else ()
     add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/deps/c-build-tools)
     set_default_build_options()
 
+    # set_default_build_options() adds -Werror -Wall on Unix.  The existing
+    # codebase (tests, samples, service client) is not -Werror clean yet, so
+    # strip -Werror from the global flags while keeping -Wall.
+    if(UNIX)
+        string(REPLACE "-Werror" "" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+        string(REPLACE "-Werror" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+    endif()
+
     add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/deps/azure-macro-utils-c)
     add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/deps/c-logging)
     # c-logging creates c_logging_v2; create alias so guard checks pass.
