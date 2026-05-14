@@ -311,7 +311,7 @@ else ()
     # are included multiple times.  C11 allows this but Clang in C99 mode does
     # not.  Suppress globally since all SDK targets include c-utility headers.
     if(CMAKE_C_COMPILER_ID MATCHES "Clang")
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-typedef-redefinition -Wno-unused-value -Wno-unused-variable -Wno-unused-but-set-variable -Wno-unused-const-variable")
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-typedef-redefinition -Wno-unused-value -Wno-unused-variable -Wno-unused-but-set-variable -Wno-unused-const-variable -Wno-unknown-pragmas")
     endif()
 
     # Apple Clang 15+ (Xcode 15, macOS-14 agents) enables -Woverloaded-virtual
@@ -325,7 +325,7 @@ else ()
     # -Wstrict-aliasing under GCC -O2/-O3 (Release).  Suppress globally.
     # Also suppress -Warray-bounds which fires on the same casts in GCC 13+.
     if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
-        add_compile_options(-Wno-strict-aliasing -Wno-array-bounds -Wno-unused-value -Wno-unused-variable -Wno-unused-but-set-variable -Wno-unused-const-variable)
+        add_compile_options(-Wno-strict-aliasing -Wno-array-bounds -Wno-unused-value -Wno-unused-variable -Wno-unused-but-set-variable -Wno-unused-const-variable -Wno-maybe-uninitialized)
     endif()
 
     add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/deps/azure-macro-utils-c)
