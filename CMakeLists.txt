@@ -296,12 +296,11 @@ else ()
     add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/deps/c-build-tools)
     set_default_build_options()
 
-    # set_default_build_options() adds -Werror -Wall on Unix.  The existing
-    # codebase (tests, samples, service client) is not -Werror clean yet, so
-    # strip -Werror from the global flags while keeping -Wall.
-    if(UNIX)
-        string(REPLACE "-Werror" "" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
-        string(REPLACE "-Werror" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+    # umock_c MOCKABLE_FUNCTION macros produce duplicate typedefs when headers
+    # are included multiple times.  C11 allows this but Clang in C99 mode does
+    # not.  Suppress globally since all SDK targets include c-utility headers.
+    if(CMAKE_C_COMPILER_ID MATCHES "Clang")
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-typedef-redefinition")
     endif()
 
     add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/deps/azure-macro-utils-c)

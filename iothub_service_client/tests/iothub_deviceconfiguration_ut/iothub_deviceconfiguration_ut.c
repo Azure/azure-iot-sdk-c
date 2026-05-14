@@ -226,7 +226,6 @@ static const char* TEST_METRICS = "themetrics";
 static const char* TEST_RESULTS = "theresults";
 static const char* TEST_QUERIES = "thequeries";
 static const char* TEST_ETAG = "theetag";
-static const char* TEST_CONFIGURATION_DEVICE_CONTENT_PAYLOAD = "{\"properties.desired.%s\":\"%s\",\"timeout\":%d,\"payload\":%s}";
 
 static char* TEST_HOSTNAME = "theHostName";
 static char* TEST_IOTHUBNAME = "theIotHubName";
@@ -234,11 +233,8 @@ static char* TEST_IOTHUBSUFFIX = "theIotHubSuffix";
 static char* TEST_SHAREDACCESSKEY = "theSharedAccessKey";
 static char* TEST_SHAREDACCESSKEYNAME = "theSharedAccessKeyName";
 
-static const HTTP_HEADERS_HANDLE TEST_HTTP_HEADERS_HANDLE = (HTTP_HEADERS_HANDLE)0x4545;
-
 static const unsigned int httpStatusCodeOk = 200;
 static const unsigned int httpStatusCodeDeleted = 204;
-static const unsigned int httpStatusCodeBadRequest = 400;
 
 static const char* TEST_CONFIGURATION_JSON_KEY_CONFIGURATION_ID = "id";
 static const char* TEST_CONFIGURATION_JSON_KEY_SCHEMA_VERSION = "schemaVersion";
@@ -265,8 +261,6 @@ static const char* TEST_CONFIGURATION_SYSTEM_METRICS_QUERIES_NODE_NAME = TEST_CO
 static const char* TEST_CONFIGURATION_CUSTOM_METRICS_RESULTS_NODE_NAME = TEST_CONFIGURATION_JSON_KEY_CUSTOM_METRICS TEST_CONFIGURATION_JSON_DOT_SEPARATOR TEST_CONFIGURATION_JSON_KEY_METRICS_RESULTS;
 static const char* TEST_CONFIGURATION_CUSTOM_METRICS_QUERIES_NODE_NAME = TEST_CONFIGURATION_JSON_KEY_CUSTOM_METRICS TEST_CONFIGURATION_JSON_DOT_SEPARATOR TEST_CONFIGURATION_JSON_KEY_METRICS_QUERIES;
 
-static const char* TEST_LASTACTIVITYTIME = "0001-01-01T33:33:33";
-
 static const char* TEST_HTTP_HEADER_KEY_AUTHORIZATION = "Authorization";
 static const char* TEST_HTTP_HEADER_VAL_AUTHORIZATION = " ";
 static const char* TEST_HTTP_HEADER_KEY_REQUEST_ID = "Request-Id";
@@ -283,7 +277,6 @@ static JSON_Value* TEST_JSON_VALUE = (JSON_Value*)0x5050;
 static JSON_Object* TEST_JSON_OBJECT = (JSON_Object*)0x5151;
 static JSON_Array* TEST_JSON_ARRAY = (JSON_Array*)0x5252;
 static JSON_Status TEST_JSON_STATUS = 0;
-static LIST_ITEM_HANDLE TEST_LIST_ITEM_HANDLE = (LIST_ITEM_HANDLE)0x5353;
 
 #ifdef __cplusplus
 extern "C"
