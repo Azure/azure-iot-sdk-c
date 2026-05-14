@@ -309,6 +309,11 @@ else ()
         add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/deps/umock-c)
     endif()
 
+    # Provide include paths from top-level deps so c-utility (and others) can
+    # find headers without recursive submodule init.
+    include_directories(${CMAKE_CURRENT_LIST_DIR}/deps/umock-c/inc)
+    include_directories(${CMAKE_CURRENT_LIST_DIR}/deps/c-logging/v2/inc)
+
     add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/c-utility)
 
     # Enable the conformant preprocessor at top-level scope so that all
