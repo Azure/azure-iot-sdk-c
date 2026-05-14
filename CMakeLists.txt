@@ -262,6 +262,10 @@ if(${use_installed_dependencies})
     add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/deps)
     find_package(parson REQUIRED CONFIG)
 
+    # New macro_utils_c package sets MACRO_UTILS_C_INCLUDES; propagate to legacy variable.
+    if(NOT MACRO_UTILS_INC_FOLDER AND MACRO_UTILS_C_INCLUDES)
+        set(MACRO_UTILS_INC_FOLDER ${MACRO_UTILS_C_INCLUDES} CACHE INTERNAL "" FORCE)
+    endif()
     include_directories(${MACRO_UTILS_INC_FOLDER})
     include_directories(${UMOCK_C_INC_FOLDER})
 
@@ -348,6 +352,27 @@ else ()
     include_directories(${CMAKE_CURRENT_LIST_DIR}/deps/c-logging/v2/inc)
 
     add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/c-utility)
+
+    # Exclude csr_gen_openssl.c when building against OpenSSL < 3.0 (no EVP_EC_gen).
+    # This typically affects cross-compile Docker images (ARM/MIPS) with old OpenSSL.
+    if(use_openssl AND TARGET aziotsharedutil)
+        include(CheckCSourceCompiles)
+        set(CMAKE_REQUIRED_INCLUDES ${OPENSSL_INCLUDE_DIR})
+        check_c_source_compiles("
+            #include <openssl/opensslv.h>
+            #if OPENSSL_VERSION_NUMBER < 0x30000000L
+            #error old openssl
+            #endif
+            int main(void){return 0;}" HAS_OPENSSL3)
+        if(NOT HAS_OPENSSL3)
+            set_source_files_properties(
+                ${CMAKE_CURRENT_LIST_DIR}/c-utility/adapters/csr_gen_openssl.c
+                TARGET_DIRECTORY aziotsharedutil
+                PROPERTIES HEADER_FILE_ONLY TRUE
+            )
+            target_sources(aziotsharedutil PRIVATE ${CMAKE_CURRENT_LIST_DIR}/build_validation/csr_gen_openssl_stub.c)
+        endif()
+    endif()
 
     # Enable the conformant preprocessor at top-level scope so that all
     # targets (iothub_client, serializer, etc.) can use macro-utils-c
