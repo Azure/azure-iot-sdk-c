@@ -311,7 +311,7 @@ else ()
     # are included multiple times.  C11 allows this but Clang in C99 mode does
     # not.  Suppress globally since all SDK targets include c-utility headers.
     if(CMAKE_C_COMPILER_ID MATCHES "Clang")
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-typedef-redefinition")
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-typedef-redefinition -Wno-unused-value")
     endif()
 
     # Apple Clang 15+ (Xcode 15, macOS-14 agents) enables -Woverloaded-virtual

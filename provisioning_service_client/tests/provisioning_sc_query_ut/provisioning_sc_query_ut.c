@@ -75,14 +75,6 @@ static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 static char* DUMMY_JSON = "{\"json\":\"dummy\"}";
 static const char* DUMMY_STRING = "dummy";
 static int DUMMY_NUM = 4747;
-static const char* DUMMY_REGISTRATION_ID = "REGISTRATION_ID";
-static const char* DUMMY_DEVICE_ID = "DEVICE_ID";
-static const char* DUMMY_GROUP_ID = "GROUP_ID";
-static const char* DUMMY_IOTHUB_HOSTNAME = "IOTHUB_HOSTNAME";
-static const char* DUMMY_ETAG = "ETAG";
-static const char* DUMMY_CREATED_TIME = "CREATED TIME";
-static const char* DUMMY_UPDATED_TIME = "UPDATED_TIME";
-static const char* DUMMY_PROVISIONING_STATUS = "enabled";
 static const char* QUERY_STRING = "*";
 static int QUERY_RESP_SIZE = 5;
 

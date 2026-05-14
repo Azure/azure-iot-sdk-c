@@ -69,8 +69,6 @@ static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 //Control Parameters
 static const char* TEST_JSON = "{\"a\": 2}";
 static const char* TEST_JSON2 = "{\"b\": 1}";
-static const char* TEST_JSON_NESTED = "{\"a\": 2, \"b\": {\"c\": \"value\"}}";
-static const char* TEST_JSON_NESTED2 = "{\"d\": 1, \"e\": {\"f\": \"value\"}}";
 static const char* TEST_EMPTY_JSON = "{}";
 static char* DUMMY_JSON_STRING = "{\"json\":\"dummy\"}";
 static const char* DUMMY_JSON_VALUE = "dummy";

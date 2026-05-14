@@ -52,9 +52,11 @@ static const char* SCOPE_NAME = "Scope_name";
 static const char* TEST_SAS_TOKEN = "sas_token";
 static const char* TEST_STRING_VALUE = "Test_string_value";
 static const char* TEST_KEYNAME_VALUE = "Test_keyname_value";
+#ifdef USE_PROV_MODULE
 static const char* TEST_REG_CERT = "Test_certificate";
 static const char* TEST_REG_PK = "Test_private_key";
 static const char* TEST_EXPIRY_TIME_KEYNAME_VALUE = "Test_expiry_time_keyname_value";
+#endif
 static uint64_t TEST_EXPIRY_TIME = 1;
 static uint64_t TEST_CURRENT_TIME = 1705444027;
 
