@@ -431,6 +431,10 @@ else ()
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azure_macro_utils
     )
 
+    # Install c-logging v2 headers so installed xlogging.h can find them.
+    file(GLOB _c_logging_headers "${CMAKE_CURRENT_LIST_DIR}/deps/c-logging/v2/inc/c_logging/*.h")
+    install(FILES ${_c_logging_headers} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/c_logging)
+
     include_directories(${CMAKE_BINARY_DIR})
     include_directories(${MACRO_UTILS_INC_FOLDER})
     include_directories(${UMOCK_C_INC_FOLDER})
