@@ -84,6 +84,7 @@ if (${build_as_dynamic})
     target_link_libraries(serializer_dll
         aziotsharedutil_dll
         parson
+        c_logging_v2
     )
 
     if (${CMAKE_C_COMPILER_ID} STREQUAL "GNU" OR ${CMAKE_C_COMPILER_ID} STREQUAL "Clang")

@@ -70,8 +70,6 @@ static int my_mallocAndStrcpy_s(char** destination, const char* source)
 #include "azure_c_shared_utility/gballoc.h"
 #undef ENABLE_MOCKS
 
-static int TEST_ISOPENED = false;
-
 MU_DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
 static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
@@ -83,7 +81,6 @@ static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 
 static IOTHUB_MESSAGE_HANDLE TEST_IOTHUB_MESSAGE_HANDLE = (IOTHUB_MESSAGE_HANDLE)0x5252;
 static IOTHUB_MESSAGING_HANDLE TEST_IOTHUB_MESSAGING_HANDLE = (IOTHUB_MESSAGING_HANDLE)0x5656;
-static IOTHUB_MESSAGING_RESULT TEST_IOTHUB_MESSAGING_RESULT = (IOTHUB_MESSAGING_RESULT)0x6767;
 //static const char* TEST_MODULE_ID = "TestModuleId"; // Modules are not supported for sending messages.
 static IOTHUB_OPEN_COMPLETE_CALLBACK TEST_IOTHUB_OPEN_COMPLETE_CALLBACK;
 static IOTHUB_FEEDBACK_MESSAGE_RECEIVED_CALLBACK TEST_IOTHUB_FEEDBACK_MESSAGE_RECEIVED_CALLBACK;

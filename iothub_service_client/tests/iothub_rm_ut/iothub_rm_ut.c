@@ -426,20 +426,10 @@ static char* TEST_CHAR_PTR = "TestString";
 static unsigned char* TEST_UNSIGNED_CHAR_PTR = (unsigned char*)"TestString";
 static const char* TEST_CONST_CHAR_PTR = "TestConstChar";
 
-static STRING_HANDLE TEST_STRING_HANDLE = (STRING_HANDLE)0x4242;
-static BUFFER_HANDLE TEST_BUFFER_HANDLE = (BUFFER_HANDLE)0x4242;
-static const SINGLYLINKEDLIST_HANDLE TEST_LIST_HANDLE = (SINGLYLINKEDLIST_HANDLE)0x4242;
-static const LIST_ITEM_HANDLE TEST_LIST_ITEM_HANDLE = (LIST_ITEM_HANDLE)0x3434;
-
 static const unsigned int httpStatusCodeOk = 200;
 static const unsigned int httpStatusCodeBadRequest = 400;
 static const unsigned int httpStatusCodeDeviceExists = 409;
 static const unsigned int httpStatusCodeDeviceNotExists = 404;
-static const HTTPAPIEX_HANDLE TEST_HTTPAPIEX_HANDLE = (HTTPAPIEX_HANDLE)0x4343;
-static HTTPAPIEX_SAS_HANDLE TEST_HTTPAPIEX_SAS_HANDLE = (HTTPAPIEX_SAS_HANDLE)0x4444;
-static const HTTP_HEADERS_HANDLE TEST_HTTP_HEADERS_HANDLE = (HTTP_HEADERS_HANDLE)0x4545;
-static const HTTP_HEADERS_RESULT TEST_HTTP_HEADERS_RESULT = (HTTP_HEADERS_RESULT)0x1;
-static HTTPAPIEX_RESULT TEST_HTTPAPIEX_RESULT = (HTTPAPIEX_RESULT)0x1;
 
 static const char* TEST_DEVICE_JSON_KEY_DEVICE_NAME = "deviceId";
 static const char* TEST_DEVICE_JSON_KEY_MODULE_NAME = "moduleId";

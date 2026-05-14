@@ -314,10 +314,18 @@ else ()
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-typedef-redefinition")
     endif()
 
+    # Apple Clang 15+ (Xcode 15, macOS-14 agents) enables -Woverloaded-virtual
+    # as part of -Wall.  The micromock C++ test framework in c-utility triggers
+    # this warning.  Suppress for CXX only.
+    if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-overloaded-virtual")
+    endif()
+
     # umock_c_internal.h does type-punned pointer casts that trigger
     # -Wstrict-aliasing under GCC -O2/-O3 (Release).  Suppress globally.
+    # Also suppress -Warray-bounds which fires on the same casts in GCC 13+.
     if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
-        add_compile_options(-Wno-strict-aliasing)
+        add_compile_options(-Wno-strict-aliasing -Wno-array-bounds)
     endif()
 
     add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/deps/azure-macro-utils-c)
@@ -343,8 +351,26 @@ else ()
     if (${original_run_e2e_tests} OR ${original_run_unittests} OR ${run_sfc_tests})
         add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/deps/ctest)
         add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/deps/c-testrunnerswitcher)
-        add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/deps/umock-c)
     endif()
+    # umock-c is needed unconditionally: umock_c_prod.h (MOCKABLE_FUNCTION)
+    # is included by production headers (e.g. iothub.h).
+    add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/deps/umock-c)
+
+    # The new umock-c uses install_library_includes with EXCLUDE_FROM_ALL,
+    # which means `make install` won't install its headers/config.
+    # Add explicit install rules so the installed-deps workflow works.
+    include(GNUInstallDirs)
+    file(GLOB _umock_c_headers "${CMAKE_CURRENT_LIST_DIR}/deps/umock-c/inc/umock_c/*.h")
+    install(FILES ${_umock_c_headers} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/umock_c)
+    install(EXPORT umock_cTargets
+        FILE umock_cTargets.cmake
+        DESTINATION cmake
+    )
+    file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/umock_cConfig.cmake"
+        "include(\"\${CMAKE_CURRENT_LIST_DIR}/umock_cTargets.cmake\")\n"
+        "set(UMOCK_C_INC_FOLDER \"\${CMAKE_CURRENT_LIST_DIR}/../${CMAKE_INSTALL_INCLUDEDIR}\" CACHE INTERNAL \"\")\n"
+    )
+    install(FILES "${CMAKE_CURRENT_BINARY_DIR}/umock_cConfig.cmake" DESTINATION cmake)
 
     # Provide include paths from top-level deps so c-utility (and others) can
     # find headers without recursive submodule init.
