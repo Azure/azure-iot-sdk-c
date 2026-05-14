@@ -319,7 +319,7 @@ else ()
     # -Wstrict-aliasing under GCC -O2/-O3 (Release).  Suppress globally.
     # Also suppress -Warray-bounds which fires on the same casts in GCC 13+.
     if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
-        add_compile_options(-Wno-strict-aliasing -Wno-array-bounds -Wno-unused-value -Wno-unused-variable -Wno-unused-but-set-variable -Wno-unused-const-variable -Wno-maybe-uninitialized -Wno-unknown-pragmas)
+        add_compile_options(-Wno-strict-aliasing -Wno-array-bounds -Wno-unused-value -Wno-unused-variable -Wno-unused-but-set-variable -Wno-unused-const-variable -Wno-maybe-uninitialized -Wno-unknown-pragmas -Wno-array-parameter)
     endif()
 
     add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/deps/azure-macro-utils-c)
