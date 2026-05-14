@@ -325,7 +325,7 @@ else ()
     # -Wstrict-aliasing under GCC -O2/-O3 (Release).  Suppress globally.
     # Also suppress -Warray-bounds which fires on the same casts in GCC 13+.
     if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
-        add_compile_options(-Wno-strict-aliasing -Wno-array-bounds)
+        add_compile_options(-Wno-strict-aliasing -Wno-array-bounds -Wno-unused-value)
     endif()
 
     add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/deps/azure-macro-utils-c)
@@ -434,6 +434,13 @@ else ()
     # Install c-logging v2 headers so installed xlogging.h can find them.
     file(GLOB _c_logging_headers "${CMAKE_CURRENT_LIST_DIR}/deps/c-logging/v2/inc/c_logging/*.h")
     install(FILES ${_c_logging_headers} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/c_logging)
+    # Install c-logging v2 library so consumers can link it.
+    install(FILES $<TARGET_FILE:c_logging_v2> DESTINATION ${CMAKE_INSTALL_LIBDIR})
+
+    # Install umock_c_prod_compat.h which c-utility headers include but
+    # c-utility's own CMakeLists doesn't list in source_h_files.
+    install(FILES ${CMAKE_CURRENT_LIST_DIR}/c-utility/inc/azure_c_shared_utility/umock_c_prod_compat.h
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azure_c_shared_utility)
 
     include_directories(${CMAKE_BINARY_DIR})
     include_directories(${MACRO_UTILS_INC_FOLDER})

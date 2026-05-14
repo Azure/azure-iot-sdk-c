@@ -114,7 +114,6 @@ static const IO_INTERFACE_DESCRIPTION* TEST_INTERFACE_DESC = (IO_INTERFACE_DESCR
 static const HTTP_CLIENT_HANDLE TEST_HTTP_CLIENT_HANDLE = (HTTP_CLIENT_HANDLE)0x11111113;
 #define TEST_INDIVIDUAL_ENROLLMENT_HANDLE (INDIVIDUAL_ENROLLMENT_HANDLE)0x11111114
 static ATTESTATION_MECHANISM_HANDLE TEST_ATT_MECH_HANDLE = (ATTESTATION_MECHANISM_HANDLE)0x11111115;
-static PROVISIONING_SERVICE_CLIENT_HANDLE TEST_PROVISIONING_SC_HANDLE = (PROVISIONING_SERVICE_CLIENT_HANDLE)0x11111116;
 static ENROLLMENT_GROUP_HANDLE TEST_ENROLLMENT_GROUP_HANDLE = (ENROLLMENT_GROUP_HANDLE)0x11111117;
 static IO_INTERFACE_DESCRIPTION* TEST_IO_INTERFACE_DESC = (IO_INTERFACE_DESCRIPTION*)0x11111118;
 static STRING_HANDLE TEST_STRING_HANDLE = (STRING_HANDLE)0x11111119;
@@ -125,7 +124,6 @@ static const unsigned char* TEST_REPLY_JSON = (const unsigned char*)"{my-json-re
 static const char* TEST_ENROLLMENT_JSON = "{my-json-serialized-enrollment}";
 static const char* TEST_CONNECTION_STRING = "my-connection-string";
 static const char* TEST_STRING = "my-string";
-static const char* TEST_EK = "my-ek";
 static const char* TEST_REGID = "my-regid";
 static const char* TEST_GROUPID = "my-groupid";
 static const char* TEST_ETAG = "my-etag";
@@ -141,7 +139,6 @@ static const char* TEST_QUERY_STRING = "*";
 static const char* TEST_CONT_TOKEN = "cont";
 static const char* TEST_CONT_TOKEN2 = "cont2";
 static int TEST_PROXY_PORT = 123;
-static size_t TEST_REPLY_JSON_LEN = 15;
 static unsigned int STATUS_CODE_SUCCESS = 204;
 
 typedef enum {ETAG, NO_ETAG} etag_flag;
