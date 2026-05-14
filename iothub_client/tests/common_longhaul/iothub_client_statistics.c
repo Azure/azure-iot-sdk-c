@@ -754,7 +754,7 @@ int iothub_client_statistics_add_connection_status(IOTHUB_CLIENT_STATISTICS_HAND
     }
     else
     {
-        CONNECTION_STATUS_INFO* conn_status;
+        CONNECTION_STATUS_INFO* conn_status = NULL;
 
         if ((conn_status = (CONNECTION_STATUS_INFO*)malloc(sizeof(CONNECTION_STATUS_INFO))) == NULL)
         {

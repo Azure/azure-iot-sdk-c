@@ -206,7 +206,6 @@ static IOTHUB_SERVICE_CLIENT_AUTH TEST_IOTHUB_SERVICE_CLIENT_AUTH;
 static IOTHUB_SERVICE_CLIENT_AUTH_HANDLE TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE = &TEST_IOTHUB_SERVICE_CLIENT_AUTH;
 
 static IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION TEST_IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION;
-static IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE TEST_IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION_HANDLE = &TEST_IOTHUB_SERVICE_CLIENT_DEVICE_CONFIGURATION;
 
 static const char* TEST_STRING_VALUE = "Test string value";
 static const char* TEST_CONST_CHAR_PTR = "TestConstChar";
@@ -214,17 +213,12 @@ static char* TEST_CHAR_PTR = "TestString";
 
 static const char* TEST_CONFIGURATION_ID = "theid";
 static const char* TEST_SCHEMA_VERSION = "theschemaVersion";
-static const char* TEST_CONTENT = "thecontent";
 static char* TEST_DEVICE_CONTENT = "thedeviceContent";
 static char* TEST_MODULES_CONTENT = "themodulesContent";
 static const char* TEST_TARGET_CONDITION = "thetargetCondition";
 static const char* TEST_CREATED_TIME = "thecreatedTimeUtc";
-static const char* TEST_LAST_UPDATED_TIME = "thelastUpdatedTimeUtc";
 static const char* TEST_PRIORITY_STRING = "4200";
 static int TEST_PRIORITY = 4200;
-static const char* TEST_METRICS = "themetrics";
-static const char* TEST_RESULTS = "theresults";
-static const char* TEST_QUERIES = "thequeries";
 static const char* TEST_ETAG = "theetag";
 
 static char* TEST_HOSTNAME = "theHostName";

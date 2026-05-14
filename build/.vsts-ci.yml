@@ -31,6 +31,18 @@ stages:
           $ErrorActionPreference = 'Stop'
           $VerbosePreference = 'Continue'
 
+          # Extract GitHub token from the service connection's git credential
+          # (checkout: self stores it as an Authorization extraheader in git config)
+          $extraHeader = git config --get-all http.https://github.com/.extraheader 2>$null
+          if ($extraHeader -match 'basic\s+(.+)$') {
+            $decoded = [System.Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($Matches[1]))
+            # Format is ":token" (empty username)
+            $env:GITHUB_TOKEN = $decoded.TrimStart(':')
+            Write-Verbose "GitHub token extracted from service connection credential."
+          } else {
+            Write-Verbose "No GitHub token found in git config; proceeding without auth."
+          }
+
           $PsmUrl = 'https://raw.githubusercontent.com/Azure/iot-sdks-e2e-fx/master/scripts/Azure.Iot.Sdk.Test.psm1'
           $PsmPath = Join-Path $PWD 'Azure.Iot.Sdk.Test.psm1'
           Invoke-WebRequest -Uri $PsmUrl -OutFile $PsmPath -UseBasicParsing
@@ -41,8 +53,6 @@ stages:
             Write-Error "Submodule consistency check FAILED. See conflicts above."
             exit 1
           }
-      env:
-        GITHUB_TOKEN: $(GitHubToken)
 
 - stage: Setup
   dependsOn: [] # Run in parallel with Requirements to save ~3-5 min
@@ -1240,7 +1250,7 @@ stages:
   dependsOn:
   - Setup
   - Tests
-  condition: always() # Run stage even if the pipeline run is cancelled.
+  condition: always()
   jobs:
   - job: destroy_azure_resource_group
     condition: always() # Run job even if the pipeline run is cancelled.

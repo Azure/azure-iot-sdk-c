@@ -219,8 +219,6 @@ static char* TEST_IOTHUBSUFFIX = "theIotHubSuffix";
 static char* TEST_SHAREDACCESSKEY = "theSharedAccessKey";
 static char* TEST_SHAREDACCESSKEYNAME = "theSharedAccessKeyName";
 
-static const HTTP_HEADERS_HANDLE TEST_HTTP_HEADERS_HANDLE = (HTTP_HEADERS_HANDLE)0x4545;
-
 static const unsigned int httpStatusCodeOk = 200;
 static const unsigned int httpStatusCodeBadRequest = 400;
 
@@ -231,14 +229,8 @@ static const char* TEST_HTTP_HEADER_VAL_REQUEST_ID = "1001";
 static const char* TEST_HTTP_HEADER_KEY_USER_AGENT = "User-Agent";
 static const char* TEST_HTTP_HEADER_KEY_ACCEPT = "Accept";
 static const char* TEST_HTTP_HEADER_VAL_ACCEPT = "application/json";
-static const char* TEST_HTTP_HEADER_KEY_CONTENT_TYPE = "Content-Type";
-static const char* TEST_HTTP_HEADER_VAL_CONTENT_TYPE = "application/json; charset=utf-8";
-static const char* TEST_HTTP_HEADER_KEY_IFMATCH = "If-Match";
-static const char* TEST_HTTP_HEADER_VAL_IFMATCH = "*";
-
 static JSON_Value* TEST_JSON_VALUE = (JSON_Value*)0x5050;
 static JSON_Object* TEST_JSON_OBJECT = (JSON_Object*)0x5151;
-static JSON_Status TEST_JSON_STATUS = 0;
 
 #ifdef __cplusplus
 extern "C"
