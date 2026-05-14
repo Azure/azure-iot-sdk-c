@@ -96,7 +96,6 @@ if (${build_as_dynamic})
         OUTPUT_NAME "serializer"
         ARCHIVE_OUTPUT_NAME "serializer_dll_import"
         ENABLE_EXPORTS YES
-        WINDOWS_EXPORT_ALL_SYMBOLS YES
         PDB_NAME "serializer_dll"
         VERSION ${IOT_SDK_VERSION}
         SOVERSION ${IOT_SDK_VERSION_MAJOR}

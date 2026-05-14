@@ -296,6 +296,13 @@ else ()
     add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/deps/c-build-tools)
     set_default_build_options()
 
+    # Suppress C4702 (unreachable code) which fires in consumed library sources
+    # (c-utility, utpm) under Release /O2 optimization, and is treated as error
+    # by /WX from set_default_build_options().
+    if(MSVC)
+        add_compile_options(/wd4702)
+    endif()
+
     # umock_c MOCKABLE_FUNCTION macros produce duplicate typedefs when headers
     # are included multiple times.  C11 allows this but Clang in C99 mode does
     # not.  Suppress globally since all SDK targets include c-utility headers.
@@ -303,8 +310,27 @@ else ()
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-typedef-redefinition")
     endif()
 
+    # umock_c_internal.h does type-punned pointer casts that trigger
+    # -Wstrict-aliasing under GCC -O2/-O3 (Release).  Suppress globally.
+    if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
+        add_compile_options(-Wno-strict-aliasing)
+    endif()
+
     add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/deps/azure-macro-utils-c)
     add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/deps/c-logging)
+
+    # On Win32 x86, get_thread_stack.c uses RtlVirtualUnwind (x64-only) and
+    # fails with #error.  Exclude the original and provide a stub instead.
+    if(MSVC AND CMAKE_SIZEOF_VOID_P EQUAL 4)
+        set_source_files_properties(
+            ${CMAKE_CURRENT_LIST_DIR}/deps/c-logging/v2/src/get_thread_stack.c
+            TARGET_DIRECTORY c_logging_v2_core c_logging_v2
+            PROPERTIES HEADER_FILE_ONLY TRUE
+        )
+        target_sources(c_logging_v2_core PRIVATE ${CMAKE_CURRENT_LIST_DIR}/build_validation/get_thread_stack_x86_stub.c)
+        target_sources(c_logging_v2 PRIVATE ${CMAKE_CURRENT_LIST_DIR}/build_validation/get_thread_stack_x86_stub.c)
+    endif()
+
     # c-logging creates c_logging_v2; create alias so guard checks pass.
     if (NOT TARGET c_logging)
         add_library(c_logging ALIAS c_logging_v2)
