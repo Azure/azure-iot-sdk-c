@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\build_local\CMakeFiles\4eb7afcf77c0d37421faf8db920bc81a\NightlyMemoryCheck.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\build_local\CMakeFiles\NightlyMemoryCheck" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{C28F1FEB-601F-33BC-B867-5B449FD4CE98}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

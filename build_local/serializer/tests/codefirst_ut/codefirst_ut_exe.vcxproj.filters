@@ -1,0 +1,51 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\serializer\tests\codefirst_ut\codefirst_ut.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\serializer\src\codefirst.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\serializer\tests\codefirst_ut\c_bool_size.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\src\gballoc.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\src\crt_abstractions.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\adapters\lock_win32.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\tests\real_test_files\real_strings.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\serializer\tests\codefirst_ut\main.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\src\xlogging.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\src\consolelogger.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\serializer\tests\codefirst_ut\c_bool_size.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\serializer\tests\codefirst_ut\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{DB9FB9A1-4109-3E3C-8BC3-C315E714134B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{94766580-D8F2-3496-A687-57026FBD9E8A}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

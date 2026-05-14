@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\c-testrunnerswitcher\src\ctrs_sprintf.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\c-testrunnerswitcher\src\testmutex.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\c-testrunnerswitcher\src\cppunittest_mutex_fixtures.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\c-testrunnerswitcher\inc\testrunnerswitcher.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\c-testrunnerswitcher\inc\cppunittest_mutex_fixtures.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\c-testrunnerswitcher\inc\ctest_2_cppunittest.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\c-testrunnerswitcher\inc\ctrs_sprintf.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\c-testrunnerswitcher\inc\testmutex.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\c-testrunnerswitcher\inc\run_cppunittest_suite.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\c-testrunnerswitcher\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{DB9FB9A1-4109-3E3C-8BC3-C315E714134B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{94766580-D8F2-3496-A687-57026FBD9E8A}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

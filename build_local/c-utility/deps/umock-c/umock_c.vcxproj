@@ -1,0 +1,424 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+  </PropertyGroup>
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="MinSizeRel|x64">
+      <Configuration>MinSizeRel</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="RelWithDebInfo|x64">
+      <Configuration>RelWithDebInfo</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{091DD3F6-C8D6-3CD8-B113-DA8E6C149CD2}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>10.0.26100.0</WindowsTargetPlatformVersion>
+    <Platform>x64</Platform>
+    <ProjectName>umock_c</ProjectName>
+    <VCProjectUpgraderObjectName>NoUpgrade</VCProjectUpgraderObjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\code\s1\azure-iot-sdk-c-pr2720-clean\build_local\c-utility\deps\umock-c\Debug\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">umock_c.dir\Debug\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">umock_c</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.lib</TargetExt>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\code\s1\azure-iot-sdk-c-pr2720-clean\build_local\c-utility\deps\umock-c\Release\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">umock_c.dir\Release\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">umock_c</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.lib</TargetExt>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\code\s1\azure-iot-sdk-c-pr2720-clean\build_local\c-utility\deps\umock-c\MinSizeRel\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">umock_c.dir\MinSizeRel\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">umock_c</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">.lib</TargetExt>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\code\s1\azure-iot-sdk-c-pr2720-clean\build_local\c-utility\deps\umock-c\RelWithDebInfo\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">umock_c.dir\RelWithDebInfo\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">umock_c</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">.lib</TargetExt>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\umock-c\inc;C:\code\s1\azure-iot-sdk-c-pr2720-clean\deps\c-logging\v2\inc;C:\code\s1\azure-iot-sdk-c-pr2720-clean\deps\azure-macro-utils-c\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /bigobj</AdditionalOptions>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <ControlFlowGuard>Guard</ControlFlowGuard>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <DisableSpecificWarnings>4232;5105;4200</DisableSpecificWarnings>
+      <ExceptionHandling>
+      </ExceptionHandling>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
+      <LanguageStandard_C>stdc11</LanguageStandard_C>
+      <MinimalRebuild></MinimalRebuild>
+      <Optimization>Disabled</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <SDLCheck>true</SDLCheck>
+      <SupportJustMyCode></SupportJustMyCode>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <UseFullPaths>false</UseFullPaths>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
+      <WarningLevel>Level4</WarningLevel>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;_CRT_SECURE_NO_WARNINGS;CMAKE_INTDIR="Debug"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_DEBUG;_WINDOWS;_CRT_SECURE_NO_WARNINGS;CMAKE_INTDIR=\"Debug\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\umock-c\inc;C:\code\s1\azure-iot-sdk-c-pr2720-clean\deps\c-logging\v2\inc;C:\code\s1\azure-iot-sdk-c-pr2720-clean\deps\azure-macro-utils-c\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\umock-c\inc;C:\code\s1\azure-iot-sdk-c-pr2720-clean\deps\c-logging\v2\inc;C:\code\s1\azure-iot-sdk-c-pr2720-clean\deps\azure-macro-utils-c\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Lib>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <TreatLibWarningAsErrors>true</TreatLibWarningAsErrors>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\umock-c\inc;C:\code\s1\azure-iot-sdk-c-pr2720-clean\deps\c-logging\v2\inc;C:\code\s1\azure-iot-sdk-c-pr2720-clean\deps\azure-macro-utils-c\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /bigobj</AdditionalOptions>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <ControlFlowGuard>Guard</ControlFlowGuard>
+      <DisableSpecificWarnings>4232;5105;4200</DisableSpecificWarnings>
+      <ExceptionHandling>
+      </ExceptionHandling>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <LanguageStandard_C>stdc11</LanguageStandard_C>
+      <MinimalRebuild></MinimalRebuild>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <SDLCheck>true</SDLCheck>
+      <SupportJustMyCode></SupportJustMyCode>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <UseFullPaths>false</UseFullPaths>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
+      <WarningLevel>Level4</WarningLevel>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;_CRT_SECURE_NO_WARNINGS;CMAKE_INTDIR="Release"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;_CRT_SECURE_NO_WARNINGS;CMAKE_INTDIR=\"Release\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\umock-c\inc;C:\code\s1\azure-iot-sdk-c-pr2720-clean\deps\c-logging\v2\inc;C:\code\s1\azure-iot-sdk-c-pr2720-clean\deps\azure-macro-utils-c\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\umock-c\inc;C:\code\s1\azure-iot-sdk-c-pr2720-clean\deps\c-logging\v2\inc;C:\code\s1\azure-iot-sdk-c-pr2720-clean\deps\azure-macro-utils-c\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Lib>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <TreatLibWarningAsErrors>true</TreatLibWarningAsErrors>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\umock-c\inc;C:\code\s1\azure-iot-sdk-c-pr2720-clean\deps\c-logging\v2\inc;C:\code\s1\azure-iot-sdk-c-pr2720-clean\deps\azure-macro-utils-c\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /bigobj</AdditionalOptions>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <ControlFlowGuard>Guard</ControlFlowGuard>
+      <DisableSpecificWarnings>4232;5105;4200</DisableSpecificWarnings>
+      <ExceptionHandling>
+      </ExceptionHandling>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <LanguageStandard_C>stdc11</LanguageStandard_C>
+      <MinimalRebuild></MinimalRebuild>
+      <Optimization>MinSpace</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <SDLCheck>true</SDLCheck>
+      <SupportJustMyCode></SupportJustMyCode>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <UseFullPaths>false</UseFullPaths>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
+      <WarningLevel>Level4</WarningLevel>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;_CRT_SECURE_NO_WARNINGS;CMAKE_INTDIR="MinSizeRel"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;_CRT_SECURE_NO_WARNINGS;CMAKE_INTDIR=\"MinSizeRel\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\umock-c\inc;C:\code\s1\azure-iot-sdk-c-pr2720-clean\deps\c-logging\v2\inc;C:\code\s1\azure-iot-sdk-c-pr2720-clean\deps\azure-macro-utils-c\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\umock-c\inc;C:\code\s1\azure-iot-sdk-c-pr2720-clean\deps\c-logging\v2\inc;C:\code\s1\azure-iot-sdk-c-pr2720-clean\deps\azure-macro-utils-c\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Lib>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <TreatLibWarningAsErrors>true</TreatLibWarningAsErrors>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\umock-c\inc;C:\code\s1\azure-iot-sdk-c-pr2720-clean\deps\c-logging\v2\inc;C:\code\s1\azure-iot-sdk-c-pr2720-clean\deps\azure-macro-utils-c\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /bigobj</AdditionalOptions>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <ControlFlowGuard>Guard</ControlFlowGuard>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <DisableSpecificWarnings>4232;5105;4200</DisableSpecificWarnings>
+      <ExceptionHandling>
+      </ExceptionHandling>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <LanguageStandard_C>stdc11</LanguageStandard_C>
+      <MinimalRebuild></MinimalRebuild>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <SDLCheck>true</SDLCheck>
+      <SupportJustMyCode></SupportJustMyCode>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <UseFullPaths>false</UseFullPaths>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
+      <WarningLevel>Level4</WarningLevel>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;_CRT_SECURE_NO_WARNINGS;CMAKE_INTDIR="RelWithDebInfo"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;_CRT_SECURE_NO_WARNINGS;CMAKE_INTDIR=\"RelWithDebInfo\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\umock-c\inc;C:\code\s1\azure-iot-sdk-c-pr2720-clean\deps\c-logging\v2\inc;C:\code\s1\azure-iot-sdk-c-pr2720-clean\deps\azure-macro-utils-c\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\umock-c\inc;C:\code\s1\azure-iot-sdk-c-pr2720-clean\deps\c-logging\v2\inc;C:\code\s1\azure-iot-sdk-c-pr2720-clean\deps\azure-macro-utils-c\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Lib>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <TreatLibWarningAsErrors>true</TreatLibWarningAsErrors>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\umock-c\CMakeLists.txt">
+      <UseUtf8Encoding>Always</UseUtf8Encoding>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Building Custom Rule C:/code/s1/azure-iot-sdk-c-pr2720-clean/c-utility/deps/umock-c/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/code/s1/azure-iot-sdk-c-pr2720-clean -BC:/code/s1/azure-iot-sdk-c-pr2720-clean/build_local --check-stamp-file C:/code/s1/azure-iot-sdk-c-pr2720-clean/build_local/c-utility/deps/umock-c/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Program Files\CMake\share\cmake-4.0\Modules\CTest.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CTestTargets.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CTestUseLaunchers.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CheckIncludeFiles.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\DartConfiguration.tcl.in;C:\Program Files\CMake\share\cmake-4.0\Modules\GNUInstallDirs.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\code\s1\azure-iot-sdk-c-pr2720-clean\build_local\c-utility\deps\umock-c\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Building Custom Rule C:/code/s1/azure-iot-sdk-c-pr2720-clean/c-utility/deps/umock-c/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/code/s1/azure-iot-sdk-c-pr2720-clean -BC:/code/s1/azure-iot-sdk-c-pr2720-clean/build_local --check-stamp-file C:/code/s1/azure-iot-sdk-c-pr2720-clean/build_local/c-utility/deps/umock-c/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Program Files\CMake\share\cmake-4.0\Modules\CTest.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CTestTargets.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CTestUseLaunchers.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CheckIncludeFiles.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\DartConfiguration.tcl.in;C:\Program Files\CMake\share\cmake-4.0\Modules\GNUInstallDirs.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\code\s1\azure-iot-sdk-c-pr2720-clean\build_local\c-utility\deps\umock-c\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">Building Custom Rule C:/code/s1/azure-iot-sdk-c-pr2720-clean/c-utility/deps/umock-c/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/code/s1/azure-iot-sdk-c-pr2720-clean -BC:/code/s1/azure-iot-sdk-c-pr2720-clean/build_local --check-stamp-file C:/code/s1/azure-iot-sdk-c-pr2720-clean/build_local/c-utility/deps/umock-c/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Program Files\CMake\share\cmake-4.0\Modules\CTest.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CTestTargets.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CTestUseLaunchers.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CheckIncludeFiles.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\DartConfiguration.tcl.in;C:\Program Files\CMake\share\cmake-4.0\Modules\GNUInstallDirs.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\code\s1\azure-iot-sdk-c-pr2720-clean\build_local\c-utility\deps\umock-c\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">Building Custom Rule C:/code/s1/azure-iot-sdk-c-pr2720-clean/c-utility/deps/umock-c/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/code/s1/azure-iot-sdk-c-pr2720-clean -BC:/code/s1/azure-iot-sdk-c-pr2720-clean/build_local --check-stamp-file C:/code/s1/azure-iot-sdk-c-pr2720-clean/build_local/c-utility/deps/umock-c/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Program Files\CMake\share\cmake-4.0\Modules\CTest.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CTestTargets.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CTestUseLaunchers.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CheckIncludeFiles.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\DartConfiguration.tcl.in;C:\Program Files\CMake\share\cmake-4.0\Modules\GNUInstallDirs.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\code\s1\azure-iot-sdk-c-pr2720-clean\build_local\c-utility\deps\umock-c\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">false</LinkObjects>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\umock-c\src\umock_c.c" />
+    <ClCompile Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\umock-c\src\umock_c_negative_tests.c" />
+    <ClCompile Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\umock-c\src\umockalloc.c" />
+    <ClCompile Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\umock-c\src\umockautoignoreargs.c" />
+    <ClCompile Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\umock-c\src\umockcall.c" />
+    <ClCompile Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\umock-c\src\umockcallpairs.c" />
+    <ClCompile Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\umock-c\src\umockcallrecorder.c" />
+    <ClCompile Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\umock-c\src\umockstring.c" />
+    <ClCompile Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\umock-c\src\umocktypename.c" />
+    <ClCompile Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\umock-c\src\umocktypes.c" />
+    <ClCompile Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\umock-c\src\umocktypes_bool.c" />
+    <ClCompile Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\umock-c\src\umocktypes_c.c" />
+    <ClCompile Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\umock-c\src\umocktypes_stdint.c" />
+    <ClCompile Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\umock-c\src\umocktypes_charptr.c" />
+    <ClCompile Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\umock-c\src\umocktypes_wcharptr.c" />
+    <ClCompile Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\umock-c\src\umocktypes_windows.c" />
+    <ClCompile Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\umock-c\src\umock_lock_factory_windows.c" />
+    <ClInclude Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\umock-c\inc\umock_c\umock_c.h" />
+    <ClInclude Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\umock-c\inc\umock_c\umock_c_internal.h" />
+    <ClInclude Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\umock-c\inc\umock_c\umock_c_negative_tests.h" />
+    <ClInclude Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\umock-c\inc\umock_c\umock_c_prod.h" />
+    <ClInclude Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\umock-c\inc\umock_c\umock_lock_factory.h" />
+    <ClInclude Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\umock-c\inc\umock_c\umock_lock_factory_default.h" />
+    <ClInclude Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\umock-c\inc\umock_c\umock_lock_if.h" />
+    <ClInclude Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\umock-c\inc\umock_c\umock_log.h" />
+    <ClInclude Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\umock-c\inc\umock_c\umockalloc.h" />
+    <ClInclude Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\umock-c\inc\umock_c\umockautoignoreargs.h" />
+    <ClInclude Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\umock-c\inc\umock_c\umockcall.h" />
+    <ClInclude Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\umock-c\inc\umock_c\umockcallpairs.h" />
+    <ClInclude Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\umock-c\inc\umock_c\umockcallrecorder.h" />
+    <ClInclude Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\umock-c\inc\umock_c\umockstring.h" />
+    <ClInclude Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\umock-c\inc\umock_c\umocktypename.h" />
+    <ClInclude Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\umock-c\inc\umock_c\umocktypes.h" />
+    <ClInclude Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\umock-c\inc\umock_c\umocktypes_bool.h" />
+    <ClInclude Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\umock-c\inc\umock_c\umocktypes_c.h" />
+    <ClInclude Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\umock-c\inc\umock_c\umocktypes_stdint.h" />
+    <ClInclude Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\umock-c\inc\umock_c\umocktypes_charptr.h" />
+    <ClInclude Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\umock-c\inc\umock_c\umocktypes_struct.h" />
+    <ClInclude Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\umock-c\inc\umock_c\umocktypes_wcharptr.h" />
+    <ClInclude Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\umock-c\inc\umock_c\umocktypes_windows.h" />
+    <None Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\umock-c\devdoc\umock_c_lib_requirements_with_ids_requirements.md">
+    </None>
+    <None Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\umock-c\devdoc\umock_c_negative_tests_requirements.md">
+    </None>
+    <None Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\umock-c\devdoc\umock_c_requirements.md">
+    </None>
+    <None Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\umock-c\devdoc\umock_lock_factory_pthread_requirements.md">
+    </None>
+    <None Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\umock-c\devdoc\umock_lock_factory_windows_requirements.md">
+    </None>
+    <None Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\umock-c\devdoc\umockalloc_requirements.md">
+    </None>
+    <None Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\umock-c\devdoc\umockautoignoreargs_requirements.md">
+    </None>
+    <None Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\umock-c\devdoc\umockcall_requirements.md">
+    </None>
+    <None Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\umock-c\devdoc\umockcallpairs_requirements.md">
+    </None>
+    <None Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\umock-c\devdoc\umockcallrecorder_requirements.md">
+    </None>
+    <None Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\umock-c\devdoc\umockstring_requirements.md">
+    </None>
+    <None Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\umock-c\devdoc\umocktypename_requirements.md">
+    </None>
+    <None Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\umock-c\devdoc\umocktypes_bool_requirements.md">
+    </None>
+    <None Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\umock-c\devdoc\umocktypes_c_requirements.md">
+    </None>
+    <None Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\umock-c\devdoc\umocktypes_charptr_requirements.md">
+    </None>
+    <None Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\umock-c\devdoc\umocktypes_requirements.md">
+    </None>
+    <None Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\umock-c\devdoc\umocktypes_stdint_requirements.md">
+    </None>
+    <None Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\umock-c\devdoc\umocktypes_struct_requirements.md">
+    </None>
+    <None Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\umock-c\devdoc\umocktypes_wcharptr_requirements.md">
+    </None>
+    <None Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\deps\umock-c\devdoc\umocktypes_windows_requirements.md">
+    </None>
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\build_local\ZERO_CHECK.vcxproj">
+      <Project>{80F8772B-BE52-3129-9180-8F30ACC8FA17}</Project>
+      <Name>ZERO_CHECK</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\build_local\deps\c-logging\v2\c_logging_v2.vcxproj">
+      <Project>{48717016-942F-3DC4-B0E0-54057BDCDCE8}</Project>
+      <Name>c_logging_v2</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\build_local\deps\c-logging\v2\c_logging_v2_core.vcxproj">
+      <Project>{0F331031-830B-366C-990B-C4199004063D}</Project>
+      <Name>c_logging_v2_core</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\build_local\deps\azure-macro-utils-c\macro_utils_c.vcxproj">
+      <Project>{EA0131C3-12D2-393F-A3F4-9FA4D4EECA4A}</Project>
+      <Name>macro_utils_c</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

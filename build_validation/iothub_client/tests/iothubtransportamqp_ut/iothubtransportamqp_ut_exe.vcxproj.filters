@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\iothub_client\tests\iothubtransportamqp_ut\iothubtransportamqp_ut.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\iothub_client\src\iothubtransportamqp.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\iothub_client\tests\iothubtransportamqp_ut\main.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\src\xlogging.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\src\consolelogger.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\iothub_client\tests\iothubtransportamqp_ut\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{C8C0ADAC-18DB-3626-B4E0-3B9D2923ABBC}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

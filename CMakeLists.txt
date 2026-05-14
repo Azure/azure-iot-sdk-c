@@ -362,6 +362,8 @@ else ()
     include(GNUInstallDirs)
     file(GLOB _umock_c_headers "${CMAKE_CURRENT_LIST_DIR}/deps/umock-c/inc/umock_c/*.h")
     install(FILES ${_umock_c_headers} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/umock_c)
+    # Install the library binary (EXCLUDE_FROM_ALL prevents normal install)
+    install(FILES $<TARGET_FILE:umock_c> DESTINATION ${CMAKE_INSTALL_LIBDIR})
     install(EXPORT umock_cTargets
         FILE umock_cTargets.cmake
         DESTINATION cmake
@@ -420,6 +422,14 @@ else ()
         "#include \"macro_utils/macro_utils.h\"\n")
     file(WRITE ${CMAKE_BINARY_DIR}/azure_macro_utils/macro_utils_generated.h
         "#include \"macro_utils/macro_utils_generated.h\"\n")
+
+    # Install the forwarding headers so consumers of the installed SDK can
+    # still #include "azure_macro_utils/macro_utils.h".
+    install(FILES
+        ${CMAKE_BINARY_DIR}/azure_macro_utils/macro_utils.h
+        ${CMAKE_BINARY_DIR}/azure_macro_utils/macro_utils_generated.h
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azure_macro_utils
+    )
 
     include_directories(${CMAKE_BINARY_DIR})
     include_directories(${MACRO_UTILS_INC_FOLDER})

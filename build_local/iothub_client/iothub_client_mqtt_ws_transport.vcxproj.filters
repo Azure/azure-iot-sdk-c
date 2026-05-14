@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\iothub_client\src\iothub_client_authorization.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\iothub_client\src\iothub_client_retry_control.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\iothub_client\src\iothub_transport_ll_private.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\iothub_client\src\iothubtransport_mqtt_common.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\iothub_client\src\iothubtransportmqtt_websockets.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\iothub_client\inc\internal\iothub_client_authorization.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\iothub_client\inc\internal\iothub_client_retry_control.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\iothub_client\inc\internal\iothub_transport_ll_private.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\iothub_client\inc\internal\iothubtransport_mqtt_common.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\iothub_client\inc\iothubtransportmqtt_websockets.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\iothub_client\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{DB9FB9A1-4109-3E3C-8BC3-C315E714134B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{94766580-D8F2-3496-A687-57026FBD9E8A}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

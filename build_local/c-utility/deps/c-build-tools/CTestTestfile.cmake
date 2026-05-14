@@ -1,0 +1,11 @@
+# CMake generated Testfile for 
+# Source directory: C:/code/s1/azure-iot-sdk-c-pr2720-clean/c-utility/deps/c-build-tools
+# Build directory: C:/code/s1/azure-iot-sdk-c-pr2720-clean/build_local/c-utility/deps/c-build-tools
+# 
+# This file includes the relevant testing commands required for 
+# testing this directory and lists subdirectories to be tested as well.
+subdirs("build_functions")
+subdirs("repo_validation")
+subdirs("traceabilitytool")
+subdirs("reals_check")
+subdirs("sarif_results_checker")

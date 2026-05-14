@@ -1,0 +1,123 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\testtools\micromock\src\micromockcharstararenullterminatedstrings.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\testtools\micromock\src\micromockexception.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\testtools\micromock\src\micromocktestmutex.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\testtools\micromock\src\mockcallrecorder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\testtools\micromock\src\mockmethodcallbase.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\testtools\micromock\src\mockvaluebase.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\testtools\micromock\src\timediscretemicromock.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\testtools\micromock\inc\globalmock.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\testtools\micromock\inc\micromock.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\testtools\micromock\inc\micromockcallmacros.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\testtools\micromock\inc\micromockcharstararenullterminatedstrings.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\testtools\micromock\inc\micromockcommon.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\testtools\micromock\inc\micromockenumtostring.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\testtools\micromock\inc\micromockexception.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\testtools\micromock\inc\micromocktestmutex.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\testtools\micromock\inc\micromocktestrunnerhooks.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\testtools\micromock\inc\mock.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\testtools\micromock\inc\mockcallargument.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\testtools\micromock\inc\mockcallargumentbase.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\testtools\micromock\inc\mockcallcomparer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\testtools\micromock\inc\mockcallrecorder.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\testtools\micromock\inc\mockmethodcall.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\testtools\micromock\inc\mockmethodcallbase.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\testtools\micromock\inc\mockresultvalue.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\testtools\micromock\inc\mockvalue.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\testtools\micromock\inc\mockvaluebase.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\testtools\micromock\inc\nicecallcomparer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\testtools\micromock\inc\runtimemock.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\testtools\micromock\inc\stdafx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\testtools\micromock\inc\strictorderedcallcomparer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\testtools\micromock\inc\strictunorderedcallcomparer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\testtools\micromock\inc\targetver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\testtools\micromock\inc\threadsafeglobalmock.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\testtools\micromock\inc\timediscretemicromock.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\testtools\micromock\inc\timediscretemicromockcallmacros.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\code\s1\azure-iot-sdk-c-pr2720-clean\c-utility\testtools\micromock\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{DB9FB9A1-4109-3E3C-8BC3-C315E714134B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{94766580-D8F2-3496-A687-57026FBD9E8A}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

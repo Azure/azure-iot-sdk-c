@@ -1,0 +1,608 @@
+
+---
+events:
+  -
+    kind: "message-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineSystem.cmake:205 (message)"
+      - "CMakeLists.txt:5 (project)"
+    message: |
+      The system is: Windows - 10.0.26200 - AMD64
+  -
+    kind: "message-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineCompilerId.cmake:17 (message)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineCCompiler.cmake:123 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:5 (project)"
+    message: |
+      Compiling the C compiler identification source file "CMakeCCompilerId.c" succeeded.
+      Compiler:  
+      Build flags: 
+      Id flags:  
+      
+      The output was:
+      0
+      MSBuild version 17.14.40+3e7442088 for .NET Framework
+      Build started 5/13/2026 11:27:56 AM.
+      
+      Project "C:\\code\\s1\\azure-iot-sdk-c-pr2720-clean\\build_validation\\CMakeFiles\\4.0.3\\CompilerIdC\\CompilerIdC.vcxproj" on node 1 (default targets).
+      PrepareForBuild:
+        Creating directory "Debug\\".
+        Structured output is enabled. The formatting of compiler diagnostics will reflect the error hierarchy. See https://aka.ms/cpp/structured-output for more details.
+        Creating directory "Debug\\CompilerIdC.tlog\\".
+      InitializeBuildStatus:
+        Creating "Debug\\CompilerIdC.tlog\\unsuccessfulbuild" because "AlwaysCreate" was specified.
+        Touching "Debug\\CompilerIdC.tlog\\unsuccessfulbuild".
+      ClCompile:
+        C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\CL.exe /c /nologo /W0 /WX- /diagnostics:column /Od /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"Debug\\\\" /Fd"Debug\\vc143.pdb" /external:W0 /Gd /TC /FC /errorReport:queue CMakeCCompilerId.c
+        CMakeCCompilerId.c
+      Link:
+        C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:".\\CompilerIdC.exe" /INCREMENTAL:NO /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /PDB:".\\CompilerIdC.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:".\\CompilerIdC.lib" /MACHINE:X64 Debug\\CMakeCCompilerId.obj
+        CompilerIdC.vcxproj -> C:\\code\\s1\\azure-iot-sdk-c-pr2720-clean\\build_validation\\CMakeFiles\\4.0.3\\CompilerIdC\\CompilerIdC.exe
+      PostBuildEvent:
+        for %%i in (cl.exe) do @echo CMAKE_C_COMPILER=%%~$PATH:i
+        :VCEnd
+        CMAKE_C_COMPILER=C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\cl.exe
+      FinalizeBuildStatus:
+        Deleting file "Debug\\CompilerIdC.tlog\\unsuccessfulbuild".
+        Touching "Debug\\CompilerIdC.tlog\\CompilerIdC.lastbuildstate".
+      Done Building Project "C:\\code\\s1\\azure-iot-sdk-c-pr2720-clean\\build_validation\\CMakeFiles\\4.0.3\\CompilerIdC\\CompilerIdC.vcxproj" (default targets).
+      
+      Build succeeded.
+          0 Warning(s)
+          0 Error(s)
+      
+      Time Elapsed 00:00:00.67
+      
+      
+      Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "CompilerIdC.exe"
+      
+      Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "CompilerIdC.vcxproj"
+      
+      The C compiler identification is MSVC, found in:
+        C:/code/s1/azure-iot-sdk-c-pr2720-clean/build_validation/CMakeFiles/4.0.3/CompilerIdC/CompilerIdC.exe
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineCompilerId.cmake:17 (message)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineCXXCompiler.cmake:126 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:5 (project)"
+    message: |
+      Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" succeeded.
+      Compiler:  
+      Build flags: 
+      Id flags:  
+      
+      The output was:
+      0
+      MSBuild version 17.14.40+3e7442088 for .NET Framework
+      Build started 5/13/2026 11:27:57 AM.
+      
+      Project "C:\\code\\s1\\azure-iot-sdk-c-pr2720-clean\\build_validation\\CMakeFiles\\4.0.3\\CompilerIdCXX\\CompilerIdCXX.vcxproj" on node 1 (default targets).
+      PrepareForBuild:
+        Creating directory "Debug\\".
+        Structured output is enabled. The formatting of compiler diagnostics will reflect the error hierarchy. See https://aka.ms/cpp/structured-output for more details.
+        Creating directory "Debug\\CompilerIdCXX.tlog\\".
+      InitializeBuildStatus:
+        Creating "Debug\\CompilerIdCXX.tlog\\unsuccessfulbuild" because "AlwaysCreate" was specified.
+        Touching "Debug\\CompilerIdCXX.tlog\\unsuccessfulbuild".
+      ClCompile:
+        C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\CL.exe /c /nologo /W0 /WX- /diagnostics:column /Od /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"Debug\\\\" /Fd"Debug\\vc143.pdb" /external:W0 /Gd /TP /FC /errorReport:queue CMakeCXXCompilerId.cpp
+        CMakeCXXCompilerId.cpp
+      Link:
+        C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:".\\CompilerIdCXX.exe" /INCREMENTAL:NO /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /PDB:".\\CompilerIdCXX.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:".\\CompilerIdCXX.lib" /MACHINE:X64 Debug\\CMakeCXXCompilerId.obj
+        CompilerIdCXX.vcxproj -> C:\\code\\s1\\azure-iot-sdk-c-pr2720-clean\\build_validation\\CMakeFiles\\4.0.3\\CompilerIdCXX\\CompilerIdCXX.exe
+      PostBuildEvent:
+        for %%i in (cl.exe) do @echo CMAKE_CXX_COMPILER=%%~$PATH:i
+        :VCEnd
+        CMAKE_CXX_COMPILER=C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\cl.exe
+      FinalizeBuildStatus:
+        Deleting file "Debug\\CompilerIdCXX.tlog\\unsuccessfulbuild".
+        Touching "Debug\\CompilerIdCXX.tlog\\CompilerIdCXX.lastbuildstate".
+      Done Building Project "C:\\code\\s1\\azure-iot-sdk-c-pr2720-clean\\build_validation\\CMakeFiles\\4.0.3\\CompilerIdCXX\\CompilerIdCXX.vcxproj" (default targets).
+      
+      Build succeeded.
+          0 Warning(s)
+          0 Error(s)
+      
+      Time Elapsed 00:00:00.67
+      
+      
+      Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "CompilerIdCXX.exe"
+      
+      Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "CompilerIdCXX.vcxproj"
+      
+      The CXX compiler identification is MSVC, found in:
+        C:/code/s1/azure-iot-sdk-c-pr2720-clean/build_validation/CMakeFiles/4.0.3/CompilerIdCXX/CompilerIdCXX.exe
+      
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineCompilerABI.cmake:83 (try_compile)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:5 (project)"
+    checks:
+      - "Detecting C compiler ABI info"
+    directories:
+      source: "C:/code/s1/azure-iot-sdk-c-pr2720-clean/build_validation/CMakeFiles/CMakeScratch/TryCompile-dsjx4h"
+      binary: "C:/code/s1/azure-iot-sdk-c-pr2720-clean/build_validation/CMakeFiles/CMakeScratch/TryCompile-dsjx4h"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "/DWIN32 /D_WINDOWS /W3"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+    buildResult:
+      variable: "CMAKE_C_ABI_COMPILED"
+      cached: true
+      stdout: |
+        Change Dir: 'C:/code/s1/azure-iot-sdk-c-pr2720-clean/build_validation/CMakeFiles/CMakeScratch/TryCompile-dsjx4h'
+        
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_f9b62.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        MSBuild version 17.14.40+3e7442088 for .NET Framework
+        Build started 5/13/2026 11:27:58 AM.
+        
+        Project "C:\\code\\s1\\azure-iot-sdk-c-pr2720-clean\\build_validation\\CMakeFiles\\CMakeScratch\\TryCompile-dsjx4h\\cmTC_f9b62.vcxproj" on node 1 (default targets).
+        PrepareForBuild:
+          Creating directory "cmTC_f9b62.dir\\Debug\\".
+          Structured output is enabled. The formatting of compiler diagnostics will reflect the error hierarchy. See https://aka.ms/cpp/structured-output for more details.
+          Creating directory "C:\\code\\s1\\azure-iot-sdk-c-pr2720-clean\\build_validation\\CMakeFiles\\CMakeScratch\\TryCompile-dsjx4h\\Debug\\".
+          Creating directory "cmTC_f9b62.dir\\Debug\\cmTC_f9b62.tlog\\".
+        InitializeBuildStatus:
+          Creating "cmTC_f9b62.dir\\Debug\\cmTC_f9b62.tlog\\unsuccessfulbuild" because "AlwaysCreate" was specified.
+          Touching "cmTC_f9b62.dir\\Debug\\cmTC_f9b62.tlog\\unsuccessfulbuild".
+        ClCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\CL.exe /c /Zi /W3 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_f9b62.dir\\Debug\\\\" /Fd"cmTC_f9b62.dir\\Debug\\vc143.pdb" /external:W3 /Gd /TC /errorReport:queue "C:\\Program Files\\CMake\\share\\cmake-4.0\\Modules\\CMakeCCompilerABI.c"
+          Microsoft (R) C/C++ Optimizing Compiler Version 19.44.35227 for x64
+          Copyright (C) Microsoft Corporation.  All rights reserved.
+          cl /c /Zi /W3 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_f9b62.dir\\Debug\\\\" /Fd"cmTC_f9b62.dir\\Debug\\vc143.pdb" /external:W3 /Gd /TC /errorReport:queue "C:\\Program Files\\CMake\\share\\cmake-4.0\\Modules\\CMakeCCompilerABI.c"
+          CMakeCCompilerABI.c
+        Link:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"C:\\code\\s1\\azure-iot-sdk-c-pr2720-clean\\build_validation\\CMakeFiles\\CMakeScratch\\TryCompile-dsjx4h\\Debug\\cmTC_f9b62.exe" /INCREMENTAL /ILK:"cmTC_f9b62.dir\\Debug\\cmTC_f9b62.ilk" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/code/s1/azure-iot-sdk-c-pr2720-clean/build_validation/CMakeFiles/CMakeScratch/TryCompile-dsjx4h/Debug/cmTC_f9b62.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/code/s1/azure-iot-sdk-c-pr2720-clean/build_validation/CMakeFiles/CMakeScratch/TryCompile-dsjx4h/Debug/cmTC_f9b62.lib" /MACHINE:X64  /machine:x64 cmTC_f9b62.dir\\Debug\\CMakeCCompilerABI.obj
+          cmTC_f9b62.vcxproj -> C:\\code\\s1\\azure-iot-sdk-c-pr2720-clean\\build_validation\\CMakeFiles\\CMakeScratch\\TryCompile-dsjx4h\\Debug\\cmTC_f9b62.exe
+        FinalizeBuildStatus:
+          Deleting file "cmTC_f9b62.dir\\Debug\\cmTC_f9b62.tlog\\unsuccessfulbuild".
+          Touching "cmTC_f9b62.dir\\Debug\\cmTC_f9b62.tlog\\cmTC_f9b62.lastbuildstate".
+        Done Building Project "C:\\code\\s1\\azure-iot-sdk-c-pr2720-clean\\build_validation\\CMakeFiles\\CMakeScratch\\TryCompile-dsjx4h\\cmTC_f9b62.vcxproj" (default targets).
+        
+        Build succeeded.
+            0 Warning(s)
+            0 Error(s)
+        
+        Time Elapsed 00:00:00.62
+        
+      exitCode: 0
+  -
+    kind: "message-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineCompilerABI.cmake:227 (message)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:5 (project)"
+    message: |
+      Parsed C implicit link information:
+        link line regex: [^( *|.*[/\\])(ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)|link\\.exe|lld-link(\\.exe)?|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\\]+-)?ld|collect2)[^/\\]*( |$)]
+        linker tool regex: [^[ 	]*(->|")?[ 	]*(([^"]*[/\\])?(ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)|link\\.exe|lld-link(\\.exe)?))("|,| |$)]
+        linker tool for 'C': C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/HostX64/x64/link.exe
+        implicit libs: []
+        implicit objs: []
+        implicit dirs: []
+        implicit fwks: []
+      
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/Internal/CMakeDetermineLinkerId.cmake:36 (message)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineCompilerABI.cmake:270 (cmake_determine_linker_id)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:5 (project)"
+    message: |
+      Running the C compiler's linker: "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/HostX64/x64/link.exe" "-v"
+      Microsoft (R) Incremental Linker Version 14.44.35227.0
+      Copyright (C) Microsoft Corporation.  All rights reserved.
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineCompilerABI.cmake:83 (try_compile)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeTestCXXCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:5 (project)"
+    checks:
+      - "Detecting CXX compiler ABI info"
+    directories:
+      source: "C:/code/s1/azure-iot-sdk-c-pr2720-clean/build_validation/CMakeFiles/CMakeScratch/TryCompile-cccxa1"
+      binary: "C:/code/s1/azure-iot-sdk-c-pr2720-clean/build_validation/CMakeFiles/CMakeScratch/TryCompile-cccxa1"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: "/DWIN32 /D_WINDOWS /W3 /GR /EHsc"
+      CMAKE_CXX_SCAN_FOR_MODULES: "OFF"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+    buildResult:
+      variable: "CMAKE_CXX_ABI_COMPILED"
+      cached: true
+      stdout: |
+        Change Dir: 'C:/code/s1/azure-iot-sdk-c-pr2720-clean/build_validation/CMakeFiles/CMakeScratch/TryCompile-cccxa1'
+        
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_b7759.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        MSBuild version 17.14.40+3e7442088 for .NET Framework
+        Build started 5/13/2026 11:27:59 AM.
+        
+        Project "C:\\code\\s1\\azure-iot-sdk-c-pr2720-clean\\build_validation\\CMakeFiles\\CMakeScratch\\TryCompile-cccxa1\\cmTC_b7759.vcxproj" on node 1 (default targets).
+        PrepareForBuild:
+          Creating directory "cmTC_b7759.dir\\Debug\\".
+          Structured output is enabled. The formatting of compiler diagnostics will reflect the error hierarchy. See https://aka.ms/cpp/structured-output for more details.
+          Creating directory "C:\\code\\s1\\azure-iot-sdk-c-pr2720-clean\\build_validation\\CMakeFiles\\CMakeScratch\\TryCompile-cccxa1\\Debug\\".
+          Creating directory "cmTC_b7759.dir\\Debug\\cmTC_b7759.tlog\\".
+        InitializeBuildStatus:
+          Creating "cmTC_b7759.dir\\Debug\\cmTC_b7759.tlog\\unsuccessfulbuild" because "AlwaysCreate" was specified.
+          Touching "cmTC_b7759.dir\\Debug\\cmTC_b7759.tlog\\unsuccessfulbuild".
+        ClCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\CL.exe /c /Zi /W3 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /Fo"cmTC_b7759.dir\\Debug\\\\" /Fd"cmTC_b7759.dir\\Debug\\vc143.pdb" /external:W3 /Gd /TP /errorReport:queue "C:\\Program Files\\CMake\\share\\cmake-4.0\\Modules\\CMakeCXXCompilerABI.cpp"
+          Microsoft (R) C/C++ Optimizing Compiler Version 19.44.35227 for x64
+          Copyright (C) Microsoft Corporation.  All rights reserved.
+          cl /c /Zi /W3 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /Fo"cmTC_b7759.dir\\Debug\\\\" /Fd"cmTC_b7759.dir\\Debug\\vc143.pdb" /external:W3 /Gd /TP /errorReport:queue "C:\\Program Files\\CMake\\share\\cmake-4.0\\Modules\\CMakeCXXCompilerABI.cpp"
+          CMakeCXXCompilerABI.cpp
+        Link:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"C:\\code\\s1\\azure-iot-sdk-c-pr2720-clean\\build_validation\\CMakeFiles\\CMakeScratch\\TryCompile-cccxa1\\Debug\\cmTC_b7759.exe" /INCREMENTAL /ILK:"cmTC_b7759.dir\\Debug\\cmTC_b7759.ilk" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/code/s1/azure-iot-sdk-c-pr2720-clean/build_validation/CMakeFiles/CMakeScratch/TryCompile-cccxa1/Debug/cmTC_b7759.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/code/s1/azure-iot-sdk-c-pr2720-clean/build_validation/CMakeFiles/CMakeScratch/TryCompile-cccxa1/Debug/cmTC_b7759.lib" /MACHINE:X64  /machine:x64 cmTC_b7759.dir\\Debug\\CMakeCXXCompilerABI.obj
+          cmTC_b7759.vcxproj -> C:\\code\\s1\\azure-iot-sdk-c-pr2720-clean\\build_validation\\CMakeFiles\\CMakeScratch\\TryCompile-cccxa1\\Debug\\cmTC_b7759.exe
+        FinalizeBuildStatus:
+          Deleting file "cmTC_b7759.dir\\Debug\\cmTC_b7759.tlog\\unsuccessfulbuild".
+          Touching "cmTC_b7759.dir\\Debug\\cmTC_b7759.tlog\\cmTC_b7759.lastbuildstate".
+        Done Building Project "C:\\code\\s1\\azure-iot-sdk-c-pr2720-clean\\build_validation\\CMakeFiles\\CMakeScratch\\TryCompile-cccxa1\\cmTC_b7759.vcxproj" (default targets).
+        
+        Build succeeded.
+            0 Warning(s)
+            0 Error(s)
+        
+        Time Elapsed 00:00:00.65
+        
+      exitCode: 0
+  -
+    kind: "message-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineCompilerABI.cmake:227 (message)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeTestCXXCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:5 (project)"
+    message: |
+      Parsed CXX implicit link information:
+        link line regex: [^( *|.*[/\\])(ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)|link\\.exe|lld-link(\\.exe)?|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\\]+-)?ld|collect2)[^/\\]*( |$)]
+        linker tool regex: [^[ 	]*(->|")?[ 	]*(([^"]*[/\\])?(ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)|link\\.exe|lld-link(\\.exe)?))("|,| |$)]
+        linker tool for 'CXX': C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/HostX64/x64/link.exe
+        implicit libs: []
+        implicit objs: []
+        implicit dirs: []
+        implicit fwks: []
+      
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/Internal/CMakeDetermineLinkerId.cmake:36 (message)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineCompilerABI.cmake:270 (cmake_determine_linker_id)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeTestCXXCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:5 (project)"
+    message: |
+      Running the CXX compiler's linker: "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/HostX64/x64/link.exe" "-v"
+      Microsoft (R) Incremental Linker Version 14.44.35227.0
+      Copyright (C) Microsoft Corporation.  All rights reserved.
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CheckSymbolExists.cmake:160 (try_compile)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CheckSymbolExists.cmake:65 (__CHECK_SYMBOL_EXISTS_IMPL)"
+      - "deps/c-build-tools/build_functions/CMakeLists.txt:15 (check_symbol_exists)"
+      - "deps/c-build-tools/build_functions/CMakeLists.txt:29 (detect_architecture)"
+    directories:
+      source: "C:/code/s1/azure-iot-sdk-c-pr2720-clean/build_validation/CMakeFiles/CMakeScratch/TryCompile-659k1r"
+      binary: "C:/code/s1/azure-iot-sdk-c-pr2720-clean/build_validation/CMakeFiles/CMakeScratch/TryCompile-659k1r"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "/DWIN32 /D_WINDOWS /W3 /W4 /wd4232 -DUSE_PROV_MODULE_FULL"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+    buildResult:
+      variable: "ARCHITECTURE_x86_64"
+      cached: true
+      stdout: |
+        Change Dir: 'C:/code/s1/azure-iot-sdk-c-pr2720-clean/build_validation/CMakeFiles/CMakeScratch/TryCompile-659k1r'
+        
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_665c2.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        MSBuild version 17.14.40+3e7442088 for .NET Framework
+        Build started 5/13/2026 11:28:01 AM.
+        
+        Project "C:\\code\\s1\\azure-iot-sdk-c-pr2720-clean\\build_validation\\CMakeFiles\\CMakeScratch\\TryCompile-659k1r\\cmTC_665c2.vcxproj" on node 1 (default targets).
+        PrepareForBuild:
+          Creating directory "cmTC_665c2.dir\\Debug\\".
+          Structured output is enabled. The formatting of compiler diagnostics will reflect the error hierarchy. See https://aka.ms/cpp/structured-output for more details.
+          Creating directory "C:\\code\\s1\\azure-iot-sdk-c-pr2720-clean\\build_validation\\CMakeFiles\\CMakeScratch\\TryCompile-659k1r\\Debug\\".
+          Creating directory "cmTC_665c2.dir\\Debug\\cmTC_665c2.tlog\\".
+        InitializeBuildStatus:
+          Creating "cmTC_665c2.dir\\Debug\\cmTC_665c2.tlog\\unsuccessfulbuild" because "AlwaysCreate" was specified.
+          Touching "cmTC_665c2.dir\\Debug\\cmTC_665c2.tlog\\unsuccessfulbuild".
+        ClCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\CL.exe /c /Zi /W4 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D USE_PROV_MODULE_FULL /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_665c2.dir\\Debug\\\\" /Fd"cmTC_665c2.dir\\Debug\\vc143.pdb" /external:W4 /Gd /TC /wd4232 /errorReport:queue "C:\\code\\s1\\azure-iot-sdk-c-pr2720-clean\\build_validation\\CMakeFiles\\CMakeScratch\\TryCompile-659k1r\\CheckSymbolExists.c"
+          Microsoft (R) C/C++ Optimizing Compiler Version 19.44.35227 for x64
+          Copyright (C) Microsoft Corporation.  All rights reserved.
+          cl /c /Zi /W4 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D USE_PROV_MODULE_FULL /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_665c2.dir\\Debug\\\\" /Fd"cmTC_665c2.dir\\Debug\\vc143.pdb" /external:W4 /Gd /TC /wd4232 /errorReport:queue "C:\\code\\s1\\azure-iot-sdk-c-pr2720-clean\\build_validation\\CMakeFiles\\CMakeScratch\\TryCompile-659k1r\\CheckSymbolExists.c"
+          CheckSymbolExists.c
+        Link:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"C:\\code\\s1\\azure-iot-sdk-c-pr2720-clean\\build_validation\\CMakeFiles\\CMakeScratch\\TryCompile-659k1r\\Debug\\cmTC_665c2.exe" /INCREMENTAL /ILK:"cmTC_665c2.dir\\Debug\\cmTC_665c2.ilk" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/code/s1/azure-iot-sdk-c-pr2720-clean/build_validation/CMakeFiles/CMakeScratch/TryCompile-659k1r/Debug/cmTC_665c2.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/code/s1/azure-iot-sdk-c-pr2720-clean/build_validation/CMakeFiles/CMakeScratch/TryCompile-659k1r/Debug/cmTC_665c2.lib" /MACHINE:X64  /machine:x64 cmTC_665c2.dir\\Debug\\CheckSymbolExists.obj
+          cmTC_665c2.vcxproj -> C:\\code\\s1\\azure-iot-sdk-c-pr2720-clean\\build_validation\\CMakeFiles\\CMakeScratch\\TryCompile-659k1r\\Debug\\cmTC_665c2.exe
+        FinalizeBuildStatus:
+          Deleting file "cmTC_665c2.dir\\Debug\\cmTC_665c2.tlog\\unsuccessfulbuild".
+          Touching "cmTC_665c2.dir\\Debug\\cmTC_665c2.tlog\\cmTC_665c2.lastbuildstate".
+        Done Building Project "C:\\code\\s1\\azure-iot-sdk-c-pr2720-clean\\build_validation\\CMakeFiles\\CMakeScratch\\TryCompile-659k1r\\cmTC_665c2.vcxproj" (default targets).
+        
+        Build succeeded.
+            0 Warning(s)
+            0 Error(s)
+        
+        Time Elapsed 00:00:00.60
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CheckIncludeFiles.cmake:141 (try_compile)"
+      - "deps/c-build-tools/CMakeLists.txt:68 (CHECK_INCLUDE_FILES)"
+    checks:
+      - "Looking for include file stdint.h"
+    directories:
+      source: "C:/code/s1/azure-iot-sdk-c-pr2720-clean/build_validation/CMakeFiles/CMakeScratch/TryCompile-61i68t"
+      binary: "C:/code/s1/azure-iot-sdk-c-pr2720-clean/build_validation/CMakeFiles/CMakeScratch/TryCompile-61i68t"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "/DWIN32 /D_WINDOWS /W3 /W4 /wd4232 -DUSE_PROV_MODULE_FULL"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+    buildResult:
+      variable: "HAVE_STDINT_H"
+      cached: true
+      stdout: |
+        Change Dir: 'C:/code/s1/azure-iot-sdk-c-pr2720-clean/build_validation/CMakeFiles/CMakeScratch/TryCompile-61i68t'
+        
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_5183c.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        MSBuild version 17.14.40+3e7442088 for .NET Framework
+        Build started 5/13/2026 11:28:02 AM.
+        
+        Project "C:\\code\\s1\\azure-iot-sdk-c-pr2720-clean\\build_validation\\CMakeFiles\\CMakeScratch\\TryCompile-61i68t\\cmTC_5183c.vcxproj" on node 1 (default targets).
+        PrepareForBuild:
+          Creating directory "cmTC_5183c.dir\\Debug\\".
+          Structured output is enabled. The formatting of compiler diagnostics will reflect the error hierarchy. See https://aka.ms/cpp/structured-output for more details.
+          Creating directory "C:\\code\\s1\\azure-iot-sdk-c-pr2720-clean\\build_validation\\CMakeFiles\\CMakeScratch\\TryCompile-61i68t\\Debug\\".
+          Creating directory "cmTC_5183c.dir\\Debug\\cmTC_5183c.tlog\\".
+        InitializeBuildStatus:
+          Creating "cmTC_5183c.dir\\Debug\\cmTC_5183c.tlog\\unsuccessfulbuild" because "AlwaysCreate" was specified.
+          Touching "cmTC_5183c.dir\\Debug\\cmTC_5183c.tlog\\unsuccessfulbuild".
+        ClCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\CL.exe /c /Zi /W4 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D USE_PROV_MODULE_FULL /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_5183c.dir\\Debug\\\\" /Fd"cmTC_5183c.dir\\Debug\\vc143.pdb" /external:W4 /Gd /TC /wd4232 /errorReport:queue "C:\\code\\s1\\azure-iot-sdk-c-pr2720-clean\\build_validation\\CMakeFiles\\CMakeScratch\\TryCompile-61i68t\\HAVE_STDINT_H.c"
+          Microsoft (R) C/C++ Optimizing Compiler Version 19.44.35227 for x64
+          Copyright (C) Microsoft Corporation.  All rights reserved.
+          cl /c /Zi /W4 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D USE_PROV_MODULE_FULL /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_5183c.dir\\Debug\\\\" /Fd"cmTC_5183c.dir\\Debug\\vc143.pdb" /external:W4 /Gd /TC /wd4232 /errorReport:queue "C:\\code\\s1\\azure-iot-sdk-c-pr2720-clean\\build_validation\\CMakeFiles\\CMakeScratch\\TryCompile-61i68t\\HAVE_STDINT_H.c"
+          HAVE_STDINT_H.c
+        Link:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"C:\\code\\s1\\azure-iot-sdk-c-pr2720-clean\\build_validation\\CMakeFiles\\CMakeScratch\\TryCompile-61i68t\\Debug\\cmTC_5183c.exe" /INCREMENTAL /ILK:"cmTC_5183c.dir\\Debug\\cmTC_5183c.ilk" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/code/s1/azure-iot-sdk-c-pr2720-clean/build_validation/CMakeFiles/CMakeScratch/TryCompile-61i68t/Debug/cmTC_5183c.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/code/s1/azure-iot-sdk-c-pr2720-clean/build_validation/CMakeFiles/CMakeScratch/TryCompile-61i68t/Debug/cmTC_5183c.lib" /MACHINE:X64  /machine:x64 cmTC_5183c.dir\\Debug\\HAVE_STDINT_H.obj
+          cmTC_5183c.vcxproj -> C:\\code\\s1\\azure-iot-sdk-c-pr2720-clean\\build_validation\\CMakeFiles\\CMakeScratch\\TryCompile-61i68t\\Debug\\cmTC_5183c.exe
+        FinalizeBuildStatus:
+          Deleting file "cmTC_5183c.dir\\Debug\\cmTC_5183c.tlog\\unsuccessfulbuild".
+          Touching "cmTC_5183c.dir\\Debug\\cmTC_5183c.tlog\\cmTC_5183c.lastbuildstate".
+        Done Building Project "C:\\code\\s1\\azure-iot-sdk-c-pr2720-clean\\build_validation\\CMakeFiles\\CMakeScratch\\TryCompile-61i68t\\cmTC_5183c.vcxproj" (default targets).
+        
+        Build succeeded.
+            0 Warning(s)
+            0 Error(s)
+        
+        Time Elapsed 00:00:00.60
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CheckIncludeFiles.cmake:141 (try_compile)"
+      - "deps/c-build-tools/CMakeLists.txt:69 (CHECK_INCLUDE_FILES)"
+    checks:
+      - "Looking for include file stdbool.h"
+    directories:
+      source: "C:/code/s1/azure-iot-sdk-c-pr2720-clean/build_validation/CMakeFiles/CMakeScratch/TryCompile-7agnl3"
+      binary: "C:/code/s1/azure-iot-sdk-c-pr2720-clean/build_validation/CMakeFiles/CMakeScratch/TryCompile-7agnl3"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "/DWIN32 /D_WINDOWS /W3 /W4 /wd4232 -DUSE_PROV_MODULE_FULL"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+    buildResult:
+      variable: "HAVE_STDBOOL_H"
+      cached: true
+      stdout: |
+        Change Dir: 'C:/code/s1/azure-iot-sdk-c-pr2720-clean/build_validation/CMakeFiles/CMakeScratch/TryCompile-7agnl3'
+        
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_80c56.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        MSBuild version 17.14.40+3e7442088 for .NET Framework
+        Build started 5/13/2026 11:28:03 AM.
+        
+        Project "C:\\code\\s1\\azure-iot-sdk-c-pr2720-clean\\build_validation\\CMakeFiles\\CMakeScratch\\TryCompile-7agnl3\\cmTC_80c56.vcxproj" on node 1 (default targets).
+        PrepareForBuild:
+          Creating directory "cmTC_80c56.dir\\Debug\\".
+          Structured output is enabled. The formatting of compiler diagnostics will reflect the error hierarchy. See https://aka.ms/cpp/structured-output for more details.
+          Creating directory "C:\\code\\s1\\azure-iot-sdk-c-pr2720-clean\\build_validation\\CMakeFiles\\CMakeScratch\\TryCompile-7agnl3\\Debug\\".
+          Creating directory "cmTC_80c56.dir\\Debug\\cmTC_80c56.tlog\\".
+        InitializeBuildStatus:
+          Creating "cmTC_80c56.dir\\Debug\\cmTC_80c56.tlog\\unsuccessfulbuild" because "AlwaysCreate" was specified.
+          Touching "cmTC_80c56.dir\\Debug\\cmTC_80c56.tlog\\unsuccessfulbuild".
+        ClCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\CL.exe /c /Zi /W4 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D USE_PROV_MODULE_FULL /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_80c56.dir\\Debug\\\\" /Fd"cmTC_80c56.dir\\Debug\\vc143.pdb" /external:W4 /Gd /TC /wd4232 /errorReport:queue "C:\\code\\s1\\azure-iot-sdk-c-pr2720-clean\\build_validation\\CMakeFiles\\CMakeScratch\\TryCompile-7agnl3\\HAVE_STDBOOL_H.c"
+          Microsoft (R) C/C++ Optimizing Compiler Version 19.44.35227 for x64
+          Copyright (C) Microsoft Corporation.  All rights reserved.
+          cl /c /Zi /W4 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D USE_PROV_MODULE_FULL /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_80c56.dir\\Debug\\\\" /Fd"cmTC_80c56.dir\\Debug\\vc143.pdb" /external:W4 /Gd /TC /wd4232 /errorReport:queue "C:\\code\\s1\\azure-iot-sdk-c-pr2720-clean\\build_validation\\CMakeFiles\\CMakeScratch\\TryCompile-7agnl3\\HAVE_STDBOOL_H.c"
+          HAVE_STDBOOL_H.c
+        Link:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"C:\\code\\s1\\azure-iot-sdk-c-pr2720-clean\\build_validation\\CMakeFiles\\CMakeScratch\\TryCompile-7agnl3\\Debug\\cmTC_80c56.exe" /INCREMENTAL /ILK:"cmTC_80c56.dir\\Debug\\cmTC_80c56.ilk" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/code/s1/azure-iot-sdk-c-pr2720-clean/build_validation/CMakeFiles/CMakeScratch/TryCompile-7agnl3/Debug/cmTC_80c56.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/code/s1/azure-iot-sdk-c-pr2720-clean/build_validation/CMakeFiles/CMakeScratch/TryCompile-7agnl3/Debug/cmTC_80c56.lib" /MACHINE:X64  /machine:x64 cmTC_80c56.dir\\Debug\\HAVE_STDBOOL_H.obj
+          cmTC_80c56.vcxproj -> C:\\code\\s1\\azure-iot-sdk-c-pr2720-clean\\build_validation\\CMakeFiles\\CMakeScratch\\TryCompile-7agnl3\\Debug\\cmTC_80c56.exe
+        FinalizeBuildStatus:
+          Deleting file "cmTC_80c56.dir\\Debug\\cmTC_80c56.tlog\\unsuccessfulbuild".
+          Touching "cmTC_80c56.dir\\Debug\\cmTC_80c56.tlog\\cmTC_80c56.lastbuildstate".
+        Done Building Project "C:\\code\\s1\\azure-iot-sdk-c-pr2720-clean\\build_validation\\CMakeFiles\\CMakeScratch\\TryCompile-7agnl3\\cmTC_80c56.vcxproj" (default targets).
+        
+        Build succeeded.
+            0 Warning(s)
+            0 Error(s)
+        
+        Time Elapsed 00:00:00.60
+        
+      exitCode: 0
+  -
+    kind: "message-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineCompilerId.cmake:17 (message)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineCSharpCompiler.cmake:23 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "deps/c-build-tools/traceabilitytool/CMakeLists.txt:3 (enable_language)"
+    message: |
+      Compiling the CSharp compiler identification source file "CMakeCSharpCompilerId.cs" succeeded.
+      Compiler:  
+      Build flags: 
+      Id flags:  
+      
+      The output was:
+      0
+      MSBuild version 17.14.40+3e7442088 for .NET Framework
+      Build started 5/13/2026 11:28:03 AM.
+      
+      Project "C:\\code\\s1\\azure-iot-sdk-c-pr2720-clean\\build_validation\\CMakeFiles\\4.0.3\\CompilerIdCSharp\\CompilerIdCSharp.csproj" on node 1 (default targets).
+      PrepareForBuild:
+        Creating directory "obj\\x64\\Debug\\".
+      CoreCompile:
+        C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\MSBuild\\Current\\Bin\\Roslyn\\csc.exe /noconfig /nowarn:1701,1702 /fullpaths /nostdlib+ /platform:anycpu32bitpreferred /define:Platformx64;PlatformToolsetv143 /highentropyva+ /reference:"C:\\Program Files (x86)\\Reference Assemblies\\Microsoft\\Framework\\.NETFramework\\v4.7.2\\mscorlib.dll" /reference:"C:\\Program Files (x86)\\Reference Assemblies\\Microsoft\\Framework\\.NETFramework\\v4.7.2\\System.Core.dll" /debug+ /out:obj\\x64\\Debug\\CompilerIdCSharp.exe /subsystemversion:6.00 /target:exe /utf8output /langversion:7.3 CMakeCSharpCompilerId.cs "obj\\x64\\Debug\\.NETFramework,Version=v4.7.2.AssemblyAttributes.cs"
+        CompilerServer: server - server processed compilation - CompilerIdCSharp
+      CopyFilesToOutputDirectory:
+        Copying file from "C:\\code\\s1\\azure-iot-sdk-c-pr2720-clean\\build_validation\\CMakeFiles\\4.0.3\\CompilerIdCSharp\\obj\\x64\\Debug\\CompilerIdCSharp.exe" to "C:\\code\\s1\\azure-iot-sdk-c-pr2720-clean\\build_validation\\CMakeFiles\\4.0.3\\CompilerIdCSharp\\CompilerIdCSharp.exe".
+        CompilerIdCSharp -> C:\\code\\s1\\azure-iot-sdk-c-pr2720-clean\\build_validation\\CMakeFiles\\4.0.3\\CompilerIdCSharp\\CompilerIdCSharp.exe
+        Copying file from "C:\\code\\s1\\azure-iot-sdk-c-pr2720-clean\\build_validation\\CMakeFiles\\4.0.3\\CompilerIdCSharp\\obj\\x64\\Debug\\CompilerIdCSharp.pdb" to "C:\\code\\s1\\azure-iot-sdk-c-pr2720-clean\\build_validation\\CMakeFiles\\4.0.3\\CompilerIdCSharp\\CompilerIdCSharp.pdb".
+      PostBuildEvent:
+        if not "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\MSBuild\\Current\\Bin\\Roslyn"=="" if exist "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\MSBuild\\Current\\Bin\\Roslyn\\csc.exe" set _CSC=C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\MSBuild\\Current\\Bin\\Roslyn
+        if exist "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\MSBuild\\Current\\Bin\\amd64\\csc.exe" set _CSC=C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\MSBuild\\Current\\Bin\\amd64
+        if "%_CSC%"=="" exit -1
+        @echo CMAKE_CSharp_COMPILER=%_CSC%\\csc.exe
+        CMAKE_CSharp_COMPILER=C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\MSBuild\\Current\\Bin\\Roslyn\\csc.exe
+      Done Building Project "C:\\code\\s1\\azure-iot-sdk-c-pr2720-clean\\build_validation\\CMakeFiles\\4.0.3\\CompilerIdCSharp\\CompilerIdCSharp.csproj" (default targets).
+      
+      Build succeeded.
+          0 Warning(s)
+          0 Error(s)
+      
+      Time Elapsed 00:00:00.62
+      
+      
+      Compilation of the CSharp compiler identification source "CMakeCSharpCompilerId.cs" produced "CompilerIdCSharp.csproj"
+      
+      Compilation of the CSharp compiler identification source "CMakeCSharpCompilerId.cs" produced "CompilerIdCSharp.exe"
+      
+      Compilation of the CSharp compiler identification source "CMakeCSharpCompilerId.cs" produced "CompilerIdCSharp.pdb"
+      
+      The CSharp compiler identification could not be found in:
+        C:/code/s1/azure-iot-sdk-c-pr2720-clean/build_validation/CMakeFiles/4.0.3/CompilerIdCSharp/CompilerIdCSharp.csproj
+      
+      The CSharp compiler identification is Microsoft Visual Studio, found in:
+        C:/code/s1/azure-iot-sdk-c-pr2720-clean/build_validation/CMakeFiles/4.0.3/CompilerIdCSharp/CompilerIdCSharp.exe
+      
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeTestCSharpCompiler.cmake:34 (try_compile)"
+      - "deps/c-build-tools/traceabilitytool/CMakeLists.txt:3 (enable_language)"
+    checks:
+      - "Check for working C# compiler: C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/Roslyn/csc.exe"
+    directories:
+      source: "C:/code/s1/azure-iot-sdk-c-pr2720-clean/build_validation/CMakeFiles/CMakeScratch/TryCompile-ovo36c"
+      binary: "C:/code/s1/azure-iot-sdk-c-pr2720-clean/build_validation/CMakeFiles/CMakeScratch/TryCompile-ovo36c"
+    cmakeVariables:
+      CMAKE_CSharp_FLAGS: "/platform:x64 /define:TRACE"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64 /MANIFEST:EMBED /MANIFESTINPUT:C:/code/s1/azure-iot-sdk-c-pr2720-clean/deps/c-build-tools/build_functions/manifest.xml /IGNORE:4075 /WX /CETCOMPAT  /LTCG  /GUARD:CF"
+    buildResult:
+      variable: "CMAKE_CSharp_COMPILER_WORKS"
+      cached: true
+      stdout: |
+        Change Dir: 'C:/code/s1/azure-iot-sdk-c-pr2720-clean/build_validation/CMakeFiles/CMakeScratch/TryCompile-ovo36c'
+        
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_9acdf.csproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        MSBuild version 17.14.40+3e7442088 for .NET Framework
+        Build started 5/13/2026 11:28:04 AM.
+        
+        Project "C:\\code\\s1\\azure-iot-sdk-c-pr2720-clean\\build_validation\\CMakeFiles\\CMakeScratch\\TryCompile-ovo36c\\cmTC_9acdf.csproj" on node 1 (default targets).
+        PrepareForBuild:
+          Creating directory "C:\\code\\s1\\azure-iot-sdk-c-pr2720-clean\\build_validation\\CMakeFiles\\CMakeScratch\\TryCompile-ovo36c\\Debug\\".
+          Creating directory "obj\\x64\\Debug\\".
+        CoreCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\MSBuild\\Current\\Bin\\Roslyn\\csc.exe /noconfig /nowarn:1701,1702 /fullpaths /nostdlib+ /platform:x64 /errorreport:prompt /warn:3 /define:TRACE;DEBUG /highentropyva+ /reference:"C:\\Program Files (x86)\\Reference Assemblies\\Microsoft\\Framework\\.NETFramework\\v4.7.2\\mscorlib.dll" /reference:"C:\\Program Files (x86)\\Reference Assemblies\\Microsoft\\Framework\\.NETFramework\\v4.7.2\\System.Core.dll" /debug+ /debug:full /optimize- /out:obj\\x64\\Debug\\cmTC_9acdf.exe /subsystemversion:6.00 /target:exe /utf8output /langversion:7.3 C:\\code\\s1\\azure-iot-sdk-c-pr2720-clean\\build_validation\\CMakeFiles\\CMakeScratch\\TryCompile-ovo36c\\testCSharpCompiler.cs "obj\\x64\\Debug\\.NETFramework,Version=v4.7.2.AssemblyAttributes.cs"
+          CompilerServer: server - server processed compilation - cmTC_9acdf
+        CopyFilesToOutputDirectory:
+          Copying file from "C:\\code\\s1\\azure-iot-sdk-c-pr2720-clean\\build_validation\\CMakeFiles\\CMakeScratch\\TryCompile-ovo36c\\obj\\x64\\Debug\\cmTC_9acdf.exe" to "C:\\code\\s1\\azure-iot-sdk-c-pr2720-clean\\build_validation\\CMakeFiles\\CMakeScratch\\TryCompile-ovo36c\\Debug\\cmTC_9acdf.exe".
+          cmTC_9acdf -> C:\\code\\s1\\azure-iot-sdk-c-pr2720-clean\\build_validation\\CMakeFiles\\CMakeScratch\\TryCompile-ovo36c\\Debug\\cmTC_9acdf.exe
+          Copying file from "C:\\code\\s1\\azure-iot-sdk-c-pr2720-clean\\build_validation\\CMakeFiles\\CMakeScratch\\TryCompile-ovo36c\\obj\\x64\\Debug\\cmTC_9acdf.pdb" to "C:\\code\\s1\\azure-iot-sdk-c-pr2720-clean\\build_validation\\CMakeFiles\\CMakeScratch\\TryCompile-ovo36c\\Debug\\cmTC_9acdf.pdb".
+        Done Building Project "C:\\code\\s1\\azure-iot-sdk-c-pr2720-clean\\build_validation\\CMakeFiles\\CMakeScratch\\TryCompile-ovo36c\\cmTC_9acdf.csproj" (default targets).
+        
+        Build succeeded.
+            0 Warning(s)
+            0 Error(s)
+        
+        Time Elapsed 00:00:00.29
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/Internal/CheckSourceCompiles.cmake:104 (try_compile)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/Internal/CheckCompilerFlag.cmake:18 (cmake_check_source_compiles)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CheckCXXCompilerFlag.cmake:55 (cmake_check_compiler_flag)"
+      - "c-utility/configs/azure_iot_build_rules.cmake:124 (CHECK_CXX_COMPILER_FLAG)"
+      - "c-utility/CMakeLists.txt:70 (include)"
+    checks:
+      - "Performing Test CXX_FLAG_CXX11"
+    directories:
+      source: "C:/code/s1/azure-iot-sdk-c-pr2720-clean/build_validation/CMakeFiles/CMakeScratch/TryCompile-ruqibm"
+      binary: "C:/code/s1/azure-iot-sdk-c-pr2720-clean/build_validation/CMakeFiles/CMakeScratch/TryCompile-ruqibm"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: "/DWIN32 /D_WINDOWS /W4 /GR /EHsc /W4 /wd4232 -DUSE_PROV_MODULE_FULL /Zc:preprocessor /wd5105 /W4 /WX /wd4200 /bigobj /sdl  /GL  /guard:cf /W4"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64 /MANIFEST:EMBED /MANIFESTINPUT:C:/code/s1/azure-iot-sdk-c-pr2720-clean/deps/c-build-tools/build_functions/manifest.xml /IGNORE:4075 /WX /CETCOMPAT  /LTCG  /GUARD:CF"
+      CMAKE_POSITION_INDEPENDENT_CODE: "TRUE"
+    buildResult:
+      variable: "CXX_FLAG_CXX11"
+      cached: true
+      stdout: |
+        Change Dir: 'C:/code/s1/azure-iot-sdk-c-pr2720-clean/build_validation/CMakeFiles/CMakeScratch/TryCompile-ruqibm'
+        
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_562d8.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        MSBuild version 17.14.40+3e7442088 for .NET Framework
+        Build started 5/13/2026 11:28:05 AM.
+        
+        Project "C:\\code\\s1\\azure-iot-sdk-c-pr2720-clean\\build_validation\\CMakeFiles\\CMakeScratch\\TryCompile-ruqibm\\cmTC_562d8.vcxproj" on node 1 (default targets).
+        PrepareForBuild:
+          Creating directory "cmTC_562d8.dir\\Debug\\".
+          Structured output is enabled. The formatting of compiler diagnostics will reflect the error hierarchy. See https://aka.ms/cpp/structured-output for more details.
+          Creating directory "C:\\code\\s1\\azure-iot-sdk-c-pr2720-clean\\build_validation\\CMakeFiles\\CMakeScratch\\TryCompile-ruqibm\\Debug\\".
+          Creating directory "cmTC_562d8.dir\\Debug\\cmTC_562d8.tlog\\".
+        InitializeBuildStatus:
+          Creating "cmTC_562d8.dir\\Debug\\cmTC_562d8.tlog\\unsuccessfulbuild" because "AlwaysCreate" was specified.
+          Touching "cmTC_562d8.dir\\Debug\\cmTC_562d8.tlog\\unsuccessfulbuild".
+        ClCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\CL.exe /c /Zi /W4 /WX /diagnostics:column /sdl /Od /Ob0 /GL /D _MBCS /D WIN32 /D _WINDOWS /D USE_PROV_MODULE_FULL /D CXX_FLAG_CXX11 /D "CMAKE_INTDIR=\\"Debug\\"" /Zc:preprocessor /EHsc /RTC1 /MDd /GS /guard:cf /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /Fo"cmTC_562d8.dir\\Debug\\\\" /Fd"cmTC_562d8.dir\\Debug\\vc143.pdb" /external:W4 /Gd /TP /wd4232 /wd5105 /wd4200 /errorReport:queue  /bigobj -std=c++11 "C:\\code\\s1\\azure-iot-sdk-c-pr2720-clean\\build_validation\\CMakeFiles\\CMakeScratch\\TryCompile-ruqibm\\src.cxx"
+          Microsoft (R) C/C++ Optimizing Compiler Version 19.44.35227 for x64
+          Copyright (C) Microsoft Corporation.  All rights reserved.
+          cl /c /Zi /W4 /WX /diagnostics:column /sdl /Od /Ob0 /GL /D _MBCS /D WIN32 /D _WINDOWS /D USE_PROV_MODULE_FULL /D CXX_FLAG_CXX11 /D "CMAKE_INTDIR=\\"Debug\\"" /Zc:preprocessor /EHsc /RTC1 /MDd /GS /guard:cf /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /Fo"cmTC_562d8.dir\\Debug\\\\" /Fd"cmTC_562d8.dir\\Debug\\vc143.pdb" /external:W4 /Gd /TP /wd4232 /wd5105 /wd4200 /errorReport:queue  /bigobj -std=c++11 "C:\\code\\s1\\azure-iot-sdk-c-pr2720-clean\\build_validation\\CMakeFiles\\CMakeScratch\\TryCompile-ruqibm\\src.cxx"
+        cl : command line  warning D9002: ignoring unknown option '-std=c++11' [C:\\code\\s1\\azure-iot-sdk-c-pr2720-clean\\build_validation\\CMakeFiles\\CMakeScratch\\TryCompile-ruqibm\\cmTC_562d8.vcxproj]
+          src.cxx
+        Link:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"C:\\code\\s1\\azure-iot-sdk-c-pr2720-clean\\build_validation\\CMakeFiles\\CMakeScratch\\TryCompile-ruqibm\\Debug\\cmTC_562d8.exe" /INCREMENTAL /ILK:"cmTC_562d8.dir\\Debug\\cmTC_562d8.ilk" /NOLOGO /WX kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/code/s1/azure-iot-sdk-c-pr2720-clean/build_validation/CMakeFiles/CMakeScratch/TryCompile-ruqibm/Debug/cmTC_562d8.pdb" /SUBSYSTEM:CONSOLE /LTCG /LTCGOUT:"cmTC_562d8.dir\\Debug\\cmTC_562d8.iobj" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/code/s1/azure-iot-sdk-c-pr2720-clean/build_validation/CMakeFiles/CMakeScratch/TryCompile-ruqibm/Debug/cmTC_562d8.lib" /MACHINE:X64 /CETCOMPAT /guard:cf  /machine:x64 /MANIFEST:EMBED /MANIFESTINPUT:C:/code/s1/azure-iot-sdk-c-pr2720-clean/deps/c-build-tools/build_functions/manifest.xml /IGNORE:4075 /GUARD:CF cmTC_562d8.dir\\Debug\\src.obj
+          Generating code
+          Finished generating code
+          cmTC_562d8.vcxproj -> C:\\code\\s1\\azure-iot-sdk-c-pr2720-clean\\build_validation\\CMakeFiles\\CMakeScratch\\TryCompile-ruqibm\\Debug\\cmTC_562d8.exe
+        FinalizeBuildStatus:
+          Deleting file "cmTC_562d8.dir\\Debug\\cmTC_562d8.tlog\\unsuccessfulbuild".
+          Touching "cmTC_562d8.dir\\Debug\\cmTC_562d8.tlog\\cmTC_562d8.lastbuildstate".
+        Done Building Project "C:\\code\\s1\\azure-iot-sdk-c-pr2720-clean\\build_validation\\CMakeFiles\\CMakeScratch\\TryCompile-ruqibm\\cmTC_562d8.vcxproj" (default targets).
+        
+        Build succeeded.
+        
+        "C:\\code\\s1\\azure-iot-sdk-c-pr2720-clean\\build_validation\\CMakeFiles\\CMakeScratch\\TryCompile-ruqibm\\cmTC_562d8.vcxproj" (default target) (1) ->
+        (ClCompile target) -> 
+          cl : command line  warning D9002: ignoring unknown option '-std=c++11' [C:\\code\\s1\\azure-iot-sdk-c-pr2720-clean\\build_validation\\CMakeFiles\\CMakeScratch\\TryCompile-ruqibm\\cmTC_562d8.vcxproj]
+        
+            1 Warning(s)
+            0 Error(s)
+        
+        Time Elapsed 00:00:00.72
+        
+      exitCode: 0
+...

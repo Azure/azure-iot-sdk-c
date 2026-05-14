@@ -354,9 +354,18 @@ BEGIN_TEST_SUITE(hsm_client_tpm_ut)
         TPMI_DH_PERSISTENT tmp_dh_per = { 0 };
 
         STRICT_EXPECTED_CALL(TSS_StartAuthSession(IGNORED_ARG, tmp_se, IGNORED_ARG, tmp_session, IGNORED_ARG))
+            .IgnoreArgument_tpm()
+            .IgnoreArgument_sessionType()
+            .IgnoreArgument_authHash()
             .IgnoreArgument_sessAttrs()
-            .IgnoreArgument_sessionType();
-        STRICT_EXPECTED_CALL(TSS_PolicySecret(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG)); // 4
+            .IgnoreArgument_session();
+        STRICT_EXPECTED_CALL(TSS_PolicySecret(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
+            .IgnoreArgument_tpm()
+            .IgnoreArgument_session()
+            .IgnoreArgument_authHandle()
+            .IgnoreArgument_policySession()
+            .IgnoreArgument_nonceTPM()
+            .IgnoreArgument_expiration();
 
         STRICT_EXPECTED_CALL(TPM2B_ID_OBJECT_Unmarshal(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));     // 2
         STRICT_EXPECTED_CALL(TPM2B_ENCRYPTED_SECRET_Unmarshal(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
@@ -365,24 +374,58 @@ BEGIN_TEST_SUITE(hsm_client_tpm_ut)
         STRICT_EXPECTED_CALL(TPM2B_PUBLIC_Unmarshal(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, TRUE));
         STRICT_EXPECTED_CALL(UINT16_Unmarshal(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));       // 7
 
-        STRICT_EXPECTED_CALL(TPM2_ActivateCredential(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(TPM2_ActivateCredential(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
+            .IgnoreArgument_tpm()
+            .IgnoreArgument_activateSess()
+            .IgnoreArgument_keySess()
+            .IgnoreArgument_activateHandle()
+            .IgnoreArgument_keyHandle()
+            .IgnoreArgument_credentialBlob()
+            .IgnoreArgument_secret()
+            .IgnoreArgument_certInfo();
         STRICT_EXPECTED_CALL(TPM2_Import(IGNORED_ARG, IGNORED_ARG, tmp_dh, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
-            .IgnoreArgument_parentHandle();
+            .IgnoreArgument_tpm()
+            .IgnoreArgument_session()
+            .IgnoreArgument_parentHandle()
+            .IgnoreArgument_encryptionKey()
+            .IgnoreArgument_objectPublic()
+            .IgnoreArgument_duplicate()
+            .IgnoreArgument_inSymSeed()
+            .IgnoreArgument_symmetricAlg()
+            .IgnoreArgument_outPrivate();
 
-        STRICT_EXPECTED_CALL(ToTpmaObject(tmp)).IgnoreArgument_attrs(); // 10
-        STRICT_EXPECTED_CALL(TSS_Create(IGNORED_ARG, IGNORED_ARG, tmp_dh, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(ToTpmaObject(tmp)).IgnoreArgument_attrs();
+        STRICT_EXPECTED_CALL(TSS_Create(IGNORED_ARG, IGNORED_ARG, tmp_dh, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
+            .IgnoreArgument_tpm()
+            .IgnoreArgument_sess()
+            .IgnoreArgument_parent()
+            .IgnoreArgument_sensCreate()
+            .IgnoreArgument_inPub()
+            .IgnoreArgument_outPriv()
+            .IgnoreArgument_outPub();
 
         STRICT_EXPECTED_CALL(TPM2_Load(IGNORED_ARG, IGNORED_ARG, tmp_dh, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
-            .IgnoreArgument_parentHandle();     // 12
+            .IgnoreArgument_tpm()
+            .IgnoreArgument_session()
+            .IgnoreArgument_parentHandle()
+            .IgnoreArgument_inPrivate()
+            .IgnoreArgument_inPublic()
+            .IgnoreArgument_objectHandle()
+            .IgnoreArgument_name();
         STRICT_EXPECTED_CALL(TPM2_EvictControl(IGNORED_ARG, IGNORED_ARG, tmp_prov, tmp_dh, tmp_dh_per))
+            .IgnoreArgument_tpm()
+            .IgnoreArgument_session()
             .IgnoreArgument_auth()
             .IgnoreArgument_objectHandle()
             .IgnoreArgument_persistentHandle();
         STRICT_EXPECTED_CALL(TPM2_EvictControl(IGNORED_ARG, IGNORED_ARG, tmp_prov, tmp_dh, tmp_dh_per))
+            .IgnoreArgument_tpm()
+            .IgnoreArgument_session()
             .IgnoreArgument_auth()
             .IgnoreArgument_objectHandle()
             .IgnoreArgument_persistentHandle();
-        STRICT_EXPECTED_CALL(TPM2_FlushContext(IGNORED_ARG, tmp_dh_ctx)) // 15
+        STRICT_EXPECTED_CALL(TPM2_FlushContext(IGNORED_ARG, tmp_dh_ctx))
+            .IgnoreArgument_tpm()
             .IgnoreArgument_flushHandle();
     }
 

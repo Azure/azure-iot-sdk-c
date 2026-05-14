@@ -1,0 +1,8 @@
+# CMake generation dependency list for this directory.
+C:/Program Files/CMake/share/cmake-4.0/Modules/CTest.cmake
+C:/Program Files/CMake/share/cmake-4.0/Modules/CTestTargets.cmake
+C:/Program Files/CMake/share/cmake-4.0/Modules/CTestUseLaunchers.cmake
+C:/Program Files/CMake/share/cmake-4.0/Modules/CheckIncludeFiles.cmake
+C:/Program Files/CMake/share/cmake-4.0/Modules/DartConfiguration.tcl.in
+C:/Program Files/CMake/share/cmake-4.0/Modules/GNUInstallDirs.cmake
+C:/code/s1/azure-iot-sdk-c-pr2720-clean/c-utility/deps/umock-c/CMakeLists.txt
