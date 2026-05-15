@@ -211,3 +211,7 @@ build_all/windows/nuget.exe
 # Doc stage output
 /doc-stage
 /cmake2
+build_local/
+build_validation/
+version_pp.i
+unused_statics.txt

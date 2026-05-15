@@ -1,6 +1,0 @@
-# CMake generation dependency list for this directory.
-C:/Program Files/CMake/share/cmake-4.0/Modules/BasicConfigVersion-SameMajorVersion.cmake.in
-C:/Program Files/CMake/share/cmake-4.0/Modules/CMakePackageConfigHelpers.cmake
-C:/Program Files/CMake/share/cmake-4.0/Modules/GNUInstallDirs.cmake
-C:/Program Files/CMake/share/cmake-4.0/Modules/WriteBasicConfigVersionFile.cmake
-C:/code/s1/azure-iot-sdk-c-pr2720-clean/provisioning_client/deps/utpm/CMakeLists.txt
