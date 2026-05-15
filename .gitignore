@@ -215,3 +215,4 @@ build_local/
 build_validation/
 version_pp.i
 unused_statics.txt
+*.i
