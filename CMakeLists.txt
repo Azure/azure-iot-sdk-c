@@ -333,8 +333,8 @@ else ()
             TARGET_DIRECTORY c_logging_v2_core c_logging_v2
             PROPERTIES HEADER_FILE_ONLY TRUE
         )
-        target_sources(c_logging_v2_core PRIVATE ${CMAKE_CURRENT_LIST_DIR}/build_validation/get_thread_stack_x86_stub.c)
-        target_sources(c_logging_v2 PRIVATE ${CMAKE_CURRENT_LIST_DIR}/build_validation/get_thread_stack_x86_stub.c)
+        target_sources(c_logging_v2_core PRIVATE ${CMAKE_CURRENT_LIST_DIR}/compat_stubs/get_thread_stack_x86_stub.c)
+        target_sources(c_logging_v2 PRIVATE ${CMAKE_CURRENT_LIST_DIR}/compat_stubs/get_thread_stack_x86_stub.c)
     endif()
 
     # c-logging creates c_logging_v2; create alias so guard checks pass.
@@ -392,7 +392,7 @@ else ()
                 TARGET_DIRECTORY aziotsharedutil
                 PROPERTIES HEADER_FILE_ONLY TRUE
             )
-            target_sources(aziotsharedutil PRIVATE ${CMAKE_CURRENT_LIST_DIR}/build_validation/csr_gen_openssl_stub.c)
+            target_sources(aziotsharedutil PRIVATE ${CMAKE_CURRENT_LIST_DIR}/compat_stubs/csr_gen_openssl_stub.c)
         endif()
     endif()
 
