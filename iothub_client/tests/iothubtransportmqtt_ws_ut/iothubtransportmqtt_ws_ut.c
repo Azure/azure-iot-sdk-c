@@ -703,7 +703,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_WS_Create_success)
     SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
 
     // act
-    STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_Common_Create(&config, IGNORED_PTR_ARG, transport_cb_info, NULL));
+    STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_Common_Create(&config, IGNORED_ARG, transport_cb_info, NULL));
 
     TRANSPORT_LL_HANDLE handle = IoTHubTransportMqtt_WS_Create(&config, transport_cb_info, NULL);
 
@@ -1159,7 +1159,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_WS_SetCallbackContext_success)
     TRANSPORT_LL_HANDLE handle = IoTHubTransportMqtt_WS_Create(&config, transport_cb_info, NULL);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_SetCallbackContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_SetCallbackContext(IGNORED_ARG, IGNORED_ARG));
 
     // act
     int result = IotHubTransportMqtt_WS_SetCallbackContext(handle, NULL);
@@ -1243,7 +1243,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_WS_GetSupportedPlatformInfo)
     PLATFORM_INFO_OPTION expected_info = PLATFORM_INFO_OPTION_RETRIEVE_SQM;
 
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_GetSupportedPlatformInfo(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_GetSupportedPlatformInfo(IGNORED_ARG, IGNORED_ARG))
         .CopyOutArgumentBuffer_info(&expected_info, sizeof(expected_info))
         .SetReturn(0);
 
@@ -1264,7 +1264,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_WS_GetSupportedPlatformInfo_NULL_handle)
 {
     // arrange
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_GetSupportedPlatformInfo(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_GetSupportedPlatformInfo(IGNORED_ARG, IGNORED_ARG))
         .SetReturn(1);
 
     // act
@@ -1287,7 +1287,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_WS_GetSupportedPlatformInfo_NULL_info)
     TRANSPORT_LL_HANDLE handle = IoTHubTransportMqtt_WS_Create(&config, transport_cb_info, NULL);
 
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_GetSupportedPlatformInfo(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_GetSupportedPlatformInfo(IGNORED_ARG, IGNORED_ARG))
         .SetReturn(1);
 
     // act

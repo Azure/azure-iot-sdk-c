@@ -70,7 +70,6 @@ if (${build_as_dynamic})
         OUTPUT_NAME "iothub_service_client"
         ARCHIVE_OUTPUT_NAME "iothub_service_client_dll_import"
         ENABLE_EXPORTS YES
-        WINDOWS_EXPORT_ALL_SYMBOLS YES
         PDB_NAME "iothub_service_client_dll"
         VERSION ${IOT_SDK_VERSION}
         SOVERSION ${IOT_SDK_VERSION_MAJOR}

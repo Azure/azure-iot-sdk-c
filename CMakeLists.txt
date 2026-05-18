@@ -5,6 +5,11 @@ cmake_minimum_required (VERSION 3.5)
 project(azure_iot_sdks)
 
 ########## Enable CMake Features ##########
+# Allow target_link_libraries() on targets from other directories (needed by utpm samples)
+if(POLICY CMP0079)
+    cmake_policy(SET CMP0079 NEW)
+endif()
+
 # Use solution folders.
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 # Set CMAKE_INSTALL_LIBDIR if not defined
@@ -253,15 +258,17 @@ if (${original_run_e2e_tests} OR ${original_run_unittests} OR ${run_sfc_tests})
     set(SHARED_UTIL_REAL_TEST_FOLDER ${CMAKE_CURRENT_LIST_DIR}/c-utility/tests/real_test_files CACHE INTERNAL "this is what needs to be included when doing test sources" FORCE)
 endif()
 
-add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/deps)
 if(${use_installed_dependencies})
+    add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/deps)
     find_package(parson REQUIRED CONFIG)
-endif()
 
-include_directories(${MACRO_UTILS_INC_FOLDER})
-include_directories(${UMOCK_C_INC_FOLDER})
+    # New macro_utils_c package sets MACRO_UTILS_C_INCLUDES; propagate to legacy variable.
+    if(NOT MACRO_UTILS_INC_FOLDER AND MACRO_UTILS_C_INCLUDES)
+        set(MACRO_UTILS_INC_FOLDER ${MACRO_UTILS_C_INCLUDES} CACHE INTERNAL "" FORCE)
+    endif()
+    include_directories(${MACRO_UTILS_INC_FOLDER})
+    include_directories(${UMOCK_C_INC_FOLDER})
 
-if(${use_installed_dependencies})
     if (NOT azure_c_shared_utility_FOUND)
         find_package(azure_c_shared_utility REQUIRED CONFIG)
     endif ()
@@ -284,7 +291,160 @@ if(${use_installed_dependencies})
         endif ()
     endif ()
 else ()
+    # Add top-level deps BEFORE c-utility so that c-utility sees the targets
+    # already defined and skips its own nested copies.  This allows customers
+    # to build with just "git submodule update --init" (non-recursive).
+    set(build_traceability_tool OFF CACHE BOOL "" FORCE)
+    set(build_sarif_results_checker OFF CACHE BOOL "" FORCE)
+    set(run_traceability OFF CACHE BOOL "" FORCE)
+    add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/deps/c-build-tools)
+    set_default_build_options()
+
+    # Suppress C4702 (unreachable code) which fires in consumed library sources
+    # (c-utility, utpm) under Release /O2 optimization, and is treated as error
+    # by /WX from set_default_build_options().
+    if(MSVC)
+        add_compile_options(/wd4702)
+    endif()
+
+    # umock_c MOCKABLE_FUNCTION macros produce duplicate typedefs when headers
+    # are included multiple times.  C11 allows this but Clang in C99 mode does
+    # not.  Suppress globally since all SDK targets include c-utility headers.
+    if(CMAKE_C_COMPILER_ID MATCHES "Clang")
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-typedef-redefinition -Wno-unused-value -Wno-unused-variable -Wno-unused-but-set-variable -Wno-unused-const-variable -Wno-unknown-pragmas")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-variable -Wno-unused-but-set-variable -Wno-unused-const-variable -Wno-unknown-pragmas -Wno-overloaded-virtual")
+    endif()
+
+    # umock_c_internal.h does type-punned pointer casts that trigger
+    # -Wstrict-aliasing under GCC -O2/-O3 (Release).  Suppress globally.
+    # Also suppress -Warray-bounds which fires on the same casts in GCC 13+.
+    if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
+        add_compile_options(-Wno-strict-aliasing -Wno-array-bounds -Wno-unused-value -Wno-unused-variable -Wno-unused-but-set-variable -Wno-unused-const-variable -Wno-maybe-uninitialized -Wno-unknown-pragmas -Wno-array-parameter)
+    endif()
+
+    add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/deps/azure-macro-utils-c)
+    add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/deps/c-logging)
+
+    # On Win32 x86, get_thread_stack.c uses RtlVirtualUnwind (x64-only) and
+    # fails with #error.  Exclude the original and provide a stub instead.
+    if(MSVC AND CMAKE_SIZEOF_VOID_P EQUAL 4)
+        set_source_files_properties(
+            ${CMAKE_CURRENT_LIST_DIR}/deps/c-logging/v2/src/get_thread_stack.c
+            TARGET_DIRECTORY c_logging_v2_core c_logging_v2
+            PROPERTIES HEADER_FILE_ONLY TRUE
+        )
+        target_sources(c_logging_v2_core PRIVATE ${CMAKE_CURRENT_LIST_DIR}/compat_stubs/get_thread_stack_x86_stub.c)
+        target_sources(c_logging_v2 PRIVATE ${CMAKE_CURRENT_LIST_DIR}/compat_stubs/get_thread_stack_x86_stub.c)
+    endif()
+
+    # c-logging creates c_logging_v2; create alias so guard checks pass.
+    if (NOT TARGET c_logging)
+        add_library(c_logging ALIAS c_logging_v2)
+    endif()
+
+    if (${original_run_e2e_tests} OR ${original_run_unittests} OR ${run_sfc_tests})
+        add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/deps/ctest)
+        add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/deps/c-testrunnerswitcher)
+    endif()
+    # umock-c is needed unconditionally: umock_c_prod.h (MOCKABLE_FUNCTION)
+    # is included by production headers (e.g. iothub.h).
+    add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/deps/umock-c)
+
+    # The new umock-c uses install_library_includes with EXCLUDE_FROM_ALL,
+    # which means `make install` won't install its headers/config.
+    # Add explicit install rules so the installed-deps workflow works.
+    include(GNUInstallDirs)
+    file(GLOB _umock_c_headers "${CMAKE_CURRENT_LIST_DIR}/deps/umock-c/inc/umock_c/*.h")
+    install(FILES ${_umock_c_headers} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/umock_c)
+    # Install the library binary (EXCLUDE_FROM_ALL prevents normal install)
+    install(FILES $<TARGET_FILE:umock_c> DESTINATION ${CMAKE_INSTALL_LIBDIR})
+    install(EXPORT umock_cTargets
+        FILE umock_cTargets.cmake
+        DESTINATION cmake
+    )
+    file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/umock_cConfig.cmake"
+        "include(\"\${CMAKE_CURRENT_LIST_DIR}/umock_cTargets.cmake\")\n"
+        "set(UMOCK_C_INC_FOLDER \"\${CMAKE_CURRENT_LIST_DIR}/../${CMAKE_INSTALL_INCLUDEDIR}\" CACHE INTERNAL \"\")\n"
+    )
+    install(FILES "${CMAKE_CURRENT_BINARY_DIR}/umock_cConfig.cmake" DESTINATION cmake)
+
+    # Provide include paths from top-level deps so c-utility (and others) can
+    # find headers without recursive submodule init.
+    include_directories(${CMAKE_CURRENT_LIST_DIR}/deps/umock-c/inc)
+    include_directories(${CMAKE_CURRENT_LIST_DIR}/deps/c-logging/v2/inc)
+
     add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/c-utility)
+
+    # Exclude csr_gen_openssl.c when building against OpenSSL < 3.0 (no EVP_EC_gen).
+    # This typically affects cross-compile Docker images (ARM/MIPS) with old OpenSSL.
+    if(use_openssl AND TARGET aziotsharedutil)
+        include(CheckCSourceCompiles)
+        set(CMAKE_REQUIRED_INCLUDES ${OPENSSL_INCLUDE_DIR})
+        check_c_source_compiles("
+            #include <openssl/opensslv.h>
+            #if OPENSSL_VERSION_NUMBER < 0x30000000L
+            #error old openssl
+            #endif
+            int main(void){return 0;}" HAS_OPENSSL3)
+        if(NOT HAS_OPENSSL3)
+            set_source_files_properties(
+                ${CMAKE_CURRENT_LIST_DIR}/c-utility/adapters/csr_gen_openssl.c
+                TARGET_DIRECTORY aziotsharedutil
+                PROPERTIES HEADER_FILE_ONLY TRUE
+            )
+            target_sources(aziotsharedutil PRIVATE ${CMAKE_CURRENT_LIST_DIR}/compat_stubs/csr_gen_openssl_stub.c)
+        endif()
+    endif()
+
+    # Enable the conformant preprocessor at top-level scope so that all
+    # targets (iothub_client, serializer, etc.) can use macro-utils-c
+    # macros with > 127 parameters.
+    if(MSVC AND NOT "${CMAKE_GENERATOR}" STREQUAL "Visual Studio 15 2017")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:preprocessor /wd5105 /wd4200")
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /Zc:preprocessor /wd5105 /wd4200")
+    endif()
+
+    # Point legacy include-path variables at top-level copies of the deps.
+    set(MACRO_UTILS_INC_FOLDER ${CMAKE_CURRENT_LIST_DIR}/deps/azure-macro-utils-c/inc CACHE INTERNAL "" FORCE)
+    set(UMOCK_C_INC_FOLDER ${CMAKE_CURRENT_LIST_DIR}/deps/umock-c/inc CACHE INTERNAL "" FORCE)
+
+    # Create forwarding headers so existing code that includes
+    # "azure_macro_utils/macro_utils.h" transparently picks up
+    # "macro_utils/macro_utils.h" from the new macro-utils-c layout.
+    file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/azure_macro_utils)
+    file(WRITE ${CMAKE_BINARY_DIR}/azure_macro_utils/macro_utils.h
+        "#include \"macro_utils/macro_utils.h\"\n")
+    file(WRITE ${CMAKE_BINARY_DIR}/azure_macro_utils/macro_utils_generated.h
+        "#include \"macro_utils/macro_utils_generated.h\"\n")
+
+    # Install the forwarding headers so consumers of the installed SDK can
+    # still #include "azure_macro_utils/macro_utils.h".
+    install(FILES
+        ${CMAKE_BINARY_DIR}/azure_macro_utils/macro_utils.h
+        ${CMAKE_BINARY_DIR}/azure_macro_utils/macro_utils_generated.h
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azure_macro_utils
+    )
+
+    # Install c-logging v2 headers so installed xlogging.h can find them.
+    file(GLOB _c_logging_headers "${CMAKE_CURRENT_LIST_DIR}/deps/c-logging/v2/inc/c_logging/*.h")
+    install(FILES ${_c_logging_headers} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/c_logging)
+    # Install c-logging v2 library so consumers can link it.
+    install(FILES $<TARGET_FILE:c_logging_v2> DESTINATION ${CMAKE_INSTALL_LIBDIR})
+
+    # Install umock_c_prod_compat.h which c-utility headers include but
+    # c-utility's own CMakeLists doesn't list in source_h_files.
+    install(FILES ${CMAKE_CURRENT_LIST_DIR}/c-utility/inc/azure_c_shared_utility/umock_c_prod_compat.h
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azure_c_shared_utility)
+
+    include_directories(${CMAKE_BINARY_DIR})
+    include_directories(${MACRO_UTILS_INC_FOLDER})
+    include_directories(${UMOCK_C_INC_FOLDER})
+
+    # c-logging v2 headers are needed by the new c-utility's xlogging.h.
+    include_directories(${CMAKE_CURRENT_LIST_DIR}/deps/c-logging/v2/inc)
+
+    # Parson
+    add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/deps)
 
     if (${use_amqp})
         add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/uamqp)
@@ -294,8 +454,6 @@ else ()
         add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/umqtt)
     endif ()
 
-    # For now this must go here and not in deps/CMakeLists.txt for
-    # CMake functionality which is in c-utility.
     if (${use_http})
         add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/deps/uhttp)
     endif ()

@@ -1,4 +1,4 @@
-LIBRARY prov_device_client_dll
+LIBRARY prov_device_client
 EXPORTS
 Prov_Device_Create
 Prov_Device_Destroy

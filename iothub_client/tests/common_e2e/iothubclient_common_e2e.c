@@ -49,7 +49,6 @@
 
 #include "iothubclient_common_e2e.h"
 
-static bool g_callbackRecv = false;
 static TEST_PROTOCOL_TYPE test_protocol_type;
 
 const char* TEST_EVENT_DATA_FMT = "{\"data\":\"%.24s\",\"id\":\"%d\"}";

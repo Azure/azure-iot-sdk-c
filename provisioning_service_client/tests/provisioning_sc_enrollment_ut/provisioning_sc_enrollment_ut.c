@@ -206,81 +206,81 @@ TEST_FUNCTION_CLEANUP(TestMethodCleanup)
 
 static void copy_json_field(const char* return_value)
 {
-    STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(return_value); //reg id //cannot fail
+    STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_ARG, IGNORED_ARG)).SetReturn(return_value); //reg id //cannot fail
     if (return_value != NULL)
     {
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
     }
 }
 
 static void individualEnrollment_deserializeFromJson_expected_calls(bool use_all_fields)
 {
-    STRICT_EXPECTED_CALL(json_parse_string(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(json_parse_string(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
 
-    STRICT_EXPECTED_CALL(json_object_get_object(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(deviceCapabilities_fromJson(IGNORED_PTR_ARG)).SetReturn(TEST_DEV_CAP);
+    STRICT_EXPECTED_CALL(json_object_get_object(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(deviceCapabilities_fromJson(IGNORED_ARG)).SetReturn(TEST_DEV_CAP);
     copy_json_field(DUMMY_REGISTRATION_ID);
     copy_json_field(use_all_fields ? DUMMY_DEVICE_ID : NULL);
-    STRICT_EXPECTED_CALL(json_object_get_object(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(use_all_fields ? TEST_JSON_OBJECT : NULL); //reg state //cannot fail
+    STRICT_EXPECTED_CALL(json_object_get_object(IGNORED_ARG, IGNORED_ARG)).SetReturn(use_all_fields ? TEST_JSON_OBJECT : NULL); //reg state //cannot fail
     if (use_all_fields)
     {
-        STRICT_EXPECTED_CALL(deviceRegistrationState_fromJson(IGNORED_PTR_ARG)).SetReturn(TEST_REGISTRATION_STATE);
+        STRICT_EXPECTED_CALL(deviceRegistrationState_fromJson(IGNORED_ARG)).SetReturn(TEST_REGISTRATION_STATE);
     }
-    STRICT_EXPECTED_CALL(json_object_get_object(IGNORED_PTR_ARG, IGNORED_PTR_ARG)); //attestation mechanism
-    STRICT_EXPECTED_CALL(attestationMechanism_fromJson(IGNORED_PTR_ARG)).SetReturn(TEST_ATTESTATION_MECHANISM);
+    STRICT_EXPECTED_CALL(json_object_get_object(IGNORED_ARG, IGNORED_ARG)); //attestation mechanism
+    STRICT_EXPECTED_CALL(attestationMechanism_fromJson(IGNORED_ARG)).SetReturn(TEST_ATTESTATION_MECHANISM);
     copy_json_field(use_all_fields ? DUMMY_IOTHUB_HOSTNAME : NULL);
-    STRICT_EXPECTED_CALL(json_object_get_object(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(use_all_fields ? TEST_JSON_OBJECT : NULL); //twin //cannot fail
+    STRICT_EXPECTED_CALL(json_object_get_object(IGNORED_ARG, IGNORED_ARG)).SetReturn(use_all_fields ? TEST_JSON_OBJECT : NULL); //twin //cannot fail
     if (use_all_fields)
     {
-        STRICT_EXPECTED_CALL(initialTwin_fromJson(IGNORED_PTR_ARG)).SetReturn(TEST_INITIAL_TWIN);
+        STRICT_EXPECTED_CALL(initialTwin_fromJson(IGNORED_ARG)).SetReturn(TEST_INITIAL_TWIN);
     }
     copy_json_field(use_all_fields ? DUMMY_ETAG : NULL);
-    STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(DUMMY_PROVISIONING_STATUS); //provisioning status
+    STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_ARG, IGNORED_ARG)).SetReturn(DUMMY_PROVISIONING_STATUS); //provisioning status
     copy_json_field(use_all_fields ? DUMMY_CREATED_TIME : NULL);
     copy_json_field(use_all_fields ? DUMMY_UPDATED_TIME : NULL);
-    STRICT_EXPECTED_CALL(json_value_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(json_value_free(IGNORED_ARG));
 }
 
 static void enrollmentGroup_deserializeFromJson_expected_calls(bool use_all_fields)
 {
-    STRICT_EXPECTED_CALL(json_parse_string(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(json_parse_string(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
     if (use_all_fields)
     {
-        STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(DUMMY_GROUP_ID); //group id
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(json_object_get_object(IGNORED_PTR_ARG, IGNORED_PTR_ARG)); //attestation mechanism
-        STRICT_EXPECTED_CALL(attestationMechanism_fromJson(IGNORED_PTR_ARG)).SetReturn(TEST_ATTESTATION_MECHANISM);
-        STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(DUMMY_IOTHUB_HOSTNAME);
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG)); //iothub hostname
-        STRICT_EXPECTED_CALL(json_object_get_object(IGNORED_PTR_ARG, IGNORED_PTR_ARG)); //twin
-        STRICT_EXPECTED_CALL(initialTwin_fromJson(IGNORED_PTR_ARG)).SetReturn(TEST_INITIAL_TWIN);
-        STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(DUMMY_ETAG); //etag
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(DUMMY_PROVISIONING_STATUS); //provisioning status
-        STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(DUMMY_CREATED_TIME); //created time
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(DUMMY_UPDATED_TIME); //updated time
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_ARG, IGNORED_ARG)).SetReturn(DUMMY_GROUP_ID); //group id
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(json_object_get_object(IGNORED_ARG, IGNORED_ARG)); //attestation mechanism
+        STRICT_EXPECTED_CALL(attestationMechanism_fromJson(IGNORED_ARG)).SetReturn(TEST_ATTESTATION_MECHANISM);
+        STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_ARG, IGNORED_ARG)).SetReturn(DUMMY_IOTHUB_HOSTNAME);
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG)); //iothub hostname
+        STRICT_EXPECTED_CALL(json_object_get_object(IGNORED_ARG, IGNORED_ARG)); //twin
+        STRICT_EXPECTED_CALL(initialTwin_fromJson(IGNORED_ARG)).SetReturn(TEST_INITIAL_TWIN);
+        STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_ARG, IGNORED_ARG)).SetReturn(DUMMY_ETAG); //etag
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_ARG, IGNORED_ARG)).SetReturn(DUMMY_PROVISIONING_STATUS); //provisioning status
+        STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_ARG, IGNORED_ARG)).SetReturn(DUMMY_CREATED_TIME); //created time
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_ARG, IGNORED_ARG)).SetReturn(DUMMY_UPDATED_TIME); //updated time
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
     }
     else
     {
-        STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(DUMMY_GROUP_ID); //group id
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(json_object_get_object(IGNORED_PTR_ARG, IGNORED_PTR_ARG)); //attestation mechanism
-        STRICT_EXPECTED_CALL(attestationMechanism_fromJson(IGNORED_PTR_ARG)).SetReturn(TEST_ATTESTATION_MECHANISM);
-        STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(NULL); //iothubhostname
-        STRICT_EXPECTED_CALL(json_object_get_object(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(NULL); //twin
-        STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(NULL); //etag
-        STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(DUMMY_PROVISIONING_STATUS); //provisioning status
-        STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(NULL); //created time
-        STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(NULL); //updated time
+        STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_ARG, IGNORED_ARG)).SetReturn(DUMMY_GROUP_ID); //group id
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(json_object_get_object(IGNORED_ARG, IGNORED_ARG)); //attestation mechanism
+        STRICT_EXPECTED_CALL(attestationMechanism_fromJson(IGNORED_ARG)).SetReturn(TEST_ATTESTATION_MECHANISM);
+        STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_ARG, IGNORED_ARG)).SetReturn(NULL); //iothubhostname
+        STRICT_EXPECTED_CALL(json_object_get_object(IGNORED_ARG, IGNORED_ARG)).SetReturn(NULL); //twin
+        STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_ARG, IGNORED_ARG)).SetReturn(NULL); //etag
+        STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_ARG, IGNORED_ARG)).SetReturn(DUMMY_PROVISIONING_STATUS); //provisioning status
+        STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_ARG, IGNORED_ARG)).SetReturn(NULL); //created time
+        STRICT_EXPECTED_CALL(json_object_get_string(IGNORED_ARG, IGNORED_ARG)).SetReturn(NULL); //updated time
 
     }
-    STRICT_EXPECTED_CALL(json_value_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(json_value_free(IGNORED_ARG));
 }
 
 static INDIVIDUAL_ENROLLMENT_HANDLE get_ie_from_json()
@@ -371,9 +371,9 @@ TEST_FUNCTION(individualEnrollment_create_success)
 {
     //arrange
     STRICT_EXPECTED_CALL(attestationMechanism_isValidForIndividualEnrollment(TEST_ATTESTATION_MECHANISM));
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
     STRICT_EXPECTED_CALL(deviceCapabilities_create());
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
 
     //act
     INDIVIDUAL_ENROLLMENT_HANDLE ie = individualEnrollment_create(DUMMY_REGISTRATION_ID, TEST_ATTESTATION_MECHANISM);
@@ -404,9 +404,9 @@ TEST_FUNCTION(individualEnrollment_create_error)
     ASSERT_ARE_EQUAL(int, 0, negativeTestsInitResult);
 
     STRICT_EXPECTED_CALL(attestationMechanism_isValidForIndividualEnrollment(TEST_ATTESTATION_MECHANISM));
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
     STRICT_EXPECTED_CALL(deviceCapabilities_create());
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
     umock_c_negative_tests_snapshot();
 
     //size_t calls_cannot_fail[] = { };
@@ -453,8 +453,8 @@ TEST_FUNCTION(individualEnrollment_destroy_min_ie)
     INDIVIDUAL_ENROLLMENT_HANDLE ie = individualEnrollment_create(DUMMY_REGISTRATION_ID, TEST_ATTESTATION_MECHANISM);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(deviceCapabilities_destroy(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)); //registration id
+    STRICT_EXPECTED_CALL(deviceCapabilities_destroy(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)); //registration id
     STRICT_EXPECTED_CALL(gballoc_free(NULL)); //device id
     STRICT_EXPECTED_CALL(gballoc_free(NULL)); //etag
     STRICT_EXPECTED_CALL(gballoc_free(NULL)); //iothubhostname
@@ -481,13 +481,13 @@ TEST_FUNCTION(individualEnrollment_destroy_max_ie)
     INDIVIDUAL_ENROLLMENT_HANDLE ie = get_ie_from_json();
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(deviceCapabilities_destroy(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)); //registration id
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)); //device id
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)); //etag
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)); //iothubhostname
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)); //created date time
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)); //updated date time
+    STRICT_EXPECTED_CALL(deviceCapabilities_destroy(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)); //registration id
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)); //device id
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)); //etag
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)); //iothubhostname
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)); //created date time
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)); //updated date time
     STRICT_EXPECTED_CALL(attestationMechanism_destroy(TEST_ATTESTATION_MECHANISM)); //attestation mechanism
     STRICT_EXPECTED_CALL(initialTwin_destroy(TEST_INITIAL_TWIN)); //initialTwin
     STRICT_EXPECTED_CALL(deviceRegistrationState_destroy(TEST_REGISTRATION_STATE)); //deviceRegistrationState
@@ -554,8 +554,8 @@ TEST_FUNCTION(enrollmentGroup_create_success)
 {
     //arrange
     STRICT_EXPECTED_CALL(attestationMechanism_isValidForEnrollmentGroup(TEST_ATTESTATION_MECHANISM));
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, DUMMY_GROUP_ID));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, DUMMY_GROUP_ID));
 
     //act
     ENROLLMENT_GROUP_HANDLE eg = enrollmentGroup_create(DUMMY_GROUP_ID, TEST_ATTESTATION_MECHANISM);
@@ -583,8 +583,8 @@ TEST_FUNCTION(enrollmentGroup_create_error)
     ASSERT_ARE_EQUAL(int, 0, negativeTestsInitResult);
 
     STRICT_EXPECTED_CALL(attestationMechanism_isValidForEnrollmentGroup(TEST_ATTESTATION_MECHANISM));
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, DUMMY_GROUP_ID));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, DUMMY_GROUP_ID));
     umock_c_negative_tests_snapshot();
 
     //size_t calls_cannot_fail[] = { };
@@ -634,7 +634,7 @@ TEST_FUNCTION(enrollmentGroup_destroy_min_eg)
     ENROLLMENT_GROUP_HANDLE eg = enrollmentGroup_create(DUMMY_GROUP_ID, TEST_ATTESTATION_MECHANISM);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)); //group id
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)); //group id
     STRICT_EXPECTED_CALL(attestationMechanism_destroy(TEST_ATTESTATION_MECHANISM)); //attestationMechanism
     STRICT_EXPECTED_CALL(initialTwin_destroy(NULL)); //initialTwin
     STRICT_EXPECTED_CALL(gballoc_free(NULL)); //etag
@@ -659,13 +659,13 @@ TEST_FUNCTION(enrollmentGroup_destroy_max_eg)
     ENROLLMENT_GROUP_HANDLE eg = get_eg_from_json();
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)); //group id
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)); //group id
     STRICT_EXPECTED_CALL(attestationMechanism_destroy(TEST_ATTESTATION_MECHANISM)); //attestationMechanism
     STRICT_EXPECTED_CALL(initialTwin_destroy(TEST_INITIAL_TWIN)); //initialTwin
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)); //etag
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)); //iothub hostname
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)); //created date time
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)); //updated date time
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)); //etag
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)); //iothub hostname
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)); //created date time
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG)); //updated date time
     STRICT_EXPECTED_CALL(gballoc_free(eg)); //enrollmentGroup
 
     //act
@@ -1084,8 +1084,8 @@ TEST_FUNCTION(individualEnrollment_setDeviceId_first_set)
     INDIVIDUAL_ENROLLMENT_HANDLE ie = individualEnrollment_create(DUMMY_REGISTRATION_ID, TEST_ATTESTATION_MECHANISM);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, DUMMY_DEVICE_ID));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, DUMMY_DEVICE_ID));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
     //act
     int result = individualEnrollment_setDeviceId(ie, DUMMY_DEVICE_ID);
@@ -1107,8 +1107,8 @@ TEST_FUNCTION(individualEnrollment_setDeviceId_overwrite)
     individualEnrollment_setDeviceId(ie, DUMMY_STRING);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, DUMMY_DEVICE_ID));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, DUMMY_DEVICE_ID));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
     //act
     int result = individualEnrollment_setDeviceId(ie, DUMMY_DEVICE_ID);
@@ -1130,7 +1130,7 @@ TEST_FUNCTION(individualEnrollment_setDeviceId_erase)
     individualEnrollment_setDeviceId(ie, DUMMY_DEVICE_ID);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
     //act
     int result = individualEnrollment_setDeviceId(ie, NULL);
@@ -1271,8 +1271,8 @@ TEST_FUNCTION(individualEnrollment_setEtag_first_set)
     INDIVIDUAL_ENROLLMENT_HANDLE ie = individualEnrollment_create(DUMMY_REGISTRATION_ID, TEST_ATTESTATION_MECHANISM);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, DUMMY_ETAG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, DUMMY_ETAG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
     //act
     int result = individualEnrollment_setEtag(ie, DUMMY_ETAG);
@@ -1294,8 +1294,8 @@ TEST_FUNCTION(individualEnrollment_setEtag_overwrite)
     individualEnrollment_setEtag(ie, DUMMY_STRING);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, DUMMY_ETAG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, DUMMY_ETAG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
     //act
     int result = individualEnrollment_setEtag(ie, DUMMY_ETAG);
@@ -1317,7 +1317,7 @@ TEST_FUNCTION(individualEnrollment_setEtag_erase)
     individualEnrollment_setEtag(ie, DUMMY_ETAG);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
     //act
     int result = individualEnrollment_setEtag(ie, NULL);
@@ -1928,7 +1928,7 @@ TEST_FUNCTION(enrollmentGroup_setEtag_success_first_set)
     ENROLLMENT_GROUP_HANDLE eg = enrollmentGroup_create(DUMMY_GROUP_ID, TEST_ATTESTATION_MECHANISM);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, DUMMY_ETAG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, DUMMY_ETAG));
     STRICT_EXPECTED_CALL(gballoc_free(NULL));
 
     //act
@@ -1951,8 +1951,8 @@ TEST_FUNCTION(enrollmentGroup_setEtag_success_overwrite)
     enrollmentGroup_setEtag(eg, DUMMY_STRING);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, DUMMY_ETAG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, DUMMY_ETAG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
     //act
     int result = enrollmentGroup_setEtag(eg, DUMMY_ETAG);
@@ -1974,7 +1974,7 @@ TEST_FUNCTION(enrollmentGroup_setEtag_success_erase)
     enrollmentGroup_setEtag(eg, DUMMY_ETAG);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
     //act
     int result = enrollmentGroup_setEtag(eg, NULL);
@@ -2199,17 +2199,17 @@ TEST_FUNCTION(individualEnrollment_serializeToJson_min_success)
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(json_value_init_object());
-    STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(deviceCapabilities_toJson(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_object_set_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)); //reg id
+    STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(deviceCapabilities_toJson(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_object_set_value(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG)); //reg id
     STRICT_EXPECTED_CALL(attestationMechanism_toJson(TEST_ATTESTATION_MECHANISM));
-    STRICT_EXPECTED_CALL(json_object_set_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)); //att mech
-    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)); //provisioning status
-    STRICT_EXPECTED_CALL(json_serialize_to_string(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_value_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_free_serialized_string(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(json_object_set_value(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG)); //att mech
+    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG)); //provisioning status
+    STRICT_EXPECTED_CALL(json_serialize_to_string(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_value_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_free_serialized_string(IGNORED_ARG));
 
     //act
     char* json = individualEnrollment_serializeToJson(ie);
@@ -2233,17 +2233,17 @@ TEST_FUNCTION(individualEnrollment_serializeToJson_min_error)
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(json_value_init_object());
-    STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(deviceCapabilities_toJson(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_object_set_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)); //reg id
+    STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(deviceCapabilities_toJson(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_object_set_value(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG)); //reg id
     STRICT_EXPECTED_CALL(attestationMechanism_toJson(TEST_ATTESTATION_MECHANISM));
-    STRICT_EXPECTED_CALL(json_object_set_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)); //att mech
-    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)); //provisioning status
-    STRICT_EXPECTED_CALL(json_serialize_to_string(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_value_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_free_serialized_string(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(json_object_set_value(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG)); //att mech
+    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG)); //provisioning status
+    STRICT_EXPECTED_CALL(json_serialize_to_string(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_value_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_free_serialized_string(IGNORED_ARG));
     umock_c_negative_tests_snapshot();
 
     size_t calls_cannot_fail[] = { 10, 11 };
@@ -2282,21 +2282,21 @@ TEST_FUNCTION(individualEnrollment_serializeToJson_max_success)
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(json_value_init_object());
-    STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(deviceCapabilities_toJson(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_object_set_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)); //dev caps
-    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)); //reg id
-    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)); //device id
+    STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(deviceCapabilities_toJson(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_object_set_value(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG)); //dev caps
+    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG)); //reg id
+    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG)); //device id
     STRICT_EXPECTED_CALL(attestationMechanism_toJson(TEST_ATTESTATION_MECHANISM));
-    STRICT_EXPECTED_CALL(json_object_set_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)); //att mech
+    STRICT_EXPECTED_CALL(json_object_set_value(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG)); //att mech
     STRICT_EXPECTED_CALL(initialTwin_toJson(TEST_INITIAL_TWIN));
-    STRICT_EXPECTED_CALL(json_object_set_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)); //twin
-    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)); //etag
-    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)); //provisioning status
-    STRICT_EXPECTED_CALL(json_serialize_to_string(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_value_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_free_serialized_string(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(json_object_set_value(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG)); //twin
+    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG)); //etag
+    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG)); //provisioning status
+    STRICT_EXPECTED_CALL(json_serialize_to_string(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_value_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_free_serialized_string(IGNORED_ARG));
 
     //act
     char* json = individualEnrollment_serializeToJson(ie);
@@ -2323,21 +2323,21 @@ TEST_FUNCTION(individualEnrollment_deserializeToJson_max_error)
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(json_value_init_object());
-    STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(deviceCapabilities_toJson(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_object_set_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)); //reg id
-    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)); //reg id
+    STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(deviceCapabilities_toJson(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_object_set_value(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG)); //reg id
+    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG)); //reg id
     STRICT_EXPECTED_CALL(attestationMechanism_toJson(TEST_ATTESTATION_MECHANISM));
-    STRICT_EXPECTED_CALL(json_object_set_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)); //att mech
+    STRICT_EXPECTED_CALL(json_object_set_value(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG)); //att mech
     STRICT_EXPECTED_CALL(initialTwin_toJson(TEST_INITIAL_TWIN));
-    STRICT_EXPECTED_CALL(json_object_set_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)); //twin
-    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)); //etag
-    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)); //provisioning status
-    STRICT_EXPECTED_CALL(json_serialize_to_string(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_value_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_free_serialized_string(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(json_object_set_value(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG)); //twin
+    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG)); //etag
+    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG)); //provisioning status
+    STRICT_EXPECTED_CALL(json_serialize_to_string(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_value_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_free_serialized_string(IGNORED_ARG));
     umock_c_negative_tests_snapshot();
 
     size_t calls_cannot_fail[] = { 14, 15 };
@@ -2524,7 +2524,7 @@ TEST_FUNCTION(individualEnrollment_setDeviceCapabilities_success)
     INDIVIDUAL_ENROLLMENT_HANDLE ie = individualEnrollment_create(DUMMY_REGISTRATION_ID, TEST_ATTESTATION_MECHANISM);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(deviceCapabilities_destroy(IGNORED_PTR_ARG)); //group id
+    STRICT_EXPECTED_CALL(deviceCapabilities_destroy(IGNORED_ARG)); //group id
 
     //act
     int result = individualEnrollment_setDeviceCapabilities(ie, TEST_DEV_CAP);
@@ -2608,15 +2608,15 @@ TEST_FUNCTION(enrollmentGroup_serializeToJson_min_success)
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(json_value_init_object());
-    STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)); //group id
+    STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG)); //group id
     STRICT_EXPECTED_CALL(attestationMechanism_toJson(TEST_ATTESTATION_MECHANISM));
-    STRICT_EXPECTED_CALL(json_object_set_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)); //attestation
-    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)); //provisioning status
-    STRICT_EXPECTED_CALL(json_serialize_to_string(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_value_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_free_serialized_string(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(json_object_set_value(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG)); //attestation
+    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG)); //provisioning status
+    STRICT_EXPECTED_CALL(json_serialize_to_string(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_value_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_free_serialized_string(IGNORED_ARG));
 
     //act
     char* json = enrollmentGroup_serializeToJson(eg);
@@ -2640,15 +2640,15 @@ TEST_FUNCTION(enrollmentGroup_serializeToJson_min_error)
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(json_value_init_object());
-    STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)); //group id
+    STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG)); //group id
     STRICT_EXPECTED_CALL(attestationMechanism_toJson(TEST_ATTESTATION_MECHANISM));
-    STRICT_EXPECTED_CALL(json_object_set_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)); //attestation
-    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)); //provisioning status
-    STRICT_EXPECTED_CALL(json_serialize_to_string(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_value_free(IGNORED_PTR_ARG)); //cannot fail
-    STRICT_EXPECTED_CALL(json_free_serialized_string(IGNORED_PTR_ARG)); //cannot fail
+    STRICT_EXPECTED_CALL(json_object_set_value(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG)); //attestation
+    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG)); //provisioning status
+    STRICT_EXPECTED_CALL(json_serialize_to_string(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_value_free(IGNORED_ARG)); //cannot fail
+    STRICT_EXPECTED_CALL(json_free_serialized_string(IGNORED_ARG)); //cannot fail
     umock_c_negative_tests_snapshot();
 
     size_t calls_cannot_fail[] = { 8, 9 };
@@ -2689,18 +2689,18 @@ TEST_FUNCTION(enrollmentGroup_serializeToJson_max_success)
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(json_value_init_object());
-    STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)); //group id
+    STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG)); //group id
     STRICT_EXPECTED_CALL(attestationMechanism_toJson(TEST_ATTESTATION_MECHANISM));
-    STRICT_EXPECTED_CALL(json_object_set_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)); //attestation
+    STRICT_EXPECTED_CALL(json_object_set_value(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG)); //attestation
     STRICT_EXPECTED_CALL(initialTwin_toJson(TEST_INITIAL_TWIN));
-    STRICT_EXPECTED_CALL(json_object_set_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)); //twin
-    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)); //etag
-    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)); //provisioning status
-    STRICT_EXPECTED_CALL(json_serialize_to_string(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_value_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_free_serialized_string(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(json_object_set_value(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG)); //twin
+    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG)); //etag
+    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG)); //provisioning status
+    STRICT_EXPECTED_CALL(json_serialize_to_string(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_value_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_free_serialized_string(IGNORED_ARG));
 
     //act
     char* json = enrollmentGroup_serializeToJson(eg);
@@ -2726,18 +2726,18 @@ TEST_FUNCTION(enrollmentGroup_serializeToJson_max_error)
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(json_value_init_object());
-    STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)); //group id
+    STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG)); //group id
     STRICT_EXPECTED_CALL(attestationMechanism_toJson(TEST_ATTESTATION_MECHANISM));
-    STRICT_EXPECTED_CALL(json_object_set_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)); //attestation
+    STRICT_EXPECTED_CALL(json_object_set_value(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG)); //attestation
     STRICT_EXPECTED_CALL(initialTwin_toJson(TEST_INITIAL_TWIN));
-    STRICT_EXPECTED_CALL(json_object_set_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)); //twin
-    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)); //etag
-    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)); //provisioning status
-    STRICT_EXPECTED_CALL(json_serialize_to_string(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_value_free(IGNORED_PTR_ARG)); //cannot fail
-    STRICT_EXPECTED_CALL(json_free_serialized_string(IGNORED_PTR_ARG)); //cannot fail
+    STRICT_EXPECTED_CALL(json_object_set_value(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG)); //twin
+    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG)); //etag
+    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG)); //provisioning status
+    STRICT_EXPECTED_CALL(json_serialize_to_string(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(json_value_free(IGNORED_ARG)); //cannot fail
+    STRICT_EXPECTED_CALL(json_free_serialized_string(IGNORED_ARG)); //cannot fail
     umock_c_negative_tests_snapshot();
 
     size_t calls_cannot_fail[] = { 11, 12 };

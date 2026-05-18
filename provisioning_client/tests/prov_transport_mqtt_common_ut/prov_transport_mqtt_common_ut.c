@@ -408,58 +408,58 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
 
     static void setup_prov_transport_common_mqtt_create_mocks(void)
     {
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_URI_VALUE));
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_DPS_API_VALUE));
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_SCOPE_ID_VALUE));
-        STRICT_EXPECTED_CALL(mqtt_client_init(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_URI_VALUE));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_DPS_API_VALUE));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_SCOPE_ID_VALUE));
+        STRICT_EXPECTED_CALL(mqtt_client_init(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
     }
 
     static void setup_create_connection_mocks(bool use_x509)
     {
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(on_mqtt_transport_io(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(on_mqtt_transport_io(IGNORED_ARG, IGNORED_ARG));
         if (use_x509)
         {
-            STRICT_EXPECTED_CALL(xio_setoption(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-            STRICT_EXPECTED_CALL(xio_setoption(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(xio_setoption(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+            STRICT_EXPECTED_CALL(xio_setoption(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
         }
-        STRICT_EXPECTED_CALL(mqtt_client_set_trace(IGNORED_PTR_ARG, false, false));
-        STRICT_EXPECTED_CALL(mqtt_client_connect(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(mqtt_client_set_trace(IGNORED_ARG, false, false));
+        STRICT_EXPECTED_CALL(mqtt_client_connect(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
     }
 
     static void setup_create_key_connection_mocks(void)
     {
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(on_mqtt_transport_io(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(on_transport_challenge_callback(NULL, 0, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(mqtt_client_set_trace(IGNORED_PTR_ARG, false, false));
-        STRICT_EXPECTED_CALL(mqtt_client_connect(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(on_mqtt_transport_io(IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(on_transport_challenge_callback(NULL, 0, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(mqtt_client_set_trace(IGNORED_ARG, false, false));
+        STRICT_EXPECTED_CALL(mqtt_client_connect(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
     }
 
     static void setup_on_message_recv_callback_mocks(void)
     {
-        STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(on_transport_json_parse(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(on_transport_register_data_cb(PROV_DEVICE_TRANSPORT_RESULT_OK, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(on_transport_json_parse(IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(on_transport_register_data_cb(PROV_DEVICE_TRANSPORT_RESULT_OK, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
     }
 
     static void setup_send_mqtt_message_mocks(void)
     {
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(on_transport_create_json_payload(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(mqttmessage_create_in_place(IGNORED_NUM_ARG, IGNORED_PTR_ARG, DELIVER_AT_MOST_ONCE, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(mqtt_client_publish(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(mqttmessage_destroy(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(on_transport_create_json_payload(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(mqttmessage_create_in_place(IGNORED_ARG, IGNORED_ARG, DELIVER_AT_MOST_ONCE, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(mqtt_client_publish(IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(mqttmessage_destroy(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
     }
 
     static int should_skip_index(size_t current_index, const size_t skip_array[], size_t length)
@@ -614,21 +614,21 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         umock_c_reset_all_calls();
 
         //arrange
-        STRICT_EXPECTED_CALL(mqtt_client_deinit(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(mqtt_client_deinit(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
         //act
         prov_transport_common_mqtt_destroy(handle);
@@ -749,7 +749,7 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         umock_c_reset_all_calls();
 
         //arrange
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_REGISTRATION_ID_VALUE));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_REGISTRATION_ID_VALUE));
 
         //act
         int result = prov_transport_common_mqtt_open(handle, TEST_REGISTRATION_ID_VALUE, NULL, NULL, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL, on_transport_challenge_callback, NULL);
@@ -772,7 +772,7 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         ASSERT_ARE_EQUAL(int, 0, negativeTestsInitResult);
 
         //arrange
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_REGISTRATION_ID_VALUE));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_REGISTRATION_ID_VALUE));
 
         umock_c_negative_tests_snapshot();
 
@@ -800,7 +800,7 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         umock_c_reset_all_calls();
 
         //arrange
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_REGISTRATION_ID_VALUE));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_REGISTRATION_ID_VALUE));
 
         //act
         int result = prov_transport_common_mqtt_open(handle, TEST_REGISTRATION_ID_VALUE, NULL, NULL, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL, on_transport_challenge_callback, NULL);
@@ -820,7 +820,7 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         umock_c_reset_all_calls();
 
         //arrange
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_REGISTRATION_ID_VALUE));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_REGISTRATION_ID_VALUE));
 
         //act
         int result = prov_transport_common_mqtt_open(handle, TEST_REGISTRATION_ID_VALUE, NULL, NULL, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL, NULL, NULL);
@@ -871,12 +871,12 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         umock_c_reset_all_calls();
 
         //arrange
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(mqtt_client_disconnect(IGNORED_PTR_ARG, NULL, NULL));
-        STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(xio_destroy(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(mqtt_client_disconnect(IGNORED_ARG, NULL, NULL));
+        STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(xio_destroy(IGNORED_ARG));
 
         //act
         int result = prov_transport_common_mqtt_close(handle);
@@ -1148,7 +1148,7 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         umock_c_reset_all_calls();
 
         //arrange
-        STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_ARG));
 
         //act
         prov_transport_common_mqtt_dowork(handle);
@@ -1175,9 +1175,9 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         umock_c_reset_all_calls();
 
         //arrange
-        STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(mqtt_client_subscribe(IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(on_transport_status_cb(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, IGNORED_NUM_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(mqtt_client_subscribe(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(on_transport_status_cb(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, IGNORED_ARG, IGNORED_ARG));
 
         //act
         prov_transport_common_mqtt_dowork(handle);
@@ -1204,10 +1204,10 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         umock_c_reset_all_calls();
 
         //arrange
-        STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(mqtt_client_subscribe(IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG)).SetReturn(__LINE__);
-        STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(on_transport_register_data_cb(PROV_DEVICE_TRANSPORT_RESULT_ERROR, NULL, NULL, NULL, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(mqtt_client_subscribe(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG)).SetReturn(__LINE__);
+        STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(on_transport_register_data_cb(PROV_DEVICE_TRANSPORT_RESULT_ERROR, NULL, NULL, NULL, IGNORED_ARG));
 
         //act
         prov_transport_common_mqtt_dowork(handle);
@@ -1243,9 +1243,9 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         umock_c_reset_all_calls();
 
         //arrange
-        STRICT_EXPECTED_CALL(mqttmessage_getTopicName(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(mqttmessage_getApplicationMsg(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(mqttmessage_getTopicName(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(mqttmessage_getApplicationMsg(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
 
         //act
         g_on_msg_recv(TEST_MQTT_MESSAGE, g_msg_recv_callback_context);
@@ -1279,8 +1279,8 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         umock_c_reset_all_calls();
 
         //arrange
-        STRICT_EXPECTED_CALL(mqttmessage_getTopicName(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(mqttmessage_getApplicationMsg(IGNORED_PTR_ARG)).SetReturn(NULL);
+        STRICT_EXPECTED_CALL(mqttmessage_getTopicName(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(mqttmessage_getApplicationMsg(IGNORED_ARG)).SetReturn(NULL);
 
         //act
         g_on_msg_recv(TEST_MQTT_MESSAGE, g_msg_recv_callback_context);
@@ -1314,9 +1314,9 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         umock_c_reset_all_calls();
 
         //arrange
-        STRICT_EXPECTED_CALL(mqttmessage_getTopicName(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(mqttmessage_getApplicationMsg(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)).SetReturn(NULL);
+        STRICT_EXPECTED_CALL(mqttmessage_getTopicName(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(mqttmessage_getApplicationMsg(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG)).SetReturn(NULL);
 
         //act
         g_on_msg_recv(TEST_MQTT_MESSAGE, g_msg_recv_callback_context);
@@ -1350,9 +1350,9 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         umock_c_reset_all_calls();
 
         //arrange
-        STRICT_EXPECTED_CALL(mqttmessage_getTopicName(IGNORED_PTR_ARG)).SetReturn(TEST_500_REGISTRATION_VALUE);
-        STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(on_transport_status_cb(PROV_DEVICE_TRANSPORT_STATUS_TRANSIENT, IGNORED_NUM_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(mqttmessage_getTopicName(IGNORED_ARG)).SetReturn(TEST_500_REGISTRATION_VALUE);
+        STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(on_transport_status_cb(PROV_DEVICE_TRANSPORT_STATUS_TRANSIENT, IGNORED_ARG, IGNORED_ARG));
 
         //act
         g_on_msg_recv(TEST_MQTT_MESSAGE, g_msg_recv_callback_context);
@@ -1388,15 +1388,15 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         umock_c_reset_all_calls();
 
         //arrange
-        STRICT_EXPECTED_CALL(mqttmessage_getTopicName(IGNORED_PTR_ARG)).SetReturn(TEST_202_REGISTRATION_VALUE);
-        STRICT_EXPECTED_CALL(mqttmessage_getApplicationMsg(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(on_transport_json_parse(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(on_transport_status_cb(PROV_DEVICE_TRANSPORT_STATUS_ASSIGNING, 8, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(mqttmessage_getTopicName(IGNORED_ARG)).SetReturn(TEST_202_REGISTRATION_VALUE);
+        STRICT_EXPECTED_CALL(mqttmessage_getApplicationMsg(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(on_transport_json_parse(IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(on_transport_status_cb(PROV_DEVICE_TRANSPORT_STATUS_ASSIGNING, 8, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
         //act
         g_on_msg_recv(TEST_MQTT_MESSAGE, g_msg_recv_callback_context);
@@ -1431,9 +1431,9 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         umock_c_reset_all_calls();
 
         //arrange
-        STRICT_EXPECTED_CALL(mqttmessage_getTopicName(IGNORED_PTR_ARG)).SetReturn(TEST_429_REGISTRATION_VALUE);
-        STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(on_transport_status_cb(PROV_DEVICE_TRANSPORT_STATUS_TRANSIENT, IGNORED_NUM_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(mqttmessage_getTopicName(IGNORED_ARG)).SetReturn(TEST_429_REGISTRATION_VALUE);
+        STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(on_transport_status_cb(PROV_DEVICE_TRANSPORT_STATUS_TRANSIENT, IGNORED_ARG, IGNORED_ARG));
 
         //act
         g_on_msg_recv(TEST_MQTT_MESSAGE, g_msg_recv_callback_context);
@@ -1510,7 +1510,7 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         umock_c_reset_all_calls();
 
         //arrange
-        STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_ARG));
         setup_send_mqtt_message_mocks();
 
         //act
@@ -1550,9 +1550,9 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         umock_c_reset_all_calls();
 
         //arrange
-        STRICT_EXPECTED_CALL(mqttmessage_getTopicName(IGNORED_PTR_ARG)).SetReturn(TEST_500_REGISTRATION_VALUE);
-        STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(on_transport_status_cb(PROV_DEVICE_TRANSPORT_STATUS_TRANSIENT, IGNORED_NUM_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(mqttmessage_getTopicName(IGNORED_ARG)).SetReturn(TEST_500_REGISTRATION_VALUE);
+        STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(on_transport_status_cb(PROV_DEVICE_TRANSPORT_STATUS_TRANSIENT, IGNORED_ARG, IGNORED_ARG));
 
         //act
         g_on_msg_recv(TEST_MQTT_MESSAGE, g_msg_recv_callback_context);
@@ -1586,7 +1586,7 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         umock_c_reset_all_calls();
 
         //arrange
-        STRICT_EXPECTED_CALL(mqtt_client_set_trace(IGNORED_PTR_ARG, true, false));
+        STRICT_EXPECTED_CALL(mqtt_client_set_trace(IGNORED_ARG, true, false));
 
         //act
         int result = prov_transport_common_mqtt_set_trace(handle, true);
@@ -1619,8 +1619,8 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         umock_c_reset_all_calls();
 
         //arrange
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_X509_CERT_VALUE));
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_PRIVATE_KEY_VALUE));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_X509_CERT_VALUE));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_PRIVATE_KEY_VALUE));
 
         //act
         int result = prov_transport_common_mqtt_x509_cert(handle, TEST_X509_CERT_VALUE, TEST_PRIVATE_KEY_VALUE);
@@ -1642,8 +1642,8 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         ASSERT_ARE_EQUAL(int, 0, negativeTestsInitResult);
 
         //arrange
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_X509_CERT_VALUE));
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_PRIVATE_KEY_VALUE));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_X509_CERT_VALUE));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_PRIVATE_KEY_VALUE));
 
         umock_c_negative_tests_snapshot();
 
@@ -1703,7 +1703,7 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         umock_c_reset_all_calls();
 
         //arrange
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_CERT_VALUE));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_CERT_VALUE));
 
         //act
         int result = prov_transport_common_mqtt_set_trusted_cert(handle, TEST_CERT_VALUE);
@@ -1722,7 +1722,7 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         umock_c_reset_all_calls();
 
         //arrange
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_CERT_VALUE)).SetReturn(__LINE__);
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_CERT_VALUE)).SetReturn(__LINE__);
 
         //act
         int result = prov_transport_common_mqtt_set_trusted_cert(handle, TEST_CERT_VALUE);
@@ -1804,9 +1804,9 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         proxy_options.username = TEST_USERNAME_VALUE;
         proxy_options.password = TEST_PASSWORD_VALUE;
 
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, proxy_options.host_address));
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, proxy_options.username));
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, proxy_options.password));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, proxy_options.host_address));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, proxy_options.username));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, proxy_options.password));
 
         //act
         int result = prov_transport_common_mqtt_set_proxy(handle, &proxy_options);
@@ -1854,9 +1854,9 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         proxy_options.username = TEST_USERNAME_VALUE;
         proxy_options.password = TEST_PASSWORD_VALUE;
 
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, proxy_options.host_address));
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, proxy_options.username));
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, proxy_options.password));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, proxy_options.host_address));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, proxy_options.username));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, proxy_options.password));
 
         umock_c_negative_tests_snapshot();
 
@@ -1888,7 +1888,7 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         proxy_options.host_address = TEST_HOST_ADDRESS_VALUE;
         proxy_options.port = 443;
 
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, proxy_options.host_address));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, proxy_options.host_address));
 
         //act
         int result = prov_transport_common_mqtt_set_proxy(handle, &proxy_options);
@@ -1914,12 +1914,12 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         umock_c_reset_all_calls();
 
         //arrange
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, proxy_options.host_address));
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, proxy_options.username));
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, proxy_options.password));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, proxy_options.host_address));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, proxy_options.username));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, proxy_options.password));
 
         //act
         int result = prov_transport_common_mqtt_set_proxy(handle, &proxy_options);
@@ -1971,8 +1971,8 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         umock_c_reset_all_calls();
 
         //arrange
-        STRICT_EXPECTED_CALL(on_mqtt_transport_io(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(xio_setoption(IGNORED_PTR_ARG, TEST_XIO_OPTION_NAME, TEST_OPTION_VALUE));
+        STRICT_EXPECTED_CALL(on_mqtt_transport_io(IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(xio_setoption(IGNORED_ARG, TEST_XIO_OPTION_NAME, TEST_OPTION_VALUE));
 
         //act
         int result = prov_transport_common_mqtt_set_option(handle, TEST_XIO_OPTION_NAME, TEST_OPTION_VALUE);
@@ -1992,7 +1992,7 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         umock_c_reset_all_calls();
 
         //arrange
-        STRICT_EXPECTED_CALL(xio_setoption(IGNORED_PTR_ARG, TEST_XIO_OPTION_NAME, TEST_OPTION_VALUE));
+        STRICT_EXPECTED_CALL(xio_setoption(IGNORED_ARG, TEST_XIO_OPTION_NAME, TEST_OPTION_VALUE));
 
         //act
         result = prov_transport_common_mqtt_set_option(handle, TEST_XIO_OPTION_NAME, TEST_OPTION_VALUE);
@@ -2012,7 +2012,7 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         umock_c_reset_all_calls();
 
         //arrange
-        STRICT_EXPECTED_CALL(on_mqtt_transport_io(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(NULL);
+        STRICT_EXPECTED_CALL(on_mqtt_transport_io(IGNORED_ARG, IGNORED_ARG)).SetReturn(NULL);
 
         //act
         int result = prov_transport_common_mqtt_set_option(handle, TEST_XIO_OPTION_NAME, TEST_OPTION_VALUE);

@@ -1,11 +1,7 @@
 LIBRARY iothub_service_client
 EXPORTS
-    IOTHUB_MESSAGE_RESULTStringStorage
-    IOTHUBMESSAGE_CONTENT_TYPEStringStorage
-    IOTHUB_MESSAGE_RESULTStrings
-    IOTHUB_MESSAGE_RESULT_FromString
-    IOTHUBMESSAGE_CONTENT_TYPEStrings
-    IOTHUBMESSAGE_CONTENT_TYPE_FromString
+    MU_IOTHUB_MESSAGE_RESULT_ToString
+    MU_IOTHUBMESSAGE_CONTENT_TYPE_ToString
     IoTHubMessage_CreateFromByteArray
     IoTHubMessage_CreateFromString
     IoTHubMessage_Clone

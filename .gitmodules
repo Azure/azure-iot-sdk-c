@@ -21,13 +21,20 @@
 	url = https://github.com/Azure/azure-utpm-c.git
 [submodule "deps/azure-macro-utils-c"]
 	path = deps/azure-macro-utils-c
-	url = https://github.com/Azure/azure-macro-utils-c.git
+	url = https://github.com/Azure/macro-utils-c.git
+
+[submodule "deps/c-logging"]
+	path = deps/c-logging
+	url = https://github.com/Azure/c-logging
+[submodule "deps/c-build-tools"]
+	path = deps/c-build-tools
+	url = https://github.com/Azure/c-build-tools
 [submodule "deps/umock-c"]
 	path = deps/umock-c
-	url = https://github.com/Azure/umock-c.git
-[submodule "deps/azure-c-testrunnerswitcher"]
-	path = deps/azure-c-testrunnerswitcher
-	url = https://github.com/Azure/azure-c-testrunnerswitcher.git
-[submodule "deps/azure-ctest"]
-	path = deps/azure-ctest
-	url = https://github.com/Azure/azure-ctest.git
+	url = https://github.com/Azure/umock-c
+[submodule "deps/ctest"]
+	path = deps/ctest
+	url = https://github.com/Azure/ctest
+[submodule "deps/c-testrunnerswitcher"]
+	path = deps/c-testrunnerswitcher
+	url = https://github.com/Azure/c-testrunnerswitcher

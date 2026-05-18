@@ -149,10 +149,10 @@ TEST_FUNCTION(IoTHubClient_Diagnostic_AddIfNecessary_fails)
 
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(IoTHubMessage_SetDiagnosticPropertyData(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubMessage_SetDiagnosticPropertyData(IGNORED_ARG, IGNORED_ARG));
 
     umock_c_negative_tests_snapshot();
 
@@ -202,14 +202,14 @@ TEST_FUNCTION(IoTHubClient_Diagnostic_AddIfNecessary_no_diag_info_with_percentag
     umock_c_reset_all_calls();
 
 
-    EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
     EXPECTED_CALL(get_time(NULL));
-    STRICT_EXPECTED_CALL(IoTHubMessage_SetDiagnosticPropertyData(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubMessage_SetDiagnosticPropertyData(IGNORED_ARG, IGNORED_ARG));
+    EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
     //act
     int result = IoTHubClient_Diagnostic_AddIfNecessary(&diag_setting, TEST_MESSAGE_HANDLE);
@@ -231,14 +231,14 @@ TEST_FUNCTION(IoTHubClient_Diagnostic_AddIfNecessary_no_diag_info_with_normal_pe
 
     umock_c_reset_all_calls();
 
-    EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
     EXPECTED_CALL(get_time(NULL));
-    STRICT_EXPECTED_CALL(IoTHubMessage_SetDiagnosticPropertyData(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubMessage_SetDiagnosticPropertyData(IGNORED_ARG, IGNORED_ARG));
+    EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
     //act
     for (uint32_t index = 0; index < 2; ++index)

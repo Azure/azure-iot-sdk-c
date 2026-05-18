@@ -426,20 +426,10 @@ static char* TEST_CHAR_PTR = "TestString";
 static unsigned char* TEST_UNSIGNED_CHAR_PTR = (unsigned char*)"TestString";
 static const char* TEST_CONST_CHAR_PTR = "TestConstChar";
 
-static STRING_HANDLE TEST_STRING_HANDLE = (STRING_HANDLE)0x4242;
-static BUFFER_HANDLE TEST_BUFFER_HANDLE = (BUFFER_HANDLE)0x4242;
-static const SINGLYLINKEDLIST_HANDLE TEST_LIST_HANDLE = (SINGLYLINKEDLIST_HANDLE)0x4242;
-static const LIST_ITEM_HANDLE TEST_LIST_ITEM_HANDLE = (LIST_ITEM_HANDLE)0x3434;
-
 static const unsigned int httpStatusCodeOk = 200;
 static const unsigned int httpStatusCodeBadRequest = 400;
 static const unsigned int httpStatusCodeDeviceExists = 409;
 static const unsigned int httpStatusCodeDeviceNotExists = 404;
-static const HTTPAPIEX_HANDLE TEST_HTTPAPIEX_HANDLE = (HTTPAPIEX_HANDLE)0x4343;
-static HTTPAPIEX_SAS_HANDLE TEST_HTTPAPIEX_SAS_HANDLE = (HTTPAPIEX_SAS_HANDLE)0x4444;
-static const HTTP_HEADERS_HANDLE TEST_HTTP_HEADERS_HANDLE = (HTTP_HEADERS_HANDLE)0x4545;
-static const HTTP_HEADERS_RESULT TEST_HTTP_HEADERS_RESULT = (HTTP_HEADERS_RESULT)0x1;
-static HTTPAPIEX_RESULT TEST_HTTPAPIEX_RESULT = (HTTPAPIEX_RESULT)0x1;
 
 static const char* TEST_DEVICE_JSON_KEY_DEVICE_NAME = "deviceId";
 static const char* TEST_DEVICE_JSON_KEY_MODULE_NAME = "moduleId";
@@ -605,27 +595,26 @@ static void setupHttpMockCalls(bool updateIfMatch, const unsigned int httpStatus
     STRICT_EXPECTED_CALL(STRING_construct(TEST_SHAREDACCESSKEYNAME));
 
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, TEST_HTTP_HEADER_KEY_AUTHORIZATION, TEST_HTTP_HEADER_VAL_AUTHORIZATION))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, TEST_HTTP_HEADER_KEY_AUTHORIZATION, TEST_HTTP_HEADER_VAL_AUTHORIZATION))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, TEST_HTTP_HEADER_KEY_REQUEST_ID, TEST_HTTP_HEADER_VAL_REQUEST_ID))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, TEST_HTTP_HEADER_KEY_REQUEST_ID, TEST_HTTP_HEADER_VAL_REQUEST_ID))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, TEST_HTTP_HEADER_KEY_USER_AGENT, TEST_HTTP_HEADER_VAL_USER_AGENT))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, TEST_HTTP_HEADER_KEY_USER_AGENT, TEST_HTTP_HEADER_VAL_USER_AGENT))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, TEST_HTTP_HEADER_KEY_ACCEPT, TEST_HTTP_HEADER_VAL_ACCEPT))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, TEST_HTTP_HEADER_KEY_ACCEPT, TEST_HTTP_HEADER_VAL_ACCEPT))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, TEST_HTTP_HEADER_KEY_CONTENT_TYPE, TEST_HTTP_HEADER_VAL_CONTENT_TYPE))
+    STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, TEST_HTTP_HEADER_KEY_CONTENT_TYPE, TEST_HTTP_HEADER_VAL_CONTENT_TYPE))
         .IgnoreArgument(1);
     if (updateIfMatch)
     {
-        STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, TEST_HTTP_HEADER_KEY_IFMATCH, TEST_HTTP_HEADER_VAL_IFMATCH))
+        STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, TEST_HTTP_HEADER_KEY_IFMATCH, TEST_HTTP_HEADER_VAL_IFMATCH))
             .IgnoreArgument(1);
     }
 
-    STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .IgnoreAllArguments();
+    STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_Create(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
     STRICT_EXPECTED_CALL(HTTPAPIEX_Create(TEST_HOSTNAME));
 
-    STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(IGNORED_PTR_ARG, IGNORED_PTR_ARG, requestType, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(IGNORED_ARG, IGNORED_ARG, requestType, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2)
         .IgnoreArgument(4)
@@ -637,24 +626,24 @@ static void setupHttpMockCalls(bool updateIfMatch, const unsigned int httpStatus
         .CopyOutArgumentBuffer_statusCode(&httpStatusCode, sizeof(httpStatusCode))
         .SetReturn(HTTPAPIEX_OK);
 
-    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPAPIEX_Destroy(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPAPIEX_Destroy(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_Destroy(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(HTTPAPIEX_SAS_Destroy(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 }
 
 static void setupJsonParseDeviceMockCalls(bool fromDeviceList, IOTHUB_REGISTRYMANAGER_AUTH_METHOD authMethod, bool isModule, const char* managedBy)
 {
-    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG))
         .IgnoreArgument(1)
         .SetReturn(TEST_UNSIGNED_CHAR_PTR);
 
@@ -693,7 +682,7 @@ static void setupJsonParseDeviceMockCalls(bool fromDeviceList, IOTHUB_REGISTRYMA
         expectedMallocs++;
     }
 
-    STRICT_EXPECTED_CALL(json_parse_string(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(json_parse_string(IGNORED_ARG))
         .IgnoreArgument(1)
         .SetReturn(TEST_JSON_VALUE);
 
@@ -788,36 +777,34 @@ static void setupJsonParseDeviceMockCalls(bool fromDeviceList, IOTHUB_REGISTRYMA
 
     for (int i = 0; i < expectedMallocs; i++)
     {
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
     }
 
     if (true == fromDeviceList)
     {
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(singlylinkedlist_add(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(singlylinkedlist_add(IGNORED_ARG, IGNORED_ARG));
 
         if (isModule == false)
         {
             // Free module specific members allocated by lower layer but not needed now.
-            STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-            STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+            STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
         }
 
-        STRICT_EXPECTED_CALL(json_object_clear(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(json_object_clear(IGNORED_ARG))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(json_array_clear(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(json_array_clear(IGNORED_ARG))
             .IgnoreArgument(1);
     }
     else
     {
-        STRICT_EXPECTED_CALL(json_object_clear(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(json_object_clear(IGNORED_ARG))
             .IgnoreArgument(1);
     }
 
-    STRICT_EXPECTED_CALL(json_value_free(IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(json_value_free(IGNORED_ARG))
         .IgnoreArgument(1);
 }
 
@@ -1132,23 +1119,18 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
     TEST_FUNCTION(IoTHubRegistryManager_Create_happy_path)
     {
         // arrange
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
 
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
 
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
 
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
 
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
 
         // act
         IOTHUB_REGISTRYMANAGER_HANDLE result = IoTHubRegistryManager_Create(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE);
@@ -1176,22 +1158,22 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         int umockc_result = umock_c_negative_tests_init();
         ASSERT_ARE_EQUAL(int, 0, umockc_result);
 
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, (const char*)(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE->hostname)))
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, (const char*)(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE->hostname)))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, (const char*)(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE->iothubName)))
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, (const char*)(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE->iothubName)))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, (const char*)(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE->iothubSuffix)))
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, (const char*)(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE->iothubSuffix)))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, (const char*)(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE->sharedAccessKey)))
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, (const char*)(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE->sharedAccessKey)))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, (const char*)(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE->keyName)))
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, (const char*)(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE->keyName)))
             .IgnoreArgument(1);
 
 
@@ -1233,19 +1215,19 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
 
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
 
         // act
@@ -1648,7 +1630,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
                 break;
         }
 
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
             .IgnoreArgument(1);
 
         STRICT_EXPECTED_CALL(json_value_init_object())
@@ -1689,8 +1671,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         STRICT_EXPECTED_CALL(json_serialize_to_string(TEST_JSON_VALUE))
             .SetReturn(TEST_CHAR_PTR);
 
-        STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
-            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_ARG, IGNORED_ARG));
 
         STRICT_EXPECTED_CALL(json_free_serialized_string(TEST_CHAR_PTR));
         STRICT_EXPECTED_CALL(json_object_clear(TEST_JSON_OBJECT));
@@ -1698,11 +1679,11 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
 
         setupHttpMockCalls(false, httpStatusCodeOk, HTTPAPI_REQUEST_PUT);
 
-        STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG))
             .IgnoreArgument(1)
             .SetReturn(TEST_UNSIGNED_CHAR_PTR);
 
-        STRICT_EXPECTED_CALL(json_parse_string(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(json_parse_string(IGNORED_ARG))
             .IgnoreArgument(1)
             .SetReturn(TEST_JSON_VALUE);
         STRICT_EXPECTED_CALL(json_value_get_object(TEST_JSON_VALUE))
@@ -1764,64 +1745,51 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
                 .SetReturn(TEST_SECONDARYKEY);
         }
 
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
         if (moduleId != NULL)
         {
-            STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments();
+            STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
         }
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-            .IgnoreAllArguments();
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-            .IgnoreAllArguments();
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-            .IgnoreAllArguments();
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-            .IgnoreAllArguments();
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-            .IgnoreAllArguments();
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-            .IgnoreAllArguments();
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-            .IgnoreAllArguments();
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-            .IgnoreAllArguments();
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
 
         if ((authType == IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT) || (authType == IOTHUB_REGISTRYMANAGER_AUTH_SPK))
         {
-            STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments();
-            STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments();
+            STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+            STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
         }
 
         if (managedBy != NULL)
         {
-            STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
         }
 
-        STRICT_EXPECTED_CALL(json_object_clear(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(json_object_clear(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(json_value_free(IGNORED_PTR_ARG))
-            .IgnoreArgument(1);
-
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
-            .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(json_value_free(IGNORED_ARG))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
+            .IgnoreArgument(1);
+
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
         if (moduleId == NULL)
         {
             // If this was *NOT* a module, then fields the lower layer allocated that are module specific
             // are freed at this point since we can't pass them up device layer.
-            STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
                 .IgnoreArgument(1);
-            STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
                 .IgnoreArgument(1);
         }
 
@@ -1979,7 +1947,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
     TEST_FUNCTION(IoTHubRegistryManager_CreateDevice_happy_path_status_code_409)
     {
         // arrange
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
             .IgnoreArgument(1);
 
         STRICT_EXPECTED_CALL(json_value_init_object())
@@ -1997,23 +1965,22 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         STRICT_EXPECTED_CALL(json_serialize_to_string(TEST_JSON_VALUE))
             .SetReturn(TEST_CHAR_PTR);
 
-        STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
-            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_ARG, IGNORED_ARG));
 
         STRICT_EXPECTED_CALL(json_free_serialized_string(TEST_CHAR_PTR));
-        STRICT_EXPECTED_CALL(json_object_clear(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(json_object_clear(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(json_value_free(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(json_value_free(IGNORED_ARG))
             .IgnoreArgument(1);
 
         setupHttpMockCalls(false, httpStatusCodeDeviceExists, HTTPAPI_REQUEST_PUT);
 
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
 
         // act
@@ -2030,7 +1997,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
     TEST_FUNCTION(IoTHubRegistryManager_CreateDevice_Ex_happy_path_status_code_409)
     {
         // arrange
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
             .IgnoreArgument(1);
 
         STRICT_EXPECTED_CALL(json_value_init_object())
@@ -2048,23 +2015,22 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         STRICT_EXPECTED_CALL(json_serialize_to_string(TEST_JSON_VALUE))
             .SetReturn(TEST_CHAR_PTR);
 
-        STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
-            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_ARG, IGNORED_ARG));
 
         STRICT_EXPECTED_CALL(json_free_serialized_string(TEST_CHAR_PTR));
-        STRICT_EXPECTED_CALL(json_object_clear(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(json_object_clear(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(json_value_free(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(json_value_free(IGNORED_ARG))
             .IgnoreArgument(1);
 
         setupHttpMockCalls(false, httpStatusCodeDeviceExists, HTTPAPI_REQUEST_PUT);
 
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
 
         // act
@@ -2083,7 +2049,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
     TEST_FUNCTION(IoTHubRegistryManager_CreateDevice_happy_path_status_code_400)
     {
         // arrange
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
             .IgnoreArgument(1);
 
         STRICT_EXPECTED_CALL(json_value_init_object())
@@ -2101,23 +2067,22 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         STRICT_EXPECTED_CALL(json_serialize_to_string(TEST_JSON_VALUE))
             .SetReturn(TEST_CHAR_PTR);
 
-        STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
-            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_ARG, IGNORED_ARG));
 
         STRICT_EXPECTED_CALL(json_free_serialized_string(TEST_CHAR_PTR));
-        STRICT_EXPECTED_CALL(json_object_clear(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(json_object_clear(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(json_value_free(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(json_value_free(IGNORED_ARG))
             .IgnoreArgument(1);
 
         setupHttpMockCalls(false, httpStatusCodeBadRequest, HTTPAPI_REQUEST_PUT);
 
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
 
         // act
@@ -2134,7 +2099,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
     TEST_FUNCTION(IoTHubRegistryManager_CreateDevice_Ex_happy_path_status_code_400)
     {
         // arrange
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
             .IgnoreArgument(1);
 
         STRICT_EXPECTED_CALL(json_value_init_object())
@@ -2152,23 +2117,22 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         STRICT_EXPECTED_CALL(json_serialize_to_string(TEST_JSON_VALUE))
             .SetReturn(TEST_CHAR_PTR);
 
-        STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
-            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_ARG, IGNORED_ARG));
 
         STRICT_EXPECTED_CALL(json_free_serialized_string(TEST_CHAR_PTR));
-        STRICT_EXPECTED_CALL(json_object_clear(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(json_object_clear(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(json_value_free(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(json_value_free(IGNORED_ARG))
             .IgnoreArgument(1);
 
         setupHttpMockCalls(false, httpStatusCodeBadRequest, HTTPAPI_REQUEST_PUT);
 
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
 
         // act
@@ -2191,7 +2155,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         int umockc_result = umock_c_negative_tests_init();
         ASSERT_ARE_EQUAL(int, 0, umockc_result);
 
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
             .IgnoreArgument(1);
 
         STRICT_EXPECTED_CALL(json_value_init_object())
@@ -2209,23 +2173,22 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         STRICT_EXPECTED_CALL(json_serialize_to_string(TEST_JSON_VALUE))
             .SetReturn(TEST_CHAR_PTR);
 
-        STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
-            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_ARG, IGNORED_ARG));
 
         STRICT_EXPECTED_CALL(json_free_serialized_string(TEST_CHAR_PTR));
-        STRICT_EXPECTED_CALL(json_object_clear(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(json_object_clear(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(json_value_free(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(json_value_free(IGNORED_ARG))
             .IgnoreArgument(1);
 
         setupHttpMockCalls(false, httpStatusCodeBadRequest, HTTPAPI_REQUEST_PUT);
 
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
 
         umock_c_negative_tests_snapshot();
@@ -2272,7 +2235,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         int umockc_result = umock_c_negative_tests_init();
         ASSERT_ARE_EQUAL(int, 0, umockc_result);
 
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
             .IgnoreArgument(1);
 
         STRICT_EXPECTED_CALL(json_value_init_object())
@@ -2290,23 +2253,22 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         STRICT_EXPECTED_CALL(json_serialize_to_string(TEST_JSON_VALUE))
             .SetReturn(TEST_CHAR_PTR);
 
-        STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
-            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_ARG, IGNORED_ARG));
 
         STRICT_EXPECTED_CALL(json_free_serialized_string(TEST_CHAR_PTR));
-        STRICT_EXPECTED_CALL(json_object_clear(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(json_object_clear(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(json_value_free(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(json_value_free(IGNORED_ARG))
             .IgnoreArgument(1);
 
         setupHttpMockCalls(false, httpStatusCodeBadRequest, HTTPAPI_REQUEST_PUT);
 
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
 
         umock_c_negative_tests_snapshot();
@@ -2441,11 +2403,11 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         setupHttpMockCalls(false, httpStatusCodeOk, HTTPAPI_REQUEST_GET);
         setupJsonParseDeviceMockCalls(false, authType, false, NULL);
 
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
 
         ///act
@@ -2478,11 +2440,11 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         setupHttpMockCalls(false, httpStatusCodeOk, HTTPAPI_REQUEST_GET);
         setupJsonParseDeviceMockCalls(false, authType, false, NULL);
 
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
 
         ///act
@@ -2597,7 +2559,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         setupHttpMockCalls(false, httpStatusCodeOk, HTTPAPI_REQUEST_GET);
         setupJsonParseDeviceMockCalls(false, authType, true, managedBy);
 
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
             .IgnoreArgument(1);
 
         ///act
@@ -2630,7 +2592,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         //TestGetDevice(IOTHUB_REGISTRYMANAGER_AUTH_SPK);
         //arrange
         setupHttpMockCalls(false, httpStatusCodeDeviceNotExists, HTTPAPI_REQUEST_GET);
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG));
 
         //act
         IOTHUB_DEVICE deviceInfo;
@@ -2650,7 +2612,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         setupHttpMockCalls(false, httpStatusCodeOk, HTTPAPI_REQUEST_GET);
         setupJsonParseDeviceMockCalls(false, IOTHUB_REGISTRYMANAGER_AUTH_SPK, false, NULL);
 
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
             .IgnoreArgument(1);
 
         umock_c_negative_tests_snapshot();
@@ -2722,7 +2684,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         setupHttpMockCalls(false, httpStatusCodeOk, HTTPAPI_REQUEST_GET);
         setupJsonParseDeviceMockCalls(false, IOTHUB_REGISTRYMANAGER_AUTH_SPK, false, NULL);
 
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
             .IgnoreArgument(1);
 
         umock_c_negative_tests_snapshot();
@@ -2980,7 +2942,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
     static void setupUpdateDeviceOrModule_happy_path(IOTHUB_REGISTRYMANAGER_AUTH_METHOD authType, const char* moduleId, const char* managedBy)
     {
         // arrange
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
             .IgnoreArgument(1);
 
         STRICT_EXPECTED_CALL(json_value_init_object())
@@ -3021,23 +2983,22 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         STRICT_EXPECTED_CALL(json_serialize_to_string(TEST_JSON_VALUE))
             .SetReturn(TEST_CHAR_PTR);
 
-        STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
-            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_ARG, IGNORED_ARG));
 
         STRICT_EXPECTED_CALL(json_free_serialized_string(TEST_CHAR_PTR));
-        STRICT_EXPECTED_CALL(json_object_clear(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(json_object_clear(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(json_value_free(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(json_value_free(IGNORED_ARG))
             .IgnoreArgument(1);
 
         setupHttpMockCalls(true, httpStatusCodeOk, HTTPAPI_REQUEST_PUT);
 
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
 
     }
@@ -3219,7 +3180,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         ASSERT_ARE_EQUAL(int, 0, umockc_result);
 
         // arrange
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
             .IgnoreArgument(1);
 
         STRICT_EXPECTED_CALL(json_value_init_object())
@@ -3237,23 +3198,22 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         STRICT_EXPECTED_CALL(json_serialize_to_string(TEST_JSON_VALUE))
             .SetReturn(TEST_CHAR_PTR);
 
-        STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
-            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_ARG, IGNORED_ARG));
 
         STRICT_EXPECTED_CALL(json_free_serialized_string(TEST_CHAR_PTR));
-        STRICT_EXPECTED_CALL(json_object_clear(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(json_object_clear(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(json_value_free(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(json_value_free(IGNORED_ARG))
             .IgnoreArgument(1);
 
         setupHttpMockCalls(true, httpStatusCodeOk, HTTPAPI_REQUEST_PUT);
 
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
 
         umock_c_negative_tests_snapshot();
@@ -3300,7 +3260,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         ASSERT_ARE_EQUAL(int, 0, umockc_result);
 
         // arrange
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
             .IgnoreArgument(1);
 
         STRICT_EXPECTED_CALL(json_value_init_object())
@@ -3318,23 +3278,22 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         STRICT_EXPECTED_CALL(json_serialize_to_string(TEST_JSON_VALUE))
             .SetReturn(TEST_CHAR_PTR);
 
-        STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
-            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_ARG, IGNORED_ARG));
 
         STRICT_EXPECTED_CALL(json_free_serialized_string(TEST_CHAR_PTR));
-        STRICT_EXPECTED_CALL(json_object_clear(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(json_object_clear(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(json_value_free(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(json_value_free(IGNORED_ARG))
             .IgnoreArgument(1);
 
         setupHttpMockCalls(true, httpStatusCodeOk, HTTPAPI_REQUEST_PUT);
 
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG))
             .IgnoreArgument(1);
 
         umock_c_negative_tests_snapshot();
@@ -3573,7 +3532,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         setupHttpMockCalls(false, httpStatusCodeOk, HTTPAPI_REQUEST_GET);
         setupJsonParseDeviceMockCalls(true, IOTHUB_REGISTRYMANAGER_AUTH_SPK, true, NULL);
 
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
             .IgnoreArgument(1);
 
         ///act
@@ -3660,7 +3619,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         setupHttpMockCalls(false, httpStatusCodeOk, HTTPAPI_REQUEST_GET);
         setupJsonParseDeviceMockCalls(true, IOTHUB_REGISTRYMANAGER_AUTH_SPK, false, NULL);
 
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
             .IgnoreArgument(1);
 
         ///act
@@ -3684,7 +3643,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         setupHttpMockCalls(false, httpStatusCodeOk, HTTPAPI_REQUEST_GET);
         setupJsonParseDeviceMockCalls(true, IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT, false, NULL);
 
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
             .IgnoreArgument(1);
 
         ///act
@@ -3708,7 +3667,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         setupHttpMockCalls(false, httpStatusCodeOk, HTTPAPI_REQUEST_GET);
         setupJsonParseDeviceMockCalls(true, IOTHUB_REGISTRYMANAGER_AUTH_SPK, false, NULL);
 
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
             .IgnoreArgument(1);
 
         umock_c_negative_tests_snapshot();
@@ -3787,7 +3746,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         setupHttpMockCalls(false, httpStatusCodeOk, HTTPAPI_REQUEST_GET);
         setupJsonParseDeviceMockCalls(true, IOTHUB_REGISTRYMANAGER_AUTH_SPK, true, NULL);
 
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
             .IgnoreArgument(1);
 
         umock_c_negative_tests_snapshot();
@@ -3863,7 +3822,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         setupHttpMockCalls(false, httpStatusCodeOk, HTTPAPI_REQUEST_GET);
         setupJsonParseDeviceMockCalls(true, IOTHUB_REGISTRYMANAGER_AUTH_SPK, true, TEST_MANAGED_BY);
 
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
             .IgnoreArgument(1);
 
         umock_c_negative_tests_snapshot();
@@ -3963,11 +3922,11 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         ///arrange
         setupHttpMockCalls(false, httpStatusCodeOk, HTTPAPI_REQUEST_GET);
 
-        STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG))
             .IgnoreArgument(1)
             .SetReturn(TEST_UNSIGNED_CHAR_PTR);
 
-        STRICT_EXPECTED_CALL(json_parse_string(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(json_parse_string(IGNORED_ARG))
             .IgnoreArgument(1)
             .SetReturn(TEST_JSON_VALUE);
 
@@ -3978,12 +3937,12 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         STRICT_EXPECTED_CALL(json_object_get_number(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_ENABLED_DEVICECCOUNT));
         STRICT_EXPECTED_CALL(json_object_get_number(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DISABLED_DEVICECOUNT));
 
-        STRICT_EXPECTED_CALL(json_object_clear(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(json_object_clear(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(json_value_free(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(json_value_free(IGNORED_ARG))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
             .IgnoreArgument(1);
 
         ///act
@@ -4004,11 +3963,11 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
 
         setupHttpMockCalls(false, httpStatusCodeOk, HTTPAPI_REQUEST_GET);
 
-        STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG))
             .IgnoreArgument(1)
             .SetReturn(TEST_UNSIGNED_CHAR_PTR);
 
-        STRICT_EXPECTED_CALL(json_parse_string(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(json_parse_string(IGNORED_ARG))
             .IgnoreArgument(1)
             .SetReturn(TEST_JSON_VALUE);
 
@@ -4019,12 +3978,12 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         STRICT_EXPECTED_CALL(json_object_get_number(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_ENABLED_DEVICECCOUNT));
         STRICT_EXPECTED_CALL(json_object_get_number(TEST_JSON_OBJECT, TEST_DEVICE_JSON_KEY_DISABLED_DEVICECOUNT));
 
-        STRICT_EXPECTED_CALL(json_object_clear(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(json_object_clear(IGNORED_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(json_value_free(IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(json_value_free(IGNORED_ARG))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
             .IgnoreArgument(1);
 
         umock_c_negative_tests_snapshot();

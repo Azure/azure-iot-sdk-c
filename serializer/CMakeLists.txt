@@ -70,6 +70,11 @@ ENDIF(WIN32)
 add_library(serializer ${serializer_c_files} ${serializer_h_files})
 target_link_libraries(serializer parson)
 
+# Suppress GCC/Clang warnings for MSVC-specific #pragma warning directives
+if(NOT MSVC)
+    target_compile_options(serializer PRIVATE -Wno-unknown-pragmas)
+endif()
+
 set (install_libs serializer)
 
 if (${build_as_dynamic})
@@ -79,6 +84,7 @@ if (${build_as_dynamic})
     target_link_libraries(serializer_dll
         aziotsharedutil_dll
         parson
+        c_logging_v2
     )
 
     if (${CMAKE_C_COMPILER_ID} STREQUAL "GNU" OR ${CMAKE_C_COMPILER_ID} STREQUAL "Clang")
@@ -91,12 +97,14 @@ if (${build_as_dynamic})
         OUTPUT_NAME "serializer"
         ARCHIVE_OUTPUT_NAME "serializer_dll_import"
         ENABLE_EXPORTS YES
-        WINDOWS_EXPORT_ALL_SYMBOLS YES
         PDB_NAME "serializer_dll"
         VERSION ${IOT_SDK_VERSION}
         SOVERSION ${IOT_SDK_VERSION_MAJOR}
         BUILD_WITH_INSTALL_RPATH TRUE
     )
+    if(NOT MSVC)
+        target_compile_options(serializer_dll PRIVATE -Wno-unknown-pragmas)
+    endif()
     set (install_libs ${install_libs} serializer_dll)
 endif()
 applyXcodeBuildFlagsIfNeeded(serializer)

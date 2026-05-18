@@ -406,7 +406,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_Create_success)
     IOTHUBTRANSPORT_CONFIG config = { 0 };
     SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
 
-    STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_Common_Create(&config, IGNORED_PTR_ARG, g_transport_cb_info, NULL));
+    STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_Common_Create(&config, IGNORED_ARG, g_transport_cb_info, NULL));
 
     // act
     TRANSPORT_LL_HANDLE handle = IoTHubTransportMqtt_Create(&config, g_transport_cb_info, NULL);
@@ -822,8 +822,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_SendMessageDisposition_success)
 {
     // arrange
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_Common_SendMessageDisposition(TEST_DEVICE_HANDLE, IGNORED_PTR_ARG, IOTHUBMESSAGE_ACCEPTED))
-        .IgnoreAllArguments();
+    STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_Common_SendMessageDisposition(TEST_DEVICE_HANDLE, IGNORED_ARG, IOTHUBMESSAGE_ACCEPTED));
 
     // act
     IOTHUB_CLIENT_RESULT result = IoTHubTransportMqtt_SendMessageDisposition(TEST_DEVICE_HANDLE, NULL, IOTHUBMESSAGE_ACCEPTED);
@@ -839,8 +838,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Subscribe_InputQueue_success)
 {
     // arrange
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_Common_Subscribe_InputQueue(IGNORED_PTR_ARG))
-        .IgnoreAllArguments();
+    STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_Common_Subscribe_InputQueue(IGNORED_ARG));
 
     // act
     int result = IoTHubTransportMqtt_Subscribe_InputQueue(NULL);
@@ -875,7 +873,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_SetCallbackContext_success)
     TRANSPORT_LL_HANDLE handle = IoTHubTransportMqtt_Create(&config, g_transport_cb_info, NULL);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_SetCallbackContext(IGNORED_PTR_ARG, g_transport_cb_ctx));
+    STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_SetCallbackContext(IGNORED_ARG, g_transport_cb_ctx));
 
     // act
     int result = IoTHubTransportMqtt_SetCallbackContext(handle, g_transport_cb_ctx);
@@ -897,7 +895,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_GetSupportedPlatformInfo)
     PLATFORM_INFO_OPTION expected_info = PLATFORM_INFO_OPTION_RETRIEVE_SQM;
 
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_GetSupportedPlatformInfo(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_GetSupportedPlatformInfo(IGNORED_ARG, IGNORED_ARG))
         .CopyOutArgumentBuffer_info(&expected_info, sizeof(expected_info))
         .SetReturn(0);
 
@@ -918,7 +916,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_GetSupportedPlatformInfo_NULL_handle)
 {
     // arrange
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_GetSupportedPlatformInfo(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_GetSupportedPlatformInfo(IGNORED_ARG, IGNORED_ARG))
         .SetReturn(1);
 
     // act
@@ -941,7 +939,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_GetSupportedPlatformInfo_NULL_info)
     TRANSPORT_LL_HANDLE handle = IoTHubTransportMqtt_Create(&config, g_transport_cb_info, NULL);
 
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_GetSupportedPlatformInfo(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_GetSupportedPlatformInfo(IGNORED_ARG, IGNORED_ARG))
         .SetReturn(1);
 
     // act

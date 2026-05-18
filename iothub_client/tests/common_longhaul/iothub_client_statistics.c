@@ -754,9 +754,9 @@ int iothub_client_statistics_add_connection_status(IOTHUB_CLIENT_STATISTICS_HAND
     }
     else
     {
-        CONNECTION_STATUS_INFO* conn_status;
+        CONNECTION_STATUS_INFO* conn_status = (CONNECTION_STATUS_INFO*)malloc(sizeof(CONNECTION_STATUS_INFO));
 
-        if ((conn_status = (CONNECTION_STATUS_INFO*)malloc(sizeof(CONNECTION_STATUS_INFO))) == NULL)
+        if (conn_status == NULL)
         {
             LogError("Failed allocating CONNECTION_STATUS_INFO");
             result = MU_FAILURE;
@@ -765,6 +765,10 @@ int iothub_client_statistics_add_connection_status(IOTHUB_CLIENT_STATISTICS_HAND
         {
             IOTHUB_CLIENT_STATISTICS_HANDLE stats = (IOTHUB_CLIENT_STATISTICS*)handle;
 
+            conn_status->status = status;
+            conn_status->reason = reason;
+            conn_status->time = INDEFINITE_TIME;
+
             if (singlylinkedlist_add(stats->connection_status_history, conn_status) == NULL)
             {
                 LogError("Failed adding CONNECTION_STATUS_INFO");
@@ -772,9 +776,6 @@ int iothub_client_statistics_add_connection_status(IOTHUB_CLIENT_STATISTICS_HAND
             }
             else
             {
-                conn_status->status = status;
-                conn_status->reason = reason;
-
                 if ((conn_status->time = time(NULL)) == INDEFINITE_TIME)
                 {
                     LogError("Failed setting the connection status info time");

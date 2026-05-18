@@ -165,8 +165,6 @@ static char* TEST_IOTHUBSUFFIX = "theIotHubSuffix";
 static char* TEST_SHAREDACCESSKEY = "theSharedAccessKey";
 static char* TEST_SHAREDACCESSKEYNAME = "theSharedAccessKeyName";
 
-static const HTTP_HEADERS_HANDLE TEST_HTTP_HEADERS_HANDLE = (HTTP_HEADERS_HANDLE)0x4545;
-
 static const unsigned int httpStatusCodeOk = 200;
 static const unsigned int httpStatusCodeBadRequest = 400;
 
@@ -177,8 +175,6 @@ static const char* TEST_HTTP_HEADER_VAL_REQUEST_ID = "1001";
 static const char* TEST_HTTP_HEADER_KEY_USER_AGENT = "User-Agent";
 static const char* TEST_HTTP_HEADER_KEY_ACCEPT = "Accept";
 static const char* TEST_HTTP_HEADER_VAL_ACCEPT = "application/json";
-static const char* TEST_HTTP_HEADER_KEY_CONTENT_TYPE = "Content-Type";
-static const char* TEST_HTTP_HEADER_VAL_CONTENT_TYPE = "application/json; charset=utf-8";
 static const char* TEST_HTTP_HEADER_KEY_IFMATCH = "If-Match";
 static const char* TEST_HTTP_HEADER_VAL_IFMATCH = "*";
 
@@ -389,17 +385,14 @@ TEST_FUNCTION(IoTHubDeviceTwin_Create_return_null_if_input_parameter_serviceClie
 TEST_FUNCTION(IoTHubDeviceTwin_Create_happy_path)
 {
     // arrange
-    EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .IgnoreAllArguments();
+    EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
 
-    EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .IgnoreAllArguments();
+    EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
 
-    EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .IgnoreAllArguments();
+    EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
 
     // act
     IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE result = IoTHubDeviceTwin_Create(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE);
@@ -425,16 +418,16 @@ TEST_FUNCTION(IoTHubDeviceTwin_Create_non_happy_path)
     int umockc_result = umock_c_negative_tests_init();
     ASSERT_ARE_EQUAL(int, 0, umockc_result);
 
-    EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+    EXPECTED_CALL(gballoc_malloc(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, (const char*)(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE->hostname)))
+    EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, (const char*)(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE->hostname)))
         .IgnoreArgument(1);
 
-    EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, (const char*)(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE->iothubName)))
+    EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, (const char*)(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE->iothubName)))
         .IgnoreArgument(1);
 
-    EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, (const char*)(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE->keyName)))
+    EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, (const char*)(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE->keyName)))
         .IgnoreArgument(1);
 
 
@@ -477,13 +470,13 @@ TEST_FUNCTION(IoTHubDeviceTwin_Destroy_do_clean_up_and_return_if_input_parameter
 
     umock_c_reset_all_calls();
 
-    EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
-    EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
-    EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
-    EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+    EXPECTED_CALL(gballoc_free(IGNORED_ARG))
         .IgnoreArgument(1);
 
     // act
@@ -525,66 +518,64 @@ static void set_expected_calls_for_sendHttpRequestTwin(const unsigned int httpSt
     EXPECTED_CALL(STRING_construct(TEST_SHAREDACCESSKEYNAME));
 
     EXPECTED_CALL(HTTPHeaders_Alloc());
-    EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, TEST_HTTP_HEADER_KEY_AUTHORIZATION, TEST_HTTP_HEADER_VAL_AUTHORIZATION))
+    EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, TEST_HTTP_HEADER_KEY_AUTHORIZATION, TEST_HTTP_HEADER_VAL_AUTHORIZATION))
         .IgnoreArgument(1);
-    EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    EXPECTED_CALL(UniqueId_Generate(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+    EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    EXPECTED_CALL(UniqueId_Generate(IGNORED_ARG, IGNORED_ARG));
 
-    EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, TEST_HTTP_HEADER_KEY_REQUEST_ID, TEST_HTTP_HEADER_VAL_REQUEST_ID))
+    EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, TEST_HTTP_HEADER_KEY_REQUEST_ID, TEST_HTTP_HEADER_VAL_REQUEST_ID))
         .IgnoreArgument(1);
-    EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, TEST_HTTP_HEADER_KEY_USER_AGENT, IGNORED_PTR_ARG))
+    EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, TEST_HTTP_HEADER_KEY_USER_AGENT, IGNORED_ARG))
         .IgnoreArgument(1);
-    EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, TEST_HTTP_HEADER_KEY_ACCEPT, TEST_HTTP_HEADER_VAL_ACCEPT))
+    EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, TEST_HTTP_HEADER_KEY_ACCEPT, TEST_HTTP_HEADER_VAL_ACCEPT))
         .IgnoreArgument(1);
 
     if (update_twin)
     {
-        EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, TEST_HTTP_HEADER_KEY_IFMATCH, TEST_HTTP_HEADER_VAL_IFMATCH))
+        EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_ARG, TEST_HTTP_HEADER_KEY_IFMATCH, TEST_HTTP_HEADER_VAL_IFMATCH))
             .IgnoreArgument(1);
     }
 
-    EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
-    EXPECTED_CALL(HTTPAPIEX_SAS_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .IgnoreAllArguments();
+    EXPECTED_CALL(HTTPAPIEX_SAS_Create(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
     EXPECTED_CALL(HTTPAPIEX_Create(TEST_HOSTNAME));
 
-    EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
+    EXPECTED_CALL(STRING_c_str(IGNORED_ARG));
 
-    EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(IGNORED_PTR_ARG, IGNORED_PTR_ARG, HTTPAPI_REQUEST_GET, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .IgnoreAllArguments()
+    EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(IGNORED_ARG, IGNORED_ARG, HTTPAPI_REQUEST_GET, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
         .CopyOutArgumentBuffer_statusCode(&httpStatusCode, sizeof(httpStatusCode))
         .SetReturn(HTTPAPIEX_OK);
 
-    EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
-    EXPECTED_CALL(HTTPAPIEX_Destroy(IGNORED_PTR_ARG))
+    EXPECTED_CALL(HTTPAPIEX_Destroy(IGNORED_ARG))
         .IgnoreArgument(1);
-    EXPECTED_CALL(HTTPAPIEX_SAS_Destroy(IGNORED_PTR_ARG))
+    EXPECTED_CALL(HTTPAPIEX_SAS_Destroy(IGNORED_ARG))
         .IgnoreArgument(1);
-    EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG))
+    EXPECTED_CALL(HTTPHeaders_Free(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
-    EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
-    EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+    EXPECTED_CALL(STRING_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 }
 
 static void set_expected_calls_for_GetDeviceOrModuleTwin_processing()
 {
-    EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG))
+    EXPECTED_CALL(BUFFER_length(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
 
-    EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG))
+    EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG))
         .IgnoreArgument(1)
         .SetReturn(TEST_UNSIGNED_CHAR_PTR);
 
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
 }
@@ -616,7 +607,7 @@ TEST_FUNCTION(IoTHubDeviceTwin_GetTwin_happy_path_status_code_400)
 
     set_expected_calls_for_sendHttpRequestTwin(httpStatusCodeBadRequest, false);
 
-    EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+    EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
     // act
@@ -784,27 +775,26 @@ TEST_FUNCTION(IoTHubDeviceTwin_UpdateTwin_return_NULL_if_input_parameter_deviceT
 
 static void set_expected_calls_for_UpdateDeviceOrModuleTwin_processing()
 {
-    EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG))
+    EXPECTED_CALL(BUFFER_length(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
 
-    EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG))
+    EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG))
         .IgnoreArgument(1)
         .SetReturn(TEST_UNSIGNED_CHAR_PTR);
 
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 }
 
 TEST_FUNCTION(IoTHubDeviceTwin_UpdateTwin_happy_path_status_code_200)
 {
     // arrange
-    EXPECTED_CALL(BUFFER_create(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
-        .IgnoreAllArguments();
+    EXPECTED_CALL(BUFFER_create(IGNORED_ARG, IGNORED_ARG));
 
     EXPECTED_CALL(BUFFER_new());
 
@@ -827,17 +817,16 @@ TEST_FUNCTION(IoTHubDeviceTwin_UpdateTwin_happy_path_status_code_200)
 TEST_FUNCTION(IoTHubDeviceTwin_UpdateTwin_happy_path_status_code_400)
 {
     // arrange
-    EXPECTED_CALL(BUFFER_create(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
-        .IgnoreAllArguments();
+    EXPECTED_CALL(BUFFER_create(IGNORED_ARG, IGNORED_ARG));
 
     EXPECTED_CALL(BUFFER_new());
 
     set_expected_calls_for_sendHttpRequestTwin(httpStatusCodeBadRequest, true);
 
-    EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+    EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
-    EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
+    EXPECTED_CALL(BUFFER_delete(IGNORED_ARG))
         .IgnoreArgument(1);
 
     // act
@@ -856,8 +845,7 @@ TEST_FUNCTION(IoTHubDeviceTwin_UpdateTwin_non_happy_path)
     int umockc_result = umock_c_negative_tests_init();
     ASSERT_ARE_EQUAL(int, 0, umockc_result);
 
-    EXPECTED_CALL(BUFFER_create(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
-        .IgnoreAllArguments();
+    EXPECTED_CALL(BUFFER_create(IGNORED_ARG, IGNORED_ARG));
 
     EXPECTED_CALL(BUFFER_new());
 
@@ -970,8 +958,7 @@ TEST_FUNCTION(IoTHubDeviceTwin_UpdateModuleTwin_return_NULL_if_input_parameter_d
 TEST_FUNCTION(IoTHubDeviceTwin_UpdateModuleTwin_happy_path_status_code_200)
 {
     // arrange
-    EXPECTED_CALL(BUFFER_create(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
-        .IgnoreAllArguments();
+    EXPECTED_CALL(BUFFER_create(IGNORED_ARG, IGNORED_ARG));
 
     EXPECTED_CALL(BUFFER_new());
 

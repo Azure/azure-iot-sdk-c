@@ -186,7 +186,7 @@ static void set_string_succeeds_impl(PFN_MESSAGE_SET_STRING pfnSetMessageString,
     IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromByteArray(c, 1);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, test_value));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, test_value));
 
     //act
     IOTHUB_MESSAGE_RESULT result = pfnSetMessageString(h, test_value);
@@ -206,8 +206,8 @@ static void set_string_string_already_allocated_succeeds_impl(PFN_MESSAGE_SET_ST
     IOTHUB_MESSAGE_RESULT result = pfnSetMessageString(h, test_value);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, test_value));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, test_value));
 
     //act
     result = pfnSetMessageString(h, test_value);
@@ -343,9 +343,9 @@ TEST_FUNCTION_CLEANUP(method_cleanup)
 TEST_FUNCTION(IoTHubMessage_CreateFromByteArray_happy_path)
 {
     // arrange
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
     STRICT_EXPECTED_CALL(BUFFER_create(c, 1));
-    STRICT_EXPECTED_CALL(Map_Create(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Map_Create(IGNORED_ARG));
 
     //act
     IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromByteArray(c, 1);
@@ -376,9 +376,9 @@ TEST_FUNCTION(IoTHubMessage_CreateFromByteArray_fails_when_size_non_zero_buffer_
 TEST_FUNCTION(IoTHubMessage_CreateFromByteArray_succeeds_when_size_0_and_buffer_NULL)
 {
     // arrange
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_PTR_ARG, 0)).IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(Map_Create(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_ARG, 0)).IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(Map_Create(IGNORED_ARG));
 
     //act
     IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromByteArray(NULL, 0);
@@ -394,9 +394,9 @@ TEST_FUNCTION(IoTHubMessage_CreateFromByteArray_succeeds_when_size_0_and_buffer_
 TEST_FUNCTION(IoTHubMessage_CreateFromByteArray_succeeds_when_size_0_and_buffer_non_NULL)
 {
     //arrange
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_PTR_ARG, 0)).IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(Map_Create(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_ARG, 0)).IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(Map_Create(IGNORED_ARG));
 
     //act
     IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromByteArray(c, 0);
@@ -415,9 +415,9 @@ TEST_FUNCTION(IoTHubMessage_CreateFromByteArray_fails)
     ASSERT_ARE_EQUAL(int, 0, negativeTestsInitResult);
 
     // arrange
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
     STRICT_EXPECTED_CALL(BUFFER_create(c, 1));
-    STRICT_EXPECTED_CALL(Map_Create(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Map_Create(IGNORED_ARG));
 
     umock_c_negative_tests_snapshot();
 
@@ -444,9 +444,9 @@ TEST_FUNCTION(IoTHubMessage_CreateFromByteArray_fails)
 TEST_FUNCTION(IoTHubMessage_CreateFromString_happy_path)
 {
     //arrange
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
     STRICT_EXPECTED_CALL(STRING_construct("a"));
-    STRICT_EXPECTED_CALL(Map_Create(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Map_Create(IGNORED_ARG));
 
     //act
     IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromString("a");
@@ -481,9 +481,9 @@ TEST_FUNCTION(IoTHubMessage_CreateFromString_fails)
     ASSERT_ARE_EQUAL(int, 0, negativeTestsInitResult);
 
     // arrange
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
     STRICT_EXPECTED_CALL(STRING_construct("a"));
-    STRICT_EXPECTED_CALL(Map_Create(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Map_Create(IGNORED_ARG));
 
     umock_c_negative_tests_snapshot();
 
@@ -577,20 +577,20 @@ TEST_FUNCTION(IoTHubMessage_Destroy_destroys_a_BYTEARRAY_IoTHubMEssage)
     IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromByteArray(c, 1);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Map_Destroy(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Map_Destroy(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
     STRICT_EXPECTED_CALL(gballoc_free(h));
 
     //act
@@ -608,20 +608,20 @@ TEST_FUNCTION(IoTHubMessage_Destroy_destroys_a_STRING_IoTHubMessage)
     IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromString(TEST_STRING_VALUE);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Map_Destroy(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Map_Destroy(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
     STRICT_EXPECTED_CALL(gballoc_free(h));
 
     //act
@@ -641,8 +641,8 @@ TEST_FUNCTION(IoTHubMessage_GetByteArray_happy_path)
     size_t size;
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_ARG));
 
     //act
     IOTHUB_MESSAGE_RESULT r = IoTHubMessage_GetByteArray(h, &byteArray, &size);
@@ -716,9 +716,9 @@ TEST_FUNCTION(IoTHubMessage_Clone_with_BYTE_ARRAY_happy_path)
     IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromByteArray(c, 1);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(BUFFER_clone(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Map_Clone(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_clone(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Map_Clone(IGNORED_ARG));
 
     //act
     IOTHUB_MESSAGE_HANDLE r = IoTHubMessage_Clone(h);
@@ -756,9 +756,9 @@ TEST_FUNCTION(IoTHubMessage_Clone_with_BYTE_ARRAY_fails)
     int negativeTestsInitResult = umock_c_negative_tests_init();
     ASSERT_ARE_EQUAL(int, 0, negativeTestsInitResult);
 
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(BUFFER_clone(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Map_Clone(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_clone(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Map_Clone(IGNORED_ARG));
 
     umock_c_negative_tests_snapshot();
 
@@ -789,9 +789,9 @@ TEST_FUNCTION(IoTHubMessage_Clone_with_STRING_happy_path)
     IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromString(TEST_STRING_VALUE);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Map_Clone(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Map_Clone(IGNORED_ARG));
 
     ///act
     IOTHUB_MESSAGE_HANDLE r = IoTHubMessage_Clone(h);
@@ -814,9 +814,9 @@ TEST_FUNCTION(IoTHubMessage_Clone_with_STRING_fails)
     int negativeTestsInitResult = umock_c_negative_tests_init();
     ASSERT_ARE_EQUAL(int, 0, negativeTestsInitResult);
 
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Map_Clone(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_clone(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Map_Clone(IGNORED_ARG));
 
     umock_c_negative_tests_snapshot();
 
@@ -906,7 +906,7 @@ TEST_FUNCTION(IoTHubMessage_GetString_happy_path)
     IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromString(TEST_STRING_VALUE);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG));
 
     //act
     const char* r = IoTHubMessage_GetString(h);
@@ -974,7 +974,7 @@ TEST_FUNCTION(IoTHubMessage_SetMessageId_SUCCEED)
     IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromByteArray(c, 1);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_MESSAGE_ID));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_MESSAGE_ID));
 
     //act
     IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetMessageId(h, TEST_MESSAGE_ID);
@@ -995,8 +995,8 @@ TEST_FUNCTION(IoTHubMessage_SetMessageId_MessageId_Not_NULL_SUCCEED)
     IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetMessageId(h, TEST_MESSAGE_ID);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_MESSAGE_ID2));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_MESSAGE_ID2));
 
     //act
     result = IoTHubMessage_SetMessageId(h, TEST_MESSAGE_ID2);
@@ -1131,7 +1131,7 @@ TEST_FUNCTION(IoTHubMessage_SetCorrelationId_SUCCEED)
     IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromByteArray(c, 1);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_MESSAGE_ID));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_MESSAGE_ID));
 
     //act
     IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetCorrelationId(h, TEST_MESSAGE_ID);
@@ -1151,8 +1151,8 @@ TEST_FUNCTION(IoTHubMessage_SetCorrelationId_CorrelationId_Not_NULL_SUCCEED)
     (void)IoTHubMessage_SetCorrelationId(h, TEST_MESSAGE_ID);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_MESSAGE_ID2));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_MESSAGE_ID2));
 
     //act
     IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetCorrelationId(h, TEST_MESSAGE_ID2);
@@ -1171,7 +1171,7 @@ TEST_FUNCTION(IoTHubMessage_SetContentTypeSystemProperty_SUCCEED)
     IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromByteArray(c, 1);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_CONTENT_TYPE));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_CONTENT_TYPE));
 
     //act
     IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetContentTypeSystemProperty(h, TEST_CONTENT_TYPE);
@@ -1191,8 +1191,8 @@ TEST_FUNCTION(IoTHubMessage_SetContentTypeSystemProperty_Not_NULL_SUCCEED)
     IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetContentTypeSystemProperty(h, TEST_CONTENT_TYPE);
 
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_CONTENT_TYPE));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_CONTENT_TYPE));
 
     //act
     result = IoTHubMessage_SetContentTypeSystemProperty(h, TEST_CONTENT_TYPE);
@@ -1246,7 +1246,7 @@ TEST_FUNCTION(IoTHubMessage_SetContentTypeSystemProperty_Fails)
     IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromByteArray(c, 1);
 
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_CONTENT_TYPE));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_CONTENT_TYPE));
     umock_c_negative_tests_snapshot();
 
     //act
@@ -1277,7 +1277,7 @@ TEST_FUNCTION(IoTHubMessage_SetContentEncodingSystemProperty_SUCCEED)
     IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromByteArray(c, 1);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_CONTENT_ENCODING));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_CONTENT_ENCODING));
 
     //act
     IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetContentEncodingSystemProperty(h, TEST_CONTENT_ENCODING);
@@ -1297,8 +1297,8 @@ TEST_FUNCTION(IoTHubMessage_SetContentEncodingSystemProperty_Not_NULL_SUCCEED)
     IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetContentEncodingSystemProperty(h, TEST_CONTENT_ENCODING);
 
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_CONTENT_ENCODING));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_CONTENT_ENCODING));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
     //act
     result = IoTHubMessage_SetContentEncodingSystemProperty(h, TEST_CONTENT_ENCODING);
@@ -1352,7 +1352,7 @@ TEST_FUNCTION(IoTHubMessage_SetContentEncodingSystemProperty_Fails)
     IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromByteArray(c, 1);
 
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_CONTENT_ENCODING));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, TEST_CONTENT_ENCODING));
     umock_c_negative_tests_snapshot();
 
     //act
@@ -1581,12 +1581,12 @@ TEST_FUNCTION(IoTHubMessage_SetDiagnosticPropertyData_DiagnosticData_Not_NULL_SU
     (void)IoTHubMessage_SetDiagnosticPropertyData(h, &TEST_DIAGNOSTIC_DATA);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
 
     //act
     IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetDiagnosticPropertyData(h, &TEST_DIAGNOSTIC_DATA2);
@@ -1607,9 +1607,9 @@ TEST_FUNCTION(IoTHubMessage_SetDiagnosticPropertyData_Fails)
     IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromByteArray(c, 1);
 
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
     umock_c_negative_tests_snapshot();
 
     //act
@@ -1640,9 +1640,9 @@ TEST_FUNCTION(IoTHubMessage_SetDiagnosticPropertyData_SUCCEED)
     IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromByteArray(c, 1);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
 
     //act
     IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetDiagnosticPropertyData(h, &TEST_DIAGNOSTIC_DATA);
@@ -1709,7 +1709,7 @@ TEST_FUNCTION(IoTHubMessage_SetProperty_key_Non_Ascii_Fail)
     IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromByteArray(c, 1);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(Map_AddOrUpdate(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(MAP_FILTER_REJECT);
+    STRICT_EXPECTED_CALL(Map_AddOrUpdate(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG)).SetReturn(MAP_FILTER_REJECT);
 
     //act
     IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetProperty(h, TEST_NON_ASCII_PROPERTY_KEY, TEST_PROPERTY_VALUE);
@@ -1728,7 +1728,7 @@ TEST_FUNCTION(IoTHubMessage_SetProperty_value_Non_Ascii_Fail)
     IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromByteArray(c, 1);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(Map_AddOrUpdate(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(MAP_FILTER_REJECT);
+    STRICT_EXPECTED_CALL(Map_AddOrUpdate(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG)).SetReturn(MAP_FILTER_REJECT);
 
     //act
     IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetProperty(h, TEST_PROPERTY_KEY, TEST_NON_ASCII_PROPERTY_VALUE);
@@ -1747,7 +1747,7 @@ TEST_FUNCTION(IoTHubMessage_SetProperty_Fail)
     IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromByteArray(c, 1);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(Map_AddOrUpdate(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(MAP_ERROR);
+    STRICT_EXPECTED_CALL(Map_AddOrUpdate(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG)).SetReturn(MAP_ERROR);
 
     //act
     IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetProperty(h, TEST_PROPERTY_KEY, TEST_PROPERTY_VALUE);
@@ -1766,7 +1766,7 @@ TEST_FUNCTION(IoTHubMessage_SetProperty_Succeed)
     IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromByteArray(c, 1);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(Map_AddOrUpdate(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Map_AddOrUpdate(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
 
     //act
     IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetProperty(h, TEST_PROPERTY_KEY, TEST_PROPERTY_VALUE);
@@ -1817,8 +1817,8 @@ TEST_FUNCTION(IoTHubMessage_GetProperty_Succeed)
     umock_c_reset_all_calls();
 
     bool key_exist = true;
-    STRICT_EXPECTED_CALL(Map_ContainsKey(IGNORED_PTR_ARG, TEST_PROPERTY_KEY, IGNORED_PTR_ARG)).CopyOutArgumentBuffer_keyExists(&key_exist, sizeof(bool));
-    STRICT_EXPECTED_CALL(Map_GetValueFromKey(IGNORED_PTR_ARG, TEST_PROPERTY_KEY)).SetReturn(TEST_PROPERTY_VALUE);
+    STRICT_EXPECTED_CALL(Map_ContainsKey(IGNORED_ARG, TEST_PROPERTY_KEY, IGNORED_ARG)).CopyOutArgumentBuffer_keyExists(&key_exist, sizeof(bool));
+    STRICT_EXPECTED_CALL(Map_GetValueFromKey(IGNORED_ARG, TEST_PROPERTY_KEY)).SetReturn(TEST_PROPERTY_VALUE);
 
     //act
     const char* result = IoTHubMessage_GetProperty(h, TEST_PROPERTY_KEY);
@@ -1839,7 +1839,7 @@ TEST_FUNCTION(IoTHubMessage_GetProperty_Fail)
     umock_c_reset_all_calls();
 
     bool key_exist = false;
-    STRICT_EXPECTED_CALL(Map_ContainsKey(IGNORED_PTR_ARG, TEST_PROPERTY_KEY, IGNORED_PTR_ARG)).CopyOutArgumentBuffer_keyExists(&key_exist, sizeof(bool));
+    STRICT_EXPECTED_CALL(Map_ContainsKey(IGNORED_ARG, TEST_PROPERTY_KEY, IGNORED_ARG)).CopyOutArgumentBuffer_keyExists(&key_exist, sizeof(bool));
 
     //act
     const char* result = IoTHubMessage_GetProperty(h, TEST_PROPERTY_KEY);
@@ -2012,7 +2012,7 @@ TEST_FUNCTION(IoTHubMessage_SetAsSecurityMessage_Succeed)
     IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromByteArray(c, 1);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
 
     //act
     IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetAsSecurityMessage(h);
@@ -2185,20 +2185,20 @@ TEST_FUNCTION(IoTHubMessage_Destroy_with_context_Succeed)
     TEST_dispositionContextDestroyFunction_handle = NULL;
 
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Map_Destroy(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Map_Destroy(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
     STRICT_EXPECTED_CALL(gballoc_free(h));
 
     //act

@@ -334,10 +334,10 @@ TEST_FUNCTION(prov_dev_set_symmetric_key_info_success)
     umock_c_reset_all_calls();
 
     //arrange
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
     STRICT_EXPECTED_CALL(iothub_security_get_symmetric_key()).SetReturn(NULL);
-    STRICT_EXPECTED_CALL(iothub_security_set_symmetric_key_info(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(iothub_security_set_symmetric_key_info(IGNORED_ARG, IGNORED_ARG));
 
     //act
     int result = prov_dev_set_symmetric_key_info(TEST_REG_NAME, TEST_SYMM_KEY);
@@ -355,8 +355,8 @@ TEST_FUNCTION(prov_dev_set_symmetric_key_info_call_2_success)
     umock_c_reset_all_calls();
 
     //arrange
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
     STRICT_EXPECTED_CALL(iothub_security_get_symmetric_key()).SetReturn(TEST_SYMM_KEY);
     STRICT_EXPECTED_CALL(iothub_security_get_symm_registration_name()).SetReturn(TEST_REG_NAME);
 
@@ -410,7 +410,7 @@ TEST_FUNCTION(prov_dev_set_symmetric_key_info_malloc_fail)
     umock_c_reset_all_calls();
 
     //arrange
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(__LINE__);
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG)).SetReturn(__LINE__);
 
     //act
     int result = prov_dev_set_symmetric_key_info(TEST_REG_NAME, TEST_SYMM_KEY);
@@ -428,9 +428,9 @@ TEST_FUNCTION(prov_dev_set_symmetric_key_info_key_malloc_fail)
     umock_c_reset_all_calls();
 
     //arrange
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(__LINE__);
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG)).SetReturn(__LINE__);
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
 
     //act
     int result = prov_dev_set_symmetric_key_info(TEST_REG_NAME, TEST_SYMM_KEY);
@@ -449,10 +449,10 @@ TEST_FUNCTION(prov_dev_set_symmetric_key_info_called_twice_success)
     umock_c_reset_all_calls();
 
     //arrange
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
     STRICT_EXPECTED_CALL(iothub_security_get_symmetric_key()).SetReturn(TEST_SYMM_KEY);
     STRICT_EXPECTED_CALL(iothub_security_get_symm_registration_name()).SetReturn(TEST_REG_NAME);
 

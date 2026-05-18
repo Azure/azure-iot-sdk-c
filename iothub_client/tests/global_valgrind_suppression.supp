@@ -1,4 +1,14 @@
 {
+    macro-utils-c MU_DEFINE_ENUM_STRINGS lazy-init of enum_value_has_equal (benign race, documented in macro_utils.h)
+    Helgrind:Race
+    fun:MU_*_ToString
+}
+{
+    macro-utils-c MU_DEFINE_ENUM_STRINGS lazy-init of result/visited (benign race)
+    Helgrind:Race
+    fun:*_for_ctest_ToString
+}
+{
     CRYPTO_malloc allow customization race in OpenSSL
     Helgrind:Race
     obj:/*lib*/libcrypto*

@@ -16,9 +16,9 @@
 /*this is what we test*/
 #include "jsonencoder.h"
 
-DEFINE_MICROMOCK_ENUM_TO_STRING(JSON_ENCODER_RESULT, JSON_ENCODER_RESULT_VALUES);
+TEST_DEFINE_ENUM_TYPE_WITHOUT_INVALID(JSON_ENCODER_RESULT, JSON_ENCODER_RESULT_VALUES);
 
-DEFINE_MICROMOCK_ENUM_TO_STRING(JSON_ENCODER_TOSTRING_RESULT, JSON_ENCODER_TOSTRING_RESULT_VALUES);
+TEST_DEFINE_ENUM_TYPE_WITHOUT_INVALID(JSON_ENCODER_TOSTRING_RESULT, JSON_ENCODER_TOSTRING_RESULT_VALUES);
 
 /*These will be the data we shall use for tests.
 
@@ -778,8 +778,7 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreArgument(1).IgnoreArgument(2);
                 ;
 
 
@@ -1079,8 +1078,7 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreArgument(1).IgnoreArgument(2)
                 .SetReturn(JSON_ENCODER_TOSTRING_ERROR)
                 ;
 
@@ -1136,8 +1134,7 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreArgument(1).IgnoreArgument(2);
                 ;
 
             whenShallSTRING_concat_with_STRING_fail = 2;
@@ -1184,8 +1181,7 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreArgument(1).IgnoreArgument(2);
                 ;
 
             STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_3, 1, IGNORED_PTR_ARG))
@@ -1203,8 +1199,7 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreArgument(1).IgnoreArgument(2);
                 ;
 
 
@@ -1544,8 +1539,7 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreArgument(1).IgnoreArgument(2)
                 .SetReturn(JSON_ENCODER_TOSTRING_ERROR)
                 ;
 
@@ -1593,8 +1587,7 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreArgument(1).IgnoreArgument(2);
                 ;
 
             whenShallSTRING_concat_with_STRING_fail = 2;
@@ -1645,8 +1638,7 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreArgument(1).IgnoreArgument(2);
                 ;
 
             whenShallSTRING_concat_with_STRING_fail = 2;
@@ -1693,8 +1685,7 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreArgument(1).IgnoreArgument(2);
                 ;
 
             STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_3, 1, IGNORED_PTR_ARG))
@@ -1750,8 +1741,7 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreArgument(1).IgnoreArgument(2);
                 ;
 
             STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_3, 1, IGNORED_PTR_ARG))
@@ -1811,8 +1801,7 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreArgument(1).IgnoreArgument(2);
                 ;
 
             STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_3, 1, IGNORED_PTR_ARG))
@@ -1872,8 +1861,7 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreArgument(1).IgnoreArgument(2);
                 ;
 
             STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_3, 1, IGNORED_PTR_ARG))
@@ -1936,8 +1924,7 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreArgument(1).IgnoreArgument(2);
                 ;
 
             STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_3, 1, IGNORED_PTR_ARG))
@@ -2004,8 +1991,7 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreArgument(1).IgnoreArgument(2);
                 ;
 
             STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_3, 1, IGNORED_PTR_ARG))
@@ -2023,8 +2009,7 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreArgument(1).IgnoreArgument(2)
                 .SetReturn(JSON_ENCODER_TOSTRING_ERROR)
                 ;
 
@@ -2076,8 +2061,7 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreArgument(1).IgnoreArgument(2);
                 ;
 
             STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_3, 1, IGNORED_PTR_ARG))
@@ -2095,8 +2079,7 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreArgument(1).IgnoreArgument(2);
                 ;
 
             whenShallSTRING_concat_with_STRING_fail = 4;
@@ -2151,8 +2134,7 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreArgument(1).IgnoreArgument(2);
                 ;
 
             STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 1, IGNORED_PTR_ARG))
@@ -2170,8 +2152,7 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreArgument(1).IgnoreArgument(2);
                 ;
 
             STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 2, IGNORED_PTR_ARG))
@@ -2189,8 +2170,7 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreArgument(1).IgnoreArgument(2);
                 ;
 
 
@@ -2506,8 +2486,7 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreArgument(1).IgnoreArgument(2)
                 .SetReturn(JSON_ENCODER_TOSTRING_ERROR)
                 ;
 
@@ -2558,8 +2537,7 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreArgument(1).IgnoreArgument(2);
                 ;
 
             whenShallSTRING_concat_with_STRING_fail = 2;
@@ -2606,8 +2584,7 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreArgument(1).IgnoreArgument(2);
                 ;
 
             whenShallSTRING_concat_with_STRING_fail = 2;
@@ -2659,8 +2636,7 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreArgument(1).IgnoreArgument(2);
                 ;
 
             STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 1, IGNORED_PTR_ARG))
@@ -2717,8 +2693,7 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreArgument(1).IgnoreArgument(2);
                 ;
 
             STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 1, IGNORED_PTR_ARG))
@@ -2777,8 +2752,7 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreArgument(1).IgnoreArgument(2);
                 ;
 
             STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 1, IGNORED_PTR_ARG))
@@ -2832,8 +2806,7 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreArgument(1).IgnoreArgument(2);
                 ;
 
             STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 1, IGNORED_PTR_ARG))
@@ -2898,8 +2871,7 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreArgument(1).IgnoreArgument(2);
                 ;
 
             STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 1, IGNORED_PTR_ARG))
@@ -2961,8 +2933,7 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreArgument(1).IgnoreArgument(2);
                 ;
 
             STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 1, IGNORED_PTR_ARG))
@@ -2980,8 +2951,7 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreArgument(1).IgnoreArgument(2)
                 .SetReturn(JSON_ENCODER_TOSTRING_ERROR)
                 ;
 
@@ -3034,8 +3004,7 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreArgument(1).IgnoreArgument(2);
                 ;
 
             STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 1, IGNORED_PTR_ARG))
@@ -3053,8 +3022,7 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreArgument(1).IgnoreArgument(2);
                 ;
 
             whenShallSTRING_concat_with_STRING_fail = 4;
@@ -3102,8 +3070,7 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreArgument(1).IgnoreArgument(2);
                 ;
 
             STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 1, IGNORED_PTR_ARG))
@@ -3121,8 +3088,7 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreArgument(1).IgnoreArgument(2);
                 ;
 
             whenShallSTRING_concat_with_STRING_fail = 4;
@@ -3177,8 +3143,7 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreArgument(1).IgnoreArgument(2);
                 ;
 
             STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 1, IGNORED_PTR_ARG))
@@ -3196,8 +3161,7 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreArgument(1).IgnoreArgument(2);
                 ;
 
             STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 2, IGNORED_PTR_ARG))
@@ -3257,8 +3221,7 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreArgument(1).IgnoreArgument(2);
                 ;
 
             STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 1, IGNORED_PTR_ARG))
@@ -3276,8 +3239,7 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreArgument(1).IgnoreArgument(2);
                 ;
 
             STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 2, IGNORED_PTR_ARG))
@@ -3339,8 +3301,7 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreArgument(1).IgnoreArgument(2);
                 ;
 
             STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 1, IGNORED_PTR_ARG))
@@ -3358,8 +3319,7 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreArgument(1).IgnoreArgument(2);
                 ;
 
             STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 2, IGNORED_PTR_ARG))
@@ -3422,8 +3382,7 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreArgument(1).IgnoreArgument(2);
                 ;
 
             STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 1, IGNORED_PTR_ARG))
@@ -3441,8 +3400,7 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreArgument(1).IgnoreArgument(2);
                 ;
 
             STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 2, IGNORED_PTR_ARG))
@@ -3510,8 +3468,7 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreArgument(1).IgnoreArgument(2);
                 ;
 
             STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 1, IGNORED_PTR_ARG))
@@ -3529,8 +3486,7 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreArgument(1).IgnoreArgument(2);
                 ;
 
             STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 2, IGNORED_PTR_ARG))
@@ -3601,8 +3557,7 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreArgument(1).IgnoreArgument(2);
                 ;
 
             STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 1, IGNORED_PTR_ARG))
@@ -3620,8 +3575,7 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreArgument(1).IgnoreArgument(2);
                 ;
 
             STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 2, IGNORED_PTR_ARG))
@@ -3639,8 +3593,7 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreArgument(1).IgnoreArgument(2)
                 .SetReturn(JSON_ENCODER_TOSTRING_ERROR)
                 ;
 
@@ -3687,8 +3640,7 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreArgument(1).IgnoreArgument(2);
                 ;
 
             STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 1, IGNORED_PTR_ARG))
@@ -3706,8 +3658,7 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreArgument(1).IgnoreArgument(2);
                 ;
 
             STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_4, 2, IGNORED_PTR_ARG))
@@ -3725,8 +3676,7 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreArgument(1).IgnoreArgument(2);
                 ;
 
             whenShallSTRING_concat_with_STRING_fail = 6;
@@ -3803,8 +3753,7 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreArgument(1).IgnoreArgument(2);
                 ;
 
             STRICT_EXPECTED_CALL((*mocks), MultiTree_GetChild(TEST_MULTITREE_HANDLE_5, 1, IGNORED_PTR_ARG))
@@ -3824,8 +3773,7 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreArgument(1).IgnoreArgument(2);
                 ;
 
 
@@ -4608,8 +4556,7 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreArgument(1).IgnoreArgument(2)
                 .SetReturn(JSON_ENCODER_TOSTRING_ERROR)
                 ;
 
@@ -4675,8 +4622,7 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreArgument(1).IgnoreArgument(2);
                 ;
 
             whenShallSTRING_concat_with_STRING_fail = 3;
@@ -4749,8 +4695,7 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreArgument(1).IgnoreArgument(2);
                 ;
 
             whenShallSTRING_concat_with_STRING_fail = 3;
@@ -4817,8 +4762,7 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreArgument(1).IgnoreArgument(2);
                 ;
 
             /*child 5*/
@@ -4897,8 +4841,7 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreArgument(1).IgnoreArgument(2);
                 ;
 
             /*child 5*/
@@ -4983,8 +4926,7 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreArgument(1).IgnoreArgument(2);
                 ;
 
             /*child 5*/
@@ -5062,8 +5004,7 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreArgument(1).IgnoreArgument(2);
                 ;
 
             /*child 5*/
@@ -5153,8 +5094,7 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreArgument(1).IgnoreArgument(2);
                 ;
 
             /*child 5*/
@@ -5248,8 +5188,7 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreArgument(1).IgnoreArgument(2);
                 ;
 
             /*child 5*/
@@ -5271,8 +5210,7 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreArgument(1).IgnoreArgument(2)
                 .SetReturn(JSON_ENCODER_TOSTRING_ERROR)
                 ;
 
@@ -5338,8 +5276,7 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreArgument(1).IgnoreArgument(2);
                 ;
 
             /*child 5*/
@@ -5361,8 +5298,7 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreArgument(1).IgnoreArgument(2);
                 ;
 
             whenShallSTRING_concat_with_STRING_fail = 5;
@@ -5429,8 +5365,7 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreArgument(1).IgnoreArgument(2);
                 ;
 
             /*child 5*/
@@ -5452,8 +5387,7 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
                 .IgnoreArgument(2)
                 ;
 
-            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .IgnoreAllArguments()
+            STRICT_EXPECTED_CALL((*mocks), TestFunc_NodesAreStrings(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreArgument(1).IgnoreArgument(2);
                 ;
 
             whenShallSTRING_concat_with_STRING_fail = 5;

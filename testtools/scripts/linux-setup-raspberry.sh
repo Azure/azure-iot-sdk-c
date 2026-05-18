@@ -8,16 +8,16 @@ sudo apt install --fix-missing -y wget git build-essential cmake xz-utils ca-cer
 export WORK_ROOT="$(pwd)/toolchain"
 mkdir $WORK_ROOT && pushd $WORK_ROOT
 
-# LINARO INSTALL
-export LINARO_SOURCE=gcc-linaro-7.4.1-2019.02-x86_64_arm-linux-gnueabihf
-wget https://releases.linaro.org/components/toolchain/binaries/7.4-2019.02/arm-linux-gnueabihf/${LINARO_SOURCE}.tar.xz
-tar -xvf ${LINARO_SOURCE}.tar.xz
+# ARM GNU TOOLCHAIN INSTALL (GCC 13.3, replaces discontinued Linaro 7.x)
+export TOOLCHAIN_SOURCE=arm-gnu-toolchain-13.3.rel1-x86_64-arm-none-linux-gnueabihf
+wget https://developer.arm.com/-/media/Files/downloads/gnu/13.3.rel1/binrel/${TOOLCHAIN_SOURCE}.tar.xz
+tar -xvf ${TOOLCHAIN_SOURCE}.tar.xz
 
 # Set up environment variables for builds
-export TOOLCHAIN_ROOT=${WORK_ROOT}/${LINARO_SOURCE}
+export TOOLCHAIN_ROOT=${WORK_ROOT}/${TOOLCHAIN_SOURCE}
 export TOOLCHAIN_SYSROOT=${TOOLCHAIN_ROOT}
 export TOOLCHAIN_EXES=${TOOLCHAIN_SYSROOT}/bin
-export TOOLCHAIN_NAME=arm-linux-gnueabihf
+export TOOLCHAIN_NAME=arm-none-linux-gnueabihf
 export TOOLCHAIN_PREFIX=${TOOLCHAIN_SYSROOT}/usr
 
 export AR=${TOOLCHAIN_EXES}/${TOOLCHAIN_NAME}-ar
@@ -83,6 +83,6 @@ cat > ./raspberry_env_vars.sh << EOF
 export TOOLCHAIN_ROOT="$TOOLCHAIN_ROOT"
 export TOOLCHAIN_SYSROOT="$TOOLCHAIN_SYSROOT"
 export TOOLCHAIN_EXES="$TOOLCHAIN_EXES"
-export TOOLCHAIN_NAME=arm-linux-gnueabihf
+export TOOLCHAIN_NAME=arm-none-linux-gnueabihf
 export TOOLCHAIN_PREFIX="$TOOLCHAIN_PREFIX"
 EOF

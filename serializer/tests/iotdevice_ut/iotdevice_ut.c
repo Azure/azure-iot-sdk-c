@@ -38,13 +38,13 @@ void my_gballoc_free(void * t)
 
 #include "testrunnerswitcher.h"
 
-TEST_DEFINE_ENUM_TYPE(DEVICE_RESULT, DEVICE_RESULT_VALUES);
+TEST_DEFINE_ENUM_TYPE_WITHOUT_INVALID(DEVICE_RESULT, DEVICE_RESULT_VALUES);
 IMPLEMENT_UMOCK_C_ENUM_TYPE(DEVICE_RESULT, DEVICE_RESULT_VALUES);
 
-TEST_DEFINE_ENUM_TYPE(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_RESULT_VALUES);
+TEST_DEFINE_ENUM_TYPE_WITHOUT_INVALID(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_RESULT_VALUES);
 IMPLEMENT_UMOCK_C_ENUM_TYPE(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_RESULT_VALUES);
 
-TEST_DEFINE_ENUM_TYPE(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_RESULT_VALUES);
+TEST_DEFINE_ENUM_TYPE_WITHOUT_INVALID(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_RESULT_VALUES);
 IMPLEMENT_UMOCK_C_ENUM_TYPE(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_RESULT_VALUES);
 
 #define ENABLE_MOCKS
@@ -320,7 +320,7 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
             .IgnoreArgument_methodCallbackContext()
             .SetReturn((COMMAND_DECODER_HANDLE)NULL);
 
-        STRICT_EXPECTED_CALL(DataPublisher_Destroy(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(DataPublisher_Destroy(IGNORED_ARG))
             .IgnoreArgument_dataPublisherHandle();
 
         // act
@@ -353,9 +353,9 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         (void)Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, deviceMethodCallback, TEST_CALLBACK_CONTEXT, false, &h);
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(DataPublisher_Destroy(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(DataPublisher_Destroy(IGNORED_ARG))
             .IgnoreArgument_dataPublisherHandle();
-        STRICT_EXPECTED_CALL(CommandDecoder_Destroy(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(CommandDecoder_Destroy(IGNORED_ARG))
             .IgnoreArgument_commandDecoderHandle();
 
         // act
@@ -374,7 +374,7 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         (void)Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, deviceMethodCallback, TEST_CALLBACK_CONTEXT, false, &deviceHandle);
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(DataPublisher_StartTransaction(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(DataPublisher_StartTransaction(IGNORED_ARG))
             .IgnoreArgument_dataPublisherHandle();
 
         // act
@@ -409,7 +409,7 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         (void)Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, deviceMethodCallback, TEST_CALLBACK_CONTEXT, false, &deviceHandle);
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(DataPublisher_StartTransaction(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(DataPublisher_StartTransaction(IGNORED_ARG))
             .IgnoreArgument_dataPublisherHandle()
             .SetReturn((TRANSACTION_HANDLE)NULL);
 
@@ -817,7 +817,7 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, deviceMethodCallback, TEST_CALLBACK_CONTEXT, false, &h);
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(CommandDecoder_ExecuteCommand(IGNORED_PTR_ARG, "some command"))
+        STRICT_EXPECTED_CALL(CommandDecoder_ExecuteCommand(IGNORED_ARG, "some command"))
             .IgnoreArgument(1);
 
         ///act
@@ -838,7 +838,7 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, deviceMethodCallback, TEST_CALLBACK_CONTEXT, false, &h);
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(CommandDecoder_ExecuteCommand(IGNORED_PTR_ARG, "some command"))
+        STRICT_EXPECTED_CALL(CommandDecoder_ExecuteCommand(IGNORED_ARG, "some command"))
             .IgnoreArgument(1)
             .SetReturn(EXECUTE_COMMAND_FAILED);
 
@@ -860,7 +860,7 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, deviceMethodCallback, TEST_CALLBACK_CONTEXT, false, &h);
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(CommandDecoder_ExecuteCommand(IGNORED_PTR_ARG, "some command"))
+        STRICT_EXPECTED_CALL(CommandDecoder_ExecuteCommand(IGNORED_ARG, "some command"))
             .IgnoreArgument(1)
             .SetReturn(EXECUTE_COMMAND_ERROR);
 
@@ -896,7 +896,7 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, deviceMethodCallback, TEST_CALLBACK_CONTEXT, false, &h);
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(DataPublisher_CreateTransaction_ReportedProperties(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(DataPublisher_CreateTransaction_ReportedProperties(IGNORED_ARG))
             .IgnoreArgument_dataPublisherHandle();
 
         ///act
@@ -918,7 +918,7 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, deviceMethodCallback, TEST_CALLBACK_CONTEXT, false, &h);
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(DataPublisher_CreateTransaction_ReportedProperties(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(DataPublisher_CreateTransaction_ReportedProperties(IGNORED_ARG))
             .IgnoreArgument_dataPublisherHandle()
             .SetReturn(NULL);
 
@@ -998,7 +998,7 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         REPORTED_PROPERTIES_TRANSACTION_HANDLE reportedPropertiesTransactionHandle = Device_CreateTransaction_ReportedProperties(h);
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(DataPublisher_PublishTransacted_ReportedProperty(IGNORED_PTR_ARG, "a", &ag))
+        STRICT_EXPECTED_CALL(DataPublisher_PublishTransacted_ReportedProperty(IGNORED_ARG, "a", &ag))
             .IgnoreArgument_transactionHandle();
 
         ///act
@@ -1022,7 +1022,7 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         REPORTED_PROPERTIES_TRANSACTION_HANDLE reportedPropertiesTransactionHandle = Device_CreateTransaction_ReportedProperties(h);
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(DataPublisher_PublishTransacted_ReportedProperty(IGNORED_PTR_ARG, "a", &ag))
+        STRICT_EXPECTED_CALL(DataPublisher_PublishTransacted_ReportedProperty(IGNORED_ARG, "a", &ag))
             .IgnoreArgument_transactionHandle()
             .SetReturn(DATA_PUBLISHER_ERROR);
 
@@ -1105,7 +1105,7 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         REPORTED_PROPERTIES_TRANSACTION_HANDLE reportedPropertiesTransactionHandle = Device_CreateTransaction_ReportedProperties(h);
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(DataPublisher_CommitTransaction_ReportedProperties(IGNORED_PTR_ARG, &destination, &destinationSize))
+        STRICT_EXPECTED_CALL(DataPublisher_CommitTransaction_ReportedProperties(IGNORED_ARG, &destination, &destinationSize))
             .IgnoreArgument_transactionHandle();
 
         ///act
@@ -1130,7 +1130,7 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         REPORTED_PROPERTIES_TRANSACTION_HANDLE reportedPropertiesTransactionHandle = Device_CreateTransaction_ReportedProperties(h);
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(DataPublisher_CommitTransaction_ReportedProperties(IGNORED_PTR_ARG, &destination, &destinationSize))
+        STRICT_EXPECTED_CALL(DataPublisher_CommitTransaction_ReportedProperties(IGNORED_ARG, &destination, &destinationSize))
             .IgnoreArgument_transactionHandle()
             .SetReturn(DATA_PUBLISHER_ERROR);
 
@@ -1167,7 +1167,7 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         REPORTED_PROPERTIES_TRANSACTION_HANDLE reportedPropertiesTransactionHandle = Device_CreateTransaction_ReportedProperties(h);
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(DataPublisher_DestroyTransaction_ReportedProperties(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(DataPublisher_DestroyTransaction_ReportedProperties(IGNORED_ARG))
             .IgnoreArgument_transactionHandle();
 
         ///act
@@ -1190,7 +1190,7 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         (void)Device_PublishTransacted_ReportedProperty(reportedPropertiesTransactionHandle, "a", &ag);
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(DataPublisher_DestroyTransaction_ReportedProperties(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(DataPublisher_DestroyTransaction_ReportedProperties(IGNORED_ARG))
             .IgnoreArgument_transactionHandle();
 
         ///act
@@ -1216,7 +1216,7 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         (void)Device_CommitTransaction_ReportedProperties(reportedPropertiesTransactionHandle, &destination, &destinationSize);
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(DataPublisher_DestroyTransaction_ReportedProperties(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(DataPublisher_DestroyTransaction_ReportedProperties(IGNORED_ARG))
             .IgnoreArgument_transactionHandle();
 
         ///act
@@ -1285,7 +1285,7 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, deviceMethodCallback, TEST_CALLBACK_CONTEXT, false,  &h);
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(CommandDecoder_IngestDesiredProperties(FAKE_DEVICE_START_ADDRESS, IGNORED_PTR_ARG, "{}", false))
+        STRICT_EXPECTED_CALL(CommandDecoder_IngestDesiredProperties(FAKE_DEVICE_START_ADDRESS, IGNORED_ARG, "{}", false))
             .IgnoreArgument_handle();
 
         ///act
@@ -1306,7 +1306,7 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, deviceMethodCallback, TEST_CALLBACK_CONTEXT, false, &h);
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(CommandDecoder_IngestDesiredProperties(FAKE_DEVICE_START_ADDRESS, IGNORED_PTR_ARG, "{}", false))
+        STRICT_EXPECTED_CALL(CommandDecoder_IngestDesiredProperties(FAKE_DEVICE_START_ADDRESS, IGNORED_ARG, "{}", false))
             .IgnoreArgument_handle()
             .SetReturn(EXECUTE_COMMAND_FAILED);
 
@@ -1357,7 +1357,7 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, deviceMethodCallback, TEST_CALLBACK_CONTEXT, false, &h);
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(CommandDecoder_ExecuteMethod(IGNORED_PTR_ARG, "theMethod", NULL))
+        STRICT_EXPECTED_CALL(CommandDecoder_ExecuteMethod(IGNORED_ARG, "theMethod", NULL))
             .IgnoreArgument_handle();
 
         ///act

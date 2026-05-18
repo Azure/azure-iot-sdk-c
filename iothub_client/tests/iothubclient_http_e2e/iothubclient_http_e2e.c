@@ -22,8 +22,6 @@
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/xlogging.h"
 
-static bool g_callbackRecv = false;
-
 const char* TEST_EVENT_DATA_FMT = "{\"data\":\"%.24s\",\"id\":\"%d\"}";
 
 const char* MSG_ID1 = "MessageIdForE2E_1";

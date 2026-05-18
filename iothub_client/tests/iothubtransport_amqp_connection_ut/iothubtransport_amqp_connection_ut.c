@@ -207,7 +207,7 @@ static void set_exp_calls_for_amqp_connection_create(AMQP_CONNECTION_CONFIG* amq
 {
     XIO_HANDLE target_underlying_io;
 
-    STRICT_EXPECTED_CALL(malloc(IGNORED_NUM_ARG)).IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(malloc(IGNORED_ARG)).IgnoreArgument(1);
     STRICT_EXPECTED_CALL(STRING_construct(amqp_connection_config->iothub_host_fqdn));
 
     // SASL
@@ -216,16 +216,16 @@ static void set_exp_calls_for_amqp_connection_create(AMQP_CONNECTION_CONFIG* amq
         STRICT_EXPECTED_CALL(saslmssbcbs_get_interface());
         STRICT_EXPECTED_CALL(saslmechanism_create(TEST_SASL_INTERFACE_HANDLE, NULL));
         STRICT_EXPECTED_CALL(saslclientio_get_interface_description());
-        STRICT_EXPECTED_CALL(xio_create(TEST_SASLCLIENTIO_INTERFACE_DESCRIPTION_HANDLE, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(xio_create(TEST_SASLCLIENTIO_INTERFACE_DESCRIPTION_HANDLE, IGNORED_ARG))
             .IgnoreArgument_io_create_parameters()
             .SetReturn(TEST_SASL_IO_HANDLE);
-        STRICT_EXPECTED_CALL(xio_setoption(TEST_SASL_IO_HANDLE, "logtrace", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(xio_setoption(TEST_SASL_IO_HANDLE, "logtrace", IGNORED_ARG))
             .IgnoreArgument_value();
     }
 
     // Connection
-    EXPECTED_CALL(calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)); // UniqueId container.
-    STRICT_EXPECTED_CALL(UniqueId_Generate(IGNORED_PTR_ARG, 40)).IgnoreArgument(1);
+    EXPECTED_CALL(calloc(IGNORED_ARG, IGNORED_ARG)); // UniqueId container.
+    STRICT_EXPECTED_CALL(UniqueId_Generate(IGNORED_ARG, 40)).IgnoreArgument(1);
     STRICT_EXPECTED_CALL(STRING_c_str(TEST_STRING_HANDLE)).SetReturn(TEST_IOTHUB_HOST_FQDN);
 
     if (amqp_connection_config->create_sasl_io || amqp_connection_config->create_cbs_connection)
@@ -237,7 +237,7 @@ static void set_exp_calls_for_amqp_connection_create(AMQP_CONNECTION_CONFIG* amq
         target_underlying_io = TEST_UNDERLYING_IO_TRANSPORT;
     }
 
-    STRICT_EXPECTED_CALL(connection_create2(target_underlying_io, TEST_IOTHUB_HOST_FQDN, IGNORED_PTR_ARG, NULL, NULL, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(connection_create2(target_underlying_io, TEST_IOTHUB_HOST_FQDN, IGNORED_ARG, NULL, NULL, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG))
         .IgnoreArgument_container_id()
         .IgnoreArgument_on_connection_state_changed()
         .IgnoreArgument_on_connection_state_changed_context()
@@ -248,7 +248,7 @@ static void set_exp_calls_for_amqp_connection_create(AMQP_CONNECTION_CONFIG* amq
     STRICT_EXPECTED_CALL(connection_set_remote_idle_timeout_empty_frame_send_ratio(TEST_CONNECTION_HANDLE, amqp_connection_config->cl2svc_keep_alive_send_ratio));
     STRICT_EXPECTED_CALL(connection_set_trace(TEST_CONNECTION_HANDLE, amqp_connection_config->is_trace_on));
 
-    EXPECTED_CALL(free(IGNORED_PTR_ARG)); // UniqueId container.
+    EXPECTED_CALL(free(IGNORED_ARG)); // UniqueId container.
 
     // Session
     STRICT_EXPECTED_CALL(session_create(TEST_CONNECTION_HANDLE, NULL, NULL));
@@ -259,7 +259,7 @@ static void set_exp_calls_for_amqp_connection_create(AMQP_CONNECTION_CONFIG* amq
     if (amqp_connection_config->create_cbs_connection)
     {
         STRICT_EXPECTED_CALL(cbs_create(TEST_SESSION_HANDLE));
-        STRICT_EXPECTED_CALL(cbs_open_async(TEST_CBS_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(cbs_open_async(TEST_CBS_HANDLE, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
     }
 }
 
@@ -1032,7 +1032,7 @@ TEST_FUNCTION(amqp_connection_set_logging_SASL_and_CBS_success)
     AMQP_CONNECTION_HANDLE handle = amqp_connection_create(config);
 
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(xio_setoption(TEST_SASL_IO_HANDLE, "logtrace", IGNORED_PTR_ARG)).IgnoreArgument(3);
+    STRICT_EXPECTED_CALL(xio_setoption(TEST_SASL_IO_HANDLE, "logtrace", IGNORED_ARG)).IgnoreArgument(3);
     STRICT_EXPECTED_CALL(connection_set_trace(TEST_CONNECTION_HANDLE, true));
 
     // act
@@ -1057,7 +1057,7 @@ TEST_FUNCTION(amqp_connection_set_logging_SASL_and_CBS_xio_setoption_fails)
     AMQP_CONNECTION_HANDLE handle = amqp_connection_create(config);
 
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(xio_setoption(TEST_SASL_IO_HANDLE, "logtrace", IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(xio_setoption(TEST_SASL_IO_HANDLE, "logtrace", IGNORED_ARG))
         .IgnoreArgument(3)
         .SetReturn(1);
 

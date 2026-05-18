@@ -208,7 +208,7 @@ TEST_FUNCTION(hsm_client_x509_set_certificate_succeed)
     HSM_CLIENT_HANDLE sec_handle = hsm_client_x509_create();
 
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
     
     //act
     int ret = hsm_client_x509_set_certificate(sec_handle, TEST_CERTIFICATE_VALUE);
@@ -263,7 +263,7 @@ TEST_FUNCTION(hsm_client_x509_set_certificate_twice_fail)
     hsm_client_x509_init();
     HSM_CLIENT_HANDLE sec_handle = hsm_client_x509_create();
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
     
     //act
     int ret = hsm_client_x509_set_certificate(sec_handle, TEST_CERTIFICATE_VALUE);
@@ -288,7 +288,7 @@ TEST_FUNCTION(hsm_client_x509_set_certificate_oom_fail)
     HSM_CLIENT_HANDLE sec_handle = hsm_client_x509_create();
     umock_c_negative_tests_reset();
 
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
     umock_c_negative_tests_fail_call(0);
 
     //act
@@ -313,7 +313,7 @@ TEST_FUNCTION(hsm_client_x509_set_key_succeed)
     HSM_CLIENT_HANDLE sec_handle = hsm_client_x509_create();
 
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
     
     //act
     int ret = hsm_client_x509_set_key(sec_handle, TEST_KEY_VALUE);
@@ -368,7 +368,7 @@ TEST_FUNCTION(hsm_client_x509_set_key_twice_fail)
     hsm_client_x509_init();
     HSM_CLIENT_HANDLE sec_handle = hsm_client_x509_create();
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
     
     //act
     int ret = hsm_client_x509_set_key(sec_handle, TEST_KEY_VALUE);
@@ -393,7 +393,7 @@ TEST_FUNCTION(hsm_client_x509_set_key_oom_fail)
     HSM_CLIENT_HANDLE sec_handle = hsm_client_x509_create();
     umock_c_negative_tests_reset();
 
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
     umock_c_negative_tests_fail_call(0);
 
     //act
@@ -419,7 +419,7 @@ TEST_FUNCTION(hsm_client_x509_get_certificate_succeed)
     hsm_client_x509_set_certificate(sec_handle, TEST_CERTIFICATE_VALUE);
 
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
     
     //act
     char* ret = hsm_client_x509_get_certificate(sec_handle);
@@ -481,7 +481,7 @@ TEST_FUNCTION(hsm_client_x509_get_certificate_oom_fail)
     hsm_client_x509_set_certificate(sec_handle, TEST_CERTIFICATE_VALUE);
     umock_c_negative_tests_reset();
 
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
     umock_c_negative_tests_fail_call(0);
 
     //act
@@ -507,7 +507,7 @@ TEST_FUNCTION(hsm_client_x509_get_key_succeed)
     hsm_client_x509_set_key(sec_handle, TEST_CERTIFICATE_VALUE);
 
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
     
     //act
     char* ret = hsm_client_x509_get_key(sec_handle);
@@ -569,7 +569,7 @@ TEST_FUNCTION(hsm_client_x509_get_key_oom_fail)
     hsm_client_x509_set_key(sec_handle, TEST_CERTIFICATE_VALUE);
     umock_c_negative_tests_reset();
 
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, IGNORED_ARG));
     umock_c_negative_tests_fail_call(0);
 
     //act

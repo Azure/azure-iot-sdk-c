@@ -52,9 +52,6 @@ static MAP_HANDLE TEST_MAP_HANDLE_NULL = (MAP_HANDLE)NULL;
 static STRING_TOKENIZER_HANDLE TEST_STRING_TOKENIZER_HANDLE = (STRING_TOKENIZER_HANDLE)0x4444;
 static STRING_TOKENIZER_HANDLE TEST_STRING_TOKENIZER_HANDLE_NULL = (STRING_TOKENIZER_HANDLE)NULL;
 
-static STRING_HANDLE TEST_KEY_STRING_HANDLE = (STRING_HANDLE)0x4545;
-static STRING_HANDLE TEST_VALUE_STRING_HANDLE = (STRING_HANDLE)0x4646;
-
 static const char* TEST_CHAR_PTR = "TestString";
 static const char* TEST_CONNECTION_STRING = "HostName=aaa.bbb.net;SharedAccessKeyName=xxx;SharedAccessKey=yyy";
 static const char* TEST_SAS_CONNECTION_STRING = "HostName=aaa.bbb.net;SharedAccessSignature=yyy";
@@ -180,18 +177,12 @@ static void set_expected_calls_for_free_service_client_auth(CIoTHubServiceClient
 static void set_expected_calls_for_CreateFromConnectionString_cleanup(CIoTHubServiceClientAuthMocks &mocks)
 {
     (void)mocks;
-    STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
-        .IgnoreAllArguments();
-    STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
-        .IgnoreAllArguments();
-    STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
-        .IgnoreAllArguments();
-    STRICT_EXPECTED_CALL(mocks, STRING_TOKENIZER_destroy(IGNORED_PTR_ARG))
-        .IgnoreAllArguments();
-    STRICT_EXPECTED_CALL(mocks, Map_Destroy(IGNORED_PTR_ARG))
-        .IgnoreAllArguments();
-    STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
-        .IgnoreAllArguments();
+    STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG)).IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG)).IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG)).IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, STRING_TOKENIZER_destroy(IGNORED_PTR_ARG)).IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, Map_Destroy(IGNORED_PTR_ARG)).IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG)).IgnoreArgument(1);
 }
 
 BEGIN_TEST_SUITE(iothub_service_client_auth_ut)
@@ -261,8 +252,7 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_and
     CIoTHubServiceClientAuthMocks mocks;
 
     whenShallmalloc_fail = 0;
-    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
-        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG)).IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_CHAR_PTR))
         .SetReturn((STRING_HANDLE)NULL);
@@ -283,8 +273,7 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_and
     CIoTHubServiceClientAuthMocks mocks;
 
     whenShallmalloc_fail = 0;
-    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
-        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG)).IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_CHAR_PTR));
 
@@ -309,8 +298,7 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_
     CIoTHubServiceClientAuthMocks mocks;
 
     whenShallmalloc_fail = 0;
-    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
-        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG)).IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_CHAR_PTR));
 
@@ -343,8 +331,7 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_
     CIoTHubServiceClientAuthMocks mocks;
 
     whenShallmalloc_fail = 0;
-    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
-        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG)).IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_CHAR_PTR));
 
@@ -374,8 +361,7 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_
     CIoTHubServiceClientAuthMocks mocks;
 
     whenShallmalloc_fail = 0;
-    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
-        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG)).IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_CHAR_PTR));
 
@@ -411,8 +397,7 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_
     CIoTHubServiceClientAuthMocks mocks;
 
     whenShallmalloc_fail = 0;
-    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
-        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG)).IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_CHAR_PTR));
 
@@ -452,8 +437,7 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_
     CIoTHubServiceClientAuthMocks mocks;
 
     whenShallmalloc_fail = 0;
-    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
-        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG)).IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_CHAR_PTR));
 
@@ -494,8 +478,7 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_
     CIoTHubServiceClientAuthMocks mocks;
 
     whenShallmalloc_fail = 0;
-    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
-        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG)).IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_CHAR_PTR));
 
@@ -539,8 +522,7 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_
     CIoTHubServiceClientAuthMocks mocks;
 
     whenShallmalloc_fail = 0;
-    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
-        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG)).IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_CHAR_PTR));
 
@@ -587,8 +569,7 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_
     CIoTHubServiceClientAuthMocks mocks;
 
     whenShallmalloc_fail = 0;
-    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
-        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG)).IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_CHAR_PTR));
 
@@ -638,8 +619,7 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_
     CIoTHubServiceClientAuthMocks mocks;
 
     whenShallmalloc_fail = 0;
-    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
-        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG)).IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_CHAR_PTR));
 
@@ -692,8 +672,7 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_
     CIoTHubServiceClientAuthMocks mocks;
 
     whenShallmalloc_fail = 0;
-    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
-        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG)).IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_CHAR_PTR));
 
@@ -749,8 +728,7 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_
     CIoTHubServiceClientAuthMocks mocks;
 
     whenShallmalloc_fail = 0;
-    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
-        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG)).IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_CHAR_PTR));
 
@@ -809,8 +787,7 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_
     CIoTHubServiceClientAuthMocks mocks;
 
     whenShallmalloc_fail = 0;
-    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
-        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG)).IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_CHAR_PTR));
 
@@ -872,8 +849,7 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_for_sharedAcces
     CIoTHubServiceClientAuthMocks mocks;
 
     whenShallmalloc_fail = 0;
-    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
-        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG)).IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_SAS_CONNECTION_STRING));
 
@@ -940,8 +916,7 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_for_sharedAcces
 
     set_expected_calls_for_CreateFromConnectionString_cleanup(mocks);
 
-    STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
-        .IgnoreAllArguments();
+    STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG)).IgnoreArgument(1);
 
 
     // act
@@ -964,8 +939,7 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_
     CIoTHubServiceClientAuthMocks mocks;
 
     whenShallmalloc_fail = 0;
-    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
-        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG)).IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_SAS_CONNECTION_STRING));
 
@@ -1021,8 +995,7 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_
     set_expected_calls_for_free_service_client_auth(mocks);
     set_expected_calls_for_CreateFromConnectionString_cleanup(mocks);
 
-    STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
-        .IgnoreAllArguments();
+    STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG)).IgnoreArgument(1);
 
 
     // act
@@ -1039,8 +1012,7 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_
     CIoTHubServiceClientAuthMocks mocks;
 
     whenShallmalloc_fail = 0;
-    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
-        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG)).IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_CHAR_PTR));
 
@@ -1111,8 +1083,7 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_
     CIoTHubServiceClientAuthMocks mocks;
 
     whenShallmalloc_fail = 0;
-    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
-        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG)).IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_CHAR_PTR));
 
@@ -1186,8 +1157,7 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_
     CIoTHubServiceClientAuthMocks mocks;
 
     whenShallmalloc_fail = 0;
-    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
-        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG)).IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_CHAR_PTR));
 
@@ -1252,8 +1222,7 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_
     CIoTHubServiceClientAuthMocks mocks;
 
     whenShallmalloc_fail = 0;
-    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
-        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG)).IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_CHAR_PTR));
 
@@ -1322,8 +1291,7 @@ static void test_IoTHubServiceClientAuth_CreateFromConnectionString_impl(bool se
     CIoTHubServiceClientAuthMocks mocks;
     
     whenShallmalloc_fail = 0;
-    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
-        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG)).IgnoreArgument(1);
     
     STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_CHAR_PTR));
     
@@ -1412,8 +1380,7 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_sharedaccesskey
     CIoTHubServiceClientAuthMocks mocks;
 
     whenShallmalloc_fail = 0;
-    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
-        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG)).IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_CHAR_PTR));
 
@@ -1456,8 +1423,7 @@ TEST_FUNCTION(IoTHubServiceClient_Destroy_do_clean_up_and_return_if_input_parame
     CIoTHubServiceClientAuthMocks mocks;
 
     whenShallmalloc_fail = 0;
-    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
-        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG)).IgnoreArgument(1);
 
     STRICT_EXPECTED_CALL(mocks, STRING_construct(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
@@ -1500,39 +1466,34 @@ TEST_FUNCTION(IoTHubServiceClient_Destroy_do_clean_up_and_return_if_input_parame
         .SetReturn(TEST_STRING_HANDLE);
 
     STRICT_EXPECTED_CALL(mocks, STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "."))
-        .IgnoreAllArguments()
+        .IgnoreArgument(1)
+        .IgnoreArgument(2)
         .SetReturn(0);
 
     STRICT_EXPECTED_CALL(mocks, STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "0"))
-        .IgnoreAllArguments()
+        .IgnoreArgument(1)
+        .IgnoreArgument(2)
         .SetReturn(0);
 
     EXPECTED_CALL(mocks, mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .IgnoreAllArguments()
         .SetReturn(0);
 
     EXPECTED_CALL(mocks, mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .IgnoreAllArguments()
         .SetReturn(0);
 
     EXPECTED_CALL(mocks, mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .IgnoreAllArguments()
         .SetReturn(0);
 
     EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
-        .IgnoreAllArguments()
         .SetReturn(TEST_CHAR_PTR);
 
     EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
-        .IgnoreAllArguments()
         .SetReturn(TEST_CHAR_PTR);
 
     EXPECTED_CALL(mocks, mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .IgnoreAllArguments()
         .SetReturn(0);
 
     EXPECTED_CALL(mocks, mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .IgnoreAllArguments()
         .SetReturn(0);
 
 
