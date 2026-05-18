@@ -32,10 +32,6 @@ if(${use_http})
 endif()
 
 if(${use_mqtt})
-    if(LINUX)
-        # Disabled: uses serializer DECLARE_MODEL incompatible with new macro-utils-c
-        #add_sample_directory(iothub_client_sample_mqtt_dm)
-    endif()
     if(${use_edge_modules})
         add_sample_directory(iothub_client_sample_module_sender)
         add_sample_directory(iothub_client_sample_module_filter)
