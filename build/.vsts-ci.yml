@@ -353,12 +353,6 @@ stages:
         valgrind_e2e:
           RUN_TESTS_ARGS: '--valgrind --e2e --e2e-only'
           NEEDS_E2E_CONFIG: 'true'
-        helgrind_ut:
-          RUN_TESTS_ARGS: '--helgrind --ut-only'
-          NEEDS_E2E_CONFIG: 'true'
-        helgrind_e2e:
-          RUN_TESTS_ARGS: '--helgrind --e2e --e2e-only'
-          NEEDS_E2E_CONFIG: 'true'
         drd:
           RUN_TESTS_ARGS: '--drd --e2e'
           NEEDS_E2E_CONFIG: 'true'
@@ -396,6 +390,62 @@ stages:
         testResultsFiles: '**/Test.xml'
         mergeTestResults: true
         testRunTitle: 'ubuntu2404_$(System.JobPositionInPhase)'
+      condition: succeededOrFailed()
+
+  - job: ubuntu2404_dbg_helgrind
+    dependsOn: ubuntu2404_dbg_build
+    timeoutInMinutes: 90
+    pool:
+      vmImage: 'ubuntu-24.04'
+    displayName: 'Ubuntu 24.04 Helgrind Tests'
+    strategy:
+      matrix:
+        helgrind_ut:
+          RUN_TESTS_ARGS: '--helgrind --ut-only'
+          NEEDS_E2E_CONFIG: 'true'
+        helgrind_e2e_amqp:
+          RUN_TESTS_ARGS: '--helgrind --e2e --e2e-only --filter iothubclient_amqp'
+          NEEDS_E2E_CONFIG: 'true'
+        helgrind_e2e_mqtt:
+          RUN_TESTS_ARGS: '--helgrind --e2e --e2e-only --filter iothubclient_mqtt'
+          NEEDS_E2E_CONFIG: 'true'
+        helgrind_e2e_other:
+          RUN_TESTS_ARGS: '--helgrind --e2e --e2e-only --exclude iothubclient_amqp --exclude iothubclient_mqtt'
+          NEEDS_E2E_CONFIG: 'true'
+    steps:
+    - checkout: self
+      submodules: true
+      fetchDepth: 1
+    - download: current
+      artifact: test_config_scripts
+      displayName: Download artifact (test config scripts)
+    - download: current
+      artifact: ubuntu2404_dbg_build_output
+      displayName: Download artifact (build output)
+    - script: |
+        set -e
+        if command -v valgrind >/dev/null 2>&1; then
+          echo "Using preinstalled valgrind on hosted agent"
+        else
+          sudo apt-get update -qq
+          sudo ./build_all/linux/setup.sh
+        fi
+      displayName: 'Host setup'
+    - script: |
+        set -e
+        tar xf "$(Pipeline.Workspace)/ubuntu2404_dbg_build_output/build_output.tar" -C $(Build.SourcesDirectory)
+        export OPENSSL_ia32cap=0x00000000
+        sudo chmod -R 755 .
+        cd cmake
+        sudo bash -c 'source "$(Pipeline.Workspace)/test_config_scripts/set_e2e_test_env_vars.sh" && ../build_all/linux/run_tests.sh $(RUN_TESTS_ARGS)'
+      displayName: "Run Tests ($(RUN_TESTS_ARGS))"
+    - task: PublishTestResults@2
+      displayName: 'Publish Test Results ($(RUN_TESTS_ARGS))'
+      inputs:
+        testRunner: CTest
+        testResultsFiles: '**/Test.xml'
+        mergeTestResults: true
+        testRunTitle: 'ubuntu2404_helgrind_$(System.JobPositionInPhase)'
       condition: succeededOrFailed()
 
   - job: clang

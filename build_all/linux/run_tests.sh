@@ -17,7 +17,7 @@ UT_CORES=16
 # blew MAX_CLOUD_TRAVEL_TIME in iothubclient_amqp_dt_e2e on the mbedTLS
 # job). Keep E2E parallelism at 4 to match the hosted-agent core count.
 E2E_CORES=4
-VALGRIND_UT_CORES=4
+VALGRIND_UT_CORES=8
 VALGRIND_E2E_CORES=2
 
 run_e2e=false
@@ -26,17 +26,22 @@ run_helgrind=false
 run_drd=false
 ut_only=false
 e2e_only=false
+filter_pattern=""
+exclude_pattern=""
 
-for arg in "$@"; do
-    case "$arg" in
+while [[ $# -gt 0 ]]; do
+    case "$1" in
         --e2e)       run_e2e=true ;;
         --valgrind)  run_valgrind=true ;;
         --helgrind)  run_helgrind=true ;;
         --drd)       run_drd=true ;;
         --ut-only)   ut_only=true ;;
         --e2e-only)  e2e_only=true ;;
-        *)           echo "Unknown option: $arg"; exit 1 ;;
+        --filter)    shift; filter_pattern="$1" ;;
+        --exclude)   shift; exclude_pattern="${exclude_pattern:+${exclude_pattern}|}$1" ;;
+        *)           echo "Unknown option: $1"; exit 1 ;;
     esac
+    shift
 done
 
 if $ut_only && $e2e_only; then
@@ -72,7 +77,9 @@ fi
 if $run_valgrind; then
     if ! $e2e_only; then
         # Unit tests under valgrind
-        ctest -T test --no-compress-output -C "Debug" -V -j $VALGRIND_UT_CORES --schedule-random -R "_valgrind$" -E "e2e"
+        valgrind_include="${filter_pattern:+${filter_pattern}.*}_valgrind$"
+        valgrind_exclude="e2e${exclude_pattern:+|${exclude_pattern}}"
+        ctest -T test --no-compress-output -C "Debug" -V -j $VALGRIND_UT_CORES --schedule-random -R "$valgrind_include" -E "$valgrind_exclude"
     fi
     if $run_e2e; then
         if ! $ut_only; then
@@ -86,13 +93,17 @@ fi
 if $run_helgrind; then
     if ! $e2e_only; then
         # Unit tests under helgrind
-        ctest -T test --no-compress-output -C "Debug" -V -j $VALGRIND_UT_CORES --schedule-random -R "_helgrind$" -E "e2e"
+        helgrind_include="${filter_pattern:+${filter_pattern}.*}_helgrind$"
+        helgrind_exclude="e2e${exclude_pattern:+|${exclude_pattern}}"
+        ctest -T test --no-compress-output -C "Debug" -V -j $VALGRIND_UT_CORES --schedule-random -R "$helgrind_include" -E "$helgrind_exclude"
     fi
     if $run_e2e; then
         if ! $ut_only; then
             # E2E tests under helgrind. Quarantined:
             #   iothubclient_mqtt_dt_e2e: see GitHub issue (twin PATCH delivery flake).
-            ctest -T test --no-compress-output -C "Debug" -V -j $VALGRIND_E2E_CORES --schedule-random -R "e2e_helgrind$" -E "^iothubclient_mqtt_dt_e2e_helgrind$"
+            helgrind_e2e_include="${filter_pattern:+${filter_pattern}.*}e2e_helgrind$"
+            helgrind_e2e_exclude="^iothubclient_mqtt_dt_e2e_helgrind$${exclude_pattern:+|${exclude_pattern}}"
+            ctest -T test --no-compress-output -C "Debug" -V -j $VALGRIND_E2E_CORES --schedule-random -R "$helgrind_e2e_include" -E "$helgrind_e2e_exclude"
         fi
     fi
 fi
@@ -100,7 +111,9 @@ fi
 if $run_drd; then
     if ! $e2e_only; then
         # Unit tests under drd
-        ctest -T test --no-compress-output -C "Debug" -V -j $VALGRIND_UT_CORES --schedule-random -R "_drd$" -E "e2e"
+        drd_include="${filter_pattern:+${filter_pattern}.*}_drd$"
+        drd_exclude="e2e${exclude_pattern:+|${exclude_pattern}}"
+        ctest -T test --no-compress-output -C "Debug" -V -j $VALGRIND_UT_CORES --schedule-random -R "$drd_include" -E "$drd_exclude"
     fi
     # NOTE: E2E tests are intentionally not run under drd.  drd's thread instrumentation adds
     # 20-50x performance overhead, which makes libcurl's TLS handshakes to Azure services fail
