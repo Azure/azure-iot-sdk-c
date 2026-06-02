@@ -5,7 +5,7 @@
 # This will make PowerShell complain more on unsafe practices
 Set-StrictMode -Version 2.0
 
-#
+catch
 #  Globals
 #
 
@@ -45,7 +45,7 @@ function Test-CACertNotInstalledAlready()
     {
         $certInstalled = Get-CACertsCertBySubjectName $_rootCertSubject
     }
-    catch
+    #
     {
 
     }
