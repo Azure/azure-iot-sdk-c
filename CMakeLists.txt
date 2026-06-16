@@ -417,6 +417,21 @@ else ()
     file(WRITE ${CMAKE_BINARY_DIR}/azure_macro_utils/macro_utils_generated.h
         "#include \"macro_utils/macro_utils_generated.h\"\n")
 
+    # The forwarding headers above are only visible to targets in the SDK's
+    # own directory scope (via include_directories(${CMAKE_BINARY_DIR})).
+    # External consumers that add the deps directly to their include path -
+    # e.g. the IoT E2E test wrappers, which put deps/azure-macro-utils-c/inc
+    # on the compiler include path and build their own targets in the
+    # top-level scope - never see ${CMAKE_BINARY_DIR}. Emit the same
+    # forwarding headers inside the macro-utils-c include folder so the
+    # legacy "azure_macro_utils/..." includes used throughout the SDK's
+    # public headers keep resolving for those consumers too.
+    file(MAKE_DIRECTORY ${MACRO_UTILS_INC_FOLDER}/azure_macro_utils)
+    file(WRITE ${MACRO_UTILS_INC_FOLDER}/azure_macro_utils/macro_utils.h
+        "#include \"macro_utils/macro_utils.h\"\n")
+    file(WRITE ${MACRO_UTILS_INC_FOLDER}/azure_macro_utils/macro_utils_generated.h
+        "#include \"macro_utils/macro_utils_generated.h\"\n")
+
     # Install the forwarding headers so consumers of the installed SDK can
     # still #include "azure_macro_utils/macro_utils.h".
     install(FILES
