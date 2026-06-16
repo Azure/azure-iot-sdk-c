@@ -43,29 +43,31 @@ ENV LD=${TOOLCHAIN_EXES}/${TOOLCHAIN_NAME}-ld
 ENV NM=${TOOLCHAIN_EXES}/${TOOLCHAIN_NAME}-nm
 
 ENV LDFLAGS="-L${TOOLCHAIN_SYSROOT}/usr/lib"
-ENV LIBS="-lssl -lcrypto -ldl -lpthread"
+ENV LIBS="-lssl -lcrypto -ldl -lpthread -latomic"
 ENV TOOLCHAIN_PREFIX=${TOOLCHAIN_SYSROOT}/usr
 ENV STAGING_DIR=${TOOLCHAIN_SYSROOT}
 
 # Download OpenSSL source and expand it
-RUN wget https://www.openssl.org/source/openssl-1.1.1w.tar.gz
-RUN tar -xvf openssl-1.1.1w.tar.gz
+RUN wget https://www.openssl.org/source/openssl-3.0.15.tar.gz
+RUN tar -xvf openssl-3.0.15.tar.gz
 
 # Build OpenSSL
-WORKDIR openssl-1.1.1w
-RUN ./Configure linux-generic32 shared --prefix=${TOOLCHAIN_PREFIX} --openssldir=${TOOLCHAIN_PREFIX}
+WORKDIR openssl-3.0.15
+RUN ./Configure linux-generic32 shared no-tests --prefix=${TOOLCHAIN_PREFIX} --openssldir=${TOOLCHAIN_PREFIX}
 RUN make
 RUN make install
 WORKDIR ..
 
 # Download cURL source and expand it
-RUN wget http://curl.haxx.se/download/curl-7.60.0.tar.gz
-RUN tar -xvf curl-7.60.0.tar.gz
+ENV CURL_VERSION=8.20.0
+RUN wget https://curl.se/download/curl-${CURL_VERSION}.tar.gz
+RUN tar -xvf curl-${CURL_VERSION}.tar.gz
 
 # Build cURL
-# we need to set the path for openssl with --with-ssl=...
-WORKDIR curl-7.60.0
-RUN ./configure --with-sysroot=${TOOLCHAIN_SYSROOT} --prefix=${TOOLCHAIN_PREFIX} --target=${TOOLCHAIN_NAME} --with-ssl=${TOOLCHAIN_PREFIX} --with-zlib --host=${TOOLCHAIN_NAME} --build=x86_64-linux-gnu
+# --with-openssl points at our cross-built OpenSSL (option renamed from --with-ssl in curl 7.77.0).
+# --disable-ntlm excludes curl's MD4-based NTLM code (banned hash algorithm MD4 finding).
+WORKDIR curl-${CURL_VERSION}
+RUN ./configure --with-sysroot=${TOOLCHAIN_SYSROOT} --prefix=${TOOLCHAIN_PREFIX} --target=${TOOLCHAIN_NAME} --with-openssl=${TOOLCHAIN_PREFIX} --with-zlib --host=${TOOLCHAIN_NAME} --build=x86_64-linux-gnu --without-libpsl --disable-ntlm
 RUN make
 RUN make install
 WORKDIR ..
