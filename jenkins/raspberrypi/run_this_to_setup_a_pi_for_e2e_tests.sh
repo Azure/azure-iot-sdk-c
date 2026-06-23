@@ -64,11 +64,15 @@ source ~/.bashrc
 [ $? -eq 0 ] || { echo "bashrc source failed"; exit 1; }
 
 # Install curl new version
-wget https://curl.haxx.se/download/curl-7.64.1.tar.gz
+# Bump CURL_VERSION to update curl everywhere in this block.
+CURL_VERSION=8.20.0
+wget https://curl.se/download/curl-${CURL_VERSION}.tar.gz
 
-tar -xzvf curl-7.64.1.tar.gz
-cd curl_source/curl-7.64.1/
-./configure --without-zlib --with-ssl
+tar -xzvf curl-${CURL_VERSION}.tar.gz
+cd curl_source/curl-${CURL_VERSION}/
+# --with-openssl replaces the old --with-ssl (renamed in curl 7.77.0).
+# --disable-ntlm: SDK does not use NTLM auth; excludes curl's MD4-based NTLM code (banned hash algorithm MD4 finding).
+./configure --without-zlib --with-openssl --disable-ntlm
 make -j
 sudo make install
 

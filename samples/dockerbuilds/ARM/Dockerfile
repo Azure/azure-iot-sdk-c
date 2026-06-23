@@ -26,7 +26,7 @@ ENV TOOLCHAIN_ARM=gcc-arm-10.3-2021.07-x86_64-arm-none-linux-gnueabihf
 ENV TOOLCHAIN_PLATFORM=arm-none-linux-gnueabihf
 ENV TOOLCHAIN_SYSROOT=${WORK_ROOT}/${TOOLCHAIN_ARM}
 ENV TOOLCHAIN_BIN=${WORK_ROOT}/${TOOLCHAIN_ARM}/bin
-ENV OPENSSL_ROOT_DIR=${WORK_ROOT}/openssl-1.1.1v
+ENV OPENSSL_ROOT_DIR=${WORK_ROOT}/openssl-3.0.15
 ENV TOOLCHAIN_PREFIX=${WORK_ROOT}/ARM
 ENV AR=${TOOLCHAIN_BIN}/${TOOLCHAIN_PLATFORM}-ar
 ENV CC=${TOOLCHAIN_BIN}/${TOOLCHAIN_PLATFORM}-gcc
@@ -43,20 +43,23 @@ RUN tar -xvf ./${TOOLCHAIN_ARM}.tar.xz
 
 #########################################
 # Download and Configure OpenSSL
-RUN wget https://github.com/openssl/openssl/releases/download/OpenSSL_1_1_1v/openssl-1.1.1v.tar.gz 
-RUN tar -xvf ./openssl-1.1.1v.tar.gz 
-WORKDIR openssl-1.1.1v 
+RUN wget https://www.openssl.org/source/openssl-3.0.15.tar.gz 
+RUN tar -xvf ./openssl-3.0.15.tar.gz 
+WORKDIR openssl-3.0.15 
 RUN ./Configure linux-armv4 --prefix=${TOOLCHAIN_PREFIX} --openssldir=${OPENSSL_ROOT_DIR} no-tests shared 
 RUN make 
-RUN make install_sw
+RUN make install
 WORKDIR ..
 
 #########################################
 # Build curl
-RUN wget http://curl.haxx.se/download/curl-7.60.0.tar.gz 
-RUN tar -xvf curl-7.60.0.tar.gz 
-WORKDIR curl-7.60.0 
-RUN ./configure --with-sysroot=${TOOLCHAIN_SYSROOT} --prefix=${TOOLCHAIN_PREFIX} --target=${TOOLCHAIN_PLATFORM} --with-ssl --with-zlib --host=${TOOLCHAIN_PLATFORM} 
+# --with-openssl replaces the old --with-ssl (renamed in curl 7.77.0); --disable-ntlm
+# excludes curl's MD4-based NTLM code (banned hash algorithm MD4 finding).
+ENV CURL_VERSION=8.20.0
+RUN wget https://curl.se/download/curl-${CURL_VERSION}.tar.gz 
+RUN tar -xvf curl-${CURL_VERSION}.tar.gz 
+WORKDIR curl-${CURL_VERSION} 
+RUN ./configure --with-sysroot=${TOOLCHAIN_SYSROOT} --prefix=${TOOLCHAIN_PREFIX} --target=${TOOLCHAIN_PLATFORM} --with-openssl=${TOOLCHAIN_PREFIX} --with-zlib --host=${TOOLCHAIN_PLATFORM} --without-libpsl --disable-ntlm
 RUN make 
 RUN make install 
 WORKDIR ..
@@ -90,6 +93,11 @@ RUN echo "SET(CMAKE_FIND_ROOT_PATH ${WORK_ROOT})" >> toolchain.cmake
 RUN echo "SET(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)" >> toolchain.cmake
 RUN echo "SET(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)" >> toolchain.cmake
 RUN echo "SET(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)" >> toolchain.cmake
+# Pre-set the cache vars CMake's FindCURL consumes (CURL_INCLUDE_DIR/CURL_LIBRARY)
+# so find_package(CURL) succeeds when cross-compiling; otherwise CMake >= 4.0
+# fails the search and clobbers CURL_LIBRARIES.
+RUN echo "SET(CURL_INCLUDE_DIR ${TOOLCHAIN_PREFIX}/include)" >> toolchain.cmake
+RUN echo "SET(CURL_LIBRARY ${TOOLCHAIN_PREFIX}/lib/libcurl.so)" >> toolchain.cmake
 RUN echo "SET(CURL_LIBRARIES ${TOOLCHAIN_PREFIX}/lib/libcurl.so)" >> toolchain.cmake
 RUN echo "SET(ENV{LDFLAGS} -L${TOOLCHAIN_PREFIX}/lib)" >> toolchain.cmake
 RUN echo "SET(set_trusted_cert_in_samples true CACHE BOOL \"Force use of TrustedCerts option\" FORCE)" >> toolchain.cmake

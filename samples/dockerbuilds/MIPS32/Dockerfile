@@ -26,12 +26,13 @@ RUN wget https://downloads.openwrt.org/releases/21.02.3/targets/ramips/mt7620/op
 RUN tar -xvf openwrt-sdk-21.02.3-ramips-mt7620_gcc-8.4.0_musl.Linux-x86_64.tar.xz
 
 # OpenSSL
-RUN wget https://www.openssl.org/source/openssl-1.0.2o.tar.gz
-RUN tar -xvf openssl-1.0.2o.tar.gz
+RUN wget https://www.openssl.org/source/openssl-3.0.15.tar.gz
+RUN tar -xvf openssl-3.0.15.tar.gz
 
 # Curl
-RUN wget http://curl.haxx.se/download/curl-7.60.0.tar.gz
-RUN tar -xvf curl-7.60.0.tar.gz
+ENV CURL_VERSION=8.20.0
+RUN wget https://curl.se/download/curl-${CURL_VERSION}.tar.gz
+RUN tar -xvf curl-${CURL_VERSION}.tar.gz
 
 # Linux utilities for libuuid
 RUN wget https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.32/util-linux-2.32-rc2.tar.gz
@@ -45,7 +46,7 @@ ENV TOOLCHAIN_PLATFORM=mipsel-openwrt-linux-musl
 ENV STAGING_DIR=${WORK_ROOT}/${TOOLCHAIN_MIPS}/staging_dir
 ENV TOOLCHAIN_SYSROOT=${WORK_ROOT}/${TOOLCHAIN_MIPS}/staging_dir/toolchain-mipsel_24kc_gcc-8.4.0_musl
 ENV TOOLCHAIN_BIN=${TOOLCHAIN_SYSROOT}/bin
-ENV OPENSSL_ROOT_DIR=${WORK_ROOT}/openssl-OpenSSL_1_1_1f
+ENV OPENSSL_ROOT_DIR=${WORK_ROOT}/openssl-3.0.15
 ENV TOOLCHAIN_PREFIX=${WORK_ROOT}/MIPS
 ENV AR=${TOOLCHAIN_BIN}/${TOOLCHAIN_PLATFORM}-ar
 ENV CC=${TOOLCHAIN_BIN}/${TOOLCHAIN_PLATFORM}-gcc
@@ -53,18 +54,22 @@ ENV CXX=${TOOLCHAIN_BIN}/${TOOLCHAIN_PLATFORM}-g++
 
 
 ENV LDFLAGS="-L${TOOLCHAIN_PREFIX}/lib"
-ENV LIBS="-lssl -lcrypto -ldl -lpthread"
+ENV LIBS="-lssl -lcrypto -ldl -lpthread -latomic"
 
 # Build OpenSSL
-WORKDIR openssl-1.0.2o
-RUN ./Configure linux-generic32 --prefix=${TOOLCHAIN_PREFIX} --openssldir=${OPENSSL_ROOT_DIR} no-tests shared 
+# -latomic: MIPS32 has no native 64-bit atomics, so the compiler emits calls to
+# libatomic's __atomic_* helpers; append it so OpenSSL's apps link successfully.
+WORKDIR openssl-3.0.15
+RUN ./Configure linux-generic32 --prefix=${TOOLCHAIN_PREFIX} --openssldir=${OPENSSL_ROOT_DIR} no-tests shared -latomic
 RUN make
-RUN make install_sw
+RUN make install
 WORKDIR ..
 
 # Build curl
-WORKDIR curl-7.60.0
-RUN ./configure --with-sysroot=${TOOLCHAIN_SYSROOT} --prefix=${TOOLCHAIN_PREFIX} --target=${TOOLCHAIN_PLATFORM} --with-ssl=${TOOLCHAIN_PREFIX} --with-zlib --host=${TOOLCHAIN_PLATFORM} 
+# --with-openssl replaces the old --with-ssl (renamed in curl 7.77.0); --disable-ntlm
+# excludes curl's MD4-based NTLM code (banned hash algorithm MD4 finding).
+WORKDIR curl-${CURL_VERSION}
+RUN ./configure --with-sysroot=${TOOLCHAIN_SYSROOT} --prefix=${TOOLCHAIN_PREFIX} --target=${TOOLCHAIN_PLATFORM} --with-openssl=${TOOLCHAIN_PREFIX} --with-zlib --host=${TOOLCHAIN_PLATFORM} --without-libpsl --disable-ntlm
 RUN make
 RUN make install
 WORKDIR ..
@@ -97,6 +102,11 @@ RUN echo "SET(CMAKE_FIND_ROOT_PATH ${WORK_ROOT})" >> toolchain.cmake
 RUN echo "SET(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)" >> toolchain.cmake
 RUN echo "SET(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)" >> toolchain.cmake
 RUN echo "SET(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)" >> toolchain.cmake
+# Pre-set the cache vars CMake's FindCURL consumes (CURL_INCLUDE_DIR/CURL_LIBRARY)
+# so find_package(CURL) succeeds when cross-compiling; otherwise CMake >= 4.0
+# fails the search and clobbers CURL_LIBRARIES.
+RUN echo "SET(CURL_INCLUDE_DIR ${TOOLCHAIN_PREFIX}/include)" >> toolchain.cmake
+RUN echo "SET(CURL_LIBRARY ${TOOLCHAIN_PREFIX}/lib/libcurl.so)" >> toolchain.cmake
 RUN echo "SET(CURL_LIBRARIES ${TOOLCHAIN_PREFIX}/lib/libcurl.so)" >> toolchain.cmake
 RUN echo "SET(ENV{LDFLAGS} -L${TOOLCHAIN_PREFIX}/lib)" >> toolchain.cmake
 RUN echo "SET(OPENSSL_ROOT_DIR ${TOOLCHAIN_PREFIX})" >> toolchain.cmake
