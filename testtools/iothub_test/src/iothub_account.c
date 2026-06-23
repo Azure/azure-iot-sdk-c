@@ -159,7 +159,7 @@ static int retrieveConnStringInfo(IOTHUB_ACCOUNT_INFO* accountInfo)
     }
     else
     {
-        (void)strcpy(accountInfo->hostname, accountInfo->iothubName);
+        (void)memcpy(accountInfo->hostname, accountInfo->iothubName, endHost - beginHost);
         accountInfo->hostname[endHost - beginHost] = '.';
         if (mallocAndStrcpy_s(&accountInfo->iothubSuffix, accountInfo->hostname + endHost - beginHost + 1) != 0)
         {
@@ -1113,7 +1113,7 @@ const char* IoTHubAccount_GetEventhubAccessKey(IOTHUB_ACCOUNT_INFO_HANDLE acctHa
                         while ((STRING_TOKENIZER_get_next_token(tokenizer, tokenString, "=") == 0))
                         {
                             char tokenValue[128];
-                            strcpy(tokenValue, STRING_c_str(tokenString));
+                            snprintf(tokenValue, sizeof(tokenValue), "%s", STRING_c_str(tokenString));
 
                             if (STRING_TOKENIZER_get_next_token(tokenizer, tokenString, ";") != 0)
                             {
@@ -1122,7 +1122,7 @@ const char* IoTHubAccount_GetEventhubAccessKey(IOTHUB_ACCOUNT_INFO_HANDLE acctHa
 
                             if (strcmp(tokenValue, "SharedAccessKey") == 0)
                             {
-                                strcpy(access_key, STRING_c_str(tokenString));
+                                snprintf(access_key, sizeof(access_key), "%s", STRING_c_str(tokenString));
                                 break;
                             }
                         }
@@ -1150,11 +1150,11 @@ const char* IoTHubAccount_GetEventhubConsumerGroup(IOTHUB_ACCOUNT_INFO_HANDLE ac
     char* envVarValue = getenv("IOTHUB_EVENTHUB_CONSUMER_GROUP");
     if (envVarValue != NULL)
     {
-        strcpy(consumerGroup, envVarValue);
+        snprintf(consumerGroup, sizeof(consumerGroup), "%s", envVarValue);
     }
     else
     {
-        strcpy(consumerGroup, DEFAULT_CONSUMER_GROUP);
+        snprintf(consumerGroup, sizeof(consumerGroup), "%s", DEFAULT_CONSUMER_GROUP);
     }
     return consumerGroup;
 }
