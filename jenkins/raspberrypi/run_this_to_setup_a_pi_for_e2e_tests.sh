@@ -108,12 +108,14 @@ echo "Now you can run the cross compiled E2E tests!"
 # # BUILD AND INSTALL NEW CURL TO CURL_ROOT
 # # We are commenting this out because it's useful info to have 
 # # but for the E2E tests it works when CURL is installed directly on the device.
-# wget https://curl.haxx.se/download/curl-7.64.1.tar.gz
+# wget https://curl.se/download/curl-8.20.0.tar.gz
 # mkdir $CURL_ROOT
 # mkdir curl_source
-# tar -C curl_source -xzvf curl-7.64.1.tar.gz
-# cd curl_source/curl-7.64.1/
-# ./configure --prefix=$CURL_ROOT --disable-shared --without-zlib --with-ssl --enable-static
+# tar -C curl_source -xzvf curl-8.20.0.tar.gz
+# cd curl_source/curl-8.20.0/
+# # --with-openssl replaces the old --with-ssl (renamed in curl 7.77.0); --disable-ntlm
+# # excludes curl's MD4/DES-based NTLM code (banned MD4 hash / banned DES cipher).
+# ./configure --prefix=$CURL_ROOT --disable-shared --without-zlib --with-openssl --disable-ntlm --enable-static
 # make -j
 # sudo make install
 
