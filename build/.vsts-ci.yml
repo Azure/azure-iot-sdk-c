@@ -94,7 +94,14 @@ stages:
     - publish: test_config
       artifact: test_config_scripts
       displayName: Publish artifact (test config scripts)
-      condition: always()
+      # Pipeline artifacts are immutable, so re-publishing this name in the same
+      # run fails with "Artifact test_config_scripts already exists for build N"
+      # whenever this job/stage re-executes in the same run (Rerun failed jobs, a
+      # stage rerun, or an agent-loss auto-retry). Publish only on the first job+
+      # stage attempt; that artifact persists for the Tests/Cleanup stages.
+      # always() keeps publishing on a resource-creation failure so Cleanup can
+      # still read azure-resource-group-name.txt.
+      condition: and(always(), eq(variables['System.JobAttempt'], '1'), eq(variables['System.StageAttempt'], '1'))
 - stage: Tests
   dependsOn:
   - Requirements
