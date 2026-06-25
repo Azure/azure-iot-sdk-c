@@ -33,13 +33,14 @@ export STAGING_DIR=${TOOLCHAIN_SYSROOT}
 
 # OPENSSL INSTALL
 # Download OpenSSL source and expand it
-export OPENSSL_SOURCE=openssl-1.1.1f
+# OpenSSL 3.0.15: curl 8.20.0's configure requires OpenSSL >= 3.0.0.
+export OPENSSL_SOURCE=openssl-3.0.15
 wget https://www.openssl.org/source/${OPENSSL_SOURCE}.tar.gz
 tar -xvf ${OPENSSL_SOURCE}.tar.gz
 
 # Build OpenSSL
 cd ${WORK_ROOT}/${OPENSSL_SOURCE}
-./Configure linux-generic32 shared --prefix=${TOOLCHAIN_PREFIX} --openssldir=${TOOLCHAIN_PREFIX}
+./Configure linux-generic32 shared no-tests --prefix=${TOOLCHAIN_PREFIX} --openssldir=${TOOLCHAIN_PREFIX}
 make
 make install
 cd ${WORK_ROOT}
@@ -47,14 +48,17 @@ cd ${WORK_ROOT}
 
 # CURL INSTALL
 # Download cURL source and expand it
-export CURL_SOURCE=curl-7.64.1
-wget http://curl.haxx.se/download/${CURL_SOURCE}.tar.gz
+export CURL_SOURCE=curl-8.20.0
+wget https://curl.se/download/${CURL_SOURCE}.tar.gz
 tar -xvf ${CURL_SOURCE}.tar.gz
 
 # Build cURL
-# we need to set the path for openssl with --with-ssl=...
+# --with-openssl points at our cross-built OpenSSL (option renamed from --with-ssl in curl 7.77.0).
+# --without-libpsl avoids curl 8.x's hard libpsl dependency, which is not in the sysroot.
+# --disable-ntlm excludes curl's MD4/DES-based NTLM code (curl_ntlm_core.c), flagged as use of
+# the banned hash algorithm MD4 and the banned symmetric algorithm DES.
 pushd /${WORK_ROOT}/${CURL_SOURCE}
-./configure --with-sysroot=${TOOLCHAIN_SYSROOT} --prefix=${TOOLCHAIN_PREFIX} --target=${TOOLCHAIN_NAME} --with-ssl=${TOOLCHAIN_PREFIX} --with-zlib --host=${TOOLCHAIN_NAME} --build=x86_64-linux-gnu
+./configure --with-sysroot=${TOOLCHAIN_SYSROOT} --prefix=${TOOLCHAIN_PREFIX} --target=${TOOLCHAIN_NAME} --with-openssl=${TOOLCHAIN_PREFIX} --with-zlib --host=${TOOLCHAIN_NAME} --build=x86_64-linux-gnu --without-libpsl --disable-ntlm
 
 make
 make install
