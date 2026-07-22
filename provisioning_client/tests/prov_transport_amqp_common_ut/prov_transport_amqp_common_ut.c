@@ -140,6 +140,7 @@ static ON_MESSAGE_RECEIVED g_on_msg_recv;
 static void* msg_recv_callback_context;
 static TPM_CHALLENGE_CALLBACK g_challenge_cb;
 static void* g_challenge_context;
+static bool g_use_invalid_msg_length;
 static bool g_use_x509;
 
 static PROV_DEVICE_TRANSPORT_STATUS g_target_transport_status;
@@ -210,7 +211,7 @@ static int my_message_get_body_amqp_data_in_place(MESSAGE_HANDLE message, size_t
 {
     (void)message;
     (void)index;
-    amqp_data->length = strlen(TEST_JSON_REPLY);
+    amqp_data->length = g_use_invalid_msg_length ? (size_t)-1 : strlen(TEST_JSON_REPLY);
     amqp_data->bytes = (unsigned char*)TEST_JSON_REPLY;
     return 0;
 }
@@ -701,6 +702,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         g_challenge_cb = NULL;
         g_challenge_context = NULL;
         g_use_x509 = false;
+        g_use_invalid_msg_length = false;
     }
 
     TEST_FUNCTION_CLEANUP(method_cleanup)
@@ -1754,6 +1756,40 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         //cleanup
+        prov_transport_common_amqp_close(handle);
+        prov_transport_common_amqp_destroy(handle);
+    }
+
+    TEST_FUNCTION(prov_transport_common_amqp_dowork_register_recv_invalid_length_fail)
+    {
+        AMQP_VALUE result;
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io, on_transport_error, NULL);
+        (void)prov_transport_common_amqp_open(handle, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL, on_transport_challenge_callback, NULL);
+        (void)prov_transport_common_amqp_register_device(handle, on_transport_json_parse, on_transport_create_json_payload, NULL);
+        prov_transport_common_amqp_dowork(handle);
+        g_msg_sndr_state_changed(g_msg_sndr_state_changed_ctx, MESSAGE_SENDER_STATE_OPEN, MESSAGE_SENDER_STATE_OPENING);
+        g_msg_rcvr_state_changed(g_msg_rcvr_state_changed_ctx, MESSAGE_RECEIVER_STATE_OPEN, MESSAGE_RECEIVER_STATE_OPENING);
+        prov_transport_common_amqp_dowork(handle);
+        umock_c_reset_all_calls();
+
+        // A wire-provided body length of SIZE_MAX would wrap (length + 1) to 0; the transport
+        // must reject it instead of allocating a zero-length buffer and copying past it.
+        g_use_invalid_msg_length = true;
+
+        //arrange
+        STRICT_EXPECTED_CALL(message_get_body_type(IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(message_get_body_amqp_data_in_place(IGNORED_ARG, 0, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(messaging_delivery_accepted());
+
+        //act
+        result = g_on_msg_recv(msg_recv_callback_context, TEST_MESSAGE_HANDLE);
+
+        //assert
+        ASSERT_IS_NOT_NULL(result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        //cleanup
+        g_use_invalid_msg_length = false;
         prov_transport_common_amqp_close(handle);
         prov_transport_common_amqp_destroy(handle);
     }

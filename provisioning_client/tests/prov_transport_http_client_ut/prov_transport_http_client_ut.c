@@ -1090,6 +1090,31 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
         prov_dev_http_transport_destroy(handle);
     }
 
+    TEST_FUNCTION(prov_transport_http_reply_recv_invalid_content_len_fail)
+    {
+        //arrange
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_error, NULL);
+        (void)prov_dev_http_transport_open(handle, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL, on_transport_challenge_callback, NULL);
+        (void)prov_dev_http_transport_register_device(handle, on_transport_json_parse, on_transport_create_json_payload, NULL);
+        g_on_http_open(g_http_open_ctx, HTTP_CALLBACK_REASON_OK);
+        prov_dev_http_transport_dowork(handle);
+        umock_c_reset_all_calls();
+
+        // A Content-Length of SIZE_MAX would wrap (content_len + 1) to 0; the transport must
+        // reject it instead of allocating a zero-length buffer and copying gigabytes past it.
+        STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_ARG, IGNORED_ARG)).SetReturn(NULL);
+
+        //act
+        g_on_http_reply_recv(g_http_execute_ctx, HTTP_CALLBACK_REASON_OK, (const unsigned char*)TEST_JSON_CONTENT, (size_t)-1, TEST_SUCCESS_STATUS_CODE, TEST_HTTP_HANDLE_VALUE);
+
+        //assert
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        //cleanup
+        (void)prov_dev_http_transport_close(handle);
+        prov_dev_http_transport_destroy(handle);
+    }
+
     TEST_FUNCTION(prov_transport_http_reply_recv_transient_error_succeed)
     {
         //arrange

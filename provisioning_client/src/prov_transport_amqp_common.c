@@ -15,6 +15,7 @@
 #include "azure_c_shared_utility/http_proxy_io.h"
 #include "azure_c_shared_utility/strings.h"
 #include "azure_c_shared_utility/azure_base64.h"
+#include "azure_c_shared_utility/safe_math.h"
 
 #include "azure_uamqp_c/message_sender.h"
 #include "azure_uamqp_c/message_receiver.h"
@@ -455,6 +456,7 @@ static AMQP_VALUE on_message_recv_callback(const void* user_ctx, MESSAGE_HANDLE 
         else
         {
             BINARY_DATA binary_data;
+            size_t alloc_size;
             if (amqp_info->payload_data != NULL)
             {
                 free(amqp_info->payload_data);
@@ -467,7 +469,13 @@ static AMQP_VALUE on_message_recv_callback(const void* user_ctx, MESSAGE_HANDLE 
                 amqp_info->transport_state = TRANSPORT_CLIENT_STATE_ERROR;
                 amqp_info->amqp_state = AMQP_STATE_ERROR;
             }
-            else if ((amqp_info->payload_data = malloc(binary_data.length + 1)) == NULL)
+            else if ((alloc_size = safe_add_size_t(binary_data.length, 1)) == SIZE_MAX)
+            {
+                LogError("failure invalid payload length");
+                amqp_info->transport_state = TRANSPORT_CLIENT_STATE_ERROR;
+                amqp_info->amqp_state = AMQP_STATE_ERROR;
+            }
+            else if ((amqp_info->payload_data = malloc(alloc_size)) == NULL)
             {
                 LogError("failure allocating payload data");
                 amqp_info->transport_state = TRANSPORT_CLIENT_STATE_ERROR;
@@ -479,7 +487,7 @@ static AMQP_VALUE on_message_recv_callback(const void* user_ctx, MESSAGE_HANDLE 
                 // be set to the default value
                 (void)get_retry_after_property(amqp_info, message);
 
-                memset(amqp_info->payload_data, 0, binary_data.length + 1);
+                memset(amqp_info->payload_data, 0, alloc_size);
                 memcpy(amqp_info->payload_data, binary_data.bytes, binary_data.length);
                 if (amqp_info->transport_state == TRANSPORT_CLIENT_STATE_REG_SENT)
                 {
