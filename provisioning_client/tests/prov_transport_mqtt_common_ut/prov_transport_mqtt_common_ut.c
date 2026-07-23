@@ -118,6 +118,7 @@ static ON_MQTT_ERROR_CALLBACK g_on_error_cb;
 static void* g_on_error_ctx;
 static bool g_use_x509;
 static APP_PAYLOAD g_app_msg;
+static bool g_use_invalid_msg_length;
 
 
 static PROV_DEVICE_TRANSPORT_STATUS g_target_transport_status;
@@ -197,7 +198,7 @@ static void my_mqttmessage_destroy(MQTT_MESSAGE_HANDLE handle)
 static const APP_PAYLOAD* my_mqttmessage_getApplicationMsg(MQTT_MESSAGE_HANDLE handle)
 {
     (void)handle;
-    g_app_msg.length = strlen(TEST_JSON_REPLY);
+    g_app_msg.length = g_use_invalid_msg_length ? (size_t)-1 : strlen(TEST_JSON_REPLY);
     g_app_msg.message = (unsigned char*)TEST_JSON_REPLY;
     return &g_app_msg;
 }
@@ -399,6 +400,7 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         g_operation_cb = NULL;
         g_on_error_cb = NULL;
         g_use_x509 = false;
+        g_use_invalid_msg_length = false;
     }
 
     TEST_FUNCTION_CLEANUP(method_cleanup)
@@ -1325,6 +1327,49 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         //cleanup
+        prov_transport_common_mqtt_close(handle);
+        prov_transport_common_mqtt_destroy(handle);
+    }
+
+    TEST_FUNCTION(prov_transport_common_mqtt_dowork_register_recv_invalid_length_fail)
+    {
+        CONNECT_ACK connack = { true, CONNECTION_ACCEPTED };
+        QOS_VALUE QosValue[] = { DELIVER_AT_LEAST_ONCE };
+        SUBSCRIBE_ACK suback;
+        suback.packetId = 1234;
+        suback.qosCount = 1;
+        suback.qosReturn = QosValue;
+
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_mqtt_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_X509, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_mqtt_transport_io, on_transport_error, NULL);
+        (void)prov_transport_common_mqtt_x509_cert(handle, TEST_X509_CERT_VALUE, TEST_PRIVATE_KEY_VALUE);
+        (void)prov_transport_common_mqtt_open(handle, TEST_REGISTRATION_ID_VALUE, NULL, NULL, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL, on_transport_challenge_callback, NULL);
+        (void)prov_transport_common_mqtt_register_device(handle, on_transport_json_parse, on_transport_create_json_payload, NULL);
+        prov_transport_common_mqtt_dowork(handle);
+        g_operation_cb(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_CONNACK, &connack, g_msg_recv_callback_context);
+        prov_transport_common_mqtt_dowork(handle);
+        g_operation_cb(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_SUBSCRIBE_ACK, &suback, g_msg_recv_callback_context);
+        prov_transport_common_mqtt_dowork(handle);
+        umock_c_reset_all_calls();
+
+        // A wire-provided payload length of SIZE_MAX would wrap (length + 1) to 0; the
+        // transport must reject it instead of allocating a zero-length buffer and copying past it.
+        g_use_invalid_msg_length = true;
+
+        //arrange
+        STRICT_EXPECTED_CALL(mqttmessage_getTopicName(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(mqttmessage_getApplicationMsg(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(on_transport_register_data_cb(PROV_DEVICE_TRANSPORT_RESULT_ERROR, NULL, NULL, NULL, IGNORED_ARG));
+
+        //act
+        g_on_msg_recv(TEST_MQTT_MESSAGE, g_msg_recv_callback_context);
+        prov_transport_common_mqtt_dowork(handle);
+
+        //assert
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        //cleanup
+        g_use_invalid_msg_length = false;
         prov_transport_common_mqtt_close(handle);
         prov_transport_common_mqtt_destroy(handle);
     }
