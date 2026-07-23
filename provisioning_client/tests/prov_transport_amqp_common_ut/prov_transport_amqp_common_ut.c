@@ -1780,9 +1780,12 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         STRICT_EXPECTED_CALL(message_get_body_type(IGNORED_ARG, IGNORED_ARG));
         STRICT_EXPECTED_CALL(message_get_body_amqp_data_in_place(IGNORED_ARG, 0, IGNORED_ARG));
         STRICT_EXPECTED_CALL(messaging_delivery_accepted());
+        STRICT_EXPECTED_CALL(connection_dowork(IGNORED_ARG));
+        STRICT_EXPECTED_CALL(on_transport_register_data_cb(PROV_DEVICE_TRANSPORT_RESULT_ERROR, NULL, NULL, NULL, IGNORED_ARG));
 
         //act
         result = g_on_msg_recv(msg_recv_callback_context, TEST_MESSAGE_HANDLE);
+        prov_transport_common_amqp_dowork(handle);
 
         //assert
         ASSERT_IS_NOT_NULL(result);

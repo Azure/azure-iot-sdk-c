@@ -152,7 +152,7 @@ static void on_http_reply_recv(void* callback_ctx, HTTP_CALLBACK_REASON request_
                 }
                 else if ((http_info->payload_data = malloc(alloc_size)) == NULL)
                 {
-                    LogError("Failure sending http request");
+                    LogError("Failure allocating payload data");
                     http_info->transport_state = TRANSPORT_CLIENT_STATE_ERROR;
                 }
                 else
