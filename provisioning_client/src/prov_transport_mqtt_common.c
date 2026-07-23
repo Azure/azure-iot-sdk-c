@@ -16,7 +16,6 @@
 #include "azure_c_shared_utility/shared_util_options.h"
 #include "azure_c_shared_utility/http_proxy_io.h"
 #include "azure_c_shared_utility/urlencode.h"
-#include "azure_c_shared_utility/http_proxy_io.h"
 #include "azure_c_shared_utility/safe_math.h"
 
 #include "azure_prov_client/internal/prov_transport_mqtt_common.h"
