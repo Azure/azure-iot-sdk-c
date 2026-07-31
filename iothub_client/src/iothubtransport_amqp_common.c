@@ -54,6 +54,9 @@
 #define DEFAULT_MAX_RETRY_TIME_IN_SECS            0
 #define MAX_SERVICE_KEEP_ALIVE_RATIO              0.9
 #define DEFAULT_DEVICE_STOP_DELAY                 10
+// Minimum time to wait before attempting to subscribe for methods again after the methods links failed.
+// Prevents the device from hammering the service with link attaches if the service keeps refusing them.
+#define DEFAULT_METHODS_RESUBSCRIBE_DELAY_SECS    5
 
 // ---------- Data Definitions ---------- //
 
@@ -145,6 +148,8 @@ typedef struct AMQP_TRANSPORT_DEVICE_INSTANCE_TAG
     bool subscribe_methods_needed;                                       // Indicates if should subscribe for device methods.
     // is the transport subscribed for methods?
     bool subscribed_for_methods;                                         // Indicates if device is subscribed for device methods.
+    bool methods_resubscribe_needed;                                     // Set by the methods callbacks when the methods links fail; the tear-down is deferred to DoWork.
+    time_t time_of_last_methods_failure;                                 // Time the methods links last failed; used to throttle re-subscription attempts.
     bool is_quota_exceeded; 
     TRANSPORT_CALLBACKS_INFO transport_callbacks;
     void* transport_ctx;
@@ -450,17 +455,31 @@ static DEVICE_MESSAGE_DISPOSITION_RESULT on_message_received(IOTHUB_MESSAGE_HAND
     return device_disposition_result;
 }
 
+// @brief
+//     Callback invoked by the methods module when the device methods links fail (e.g., the service
+//     detached them with an error condition, or a method response could not be sent).
+// @remarks
+//     The links MUST NOT be destroyed here: this callback runs from within the uamqp message sender/
+//     receiver handlers, which keep using the links after it returns. The tear-down is deferred to
+//     handle_methods_resubscribe(), invoked from DoWork.
 static void on_methods_error(void* context)
 {
-    (void)context;
+    AMQP_TRANSPORT_DEVICE_INSTANCE* device_state = (AMQP_TRANSPORT_DEVICE_INSTANCE*)context;
+    const char* device_id = STRING_c_str(device_state->device_id); // advoid MU_P_OR_NULL double call
+    LogError("Device '%s' methods links failed; scheduling re-subscription for device methods", MU_P_OR_NULL(device_id));
+
+    device_state->methods_resubscribe_needed = true;
 }
 
+// @brief
+//     Callback invoked by the methods module when the device methods links have been detached.
+// @remarks
+//     Deferred to DoWork for the same reason described in on_methods_error().
 static void on_methods_unsubscribed(void* context)
 {
     AMQP_TRANSPORT_DEVICE_INSTANCE* device_state = (AMQP_TRANSPORT_DEVICE_INSTANCE*)context;
 
-    iothubtransportamqp_methods_unsubscribe(device_state->methods_handle);
-    device_state->subscribed_for_methods = false;
+    device_state->methods_resubscribe_needed = true;
 }
 
 static int on_method_request_received(void* context, const char* method_name, const unsigned char* request, size_t request_size, IOTHUBTRANSPORT_AMQP_METHOD_HANDLE method_handle)
@@ -478,6 +497,58 @@ static int on_method_request_received(void* context, const char* method_name, co
         device_state->number_of_previous_failures = 0;
         result = 0;
     }
+    return result;
+}
+
+// @brief
+//     Destroys the device methods links if a failure was reported by the methods callbacks, so that
+//     DoWork can subscribe for methods again.
+// @remarks
+//     Must only be invoked from DoWork; see the remarks on on_methods_error().
+static void handle_methods_resubscribe(AMQP_TRANSPORT_DEVICE_INSTANCE* registered_device)
+{
+    if (registered_device->methods_resubscribe_needed)
+    {
+        registered_device->methods_resubscribe_needed = false;
+        registered_device->time_of_last_methods_failure = get_time(NULL);
+
+        if (registered_device->subscribed_for_methods)
+        {
+            iothubtransportamqp_methods_unsubscribe(registered_device->methods_handle);
+            registered_device->subscribed_for_methods = false;
+        }
+    }
+}
+
+// @brief
+//     Verifies if enough time has passed since the methods links last failed to attempt subscribing again.
+// @returns
+//     true if subscribing for methods can be attempted now, false if it must be delayed.
+static bool can_subscribe_methods(AMQP_TRANSPORT_DEVICE_INSTANCE* registered_device)
+{
+    bool result;
+
+    if (registered_device->time_of_last_methods_failure == INDEFINITE_TIME)
+    {
+        // The methods links have not failed (or the failure time could not be obtained); no need to wait.
+        result = true;
+    }
+    else
+    {
+        bool is_timed_out;
+
+        if (is_timeout_reached(registered_device->time_of_last_methods_failure, DEFAULT_METHODS_RESUBSCRIBE_DELAY_SECS, &is_timed_out) != RESULT_OK)
+        {
+            const char* device_id = STRING_c_str(registered_device->device_id); // advoid MU_P_OR_NULL double call
+            LogError("Device '%s' failed verifying the methods re-subscription delay (is_timeout_reached failed)", MU_P_OR_NULL(device_id));
+            result = false;
+        }
+        else
+        {
+            result = is_timed_out;
+        }
+    }
+
     return result;
 }
 
@@ -811,6 +882,8 @@ static void prepare_device_for_connection_retry(AMQP_TRANSPORT_DEVICE_INSTANCE* 
 {
     iothubtransportamqp_methods_unsubscribe(registered_device->methods_handle);
     registered_device->subscribed_for_methods = 0;
+    registered_device->methods_resubscribe_needed = false;
+    registered_device->time_of_last_methods_failure = INDEFINITE_TIME;
 
     if (registered_device->device_state != DEVICE_STATE_STOPPED)
     {
@@ -1016,6 +1089,8 @@ static int IoTHubTransport_AMQP_Common_Device_DoWork(AMQP_TRANSPORT_DEVICE_INSTA
 {
     int result;
 
+    handle_methods_resubscribe(registered_device);
+
     if (registered_device->device_state != DEVICE_STATE_STARTED)
     {
         if (registered_device->device_state == DEVICE_STATE_STOPPED)
@@ -1095,6 +1170,7 @@ static int IoTHubTransport_AMQP_Common_Device_DoWork(AMQP_TRANSPORT_DEVICE_INSTA
     }
     else if (registered_device->subscribe_methods_needed &&
         !registered_device->subscribed_for_methods &&
+        can_subscribe_methods(registered_device) &&
         subscribe_methods(registered_device) != RESULT_OK)
     {
         const char* device_id = STRING_c_str(registered_device->device_id); // advoid MU_P_OR_NULL double call
@@ -2080,6 +2156,8 @@ IOTHUB_DEVICE_HANDLE IoTHubTransport_AMQP_Common_Register(TRANSPORT_LL_HANDLE ha
                 amqp_device_instance->max_state_change_timeout_secs = DEFAULT_DEVICE_STATE_CHANGE_TIMEOUT_SECS;
                 amqp_device_instance->subscribe_methods_needed = false;
                 amqp_device_instance->subscribed_for_methods = false;
+                amqp_device_instance->methods_resubscribe_needed = false;
+                amqp_device_instance->time_of_last_methods_failure = INDEFINITE_TIME;
                 amqp_device_instance->is_quota_exceeded = false;  
                 amqp_device_instance->transport_ctx = transport_instance->transport_ctx;
                 amqp_device_instance->transport_callbacks = transport_instance->transport_callbacks;

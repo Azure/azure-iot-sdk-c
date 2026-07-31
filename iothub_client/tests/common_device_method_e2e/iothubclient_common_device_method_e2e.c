@@ -554,6 +554,22 @@ static void setmethodcallback_on_device_or_module(const char* payload)
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not IoTHubDeviceClient_Set(Device|Module)MethodCallback");
 }
 
+static void unsetmethodcallback_on_device_or_module(void)
+{
+    IOTHUB_CLIENT_RESULT result;
+
+    if (iothub_moduleclient_handle != NULL)
+    {
+        result = IoTHubModuleClient_SetModuleMethodCallback(iothub_moduleclient_handle, NULL, NULL);
+    }
+    else
+    {
+        result = IoTHubDeviceClient_SetDeviceMethodCallback(iothub_deviceclient_handle, NULL, NULL);
+    }
+
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not clear IoTHubDeviceClient_Set(Device|Module)MethodCallback");
+}
+
 static void setcommandcallback_on_device_or_module(const char* payload)
 {
     IOTHUB_CLIENT_RESULT result;
@@ -684,6 +700,40 @@ static void test_device_method_with_string(IOTHUB_PROVISIONED_DEVICE* deviceToUs
 
     serviceClientDeviceMethodHandle = IoTHubDeviceMethod_Create(iotHubServiceClientHandle);
     ASSERT_IS_NOT_NULL(serviceClientDeviceMethodHandle, "Could not create device method handle");
+
+    test_invoke_device_method(deviceToUse->deviceId, deviceToUse->moduleId, TEST_METHOD_NAME, payload);
+}
+
+// Verifies that device methods keep working after the methods subscription is torn down and
+// re-established on a live connection (i.e., without reconnecting the transport).
+// This is the recovery the AMQP transport performs when the service detaches the methods links; if it
+// is broken, the service rejects every subsequent invocation with 404103 (DeviceNotOnline) even though
+// the device stays connected and telemetry keeps flowing.
+static void test_device_method_after_resubscribe(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, const char *payload)
+{
+    g_conn_info.conn_status = IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED;
+
+    create_hub_client_from_provisioned_device(deviceToUse, protocol, NULL);
+    setmethodcallback_on_device_or_module(payload);
+    test_wait_for_device_to_connect();
+
+    // Wait for the method to subscribe
+    ThreadAPI_Sleep(DEVICE_METHOD_SUB_WAIT_TIME_MS);
+
+    iotHubServiceClientHandle = IoTHubServiceClientAuth_CreateFromConnectionString(IoTHubAccount_GetIoTHubConnString(g_iothubAcctInfo));
+    ASSERT_IS_NOT_NULL(iotHubServiceClientHandle, "Could not create service client handle");
+
+    serviceClientDeviceMethodHandle = IoTHubDeviceMethod_Create(iotHubServiceClientHandle);
+    ASSERT_IS_NOT_NULL(serviceClientDeviceMethodHandle, "Could not create device method handle");
+
+    test_invoke_device_method(deviceToUse->deviceId, deviceToUse->moduleId, TEST_METHOD_NAME, payload);
+
+    (void)printf("Unsubscribing and re-subscribing for device methods...\r\n");
+    unsetmethodcallback_on_device_or_module();
+    setmethodcallback_on_device_or_module(payload);
+
+    // Wait for the method to subscribe again
+    ThreadAPI_Sleep(DEVICE_METHOD_SUB_WAIT_TIME_MS);
 
     test_invoke_device_method(deviceToUse->deviceId, deviceToUse->moduleId, TEST_METHOD_NAME, payload);
 }
@@ -900,6 +950,11 @@ void device_method_e2e_method_call_with_empty_json_object_sas(IOTHUB_CLIENT_TRAN
 void device_method_e2e_method_call_with_null_sas(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 {
     test_device_method_with_string(IoTHubAccount_GetSASDevice(g_iothubAcctInfo), protocol, "null");
+}
+
+void device_method_e2e_method_call_after_resubscribe_sas(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
+{
+    test_device_method_after_resubscribe(IoTHubAccount_GetSASDevice(g_iothubAcctInfo), protocol, "\"I'm a happy little string\"");
 }
 
 extern void device_method_e2e_method_call_with_embedded_double_quote_sas(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
