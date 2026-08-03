@@ -465,7 +465,7 @@ static DEVICE_MESSAGE_DISPOSITION_RESULT on_message_received(IOTHUB_MESSAGE_HAND
 static void on_methods_error(void* context)
 {
     AMQP_TRANSPORT_DEVICE_INSTANCE* device_state = (AMQP_TRANSPORT_DEVICE_INSTANCE*)context;
-    const char* device_id = STRING_c_str(device_state->device_id); // advoid MU_P_OR_NULL double call
+    const char* device_id = STRING_c_str(device_state->device_id); // avoid MU_P_OR_NULL double call
     LogError("Device '%s' methods links failed; scheduling re-subscription for device methods", MU_P_OR_NULL(device_id));
 
     device_state->methods_resubscribe_needed = true;
@@ -510,10 +510,12 @@ static void handle_methods_resubscribe(AMQP_TRANSPORT_DEVICE_INSTANCE* registere
     if (registered_device->methods_resubscribe_needed)
     {
         registered_device->methods_resubscribe_needed = false;
-        registered_device->time_of_last_methods_failure = get_time(NULL);
 
+        // Only on an actual subscribed->unsubscribed transition, so that several callbacks reporting the
+        // same failure (e.g. the receiver and then the sender link) do not keep pushing the delay forward.
         if (registered_device->subscribed_for_methods)
         {
+            registered_device->time_of_last_methods_failure = get_time(NULL);
             iothubtransportamqp_methods_unsubscribe(registered_device->methods_handle);
             registered_device->subscribed_for_methods = false;
         }
@@ -539,9 +541,11 @@ static bool can_subscribe_methods(AMQP_TRANSPORT_DEVICE_INSTANCE* registered_dev
 
         if (is_timeout_reached(registered_device->time_of_last_methods_failure, DEFAULT_METHODS_RESUBSCRIBE_DELAY_SECS, &is_timed_out) != RESULT_OK)
         {
-            const char* device_id = STRING_c_str(registered_device->device_id); // advoid MU_P_OR_NULL double call
-            LogError("Device '%s' failed verifying the methods re-subscription delay (is_timeout_reached failed)", MU_P_OR_NULL(device_id));
-            result = false;
+            const char* device_id = STRING_c_str(registered_device->device_id); // avoid MU_P_OR_NULL double call
+            LogError("Device '%s' failed verifying the methods re-subscription delay (is_timeout_reached failed); subscribing anyway", MU_P_OR_NULL(device_id));
+            // The delay cannot be evaluated, so it is not enforced: blocking here would leave device
+            // methods inoperative indefinitely, which is the very failure this is meant to recover from.
+            result = true;
         }
         else
         {

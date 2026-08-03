@@ -697,6 +697,15 @@ static void set_expected_calls_for_can_subscribe_methods(time_t time_of_last_met
         .CopyOutArgumentBuffer_is_timed_out(&is_timed_out, sizeof(is_timed_out));
 }
 
+// Same as above, but the delay cannot be evaluated (e.g., the current time is not available).
+static void set_expected_calls_for_can_subscribe_methods_failure(time_t time_of_last_methods_failure)
+{
+    STRICT_EXPECTED_CALL(is_timeout_reached(time_of_last_methods_failure, TEST_METHODS_RESUBSCRIBE_DELAY_SECS, IGNORED_ARG))
+        .SetReturn(MU_FAILURE);
+    STRICT_EXPECTED_CALL(STRING_c_str(TEST_DEVICE_ID_STRING_HANDLE))
+        .SetReturn(TEST_DEVICE_ID_CHAR_PTR);
+}
+
 static void set_expected_calls_for_send_pending_events(PDLIST_ENTRY wts, int expected_number_of_events)
 {
     int i;
@@ -2022,6 +2031,54 @@ TEST_FUNCTION(on_methods_error_delays_re_subscription_for_methods)
     set_expected_calls_for_handle_methods_resubscribe(TEST_current_time);
     set_expected_calls_for_can_subscribe_methods(TEST_current_time, false); // delay has not elapsed yet.
     // No call to iothubtransportamqp_methods_subscribe is expected here.
+    set_expected_calls_for_send_pending_events(&TEST_waitingToSend, 0);
+    STRICT_EXPECTED_CALL(amqp_device_do_work(TEST_DEVICE_HANDLE));
+    EXPECTED_CALL(singlylinkedlist_get_next_item(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(amqp_connection_do_work(TEST_AMQP_CONNECTION_HANDLE));
+
+    // act
+    (void)IoTHubTransport_AMQP_Common_DoWork(handle);
+
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    // cleanup
+    destroy_transport(handle, device_handle, NULL);
+}
+
+// If the re-subscription delay cannot be evaluated, the delay must not be enforced: blocking would leave
+// device methods inoperative indefinitely, which is the failure this recovery exists to fix.
+TEST_FUNCTION(on_methods_error_re_subscribes_when_the_delay_cannot_be_evaluated)
+{
+    // arrange
+    initialize_test_variables();
+
+    TRANSPORT_LL_HANDLE handle;
+    IOTHUB_DEVICE_CONFIG device_config;
+    IOTHUB_DEVICE_HANDLE device_handle;
+
+    handle = create_transport();
+
+    device_config.deviceId = "blah";
+    device_config.deviceKey = "cucu";
+    device_config.deviceSasToken = NULL;
+    device_config.moduleId = NULL;
+
+    device_handle = register_device(handle, &device_config, &TEST_waitingToSend, true);
+
+    (void)IoTHubTransport_AMQP_Common_Subscribe_DeviceMethod(device_handle);
+
+    crank_transport_ready_after_create(handle, &TEST_waitingToSend, 0, false, true, 1, TEST_current_time, true);
+
+    umock_c_reset_all_calls();
+    g_on_methods_error(g_on_methods_error_context);
+
+    umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(TEST_REGISTERED_DEVICES_LIST));
+    EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_ARG));
+    set_expected_calls_for_handle_methods_resubscribe(TEST_current_time);
+    set_expected_calls_for_can_subscribe_methods_failure(TEST_current_time);
+    set_expected_calls_for_subscribe_methods();
     set_expected_calls_for_send_pending_events(&TEST_waitingToSend, 0);
     STRICT_EXPECTED_CALL(amqp_device_do_work(TEST_DEVICE_HANDLE));
     EXPECTED_CALL(singlylinkedlist_get_next_item(IGNORED_ARG));
