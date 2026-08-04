@@ -2653,6 +2653,31 @@ TEST_FUNCTION(when_state_changes_from_OPEN_to_IDLE_for_the_message_receiver_and_
 
 /* on_message_sender_state_changed */
 
+TEST_FUNCTION(when_only_the_message_receiver_goes_IDLE_on_methods_unsubscribed_is_called)
+{
+    /// arrange
+    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testhost", "testdevice", NULL);
+
+    umock_c_reset_all_calls();
+    setup_subscribe_expected_calls(false);
+    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243, test_on_methods_unsubscribed, (void*)0x4344);
+    umock_c_reset_all_calls();
+
+    // Device methods are inoperative as soon as the requests link is gone, so the caller must be told
+    // right away. Waiting for the responses link to detach as well would leave methods permanently
+    // broken whenever the service detaches only one of the two links.
+    STRICT_EXPECTED_CALL(test_on_methods_unsubscribed((void*)0x4344));
+
+    /// act
+    g_on_message_receiver_state_changed(g_on_message_receiver_state_changed_context, MESSAGE_RECEIVER_STATE_IDLE, MESSAGE_RECEIVER_STATE_OPEN);
+
+    /// assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    /// cleanup
+    iothubtransportamqp_methods_destroy(amqp_methods_handle);
+}
+
 TEST_FUNCTION(when_on_message_sender_state_changed_is_called_with_error_the_on_error_callback_shall_be_triggered)
 {
     /// arrange
@@ -2739,6 +2764,29 @@ TEST_FUNCTION(when_state_changes_from_OPEN_to_IDLE_for_the_message_sender_and_me
 }
 
 /* on_message_send_complete */
+
+TEST_FUNCTION(when_only_the_message_sender_goes_IDLE_on_methods_unsubscribed_is_called)
+{
+    /// arrange
+    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testhost", "testdevice", NULL);
+
+    umock_c_reset_all_calls();
+    setup_subscribe_expected_calls(false);
+    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243, test_on_methods_unsubscribed, (void*)0x4344);
+    umock_c_reset_all_calls();
+
+    // Method responses cannot be sent once the responses link is gone; see the receiver counterpart.
+    STRICT_EXPECTED_CALL(test_on_methods_unsubscribed((void*)0x4344));
+
+    /// act
+    g_on_message_sender_state_changed(g_on_message_sender_state_changed_context, MESSAGE_SENDER_STATE_IDLE, MESSAGE_SENDER_STATE_OPEN);
+
+    /// assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    /// cleanup
+    iothubtransportamqp_methods_destroy(amqp_methods_handle);
+}
 
 TEST_FUNCTION(when_an_error_is_indicated_in_the_send_complete_callback_an_error_is_indicated_through_on_methods_error)
 {
