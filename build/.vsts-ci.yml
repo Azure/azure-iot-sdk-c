@@ -8,13 +8,24 @@ variables:
   CCACHE_UMASK: '000'
   DEFAULT_AZURE_LOCATION: centraluseuap
   AZURE_LOCATION_EFFECTIVE: $[ coalesce(variables['AZURE_LOCATION'], variables['DEFAULT_AZURE_LOCATION']) ]
+  # CodeQL is auto-injected into every job by the 1ES policy decorator. Turn it
+  # off globally here and opt in per job, because S360 records the *latest*
+  # snapshot per (repo, language) - so a database produced incidentally by a
+  # cross-compile or test job silently replaces the one produced by the job that
+  # actually builds the product. Exactly two jobs opt back in, and together they
+  # cover every language this repo is graded on
+  # (Microsoft.Security.CodeQL.10000: cpp, csharp, python):
+  #   windowsx64release -> cpp     (full x64 Release build of the SDK)
+  #   DotNET            -> csharp, python
+  # Leaving injection on elsewhere also cost ~102 agent-minutes per run in
+  # Init/Finalize alone, on top of the build-tracer overhead inside each build.
+  # See https://aka.ms/codeql3000 and https://aka.ms/sdlfaqcodeql.
+  Codeql.Enabled: false
 
 stages:
 - stage: Requirements
   jobs:
   - job: checksubmodule
-    variables:
-      CodeQL.Enabled: false
     pool:
       vmImage: 'ubuntu-24.04'
     displayName: "Check Submodules"
@@ -166,8 +177,10 @@ stages:
   - job: windowsx64release
     timeoutInMinutes: 190
     variables:
-      CodeQL.Enabled: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
-      CodeQL.Language: cpp
+      # Owns the 'cpp' CodeQL snapshot for this repo. Overrides the pipeline-level
+      # Codeql.Enabled: false. Only on main, so PR builds stay fast.
+      Codeql.Enabled: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
+      Codeql.Language: cpp
     pool:
       vmImage: 'windows-2022'
     displayName: 'Windows x64 (Release)'
@@ -1158,8 +1171,6 @@ stages:
       condition: succeededOrFailed()
 
   - job: OSX
-    variables:
-      CodeQL.Enabled: false
     pool:
       vmImage: 'macOS-14'
     displayName: 'OSX'
@@ -1192,8 +1203,6 @@ stages:
       condition: always()
 
   - job: xcodenative
-    variables:
-      CodeQL.Enabled: false
     pool:
       vmImage: 'macOS-14'
     displayName: 'Xcode Native'
@@ -1231,6 +1240,10 @@ stages:
   - job: DotNET
     displayName: '.NET'
     variables:
+      # Owns the 'csharp' and 'python' CodeQL snapshots for this repo. csharp comes
+      # from tracing the traceabilitytool build below; python is an interpreted
+      # language, so CodeQL extracts it straight from the checked-out sources.
+      # Overrides the pipeline-level Codeql.Enabled: false.
       Codeql.Enabled: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
       Codeql.Language: csharp,python
     pool:

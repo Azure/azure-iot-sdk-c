@@ -3,6 +3,9 @@ variables:
   runCodesignValidationInjection: false
   iotHubLonghaulTotalDurationSecs: 43200
   iotHubLonghaulLoopDurationSecs: 60
+  # Longhaul runs for hours; the SDL CodeQL snapshot is produced by
+  # build/.vsts-ci.yml. See https://aka.ms/codeql3000.
+  Codeql.Enabled: false
 resources:
   containers:
   - container: linux-c-ubuntu-2004
