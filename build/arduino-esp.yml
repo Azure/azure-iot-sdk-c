@@ -1,5 +1,10 @@
 name: $(BuildID)_$(BuildDefinitionName)_$(SourceBranchName)_$(Date:yyyyMMdd)$(Rev:.r)
 
+variables:
+  # Device-lab build only; the SDL CodeQL snapshot is produced by
+  # build/.vsts-ci.yml. See https://aka.ms/codeql3000.
+  Codeql.Enabled: false
+
 jobs:
 - job: test_esp8266
   pool:

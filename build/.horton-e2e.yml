@@ -5,6 +5,11 @@ variables:
   Horton.Repo: $(Build.Repository.Uri)
   Horton.Commit: $(Build.SourceBranch)
   Horton.ForcedImage: ''
+  # This is an e2e gate, not the SDL scanning pipeline. Auto-injected CodeQL here
+  # was uploading incidental python/javascript/powershell/iac databases that
+  # displaced the ones produced by build/.vsts-ci.yml, which is where the SDL
+  # snapshot for this repo is owned. See https://aka.ms/codeql3000.
+  Codeql.Enabled: false
 
 resources:
   repositories:
