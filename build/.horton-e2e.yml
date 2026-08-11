@@ -21,6 +21,10 @@ stages:
     pool:
       vmImage: 'windows-latest'
     steps:
+    # create_azure_resources only needs the e2e-fx framework, not this SDK.
+    # `self` here is azure-iot-sdk-c, whose recursive submodule graph exceeds
+    # MAX_PATH on the windows-latest agent and fails the implicit checkout.
+    - checkout: none
     - template: vsts/templates/steps-create-azure-resources.yaml@e2e_fx
 
 - stage: build_and_test
