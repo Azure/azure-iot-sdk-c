@@ -76,7 +76,7 @@ def convert_mockable_function_line(current_line):
 # later in the file parse where the .c file actually instantiates the enum.
 def add_new_values_enum(src_file_handle, current_line):
     # Remove the "define", trailing "/", and whitespace to get just value by itself
-    enum_value_name = re.sub(".*#define\s*", "", current_line)
+    enum_value_name = re.sub(r".*#define\s*", "", current_line)
     enum_value_name = enum_value_name.replace("\\","").replace("\n","").strip()
     
     # Read the file - unlike most functions, we actually advance file pointer
