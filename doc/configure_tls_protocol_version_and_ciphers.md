@@ -42,7 +42,8 @@ TLS 1.2+ should already be the default for the latest versions of Apple iOS.
 ### mbedTLS
 
 mbedTLS can be configured to use only higher versions of TLS. 
-That is achieved by calling  [mbedtls_ssl_conf_min_version](https://os.mbed.com/teams/sandbox/code/mbedtls/docs/bef26f687287/ssl_8h.html).
+That is achieved by calling  [mbedtls_ssl_conf_min_version](https://os.mbed.com/teams/sandbox/code/mbedtls/docs/bef26f687287/ssl_8h.html)
+(renamed to `mbedtls_ssl_conf_min_tls_version` in mbedTLS 4.x, where `mbedtls_ssl_conf_min_version` was removed).
 
 In its adapter layer, Azure IoT C SDK already [sets the minimum TLS version that mbedTLS should use](https://github.com/Azure/azure-c-shared-utility/blob/48f7a556865731f0e96c47eb5e9537361f24647c/adapters/tlsio_mbedtls.c#L481) to TLS 1.2.
 

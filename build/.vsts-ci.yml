@@ -1081,6 +1081,79 @@ stages:
         testRunTitle: 'mbedtls_3x'
       condition: succeededOrFailed()
 
+  - job: mbedtls_4x
+    # Coverage for mbedTLS 4.x.  4.0 moved all cryptography into TF-PSA-Crypto
+    # and removed the public entropy/CTR_DRBG modules, mbedtls_ssl_conf_rng()
+    # and mbedtls_ssl_conf_min_version(); the c-utility mbedTLS adapter guards
+    # those call sites on MBEDTLS_VERSION_NUMBER.
+    timeoutInMinutes: 90
+    pool:
+      vmImage: 'ubuntu-24.04'
+    displayName: 'mbedTLS 4.x'
+    steps:
+    - checkout: self
+      submodules: true
+      fetchDepth: 1
+    - download: current
+      artifact: test_config_scripts
+      displayName: Download artifact (test config scripts)
+    - script: |
+        set -e
+        sudo apt-get update -qq
+        sudo ./build_all/linux/setup.sh
+        sudo apt-get install -y python3-pip
+      displayName: 'Host setup'
+    - task: Cache@2
+      inputs:
+        key: 'ccache | "$(Agent.JobName)" | "v1"'
+        path: /tmp/ccache_cache
+      displayName: 'Restore ccache'
+    - script: |
+        mkdir -p /tmp/ccache_cache && chmod 777 /tmp/ccache_cache
+        ccache --set-config=max_size=500M
+        ccache --zero-stats
+      displayName: 'Configure ccache'
+    - task: Cache@2
+      inputs:
+        key: 'mbedtls | "4.2.0" | "v1"'
+        path: /tmp/mbedtls-4x-install
+        cacheHitVar: MBEDTLS_CACHE_RESTORED
+      displayName: 'Restore cached mbedTLS 4.x'
+    - script: |
+        set -e
+        if [ "$MBEDTLS_CACHE_RESTORED" = "true" ]; then
+          echo "mbedTLS 4.x restored from cache"
+        else
+          git clone --depth 1 -b mbedtls-4.2.0 https://github.com/Mbed-TLS/mbedtls /tmp/mbedtls-4x
+          cd /tmp/mbedtls-4x
+          git submodule update --init --recursive --depth 1
+          python3 -m pip install --break-system-packages -r scripts/basic.requirements.txt
+          mkdir build && cd build
+          cmake -DUSE_SHARED_MBEDTLS_LIBRARY=ON -DENABLE_TESTING=Off -DENABLE_PROGRAMS=Off -DCMAKE_INSTALL_PREFIX=/tmp/mbedtls-4x-install ..
+          make -j$(nproc)
+          make install
+        fi
+        sudo cp -a /tmp/mbedtls-4x-install/* /usr/local/
+        sudo ldconfig
+      displayName: 'Install mbedTLS 4.x'
+    - script: |
+        sudo -E bash jenkins/linux_mbedtls.sh
+      displayName: 'Build'
+      env:
+        LD_LIBRARY_PATH: /usr/local/lib
+    - script: |
+        cd cmake
+        sudo bash -c 'export LD_LIBRARY_PATH=/usr/local/lib && source "$(Pipeline.Workspace)/test_config_scripts/set_e2e_test_env_vars.sh" && ../build_all/linux/run_tests.sh --e2e'
+      displayName: 'Run Tests'
+    - task: PublishTestResults@2
+      displayName: 'Publish Test Results (mbedTLS 4.x)'
+      inputs:
+        testRunner: CTest
+        testResultsFiles: '**/Test.xml'
+        mergeTestResults: true
+        testRunTitle: 'mbedtls_4x'
+      condition: succeededOrFailed()
+
   - job: cares
     timeoutInMinutes: 90
     pool:
