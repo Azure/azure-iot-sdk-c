@@ -1,5 +1,5 @@
-# Start with the latest version of the Debian Docker container
-FROM debian:stretch
+# Start with a modern Debian base for cross-compilation
+FROM debian:bookworm
 
 RUN ls -la
 
@@ -7,7 +7,7 @@ RUN ls -la
 RUN apt-get update && apt-get -y upgrade
 
 # Install wget git cmake xz-utils
-RUN apt-get install -y wget git cmake xz-utils
+RUN apt-get install -y wget git cmake xz-utils ca-certificates pkg-config build-essential
 
 # Add a non-root user
 RUN useradd -d /home/builder -ms /bin/bash -G sudo -p builder builder
@@ -17,7 +17,7 @@ USER builder
 WORKDIR /home/builder
 #WORKDIR /root
 
-# Don't use RPiTools because gcc is old, use linaro's toolchain
+# Don't use RPiTools because gcc is old, use Arm GNU Toolchain (GCC 13.3)
 #RUN mkdir RPiTools
 #WORKDIR RPiTools
 #RUN git clone https://github.com/raspberrypi/tools.git
@@ -26,14 +26,14 @@ RUN mkdir RPiBuild
 ENV WORK_ROOT=/home/builder/RPiBuild
 WORKDIR ${WORK_ROOT}
 
-RUN wget https://releases.linaro.org/components/toolchain/binaries/7.5-2019.12/arm-linux-gnueabihf/gcc-linaro-7.5.0-2019.12-x86_64_arm-linux-gnueabihf.tar.xz
-RUN tar -xvf gcc-linaro-7.5.0-2019.12-x86_64_arm-linux-gnueabihf.tar.xz
+RUN wget https://developer.arm.com/-/media/Files/downloads/gnu/13.3.rel1/binrel/arm-gnu-toolchain-13.3.rel1-x86_64-arm-none-linux-gnueabihf.tar.xz
+RUN tar -xvf arm-gnu-toolchain-13.3.rel1-x86_64-arm-none-linux-gnueabihf.tar.xz
 
 # Set up environment variables for builds
-ENV TOOLCHAIN_ROOT=${WORK_ROOT}/gcc-linaro-7.5.0-2019.12-x86_64_arm-linux-gnueabihf
+ENV TOOLCHAIN_ROOT=${WORK_ROOT}/arm-gnu-toolchain-13.3.rel1-x86_64-arm-none-linux-gnueabihf
 ENV TOOLCHAIN_SYSROOT=${TOOLCHAIN_ROOT}
 ENV TOOLCHAIN_EXES=${TOOLCHAIN_SYSROOT}/bin
-ENV TOOLCHAIN_NAME=arm-linux-gnueabihf
+ENV TOOLCHAIN_NAME=arm-none-linux-gnueabihf
 ENV TOOLCHAIN_PREFIX=${TOOLCHAIN_SYSROOT}/usr
 
 ENV AR=${TOOLCHAIN_EXES}/${TOOLCHAIN_NAME}-ar
@@ -43,29 +43,31 @@ ENV LD=${TOOLCHAIN_EXES}/${TOOLCHAIN_NAME}-ld
 ENV NM=${TOOLCHAIN_EXES}/${TOOLCHAIN_NAME}-nm
 
 ENV LDFLAGS="-L${TOOLCHAIN_SYSROOT}/usr/lib"
-ENV LIBS="-lssl -lcrypto -ldl -lpthread"
+ENV LIBS="-lssl -lcrypto -ldl -lpthread -latomic"
 ENV TOOLCHAIN_PREFIX=${TOOLCHAIN_SYSROOT}/usr
 ENV STAGING_DIR=${TOOLCHAIN_SYSROOT}
 
 # Download OpenSSL source and expand it
-RUN wget https://www.openssl.org/source/openssl-1.1.0f.tar.gz
-RUN tar -xvf openssl-1.1.0f.tar.gz
+RUN wget https://www.openssl.org/source/openssl-3.0.15.tar.gz
+RUN tar -xvf openssl-3.0.15.tar.gz
 
 # Build OpenSSL
-WORKDIR openssl-1.1.0f
-RUN ./Configure linux-generic32 shared --prefix=${TOOLCHAIN_PREFIX} --openssldir=${TOOLCHAIN_PREFIX}
+WORKDIR openssl-3.0.15
+RUN ./Configure linux-generic32 shared no-tests --prefix=${TOOLCHAIN_PREFIX} --openssldir=${TOOLCHAIN_PREFIX}
 RUN make
 RUN make install
 WORKDIR ..
 
 # Download cURL source and expand it
-RUN wget http://curl.haxx.se/download/curl-7.60.0.tar.gz
-RUN tar -xvf curl-7.60.0.tar.gz
+ENV CURL_VERSION=8.20.0
+RUN wget https://curl.se/download/curl-${CURL_VERSION}.tar.gz
+RUN tar -xvf curl-${CURL_VERSION}.tar.gz
 
 # Build cURL
-# we need to set the path for openssl with --with-ssl=...
-WORKDIR curl-7.60.0
-RUN ./configure --with-sysroot=${TOOLCHAIN_SYSROOT} --prefix=${TOOLCHAIN_PREFIX} --target=${TOOLCHAIN_NAME} --with-ssl=${TOOLCHAIN_PREFIX} --with-zlib --host=${TOOLCHAIN_NAME} --build=x86_64-linux-gnu
+# --with-openssl points at our cross-built OpenSSL (option renamed from --with-ssl in curl 7.77.0).
+# --disable-ntlm excludes curl's MD4-based NTLM code (banned hash algorithm MD4 finding).
+WORKDIR curl-${CURL_VERSION}
+RUN ./configure --with-sysroot=${TOOLCHAIN_SYSROOT} --prefix=${TOOLCHAIN_PREFIX} --target=${TOOLCHAIN_NAME} --with-openssl=${TOOLCHAIN_PREFIX} --with-zlib --host=${TOOLCHAIN_NAME} --build=x86_64-linux-gnu --without-libpsl --disable-ntlm
 RUN make
 RUN make install
 WORKDIR ..

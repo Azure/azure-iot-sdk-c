@@ -38,20 +38,20 @@ ENV LD=${TOOLCHAIN_EXES}/${TOOLCHAIN_NAME}-ld
 ENV NM=${TOOLCHAIN_EXES}/${TOOLCHAIN_NAME}-nm
 
 ENV LDFLAGS="-L${TOOLCHAIN_SYSROOT}/usr/lib"
-ENV LIBS="-lssl -lcrypto -ldl -lpthread"
+ENV LIBS="-lssl -lcrypto -ldl -lpthread -latomic"
 ENV STAGING_DIR=${TOOLCHAIN_SYSROOT}
 
 
 ########## OPENSSL INSTALL ##########
 # Download OpenSSL source and expand it
-ENV OPENSSL_SOURCE=openssl-1.1.1f
+ENV OPENSSL_SOURCE=openssl-3.0.15
 RUN wget https://www.openssl.org/source/${OPENSSL_SOURCE}.tar.gz
 RUN tar -xvf ${OPENSSL_SOURCE}.tar.gz
 
 # Build OpenSSL
 
 WORKDIR /${WORK_ROOT}/${OPENSSL_SOURCE}
-RUN ./Configure linux-generic32 shared --prefix=${TOOLCHAIN_PREFIX} --openssldir=${TOOLCHAIN_PREFIX}
+RUN ./Configure linux-generic32 shared no-tests --prefix=${TOOLCHAIN_PREFIX} --openssldir=${TOOLCHAIN_PREFIX}
 RUN make
 RUN make install
 WORKDIR /${WORK_ROOT}
@@ -59,14 +59,17 @@ WORKDIR /${WORK_ROOT}
 
 ########## CURL INSTALL ##########
 # Download cURL source and expand it
-ENV CURL_SOURCE=curl-7.64.1
-RUN wget http://curl.haxx.se/download/${CURL_SOURCE}.tar.gz
+ENV CURL_VERSION=8.20.0
+ENV CURL_SOURCE=curl-${CURL_VERSION}
+RUN wget https://curl.se/download/${CURL_SOURCE}.tar.gz
 RUN tar -xvf ${CURL_SOURCE}.tar.gz
 
 # Build cURL
-# we need to set the path for openssl with --with-ssl=...
+# --with-openssl points at our cross-built OpenSSL (option renamed from --with-ssl in curl 7.77.0).
+# --disable-ntlm: the SDK never uses NTLM auth; this excludes curl's MD4-based NTLM
+# code (curl_ntlm_core.c), which is flagged as use of the banned hash algorithm MD4.
 WORKDIR /${WORK_ROOT}/${CURL_SOURCE}
-RUN ./configure --with-sysroot=${TOOLCHAIN_SYSROOT} --prefix=${TOOLCHAIN_PREFIX} --target=${TOOLCHAIN_NAME} --with-ssl=${TOOLCHAIN_PREFIX} --with-zlib --host=${TOOLCHAIN_NAME} --build=x86_64-linux-gnu
+RUN ./configure --with-sysroot=${TOOLCHAIN_SYSROOT} --prefix=${TOOLCHAIN_PREFIX} --target=${TOOLCHAIN_NAME} --with-openssl=${TOOLCHAIN_PREFIX} --with-zlib --host=${TOOLCHAIN_NAME} --build=x86_64-linux-gnu --without-libpsl --disable-ntlm
 
 RUN make
 RUN make install
