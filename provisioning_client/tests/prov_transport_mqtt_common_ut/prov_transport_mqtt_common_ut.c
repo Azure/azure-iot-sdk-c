@@ -1356,10 +1356,10 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         g_use_invalid_msg_length = true;
 
         //arrange
-        STRICT_EXPECTED_CALL(mqttmessage_getTopicName(IGNORED_ARG));
-        STRICT_EXPECTED_CALL(mqttmessage_getApplicationMsg(IGNORED_ARG));
-        STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_ARG));
-        STRICT_EXPECTED_CALL(on_transport_register_data_cb(PROV_DEVICE_TRANSPORT_RESULT_ERROR, NULL, NULL, NULL, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(mqttmessage_getTopicName(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(mqttmessage_getApplicationMsg(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(on_transport_register_data_cb(PROV_DEVICE_TRANSPORT_RESULT_ERROR, NULL, NULL, NULL, IGNORED_PTR_ARG));
 
         //act
         g_on_msg_recv(TEST_MQTT_MESSAGE, g_msg_recv_callback_context);

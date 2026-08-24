@@ -1102,7 +1102,7 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
 
         // A Content-Length of SIZE_MAX would wrap (content_len + 1) to 0; the transport must
         // reject it instead of allocating a zero-length buffer and copying gigabytes past it.
-        STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_ARG, IGNORED_ARG)).SetReturn(NULL);
+        STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(NULL);
 
         //act
         g_on_http_reply_recv(g_http_execute_ctx, HTTP_CALLBACK_REASON_OK, (const unsigned char*)TEST_JSON_CONTENT, (size_t)-1, TEST_SUCCESS_STATUS_CODE, TEST_HTTP_HANDLE_VALUE);

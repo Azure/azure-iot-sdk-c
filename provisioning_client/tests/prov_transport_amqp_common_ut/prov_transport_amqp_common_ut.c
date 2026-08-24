@@ -1777,11 +1777,11 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         g_use_invalid_msg_length = true;
 
         //arrange
-        STRICT_EXPECTED_CALL(message_get_body_type(IGNORED_ARG, IGNORED_ARG));
-        STRICT_EXPECTED_CALL(message_get_body_amqp_data_in_place(IGNORED_ARG, 0, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(message_get_body_type(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(message_get_body_amqp_data_in_place(IGNORED_PTR_ARG, 0, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(messaging_delivery_accepted());
-        STRICT_EXPECTED_CALL(connection_dowork(IGNORED_ARG));
-        STRICT_EXPECTED_CALL(on_transport_register_data_cb(PROV_DEVICE_TRANSPORT_RESULT_ERROR, NULL, NULL, NULL, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(connection_dowork(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(on_transport_register_data_cb(PROV_DEVICE_TRANSPORT_RESULT_ERROR, NULL, NULL, NULL, IGNORED_PTR_ARG));
 
         //act
         result = g_on_msg_recv(msg_recv_callback_context, TEST_MESSAGE_HANDLE);
