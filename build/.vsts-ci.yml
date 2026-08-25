@@ -89,9 +89,7 @@ stages:
           $PSVersionTable
           New-Item -ItemType Directory -Force -Path test_config | Out-Null
 
-          # TEMP: pinned to a working branch on iot-sdks-e2e-fx until the fix is merged to master.
-          # Revert to master once https://github.com/Azure/iot-sdks-e2e-fx/tree/ewertons/install-stable-azure-iot-extension-by-default is merged.
-          $PsmUrl = 'https://raw.githubusercontent.com/Azure/iot-sdks-e2e-fx/ewertons/install-stable-azure-iot-extension-by-default/scripts/Azure.Iot.Sdk.Test.psm1'
+          $PsmUrl = 'https://raw.githubusercontent.com/Azure/iot-sdks-e2e-fx/master/scripts/Azure.Iot.Sdk.Test.psm1'
           $PsmPath = Join-Path $PWD 'Azure.Iot.Sdk.Test.psm1'
           Invoke-WebRequest -Uri $PsmUrl -OutFile $PsmPath -UseBasicParsing
           Import-Module $PsmPath
@@ -257,7 +255,7 @@ stages:
       displayName: 'Host setup'
       condition: always()
     - script: |
-       $HOME
+       echo "$HOME"
        whoami
        ls -lr
        pwd
@@ -1289,7 +1287,14 @@ stages:
         inlineScript: |
           set -e
           export AZURE_RESOURCE_GROUP=$(cat "$(Pipeline.Workspace)/test_config_scripts/azure-resource-group-name.txt")
-          az group delete --name $AZURE_RESOURCE_GROUP --yes --no-wait
+          # Tolerate an already-deleted group. Retrying any job re-runs this
+          # stage, and `az group delete` exits 3 when the group is gone, which
+          # under `set -e` failed the build after a successful earlier cleanup.
+          if [ -z "$(az group list --query "[?name=='$AZURE_RESOURCE_GROUP'].name" -o tsv)" ]; then
+            echo "Resource group $AZURE_RESOURCE_GROUP already deleted; nothing to do."
+          else
+            az group delete --name $AZURE_RESOURCE_GROUP --yes --no-wait
+          fi
       displayName: Destroy Azure Resource Group
       condition: always() # Run step even if the pipeline run is cancelled.
 

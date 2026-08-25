@@ -44,6 +44,13 @@ if $ut_only && $e2e_only; then
     exit 1
 fi
 
+# --e2e-only selects the E2E half of a run, so there has to be an E2E half to
+# select. Without --e2e the old code silently ran nothing and exited 0.
+if $e2e_only && ! $run_e2e; then
+    echo "--e2e-only requires --e2e"
+    exit 1
+fi
+
 # If no instrumentation flags are set, run plain (non-valgrind) tests.
 run_plain=true
 if $run_valgrind || $run_helgrind || $run_drd; then
@@ -55,17 +62,22 @@ sudo ldconfig
 
 if $run_plain; then
     if $run_e2e; then
-        if ! $ut_only; then
+        # iothubclient_mqtt_dt_e2e is quarantined: see GitHub issue (twin PATCH never
+        # delivered to device after subscribe; pre-existing flake, not pipeline-related).
+        if $e2e_only; then
+            # E2E only
+            ctest -T test --no-compress-output -C "Debug" -V -j $E2E_CORES --schedule-random -R "e2e$" -E "_(valgrind|helgrind|drd)$|^iothubclient_mqtt_dt_e2e$"
+        elif $ut_only; then
+            # Unit tests only
+            ctest -T test --no-compress-output -C "Debug" -V -j $UT_CORES --schedule-random -E "_(valgrind|helgrind|drd)|e2e"
+        else
             # Unit tests + E2E, no valgrind/helgrind/drd
-            # iothubclient_mqtt_dt_e2e is quarantined: see GitHub issue (twin PATCH never
-            # delivered to device after subscribe; pre-existing flake, not pipeline-related).
             ctest -T test --no-compress-output -C "Debug" -V -j $E2E_CORES --schedule-random -E "_(valgrind|helgrind|drd)$|^iothubclient_mqtt_dt_e2e$"
         fi
     else
-        if ! $e2e_only; then
-            # Unit tests only, no E2E, no valgrind/helgrind/drd
-            ctest -T test --no-compress-output -C "Debug" -V -j $UT_CORES --schedule-random -E "_(valgrind|helgrind|drd)|e2e"
-        fi
+        # Unit tests only, no E2E, no valgrind/helgrind/drd
+        # ($e2e_only without --e2e is rejected above.)
+        ctest -T test --no-compress-output -C "Debug" -V -j $UT_CORES --schedule-random -E "_(valgrind|helgrind|drd)|e2e"
     fi
 fi
 
