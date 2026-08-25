@@ -564,11 +564,22 @@ stages:
         deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports ${CODENAME}-security main restricted universe multiverse
         EOF
         sudo apt-get update
-        sudo apt-get install -y \
+        # libssl3t64, libcurl4t64 and zlib1g are Multi-Arch: same, so the arm64
+        # copy must be the exact same version as the amd64 copy already on the
+        # image. ports.ubuntu.com and archive.ubuntu.com are not always in sync,
+        # and when they drift apt refuses the whole transaction with
+        # "libssl3t64:arm64 ... is not going to be installed / held broken
+        # packages". Naming both arches lets apt pick one version available in
+        # both, and --allow-downgrades lets it move the amd64 copy back when
+        # ports is the one lagging.
+        sudo apt-get install -y --allow-downgrades \
           cmake \
           build-essential \
           pkg-config \
           crossbuild-essential-arm64 \
+          libssl3t64:amd64 libssl3t64:arm64 \
+          libcurl4t64:amd64 libcurl4t64:arm64 \
+          zlib1g:amd64 zlib1g:arm64 \
           libcurl4-openssl-dev:arm64 \
           libssl-dev:arm64 \
           uuid-dev:arm64 \
