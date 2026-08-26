@@ -5,6 +5,11 @@ variables:
   Horton.Repo: $(Build.Repository.Uri)
   Horton.Commit: $(Build.SourceBranch)
   Horton.ForcedImage: ''
+  # This is an e2e gate, not the SDL scanning pipeline. Auto-injected CodeQL here
+  # was uploading incidental python/javascript/powershell/iac databases that
+  # displaced the ones produced by build/.vsts-ci.yml, which is where the SDL
+  # snapshot for this repo is owned. See https://aka.ms/codeql3000.
+  Codeql.Enabled: false
 
 resources:
   repositories:
@@ -12,9 +17,35 @@ resources:
     type: github
     name: Azure/iot-sdks-e2e-fx
     ref: refs/heads/master
-    endpoint: 'GitHub OAuth - az-iot-builder-01'
+    endpoint: 'azure-iot-sdk-python-github'
 
-jobs:
-- template: vsts/templates/jobs-gate-c.yaml@e2e_fx
+stages:
+- stage: setup
+  jobs:
+  - job: create_azure_resources
+    pool:
+      vmImage: 'windows-latest'
+    steps:
+    # create_azure_resources only needs the e2e-fx framework, not this SDK.
+    # `self` here is azure-iot-sdk-c, whose recursive submodule graph exceeds
+    # MAX_PATH on the windows-latest agent and fails the implicit checkout.
+    - checkout: none
+    - template: vsts/templates/steps-create-azure-resources.yaml@e2e_fx
 
-  
+- stage: build_and_test
+  dependsOn: setup
+  jobs:
+  - template: vsts/templates/jobs-gate-c.yaml@e2e_fx
+
+- stage: cleanup
+  dependsOn:
+  - setup
+  - build_and_test
+  condition: always()
+  jobs:
+  - job: destroy_azure_resource_group
+    condition: always()
+    pool:
+      vmImage: 'ubuntu-24.04'
+    steps:
+    - template: vsts/templates/steps-destroy-azure-resources.yaml@e2e_fx
