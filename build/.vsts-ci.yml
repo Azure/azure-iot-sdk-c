@@ -1127,7 +1127,7 @@ stages:
           git clone --depth 1 -b mbedtls-4.2.0 https://github.com/Mbed-TLS/mbedtls /tmp/mbedtls-4x
           cd /tmp/mbedtls-4x
           git submodule update --init --recursive --depth 1
-          python3 -m pip install --break-system-packages -r scripts/basic.requirements.txt
+          python3 -m pip install --user --break-system-packages -r scripts/basic.requirements.txt
           mkdir build && cd build
           cmake -DUSE_SHARED_MBEDTLS_LIBRARY=ON -DENABLE_TESTING=Off -DENABLE_PROGRAMS=Off -DCMAKE_INSTALL_PREFIX=/tmp/mbedtls-4x-install ..
           make -j$(nproc)
