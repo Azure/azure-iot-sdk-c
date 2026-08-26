@@ -596,7 +596,9 @@ stages:
           echo "arm64 dependency install failed (attempt ${attempt} of 3)"
           if [ "${attempt}" = "2" ]; then
             echo "Repointing amd64 sources at archive.ubuntu.com to clear the version skew"
-            sudo sed -i -E 's|https?://[a-z0-9.-]*archive\.ubuntu\.com/ubuntu|http://archive.ubuntu.com/ubuntu|g' \
+            # Swap only the host, keeping the original scheme so an https
+            # source is not downgraded to http.
+            sudo sed -i -E 's|(https?://)[a-z0-9.-]*archive\.ubuntu\.com/ubuntu|\1archive.ubuntu.com/ubuntu|g' \
               /etc/apt/sources.list /etc/apt/sources.list.d/ubuntu.sources 2>/dev/null || true
           fi
           sleep 20
