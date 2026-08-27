@@ -13,6 +13,7 @@
 #include "azure_c_shared_utility/http_proxy_io.h"
 #include "azure_c_shared_utility/urlencode.h"
 #include "azure_c_shared_utility/azure_base64.h"
+#include "azure_c_shared_utility/safe_math.h"
 
 #include "azure_prov_client/prov_transport_http_client.h"
 #include "azure_prov_client/internal/prov_transport_private.h"
@@ -138,19 +139,25 @@ static void on_http_reply_recv(void* callback_ctx, HTTP_CALLBACK_REASON request_
         {
             if (content != NULL && content_len > 0)
             {
+                size_t alloc_size = safe_add_size_t(content_len, 1);
                 if (http_info->payload_data != NULL)
                 {
                     free(http_info->payload_data);
+                    http_info->payload_data = NULL;
                 }
-                http_info->payload_data = malloc(content_len + 1);
-                if (http_info->payload_data == NULL)
+                if (alloc_size == SIZE_MAX)
                 {
-                    LogError("Failure sending http request");
+                    LogError("Failure invalid content length specified");
+                    http_info->transport_state = TRANSPORT_CLIENT_STATE_ERROR;
+                }
+                else if ((http_info->payload_data = malloc(alloc_size)) == NULL)
+                {
+                    LogError("Failure allocating payload data");
                     http_info->transport_state = TRANSPORT_CLIENT_STATE_ERROR;
                 }
                 else
                 {
-                    memset(http_info->payload_data, 0, content_len + 1);
+                    memset(http_info->payload_data, 0, alloc_size);
                     memcpy(http_info->payload_data, content, content_len);
                     if (http_info->transport_state == TRANSPORT_CLIENT_STATE_REG_SENT)
                     {

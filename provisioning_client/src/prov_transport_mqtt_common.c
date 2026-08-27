@@ -16,7 +16,7 @@
 #include "azure_c_shared_utility/shared_util_options.h"
 #include "azure_c_shared_utility/http_proxy_io.h"
 #include "azure_c_shared_utility/urlencode.h"
-#include "azure_c_shared_utility/http_proxy_io.h"
+#include "azure_c_shared_utility/safe_math.h"
 
 #include "azure_prov_client/internal/prov_transport_mqtt_common.h"
 #include "azure_umqtt_c/mqtt_client.h"
@@ -344,13 +344,20 @@ static MQTT_CLIENT_ACK_OPTION mqtt_notification_callback(MQTT_MESSAGE_HANDLE han
             const APP_PAYLOAD* payload = mqttmessage_getApplicationMsg(handle);
             if (payload != NULL)
             {
+                size_t alloc_size = safe_add_size_t(payload->length, 1);
                 if (mqtt_info->payload_data != NULL)
                 {
                     free(mqtt_info->payload_data);
                     mqtt_info->payload_data = NULL;
                 }
 
-                if ((mqtt_info->payload_data = malloc(payload->length + 1)) == NULL)
+                if (alloc_size == SIZE_MAX)
+                {
+                    LogError("failure invalid payload length");
+                    mqtt_info->transport_state = TRANSPORT_CLIENT_STATE_ERROR;
+                    mqtt_info->mqtt_state = MQTT_STATE_ERROR;
+                }
+                else if ((mqtt_info->payload_data = malloc(alloc_size)) == NULL)
                 {
                     LogError("failure allocating payload data");
                     mqtt_info->transport_state = TRANSPORT_CLIENT_STATE_ERROR;
@@ -358,7 +365,7 @@ static MQTT_CLIENT_ACK_OPTION mqtt_notification_callback(MQTT_MESSAGE_HANDLE han
                 }
                 else
                 {
-                    memset(mqtt_info->payload_data, 0, payload->length + 1);
+                    memset(mqtt_info->payload_data, 0, alloc_size);
                     memcpy(mqtt_info->payload_data, payload->message, payload->length);
                     if (mqtt_info->transport_state == TRANSPORT_CLIENT_STATE_REG_SENT)
                     {

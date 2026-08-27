@@ -42,7 +42,7 @@ static void connection_status_callback(IOTHUB_CLIENT_CONNECTION_STATUS result, I
     IOTHUB_CLIENT_SAMPLE_INFO* iothub_info = (IOTHUB_CLIENT_SAMPLE_INFO*)user_context;
     if (iothub_info != NULL)
     {
-        if (reason == IOTHUB_CLIENT_CONNECTION_OK && result == IOTHUB_CLIENT_CONFIRMATION_OK)
+        if (result == IOTHUB_CLIENT_CONNECTION_AUTHENTICATED && reason == IOTHUB_CLIENT_CONNECTION_OK)
         {
             iothub_info->connected = 1;
         }
