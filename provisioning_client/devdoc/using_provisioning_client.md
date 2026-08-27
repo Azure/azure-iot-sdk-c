@@ -78,7 +78,7 @@ To enroll a device in the azure portal you will need to either get the Registrat
 
 ### Provisioning Samples
 
-There are two provisioning samples in the SDK and two HSM samples.  The provisioning samples, `prov_dev_client_ll_sample` and `prov_dev_client_sample` show how to use the provisioning client to connect to DPS and recieve your IoTHub credentials.  The HSM samples include `iothub_client_sample_hsm`, which shows the us of the IoThub device client on an previously provisioned device and `custom_hsm_example`, which shows how to create a sample hsm to be used along side the provisioning client.
+There are two provisioning samples in the SDK and two HSM samples.  The provisioning samples, `prov_dev_client_ll_sample` and `prov_dev_client_sample` show how to use the provisioning client to connect to DPS and receive your IoTHub credentials.  The HSM samples include `iothub_client_sample_hsm`, which shows the us of the IoThub device client on an previously provisioned device and `custom_hsm_example`, which shows how to create a sample hsm to be used along side the provisioning client.
 
 The `prov_dev_client_ll_sample` version uses a non-threaded version of the api and the `prov_dev_client_sample` uses the threaded api version.  Before compiling the samples you must make modifications to the c files to get provisioning to work correctly.
 

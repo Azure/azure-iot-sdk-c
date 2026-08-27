@@ -208,7 +208,7 @@ include_directories(${OPENSSL_INCLUDE_DIR})
 target_link_libraries(myapp iothub_client prov_device_client iothub_client_mqtt_transport prov_auth_client umqtt hsm_security_client utpm dl aziotsharedutil parson pthread curl OpenSSL::SSL OpenSSL::Crypto m )
 ```
 ### Using a Separate Docker Script to Build the Application
-Though one could append the application build steps to the Docker script above, this will demonstrate how to use the existing image and build the application in a seperate Docker script. This will keep the original image clean so it may be used for building multiple applications.
+Though one could append the application build steps to the Docker script above, this will demonstrate how to use the existing image and build the application in a separate Docker script. This will keep the original image clean so it may be used for building multiple applications.
 
 This sample script assumes you have your source files and the ```CMakeLists.txt``` in a directory called ```myapp```.
 ```docker
