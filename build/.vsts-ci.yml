@@ -565,16 +565,49 @@ stages:
         deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports ${CODENAME}-updates main restricted universe multiverse
         deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports ${CODENAME}-security main restricted universe multiverse
         EOF
+        # Multi-Arch: same packages (libssl3t64, zlib1g, ...) must be at the
+        # exact same version for amd64 and arm64. The default amd64 mirror and
+        # ports.ubuntu.com publish independently, so for a window after a
+        # security update the arm64 index can offer a version the amd64 mirror
+        # does not carry yet. apt then reports the arm64 dev libs as
+        # uninstallable, e.g.
+        #   libcurl4t64:arm64 : Depends: libssl3t64:arm64 (>= 3.0.0)
+        #                       but it is not going to be installed
+        # Retry, and before the last attempt repoint amd64 at the canonical
+        # archive, which is published in lockstep with ports.
+        install_arm64_deps() {
+          sudo apt-get install -y \
+            cmake \
+            build-essential \
+            pkg-config \
+            crossbuild-essential-arm64 \
+            libcurl4-openssl-dev:arm64 \
+            libssl-dev:arm64 \
+            uuid-dev:arm64 \
+            zlib1g-dev:arm64
+        }
         sudo apt-get update
-        sudo apt-get install -y \
-          cmake \
-          build-essential \
-          pkg-config \
-          crossbuild-essential-arm64 \
-          libcurl4-openssl-dev:arm64 \
-          libssl-dev:arm64 \
-          uuid-dev:arm64 \
-          zlib1g-dev:arm64
+        installed=0
+        for attempt in 1 2 3; do
+          if install_arm64_deps; then
+            installed=1
+            break
+          fi
+          echo "arm64 dependency install failed (attempt ${attempt} of 3)"
+          if [ "${attempt}" = "2" ]; then
+            echo "Repointing amd64 sources at archive.ubuntu.com to clear the version skew"
+            # Swap only the host, keeping the original scheme so an https
+            # source is not downgraded to http.
+            sudo sed -i -E 's|(https?://)[a-z0-9.-]*archive\.ubuntu\.com/ubuntu|\1archive.ubuntu.com/ubuntu|g' \
+              /etc/apt/sources.list /etc/apt/sources.list.d/ubuntu.sources 2>/dev/null || true
+          fi
+          sleep 20
+          sudo apt-get update || true
+        done
+        if [ "${installed}" != "1" ]; then
+          echo "Could not install the arm64 dependencies after 3 attempts" >&2
+          exit 1
+        fi
       displayName: 'Install aarch64 cross toolchain and arm64 dev libs'
     - script: |
         set -e
