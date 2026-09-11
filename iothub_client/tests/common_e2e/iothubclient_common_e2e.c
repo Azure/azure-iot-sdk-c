@@ -489,6 +489,7 @@ static char* get_target_mac_address()
     else
     {
         struct ifreq ifr;
+        struct ifreq ifr_hw;
         struct ifconf ifc;
         char buf[1024];
 
@@ -511,13 +512,15 @@ static char* get_target_mac_address()
             for (; it != end; ++it)
             {
                 strcpy(ifr.ifr_name, it->ifr_name);
+                strcpy(ifr_hw.ifr_name, it->ifr_name);
 
                 if (ioctl(s, SIOCGIFFLAGS, &ifr) != 0)
                 {
                     LogError("ioctl failed querying socket (SIOCGIFFLAGS)");
                     break;
                 }
-                else if (ioctl(s, SIOCGIFHWADDR, &ifr) != 0)
+                // ifr_hwaddr and ifr_addr share a union, so SIOCGIFADDR below would overwrite the MAC
+                else if (ioctl(s, SIOCGIFHWADDR, &ifr_hw) != 0)
                 {
                     LogError("ioctl failed querying socket (SIOCGIFHWADDR)");
                     break;
@@ -529,7 +532,7 @@ static char* get_target_mac_address()
                 }
                 else if (strcmp(ifr.ifr_name, networkInterface) == 0)
                 {
-                    unsigned char* mac = (unsigned char*)ifr.ifr_hwaddr.sa_data;
+                    unsigned char* mac = (unsigned char*)ifr_hw.ifr_hwaddr.sa_data;
 
                     if ((result = (char*)malloc(sizeof(char) * 18)) == NULL)
                     {
