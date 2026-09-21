@@ -6,7 +6,7 @@ resources:
 variables:
   CCACHE_DIR: /tmp/ccache_cache
   CCACHE_UMASK: '000'
-  DEFAULT_AZURE_LOCATION: centraluseuap
+  DEFAULT_AZURE_LOCATION: eastus2euap
   AZURE_LOCATION_EFFECTIVE: $[ coalesce(variables['AZURE_LOCATION'], variables['DEFAULT_AZURE_LOCATION']) ]
   # CodeQL is auto-injected into every job by the 1ES policy decorator. Turn it
   # off globally here and opt in per job, because S360 records the *latest*
