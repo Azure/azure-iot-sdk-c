@@ -307,6 +307,27 @@ static AMQP_MESSENGER_HANDLE TEST_amqp_messenger_create(const AMQP_MESSENGER_CON
     return TEST_amqp_messenger_create_return;
 }
 
+static AMQP_MESSENGER_SEND_COMPLETE_CALLBACK TEST_amqp_messenger_send_async_callback;
+static void* TEST_amqp_messenger_send_async_context;
+static int TEST_amqp_messenger_send_async(AMQP_MESSENGER_HANDLE messenger_handle, MESSAGE_HANDLE message, AMQP_MESSENGER_SEND_COMPLETE_CALLBACK on_user_defined_send_complete_callback, void* user_context)
+{
+    (void)messenger_handle;
+    (void)message;
+    TEST_amqp_messenger_send_async_callback = on_user_defined_send_complete_callback;
+    TEST_amqp_messenger_send_async_context = user_context;
+    return 0;
+}
+
+static ON_AMQP_MESSENGER_MESSAGE_RECEIVED TEST_amqp_messenger_subscribe_for_messages_callback;
+static void* TEST_amqp_messenger_subscribe_for_messages_context;
+static int TEST_amqp_messenger_subscribe_for_messages(AMQP_MESSENGER_HANDLE messenger_handle, ON_AMQP_MESSENGER_MESSAGE_RECEIVED on_message_received_callback, void* context)
+{
+    (void)messenger_handle;
+    TEST_amqp_messenger_subscribe_for_messages_callback = on_message_received_callback;
+    TEST_amqp_messenger_subscribe_for_messages_context = context;
+    return 0;
+}
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -437,6 +458,7 @@ typedef struct DOWORK_TEST_PROFILE_TAG
     size_t number_of_expired_pending_patches;
     size_t number_of_pending_operations;
     size_t number_of_expired_pending_operations;
+    bool expired_operations_send_in_progress;
 } DOWORK_TEST_PROFILE;
 
 static void reset_dowork_test_profile(DOWORK_TEST_PROFILE* dwtp)
@@ -448,6 +470,7 @@ static void reset_dowork_test_profile(DOWORK_TEST_PROFILE* dwtp)
     dwtp->number_of_expired_pending_patches = 0;
     dwtp->number_of_pending_operations = 0;
     dwtp->number_of_expired_pending_operations = 0;
+    dwtp->expired_operations_send_in_progress = false;
 }
 
 static TWIN_UPDATE_TYPE get_twin_completed_update_type;
@@ -537,7 +560,7 @@ static void set_twin_messenger_retrieve_options_expected_calls()
     STRICT_EXPECTED_CALL(amqp_messenger_retrieve_options(TEST_AMQP_MESSENGER_HANDLE));
 }
 
-static void set_process_timeouts_expected_calls(time_t current_time, size_t number_of_pending_patches, size_t number_of_expired_pending_patches, size_t number_of_pending_operations, size_t number_of_expired_pending_operations)
+static void set_process_timeouts_expected_calls(time_t current_time, size_t number_of_pending_patches, size_t number_of_expired_pending_patches, size_t number_of_pending_operations, size_t number_of_expired_pending_operations, bool expired_operations_send_in_progress)
 {
     size_t i;
 
@@ -562,8 +585,12 @@ static void set_process_timeouts_expected_calls(time_t current_time, size_t numb
     for (i = 0; i < number_of_expired_pending_operations; i++)
     {
         STRICT_EXPECTED_CALL(get_difftime(current_time, IGNORED_ARG)).SetReturn(10000000); // Simulate it's expired for sure.
-        STRICT_EXPECTED_CALL(free(IGNORED_ARG)); // correlation id
-        STRICT_EXPECTED_CALL(free(IGNORED_ARG));
+
+        if (!expired_operations_send_in_progress)
+        {
+            STRICT_EXPECTED_CALL(free(IGNORED_ARG)); // correlation id
+            STRICT_EXPECTED_CALL(free(IGNORED_ARG));
+        }
     }
 
     if (number_of_pending_operations > number_of_expired_pending_operations)
@@ -703,7 +730,7 @@ static void set_twin_messenger_do_work_expected_calls(DOWORK_TEST_PROFILE* dwtp)
         }
     }
 
-    set_process_timeouts_expected_calls(dwtp->current_time, dwtp->number_of_pending_patches, dwtp->number_of_expired_pending_patches, dwtp->number_of_pending_operations, dwtp->number_of_expired_pending_operations);
+    set_process_timeouts_expected_calls(dwtp->current_time, dwtp->number_of_pending_patches, dwtp->number_of_expired_pending_patches, dwtp->number_of_pending_operations, dwtp->number_of_expired_pending_operations, dwtp->expired_operations_send_in_progress);
 
     STRICT_EXPECTED_CALL(amqp_messenger_do_work(TEST_AMQP_MESSENGER_HANDLE));
 }
@@ -871,7 +898,7 @@ static void register_global_mock_returns()
     REGISTER_GLOBAL_MOCK_RETURN(amqp_messenger_create, TEST_AMQP_MESSENGER_HANDLE);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(amqp_messenger_create, NULL);
 
-    REGISTER_GLOBAL_MOCK_RETURN(amqp_messenger_subscribe_for_messages, 0);
+    REGISTER_GLOBAL_MOCK_HOOK(amqp_messenger_subscribe_for_messages, TEST_amqp_messenger_subscribe_for_messages);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(amqp_messenger_subscribe_for_messages, 1);
 
     REGISTER_GLOBAL_MOCK_RETURN(amqp_messenger_set_option, 0);
@@ -886,7 +913,7 @@ static void register_global_mock_returns()
     REGISTER_GLOBAL_MOCK_RETURN(amqp_messenger_retrieve_options, TEST_OPTIONHANDLER_HANDLE);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(amqp_messenger_retrieve_options, NULL);
 
-    REGISTER_GLOBAL_MOCK_RETURN(amqp_messenger_send_async, 0);
+    REGISTER_GLOBAL_MOCK_HOOK(amqp_messenger_send_async, TEST_amqp_messenger_send_async);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(amqp_messenger_send_async, 1);
 
     // amqpvalue
@@ -989,6 +1016,11 @@ static void reset_test_data()
 
     memset(&TEST_amqp_messenger_create_config, 0, sizeof(TEST_amqp_messenger_create_config));
     TEST_amqp_messenger_create_return = TEST_AMQP_MESSENGER_HANDLE;
+
+    TEST_amqp_messenger_send_async_callback = NULL;
+    TEST_amqp_messenger_send_async_context = NULL;
+    TEST_amqp_messenger_subscribe_for_messages_callback = NULL;
+    TEST_amqp_messenger_subscribe_for_messages_context = NULL;
 
     TEST_on_report_state_complete_callback_result = TWIN_REPORT_STATE_RESULT_SUCCESS;
     TEST_on_report_state_complete_callback_reason = TWIN_REPORT_STATE_REASON_NONE;
@@ -1801,6 +1833,9 @@ TEST_FUNCTION(twin_msgr_do_work_started_with_EXPIRED_in_progress_patches_success
 
     crank_twin_messenger_do_work(handle, config, &dwtp);
 
+    // Send completed; the operation now only awaits the service response.
+    TEST_amqp_messenger_send_async_callback(AMQP_MESSENGER_SEND_RESULT_SUCCESS, AMQP_MESSENGER_REASON_NONE, TEST_amqp_messenger_send_async_context);
+
     umock_c_reset_all_calls();
     dwtp.current_time = g_initial_time_plus_300_secs;
     dwtp.number_of_pending_patches = 0;
@@ -1828,7 +1863,155 @@ TEST_FUNCTION(twin_msgr_do_work_started_with_EXPIRED_in_progress_patches_success
     // cleanup
     twin_messenger_destroy(handle);
 }
+static TWIN_MESSENGER_HANDLE expire_one_report_patch_with_send_in_progress(TWIN_MESSENGER_CONFIG* config)
+{
+    TWIN_MESSENGER_HANDLE handle = create_and_start_twin_messenger(config);
 
+    send_one_report_patch(handle, g_initial_time);
+
+    DOWORK_TEST_PROFILE dwtp;
+    reset_dowork_test_profile(&dwtp);
+    dwtp.current_state = TWIN_MESSENGER_STATE_STARTED;
+    dwtp.number_of_pending_patches = 1;
+
+    crank_twin_messenger_do_work(handle, config, &dwtp);
+
+    dwtp.current_time = g_initial_time_plus_300_secs;
+    dwtp.number_of_pending_patches = 0;
+    dwtp.number_of_pending_operations = 1;
+    dwtp.number_of_expired_pending_operations = 1;
+    dwtp.expired_operations_send_in_progress = true;
+
+    umock_c_reset_all_calls();
+    set_twin_messenger_do_work_expected_calls(&dwtp);
+    twin_messenger_do_work(handle);
+
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(size_t, 1, TEST_on_report_state_complete_callback_result_ERROR_count);
+    ASSERT_ARE_EQUAL(size_t, 1, TEST_on_report_state_complete_callback_reason_TIMEOUT_count);
+    ASSERT_IS_NOT_NULL(TEST_amqp_messenger_send_async_callback);
+    ASSERT_IS_NOT_NULL(TEST_amqp_messenger_send_async_context);
+
+    return handle;
+}
+
+static void assert_send_complete_after_timeout_destroys_context(AMQP_MESSENGER_SEND_RESULT send_result, AMQP_MESSENGER_REASON send_reason)
+{
+    // arrange
+    TWIN_MESSENGER_CONFIG* config = get_twin_messenger_config();
+    TWIN_MESSENGER_HANDLE handle = expire_one_report_patch_with_send_in_progress(config);
+
+    umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(free(IGNORED_ARG)); // correlation id
+    STRICT_EXPECTED_CALL(free(IGNORED_ARG));
+
+    // act
+    TEST_amqp_messenger_send_async_callback(send_result, send_reason, TEST_amqp_messenger_send_async_context);
+
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(size_t, 0, TEST_on_report_state_complete_callback_result_SUCCESS_count);
+    ASSERT_ARE_EQUAL(size_t, 1, TEST_on_report_state_complete_callback_result_ERROR_count);
+    ASSERT_ARE_EQUAL(size_t, 0, TEST_on_report_state_complete_callback_result_CANCELLED_count);
+    ASSERT_ARE_EQUAL(size_t, 1, TEST_on_report_state_complete_callback_reason_TIMEOUT_count);
+    ASSERT_ARE_EQUAL(size_t, 0, TEST_on_report_state_complete_callback_reason_FAIL_SENDING_count);
+    ASSERT_ARE_EQUAL(size_t, 0, TEST_on_report_state_complete_callback_reason_MESSENGER_DESTROYED_count);
+
+    // cleanup
+    twin_messenger_destroy(handle);
+}
+
+TEST_FUNCTION(twin_msgr_do_work_EXPIRED_operation_send_in_progress_then_send_ERROR_success)
+{
+    assert_send_complete_after_timeout_destroys_context(AMQP_MESSENGER_SEND_RESULT_ERROR, AMQP_MESSENGER_REASON_FAIL_SENDING);
+}
+
+TEST_FUNCTION(twin_msgr_do_work_EXPIRED_operation_send_in_progress_then_send_TIMEOUT_success)
+{
+    assert_send_complete_after_timeout_destroys_context(AMQP_MESSENGER_SEND_RESULT_ERROR, AMQP_MESSENGER_REASON_TIMEOUT);
+}
+
+TEST_FUNCTION(twin_msgr_do_work_EXPIRED_operation_send_in_progress_then_send_CANCELLED_success)
+{
+    assert_send_complete_after_timeout_destroys_context(AMQP_MESSENGER_SEND_RESULT_CANCELLED, AMQP_MESSENGER_REASON_MESSENGER_DESTROYED);
+}
+
+TEST_FUNCTION(twin_msgr_do_work_EXPIRED_operation_send_in_progress_then_send_SUCCESS_success)
+{
+    assert_send_complete_after_timeout_destroys_context(AMQP_MESSENGER_SEND_RESULT_SUCCESS, AMQP_MESSENGER_REASON_NONE);
+}
+
+TEST_FUNCTION(twin_msgr_response_received_with_send_in_progress_then_send_ERROR_success)
+{
+    // arrange
+    TWIN_MESSENGER_CONFIG* config = get_twin_messenger_config();
+    TWIN_MESSENGER_HANDLE handle = create_and_start_twin_messenger(config);
+
+    send_one_report_patch(handle, g_initial_time);
+
+    DOWORK_TEST_PROFILE dwtp;
+    reset_dowork_test_profile(&dwtp);
+    dwtp.current_state = TWIN_MESSENGER_STATE_STARTED;
+    dwtp.number_of_pending_patches = 1;
+    crank_twin_messenger_do_work(handle, config, &dwtp);
+
+    ASSERT_IS_NOT_NULL(TEST_amqp_messenger_send_async_callback);
+    ASSERT_IS_NOT_NULL(TEST_amqp_messenger_subscribe_for_messages_callback);
+
+    // Operation correlation id is empty since UniqueId_Generate is mocked.
+    const char* correlation_id_value = "";
+    char* correlation_id = (char*)TEST_malloc(strlen(correlation_id_value) + 1);
+    (void)strcpy(correlation_id, correlation_id_value);
+    PROPERTIES_HANDLE properties = TEST_PROPERTIES_HANDLE;
+    AMQP_VALUE correlation_id_amqp_value = TEST_STRING_AMQP_VALUE;
+    message_annotations annotations = NULL;
+    MESSAGE_BODY_TYPE body_type = MESSAGE_BODY_TYPE_NONE;
+
+    umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(amqp_messenger_destroy_disposition_info(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(message_get_properties(TEST_MESSAGE_HANDLE, IGNORED_ARG))
+        .CopyOutArgumentBuffer_properties(&properties, sizeof(properties));
+    STRICT_EXPECTED_CALL(properties_get_correlation_id(TEST_PROPERTIES_HANDLE, IGNORED_ARG))
+        .CopyOutArgumentBuffer_correlation_id_value(&correlation_id_amqp_value, sizeof(correlation_id_amqp_value));
+    STRICT_EXPECTED_CALL(amqpvalue_get_string(TEST_STRING_AMQP_VALUE, IGNORED_ARG))
+        .CopyOutArgumentBuffer_string_value(&correlation_id_value, sizeof(correlation_id_value));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_ARG, correlation_id_value))
+        .CopyOutArgumentBuffer_destination(&correlation_id, sizeof(correlation_id));
+    STRICT_EXPECTED_CALL(properties_destroy(TEST_PROPERTIES_HANDLE));
+    STRICT_EXPECTED_CALL(message_get_message_annotations(TEST_MESSAGE_HANDLE, IGNORED_ARG))
+        .CopyOutArgumentBuffer_annotations(&annotations, sizeof(annotations));
+    STRICT_EXPECTED_CALL(message_get_body_type(TEST_MESSAGE_HANDLE, IGNORED_ARG))
+        .CopyOutArgumentBuffer_body_type(&body_type, sizeof(body_type));
+    STRICT_EXPECTED_CALL(singlylinkedlist_find(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_remove(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(free(correlation_id));
+
+    // act (PATCH response without status code)
+    (void)TEST_amqp_messenger_subscribe_for_messages_callback(TEST_MESSAGE_HANDLE, (AMQP_MESSENGER_MESSAGE_DISPOSITION_INFO*)0x4499, TEST_amqp_messenger_subscribe_for_messages_context);
+
+    // assert (operation context kept while the send is in progress)
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(size_t, 1, TEST_on_report_state_complete_callback_result_ERROR_count);
+    ASSERT_ARE_EQUAL(size_t, 1, TEST_on_report_state_complete_callback_reason_INVALID_RESPONSE_count);
+
+    // arrange
+    umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(free(IGNORED_ARG)); // correlation id
+    STRICT_EXPECTED_CALL(free(IGNORED_ARG));
+
+    // act
+    TEST_amqp_messenger_send_async_callback(AMQP_MESSENGER_SEND_RESULT_ERROR, AMQP_MESSENGER_REASON_FAIL_SENDING, TEST_amqp_messenger_send_async_context);
+
+    // assert (context destroyed, no further user callback)
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(size_t, 1, TEST_on_report_state_complete_callback_result_ERROR_count);
+    ASSERT_ARE_EQUAL(size_t, 0, TEST_on_report_state_complete_callback_reason_FAIL_SENDING_count);
+
+    // cleanup
+    twin_messenger_destroy(handle);
+}
 
 
 END_TEST_SUITE(iothubtr_amqp_twin_msgr_ut)
