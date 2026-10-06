@@ -30,7 +30,11 @@ stages:
     # `self` here is azure-iot-sdk-c, whose recursive submodule graph exceeds
     # MAX_PATH on the windows-latest agent and fails the implicit checkout.
     - checkout: none
+    # The template still defaults to centraluseuap, where the build subscription
+    # can no longer create IoT Hubs (IH400059: pinned to eastus2euap).
     - template: vsts/templates/steps-create-azure-resources.yaml@e2e_fx
+      parameters:
+        azure_location: eastus2euap
 
 - stage: build_and_test
   dependsOn: setup
