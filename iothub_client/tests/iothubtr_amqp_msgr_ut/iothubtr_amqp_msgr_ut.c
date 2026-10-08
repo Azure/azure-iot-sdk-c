@@ -515,6 +515,8 @@ static MESSAGE_HANDLE saved_messagesender_send_message;
 static ON_MESSAGE_SEND_COMPLETE saved_messagesender_send_on_message_send_complete;
 static void* saved_messagesender_send_callback_context;
 static bool TEST_messagesender_send_complete_synchronously;
+static MESSAGE_SEND_RESULT TEST_messagesender_send_complete_result;
+static ASYNC_OPERATION_HANDLE TEST_messagesender_send_return;
 
 static ASYNC_OPERATION_HANDLE TEST_messagesender_send(MESSAGE_SENDER_HANDLE message_sender, MESSAGE_HANDLE message, ON_MESSAGE_SEND_COMPLETE on_message_send_complete, void* callback_context, tickcounter_ms_t timeout)
 {
@@ -526,10 +528,10 @@ static ASYNC_OPERATION_HANDLE TEST_messagesender_send(MESSAGE_SENDER_HANDLE mess
 
     if (TEST_messagesender_send_complete_synchronously)
     {
-        on_message_send_complete(callback_context, MESSAGE_SEND_OK, NULL);
+        on_message_send_complete(callback_context, TEST_messagesender_send_complete_result, NULL);
     }
 
-    return (ASYNC_OPERATION_HANDLE)0x64;
+    return TEST_messagesender_send_return;
 }
 
 static void set_clone_link_configuration_expected_calls(role link_role, AMQP_MESSENGER_LINK_CONFIG* config)
@@ -705,8 +707,10 @@ static void set_expected_calls_for_amqp_messenger_send_async()
 static AMQP_MESSENGER_SEND_RESULT TEST_on_event_send_complete_result;
 static AMQP_MESSENGER_REASON TEST_on_event_send_complete_reason;
 static void* TEST_on_event_send_complete_context;
+static size_t TEST_on_event_send_complete_count;
 static void TEST_on_event_send_complete(AMQP_MESSENGER_SEND_RESULT result, AMQP_MESSENGER_REASON reason, void* context)
 {
+    TEST_on_event_send_complete_count++;
     TEST_on_event_send_complete_result = result;
     TEST_on_event_send_complete_reason = reason;
     TEST_on_event_send_complete_context = context;
@@ -1271,6 +1275,8 @@ static void reset_test_data()
     saved_messagesender_send_on_message_send_complete = NULL;
     saved_messagesender_send_callback_context = NULL;
     TEST_messagesender_send_complete_synchronously = false;
+    TEST_messagesender_send_complete_result = MESSAGE_SEND_OK;
+    TEST_messagesender_send_return = (ASYNC_OPERATION_HANDLE)0x64;
 
     saved_messagereceiver_create_link = NULL;
     saved_messagereceiver_create_on_message_receiver_state_changed = NULL;
@@ -1293,6 +1299,7 @@ static void reset_test_data()
     TEST_on_event_send_complete_result = AMQP_MESSENGER_SEND_RESULT_SUCCESS;
     TEST_on_event_send_complete_reason = AMQP_MESSENGER_REASON_NONE;
     TEST_on_event_send_complete_context = NULL;
+    TEST_on_event_send_complete_count = 0;
 
     TEST_DELIVERY_NUMBER = (delivery_number)1234;
     TEST_messagereceiver_get_link_name_link_name = TEST_MESSAGE_RECEIVER_LINK_NAME_CHAR_PTR;
@@ -2831,12 +2838,15 @@ static void TEST_on_process_message_completed(MESSAGE_QUEUE_HANDLE message_queue
     (void)reason;
     TEST_on_process_message_completed_count++;
 
-    // Mimics message_queue: dequeues the message and fires its completion callback.
-    TEST_message_queue_add_on_message_processing_completed_callback[0](TEST_message_queue_add_message[0], result, NULL, TEST_message_queue_add_user_context[0]);
-    TEST_remove_message_queue_first_item();
+    // Mimics message_queue: dequeues the message and fires its completion callback (no-op if already dequeued).
+    if (TEST_message_queue_add_count > 0)
+    {
+        TEST_message_queue_add_on_message_processing_completed_callback[0](TEST_message_queue_add_message[0], result, NULL, TEST_message_queue_add_user_context[0]);
+        TEST_remove_message_queue_first_item();
+    }
 }
 
-TEST_FUNCTION(amqp_messenger_on_process_message_send_completes_synchronously_success)
+static void amqp_messenger_on_process_message_send_completes_synchronously_impl(MESSAGE_SEND_RESULT send_result, ASYNC_OPERATION_HANDLE send_return, AMQP_MESSENGER_SEND_RESULT expected_result, AMQP_MESSENGER_REASON expected_reason)
 {
     // arrange
     AMQP_MESSENGER_CONFIG* config = get_messenger_config();
@@ -2848,7 +2858,9 @@ TEST_FUNCTION(amqp_messenger_on_process_message_send_completes_synchronously_suc
     ASSERT_ARE_EQUAL(size_t, 1, TEST_message_queue_add_count);
 
     TEST_messagesender_send_complete_synchronously = true;
-    TEST_on_event_send_complete_result = AMQP_MESSENGER_SEND_RESULT_ERROR;
+    TEST_messagesender_send_complete_result = send_result;
+    TEST_messagesender_send_return = send_return;
+    TEST_on_event_send_complete_count = 0;
     TEST_on_process_message_completed_count = 0;
 
     umock_c_reset_all_calls();
@@ -2862,12 +2874,24 @@ TEST_FUNCTION(amqp_messenger_on_process_message_send_completes_synchronously_suc
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     ASSERT_ARE_EQUAL(size_t, 1, TEST_on_process_message_completed_count);
-    ASSERT_ARE_EQUAL(int, AMQP_MESSENGER_SEND_RESULT_SUCCESS, TEST_on_event_send_complete_result);
+    ASSERT_ARE_EQUAL(size_t, 1, TEST_on_event_send_complete_count);
+    ASSERT_ARE_EQUAL(int, expected_result, TEST_on_event_send_complete_result);
+    ASSERT_ARE_EQUAL(int, expected_reason, TEST_on_event_send_complete_reason);
     ASSERT_ARE_EQUAL(void_ptr, TEST_IOTHUB_CLIENT_HANDLE, TEST_on_event_send_complete_context);
     ASSERT_ARE_EQUAL(size_t, 0, TEST_message_queue_add_count);
 
     // cleanup
     amqp_messenger_destroy(handle);
+}
+
+TEST_FUNCTION(amqp_messenger_on_process_message_send_completes_synchronously_success)
+{
+    amqp_messenger_on_process_message_send_completes_synchronously_impl(MESSAGE_SEND_OK, (ASYNC_OPERATION_HANDLE)0x64, AMQP_MESSENGER_SEND_RESULT_SUCCESS, AMQP_MESSENGER_REASON_NONE);
+}
+
+TEST_FUNCTION(amqp_messenger_on_process_message_send_fails_synchronously_with_NULL_return_completes_once)
+{
+    amqp_messenger_on_process_message_send_completes_synchronously_impl(MESSAGE_SEND_ERROR, NULL, AMQP_MESSENGER_SEND_RESULT_ERROR, AMQP_MESSENGER_REASON_FAIL_SENDING);
 }
 
 END_TEST_SUITE(iothubtr_amqp_msgr_ut)
