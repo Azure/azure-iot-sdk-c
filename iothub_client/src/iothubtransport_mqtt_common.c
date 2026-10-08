@@ -2497,13 +2497,23 @@ static void ProcessPendingTelemetryMessages(PMQTTTRANSPORT_HANDLE_DATA transport
 
         if (((current_ms - msg_detail_entry->msgCreationTime) / 1000) >= TELEMETRY_MSG_TIMEOUT_MIN)
         {
-            notifyApplicationOfSendMessageComplete(msg_detail_entry->iotHubMessageEntry, transport_data, IOTHUB_CLIENT_CONFIRMATION_MESSAGE_TIMEOUT);
+            uint16_t timed_out_packet_id = msg_detail_entry->packet_id;
+
+            // Unlink and free the entry before invoking any callback, so that it cannot be
+            // observed or completed a second time from a re-entrant call.
             (void)DList_RemoveEntryList(current_entry);
-            LogError("Disconnecting MQTT connection because message PUBACK (%d) timeout.", msg_detail_entry->packet_id);
+            notifyApplicationOfSendMessageComplete(msg_detail_entry->iotHubMessageEntry, transport_data, IOTHUB_CLIENT_CONFIRMATION_MESSAGE_TIMEOUT);
             free(msg_detail_entry);
+            LogError("Disconnecting MQTT connection because message PUBACK (%d) timeout.", timed_out_packet_id);
 
             DisconnectFromClient(transport_data);
             transport_data->transport_callbacks.connection_status_cb(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_COMMUNICATION_ERROR, transport_data->transport_ctx);
+
+            // DisconnectFromClient() pumps the MQTT client while draining the DISCONNECT, so PUBACKs
+            // for the still pending messages can be delivered re-entrantly, which removes and frees
+            // their entries. nextListEntry may therefore already be freed: stop walking the list.
+            // The entries that survived are re-examined on the next call to this function.
+            break;
         }
         else if (((current_ms - msg_detail_entry->msgPublishTime) / 1000) > RESEND_TIMEOUT_VALUE_MIN)
         {
@@ -2518,6 +2528,7 @@ static void ProcessPendingTelemetryMessages(PMQTTTRANSPORT_HANDLE_DATA transport
                 {
                     (void)DList_RemoveEntryList(current_entry);
                     notifyApplicationOfSendMessageComplete(msg_detail_entry->iotHubMessageEntry, transport_data, IOTHUB_CLIENT_CONFIRMATION_ERROR);
+                    free(msg_detail_entry);
                 }
                 else
                 {
