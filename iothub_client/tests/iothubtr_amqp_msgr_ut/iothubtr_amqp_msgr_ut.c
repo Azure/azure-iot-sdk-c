@@ -514,6 +514,7 @@ static MESSAGE_SENDER_HANDLE saved_messagesender_send_message_sender;
 static MESSAGE_HANDLE saved_messagesender_send_message;
 static ON_MESSAGE_SEND_COMPLETE saved_messagesender_send_on_message_send_complete;
 static void* saved_messagesender_send_callback_context;
+static bool TEST_messagesender_send_complete_synchronously;
 
 static ASYNC_OPERATION_HANDLE TEST_messagesender_send(MESSAGE_SENDER_HANDLE message_sender, MESSAGE_HANDLE message, ON_MESSAGE_SEND_COMPLETE on_message_send_complete, void* callback_context, tickcounter_ms_t timeout)
 {
@@ -522,6 +523,11 @@ static ASYNC_OPERATION_HANDLE TEST_messagesender_send(MESSAGE_SENDER_HANDLE mess
     saved_messagesender_send_message = message;
     saved_messagesender_send_on_message_send_complete = on_message_send_complete;
     saved_messagesender_send_callback_context = callback_context;
+
+    if (TEST_messagesender_send_complete_synchronously)
+    {
+        on_message_send_complete(callback_context, MESSAGE_SEND_OK, NULL);
+    }
 
     return (ASYNC_OPERATION_HANDLE)0x64;
 }
@@ -1264,6 +1270,7 @@ static void reset_test_data()
     saved_messagesender_send_message = NULL;
     saved_messagesender_send_on_message_send_complete = NULL;
     saved_messagesender_send_callback_context = NULL;
+    TEST_messagesender_send_complete_synchronously = false;
 
     saved_messagereceiver_create_link = NULL;
     saved_messagereceiver_create_on_message_receiver_state_changed = NULL;
@@ -2814,6 +2821,53 @@ TEST_FUNCTION(amqp_messenger_retrieve_options_failure_checks)
     // cleanup
     amqp_messenger_destroy(handle);
     umock_c_negative_tests_deinit();
+}
+
+static size_t TEST_on_process_message_completed_count;
+static void TEST_on_process_message_completed(MESSAGE_QUEUE_HANDLE message_queue, uint32_t message_id, MESSAGE_QUEUE_RESULT result, USER_DEFINED_REASON reason)
+{
+    (void)message_queue;
+    (void)message_id;
+    (void)reason;
+    TEST_on_process_message_completed_count++;
+
+    // Mimics message_queue: dequeues the message and fires its completion callback.
+    TEST_message_queue_add_on_message_processing_completed_callback[0](TEST_message_queue_add_message[0], result, NULL, TEST_message_queue_add_user_context[0]);
+    TEST_remove_message_queue_first_item();
+}
+
+TEST_FUNCTION(amqp_messenger_on_process_message_send_completes_synchronously_success)
+{
+    // arrange
+    AMQP_MESSENGER_CONFIG* config = get_messenger_config();
+    AMQP_MESSENGER_HANDLE handle = create_and_start_messenger2(config, false);
+
+    umock_c_reset_all_calls();
+    set_expected_calls_for_amqp_messenger_send_async();
+    ASSERT_ARE_EQUAL(int, 0, amqp_messenger_send_async(handle, TEST_MESSAGE_HANDLE, TEST_on_event_send_complete, TEST_IOTHUB_CLIENT_HANDLE));
+    ASSERT_ARE_EQUAL(size_t, 1, TEST_message_queue_add_count);
+
+    TEST_messagesender_send_complete_synchronously = true;
+    TEST_on_event_send_complete_result = AMQP_MESSENGER_SEND_RESULT_ERROR;
+    TEST_on_process_message_completed_count = 0;
+
+    umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(messagesender_send_async(TEST_MESSAGE_SENDER_HANDLE, TEST_message_queue_add_message[0], IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(message_destroy(TEST_message_queue_add_message[0]));
+    STRICT_EXPECTED_CALL(free(TEST_message_queue_add_user_context[0]));
+
+    // act
+    TEST_on_process_message_callback(TEST_MESSAGE_QUEUE_HANDLE, TEST_message_queue_add_message[0], 1, TEST_on_process_message_completed, TEST_message_queue_add_user_context[0]);
+
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(size_t, 1, TEST_on_process_message_completed_count);
+    ASSERT_ARE_EQUAL(int, AMQP_MESSENGER_SEND_RESULT_SUCCESS, TEST_on_event_send_complete_result);
+    ASSERT_ARE_EQUAL(void_ptr, TEST_IOTHUB_CLIENT_HANDLE, TEST_on_event_send_complete_context);
+    ASSERT_ARE_EQUAL(size_t, 0, TEST_message_queue_add_count);
+
+    // cleanup
+    amqp_messenger_destroy(handle);
 }
 
 END_TEST_SUITE(iothubtr_amqp_msgr_ut)
