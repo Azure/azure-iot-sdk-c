@@ -244,6 +244,16 @@ static DLIST_ENTRY g_waitingToSend;
 static tickcounter_ms_t g_current_ms;
 static size_t g_tokenizerIndex;
 
+// Packet id of a PUBACK that my_mqtt_client_dowork() delivers the next time it runs, 0 for none.
+static uint16_t g_puback_packet_id_on_dowork;
+
+// Record of the messages handed to Transport_SendComplete_Callback, so a test can assert that
+// a message is completed exactly once.
+#define MAX_RECORDED_SEND_COMPLETES 8
+static PDLIST_ENTRY g_send_complete_entries[MAX_RECORDED_SEND_COMPLETES];
+static IOTHUB_CLIENT_CONFIRMATION_RESULT g_send_complete_results[MAX_RECORDED_SEND_COMPLETES];
+static size_t g_send_complete_count;
+
 static CONSTBUFFER_HANDLE TEST_CONST_BUFFER_HANDLE = (CONSTBUFFER_HANDLE)0x2331;
 
 // Use #define and not const because switch statement that consumes these assumes they're not const and won't compile.
@@ -252,6 +262,10 @@ static CONSTBUFFER_HANDLE TEST_CONST_BUFFER_HANDLE = (CONSTBUFFER_HANDLE)0x2331;
 
 #define PARSE_SLASHES_FOR_INPUT_QUEUE_NO_TOKENS               (500)
 #define NUM_DOWORK_VALUE                1
+
+// The transport assigns telemetry packet ids sequentially starting at 2 (packetId is seeded to 1
+// at create time and pre-incremented for each message).
+#define SECOND_TELEMETRY_PACKET_ID      3
 
 static const unsigned char* TEST_DEVICE_METHOD_RESPONSE = (const unsigned char*)0x62;
 static size_t TEST_DEVICE_RESP_LENGTH = 1;
@@ -443,6 +457,17 @@ static void my_IoTHubClientCore_LL_SendComplete(IOTHUB_CLIENT_CORE_LL_HANDLE han
     (void)result;
 }
 
+static void my_Transport_SendComplete_Callback(PDLIST_ENTRY completed, IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* ctx)
+{
+    (void)ctx;
+    if (g_send_complete_count < MAX_RECORDED_SEND_COMPLETES)
+    {
+        g_send_complete_entries[g_send_complete_count] = (completed == NULL) ? NULL : completed->Flink;
+        g_send_complete_results[g_send_complete_count] = result;
+    }
+    g_send_complete_count++;
+}
+
 static MQTT_CLIENT_HANDLE my_mqtt_client_init(ON_MQTT_MESSAGE_RECV_CALLBACK msgRecv, ON_MQTT_OPERATION_CALLBACK opCallback, void* callbackCtx, ON_MQTT_ERROR_CALLBACK errorCallback, void* errorcallbackCtx)
 {
     g_fnMqttMsgRecv = msgRecv;
@@ -469,6 +494,15 @@ static void my_mqtt_client_deinit(MQTT_CLIENT_HANDLE handle)
 static void my_mqtt_client_dowork(MQTT_CLIENT_HANDLE handle)
 {
     (void)handle;
+    // Simulates a PUBACK that is read off the socket the next time the MQTT client is pumped.
+    // Used to drive the case where DisconnectFromClient() completes telemetry re-entrantly.
+    if (g_puback_packet_id_on_dowork != 0)
+    {
+        PUBLISH_ACK puback;
+        puback.packetId = g_puback_packet_id_on_dowork;
+        g_puback_packet_id_on_dowork = 0;
+        g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_PUBLISH_ACK, &puback, g_callbackCtx);
+    }
 }
 
 static STRING_TOKENIZER_HANDLE my_STRING_TOKENIZER_create_from_char(const char* input)
@@ -828,6 +862,8 @@ TEST_SUITE_INITIALIZE(suite_init)
 
     REGISTER_GLOBAL_MOCK_HOOK(mqtt_client_deinit, my_mqtt_client_deinit);
 
+    REGISTER_GLOBAL_MOCK_HOOK(mqtt_client_dowork, my_mqtt_client_dowork);
+
     REGISTER_GLOBAL_MOCK_HOOK(mqtt_client_disconnect, my_mqtt_client_disconnect);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(mqtt_client_disconnect, MU_FAILURE);
 
@@ -878,6 +914,8 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(xio_setoption, MU_FAILURE);
 
     REGISTER_GLOBAL_MOCK_HOOK(xio_destroy, my_xio_destroy);
+
+    REGISTER_GLOBAL_MOCK_HOOK(Transport_SendComplete_Callback, my_Transport_SendComplete_Callback);
 
     REGISTER_GLOBAL_MOCK_HOOK(tickcounter_create, my_tickcounter_create);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(tickcounter_create, NULL);
@@ -955,6 +993,10 @@ static void reset_test_data()
     expected_MQTT_TRANSPORT_PROXY_OPTIONS = NULL;
     g_disconnect_callback = NULL;
     g_disconnect_callback_ctx = NULL;
+
+    g_puback_packet_id_on_dowork = 0;
+    g_send_complete_count = 0;
+    memset(g_send_complete_entries, 0, sizeof(g_send_complete_entries));
 }
 
 TEST_FUNCTION_INITIALIZE(method_init)
@@ -5026,10 +5068,10 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_message_timeout_succeeds)
     STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_ARG));
     STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_SasToken_Expiry(IGNORED_ARG));
     STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(DList_RemoveEntryList(IGNORED_ARG));
     STRICT_EXPECTED_CALL(DList_InitializeListHead(IGNORED_ARG));
     STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_ARG, IGNORED_ARG));
     STRICT_EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_ARG, IOTHUB_CLIENT_CONFIRMATION_MESSAGE_TIMEOUT, transport_cb_ctx));
-    STRICT_EXPECTED_CALL(DList_RemoveEntryList(IGNORED_ARG));
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
     STRICT_EXPECTED_CALL(xio_retrieveoptions(IGNORED_ARG));
     STRICT_EXPECTED_CALL(mqtt_client_disconnect(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
@@ -5043,8 +5085,8 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_message_timeout_succeeds)
     STRICT_EXPECTED_CALL(Transport_ConnectionStatusCallBack(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_COMMUNICATION_ERROR, transport_cb_ctx));
     STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_ARG));
 
+    // the second pass over the pending telemetry is skipped: the connection was torn down
     // removeExpiredTwinRequests
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
     STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
 
     // act
@@ -5100,6 +5142,8 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_2_message_timeout_succeeds)
     }
 
     umock_c_reset_all_calls();
+    g_send_complete_count = 0;
+    memset(g_send_complete_entries, 0, sizeof(g_send_complete_entries));
 
     STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
     STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_ARG));
@@ -5114,10 +5158,10 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_2_message_timeout_succeeds)
     STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG))
         .CopyOutArgumentBuffer(2, &g_current_ms, sizeof(g_current_ms));
 
+    STRICT_EXPECTED_CALL(DList_RemoveEntryList(IGNORED_ARG));
     STRICT_EXPECTED_CALL(DList_InitializeListHead(IGNORED_ARG));
     STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_ARG, IGNORED_ARG));
     STRICT_EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_ARG, IOTHUB_CLIENT_CONFIRMATION_MESSAGE_TIMEOUT, transport_cb_ctx));
-    STRICT_EXPECTED_CALL(DList_RemoveEntryList(IGNORED_ARG));
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
     STRICT_EXPECTED_CALL(xio_retrieveoptions(IGNORED_ARG));
     STRICT_EXPECTED_CALL(mqtt_client_disconnect(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
@@ -5130,13 +5174,174 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_2_message_timeout_succeeds)
     STRICT_EXPECTED_CALL(xio_destroy(IGNORED_ARG));
     STRICT_EXPECTED_CALL(Transport_ConnectionStatusCallBack(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_COMMUNICATION_ERROR, transport_cb_ctx));
 
+    // removeExpiredTwinRequests
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
+
+    // act
+    // Tearing the connection down ends this pass over the pending telemetry: the remaining
+    // messages are examined again on the next DoWork.
+    IoTHubTransport_MQTT_Common_DoWork(handle);
+
+    //assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(size_t, 1, g_send_complete_count);
+    ASSERT_ARE_EQUAL(void_ptr, (void*)&message1.entry, (void*)g_send_complete_entries[0]);
+
+    // the second message times out on the following DoWork
+    g_send_complete_count = 0;
+    memset(g_send_complete_entries, 0, sizeof(g_send_complete_entries));
+
+    IoTHubTransport_MQTT_Common_DoWork(handle);
+
+    ASSERT_ARE_EQUAL(size_t, 1, g_send_complete_count);
+    ASSERT_ARE_EQUAL(void_ptr, (void*)&message2.entry, (void*)g_send_complete_entries[0]);
+    ASSERT_ARE_EQUAL(int, (int)IOTHUB_CLIENT_CONFIRMATION_MESSAGE_TIMEOUT, (int)g_send_complete_results[0]);
+
+    //cleanup
+    IoTHubTransport_MQTT_Common_Destroy(handle);
+}
+
+// Regression test: while a telemetry message is being timed out, the MQTT client pump that
+// DisconnectFromClient() runs can deliver the PUBACK of another pending message, which removes
+// and frees that message's entry re-entrantly.  The timeout walk must not keep using the list
+// pointer it saved beforehand, and no message may be completed twice.  Tearing the connection
+// down must also end the rest of the DoWork pass, so a third pending message is not completed
+// over an already closed connection.
+TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_message_timeout_with_puback_during_disconnect_succeeds)
+{
+    CONNECT_ACK connack = { true, CONNECTION_ACCEPTED };
+    SUBSCRIBE_ACK suback;
+    QOS_VALUE QosValue[] = { DELIVER_AT_LEAST_ONCE };
+    IOTHUB_MESSAGE_LIST message1;
+    IOTHUB_MESSAGE_LIST message2;
+    IOTHUB_MESSAGE_LIST message3;
+    TRANSPORT_LL_HANDLE handle;
+
+    // arrange
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
+    SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME, NULL);
+
+    handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport, &transport_cb_info, transport_cb_ctx);
+
+    IoTHubTransport_MQTT_Common_DoWork(handle);
+    g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_CONNACK, &connack, g_callbackCtx);
+    IoTHubTransport_MQTT_Common_DoWork(handle);
+
+    suback.packetId = 1234;
+    suback.qosCount = 1;
+    suback.qosReturn = QosValue;
+    g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_SUBSCRIBE_ACK, &suback, g_callbackCtx);
+    IoTHubTransport_MQTT_Common_DoWork(handle);
+
+    memset(&message1, 0, sizeof(IOTHUB_MESSAGE_LIST));
+    message1.messageHandle = TEST_IOTHUB_MSG_STRING;
+    DList_InsertTailList(config.waitingToSend, &(message1.entry));
+
+    memset(&message2, 0, sizeof(IOTHUB_MESSAGE_LIST));
+    message2.messageHandle = TEST_IOTHUB_MSG_STRING;
+    DList_InsertTailList(config.waitingToSend, &(message2.entry));
+
+    memset(&message3, 0, sizeof(IOTHUB_MESSAGE_LIST));
+    message3.messageHandle = TEST_IOTHUB_MSG_STRING;
+    DList_InsertTailList(config.waitingToSend, &(message3.entry));
+
+    // All three messages are published and are now waiting for their PUBACK.
+    IoTHubTransport_MQTT_Common_DoWork(handle);
+
+    // Age the messages up to, but not past, the telemetry timeout.
+    for (int i = 1; i < (MSG_TIMEOUT_VALUE_MS) / (RESEND_TIMEOUT_VALUE_MS); i++)
+    {
+        g_current_ms += RESEND_TIMEOUT_VALUE_MS;
+        IoTHubTransport_MQTT_Common_DoWork(handle);
+    }
+    g_current_ms += RESEND_TIMEOUT_VALUE_MS;
+
+    g_send_complete_count = 0;
+    memset(g_send_complete_entries, 0, sizeof(g_send_complete_entries));
+
+    // The second message is PUBACK'd by the broker just as the first one times out, so the ack
+    // is read by the MQTT client pump inside DisconnectFromClient().
+    g_puback_packet_id_on_dowork = SECOND_TELEMETRY_PACKET_ID;
+
+    // act
+    IoTHubTransport_MQTT_Common_DoWork(handle);
+
+    // assert
+    ASSERT_ARE_EQUAL(size_t, 2, g_send_complete_count, "each message must be completed exactly once");
+    ASSERT_ARE_EQUAL(void_ptr, (void*)&message1.entry, (void*)g_send_complete_entries[0]);
+    ASSERT_ARE_EQUAL(int, (int)IOTHUB_CLIENT_CONFIRMATION_MESSAGE_TIMEOUT, (int)g_send_complete_results[0]);
+    ASSERT_ARE_EQUAL(void_ptr, (void*)&message2.entry, (void*)g_send_complete_entries[1]);
+    ASSERT_ARE_EQUAL(int, (int)IOTHUB_CLIENT_CONFIRMATION_OK, (int)g_send_complete_results[1]);
+    ASSERT_ARE_EQUAL(int, 0, (int)g_puback_packet_id_on_dowork, "the simulated PUBACK must have been delivered");
+
+    // the third message is not touched again until the next DoWork
+    g_send_complete_count = 0;
+    memset(g_send_complete_entries, 0, sizeof(g_send_complete_entries));
+
+    IoTHubTransport_MQTT_Common_DoWork(handle);
+
+    ASSERT_ARE_EQUAL(size_t, 1, g_send_complete_count);
+    ASSERT_ARE_EQUAL(void_ptr, (void*)&message3.entry, (void*)g_send_complete_entries[0]);
+    ASSERT_ARE_EQUAL(int, (int)IOTHUB_CLIENT_CONFIRMATION_MESSAGE_TIMEOUT, (int)g_send_complete_results[0]);
+
+    //cleanup
+    IoTHubTransport_MQTT_Common_Destroy(handle);
+}
+
+// Regression test: a message being resent whose payload can no longer be retrieved must be
+// completed with an error AND have its MQTT_MESSAGE_DETAILS_LIST freed.
+TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_resend_payload_retrieval_fails_frees_entry)
+{
+    CONNECT_ACK connack = { true, CONNECTION_ACCEPTED };
+    SUBSCRIBE_ACK suback;
+    QOS_VALUE QosValue[] = { DELIVER_AT_LEAST_ONCE };
+    IOTHUB_MESSAGE_LIST message1;
+    TRANSPORT_LL_HANDLE handle;
+
+    // arrange
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
+    SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME, NULL);
+
+    handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport, &transport_cb_info, transport_cb_ctx);
+
+    IoTHubTransport_MQTT_Common_DoWork(handle);
+    g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_CONNACK, &connack, g_callbackCtx);
+    IoTHubTransport_MQTT_Common_DoWork(handle);
+
+    suback.packetId = 1234;
+    suback.qosCount = 1;
+    suback.qosReturn = QosValue;
+    g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_SUBSCRIBE_ACK, &suback, g_callbackCtx);
+    IoTHubTransport_MQTT_Common_DoWork(handle);
+
+    memset(&message1, 0, sizeof(IOTHUB_MESSAGE_LIST));
+    message1.messageHandle = TEST_IOTHUB_MSG_STRING;
+    DList_InsertTailList(config.waitingToSend, &(message1.entry));
+
+    // The message is published and is now waiting for its PUBACK.
+    IoTHubTransport_MQTT_Common_DoWork(handle);
+
+    // Age it past the resend timeout but not past the telemetry timeout.
+    g_current_ms += RESEND_TIMEOUT_VALUE_MS;
+    umock_c_reset_all_calls();
+    g_send_complete_count = 0;
+    memset(g_send_complete_entries, 0, sizeof(g_send_complete_entries));
+
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_SasToken_Expiry(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
+    // the resend cannot retrieve the payload any more
+    STRICT_EXPECTED_CALL(IoTHubMessage_GetContentType(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(IoTHubMessage_GetString(IGNORED_ARG)).SetReturn(NULL);
+    STRICT_EXPECTED_CALL(DList_RemoveEntryList(IGNORED_ARG));
     STRICT_EXPECTED_CALL(DList_InitializeListHead(IGNORED_ARG));
     STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_ARG, IGNORED_ARG));
-    STRICT_EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_ARG, IOTHUB_CLIENT_CONFIRMATION_MESSAGE_TIMEOUT, transport_cb_ctx));
-    STRICT_EXPECTED_CALL(DList_RemoveEntryList(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(Transport_SendComplete_Callback(IGNORED_ARG, IOTHUB_CLIENT_CONFIRMATION_ERROR, transport_cb_ctx));
+    // the MQTT_MESSAGE_DETAILS_LIST must be released, not leaked
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
-    STRICT_EXPECTED_CALL(Transport_ConnectionStatusCallBack(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_COMMUNICATION_ERROR, transport_cb_ctx));
-
+    STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
     // removeExpiredTwinRequests
     STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_ARG, IGNORED_ARG));
 
@@ -5145,6 +5350,9 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_2_message_timeout_succeeds)
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(size_t, 1, g_send_complete_count);
+    ASSERT_ARE_EQUAL(void_ptr, (void*)&message1.entry, (void*)g_send_complete_entries[0]);
+    ASSERT_ARE_EQUAL(int, (int)IOTHUB_CLIENT_CONFIRMATION_ERROR, (int)g_send_complete_results[0]);
 
     //cleanup
     IoTHubTransport_MQTT_Common_Destroy(handle);
