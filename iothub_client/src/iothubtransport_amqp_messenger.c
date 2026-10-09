@@ -91,6 +91,10 @@ typedef struct MESSAGE_SEND_CONTEXT_TAG
     // Handle to the async operation instance returned
     // by messagesender_send_async().
     ASYNC_OPERATION_HANDLE async_operation;
+    /** @brief True while messagesender_send_async() runs for this message. */
+    bool in_send_async;
+    /** @brief Send completed inside messagesender_send_async(); cleanup deferred to its caller. */
+    bool completed_in_send_async;
 } MESSAGE_SEND_CONTEXT;
 
 static void destroy_message_send_context(MESSAGE_SEND_CONTEXT* context)
@@ -885,11 +889,22 @@ static void on_process_message_callback(MESSAGE_QUEUE_HANDLE message_queue, MQ_M
     else
     {
         MESSAGE_SEND_CONTEXT* message_context = (MESSAGE_SEND_CONTEXT*)context;
+        ASYNC_OPERATION_HANDLE async_operation;
+
         message_context->mq_message_id = message_id;
         message_context->on_process_message_completed_callback = on_process_message_completed_callback;
-        message_context->async_operation = messagesender_send_async(message_context->messenger->message_sender, (MESSAGE_HANDLE)message, on_send_complete_callback, context, 0);
 
-        if (message_context->async_operation == NULL)
+        message_context->in_send_async = true;
+        async_operation = messagesender_send_async(message_context->messenger->message_sender, (MESSAGE_HANDLE)message, on_send_complete_callback, context, 0);
+        message_context->in_send_async = false;
+
+        if (message_context->completed_in_send_async)
+        {
+            // Completion was already reported; the returned operation handle is no longer valid.
+            message_destroy((MESSAGE_HANDLE)message);
+            destroy_message_send_context(message_context);
+        }
+        else if ((message_context->async_operation = async_operation) == NULL)
         {
             LogError("Failed sending AMQP message");
             on_process_message_completed_callback(message_queue, message_id, MESSAGE_QUEUE_ERROR, NULL);
@@ -950,8 +965,15 @@ static void on_message_processing_completed_callback(MQ_MESSAGE_HANDLE message, 
             msg_ctx->on_send_complete_callback(messenger_send_result, messenger_send_reason, msg_ctx->user_context);
         }
 
-        message_destroy((MESSAGE_HANDLE)message);
-        destroy_message_send_context(msg_ctx);
+        if (msg_ctx->in_send_async)
+        {
+            msg_ctx->completed_in_send_async = true;
+        }
+        else
+        {
+            message_destroy((MESSAGE_HANDLE)message);
+            destroy_message_send_context(msg_ctx);
+        }
     }
 }
 
