@@ -2478,14 +2478,17 @@ static bool RetrieveMessagePayload(IOTHUB_MESSAGE_HANDLE messageHandle, const un
 
 //
 // ProcessPendingTelemetryMessages examines each telemetry message the device/module has sent that hasn't yet been PUBACK'd.
+// Returns true if it tore the connection down, in which case the caller must not run any further
+// publish or telemetry work in this DoWork pass.
 // For each message, it might:
 // * Ignore it, if its timeout has not yet been reached.
 // * Attempt to retry PUBLISH the message, if has remaining retries left.
 // * Stop attempting to send the message.  This will result in tearing down the underlying MQTT/TCP connection because it indicates
 //   something is wrong.
 //
-static void ProcessPendingTelemetryMessages(PMQTTTRANSPORT_HANDLE_DATA transport_data)
+static bool ProcessPendingTelemetryMessages(PMQTTTRANSPORT_HANDLE_DATA transport_data)
 {
+    bool disconnected = false;
     PDLIST_ENTRY current_entry = transport_data->telemetry_waitingForAck.Flink;
     tickcounter_ms_t current_ms;
     (void)tickcounter_get_current_ms(transport_data->msgTickCounter, &current_ms);
@@ -2499,8 +2502,9 @@ static void ProcessPendingTelemetryMessages(PMQTTTRANSPORT_HANDLE_DATA transport
         {
             uint16_t timed_out_packet_id = msg_detail_entry->packet_id;
 
-            // Unlink and free the entry before invoking any callback, so that it cannot be
-            // observed or completed a second time from a re-entrant call.
+            // Unlink the entry before invoking any callback: that is what stops a re-entrant
+            // caller finding it on the list and completing it a second time. It is freed once
+            // the completion callback, which reads its iotHubMessageEntry, has returned.
             (void)DList_RemoveEntryList(current_entry);
             notifyApplicationOfSendMessageComplete(msg_detail_entry->iotHubMessageEntry, transport_data, IOTHUB_CLIENT_CONFIRMATION_MESSAGE_TIMEOUT);
             free(msg_detail_entry);
@@ -2512,7 +2516,8 @@ static void ProcessPendingTelemetryMessages(PMQTTTRANSPORT_HANDLE_DATA transport
             // DisconnectFromClient() pumps the MQTT client while draining the DISCONNECT, so PUBACKs
             // for the still pending messages can be delivered re-entrantly, which removes and frees
             // their entries. nextListEntry may therefore already be freed: stop walking the list.
-            // The entries that survived are re-examined on the next call to this function.
+            // The entries that survived are re-examined on the next DoWork.
+            disconnected = true;
             break;
         }
         else if (((current_ms - msg_detail_entry->msgPublishTime) / 1000) > RESEND_TIMEOUT_VALUE_MIN)
@@ -2547,6 +2552,8 @@ static void ProcessPendingTelemetryMessages(PMQTTTRANSPORT_HANDLE_DATA transport
         }
         current_entry = nextListEntry.Flink;
     }
+
+    return disconnected;
 }
 
 //
@@ -3649,6 +3656,8 @@ void IoTHubTransport_MQTT_Common_DoWork(TRANSPORT_LL_HANDLE handle)
     PMQTTTRANSPORT_HANDLE_DATA transport_data = (PMQTTTRANSPORT_HANDLE_DATA)handle;
     if (transport_data != NULL)
     {
+        bool disconnected = false;
+
         if (UpdateMqttConnectionStateIfNeeded(transport_data) == 0)
         {
             if (transport_data->mqttClientStatus == MQTT_CLIENT_STATUS_PENDING_CLOSE)
@@ -3669,14 +3678,21 @@ void IoTHubTransport_MQTT_Common_DoWork(TRANSPORT_LL_HANDLE handle)
                 // The duplicated call here and down below is intentional at this point.
                 // This is the simplest way to guarantee compliance with MQTT v3.1.1 [MQTT-4.6.0-1].
                 // ** QoS1 Publish messages must be sent in packet id order on reconnect
-                ProcessPendingTelemetryMessages(transport_data);
-                ProcessPublishStateDoWork(transport_data);
+                disconnected = ProcessPendingTelemetryMessages(transport_data);
+                if (!disconnected)
+                {
+                    ProcessPublishStateDoWork(transport_data);
+                }
             }
             mqtt_client_dowork(transport_data->mqttClient);
         }
 
-        // Check the ack messages timeouts
-        ProcessPendingTelemetryMessages(transport_data);
+        // Check the ack messages timeouts, unless the connection was just torn down: the
+        // remaining messages are examined on the next DoWork, once reconnection is settled.
+        if (!disconnected)
+        {
+            (void)ProcessPendingTelemetryMessages(transport_data);
+        }
         removeExpiredTwinRequests(transport_data);
     }
 }
