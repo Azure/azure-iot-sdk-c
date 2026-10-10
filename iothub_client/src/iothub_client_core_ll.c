@@ -3151,33 +3151,41 @@ static IOTHUB_CLIENT_RESULT create_event_handler_callback(IOTHUB_CLIENT_CORE_LL_
 
             if ((inputName == NULL) || (event_callback->inputName != NULL))
             {
-                event_callback->callbackAsync = callbackSync;
-                event_callback->callbackAsyncEx = callbackSyncEx;
-
-                free(event_callback->userContextCallbackEx);
-                event_callback->userContextCallbackEx = NULL;
-
-                if (userContextCallbackEx == NULL)
-                {
-                    event_callback->userContextCallback = userContextCallback;
-                }
+                // The update of an existing (already listed) callback must be transactional: every
+                // operation that can fail runs before the callback is mutated, so a failure leaves
+                // the listed callback usable and never frees an object the list still points to.
+                void* new_userContextCallbackEx = NULL;
 
                 if ((userContextCallbackEx != NULL) &&
-                    (NULL == (event_callback->userContextCallbackEx = malloc(userContextCallbackExLength))))
+                    (NULL == (new_userContextCallbackEx = malloc(userContextCallbackExLength))))
                 {
                     LogError("Unable to allocate userContextCallback");
-                    delete_event(event_callback);
+                    if (add_to_list == true)
+                    {
+                        delete_event(event_callback);
+                    }
                     result = IOTHUB_CLIENT_ERROR;
                 }
                 else if ((add_to_list == true) && (NULL == singlylinkedlist_add(handleData->event_callbacks, event_callback)))
                 {
                     LogError("Unable to add eventCallback to list");
+                    event_callback->userContextCallbackEx = new_userContextCallbackEx;
                     delete_event(event_callback);
                     result = IOTHUB_CLIENT_ERROR;
                 }
                 else
                 {
-                    if (userContextCallbackEx != NULL)
+                    event_callback->callbackAsync = callbackSync;
+                    event_callback->callbackAsyncEx = callbackSyncEx;
+
+                    free(event_callback->userContextCallbackEx);
+                    event_callback->userContextCallbackEx = new_userContextCallbackEx;
+
+                    if (userContextCallbackEx == NULL)
+                    {
+                        event_callback->userContextCallback = userContextCallback;
+                    }
+                    else
                     {
                         memcpy(event_callback->userContextCallbackEx, userContextCallbackEx, userContextCallbackExLength);
                     }
@@ -3186,7 +3194,10 @@ static IOTHUB_CLIENT_RESULT create_event_handler_callback(IOTHUB_CLIENT_CORE_LL_
             }
             else
             {
-                delete_event(event_callback);
+                if (add_to_list == true)
+                {
+                    delete_event(event_callback);
+                }
                 result = IOTHUB_CLIENT_ERROR;
             }
         }
@@ -3215,7 +3226,8 @@ static IOTHUB_CLIENT_RESULT remove_event_unsubscribe_if_needed(IOTHUB_CLIENT_COR
         }
         else
         {
-            delete_event(event_callback);
+            // The list node must be removed before the callback is freed, otherwise a failure to
+            // remove it leaves the list holding a dangling pointer.
             if (singlylinkedlist_remove(handleData->event_callbacks, item_handle) != 0)
             {
                 LogError("singlylinkedlist_remove failed");
@@ -3223,6 +3235,8 @@ static IOTHUB_CLIENT_RESULT remove_event_unsubscribe_if_needed(IOTHUB_CLIENT_COR
             }
             else
             {
+                delete_event(event_callback);
+
                 if (singlylinkedlist_get_head_item(handleData->event_callbacks) == NULL)
                 {
                     handleData->IoTHubTransport_Unsubscribe_InputQueue(handleData->deviceHandle);
