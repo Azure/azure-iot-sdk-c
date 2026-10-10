@@ -5767,8 +5767,8 @@ static void setup_IoTHubClientCore_LL_SetInputMessageCallback_first_invocation_m
     STRICT_EXPECTED_CALL(singlylinkedlist_find(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
     STRICT_EXPECTED_CALL(STRING_construct(IGNORED_ARG)).IgnoreArgument_psz();
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
     STRICT_EXPECTED_CALL(singlylinkedlist_add(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
     STRICT_EXPECTED_CALL(FAKE_IotHubTransport_Subscribe_InputQueue(IGNORED_ARG));
 }
 
@@ -5788,8 +5788,8 @@ static void setup_IoTHubClientCore_LL_SetInputMessageCallback_after_first_invoca
     {
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
         STRICT_EXPECTED_CALL(STRING_construct(IGNORED_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
         STRICT_EXPECTED_CALL(singlylinkedlist_add(IGNORED_ARG, IGNORED_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
     }
     else
     {
@@ -5804,10 +5804,10 @@ static void setup_IoTHubClientCore_LL_SetInputMessageCallback_callback_null(bool
     STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_ARG));
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).SetReturn(input_name);
     STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_remove(IGNORED_ARG, IGNORED_ARG));
     STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
-    STRICT_EXPECTED_CALL(singlylinkedlist_remove(IGNORED_ARG, IGNORED_ARG));
     STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_ARG));
 
     if (unsubscribeExpected)
@@ -5938,10 +5938,10 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetInputMessageCallback_three_items_and_unregi
     STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_ARG));
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).SetReturn(TEST_INPUT_NAME2);
     STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_remove(IGNORED_ARG, IGNORED_ARG));
     STRICT_EXPECTED_CALL(STRING_delete(IGNORED_ARG));
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
-    STRICT_EXPECTED_CALL(singlylinkedlist_remove(IGNORED_ARG, IGNORED_ARG));
     STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_ARG));
 
 
@@ -6003,6 +6003,94 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetInputMessageCallback_unregister_not_found_f
     IoTHubClientCore_LL_Destroy(handle);
 }
 
+TEST_FUNCTION(IoTHubClientCore_LL_SetInputMessageCallback_unregister_when_list_remove_fails_does_not_free_listed_callback)
+{
+    //arrange
+    IOTHUB_CLIENT_CORE_LL_HANDLE handle = IoTHubClientCore_LL_Create(&TEST_CONFIG);
+    char expected_calls[1024];
+    char actual_calls[1024];
+    umock_c_reset_all_calls();
+
+    IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_SetInputMessageCallback(handle, TEST_INPUT_NAME, messageCallback, (void*)1);
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+    umock_c_reset_all_calls();
+
+    STRICT_EXPECTED_CALL(singlylinkedlist_find(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).SetReturn(TEST_INPUT_NAME);
+    STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_remove(IGNORED_ARG, IGNORED_ARG)).SetReturn(1);
+    // The callback must not be freed, since it is still referenced by the list.
+
+    ///act
+    result = IoTHubClientCore_LL_SetInputMessageCallback(handle, TEST_INPUT_NAME, NULL, NULL);
+
+    (void)snprintf(expected_calls, sizeof(expected_calls), "%s", umock_c_get_expected_calls());
+    (void)snprintf(actual_calls, sizeof(actual_calls), "%s", umock_c_get_actual_calls());
+
+    // Destroy walks the list and frees every entry; it must not free the callback a second time.
+    IoTHubClientCore_LL_Destroy(handle);
+
+    ///assert
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, result);
+    ASSERT_ARE_EQUAL(char_ptr, expected_calls, actual_calls);
+}
+
+TEST_FUNCTION(IoTHubClientCore_LL_SetInputMessageCallbackEx_when_context_alloc_fails_on_update_keeps_listed_callback)
+{
+    //arrange
+    IOTHUB_CLIENT_CORE_LL_HANDLE handle = IoTHubClientCore_LL_Create(&TEST_CONFIG);
+    int first_context = 1;
+    int second_context = 2;
+    char expected_calls[1024];
+    char actual_calls[1024];
+    char expected_dispatch_calls[1024];
+    char actual_dispatch_calls[1024];
+    umock_c_reset_all_calls();
+
+    IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_SetInputMessageCallbackEx(handle, TEST_INPUT_NAME, messageCallbackEx, &first_context, sizeof(first_context));
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+    umock_c_reset_all_calls();
+
+    STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_find(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).SetReturn(TEST_INPUT_NAME);
+    STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG)).SetReturn(NULL);
+    // The callback already in the list must be left intact, not freed.
+
+    ///act
+    result = IoTHubClientCore_LL_SetInputMessageCallbackEx(handle, TEST_INPUT_NAME, messageCallbackEx, &second_context, sizeof(second_context));
+
+    (void)snprintf(expected_calls, sizeof(expected_calls), "%s", umock_c_get_expected_calls());
+    (void)snprintf(actual_calls, sizeof(actual_calls), "%s", umock_c_get_actual_calls());
+
+    // The listed callback is still live and still dispatches messages.
+    umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(IoTHubMessage_GetInputName(IGNORED_ARG)).SetReturn(TEST_INPUT_NAME);
+    STRICT_EXPECTED_CALL(singlylinkedlist_find(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_ARG)).SetReturn(TEST_INPUT_NAME);
+    STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_ARG));
+    STRICT_EXPECTED_CALL(get_time(NULL));
+    STRICT_EXPECTED_CALL(messageCallbackEx(TEST_MESSAGE_HANDLE, IGNORED_ARG));
+
+    bool dispatched = g_transport_cb_info.msg_input_cb(TEST_MESSAGE_HANDLE, handle);
+
+    (void)snprintf(expected_dispatch_calls, sizeof(expected_dispatch_calls), "%s", umock_c_get_expected_calls());
+    (void)snprintf(actual_dispatch_calls, sizeof(actual_dispatch_calls), "%s", umock_c_get_actual_calls());
+
+    // Destroy walks the list and frees every entry; it must not free the callback a second time.
+    IoTHubClientCore_LL_Destroy(handle);
+
+    ///assert
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, result);
+    ASSERT_ARE_EQUAL(char_ptr, expected_calls, actual_calls);
+    ASSERT_IS_TRUE(dispatched);
+    ASSERT_ARE_EQUAL(char_ptr, expected_dispatch_calls, actual_dispatch_calls);
+}
+
 TEST_FUNCTION(IoTHubClientCore_LL_SetInputMessageCallback_one_item_fail)
 {
     //arrange
@@ -6052,15 +6140,20 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetInputMessageCallback_one_item_fail)
     STRICT_EXPECTED_CALL(singlylinkedlist_find(IGNORED_ARG, IGNORED_ARG, IGNORED_ARG));
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_ARG));
     STRICT_EXPECTED_CALL(STRING_construct(IGNORED_ARG)).IgnoreArgument_psz();
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
     STRICT_EXPECTED_CALL(singlylinkedlist_add(IGNORED_ARG, IGNORED_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_ARG));
     STRICT_EXPECTED_CALL(FAKE_IotHubTransport_Subscribe_InputQueue(IGNORED_ARG));
 
     umock_c_negative_tests_snapshot();
 
     count = umock_c_negative_tests_call_count();
-    for (size_t index = 5; index < count; index++)
+    for (size_t index = 4; index < count; index++)
     {
+        if (!umock_c_negative_tests_can_call_fail(index))
+        {
+            continue;
+        }
+
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
 
