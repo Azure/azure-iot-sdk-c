@@ -141,6 +141,10 @@ typedef struct TWIN_OPERATION_CONTEXT_TAG
         } get_twin;
     } cb;
     time_t time_sent;
+    /** @brief True while the AMQP messenger owns a send using this context as its completion context. */
+    bool send_in_progress;
+    /** @brief Operation finished (timeout/response) while send_in_progress; destroyed on send completion. */
+    bool pending_destroy;
 } TWIN_OPERATION_CONTEXT;
 
 
@@ -439,6 +443,22 @@ static void destroy_twin_operation_context(TWIN_OPERATION_CONTEXT* op_ctx)
 {
     free(op_ctx->correlation_id);
     free(op_ctx);
+}
+
+/**
+ * @brief Destroys @p op_ctx, or defers it to on_amqp_send_complete_callback if its send is still in progress.
+ * @param op_ctx Context already removed from the operations list.
+ */
+static void release_twin_operation_context(TWIN_OPERATION_CONTEXT* op_ctx)
+{
+    if (op_ctx->send_in_progress)
+    {
+        op_ctx->pending_destroy = true;
+    }
+    else
+    {
+        destroy_twin_operation_context(op_ctx);
+    }
 }
 
 static int add_twin_operation_context_to_queue(TWIN_OPERATION_CONTEXT* twin_op_ctx)
@@ -891,7 +911,14 @@ static void on_amqp_send_complete_callback(AMQP_MESSENGER_SEND_RESULT result, AM
     {
         TWIN_OPERATION_CONTEXT* twin_op_ctx = (TWIN_OPERATION_CONTEXT*)context;
 
-        if (result != AMQP_MESSENGER_SEND_RESULT_SUCCESS)
+        twin_op_ctx->send_in_progress = false;
+
+        if (twin_op_ctx->pending_destroy)
+        {
+            // Operation already completed and was removed from the operations list.
+            destroy_twin_operation_context(twin_op_ctx);
+        }
+        else if (result != AMQP_MESSENGER_SEND_RESULT_SUCCESS)
         {
             if (twin_op_ctx->type == TWIN_OPERATION_TYPE_PATCH)
             {
@@ -964,14 +991,20 @@ static int send_twin_operation_request(TWIN_MESSENGER_INSTANCE* twin_msgr, TWIN_
             LogError("Failed setting TWIN operation sent time (%s, %s, %s)", twin_msgr->device_id, MU_ENUM_TO_STRING(TWIN_OPERATION_TYPE, op_ctx->type), op_ctx->correlation_id);
             result = MU_FAILURE;
         }
-        else if (amqp_messenger_send_async(twin_msgr->amqp_msgr, amqp_message, on_amqp_send_complete_callback, (void*)op_ctx) != 0)
-        {
-            LogError("Failed sending request message for (%s, %s, %s)", twin_msgr->device_id, MU_ENUM_TO_STRING(TWIN_OPERATION_TYPE, op_ctx->type), op_ctx->correlation_id);
-            result = MU_FAILURE;
-        }
         else
         {
-            result = RESULT_OK;
+            op_ctx->send_in_progress = true;
+
+            if (amqp_messenger_send_async(twin_msgr->amqp_msgr, amqp_message, on_amqp_send_complete_callback, (void*)op_ctx) != 0)
+            {
+                LogError("Failed sending request message for (%s, %s, %s)", twin_msgr->device_id, MU_ENUM_TO_STRING(TWIN_OPERATION_TYPE, op_ctx->type), op_ctx->correlation_id);
+                op_ctx->send_in_progress = false;
+                result = MU_FAILURE;
+            }
+            else
+            {
+                result = RESULT_OK;
+            }
         }
 
         message_destroy(amqp_message);
@@ -1084,7 +1117,7 @@ static bool remove_expired_twin_operation_request(const void* item, const void* 
                 twin_op_ctx->cb.get_twin.callback(TWIN_UPDATE_TYPE_COMPLETE, NULL, 0, twin_op_ctx->cb.get_twin.context);
             }
 
-            destroy_twin_operation_context(twin_op_ctx);
+            release_twin_operation_context(twin_op_ctx);
         }
     }
 
@@ -1528,8 +1561,6 @@ static AMQP_MESSENGER_DISPOSITION_RESULT on_amqp_message_received_callback(MESSA
                                 }
                             }
                         }
-
-                        destroy_twin_operation_context(twin_op_ctx);
                     }
 
                     if (singlylinkedlist_remove(twin_msgr->operations, list_item) != 0)
@@ -1538,6 +1569,10 @@ static AMQP_MESSENGER_DISPOSITION_RESULT on_amqp_message_received_callback(MESSA
                             twin_msgr->device_id, correlation_id);
 
                         update_state(twin_msgr, TWIN_MESSENGER_STATE_ERROR);
+                    }
+                    else if (twin_op_ctx != NULL)
+                    {
+                        release_twin_operation_context(twin_op_ctx);
                     }
                 }
 
