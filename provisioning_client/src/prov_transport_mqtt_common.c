@@ -316,7 +316,7 @@ static MQTT_CLIENT_ACK_OPTION mqtt_notification_callback(MQTT_MESSAGE_HANDLE han
         {
             // Extract the registration status
             size_t status_pos = strlen(MQTT_TOPIC_STATUS_PREFIX);
-            if (memcmp(MQTT_TOPIC_STATUS_PREFIX, topic_resp, status_pos) == 0)
+            if (strncmp(MQTT_TOPIC_STATUS_PREFIX, topic_resp, status_pos) == 0)
             {
                 // If the status code is >= 429 then this is a transient error
                 long status_code = atol(topic_resp + status_pos);
