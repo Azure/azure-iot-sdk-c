@@ -1498,9 +1498,10 @@ static void on_listen_link_detach_received(void* context, ERROR_HANDLE error)
 /**
  * @brief Single attempt of IoTHubTest_ListenForEvent.
  *
+ * @param deadline Time by which this attempt, including any DETACH wait, returns.
  * @param[out] receiverError Set to true when the message receiver failed; the caller may retry.
  */
-static IOTHUB_TEST_CLIENT_RESULT listen_for_event_once(IOTHUB_TEST_HANDLE devhubHandle, pfIoTHubMessageCallback msgCallback, size_t partitionCount, void* context, time_t receiveTimeRangeStart, double maxDrainTimeInSeconds, bool* receiverError)
+static IOTHUB_TEST_CLIENT_RESULT listen_for_event_once(IOTHUB_TEST_HANDLE devhubHandle, pfIoTHubMessageCallback msgCallback, size_t partitionCount, void* context, time_t receiveTimeRangeStart, time_t deadline, bool* receiverError)
 {
     IOTHUB_TEST_CLIENT_RESULT result = 0;
     *receiverError = false;
@@ -1698,12 +1699,8 @@ static IOTHUB_TEST_CLIENT_RESULT listen_for_event_once(IOTHUB_TEST_HANDLE devhub
                                         }
                                         else
                                         {
-                                            time_t nowExecutionTime;
-                                            time_t beginExecutionTime = time(NULL);
-                                            double timespan;
-
                                             LogInfo("IoTHubTest_ListenForEvent: Waiting for message_received.");
-                                            while ((nowExecutionTime = time(NULL)), timespan = difftime(nowExecutionTime, beginExecutionTime), timespan < maxDrainTimeInSeconds)
+                                            while (difftime(deadline, time(NULL)) > 0)
                                             {
                                                 connection_dowork(connection);
                                                 ThreadAPI_Sleep(10);
@@ -1720,7 +1717,9 @@ static IOTHUB_TEST_CLIENT_RESULT listen_for_event_once(IOTHUB_TEST_HANDLE devhub
 
                                                 // The DETACH carrying the reason may arrive after the refused ATTACH.
                                                 time_t detachWaitBegin = time(NULL);
-                                                while (!detach_received && difftime(time(NULL), detachWaitBegin) < LISTEN_FOR_EVENT_DETACH_WAIT_SECONDS)
+                                                while (!detach_received &&
+                                                    (difftime(time(NULL), detachWaitBegin) < LISTEN_FOR_EVENT_DETACH_WAIT_SECONDS) &&
+                                                    (difftime(deadline, time(NULL)) > 0))
                                                 {
                                                     connection_dowork(connection);
                                                     ThreadAPI_Sleep(10);
@@ -1770,24 +1769,29 @@ static IOTHUB_TEST_CLIENT_RESULT listen_for_event_once(IOTHUB_TEST_HANDLE devhub
 IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEvent(IOTHUB_TEST_HANDLE devhubHandle, pfIoTHubMessageCallback msgCallback, size_t partitionCount, void* context, time_t receiveTimeRangeStart, double maxDrainTimeInSeconds)
 {
     IOTHUB_TEST_CLIENT_RESULT result;
-    time_t beginTime = time(NULL);
+    time_t deadline = time(NULL) + (time_t)maxDrainTimeInSeconds;
     int attempt = 1;
 
     while (true)
     {
         bool receiverError;
-        double remainingSeconds = maxDrainTimeInSeconds - difftime(time(NULL), beginTime);
 
-        result = listen_for_event_once(devhubHandle, msgCallback, partitionCount, context, receiveTimeRangeStart, remainingSeconds, &receiverError);
+        result = listen_for_event_once(devhubHandle, msgCallback, partitionCount, context, receiveTimeRangeStart, deadline, &receiverError);
 
         if ((result == IOTHUB_TEST_CLIENT_OK) || !receiverError || (attempt >= LISTEN_FOR_EVENT_MAX_ATTEMPTS))
         {
             break;
         }
 
+        if (difftime(deadline, time(NULL)) <= (LISTEN_FOR_EVENT_RETRY_DELAY_MS / 1000.0))
+        {
+            LogError("No time left to retry listening for events.");
+            break;
+        }
+
         ThreadAPI_Sleep(LISTEN_FOR_EVENT_RETRY_DELAY_MS);
 
-        if (difftime(time(NULL), beginTime) >= maxDrainTimeInSeconds)
+        if (difftime(deadline, time(NULL)) <= 0)
         {
             LogError("No time left to retry listening for events.");
             break;
