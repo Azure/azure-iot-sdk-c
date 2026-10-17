@@ -1767,7 +1767,7 @@ static IOTHUB_TEST_CLIENT_RESULT listen_for_event_once(IOTHUB_TEST_HANDLE devhub
 IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEvent(IOTHUB_TEST_HANDLE devhubHandle, pfIoTHubMessageCallback msgCallback, size_t partitionCount, void* context, time_t receiveTimeRangeStart, double maxDrainTimeInSeconds)
 {
     IOTHUB_TEST_CLIENT_RESULT result;
-    time_t deadline = time(NULL) + (time_t)maxDrainTimeInSeconds;
+    time_t deadline = time(NULL) + (time_t)ceil(maxDrainTimeInSeconds);
     int attempt = 1;
 
     while (true)
