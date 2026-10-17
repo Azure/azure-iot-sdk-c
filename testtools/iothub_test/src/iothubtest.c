@@ -1469,9 +1469,7 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEventAsync(IOTHUB_TEST_HANDLE devh
 }
 
 
-/** @brief Attempts made by IoTHubTest_ListenForEvent when the receiver fails, e.g. the service refuses the link. */
-#define LISTEN_FOR_EVENT_MAX_ATTEMPTS 5
-/** @brief Delay between those attempts. */
+/** @brief Delay between IoTHubTest_ListenForEvent attempts after the receiver fails, e.g. the service refuses the link. */
 #define LISTEN_FOR_EVENT_RETRY_DELAY_MS 2000
 /** @brief Time allowed for the service DETACH, which carries the error, to arrive after the receiver fails. */
 #define LISTEN_FOR_EVENT_DETACH_WAIT_SECONDS 2.0
@@ -1778,7 +1776,7 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEvent(IOTHUB_TEST_HANDLE devhubHan
 
         result = listen_for_event_once(devhubHandle, msgCallback, partitionCount, context, receiveTimeRangeStart, deadline, &receiverError);
 
-        if ((result == IOTHUB_TEST_CLIENT_OK) || !receiverError || (attempt >= LISTEN_FOR_EVENT_MAX_ATTEMPTS))
+        if ((result == IOTHUB_TEST_CLIENT_OK) || !receiverError)
         {
             break;
         }
@@ -1798,7 +1796,7 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEvent(IOTHUB_TEST_HANDLE devhubHan
         }
 
         attempt++;
-        LogInfo("IoTHubTest_ListenForEvent: retrying after receiver failure (attempt %d of %d).", attempt, LISTEN_FOR_EVENT_MAX_ATTEMPTS);
+        LogInfo("IoTHubTest_ListenForEvent: retrying after receiver failure (attempt %d).", attempt);
     }
 
     return result;
