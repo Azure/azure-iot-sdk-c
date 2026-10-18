@@ -1668,7 +1668,8 @@ static IOTHUB_TEST_CLIENT_RESULT listen_for_event_once(IOTHUB_TEST_HANDLE devhub
                                     else
                                     {
                                         bool detach_received = false;
-                                        if (link_subscribe_on_link_detach_received(link, on_listen_link_detach_received, &detach_received) == NULL)
+                                        ON_LINK_DETACH_EVENT_SUBSCRIPTION_HANDLE detach_subscription = link_subscribe_on_link_detach_received(link, on_listen_link_detach_received, &detach_received);
+                                        if (detach_subscription == NULL)
                                         {
                                             LogError("Failed subscribing to link detach events; a detach error will not be logged.");
                                         }
@@ -1736,6 +1737,12 @@ static IOTHUB_TEST_CLIENT_RESULT listen_for_event_once(IOTHUB_TEST_HANDLE devhub
                                                 result = IOTHUB_TEST_CLIENT_OK;
                                             }
                                             messagereceiver_destroy(message_receiver);
+                                        }
+
+                                        // detach_received goes out of scope here.
+                                        if (detach_subscription != NULL)
+                                        {
+                                            link_unsubscribe_on_link_detach_received(detach_subscription);
                                         }
 
                                         amqpvalue_destroy(target);
