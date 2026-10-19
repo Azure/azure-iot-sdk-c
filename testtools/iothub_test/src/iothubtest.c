@@ -1469,9 +1469,40 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEventAsync(IOTHUB_TEST_HANDLE devh
 }
 
 
-IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEvent(IOTHUB_TEST_HANDLE devhubHandle, pfIoTHubMessageCallback msgCallback, size_t partitionCount, void* context, time_t receiveTimeRangeStart, double maxDrainTimeInSeconds)
+/** @brief Delay between IoTHubTest_ListenForEvent attempts after the receiver fails, e.g. the service refuses the link. */
+#define LISTEN_FOR_EVENT_RETRY_DELAY_MS 2000
+/** @brief Time allowed for the service DETACH, which carries the error, to arrive after the receiver fails. */
+#define LISTEN_FOR_EVENT_DETACH_WAIT_SECONDS 2.0
+
+/** @brief Logs the error sent by the service when it detaches the receiver link. */
+static void on_listen_link_detach_received(void* context, ERROR_HANDLE error)
+{
+    const char* condition = NULL;
+    const char* description = NULL;
+
+    *(bool*)context = true;
+
+    if (error != NULL)
+    {
+        (void)error_get_condition(error, &condition);
+        (void)error_get_description(error, &description);
+    }
+
+    LogError("Receiver link detached by the service: condition=%s, description=%s",
+        (condition == NULL) ? "NULL" : condition,
+        (description == NULL) ? "NULL" : description);
+}
+
+/**
+ * @brief Single attempt of IoTHubTest_ListenForEvent.
+ *
+ * @param deadline Time by which this attempt, including any DETACH wait, returns.
+ * @param[out] receiverError Set to true when the message receiver failed; the caller may retry.
+ */
+static IOTHUB_TEST_CLIENT_RESULT listen_for_event_once(IOTHUB_TEST_HANDLE devhubHandle, pfIoTHubMessageCallback msgCallback, size_t partitionCount, void* context, time_t receiveTimeRangeStart, time_t deadline, bool* receiverError)
 {
     IOTHUB_TEST_CLIENT_RESULT result = 0;
+    *receiverError = false;
     if (devhubHandle == NULL || msgCallback == NULL)
     {
         LogError("Invalid parameter given in IoTHubTest_ListenForEvent DevhubHandle: 0x%p\r\nMessage Callback: 0x%p.", devhubHandle, msgCallback);
@@ -1636,6 +1667,13 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEvent(IOTHUB_TEST_HANDLE devhubHan
                                     }
                                     else
                                     {
+                                        bool detach_received = false;
+                                        ON_LINK_DETACH_EVENT_SUBSCRIPTION_HANDLE detach_subscription = link_subscribe_on_link_detach_received(link, on_listen_link_detach_received, &detach_received);
+                                        if (detach_subscription == NULL)
+                                        {
+                                            LogError("Failed subscribing to link detach events; a detach error will not be logged.");
+                                        }
+
                                         LogInfo("IoTHubTest_ListenForEvent: Create message receiver.");
                                         MESSAGE_RECEIVER_CONTEXT message_receiver_context;
                                         message_receiver_context.msgCallback = msgCallback;
@@ -1660,12 +1698,8 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEvent(IOTHUB_TEST_HANDLE devhubHan
                                         }
                                         else
                                         {
-                                            time_t nowExecutionTime;
-                                            time_t beginExecutionTime = time(NULL);
-                                            double timespan;
-
                                             LogInfo("IoTHubTest_ListenForEvent: Waiting for message_received.");
-                                            while ((nowExecutionTime = time(NULL)), timespan = difftime(nowExecutionTime, beginExecutionTime), timespan < maxDrainTimeInSeconds)
+                                            while (difftime(deadline, time(NULL)) > 0)
                                             {
                                                 connection_dowork(connection);
                                                 ThreadAPI_Sleep(10);
@@ -1679,6 +1713,18 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEvent(IOTHUB_TEST_HANDLE devhubHan
                                             if (message_receiver_state_changed_context.state == MESSAGE_RECEIVER_STATE_ERROR)
                                             {
                                                 LogError("message receiver entered an error state.");
+
+                                                // The DETACH carrying the reason may arrive after the refused ATTACH.
+                                                time_t detachWaitBegin = time(NULL);
+                                                while (!detach_received &&
+                                                    (difftime(time(NULL), detachWaitBegin) < LISTEN_FOR_EVENT_DETACH_WAIT_SECONDS) &&
+                                                    (difftime(deadline, time(NULL)) > 0))
+                                                {
+                                                    connection_dowork(connection);
+                                                    ThreadAPI_Sleep(10);
+                                                }
+
+                                                *receiverError = true;
                                                 result = IOTHUB_TEST_CLIENT_ERROR;
                                             }
                                             else if (!message_receiver_context.message_received)
@@ -1691,6 +1737,12 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEvent(IOTHUB_TEST_HANDLE devhubHan
                                                 result = IOTHUB_TEST_CLIENT_OK;
                                             }
                                             messagereceiver_destroy(message_receiver);
+                                        }
+
+                                        // detach_received goes out of scope here.
+                                        if (detach_subscription != NULL)
+                                        {
+                                            link_unsubscribe_on_link_detach_received(detach_subscription);
                                         }
 
                                         amqpvalue_destroy(target);
@@ -1714,6 +1766,44 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEvent(IOTHUB_TEST_HANDLE devhubHan
 
             free(eh_hostname);
         }
+    }
+
+    return result;
+}
+
+IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEvent(IOTHUB_TEST_HANDLE devhubHandle, pfIoTHubMessageCallback msgCallback, size_t partitionCount, void* context, time_t receiveTimeRangeStart, double maxDrainTimeInSeconds)
+{
+    IOTHUB_TEST_CLIENT_RESULT result;
+    time_t deadline = time(NULL) + (time_t)ceil(maxDrainTimeInSeconds);
+    int attempt = 1;
+
+    while (true)
+    {
+        bool receiverError;
+
+        result = listen_for_event_once(devhubHandle, msgCallback, partitionCount, context, receiveTimeRangeStart, deadline, &receiverError);
+
+        if ((result == IOTHUB_TEST_CLIENT_OK) || !receiverError)
+        {
+            break;
+        }
+
+        if (difftime(deadline, time(NULL)) <= (LISTEN_FOR_EVENT_RETRY_DELAY_MS / 1000.0))
+        {
+            LogError("No time left to retry listening for events.");
+            break;
+        }
+
+        ThreadAPI_Sleep(LISTEN_FOR_EVENT_RETRY_DELAY_MS);
+
+        if (difftime(deadline, time(NULL)) <= 0)
+        {
+            LogError("No time left to retry listening for events.");
+            break;
+        }
+
+        attempt++;
+        LogInfo("IoTHubTest_ListenForEvent: retrying after receiver failure (attempt %d).", attempt);
     }
 
     return result;
