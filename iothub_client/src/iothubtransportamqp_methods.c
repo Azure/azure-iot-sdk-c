@@ -192,7 +192,10 @@ void iothubtransportamqp_methods_destroy(IOTHUBTRANSPORT_AMQP_METHODS_HANDLE iot
 
 static void call_methods_unsubscribed_if_needed(IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle)
 {
-    if (amqp_methods_handle->receiver_link_disconnected && amqp_methods_handle->sender_link_disconnected)
+    // Either link going down leaves device methods inoperative, so both links must be torn down and
+    // re-established. Waiting for both to detach would leave methods permanently broken if the service
+    // detaches only one of them.
+    if (amqp_methods_handle->receiver_link_disconnected || amqp_methods_handle->sender_link_disconnected)
     {
         amqp_methods_handle->receiver_link_disconnected = false;
         amqp_methods_handle->sender_link_disconnected = false;
