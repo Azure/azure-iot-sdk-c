@@ -265,5 +265,5 @@ var searchData=
   ['iothubmoduleclient_5fsubscribetocommands_278',['IoTHubModuleClient_SubscribeToCommands',['../iothub__module__client_8h.html#a12dce673fd050e7f6f249dd95fcb3016',1,'iothub_module_client.h']]],
   ['iothubname_279',['iotHubName',['../struct_i_o_t_h_u_b___c_l_i_e_n_t___c_o_n_f_i_g.html#a1093f0adcc81c72036b8c51871a21e5b',1,'IOTHUB_CLIENT_CONFIG']]],
   ['iothubsuffix_280',['iotHubSuffix',['../struct_i_o_t_h_u_b___c_l_i_e_n_t___c_o_n_f_i_g.html#afce8f7054c21e99eb5233aa989cb7f74',1,'IOTHUB_CLIENT_CONFIG']]],
-  ['iot_20hub_20c_20sdk_20options_281',['IoT Hub C SDK Options',['../md__home_runner_work_azure_iot_sdk_c_azure_iot_sdk_c_doc__iothub_sdk_options.html',1,'']]]
+  ['iot_20hub_20c_20sdk_20options_281',['IoT Hub C SDK Options',['../md__home_runner_work_iot_sdks_internals_iot_sdks_internals_sdk_doc__iothub_sdk_options.html',1,'']]]
 ];

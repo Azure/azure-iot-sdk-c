@@ -65,7 +65,7 @@ $(function() {
 <div class="title">Azure IoT C SDKs and Libraries </div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="md__home_runner_work_azure_iot_sdk_c_azure_iot_sdk_c_readme"></a> <a href="https://azure-iot-sdks.visualstudio.com/azure-iot-sdks/_build/latest?definitionId=85"><img src="https://azure-iot-sdks.visualstudio.com/azure-iot-sdks/_apis/build/status/c/integrate-into-repo-C" alt="Build Status" class="inline"/></a></p>
+<div class="textblock"><p><a class="anchor" id="md__home_runner_work_iot_sdks_internals_iot_sdks_internals_sdk_readme"></a> <a href="https://azure-iot-sdks.visualstudio.com/azure-iot-sdks/_build/latest?definitionId=85"><img src="https://azure-iot-sdks.visualstudio.com/azure-iot-sdks/_apis/build/status/c/integrate-into-repo-C" alt="Build Status" class="inline"/></a></p>
 <h1><a class="anchor" id="autotoc_md1"></a>
 Introduction</h1>
 <p>The Azure IOT Hub Device SDK allows applications written in C99 or later or C++ to communicate easily with <a href="https://azure.microsoft.com/services/iot-hub/">Azure IoT Hub</a>, <a href="https://docs.microsoft.com/azure/iot-central/">Azure IoT Central</a> and to <a href="https://docs.microsoft.com/azure/iot-dps/">Azure IoT Device Provisioning</a>. This repo includes the source code for the libraries, setup instructions, and samples demonstrating use scenarios.</p>
@@ -191,12 +191,12 @@ Device Client SDK</h2>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">Retry policies   </td><td class="markdownTableBodyNone">:heavy_check_mark:*   </td><td class="markdownTableBodyNone">:heavy_check_mark:*   </td><td class="markdownTableBodyNone">:heavy_check_mark:*   </td><td class="markdownTableBodyNone">:heavy_check_mark:*   </td><td class="markdownTableBodyNone">:heavy_multiplication_x:   </td><td class="markdownTableBodyNone">Retry policy for unsuccessful device-to-cloud messages have two options: no try, exponential backoff with jitter (default). *Custom retry policy is in progress.    </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone">Devices multiplexing over single connection   </td><td class="markdownTableBodyNone">:heavy_minus_sign:   </td><td class="markdownTableBodyNone">:heavy_minus_sign:   </td><td class="markdownTableBodyNone">:heavy_check_mark:   </td><td class="markdownTableBodyNone">:heavy_check_mark:   </td><td class="markdownTableBodyNone">:heavy_check_mark:   </td><td class="markdownTableBodyNone">There are more limitations to multiplexing than captured in this table. See <a class="el" href="md__home_runner_work_azure_iot_sdk_c_azure_iot_sdk_c_doc_multiplexing_limitations.html">this document</a> for more information.    </td></tr>
+<td class="markdownTableBodyNone">Devices multiplexing over single connection   </td><td class="markdownTableBodyNone">:heavy_minus_sign:   </td><td class="markdownTableBodyNone">:heavy_minus_sign:   </td><td class="markdownTableBodyNone">:heavy_check_mark:   </td><td class="markdownTableBodyNone">:heavy_check_mark:   </td><td class="markdownTableBodyNone">:heavy_check_mark:   </td><td class="markdownTableBodyNone">There are more limitations to multiplexing than captured in this table. See <a class="el" href="md__home_runner_work_iot_sdks_internals_iot_sdks_internals_sdk_doc_multiplexing_limitations.html">this document</a> for more information.    </td></tr>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">Connection Pooling - Specifying number of connections   </td><td class="markdownTableBodyNone">:heavy_minus_sign:   </td><td class="markdownTableBodyNone">:heavy_minus_sign:   </td><td class="markdownTableBodyNone">:heavy_multiplication_x:   </td><td class="markdownTableBodyNone">:heavy_multiplication_x:   </td><td class="markdownTableBodyNone">:heavy_multiplication_x:   </td><td class="markdownTableBodyNone"></td></tr>
 </table>
 <p>| <a href="https://docs.microsoft.com/azure/iot-pnp/overview-iot-plug-and-play">Azure IoT Plug and Play Support</a> | :heavy_check_mark: | :heavy_check_mark: | :heavy_minus_sign: | :heavy_minus_sign: | :heavy_minus_sign: |Ability to build Azure IoT Plug and Play devices.| |</p>
-<p>This SDK also contains options you can set and platform specific features. You can find detail list in this <a class="el" href="md__home_runner_work_azure_iot_sdk_c_azure_iot_sdk_c_doc__iothub_sdk_options.html">document</a>.</p>
+<p>This SDK also contains options you can set and platform specific features. You can find detail list in this <a class="el" href="md__home_runner_work_iot_sdks_internals_iot_sdks_internals_sdk_doc__iothub_sdk_options.html">document</a>.</p>
 <h2><a class="anchor" id="autotoc_md13"></a>
 Provisioning Client SDK</h2>
 <p>This repository contains <a href="./provisioning_client">provisioning client SDK</a> for the <a href="https://docs.microsoft.com/azure/iot-dps/">Device Provisioning Service</a>.</p>
@@ -242,7 +242,7 @@ Deprecation Notes</h1>
 <p>See also <a href="#deprecated-folders">Deprecated Folders</a> below for other relevant notes.</p>
 <h1><a class="anchor" id="autotoc_md17"></a>
 Contribution, Feedback and Issues</h1>
-<p>If you encounter any bugs, have suggestions for new features or if you would like to become an active contributor to this project please follow the instructions provided in the /home/runner/work/azure-iot-sdk-c/azure-iot-sdk-c/.github/CONTRIBUTING.md "contribution guidelines".</p>
+<p>If you encounter any bugs, have suggestions for new features or if you would like to become an active contributor to this project please follow the instructions provided in the /home/runner/work/iot-sdks-internals/iot-sdks-internals/sdk/.github/CONTRIBUTING.md "contribution guidelines".</p>
 <h1><a class="anchor" id="autotoc_md18"></a>
 Support</h1>
 <ul>
@@ -255,7 +255,7 @@ Support</h1>
 Read More</h1>
 <ul>
 <li><a href="https://docs.microsoft.com/azure/iot-hub/">Azure IoT Hub documentation</a></li>
-<li><a class="el" href="md__home_runner_work_azure_iot_sdk_c_azure_iot_sdk_c_doc_devbox_setup.html">Prepare your development environment to use the Azure IoT device SDK for C</a></li>
+<li><a class="el" href="md__home_runner_work_iot_sdks_internals_iot_sdks_internals_sdk_doc_devbox_setup.html">Prepare your development environment to use the Azure IoT device SDK for C</a></li>
 <li><a href="https://aka.ms/howtocreateazureiothub">Setup IoT Hub</a></li>
 <li><a href="https://azure.microsoft.com/documentation/articles/iot-hub-device-sdk-c-intro/">Azure IoT device SDK for C tutorial</a></li>
 <li><a href="https://github.com/Azure/azure-c-shared-utility/blob/master/devdoc/porting_guide.md">How to port the C libraries to other OS platforms</a></li>
@@ -315,9 +315,7 @@ LTS Schedule</h3>
 <tr class="markdownTableHead">
 <th class="markdownTableHeadCenter">Package   </th><th class="markdownTableHeadCenter">GitHub Branch   </th><th class="markdownTableHeadCenter">LTS Tag   </th><th class="markdownTableHeadCenter">LTS Start Date   </th><th class="markdownTableHeadCenter">Maintenance End Date    </th></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyCenter">vcpkg: 2025-03-31   </td><td class="markdownTableBodyCenter">lts_03_2025   </td><td class="markdownTableBodyCenter">LTS_03_2025   </td><td class="markdownTableBodyCenter">2025-03-31   </td><td class="markdownTableBodyCenter">2026-03-31    </td></tr>
-<tr class="markdownTableRowEven">
-<td class="markdownTableBodyCenter">vcpkg: 2024-08-12   </td><td class="markdownTableBodyCenter">lts_08_2024   </td><td class="markdownTableBodyCenter">LTS_08_2024   </td><td class="markdownTableBodyCenter">2024-08-12   </td><td class="markdownTableBodyCenter">2025-08-12   </td></tr>
+<td class="markdownTableBodyCenter">vcpkg: 2026-10-19   </td><td class="markdownTableBodyCenter">lts_10_2026   </td><td class="markdownTableBodyCenter">LTS_10_2026   </td><td class="markdownTableBodyCenter">2026-10-19   </td><td class="markdownTableBodyCenter">2027-10-19   </td></tr>
 </table>
 <p>'Maintenance End Date' refers to the end of life support of the related version.</p>
 <h2><a class="anchor" id="autotoc_md26"></a>

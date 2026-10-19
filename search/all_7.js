@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['prepare_20your_20development_20environment_285',['Prepare your development environment',['../md__home_runner_work_azure_iot_sdk_c_azure_iot_sdk_c_doc_devbox_setup.html',1,'']]],
+  ['prepare_20your_20development_20environment_285',['Prepare your development environment',['../md__home_runner_work_iot_sdks_internals_iot_sdks_internals_sdk_doc_devbox_setup.html',1,'']]],
   ['payload_286',['payload',['../struct_i_o_t_h_u_b___c_l_i_e_n_t___c_o_m_m_a_n_d___r_e_q_u_e_s_t.html#a2326d8965d913f5e6a80574395d1b6ed',1,'IOTHUB_CLIENT_COMMAND_REQUEST::payload()'],['../struct_i_o_t_h_u_b___c_l_i_e_n_t___c_o_m_m_a_n_d___r_e_s_p_o_n_s_e.html#a6ce2450ba3fa8594b11f06e9cfd9abfd',1,'IOTHUB_CLIENT_COMMAND_RESPONSE::payload()']]],
   ['payloadlength_287',['payloadLength',['../struct_i_o_t_h_u_b___c_l_i_e_n_t___c_o_m_m_a_n_d___r_e_q_u_e_s_t.html#a5aa98a5dc3f8131cd91ea7e675720697',1,'IOTHUB_CLIENT_COMMAND_REQUEST::payloadLength()'],['../struct_i_o_t_h_u_b___c_l_i_e_n_t___c_o_m_m_a_n_d___r_e_s_p_o_n_s_e.html#a0b1e1b00916e687410076f4a0cf89bb7',1,'IOTHUB_CLIENT_COMMAND_RESPONSE::payloadLength()']]],
   ['propertytype_288',['propertyType',['../struct_i_o_t_h_u_b___c_l_i_e_n_t___p_r_o_p_e_r_t_y___p_a_r_s_e_d.html#ac595bae3d629e47310e8b492203895d4',1,'IOTHUB_CLIENT_PROPERTY_PARSED']]],

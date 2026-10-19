@@ -86,8 +86,8 @@ Process</h1>
 <p>Once this is complete, the script will acquire all of the prerequisites. These are:</p><ul>
 <li>The toolchain that will build binaries for our target platform. You should substitute the toolchain for your target platform</li>
 <li><a href="https://github.com/azure/azure-iot-sdk-c">The IoT SDK source code</a>.</li>
-<li><a href="https://www.openssl.org/">OpenSSL</a> - version 1.0.2o used</li>
-<li><a href="https://curl.haxx.se/">cURL</a> - version 7.60.0 used</li>
+<li><a href="https://www.openssl.org/">OpenSSL</a> - version 3.0.15 used</li>
+<li><a href="https://curl.se/">cURL</a> - version 8.20.0 used</li>
 <li><a href="https://en.wikipedia.org/wiki/Util-linux">util-linux</a> for uuid functionality.</li>
 </ul>
 <p>With all of those in place we can build OpenSSL, cURL, and libuuid. These will be installed into the toolchain as each is built and will be used in the final step when the SDK itself is built.</p>
@@ -97,6 +97,9 @@ Major Tasks</h1>
 <p>Once this is done, then the environment variable set below will need to be modified to reflect the location and directory names of that toolchain. Once these have been updated then the Docker script should be ready to run.</p>
 <h1><a class="anchor" id="autotoc_md93"></a>
 The Docker Script</h1>
+<blockquote class="doxtable">
+<p><b>Note:</b> This inline example is illustrative and targets MIPS32. For a complete, maintained, and tested cross-compile - including the OpenSSL 3 and CMake/FindCURL adjustments current toolchains need - use the Dockerfiles under <a href="../samples/dockerbuilds">samples/dockerbuilds</a> (for example <code>MIPS32/Dockerfile</code>), which are kept up to date with the SDK. </p>
+</blockquote>
 <p>Here is an example script: </p><div class="fragment"><div class="line"><span class="preprocessor"># Start with the latest version of the Ubuntu Docker container</span></div>
 <div class="line">FROM ubuntu:latest</div>
 <div class="line"> </div>
@@ -125,12 +128,12 @@ The Docker Script</h1>
 <div class="line">RUN tar -xvf openwrt-sdk-21.02.3-ramips-mt7620_gcc-8.4.0_musl.Linux-x86_64.tar.xz</div>
 <div class="line"> </div>
 <div class="line"><span class="preprocessor"># OpenSSL</span></div>
-<div class="line">RUN wget https:<span class="comment">//www.openssl.org/source/openssl-1.0.2o.tar.gz</span></div>
-<div class="line">RUN tar -xvf openssl-1.0.2o.tar.gz</div>
+<div class="line">RUN wget https:<span class="comment">//www.openssl.org/source/openssl-3.0.15.tar.gz</span></div>
+<div class="line">RUN tar -xvf openssl-3.0.15.tar.gz</div>
 <div class="line"> </div>
 <div class="line"><span class="preprocessor"># Curl</span></div>
-<div class="line">RUN wget http:<span class="comment">//curl.haxx.se/download/curl-7.60.0.tar.gz</span></div>
-<div class="line">RUN tar -xvf curl-7.60.0.tar.gz</div>
+<div class="line">RUN wget https:<span class="comment">//curl.se/download/curl-8.20.0.tar.gz</span></div>
+<div class="line">RUN tar -xvf curl-8.20.0.tar.gz</div>
 <div class="line"> </div>
 <div class="line"><span class="preprocessor"># Linux utilities for libuuid</span></div>
 <div class="line">RUN wget https:<span class="comment">//mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.32/util-linux-2.32-rc2.tar.gz</span></div>
@@ -144,7 +147,7 @@ The Docker Script</h1>
 <div class="line">ENV STAGING_DIR=${WORK_ROOT}/${TOOLCHAIN_MIPS}/staging_dir</div>
 <div class="line">ENV TOOLCHAIN_SYSROOT=${WORK_ROOT}/${TOOLCHAIN_MIPS}/staging_dir/toolchain-mipsel_24kc_gcc-8.4.0_musl</div>
 <div class="line">ENV TOOLCHAIN_BIN=${TOOLCHAIN_SYSROOT}/bin</div>
-<div class="line">ENV OPENSSL_ROOT_DIR=${WORK_ROOT}/openssl-OpenSSL_1_1_1f</div>
+<div class="line">ENV OPENSSL_ROOT_DIR=${WORK_ROOT}/openssl-3.0.15</div>
 <div class="line">ENV TOOLCHAIN_PREFIX=${WORK_ROOT}/MIPS</div>
 <div class="line">ENV AR=${TOOLCHAIN_BIN}/${TOOLCHAIN_PLATFORM}-ar</div>
 <div class="line">ENV CC=${TOOLCHAIN_BIN}/${TOOLCHAIN_PLATFORM}-gcc</div>
@@ -155,15 +158,18 @@ The Docker Script</h1>
 <div class="line">ENV LIBS=<span class="stringliteral">&quot;-lssl -lcrypto -ldl -lpthread&quot;</span></div>
 <div class="line"> </div>
 <div class="line"><span class="preprocessor"># Build OpenSSL</span></div>
-<div class="line">WORKDIR openssl-1.0.2o</div>
-<div class="line">RUN ./Configure linux-generic32 --prefix=${TOOLCHAIN_PREFIX} --openssldir=${OPENSSL_ROOT_DIR} no-tests shared </div>
+<div class="line">WORKDIR openssl-3.0.15</div>
+<div class="line">RUN ./Configure linux-generic32 --prefix=${TOOLCHAIN_PREFIX} --openssldir=${OPENSSL_ROOT_DIR} no-tests shared -latomic</div>
 <div class="line">RUN make</div>
 <div class="line">RUN make install_sw</div>
 <div class="line">WORKDIR ..</div>
 <div class="line"> </div>
 <div class="line"><span class="preprocessor"># Build curl</span></div>
-<div class="line">WORKDIR curl-7.60.0</div>
-<div class="line">RUN ./configure --with-sysroot=${TOOLCHAIN_SYSROOT} --prefix=${TOOLCHAIN_PREFIX} --target=${TOOLCHAIN_PLATFORM} --with-ssl=${TOOLCHAIN_PREFIX} --with-zlib --host=${TOOLCHAIN_PLATFORM} </div>
+<div class="line"><span class="preprocessor"># --with-openssl replaces the old --with-ssl (renamed in curl 7.77.0); --without-libpsl</span></div>
+<div class="line"><span class="preprocessor"># avoids curl 8.x&#39;s hard libpsl dependency; --disable-ntlm excludes curl&#39;s MD4/DES-based</span></div>
+<div class="line"><span class="preprocessor"># NTLM code (curl_ntlm_core.c), flagged as banned hash algorithm MD4 / banned cipher DES.</span></div>
+<div class="line">WORKDIR curl-8.20.0</div>
+<div class="line">RUN ./configure --with-sysroot=${TOOLCHAIN_SYSROOT} --prefix=${TOOLCHAIN_PREFIX} --target=${TOOLCHAIN_PLATFORM} --with-openssl=${TOOLCHAIN_PREFIX} --with-zlib --host=${TOOLCHAIN_PLATFORM} --without-libpsl --disable-ntlm</div>
 <div class="line">RUN make</div>
 <div class="line">RUN make install</div>
 <div class="line">WORKDIR ..</div>
