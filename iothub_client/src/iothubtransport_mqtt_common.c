@@ -2241,7 +2241,8 @@ static void DisconnectFromClient(PMQTTTRANSPORT_HANDLE_DATA transport_data)
             setSavedTlsOptions(transport_data, options);
         }
         // Ensure the disconnect message is sent
-        if (transport_data->mqttClientStatus == MQTT_CLIENT_STATUS_CONNECTED)
+        if (transport_data->mqttClientStatus == MQTT_CLIENT_STATUS_CONNECTED ||
+            transport_data->mqttClientStatus == MQTT_CLIENT_STATUS_CONNECTING)
         {
             transport_data->disconnect_recv_flag = 0;
             (void)mqtt_client_disconnect(transport_data->mqttClient, processDisconnectCallback, &transport_data->disconnect_recv_flag);
