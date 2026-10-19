@@ -30,6 +30,8 @@ extern void device_method_e2e_method_call_with_empty_json_object_sas(IOTHUB_CLIE
 
 extern void device_method_e2e_method_call_with_null_sas(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol);
 
+extern void device_method_e2e_method_call_after_resubscribe_sas(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol);
+
 extern void device_method_e2e_method_call_with_embedded_double_quote_sas(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol);
 
 extern void device_method_e2e_method_call_with_embedded_single_quote_sas(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol);

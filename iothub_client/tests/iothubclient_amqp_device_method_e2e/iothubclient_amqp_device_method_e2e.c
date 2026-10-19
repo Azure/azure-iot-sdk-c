@@ -59,6 +59,11 @@ BEGIN_TEST_SUITE(iothubclient_amqp_device_method_e2e)
         device_method_e2e_method_call_with_embedded_single_quote_sas(AMQP_Protocol);
     }
 
+    TEST_FUNCTION(IotHub_AMQP_Method_Call_After_Resubscribe_sas)
+    {
+        device_method_e2e_method_call_after_resubscribe_sas(AMQP_Protocol);
+    }
+
 #ifndef __APPLE__
     TEST_FUNCTION(IotHub_AMQP_Method_Call_With_String_x509)
     {
