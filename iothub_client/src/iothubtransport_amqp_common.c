@@ -1801,7 +1801,6 @@ int IoTHubTransport_AMQP_Common_Subscribe_DeviceMethod(IOTHUB_DEVICE_HANDLE hand
     {
         AMQP_TRANSPORT_DEVICE_INSTANCE* device_state = (AMQP_TRANSPORT_DEVICE_INSTANCE*)handle;
         device_state->subscribe_methods_needed = true;
-        device_state->subscribed_for_methods = false;
         result = 0;
     }
 
