@@ -63,6 +63,9 @@ TEST_FUNCTION(IoTHub_Init_succeed)
     //assert
     ASSERT_ARE_EQUAL(int, 0, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    IoTHub_Deinit();
 }
 
 TEST_FUNCTION(IoTHub_Init_fail)
@@ -81,6 +84,8 @@ TEST_FUNCTION(IoTHub_Init_fail)
 TEST_FUNCTION(IoTHub_Deinit_succeed)
 {
     //arrange
+    ASSERT_ARE_EQUAL(int, 0, IoTHub_Init());
+    umock_c_reset_all_calls();
     STRICT_EXPECTED_CALL(platform_deinit());
 
     //act
