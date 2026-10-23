@@ -19,6 +19,9 @@
 
 #define ENABLE_MOCKS
 #include "azure_c_shared_utility/platform.h"
+#include "umock_c/umock_c_prod.h"
+MOCKABLE_FUNCTION(, int, mock_logger_init);
+MOCKABLE_FUNCTION(, void, mock_logger_deinit);
 #undef ENABLE_MOCKS
 
 #include "iothub.h"
@@ -44,6 +47,8 @@ TEST_SUITE_INITIALIZE(suite_init)
 
     REGISTER_GLOBAL_MOCK_RETURN(platform_init, 0);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(platform_init, __LINE__);
+    REGISTER_GLOBAL_MOCK_RETURN(mock_logger_init, 0);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(mock_logger_init, __LINE__);
 }
 
 TEST_SUITE_CLEANUP(suite_cleanup)
@@ -52,9 +57,24 @@ TEST_SUITE_CLEANUP(suite_cleanup)
     TEST_MUTEX_DESTROY(test_serialize_mutex);
 }
 
+TEST_FUNCTION_INITIALIZE(method_init)
+{
+    if (TEST_MUTEX_ACQUIRE(test_serialize_mutex))
+    {
+        ASSERT_FAIL("Could not acquire test serialization mutex.");
+    }
+    umock_c_reset_all_calls();
+}
+
+TEST_FUNCTION_CLEANUP(method_cleanup)
+{
+    TEST_MUTEX_RELEASE(test_serialize_mutex);
+}
+
 TEST_FUNCTION(IoTHub_Init_succeed)
 {
     //arrange
+    STRICT_EXPECTED_CALL(mock_logger_init());
     STRICT_EXPECTED_CALL(platform_init());
 
     //act
@@ -68,10 +88,25 @@ TEST_FUNCTION(IoTHub_Init_succeed)
     IoTHub_Deinit();
 }
 
-TEST_FUNCTION(IoTHub_Init_fail)
+TEST_FUNCTION(IoTHub_Init_logger_init_fail_skips_platform_init)
 {
     //arrange
+    STRICT_EXPECTED_CALL(mock_logger_init()).SetReturn(__LINE__);
+
+    //act
+    int result = IoTHub_Init();
+
+    //assert
+    ASSERT_ARE_NOT_EQUAL(int, 0, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+}
+
+TEST_FUNCTION(IoTHub_Init_platform_init_fail_releases_logger)
+{
+    //arrange
+    STRICT_EXPECTED_CALL(mock_logger_init());
     STRICT_EXPECTED_CALL(platform_init()).SetReturn(__LINE__);
+    STRICT_EXPECTED_CALL(mock_logger_deinit());
 
     //act
     int result = IoTHub_Init();
@@ -87,7 +122,33 @@ TEST_FUNCTION(IoTHub_Deinit_succeed)
     ASSERT_ARE_EQUAL(int, 0, IoTHub_Init());
     umock_c_reset_all_calls();
     STRICT_EXPECTED_CALL(platform_deinit());
+    STRICT_EXPECTED_CALL(mock_logger_deinit());
 
+    //act
+    IoTHub_Deinit();
+
+    //assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+}
+
+TEST_FUNCTION(IoTHub_Deinit_after_failed_IoTHub_Init_does_nothing)
+{
+    //arrange
+    STRICT_EXPECTED_CALL(mock_logger_init());
+    STRICT_EXPECTED_CALL(platform_init()).SetReturn(__LINE__);
+    STRICT_EXPECTED_CALL(mock_logger_deinit());
+    ASSERT_ARE_NOT_EQUAL(int, 0, IoTHub_Init());
+    umock_c_reset_all_calls();
+
+    //act
+    IoTHub_Deinit();
+
+    //assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+}
+
+TEST_FUNCTION(IoTHub_Deinit_without_IoTHub_Init_does_nothing)
+{
     //act
     IoTHub_Deinit();
 
