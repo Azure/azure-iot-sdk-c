@@ -65,6 +65,28 @@ stages:
             exit 1
           }
 
+  # Warns (never fails) when a submodule is behind its upstream branch: the job ends as
+  # SucceededWithIssues and the run gets a "Dependency updates" summary.
+  - job: checkdependencyupdates
+    displayName: "Check Dependency Updates"
+    continueOnError: true
+    pool:
+      vmImage: 'ubuntu-24.04'
+    steps:
+    - checkout: self
+      submodules: false
+      persistCredentials: true  # keeps the GitHub token in git config for the compare API
+
+    - bash: |
+        header=$(git config --get-regexp '^http\..*\.extraheader$' 2>/dev/null | sed -n 's/.*basic[[:space:]]\+//p' | head -1)
+        if [ -n "$header" ]; then
+          GITHUB_TOKEN=$(printf '%s' "$header" | base64 -d | sed 's/^[^:]*://')
+          echo "##vso[task.setsecret]$GITHUB_TOKEN"
+          export GITHUB_TOKEN
+        fi
+        python3 build/check_dependency_updates.py "$(Build.SourcesDirectory)"
+      displayName: 'Check Dependency Updates'
+
 - stage: Setup
   dependsOn: [] # Run in parallel with Requirements to save ~3-5 min
   jobs:
