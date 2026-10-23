@@ -1,5 +1,9 @@
 # Updating submodules for the C SDK
 
+The C-canary pipeline's "Check Dependency Updates" job lists submodules pinned behind their upstream branch
+(warnings and a "Dependency updates" run summary; it never fails the build). Run it locally with
+`python3 build/check_dependency_updates.py` (set `GITHUB_TOKEN` to avoid API rate limits).
+
 ## Commands
 
 ```bash
