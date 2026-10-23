@@ -56,7 +56,8 @@ def github_repo(url):
 
 
 def compare(repo, base, head):
-    """(commits behind, pinned commit date) from the GitHub compare API, or (None, None)."""
+    """(commits the pin is behind, commits it is ahead, pinned commit date) from the GitHub compare API,
+    or None if the comparison failed."""
     req = urllib.request.Request(f"https://api.github.com/repos/{repo}/compare/{base}...{head}",
                                  headers={"Accept": "application/vnd.github+json"})
     token = os.environ.get("GITHUB_TOKEN")
@@ -65,10 +66,10 @@ def compare(repo, base, head):
     try:
         with urllib.request.urlopen(req, timeout=30) as r:
             data = json.load(r)
-        date = (data.get("merge_base_commit") or {}).get("commit", {}).get("committer", {}).get("date", "")
-        return data.get("ahead_by"), date[:10] or None
+        date = (data.get("base_commit") or {}).get("commit", {}).get("committer", {}).get("date", "")
+        return data["ahead_by"], data["behind_by"], date[:10] or None
     except Exception:
-        return None, None
+        return None
 
 
 def warn(msg):
@@ -77,37 +78,49 @@ def warn(msg):
 
 def main():
     root = sys.argv[1] if len(sys.argv) > 1 else "."
-    rows, outdated = [], 0
+    rows, outdated, unverified = [], 0, 0
     for path, url, branch in sorted(submodules(root)):
         pinned = pinned_sha(root, path)
+        repo = github_repo(url)
         try:
             ref, tip = upstream_tip(url, branch)
         except subprocess.CalledProcessError as e:
             warn(f"{path}: could not read {url}: {e.stderr.strip()}")
-            rows.append((path, url, "?", pinned, None, None, None, "unreachable"))
+            unverified += 1
+            rows.append((path, url, "?", pinned, None, None, None, "unverified: upstream unreachable"))
             continue
         if not pinned or not tip:
             warn(f"{path}: pinned or upstream commit not found ({url})")
-            rows.append((path, url, ref, pinned, tip, None, None, "unknown"))
+            unverified += 1
+            rows.append((path, url, ref, pinned, tip, None, None, "unverified: commit not found"))
             continue
         if pinned == tip:
             rows.append((path, url, ref, pinned, tip, 0, None, "up to date"))
             continue
-        repo = github_repo(url)
-        behind, date = compare(repo, pinned, tip) if repo else (None, None)
+        result = compare(repo, pinned, tip) if repo else None
+        if result is None:
+            warn(f"{path}: pinned {pinned[:9]} differs from {repo or url}@{ref} {tip[:9]}, but they could not be compared")
+            unverified += 1
+            rows.append((path, url, ref, pinned, tip, None, None, "unverified: comparison failed"))
+            continue
+        behind, ahead, date = result
         if behind == 0:
-            rows.append((path, url, ref, pinned, tip, 0, date, "ahead of upstream"))
+            rows.append((path, url, ref, pinned, tip, 0, date, f"ahead of upstream by {ahead}"))
             continue
         outdated += 1
-        detail = f"{behind} commits behind" if behind is not None else "behind"
         since = f", pinned commit from {date}" if date else ""
-        warn(f"{path} is {detail} {repo or url}@{ref} (pinned {pinned[:9]}{since}, latest {tip[:9]})")
-        rows.append((path, url, ref, pinned, tip, behind, date, "OUTDATED"))
+        diverged = f", diverged ({ahead} commits not upstream)" if ahead else ""
+        warn(f"{path} is {behind} commits behind {repo}@{ref} (pinned {pinned[:9]}{since}, latest {tip[:9]}){diverged}")
+        rows.append((path, url, ref, pinned, tip, behind, date, "OUTDATED" + (" (diverged)" if ahead else "")))
 
     lines = ["# Dependency updates", ""]
-    lines.append(f"**{outdated} of {len(rows)} dependencies are behind upstream.** Time to update them!"
-                 if outdated else f"All {len(rows)} dependencies are up to date.")
-    lines += ["", "| Submodule | Upstream | Pinned | Latest | Behind | Pinned date | Status |", "|---|---|---|---|---|---|---|"]
+    if outdated:
+        lines.append(f"**{outdated} of {len(rows)} dependencies are behind upstream.** Time to update them!")
+    if unverified:
+        lines.append(f"**{unverified} of {len(rows)} dependencies could not be verified.**")
+    if not outdated and not unverified:
+        lines.append(f"All {len(rows)} dependencies are up to date.")
+    lines += ["", "| Submodule | Upstream | Pinned | Latest | Behind | Pinned commit date | Status |", "|---|---|---|---|---|---|---|"]
     for path, url, ref, pinned, tip, behind, date, status in rows:
         lines.append(f"| {path} | {github_repo(url) or url}@{ref} | {(pinned or '-')[:9]} | {(tip or '-')[:9]} | "
                      f"{'-' if behind is None else behind} | {date or '-'} | {status} |")
@@ -119,8 +132,8 @@ def main():
         with os.fdopen(fd, "w", encoding="utf-8") as f:
             f.write(summary)
         print(f"##vso[task.uploadsummary]{name}")
-        if outdated:
-            print("##vso[task.complete result=SucceededWithIssues;]Outdated dependencies", flush=True)
+        if outdated or unverified:
+            print("##vso[task.complete result=SucceededWithIssues;]Outdated or unverified dependencies", flush=True)
     return 0
 
 
