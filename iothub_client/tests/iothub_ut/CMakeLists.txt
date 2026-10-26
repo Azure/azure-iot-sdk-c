@@ -12,7 +12,7 @@ generate_cppunittest_wrapper(${theseTestsName})
 include_directories(${SHARED_UTIL_REAL_TEST_FOLDER})
 
 set(${theseTestsName}_c_files
-    ../../src/iothub.c
+    iothub_mocked.c
 )
 
 set(${theseTestsName}_h_files

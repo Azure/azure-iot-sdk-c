@@ -39,6 +39,8 @@ endif()
 
 #this is CMakeLists for iothub_client tests folder
 add_unittest_directory(iothub_ut)
+add_unittest_directory(iothub_init_logging_int)
+add_unittest_directory(iothub_init_platform_fail_int)
 add_unittest_directory(iothub_client_authorization_ut)
 add_unittest_directory(iothub_transport_ll_private_ut)
 add_unittest_directory(iothubclient_ll_ut)
