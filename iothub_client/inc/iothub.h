@@ -25,6 +25,9 @@ extern "C"
     *           
     *           @c IoTHubClient_Init should be called once per process, not per-thread.
     *
+    *           It also initializes the SDK logging (c-logging); the application does not need to
+    *           call @c logger_init.
+    *
     * @return   int zero upon success, any other value upon failure.
     */
     MOCKABLE_FUNCTION(, int, IoTHub_Init);
@@ -40,6 +43,8 @@ extern "C"
     *
     * @warning
     *           Close all IoT Hub and provisioning client handles prior to invoking this.
+    *           The SDK must not log after this returns, unless the application also called @c logger_init.
+    *           Does nothing without a matching successful @c IoTHub_Init (e.g. after it failed).
     *
     */
     MOCKABLE_FUNCTION(, void, IoTHub_Deinit);
