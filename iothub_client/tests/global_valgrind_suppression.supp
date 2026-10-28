@@ -1701,34 +1701,6 @@
    fun:(below main)
 }
 # ------------------------------------------------------------------------
-# HTTPAPIEX one-time-init flag (`useGlobalInitialization`) - the main
-# thread sets it under no lock in HTTPAPIEX_Init() during IoTHub_Init,
-# while the transport worker thread later reads it (under locks) from
-# HTTPAPIEX_ExecuteRequest(). The init happens before any worker thread
-# is created, so the read-after-write is safe in practice but helgrind
-# cannot prove the happens-before through pthread_create.
-# ------------------------------------------------------------------------
-{
-   HTTPAPIEX_Init useGlobalInitialization one-time init flag (write)
-   Helgrind:Race
-   fun:HTTPAPIEX_Init
-}
-{
-   HTTPAPIEX_Init useGlobalInitialization one-time init flag (read)
-   Helgrind:Race
-   fun:HTTPAPIEX_ExecuteRequest
-}
-{
-   DRD HTTPAPIEX_Init useGlobalInitialization one-time init flag (write)
-   drd:ConflictingAccess
-   fun:HTTPAPIEX_Init
-}
-{
-   DRD HTTPAPIEX_Init useGlobalInitialization one-time init flag (read)
-   drd:ConflictingAccess
-   fun:HTTPAPIEX_ExecuteRequest
-}
-# ------------------------------------------------------------------------
 # glibc stdio buffer races on stdout between the test's main thread
 # (calling printf/puts from RecvMessage / RunTests) and the IoT Hub
 # message callback running on the transport worker thread (also calling
