@@ -226,8 +226,11 @@ macro(enable_address_sanitize)
         # MSVC x86 ASan runtime issue rather than an SDK bug. Restrict ASan
         # to x64 Debug to avoid spurious CI failures while keeping real
         # coverage on the 64-bit test matrix.
-        if((${CMAKE_BUILD_TYPE} STREQUAL "Debug")
-            AND (${MSVC_VERSION} GREATER_EQUAL 1930)
+        # Reference the variables by name rather than expanding them: with
+        # multi-config generators (e.g. Visual Studio) CMAKE_BUILD_TYPE is empty,
+        # and an empty expansion makes if() fail with "Unknown arguments specified".
+        if((CMAKE_BUILD_TYPE STREQUAL "Debug")
+            AND (MSVC_VERSION GREATER_EQUAL 1930)
             AND (CMAKE_SIZEOF_VOID_P EQUAL 8))
             set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /fsanitize=address")
             set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /fsanitize=address")
