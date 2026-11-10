@@ -111,21 +111,20 @@ stages:
           $PSVersionTable
           New-Item -ItemType Directory -Force -Path test_config | Out-Null
 
-          # The extension index can list an azure-iot release before its wheel is
-          # downloadable, so fall back to the newest stable release that installs.
+          # azure-iot 1.0.0 creates IoT hubs with local (SAS) auth disabled, which the
+          # E2E tests need, so install the newest stable 0.x release that installs (the
+          # index can list a release before its wheel is downloadable).
           # The test module keeps an already installed stable extension.
-          az extension add --name azure-iot --only-show-errors
-          if ($LASTEXITCODE -ne 0) {
-            $StableReleases = (az extension list-available --show-details --only-show-errors | ConvertFrom-Json).'azure-iot' |
-              Where-Object { $_.metadata.version -match '^\d+(\.\d+)+$' } |
-              Sort-Object { [version]$_.metadata.version } -Descending
-            foreach ($Release in $StableReleases) {
-              Write-Host "Installing Azure IoT extension $($Release.metadata.version)."
-              az extension add --name azure-iot --version $Release.metadata.version --only-show-errors
-              if ($LASTEXITCODE -eq 0) { break }
-            }
-            if ($LASTEXITCODE -ne 0) { throw 'Could not install any stable azure-iot CLI extension release.' }
+          $StableReleases = (az extension list-available --show-details --only-show-errors | ConvertFrom-Json).'azure-iot' |
+            Where-Object { $_.metadata.version -match '^\d+(\.\d+)+$' -and [version]$_.metadata.version -lt [version]'1.0' } |
+            Sort-Object { [version]$_.metadata.version } -Descending
+          $AzureIotExtensionInstalled = $false
+          foreach ($Release in $StableReleases) {
+            Write-Host "Installing Azure IoT extension $($Release.metadata.version)."
+            az extension add --name azure-iot --version $Release.metadata.version --only-show-errors
+            if ($LASTEXITCODE -eq 0) { $AzureIotExtensionInstalled = $true; break }
           }
+          if (-not $AzureIotExtensionInstalled) { throw 'Could not install a stable 0.x azure-iot CLI extension release.' }
 
           # TEMP: pinned to a working branch on iot-sdks-e2e-fx until the fix is merged to master.
           # Revert to master once https://github.com/Azure/iot-sdks-e2e-fx/tree/ewertons/install-stable-azure-iot-extension-by-default is merged.
