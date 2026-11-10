@@ -111,6 +111,22 @@ stages:
           $PSVersionTable
           New-Item -ItemType Directory -Force -Path test_config | Out-Null
 
+          # The extension index can list an azure-iot release before its wheel is
+          # downloadable, so fall back to the newest stable release that installs.
+          # The test module keeps an already installed stable extension.
+          az extension add --name azure-iot --only-show-errors
+          if ($LASTEXITCODE -ne 0) {
+            $StableReleases = (az extension list-available --show-details --only-show-errors | ConvertFrom-Json).'azure-iot' |
+              Where-Object { $_.metadata.version -match '^\d+(\.\d+)+$' } |
+              Sort-Object { [version]$_.metadata.version } -Descending
+            foreach ($Release in $StableReleases) {
+              Write-Host "Installing Azure IoT extension $($Release.metadata.version)."
+              az extension add --name azure-iot --version $Release.metadata.version --only-show-errors
+              if ($LASTEXITCODE -eq 0) { break }
+            }
+            if ($LASTEXITCODE -ne 0) { throw 'Could not install any stable azure-iot CLI extension release.' }
+          }
+
           # TEMP: pinned to a working branch on iot-sdks-e2e-fx until the fix is merged to master.
           # Revert to master once https://github.com/Azure/iot-sdks-e2e-fx/tree/ewertons/install-stable-azure-iot-extension-by-default is merged.
           $PsmUrl = 'https://raw.githubusercontent.com/Azure/iot-sdks-e2e-fx/ewertons/install-stable-azure-iot-extension-by-default/scripts/Azure.Iot.Sdk.Test.psm1'
@@ -1417,7 +1433,13 @@ stages:
         inlineScript: |
           set -e
           export AZURE_RESOURCE_GROUP=$(cat "$(Pipeline.Workspace)/test_config_scripts/azure-resource-group-name.txt")
-          az group delete --name $AZURE_RESOURCE_GROUP --yes --no-wait
+          # Setup may fail before creating the group; there is nothing to delete then.
+          RESOURCE_GROUP_EXISTS=$(az group exists --name "$AZURE_RESOURCE_GROUP")
+          if [ "$RESOURCE_GROUP_EXISTS" = "true" ]; then
+            az group delete --name "$AZURE_RESOURCE_GROUP" --yes --no-wait
+          else
+            echo "Resource group $AZURE_RESOURCE_GROUP does not exist; nothing to delete."
+          fi
       displayName: Destroy Azure Resource Group
       condition: always() # Run step even if the pipeline run is cancelled.
 
