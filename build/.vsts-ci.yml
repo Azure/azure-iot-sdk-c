@@ -146,8 +146,9 @@ stages:
   - Requirements
   - Setup
   variables:
-    # Artifact holding the test config of the latest Setup attempt (see Setup).
-    TEST_CONFIG_ARTIFACT: $[ coalesce(dependencies.Setup.outputs['create_azure_resources.testConfigArtifact.artifactName'], 'test_config_scripts_1_1') ]
+    # Test config artifact of the latest Setup attempt (see Setup). The fallback names
+    # no artifact, so a missing Setup output fails the download instead of using stale config.
+    TEST_CONFIG_ARTIFACT: $[ coalesce(dependencies.Setup.outputs['create_azure_resources.testConfigArtifact.artifactName'], 'setup_did_not_name_test_config_artifact') ]
   jobs:
   - job: windowsx64debug
     timeoutInMinutes: 190
@@ -1409,8 +1410,9 @@ stages:
   - Tests
   condition: always()
   variables:
-    # Artifact holding the test config of the latest Setup attempt (see Setup).
-    TEST_CONFIG_ARTIFACT: $[ coalesce(dependencies.Setup.outputs['create_azure_resources.testConfigArtifact.artifactName'], 'test_config_scripts_1_1') ]
+    # Test config artifact of the latest Setup attempt (see Setup). The fallback names
+    # no artifact, so a missing Setup output fails the download instead of using stale config.
+    TEST_CONFIG_ARTIFACT: $[ coalesce(dependencies.Setup.outputs['create_azure_resources.testConfigArtifact.artifactName'], 'setup_did_not_name_test_config_artifact') ]
   jobs:
   - job: destroy_azure_resource_group
     condition: always() # Run job even if the pipeline run is cancelled.
