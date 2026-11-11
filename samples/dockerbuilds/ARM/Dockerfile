@@ -8,8 +8,13 @@ RUN cd ~
 
 #########################################
 # Run commands that require root authority
-RUN apt-get update && apt-get -y upgrade
-RUN apt-get install -y make cmake git wget nano xz-utils bzip2
+# Retry apt: Ubuntu mirrors can fail transiently (connection errors, or indexes
+# listing packages whose files are not yet published, which return 404).
+RUN for attempt in 1 2 3 4 5; do \
+      apt-get update && apt-get -y upgrade && apt-get install -y make cmake git wget nano xz-utils bzip2 && break; \
+      if [ "$attempt" -eq 5 ]; then exit 1; fi; \
+      echo "apt failed (attempt $attempt), retrying in $((attempt * 60))s"; sleep $((attempt * 60)); \
+    done
 
 #########################################
 # Create and switch to new user

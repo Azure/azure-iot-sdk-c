@@ -133,6 +133,11 @@ stages:
           Invoke-WebRequest -Uri $PsmUrl -OutFile $PsmPath -UseBasicParsing
           Import-Module $PsmPath
 
+          # Pin azure-iot to 0.31.0 (the module keeps an installed stable version). From 1.0.0,
+          # 'az iot hub create' disables local auth by default, so SAS device creation fails (401002).
+          az extension add --upgrade --yes --only-show-errors --source 'https://github.com/Azure/azure-iot-cli-extension/releases/download/v0.31.0/azure_iot-0.31.0-py3-none-any.whl'
+          if ($LASTEXITCODE -ne 0) { throw "Failed to install azure-iot CLI extension 0.31.0" }
+
           $ResourceGroupName = New-AzureResourceGroupName -OutFile "test_config/azure-resource-group-name.txt"
           $TestEnvInfo = New-AzIotTestEnvironment -AzureLocation $env:AZURE_LOCATION_EFFECTIVE -ResourceGroup $ResourceGroupName -EnableFileUpload -IotHubX509ThumbprintDevices 1 -DpsX509IndividualEnrollments 1
 
