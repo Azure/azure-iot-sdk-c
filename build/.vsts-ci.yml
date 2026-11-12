@@ -95,6 +95,12 @@ stages:
       vmImage: 'windows-latest'
     steps:
     - checkout: none
+    # Pipeline artifacts are immutable, so each Setup attempt (stage rerun, job rerun or
+    # agent-loss retry) publishes its test config under its own name. Tests and Cleanup
+    # read this name, so they use the config and resource group of the latest attempt.
+    - pwsh: Write-Host "##vso[task.setvariable variable=artifactName;isOutput=true]test_config_scripts_$(System.StageAttempt)_$(System.JobAttempt)"
+      name: testConfigArtifact
+      displayName: Name test config artifact for this attempt
     - task: AzureCLI@2
       inputs:
         azureSubscription: 'iot hub sdk service connection'
@@ -130,20 +136,20 @@ stages:
           New-AzIotCSDKE2ETestConfig -TestEnvInfo $TestEnvInfo -Target powershell -OutFile test_config/Set-E2ETestEnvVars.ps1
       displayName: 'Create Azure Resources and Test Config'
     - publish: test_config
-      artifact: test_config_scripts
+      artifact: $(testConfigArtifact.artifactName)
       displayName: Publish artifact (test config scripts)
-      # Pipeline artifacts are immutable, so re-publishing this name in the same
-      # run fails with "Artifact test_config_scripts already exists for build N"
-      # whenever this job/stage re-executes in the same run (Rerun failed jobs, a
-      # stage rerun, or an agent-loss auto-retry). Publish only on the first job+
-      # stage attempt; that artifact persists for the Tests/Cleanup stages.
       # always() keeps publishing on a resource-creation failure so Cleanup can
       # still read azure-resource-group-name.txt.
-      condition: and(always(), eq(variables['System.JobAttempt'], '1'), eq(variables['System.StageAttempt'], '1'))
+      condition: always()
 - stage: Tests
   dependsOn:
   - Requirements
   - Setup
+  variables:
+    # Test config artifact of the latest Setup attempt (see Setup). Runtime expressions here
+    # are evaluated per job, so this uses stageDependencies. The fallback names
+    # no artifact, so a missing Setup output fails the download instead of using stale config.
+    TEST_CONFIG_ARTIFACT: $[ coalesce(stageDependencies.Setup.create_azure_resources.outputs['testConfigArtifact.artifactName'], 'setup_did_not_name_test_config_artifact') ]
   jobs:
   - job: windowsx64debug
     timeoutInMinutes: 190
@@ -155,13 +161,13 @@ stages:
       submodules: true
       fetchDepth: 1
     - download: current
-      artifact: test_config_scripts
+      artifact: $(TEST_CONFIG_ARTIFACT)
       displayName: Download artifact (test config scripts)
     - script: |
         call jenkins\windows_c.cmd --platform x64
       displayName: 'Build'
     - powershell: |
-        . "$(Pipeline.Workspace)\test_config_scripts\Set-E2ETestEnvVars.ps1"
+        . "$(Pipeline.Workspace)\$(TEST_CONFIG_ARTIFACT)\Set-E2ETestEnvVars.ps1"
         cmd /c "call jenkins\windows_c_VsDevCmd.cmd x64 && cd cmake && ctest -T test --no-compress-output -C Debug -V -j 16 --schedule-random -E iothubclient_mqtt_dt_e2e"
       displayName: "Run Tests"
     - task: PublishTestResults@2
@@ -183,13 +189,13 @@ stages:
       submodules: true
       fetchDepth: 1
     - download: current
-      artifact: test_config_scripts
+      artifact: $(TEST_CONFIG_ARTIFACT)
       displayName: Download artifact (test config scripts)
     - script: |
         call jenkins\windows_c.cmd
       displayName: 'Build'
     - powershell: |
-        . "$(Pipeline.Workspace)\test_config_scripts\Set-E2ETestEnvVars.ps1"
+        . "$(Pipeline.Workspace)\$(TEST_CONFIG_ARTIFACT)\Set-E2ETestEnvVars.ps1"
         cmd /c "call jenkins\windows_c_VsDevCmd.cmd x86 && cd cmake && ctest -T test --no-compress-output -C Debug -V -j 16 --schedule-random -E iothubclient_mqtt_dt_e2e"
       displayName: 'Run Tests'
     - task: PublishTestResults@2
@@ -216,7 +222,7 @@ stages:
       submodules: true
       fetchDepth: 1
     - download: current
-      artifact: test_config_scripts
+      artifact: $(TEST_CONFIG_ARTIFACT)
       displayName: Download artifact (test config scripts)
     - task: CodeQL3000Init@0
     - script: |
@@ -225,7 +231,7 @@ stages:
     - task: CodeQL3000Finalize@0
       condition: always()
     - powershell: |
-        . "$(Pipeline.Workspace)\test_config_scripts\Set-E2ETestEnvVars.ps1"
+        . "$(Pipeline.Workspace)\$(TEST_CONFIG_ARTIFACT)\Set-E2ETestEnvVars.ps1"
         cmd /c "call jenkins\windows_c_VsDevCmd.cmd x64 && cd cmake && ctest -T test --no-compress-output -C Release -V -j 16 --schedule-random -E iothubclient_mqtt_dt_e2e"
       displayName: 'Run Tests'
     - task: PublishTestResults@2
@@ -247,10 +253,10 @@ stages:
       submodules: true
       fetchDepth: 1
     - download: current
-      artifact: test_config_scripts
+      artifact: $(TEST_CONFIG_ARTIFACT)
       displayName: Download artifact (test config scripts)
     - powershell: |
-        . "$(Pipeline.Workspace)\test_config_scripts\Set-E2ETestEnvVars.ps1"
+        . "$(Pipeline.Workspace)\$(TEST_CONFIG_ARTIFACT)\Set-E2ETestEnvVars.ps1"
         cmd /c "call jenkins\windows_c_VsDevCmd.cmd && call jenkins\windows_c_build_as_dynamic.cmd"
       displayName: 'Build'
   - job: linuxoptions
@@ -414,7 +420,7 @@ stages:
       submodules: true
       fetchDepth: 1
     - download: current
-      artifact: test_config_scripts
+      artifact: $(TEST_CONFIG_ARTIFACT)
       displayName: Download artifact (test config scripts)
     - download: current
       artifact: ubuntu2404_dbg_build_output
@@ -434,7 +440,7 @@ stages:
         export OPENSSL_ia32cap=0x00000000
         sudo chmod -R 755 .
         cd cmake
-        sudo bash -c 'source "$(Pipeline.Workspace)/test_config_scripts/set_e2e_test_env_vars.sh" && ../build_all/linux/run_tests.sh $(RUN_TESTS_ARGS)'
+        sudo bash -c 'source "$(Pipeline.Workspace)/$(TEST_CONFIG_ARTIFACT)/set_e2e_test_env_vars.sh" && ../build_all/linux/run_tests.sh $(RUN_TESTS_ARGS)'
       displayName: "Run Tests ($(RUN_TESTS_ARGS))"
     - task: PublishTestResults@2
       displayName: 'Publish Test Results ($(RUN_TESTS_ARGS))'
@@ -455,7 +461,7 @@ stages:
       submodules: true
       fetchDepth: 1
     - download: current
-      artifact: test_config_scripts
+      artifact: $(TEST_CONFIG_ARTIFACT)
       displayName: Download artifact (test config scripts)
     - script: |
         set -e
@@ -488,7 +494,7 @@ stages:
         export OPENSSL_ia32cap=0x00000000
         sudo chmod -R 755 .
         cd cmake
-        sudo bash -c 'source "$(Pipeline.Workspace)/test_config_scripts/set_e2e_test_env_vars.sh" && ../build_all/linux/run_tests.sh --e2e'
+        sudo bash -c 'source "$(Pipeline.Workspace)/$(TEST_CONFIG_ARTIFACT)/set_e2e_test_env_vars.sh" && ../build_all/linux/run_tests.sh --e2e'
       displayName: 'Run Tests'
     - task: PublishTestResults@2
       displayName: 'Publish Test Results (Clang Debug)'
@@ -509,7 +515,7 @@ stages:
       submodules: true
       fetchDepth: 1
     - download: current
-      artifact: test_config_scripts
+      artifact: $(TEST_CONFIG_ARTIFACT)
       displayName: Download artifact (test config scripts)
     - script: |
         set -e
@@ -542,7 +548,7 @@ stages:
         export OPENSSL_ia32cap=0x00000000
         sudo chmod -R 755 .
         cd cmake
-        sudo bash -c 'source "$(Pipeline.Workspace)/test_config_scripts/set_e2e_test_env_vars.sh" && ../build_all/linux/run_tests.sh --e2e'
+        sudo bash -c 'source "$(Pipeline.Workspace)/$(TEST_CONFIG_ARTIFACT)/set_e2e_test_env_vars.sh" && ../build_all/linux/run_tests.sh --e2e'
       displayName: 'Run Tests'
     - task: PublishTestResults@2
       displayName: 'Publish Test Results (Clang Release)'
@@ -696,7 +702,7 @@ stages:
       submodules: true
       fetchDepth: 1
     - download: current
-      artifact: test_config_scripts
+      artifact: $(TEST_CONFIG_ARTIFACT)
       displayName: Download artifact (test config scripts)
     - script: |
         set -e
@@ -720,7 +726,7 @@ stages:
         export OPENSSL_ia32cap=0x00000000
         sudo chmod -R 755 .
         cd cmake
-        sudo bash -c 'source "$(Pipeline.Workspace)/test_config_scripts/set_e2e_test_env_vars.sh" && ../build_all/linux/run_tests.sh --e2e'
+        sudo bash -c 'source "$(Pipeline.Workspace)/$(TEST_CONFIG_ARTIFACT)/set_e2e_test_env_vars.sh" && ../build_all/linux/run_tests.sh --e2e'
       displayName: 'Run Tests'
     - task: PublishTestResults@2
       displayName: 'Publish Test Results (Ubuntu RIOT)'
@@ -741,7 +747,7 @@ stages:
       submodules: true
       fetchDepth: 1
     - download: current
-      artifact: test_config_scripts
+      artifact: $(TEST_CONFIG_ARTIFACT)
       displayName: Download artifact (test config scripts)
     - script: |
         set -e
@@ -769,7 +775,7 @@ stages:
         export OPENSSL_ia32cap=0x00000000
         sudo chmod -R 755 .
         cd cmake
-        sudo bash -c 'source "$(Pipeline.Workspace)/test_config_scripts/set_e2e_test_env_vars.sh" && ../build_all/linux/run_tests.sh --e2e'
+        sudo bash -c 'source "$(Pipeline.Workspace)/$(TEST_CONFIG_ARTIFACT)/set_e2e_test_env_vars.sh" && ../build_all/linux/run_tests.sh --e2e'
       displayName: 'Run Tests'
     - task: PublishTestResults@2
       displayName: 'Publish Test Results (Dual IP Stack)'
@@ -790,7 +796,7 @@ stages:
       submodules: true
       fetchDepth: 1
     - download: current
-      artifact: test_config_scripts
+      artifact: $(TEST_CONFIG_ARTIFACT)
       displayName: Download artifact (test config scripts)
     - script: |
         set -e
@@ -814,7 +820,7 @@ stages:
         export OPENSSL_ia32cap=0x00000000
         sudo chmod -R 755 .
         cd cmake
-        sudo bash -c 'source "$(Pipeline.Workspace)/test_config_scripts/set_e2e_test_env_vars.sh" && ../build_all/linux/run_tests.sh --e2e'
+        sudo bash -c 'source "$(Pipeline.Workspace)/$(TEST_CONFIG_ARTIFACT)/set_e2e_test_env_vars.sh" && ../build_all/linux/run_tests.sh --e2e'
       displayName: 'Run Tests'
     - task: PublishTestResults@2
       displayName: 'Publish Test Results (Debian)'
@@ -854,7 +860,7 @@ stages:
       submodules: true
       fetchDepth: 1
     - download: current
-      artifact: test_config_scripts
+      artifact: $(TEST_CONFIG_ARTIFACT)
       displayName: Download artifact (test config scripts)
     - script: |
         set -e
@@ -878,7 +884,7 @@ stages:
       displayName: 'Build'
     - script: |
         cd cmake
-        sudo bash -c 'source "$(Pipeline.Workspace)/test_config_scripts/set_e2e_test_env_vars.sh" && ../build_all/linux/run_tests.sh --e2e'
+        sudo bash -c 'source "$(Pipeline.Workspace)/$(TEST_CONFIG_ARTIFACT)/set_e2e_test_env_vars.sh" && ../build_all/linux/run_tests.sh --e2e'
       displayName: 'Run Tests'
     - task: PublishTestResults@2
       displayName: 'Publish Test Results (WolfSSL)'
@@ -899,7 +905,7 @@ stages:
       submodules: true
       fetchDepth: 1
     - download: current
-      artifact: test_config_scripts
+      artifact: $(TEST_CONFIG_ARTIFACT)
       displayName: Download artifact (test config scripts)
     - script: |
         set -e
@@ -923,7 +929,7 @@ stages:
       displayName: 'Build'
     - script: |
         cd cmake
-        sudo bash -c 'source "$(Pipeline.Workspace)/test_config_scripts/set_e2e_test_env_vars.sh" && ../build_all/linux/run_tests.sh --e2e'
+        sudo bash -c 'source "$(Pipeline.Workspace)/$(TEST_CONFIG_ARTIFACT)/set_e2e_test_env_vars.sh" && ../build_all/linux/run_tests.sh --e2e'
       displayName: 'Run Tests'
     - task: PublishTestResults@2
       displayName: 'Publish Test Results (BearSSL)'
@@ -947,7 +953,7 @@ stages:
       submodules: true
       fetchDepth: 1
     - download: current
-      artifact: test_config_scripts
+      artifact: $(TEST_CONFIG_ARTIFACT)
       displayName: Download artifact (test config scripts)
     - script: |
         set -e
@@ -992,7 +998,7 @@ stages:
         LD_LIBRARY_PATH: /usr/local/lib
     - script: |
         cd cmake
-        sudo bash -c 'export LD_LIBRARY_PATH=/usr/local/lib && source "$(Pipeline.Workspace)/test_config_scripts/set_e2e_test_env_vars.sh" && ../build_all/linux/run_tests.sh --e2e'
+        sudo bash -c 'export LD_LIBRARY_PATH=/usr/local/lib && source "$(Pipeline.Workspace)/$(TEST_CONFIG_ARTIFACT)/set_e2e_test_env_vars.sh" && ../build_all/linux/run_tests.sh --e2e'
       displayName: 'Run Tests'
     - task: PublishTestResults@2
       displayName: 'Publish Test Results (mbedTLS 2.16)'
@@ -1016,7 +1022,7 @@ stages:
       submodules: true
       fetchDepth: 1
     - download: current
-      artifact: test_config_scripts
+      artifact: $(TEST_CONFIG_ARTIFACT)
       displayName: Download artifact (test config scripts)
     - script: |
         set -e
@@ -1061,7 +1067,7 @@ stages:
         LD_LIBRARY_PATH: /usr/local/lib
     - script: |
         cd cmake
-        sudo bash -c 'export LD_LIBRARY_PATH=/usr/local/lib && source "$(Pipeline.Workspace)/test_config_scripts/set_e2e_test_env_vars.sh" && ../build_all/linux/run_tests.sh --e2e'
+        sudo bash -c 'export LD_LIBRARY_PATH=/usr/local/lib && source "$(Pipeline.Workspace)/$(TEST_CONFIG_ARTIFACT)/set_e2e_test_env_vars.sh" && ../build_all/linux/run_tests.sh --e2e'
       displayName: 'Run Tests'
     - task: PublishTestResults@2
       displayName: 'Publish Test Results (mbedTLS 2.28)'
@@ -1084,7 +1090,7 @@ stages:
       submodules: true
       fetchDepth: 1
     - download: current
-      artifact: test_config_scripts
+      artifact: $(TEST_CONFIG_ARTIFACT)
       displayName: Download artifact (test config scripts)
     - script: |
         set -e
@@ -1130,7 +1136,7 @@ stages:
         LD_LIBRARY_PATH: /usr/local/lib
     - script: |
         cd cmake
-        sudo bash -c 'export LD_LIBRARY_PATH=/usr/local/lib && source "$(Pipeline.Workspace)/test_config_scripts/set_e2e_test_env_vars.sh" && ../build_all/linux/run_tests.sh --e2e'
+        sudo bash -c 'export LD_LIBRARY_PATH=/usr/local/lib && source "$(Pipeline.Workspace)/$(TEST_CONFIG_ARTIFACT)/set_e2e_test_env_vars.sh" && ../build_all/linux/run_tests.sh --e2e'
       displayName: 'Run Tests'
     - task: PublishTestResults@2
       displayName: 'Publish Test Results (mbedTLS 3.x)'
@@ -1155,7 +1161,7 @@ stages:
       submodules: true
       fetchDepth: 1
     - download: current
-      artifact: test_config_scripts
+      artifact: $(TEST_CONFIG_ARTIFACT)
       displayName: Download artifact (test config scripts)
     - script: |
         set -e
@@ -1203,7 +1209,7 @@ stages:
         LD_LIBRARY_PATH: /usr/local/lib
     - script: |
         cd cmake
-        sudo bash -c 'export LD_LIBRARY_PATH=/usr/local/lib && source "$(Pipeline.Workspace)/test_config_scripts/set_e2e_test_env_vars.sh" && ../build_all/linux/run_tests.sh --e2e'
+        sudo bash -c 'export LD_LIBRARY_PATH=/usr/local/lib && source "$(Pipeline.Workspace)/$(TEST_CONFIG_ARTIFACT)/set_e2e_test_env_vars.sh" && ../build_all/linux/run_tests.sh --e2e'
       displayName: 'Run Tests'
     - task: PublishTestResults@2
       displayName: 'Publish Test Results (mbedTLS 4.x)'
@@ -1224,7 +1230,7 @@ stages:
       submodules: true
       fetchDepth: 1
     - download: current
-      artifact: test_config_scripts
+      artifact: $(TEST_CONFIG_ARTIFACT)
       displayName: Download artifact (test config scripts)
     - script: |
         set -e
@@ -1247,7 +1253,7 @@ stages:
       displayName: 'Build'
     - script: |
         cd cmake
-        sudo bash -c 'source "$(Pipeline.Workspace)/test_config_scripts/set_e2e_test_env_vars.sh" && ../build_all/linux/run_tests.sh --e2e'
+        sudo bash -c 'source "$(Pipeline.Workspace)/$(TEST_CONFIG_ARTIFACT)/set_e2e_test_env_vars.sh" && ../build_all/linux/run_tests.sh --e2e'
       displayName: 'Run Tests'
     - task: PublishTestResults@2
       displayName: 'Publish Test Results (C-Ares)'
@@ -1268,7 +1274,7 @@ stages:
       submodules: true
       fetchDepth: 1
     - download: current
-      artifact: test_config_scripts
+      artifact: $(TEST_CONFIG_ARTIFACT)
       displayName: Download artifact (test config scripts)
     - script: |
         set -e
@@ -1288,11 +1294,11 @@ stages:
       displayName: 'Configure ccache'
     - script: |
         # Use dynamically generated E2E variables from Setup stage to avoid unresolved placeholders.
-        sudo bash -c 'source "$(Pipeline.Workspace)/test_config_scripts/set_e2e_test_env_vars.sh" && ./jenkins/linux_openssl_engine.sh'
+        sudo bash -c 'source "$(Pipeline.Workspace)/$(TEST_CONFIG_ARTIFACT)/set_e2e_test_env_vars.sh" && ./jenkins/linux_openssl_engine.sh'
       displayName: 'Build'
     - script: |
         cd cmake
-        sudo bash -c 'source "$(Pipeline.Workspace)/test_config_scripts/set_e2e_test_env_vars.sh" && ../build_all/linux/run_tests.sh --e2e'
+        sudo bash -c 'source "$(Pipeline.Workspace)/$(TEST_CONFIG_ARTIFACT)/set_e2e_test_env_vars.sh" && ../build_all/linux/run_tests.sh --e2e'
       displayName: 'Run Tests'
     - task: PublishTestResults@2
       displayName: 'Publish Test Results (OpenSSL Engine)'
@@ -1312,14 +1318,14 @@ stages:
       submodules: true
       fetchDepth: 1
     - download: current
-      artifact: test_config_scripts
+      artifact: $(TEST_CONFIG_ARTIFACT)
       displayName: Download artifact (test config scripts)
     - script: |
         ./jenkins/osx_gcc_openssl.sh
       displayName: 'Build'
     - script: |
         cd cmake
-        bash -c 'source "$(Pipeline.Workspace)/test_config_scripts/set_e2e_test_env_vars.sh" && ctest -T test --no-compress-output -C "Debug" -V -j 8 --schedule-random -E iothubclient_mqtt_dt_e2e'
+        bash -c 'source "$(Pipeline.Workspace)/$(TEST_CONFIG_ARTIFACT)/set_e2e_test_env_vars.sh" && ctest -T test --no-compress-output -C "Debug" -V -j 8 --schedule-random -E iothubclient_mqtt_dt_e2e'
       displayName: 'Run Tests'
     - task: PublishTestResults@2
       displayName: 'Publish OSX Results'
@@ -1344,7 +1350,7 @@ stages:
       submodules: true
       fetchDepth: 1
     - download: current
-      artifact: test_config_scripts
+      artifact: $(TEST_CONFIG_ARTIFACT)
       displayName: Download artifact (test config scripts)
     - script: |
         curl --version
@@ -1354,7 +1360,7 @@ stages:
     - script: |
         export DYLD_LIBRARY_PATH="/usr/local/Cellar/curl/$(ls -b /usr/local/Cellar/curl | grep -e '[0-9\.]')/lib"
         cd cmake
-        bash -c 'source "$(Pipeline.Workspace)/test_config_scripts/set_e2e_test_env_vars.sh" && ctest -T test --no-compress-output -C "Debug" -V -j 8 --schedule-random -E iothubclient_mqtt_dt_e2e'
+        bash -c 'source "$(Pipeline.Workspace)/$(TEST_CONFIG_ARTIFACT)/set_e2e_test_env_vars.sh" && ctest -T test --no-compress-output -C "Debug" -V -j 8 --schedule-random -E iothubclient_mqtt_dt_e2e'
       displayName: 'Run Tests'
     - task: PublishTestResults@2
       displayName: 'Publish XCode Results'
@@ -1404,6 +1410,11 @@ stages:
   - Setup
   - Tests
   condition: always()
+  variables:
+    # Test config artifact of the latest Setup attempt (see Setup). Runtime expressions here
+    # are evaluated per job, so this uses stageDependencies. The fallback names
+    # no artifact, so a missing Setup output fails the download instead of using stale config.
+    TEST_CONFIG_ARTIFACT: $[ coalesce(stageDependencies.Setup.create_azure_resources.outputs['testConfigArtifact.artifactName'], 'setup_did_not_name_test_config_artifact') ]
   jobs:
   - job: destroy_azure_resource_group
     condition: always() # Run job even if the pipeline run is cancelled.
@@ -1412,7 +1423,7 @@ stages:
     steps:
     - checkout: none
     - download: current
-      artifact: test_config_scripts
+      artifact: $(TEST_CONFIG_ARTIFACT)
       displayName: Download artifact (test config scripts)
     - task: AzureCLI@2
       inputs:
@@ -1421,8 +1432,14 @@ stages:
         scriptLocation: 'inlineScript'
         inlineScript: |
           set -e
-          export AZURE_RESOURCE_GROUP=$(cat "$(Pipeline.Workspace)/test_config_scripts/azure-resource-group-name.txt")
-          az group delete --name $AZURE_RESOURCE_GROUP --yes --no-wait
+          export AZURE_RESOURCE_GROUP=$(cat "$(Pipeline.Workspace)/$(TEST_CONFIG_ARTIFACT)/azure-resource-group-name.txt")
+          # Setup may fail before creating the group; there is nothing to delete then.
+          RESOURCE_GROUP_EXISTS=$(az group exists --name "$AZURE_RESOURCE_GROUP")
+          if [ "$RESOURCE_GROUP_EXISTS" = "true" ]; then
+            az group delete --name "$AZURE_RESOURCE_GROUP" --yes --no-wait
+          else
+            echo "Resource group $AZURE_RESOURCE_GROUP does not exist; nothing to delete."
+          fi
       displayName: Destroy Azure Resource Group
       condition: always() # Run step even if the pipeline run is cancelled.
 
