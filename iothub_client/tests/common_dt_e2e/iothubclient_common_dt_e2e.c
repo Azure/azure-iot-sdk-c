@@ -520,12 +520,16 @@ static bool try_receive_twin_loop(RECEIVED_TWIN_DATA* received_twin_data, DEVICE
     time_t begin_operation = time(NULL);
     time_t now_time;
     bool received = false;
+    DEVICE_TWIN_UPDATE_STATE last_update_state = DEVICE_TWIN_UPDATE_COMPLETE;
 
     LogInfo("try_receive_twin_loop(): Entering loop with expected state %s.", MU_ENUM_TO_STRING(DEVICE_TWIN_UPDATE_STATE, expected_update_state));
 
     while (now_time = time(NULL), (difftime(now_time, begin_operation) < MAX_CLOUD_TRAVEL_TIME))
     {
         ASSERT_IS_TRUE(Lock(received_twin_data->lock) == LOCK_OK);
+
+        // Copied under the lock: twin_callback may still write it after this loop exits.
+        last_update_state = received_twin_data->update_state;
 
         if ((received_twin_data->received_callback) &&
             (received_twin_data->cb_payload != NULL) &&
@@ -547,7 +551,7 @@ static bool try_receive_twin_loop(RECEIVED_TWIN_DATA* received_twin_data, DEVICE
     }
 
     LogInfo("try_receive_twin_loop(): Exiting loop with state %s, received=%s.",
-            MU_ENUM_TO_STRING(DEVICE_TWIN_UPDATE_STATE, received_twin_data->update_state),
+            MU_ENUM_TO_STRING(DEVICE_TWIN_UPDATE_STATE, last_update_state),
             received ? "true" : "false");
     return received;
 }
@@ -838,7 +842,12 @@ void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol,
         {
             if (try_receive_twin_loop(received_twin_data, DEVICE_TWIN_UPDATE_PARTIAL))
             {
-                if (received_twin_data->wasDisconnected == false)
+                bool was_disconnected;
+                ASSERT_IS_TRUE(Lock(received_twin_data->lock) == LOCK_OK);
+                was_disconnected = received_twin_data->wasDisconnected;
+                Unlock(received_twin_data->lock);
+
+                if (was_disconnected == false)
                 {
                     received_partial_twin = true;
                     break;
