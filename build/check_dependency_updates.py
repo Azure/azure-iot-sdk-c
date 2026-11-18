@@ -6,7 +6,9 @@
 
 In Azure Pipelines (TF_BUILD set) each outdated dependency is a warning, the job ends as
 SucceededWithIssues and a markdown summary is attached to the run. GITHUB_TOKEN, if set, is used
-for the GitHub compare API (commits behind, pinned commit date).
+for the GitHub compare API (commits behind, pinned commit date, changed files).
+Upstream commits that change only .github/ (repository automation, not consumed by this SDK) are
+listed in the summary but not reported as outdated.
 """
 import json
 import os
@@ -56,8 +58,8 @@ def github_repo(url):
 
 
 def compare(repo, base, head):
-    """(commits the pin is behind, commits it is ahead, pinned commit date) from the GitHub compare API,
-    or None if the comparison failed."""
+    """(commits the pin is behind, commits it is ahead, pinned commit date, changed paths or None if the
+    list may be incomplete) from the GitHub compare API, or None if the comparison failed."""
     req = urllib.request.Request(f"https://api.github.com/repos/{repo}/compare/{base}...{head}",
                                  headers={"Accept": "application/vnd.github+json"})
     token = os.environ.get("GITHUB_TOKEN")
@@ -67,7 +69,10 @@ def compare(repo, base, head):
         with urllib.request.urlopen(req, timeout=30) as r:
             data = json.load(r)
         date = (data.get("base_commit") or {}).get("commit", {}).get("committer", {}).get("date", "")
-        return data["ahead_by"], data["behind_by"], date[:10] or None
+        files = data.get("files")
+        # The compare API returns at most 300 files.
+        paths = [f["filename"] for f in files] if files is not None and len(files) < 300 else None
+        return data["ahead_by"], data["behind_by"], date[:10] or None, paths
     except Exception:
         return None
 
@@ -103,9 +108,12 @@ def main():
             unverified += 1
             rows.append((path, url, ref, pinned, tip, None, None, "unverified: comparison failed"))
             continue
-        behind, ahead, date = result
+        behind, ahead, date, paths = result
         if behind == 0:
             rows.append((path, url, ref, pinned, tip, 0, date, f"ahead of upstream by {ahead}"))
+            continue
+        if not ahead and paths and all(p.startswith(".github/") for p in paths):
+            rows.append((path, url, ref, pinned, tip, behind, date, "behind only in .github/ (not flagged)"))
             continue
         outdated += 1
         since = f", pinned commit from {date}" if date else ""

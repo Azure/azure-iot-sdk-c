@@ -298,6 +298,7 @@ else ()
     set(build_sarif_results_checker OFF CACHE BOOL "" FORCE)
     set(run_traceability OFF CACHE BOOL "" FORCE)
     add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/deps/c-build-tools)
+    include(${CMAKE_CURRENT_LIST_DIR}/c-utility/configs/cxx23_visual_studio_generator.cmake)
     set_default_build_options()
 
     # Suppress C4702 (unreachable code) which fires in consumed library sources

@@ -8,9 +8,19 @@ sudo apt install --fix-missing -y wget git build-essential cmake xz-utils ca-cer
 export WORK_ROOT="$(pwd)/toolchain"
 mkdir $WORK_ROOT && pushd $WORK_ROOT
 
+# wget does not retry TLS handshake failures, so retry transient download errors here.
+download_with_retries() {
+    for attempt in 1 2 3 4 5; do
+        wget -O "${1##*/}" "$1" && return 0
+        echo "Download of $1 failed (attempt $attempt)."
+        sleep $((attempt * 10))
+    done
+    return 1
+}
+
 # ARM GNU TOOLCHAIN INSTALL (GCC 13.3, replaces discontinued Linaro 7.x)
 export TOOLCHAIN_SOURCE=arm-gnu-toolchain-13.3.rel1-x86_64-arm-none-linux-gnueabihf
-wget https://developer.arm.com/-/media/Files/downloads/gnu/13.3.rel1/binrel/${TOOLCHAIN_SOURCE}.tar.xz
+download_with_retries https://developer.arm.com/-/media/Files/downloads/gnu/13.3.rel1/binrel/${TOOLCHAIN_SOURCE}.tar.xz
 tar -xvf ${TOOLCHAIN_SOURCE}.tar.xz
 
 # Set up environment variables for builds
@@ -35,7 +45,7 @@ export STAGING_DIR=${TOOLCHAIN_SYSROOT}
 # Download OpenSSL source and expand it
 # OpenSSL 3.0.15: curl 8.20.0's configure requires OpenSSL >= 3.0.0.
 export OPENSSL_SOURCE=openssl-3.0.15
-wget https://www.openssl.org/source/${OPENSSL_SOURCE}.tar.gz
+download_with_retries https://www.openssl.org/source/${OPENSSL_SOURCE}.tar.gz
 tar -xvf ${OPENSSL_SOURCE}.tar.gz
 
 # Build OpenSSL
@@ -49,7 +59,7 @@ cd ${WORK_ROOT}
 # CURL INSTALL
 # Download cURL source and expand it
 export CURL_SOURCE=curl-8.20.0
-wget https://curl.se/download/${CURL_SOURCE}.tar.gz
+download_with_retries https://curl.se/download/${CURL_SOURCE}.tar.gz
 tar -xvf ${CURL_SOURCE}.tar.gz
 
 # Build cURL
@@ -67,7 +77,7 @@ cd ${WORK_ROOT}
 ########## UTIL LINUX INSTALL ##########
 # Download the Linux utilities for libuuid and expand it
 export UTIL_LINUX_SOURCE=util-linux-2.33-rc2
-wget https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.33/${UTIL_LINUX_SOURCE}.tar.gz
+download_with_retries https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.33/${UTIL_LINUX_SOURCE}.tar.gz
 tar -xvf ${UTIL_LINUX_SOURCE}.tar.gz
 
 # Build uuid
