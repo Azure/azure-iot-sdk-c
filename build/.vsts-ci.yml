@@ -1305,7 +1305,7 @@ stages:
 
   - job: OSX
     pool:
-      vmImage: 'macOS-14'
+      vmImage: 'macOS-15'
     displayName: 'OSX'
     steps:
     - checkout: self
@@ -1337,7 +1337,7 @@ stages:
 
   - job: xcodenative
     pool:
-      vmImage: 'macOS-14'
+      vmImage: 'macOS-15'
     displayName: 'Xcode Native'
     steps:
     - checkout: self
@@ -1348,11 +1348,11 @@ stages:
       displayName: Download artifact (test config scripts)
     - script: |
         curl --version
-        export DYLD_LIBRARY_PATH="/usr/local/Cellar/curl/$(ls -b /usr/local/Cellar/curl | grep -e '[0-9\.]')/lib"
+        export DYLD_LIBRARY_PATH="$(brew --prefix curl)/lib"
         ./jenkins/osx_xcode_native.sh
       displayName: 'Build'
     - script: |
-        export DYLD_LIBRARY_PATH="/usr/local/Cellar/curl/$(ls -b /usr/local/Cellar/curl | grep -e '[0-9\.]')/lib"
+        export DYLD_LIBRARY_PATH="$(brew --prefix curl)/lib"
         cd cmake
         bash -c 'source "$(Pipeline.Workspace)/$(TEST_CONFIG_ARTIFACT)/set_e2e_test_env_vars.sh" && ctest -T test --no-compress-output -C "Debug" -V -j 8 --schedule-random -E iothubclient_mqtt_dt_e2e'
       displayName: 'Run Tests'
