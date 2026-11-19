@@ -16,6 +16,12 @@ RUN for attempt in 1 2 3 4 5; do \
     done
 
 #########################################
+# Make every wget below retry transient failures (connect timeouts, unreachable
+# hosts, DNS errors, HTTP 429/5xx). Without retry_connrefused, wget gives up
+# when its last address fails with "Network is unreachable".
+RUN printf '%s\n' tries=10 timeout=60 retry_connrefused=on retry_on_host_error=on retry_on_http_error=429,500,502,503,504 >> /etc/wgetrc
+
+#########################################
 # Create and switch to new user
 RUN useradd -d /home/builder -ms /bin/bash -G sudo -p builder builder
 USER builder
